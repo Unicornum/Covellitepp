@@ -1,0 +1,18 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Tasks>
+  <Options>
+    <Width>1394</Width>
+    <Height>928</Height>
+  </Options>
+  <Process/>
+  <Complete>
+    <Week6109>
+      <Task6 Text="Класс Environment." Type="Red" Version="None" ExternalProgram="None" Expanded="false" Completed="true" History="false" ParentTaskText="false">
+        <Task7 Text="Наследование от класса из Alicorn." Type="None" Version="None" ExternalProgram="RootPart" Expanded="false" Completed="true" History="true" ParentTaskText="true"/>
+      </Task6>
+    </Week6109>
+    <Week6108/>
+    <Week6107/>
+    <Week6106/>
+  </Complete>
+</Tasks>

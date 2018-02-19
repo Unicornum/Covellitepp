@@ -1,0 +1,18 @@
+﻿<rml>
+  <head>
+    <link type="text/rcss" href="scroll.rcss"/>
+  </head>
+  <body id="id_body">
+    <form class="tr1">
+      <h1>Scroll example</h1>
+    </form>
+    <form class="tr2">
+     <h2>Scroll example</h2>
+    </form>
+    <form class="tr3">
+    </form>
+    <form class="tr4">
+      <button class="button2">Принять</button>
+    </form>
+  </body>
+</rml>

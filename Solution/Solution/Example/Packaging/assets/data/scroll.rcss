@@ -1,0 +1,142 @@
+
+rml
+{
+	top: 0px;
+	left: 0px;
+    width: 100%;
+	height: 100%;
+}
+
+body
+{
+	top: 0px;
+	left: 0px;
+    width: 100%;
+	height: 100%;
+
+	max-height: 100%;
+	overflow-y: auto;
+
+	font-family: Times New Roman;
+	font-charset: U+0020-00FF, U+04??, U+25??;
+
+	color: white;
+	background-color: #1E90FF;
+
+	background-decorator: image;
+	background-image: gradient.png 16px 16px 64px 64px;
+}
+
+h1
+{
+	display: inline-block;
+
+	font-size: 150%;
+	text-align: center;
+	font-family: Ubuntu;
+	color: white;
+
+	header-font-effect: outline;
+	header-width: 2px;
+	header-color: grey;
+}
+
+h2
+{
+	display: inline-block;
+
+	font-size: 125%;
+	text-align: center;
+	font-family: Ubuntu;
+	color: white;
+
+	header-font-effect: outline;
+	header-width: 2px;
+	header-color: grey;
+}
+
+.tr1,
+.tr2,
+.tr3,
+.tr4
+{
+	display: block;
+
+    padding: 1% 0px;
+	margin: 1% 0px;
+}
+
+.tr3
+{
+    height: 50%;
+
+	background-color: rgba(255, 255, 255, 64);
+
+	margin: 1% 2%;
+	border-width: 1px;
+	border-color: grey;
+}
+
+.button2
+{
+	display: inline-block;
+
+	border-width: 0px;
+    padding: 1% 0px;
+	margin: 0px 2%;
+
+	font-family: Ubuntu;
+	font-size: 140%;
+	text-align: center;
+	color: white;
+	header-font-effect: shadow;
+	header-offset: 2px 2px;
+	header-color: grey;
+
+	background-color: orange;
+
+	background-decorator: image;
+	background-image: gradient.png 32px 0px 63px 63px;
+}
+
+button.button2:active
+{
+	color: grey;
+	header-color: white;
+
+	background-decorator: image;
+	background-image: gradient.png 63px 63px 32px 0px;
+}
+
+/********************************* Scroll bar *********************************/
+
+scrollbarhorizontal
+{
+	width: 0px;
+	height: 0px;
+}
+
+scrollbarvertical
+{
+	width: 16px;
+}
+
+scrollbarvertical slidertrack
+{
+	width: 14px;
+
+	border-width: 1px;
+	border-color: black;
+}
+
+scrollbarvertical sliderbar
+{
+	margin-left: 1px;
+	width: 14px;
+	min-height: 20px;
+
+	background-color: #000080;
+
+	background-decorator: image;
+	background-image: gradient.png 32px 32px 64px 64px;
+}

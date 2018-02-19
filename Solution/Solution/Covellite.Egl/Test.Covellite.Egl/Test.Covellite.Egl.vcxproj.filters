@@ -1,0 +1,72 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source">
+      <UniqueIdentifier>{0b32bfba-a2e6-498f-b78b-da37c9bc83e4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Tests">
+      <UniqueIdentifier>{8c9b3b90-01b4-4c5a-9f59-393719bfa270}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Tests\CallProxy">
+      <UniqueIdentifier>{bc0710d2-d77d-41a0-9d33-2c52a6b01ce9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Tests\Config">
+      <UniqueIdentifier>{42199af7-8b16-4993-91d3-9490bc3f21a9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Tests\Context">
+      <UniqueIdentifier>{254e50b1-d35e-4897-9c22-d963105d345f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Tests\Display">
+      <UniqueIdentifier>{a72082f9-4181-4116-b444-d8370cca9bf0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Tests\Surface">
+      <UniqueIdentifier>{954b17d8-ec6b-442e-99e3-666a2a2563dc}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="Resources.rc">
+      <Filter>Source</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="stdafx.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Test.CallProxy\CallProxy_test.cpp">
+      <Filter>Tests\CallProxy</Filter>
+    </ClCompile>
+    <ClCompile Include="Test.Config\Config_test.cpp">
+      <Filter>Tests\Config</Filter>
+    </ClCompile>
+    <ClCompile Include="Test.Context\Context_test.cpp">
+      <Filter>Tests\Context</Filter>
+    </ClCompile>
+    <ClCompile Include="Test.Display\Display_test.cpp">
+      <Filter>Tests\Display</Filter>
+    </ClCompile>
+    <ClCompile Include="Test.Surface\Surface_test.cpp">
+      <Filter>Tests\Surface</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Covellite.Egl\CallProxy.cpp">
+      <Filter>Tests\CallProxy</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Covellite.Egl\config.cpp">
+      <Filter>Tests\Config</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Covellite.Egl\context.cpp">
+      <Filter>Tests\Context</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Covellite.Egl\display.cpp">
+      <Filter>Tests\Display</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Covellite.Egl\surface.cpp">
+      <Filter>Tests\Surface</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="stdafx.h">
+      <Filter>Source</Filter>
+    </ClInclude>
+    <ClInclude Include="mock.hpp" />
+  </ItemGroup>
+</Project>

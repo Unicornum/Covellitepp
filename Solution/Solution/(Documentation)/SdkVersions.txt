@@ -1,0 +1,9 @@
+
+Used tool versions:
+
+Android SDK build tools: 27.0.1
+Android SDK platform:    android-27
+Android NDK:             crystax-ndk-10.3.2
+Android API Level:       android-19
+JDK:                     1.8.0_144
+Ant:                     apache-ant-1.10.1

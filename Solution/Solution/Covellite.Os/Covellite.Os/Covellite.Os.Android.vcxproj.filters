@@ -1,0 +1,28 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Common">
+      <UniqueIdentifier>{794a7e75-d6d9-484c-81ef-b77902790ddd}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="pch.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="Configuration.hpp" />
+    <ClInclude Include="Configuration.mock.hpp" />
+    <ClInclude Include="Predefined.hpp" />
+    <ClInclude Include="Window.hpp" />
+    <ClInclude Include="Window.mock.hpp" />
+    <ClInclude Include="IWindow.hpp" />
+    <ClInclude Include="stdafx.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Configuration.android.cpp" />
+    <ClCompile Include="Window.android.cpp" />
+    <ClCompile Include="Window.cpp" />
+    <ClCompile Include="Configuration.cpp" />
+  </ItemGroup>
+</Project>

@@ -1,0 +1,41 @@
+﻿<rml>
+  <head>
+    <title>libRocket example layer 1</title>
+    <link type="text/template" href="window.rml" />
+    <style>
+      div#title_bar div#icon
+      {
+      display: none;
+      }
+
+      div#content
+      {
+      text-align: left;
+      }
+    </style>
+  </head>
+  <body template="window" id="demo">
+    <span id="id_header"><h1>Layer 1</h1></span>
+    <button id="button1">Layer 2 >></button>
+    <button id="button2">Table >></button>
+    <button id="button3">Scroll >></button>
+    <form name="xxx" style="display:block; border: 4px double black;">
+      <input type="text"
+             id="main_text"
+             value="Name ***"/><br/>
+      <input type="radio"
+             name="radioA"/>1
+      <input type="radio"
+             name="radioA"/>2<br/>
+      <input type="radio"
+             name="radioB"/>3
+      <input type="radio"
+             name="radioB"/>4<br/>
+      <input type="checkbox"
+             name="check1"/>1
+      <input type="checkbox"
+             name="check1"/>2<br/>
+    </form>
+    <button id="exit">Пока-пока!</button>
+  </body>
+</rml>

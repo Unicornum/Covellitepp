@@ -1,0 +1,109 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|ARM">
+      <Configuration>Debug</Configuration>
+      <Platform>ARM</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|ARM">
+      <Configuration>Release</Configuration>
+      <Platform>ARM</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{57eeb0f3-35f3-4657-8b97-ff64fffd8785}</ProjectGuid>
+    <Keyword>Android</Keyword>
+    <RootNamespace>Covellite</RootNamespace>
+    <DefaultLanguage>en-US</DefaultLanguage>
+    <MinimumVisualStudioVersion>14.0</MinimumVisualStudioVersion>
+    <ApplicationType>Android</ApplicationType>
+    <ApplicationTypeRevision>2.0</ApplicationTypeRevision>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>Gcc_4_9</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>Gcc_4_9</PlatformToolset>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\..\..\Solution.ARM.props" />
+    <Import Project="..\..\Externals\Externals.Build.props" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\..\..\Solution.ARM.props" />
+    <Import Project="..\..\Externals\Externals.Build.props" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM'" />
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">
+    <ClCompile>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+    </ClCompile>
+    <Link>
+      <LibraryDependencies>%(LibraryDependencies);GLESv1_CM;EGL;Covellite.Jni.$(Configuration)</LibraryDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)$(Configuration)\Lib\$(PlatformTarget);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">
+    <ClCompile>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+    </ClCompile>
+    <Link>
+      <LibraryDependencies>%(LibraryDependencies);GLESv1_CM;EGL;Covellite.Jni.$(Configuration)</LibraryDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)$(Configuration)\Lib\$(PlatformTarget);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClInclude Include="android_native_app_glue.h" />
+    <ClInclude Include="Application.hpp" />
+    <ClInclude Include="Application.mock.hpp" />
+    <ClInclude Include="ApplicationEntryPoint.hpp" />
+    <ClInclude Include="ApplicationEntryPoint.mock.hpp" />
+    <ClInclude Include="ClickEventListener.hpp" />
+    <ClInclude Include="Event.hpp" />
+    <ClInclude Include="EventHandler.hpp" />
+    <ClInclude Include="EventHandler.mock.hpp" />
+    <ClInclude Include="IWindow.hpp" />
+    <ClInclude Include="Message.hpp" />
+    <ClInclude Include="Params.hpp" />
+    <ClInclude Include="Params.mock.hpp" />
+    <ClInclude Include="pch.h" />
+    <ClInclude Include="Settings.hpp" />
+    <ClInclude Include="Settings.mock.hpp" />
+    <ClInclude Include="stdafx.h" />
+    <ClInclude Include="Window.hpp" />
+    <ClInclude Include="Window.mock.hpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="android_native_app_glue.c" />
+    <ClCompile Include="Application.android.cpp" />
+    <ClCompile Include="ClickEventListener.cpp" />
+    <ClCompile Include="EventHandler.android.cpp" />
+    <ClCompile Include="EventHandler.cpp" />
+    <ClCompile Include="Params.android.cpp" />
+    <ClCompile Include="Settings.cpp" />
+    <ClCompile Include="Window.android.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Application.inl" />
+    <None Include="EventHandler.inl" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

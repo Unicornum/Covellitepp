@@ -1,0 +1,473 @@
+<hr width=98%>
+<table frame=void border=0 bordercolor=#FFFFFF cellpadding=10 cellspacing=0 width=98%>
+<tr>
+<td><b> solution\solution\covellite.api\covellite.api\renderopengl.cpp: </b></td>
+</tr>
+</table>
+<table frame=void border=0 bordercolor=#FFFFFF cellpadding=2 cellspacing=0 width=98%>
+<tr>
+<td width=20px></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#B8CCE4 width=10px><font size=1></font></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#FFC0C0 width=10px></td>
+<td bgcolor=#FFC0C0><code></code></td>
+</tr>
+<tr>
+<td width=20px></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#B8CCE4 width=10px><font size=1>96</font></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#FFC0C0 width=10px></td>
+<td bgcolor=#FFC0C0><code>  _TextureDimensions.x = static_cast<int>(Image.GetData().Width);</code></td>
+</tr>
+<tr>
+<td width=20px></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#B8CCE4 width=10px><font size=1>97</font></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#FFC0C0 width=10px></td>
+<td bgcolor=#FFC0C0><code>  _TextureDimensions.y = static_cast<int>(Image.GetData().Height);</code></td>
+</tr>
+<tr>
+<td width=20px></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#B8CCE4 width=10px><font size=1></font></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#FFC0C0 width=10px></td>
+<td bgcolor=#FFC0C0><code>...</code></td>
+</tr>
+<tr>
+<td width=20px></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#B8CCE4 width=10px><font size=1>99</font></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#FFC0C0 width=10px></td>
+<td bgcolor=#FFC0C0><code>  return GenerateTexture(_hTexture,</code></td>
+</tr>
+<tr>
+<td width=20px></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#B8CCE4 width=10px><font size=1></font></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#FFC0C0 width=10px></td>
+<td bgcolor=#FFC0C0><code></code></td>
+</tr>
+</table>
+<hr width=98%>
+<table frame=void border=0 bordercolor=#FFFFFF cellpadding=10 cellspacing=0 width=98%>
+<tr>
+<td><b> solution\solution\covellite.jni\covellite.jni\environment.cpp: </b></td>
+</tr>
+</table>
+<table frame=void border=0 bordercolor=#FFFFFF cellpadding=2 cellspacing=0 width=98%>
+<tr>
+<td width=20px></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#B8CCE4 width=10px><font size=1></font></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#FFC0C0 width=10px></td>
+<td bgcolor=#FFC0C0><code></code></td>
+</tr>
+<tr>
+<td width=20px></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#B8CCE4 width=10px><font size=1>17</font></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#FFC0C0 width=10px></td>
+<td bgcolor=#FFC0C0><code>  auto ClassNativeActivity = m_pJniEnv->FindClass("android/app/NativeActivity");</code></td>
+</tr>
+<tr>
+<td width=20px></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#B8CCE4 width=10px><font size=1></font></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#FFC0C0 width=10px></td>
+<td bgcolor=#FFC0C0><code>...</code></td>
+</tr>
+<tr>
+<td width=20px></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#B8CCE4 width=10px><font size=1>19</font></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#FFC0C0 width=10px></td>
+<td bgcolor=#FFC0C0><code>  auto ClassWindow = m_pJniEnv->FindClass("android/view/Window");</code></td>
+</tr>
+<tr>
+<td width=20px></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#B8CCE4 width=10px><font size=1>20</font></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#FFC0C0 width=10px></td>
+<td bgcolor=#FFC0C0><code>  auto MethodGetWindow = m_pJniEnv->GetMethodID(ClassNativeActivity, </code></td>
+</tr>
+<tr>
+<td width=20px></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#B8CCE4 width=10px><font size=1></font></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#FFC0C0 width=10px></td>
+<td bgcolor=#FFC0C0><code>...</code></td>
+</tr>
+<tr>
+<td width=20px></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#B8CCE4 width=10px><font size=1>22</font></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#FFC0C0 width=10px></td>
+<td bgcolor=#FFC0C0><code>  auto lWindow = m_pJniEnv->CallObjectMethod(m_pActivity, MethodGetWindow);</code></td>
+</tr>
+<tr>
+<td width=20px></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#B8CCE4 width=10px><font size=1></font></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#FFC0C0 width=10px></td>
+<td bgcolor=#FFC0C0><code>...</code></td>
+</tr>
+<tr>
+<td width=20px></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#B8CCE4 width=10px><font size=1>24</font></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#FFC0C0 width=10px></td>
+<td bgcolor=#FFC0C0><code>  auto ClassView = m_pJniEnv->FindClass("android/view/View");</code></td>
+</tr>
+<tr>
+<td width=20px></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#B8CCE4 width=10px><font size=1>25</font></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#FFC0C0 width=10px></td>
+<td bgcolor=#FFC0C0><code>  auto MethodGetDecorView = m_pJniEnv->GetMethodID(ClassWindow, </code></td>
+</tr>
+<tr>
+<td width=20px></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#B8CCE4 width=10px><font size=1></font></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#FFC0C0 width=10px></td>
+<td bgcolor=#FFC0C0><code>...</code></td>
+</tr>
+<tr>
+<td width=20px></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#B8CCE4 width=10px><font size=1>27</font></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#FFC0C0 width=10px></td>
+<td bgcolor=#FFC0C0><code>  auto lDecorView = m_pJniEnv->CallObjectMethod(lWindow, MethodGetDecorView);</code></td>
+</tr>
+<tr>
+<td width=20px></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#B8CCE4 width=10px><font size=1></font></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#FFC0C0 width=10px></td>
+<td bgcolor=#FFC0C0><code>...</code></td>
+</tr>
+<tr>
+<td width=20px></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#B8CCE4 width=10px><font size=1>29</font></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#FFC0C0 width=10px></td>
+<td bgcolor=#FFC0C0><code>  auto ClassRect = m_pJniEnv->FindClass("android/graphics/Rect");</code></td>
+</tr>
+<tr>
+<td width=20px></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#B8CCE4 width=10px><font size=1>30</font></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#FFC0C0 width=10px></td>
+<td bgcolor=#FFC0C0><code>  auto ConstructorRect = m_pJniEnv->GetMethodID(ClassRect, "<init>", "()V");</code></td>
+</tr>
+<tr>
+<td width=20px></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#B8CCE4 width=10px><font size=1>31</font></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#FFC0C0 width=10px></td>
+<td bgcolor=#FFC0C0><code>  auto Rect = m_pJniEnv->NewObject(ClassRect, ConstructorRect);</code></td>
+</tr>
+<tr>
+<td width=20px></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#B8CCE4 width=10px><font size=1></font></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#FFC0C0 width=10px></td>
+<td bgcolor=#FFC0C0><code>...</code></td>
+</tr>
+<tr>
+<td width=20px></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#B8CCE4 width=10px><font size=1>33</font></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#FFC0C0 width=10px></td>
+<td bgcolor=#FFC0C0><code>  auto MethodGetWindowVisibleDisplayFrame = m_pJniEnv->GetMethodID(ClassView, </code></td>
+</tr>
+<tr>
+<td width=20px></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#B8CCE4 width=10px><font size=1></font></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#FFC0C0 width=10px></td>
+<td bgcolor=#FFC0C0><code>...</code></td>
+</tr>
+<tr>
+<td width=20px></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#B8CCE4 width=10px><font size=1>35</font></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#FFC0C0 width=10px></td>
+<td bgcolor=#FFC0C0><code>  m_pJniEnv->CallVoidMethod(lDecorView, MethodGetWindowVisibleDisplayFrame, Rect);</code></td>
+</tr>
+<tr>
+<td width=20px></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#B8CCE4 width=10px><font size=1></font></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#FFC0C0 width=10px></td>
+<td bgcolor=#FFC0C0><code>...</code></td>
+</tr>
+<tr>
+<td width=20px></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#B8CCE4 width=10px><font size=1>37</font></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#FFC0C0 width=10px></td>
+<td bgcolor=#FFC0C0><code>  auto fidTop = m_pJniEnv->GetFieldID(ClassRect, "top", "I");</code></td>
+</tr>
+<tr>
+<td width=20px></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#B8CCE4 width=10px><font size=1>38</font></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#FFC0C0 width=10px></td>
+<td bgcolor=#FFC0C0><code>  return m_pJniEnv->GetIntField(Rect, fidTop);</code></td>
+</tr>
+<tr>
+<td width=20px></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#B8CCE4 width=10px><font size=1></font></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#FFC0C0 width=10px></td>
+<td bgcolor=#FFC0C0><code>...</code></td>
+</tr>
+<tr>
+<td width=20px></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#B8CCE4 width=10px><font size=1>56</font></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#FFC0C0 width=10px></td>
+<td bgcolor=#FFC0C0><code>  auto ClassNativeActivity = m_pJniEnv->GetObjectClass(m_pActivity);</code></td>
+</tr>
+<tr>
+<td width=20px></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#B8CCE4 width=10px><font size=1></font></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#FFC0C0 width=10px></td>
+<td bgcolor=#FFC0C0><code>...</code></td>
+</tr>
+<tr>
+<td width=20px></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#B8CCE4 width=10px><font size=1>59</font></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#FFC0C0 width=10px></td>
+<td bgcolor=#FFC0C0><code>  auto ClassContext = m_pJniEnv->FindClass("android/content/Context");</code></td>
+</tr>
+<tr>
+<td width=20px></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#B8CCE4 width=10px><font size=1>60</font></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#FFC0C0 width=10px></td>
+<td bgcolor=#FFC0C0><code>  auto FieldINPUT_METHOD_SERVICE = m_pJniEnv->GetStaticFieldID(ClassContext,</code></td>
+</tr>
+<tr>
+<td width=20px></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#B8CCE4 width=10px><font size=1></font></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#FFC0C0 width=10px></td>
+<td bgcolor=#FFC0C0><code>...</code></td>
+</tr>
+<tr>
+<td width=20px></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#B8CCE4 width=10px><font size=1>62</font></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#FFC0C0 width=10px></td>
+<td bgcolor=#FFC0C0><code>  auto INPUT_METHOD_SERVICE = m_pJniEnv->GetStaticObjectField(ClassContext,</code></td>
+</tr>
+<tr>
+<td width=20px></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#B8CCE4 width=10px><font size=1></font></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#FFC0C0 width=10px></td>
+<td bgcolor=#FFC0C0><code>...</code></td>
+</tr>
+<tr>
+<td width=20px></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#B8CCE4 width=10px><font size=1>66</font></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#FFC0C0 width=10px></td>
+<td bgcolor=#FFC0C0><code>  auto ClassInputMethodManager = m_pJniEnv->FindClass(</code></td>
+</tr>
+<tr>
+<td width=20px></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#B8CCE4 width=10px><font size=1></font></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#FFC0C0 width=10px></td>
+<td bgcolor=#FFC0C0><code>...</code></td>
+</tr>
+<tr>
+<td width=20px></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#B8CCE4 width=10px><font size=1>68</font></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#FFC0C0 width=10px></td>
+<td bgcolor=#FFC0C0><code>  auto MethodGetSystemService = m_pJniEnv->GetMethodID(ClassNativeActivity,</code></td>
+</tr>
+<tr>
+<td width=20px></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#B8CCE4 width=10px><font size=1></font></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#FFC0C0 width=10px></td>
+<td bgcolor=#FFC0C0><code>...</code></td>
+</tr>
+<tr>
+<td width=20px></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#B8CCE4 width=10px><font size=1>70</font></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#FFC0C0 width=10px></td>
+<td bgcolor=#FFC0C0><code>  auto lInputMethodManager = m_pJniEnv->CallObjectMethod(m_pActivity,</code></td>
+</tr>
+<tr>
+<td width=20px></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#B8CCE4 width=10px><font size=1></font></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#FFC0C0 width=10px></td>
+<td bgcolor=#FFC0C0><code>...</code></td>
+</tr>
+<tr>
+<td width=20px></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#B8CCE4 width=10px><font size=1>74</font></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#FFC0C0 width=10px></td>
+<td bgcolor=#FFC0C0><code>  auto MethodGetWindow = m_pJniEnv->GetMethodID(ClassNativeActivity,</code></td>
+</tr>
+<tr>
+<td width=20px></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#B8CCE4 width=10px><font size=1></font></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#FFC0C0 width=10px></td>
+<td bgcolor=#FFC0C0><code>...</code></td>
+</tr>
+<tr>
+<td width=20px></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#B8CCE4 width=10px><font size=1>76</font></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#FFC0C0 width=10px></td>
+<td bgcolor=#FFC0C0><code>  auto lWindow = m_pJniEnv->CallObjectMethod(m_pActivity, MethodGetWindow);</code></td>
+</tr>
+<tr>
+<td width=20px></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#B8CCE4 width=10px><font size=1>77</font></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#FFC0C0 width=10px></td>
+<td bgcolor=#FFC0C0><code>  auto ClassWindow = m_pJniEnv->FindClass("android/view/Window");</code></td>
+</tr>
+<tr>
+<td width=20px></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#B8CCE4 width=10px><font size=1>78</font></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#FFC0C0 width=10px></td>
+<td bgcolor=#FFC0C0><code>  auto MethodGetDecorView = m_pJniEnv->GetMethodID(</code></td>
+</tr>
+<tr>
+<td width=20px></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#B8CCE4 width=10px><font size=1></font></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#FFC0C0 width=10px></td>
+<td bgcolor=#FFC0C0><code>...</code></td>
+</tr>
+<tr>
+<td width=20px></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#B8CCE4 width=10px><font size=1>80</font></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#FFC0C0 width=10px></td>
+<td bgcolor=#FFC0C0><code>  auto lDecorView = m_pJniEnv->CallObjectMethod(lWindow, MethodGetDecorView);</code></td>
+</tr>
+<tr>
+<td width=20px></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#B8CCE4 width=10px><font size=1></font></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#FFC0C0 width=10px></td>
+<td bgcolor=#FFC0C0><code>...</code></td>
+</tr>
+<tr>
+<td width=20px></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#B8CCE4 width=10px><font size=1>82</font></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#FFC0C0 width=10px></td>
+<td bgcolor=#FFC0C0><code>  jint lFlags = 0;</code></td>
+</tr>
+<tr>
+<td width=20px></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#B8CCE4 width=10px><font size=1></font></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#FFC0C0 width=10px></td>
+<td bgcolor=#FFC0C0><code>...</code></td>
+</tr>
+<tr>
+<td width=20px></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#B8CCE4 width=10px><font size=1>85</font></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#FFC0C0 width=10px></td>
+<td bgcolor=#FFC0C0><code>  auto MethodShowSoftInput = m_pJniEnv->GetMethodID(ClassInputMethodManager, </code></td>
+</tr>
+<tr>
+<td width=20px></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#B8CCE4 width=10px><font size=1></font></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#FFC0C0 width=10px></td>
+<td bgcolor=#FFC0C0><code>...</code></td>
+</tr>
+<tr>
+<td width=20px></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#B8CCE4 width=10px><font size=1>87</font></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#FFC0C0 width=10px></td>
+<td bgcolor=#FFC0C0><code>  m_pJniEnv->CallBooleanMethod(lInputMethodManager, MethodShowSoftInput,</code></td>
+</tr>
+<tr>
+<td width=20px></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#B8CCE4 width=10px><font size=1></font></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#FFC0C0 width=10px></td>
+<td bgcolor=#FFC0C0><code></code></td>
+</tr>
+</table>
+<hr width=98%>

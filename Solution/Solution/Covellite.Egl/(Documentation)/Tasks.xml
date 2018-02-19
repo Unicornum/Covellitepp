@@ -1,0 +1,21 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Tasks>
+  <Options>
+    <Width>1402</Width>
+    <Height>942</Height>
+  </Options>
+  <Process/>
+  <Complete>
+    <Week6102>
+      <Task10 Text="Класс Config: отрисовка нового слоя поверх предыдущего." Type="Bug" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="true" ParentTaskText="false"/>
+    </Week6102>
+    <Week6101>
+      <Task4 Text="Проект для классов-оберток EGL." Type="Red" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="true" ParentTaskText="false"/>
+      <Task5 Text="Описание проекта." Type="Red" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="true" ParentTaskText="false"/>
+      <Task6 Text="Общий тестовый проект." Type="Red" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="true" ParentTaskText="false"/>
+      <Task7 Text="Перенос кода из проекта Covellite." Type="Red" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="true" ParentTaskText="false"/>
+    </Week6101>
+    <Week6100/>
+    <Week6099/>
+  </Complete>
+</Tasks>

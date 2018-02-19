@@ -1,0 +1,66 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source">
+      <UniqueIdentifier>{0b32bfba-a2e6-498f-b78b-da37c9bc83e4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Tests">
+      <UniqueIdentifier>{8c9b3b90-01b4-4c5a-9f59-393719bfa270}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Tests\Window">
+      <UniqueIdentifier>{d0617cde-65f0-432f-b00f-a50f7730b49d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Tests\RenderOpenGL">
+      <UniqueIdentifier>{5d9f2d3d-229d-4b87-b319-4052fdc56470}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Tests\IWindow">
+      <UniqueIdentifier>{e7583767-c3f1-42cf-874a-7e3a621da096}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Tests\OpenGLES">
+      <UniqueIdentifier>{7e4e0ed3-0317-4aad-83ef-14248c4bb315}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Tests\OpenGL">
+      <UniqueIdentifier>{81b74a6f-fcfa-4b75-9365-464c0c1bbe71}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="Resources.rc">
+      <Filter>Source</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="stdafx.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Test.Window\Window_test.cpp">
+      <Filter>Tests\Window</Filter>
+    </ClCompile>
+    <ClCompile Include="Test.RenderOpenGL\RenderOpenGL_test.cpp">
+      <Filter>Tests\RenderOpenGL</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Covellite.Api\RenderOpenGL.cpp">
+      <Filter>Tests\RenderOpenGL</Filter>
+    </ClCompile>
+    <ClCompile Include="Test.IWindow\IWindow_test.cpp">
+      <Filter>Tests\IWindow</Filter>
+    </ClCompile>
+    <ClCompile Include="Test.OpenGLES\OpenGLES_test.cpp">
+      <Filter>Tests\OpenGLES</Filter>
+    </ClCompile>
+    <ClCompile Include="Test.OpenGL\OpenGL_test.cpp">
+      <Filter>Tests\OpenGL</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="stdafx.h">
+      <Filter>Source</Filter>
+    </ClInclude>
+    <ClInclude Include="mock.hpp" />
+    <ClInclude Include="..\Covellite.Api\RenderOpenGL.hpp">
+      <Filter>Tests\RenderOpenGL</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Covellite.Api\IWindow.hpp">
+      <Filter>Tests\IWindow</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>

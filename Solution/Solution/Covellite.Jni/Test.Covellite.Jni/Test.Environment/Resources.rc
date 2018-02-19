@@ -1,0 +1,6 @@
+
+#ifndef APSTUDIO_INVOKED
+
+# include <Testing\Test.Front\Test.Class.rc>
+
+#endif

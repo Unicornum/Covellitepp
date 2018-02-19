@@ -1,0 +1,81 @@
+﻿
+@startuml
+
+note "This is a class real program." as NRealClasses
+
+core_Events : + OnSystem
+core_Events : + OnWindow
+core_Events : + OnInput
+core_Events : + OnError
+
+core_Application : + MakeWindow()
+core_Application : + Run()
+
+core_Events --* core_Application
+
+core_IWindow : + Subscribe(Events &)
+
+core_IWindow --* core_Application
+
+os_ILayer : + Show()
+os_ILayer : + Hide()
+
+os_Layers : + Push()
+os_Layers : + Pop()
+
+os_ILayer --* os_Layers
+os_Layers --* os_Window
+
+os_Window : + GetHandle()
+os_Window : + GetConfiguration()
+os_Window : + Exit()
+os_Window : ---
+os_Window : + AddLayer(ILayer *)
+os_Window : + Back()
+
+core_IWindow <|-.- os_Window
+core_Events --o os_Window
+
+api_IWindow : + GetWidth()
+api_IWindow : + GetHeight()
+api_IWindow : ---
+api_IWindow : + MakeRenderInterface()
+
+core_IWindow <|-.- api_Window
+api_IWindow <|-.- api_Window
+
+os_Window --o api_Window
+core_Events --o api_Window
+
+rocket_Window : # LoadFontFace(PathToFile)
+rocket_Window : # AddLayer<TLayer>(PathToFile)
+
+core_IWindow <|-.- rocket_Window
+os_Window --o rocket_Window
+api_IWindow --o rocket_Window
+core_Events --o rocket_Window
+
+rocket_ElementEvents : + OnClick
+
+rocket_IStringTranslator : + Utf8String_t Translate(const Utf8String_t &)
+
+rocket_ElementEvents <|-- rocket_Layer
+os_ILayer <|-.- rocket_Layer
+
+rocket_ElementEvents <|-- rocket_Window
+rocket_IStringTranslator <|-.- rocket_Window
+
+ExampleLayer -right- ExampleWindow
+
+rocket_Layer <|-- ExampleLayer
+ExampleLayer .. NRealClasses
+
+rocket_Window <|-- ExampleWindow
+ExampleWindow .. NRealClasses
+
+core_Application <|-- ExampleApp
+ExampleApp .. NRealClasses
+
+ExampleWindow -right- ExampleApp
+
+@enduml

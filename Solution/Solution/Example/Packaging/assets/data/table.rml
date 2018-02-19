@@ -1,0 +1,37 @@
+﻿<rml>
+  <head>
+    <link type="text/rcss" href="table.rcss"/>
+  </head>
+  <body id="table">
+    <form class="tr01"></form>
+    <form class="tr1">
+      <button class="present" />
+      <h1><font36>CSS example</font36></h1>
+      <separator><font56>|</font56></separator>
+      <button class="square"><font42>+</font42></button>
+      <separator><font56>|</font56></separator>
+      <button class="square"><font42>1</font42></button>
+      <separator><font56>|</font56></separator>
+      <button class="square"><font42>×</font42></button>
+    </form>
+    <form class="tr02"></form>
+    <form class="tr5">
+      <button class="left"><font42>×</font42></button>
+      <p class="textleft"><font36>CSS example</font36></p>
+      <button class="right"><font42>×</font42></button>
+      <button class="right"><font42>×</font42></button>
+    </form>
+    <form class="tr2">
+      <span id="id_board_name"></span>
+    </form>
+    <form class="tr3">
+      <textarea id="multiline_text"/>
+    </form>
+    <form class="tr4">
+      <button class="button1"><font42>Да</font42></button>
+      <button class="button2"><font42>Нет</font42></button>
+    </form>
+    <form class="tr6" id="id_list">
+    </form>
+  </body>
+</rml>

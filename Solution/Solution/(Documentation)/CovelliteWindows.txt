@@ -1,0 +1,76 @@
+﻿
+@startuml
+
+core_EventHandler : + operator[] (EventType)
+core_EventHandler : + operator[] (Event::Rocket)
+core_EventHandler : + PostCommandDrawWindow()
+core_EventHandler : ---
+core_EventHandler : + Subscribe(TSource *)
+core_EventHandler : + Unsubscribe(TSource *)
+core_EventHandler : ---
+core_EventHandler : + EventHandler()
+core_EventHandler : + EventHandler(Dummy)
+
+core_Application : + MakeWindow<TWindow>()
+core_Application : + Run()
+core_Application : ---
+
+core_EventHandler -left-* core_Application
+
+core_IWindow : {abstract} + Subscribe(EventHandler &)
+core_IWindow : ---
+
+os_IWindow : {abstract} + GetHandle()
+os_IWindow : {abstract} + GetConfiguration()
+os_IWindow : ---
+
+core_IWindow --* core_Application
+core_EventHandler --o core_IWindow
+
+core_IWindow <|-.-.- os_Window
+os_IWindow <|-.- os_Window
+
+api_IWindow : {abstract} + GetUsingApi()
+api_IWindow : {abstract} + GetWidth()
+api_IWindow : {abstract} + GetHeight()
+api_IWindow : {abstract} + MakeRenderInterface()
+api_IWindow : ---
+
+api_Window : + Window(os_IWindow *)
+
+core_IWindow <|-.- api_Window
+api_IWindow <|-.- api_Window
+
+os_IWindow --o api_Window
+
+rocket_Window : + LoadFontFace(PathToFile)
+rocket_Window : + AddLayer<TLayer>()
+rocket_Window : + Back()
+rocket_Window : ---
+rocket_Window : + Window(api_IWindow *)
+
+core_IWindow <|-.- rocket_Window
+api_IWindow --o rocket_Window
+
+ExampleWindow : + Window(rocket_Window *)
+
+core_IWindow <|-.- ExampleWindow
+rocket_Window -left--o ExampleWindow
+
+core_Window : + Exit()
+core_Window : ---
+
+core_Window <|---- rocket_Window
+core_Window <|-- ExampleWindow
+
+core_Application <|-- ExampleApp
+
+os_Window -right- api_Window
+api_Window -right- rocket_Window
+
+os_Window --o ExampleApp
+api_Window --o ExampleApp
+rocket_Window --o ExampleApp
+ExampleWindow --o ExampleApp
+
+@enduml

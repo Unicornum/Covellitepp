@@ -1,0 +1,31 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Tasks>
+  <Options>
+    <Width>1398</Width>
+    <Height>942</Height>
+    <X>318</X>
+    <Y>71</Y>
+  </Options>
+  <Process/>
+  <Complete>
+    <Week6148>
+      <Task3 Text="Изменение способа обработки нажатия кнопок." Type="Red" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="false"/>
+      <Task4 Text="Стилистические исправления кода." Type="Red" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="false"/>
+      <Task5 Text="Автоматическая загрузка всех шрифтов из указанной в настройках папки." Type="Red" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="true" ParentTaskText="false"/>
+      <Task16 Text="Изменение способа доступа к настройкам программы." Type="Red" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="false"/>
+    </Week6148>
+    <Week6147>
+      <Task7 Text="Реализация системного интерфейса libRocket для Windows." Type="Red" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="false"/>
+      <Task8 Text="Преобразование слешей в путях к файлам в зависимости от типа операционной системы." Type="Red" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="false">
+        <Task9 Text="Реорганизация кода." Type="None" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+        <Task10 Text="Использование системной локали." Type="None" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+      </Task8>
+      <Task11 Text="Восстановление компилируемости тестовых проектов решения." Type="Red" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="false"/>
+      <Task12 Text="Унификация передачи кодов нажатых клавиш коду libRocket." Type="Red" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="false"/>
+    </Week6147>
+    <Week6146/>
+    <Week6145>
+      <Task15 Text="Реорганизация кода." Type="Red" Version="None" ExternalProgram="RootPart" Expanded="false" Completed="true" History="false" ParentTaskText="false"/>
+    </Week6145>
+  </Complete>
+</Tasks>

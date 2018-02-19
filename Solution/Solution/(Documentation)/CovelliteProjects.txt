@@ -1,0 +1,10 @@
+﻿
+@startuml
+
+[Covellite.Rocket] -down- [Covellite.Api]
+[Covellite.Api] -down- [Covellite.Os]
+[Covellite.Api] - [Covellite.Egl]
+[Covellite.Os] -down- [Covellite.Core]
+[Covellite.Core] -down- [Covellite.Jni]
+
+@enduml

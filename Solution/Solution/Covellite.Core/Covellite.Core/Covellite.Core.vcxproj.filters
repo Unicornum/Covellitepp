@@ -1,0 +1,49 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Common">
+      <UniqueIdentifier>{c429762f-de2b-4d7f-90e6-8413abbec256}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="stdafx.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="targetver.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="Application.hpp" />
+    <ClInclude Include="Application.mock.hpp" />
+    <ClInclude Include="ClickEventListener.hpp" />
+    <ClInclude Include="Event.hpp" />
+    <ClInclude Include="EventHandler.hpp" />
+    <ClInclude Include="EventHandler.mock.hpp" />
+    <ClInclude Include="IWindow.hpp" />
+    <ClInclude Include="Params.hpp" />
+    <ClInclude Include="Window.hpp" />
+    <ClInclude Include="Window.mock.hpp" />
+    <ClInclude Include="ApplicationEntryPoint.hpp" />
+    <ClInclude Include="ApplicationEntryPoint.mock.hpp" />
+    <ClInclude Include="ClassName.windows.hpp" />
+    <ClInclude Include="Message.hpp" />
+    <ClInclude Include="Params.mock.hpp" />
+    <ClInclude Include="Settings.hpp" />
+    <ClInclude Include="Settings.mock.hpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="stdafx.cpp">
+      <Filter>Common</Filter>
+    </ClCompile>
+    <ClCompile Include="ClickEventListener.cpp" />
+    <ClCompile Include="Application.windows.cpp" />
+    <ClCompile Include="EventHandler.windows.cpp" />
+    <ClCompile Include="Window.windows.cpp" />
+    <ClCompile Include="EventHandler.cpp" />
+    <ClCompile Include="Params.windows.cpp" />
+    <ClCompile Include="Settings.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Application.inl" />
+    <None Include="EventHandler.inl" />
+  </ItemGroup>
+</Project>

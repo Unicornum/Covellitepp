@@ -1,0 +1,37 @@
+﻿
+@startuml
+
+rocket_ILayer : {abstract} + Show()
+rocket_ILayer : {abstract} + Hide()
+rocket_ILayer : ---
+
+core_IWindow : {abstract} + Subscribe(Events)
+core_IWindow : ---
+
+rocket_Layers : + Push()
+rocket_Layers : + Pop()
+rocket_Layers : ---
+
+rocket_ILayer --* rocket_Layers
+rocket_Layers --* rocket_Window
+
+rocket_Window : # AddLayer<TLayer>()
+rocket_Window : ---
+
+rocket_Layer : ---
+rocket_Layer : + Layer(Contex, PathToFile);
+rocket_Layer : + Layer(Contex, PathToFile, TitleName);
+
+core_IWindow <|-.- rocket_Layer
+rocket_ILayer <|-.- rocket_Layer
+
+ExampleLayer --o ExampleWindow
+
+ExampleLayer : + Subscribe(Events)
+ExampleLayer : ---
+
+rocket_Layer <|-- ExampleLayer
+
+rocket_Window --o ExampleWindow
+
+@enduml
