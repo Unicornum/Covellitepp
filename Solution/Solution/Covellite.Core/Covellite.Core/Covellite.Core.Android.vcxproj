@@ -96,7 +96,6 @@
     <ClCompile Include="EventHandler.android.cpp" />
     <ClCompile Include="EventHandler.cpp" />
     <ClCompile Include="Params.android.cpp" />
-    <ClCompile Include="Settings.cpp" />
     <ClCompile Include="Window.android.cpp" />
   </ItemGroup>
   <ItemGroup>

@@ -40,7 +40,6 @@
     <ClCompile Include="Window.windows.cpp" />
     <ClCompile Include="EventHandler.cpp" />
     <ClCompile Include="Params.windows.cpp" />
-    <ClCompile Include="Settings.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Application.inl" />

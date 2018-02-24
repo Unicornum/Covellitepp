@@ -312,19 +312,7 @@ TEST_F(OpenGLES_test, /*DISABLED_*/Test_StartDrawing)
   {
     InSequence Dummy;
 
-    EXPECT_CALL(SectionImplProxy, Constructor())
-      .Times(1)
-      .WillOnce(Return(0));
-
-    EXPECT_CALL(SectionImplProxy, GetChildSectionImpl(_, _))
-      .Times(1);
-
-    EXPECT_CALL(SectionImplProxy, Constructor())
-      .Times(1)
-      .WillOnce(Return(0));
-
-    EXPECT_CALL(SectionImplProxy,
-      GetChildSectionImpl(_, uT("Window")))
+    EXPECT_CALL(SectionImplProxy, GetChildSectionImpl(_, uT("Window")))
       .Times(1);
 
     EXPECT_CALL(SectionImplProxy, Constructor())

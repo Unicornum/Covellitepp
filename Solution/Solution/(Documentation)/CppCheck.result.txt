@@ -1,0 +1,4 @@
+P:\projects\Covellitepp\Solution\Solution\Covellite.Egl\Test.Covellite.Egl\Test.Surface\Surface_test.cpp(36): performance (suppress_id = passedByValue): Function parameter '_MockConfig' should be passed by reference.
+P:\projects\Covellitepp\Solution\Solution\Covellite.Rocket\Covellite.Rocket\Window.cpp(160): performance (suppress_id = passedByValue): Function parameter '_fnCallBack' should be passed by reference.
+P:\projects\Covellitepp\Solution\Solution\Example\Example\ReadFileData.cpp(18): error (suppress_id = syntaxError): syntax error
+(): information (suppress_id = missingIncludeSystem): Cppcheck cannot find all the include files (use --check-config for details)

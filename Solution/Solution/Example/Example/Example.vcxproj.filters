@@ -27,6 +27,7 @@
     <ClCompile Include="ExampleWindow.cpp" />
     <ClCompile Include="ExtraWindow.cpp" />
     <ClCompile Include="DefaultSettings.cpp" />
+    <ClCompile Include="ReadFileData.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Version.rc">

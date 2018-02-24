@@ -57,7 +57,7 @@ TEST_F(IStringTranslator_test, /*DISABLED_*/Test_VirtualDestructor)
     Utf8String_t Translate(const Utf8String_t &) override { throw ::std::exception{}; }
 
   public:
-    ~Tested(void)
+    ~Tested(void) noexcept
     {
       Proxy::GetInstance()->Destructor();
     }

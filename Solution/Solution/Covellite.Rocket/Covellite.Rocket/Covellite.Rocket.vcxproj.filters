@@ -26,6 +26,7 @@
     <ClInclude Include="System.hpp" />
     <ClInclude Include="Window.hpp" />
     <ClInclude Include="Window.mock.hpp" />
+    <ClInclude Include="IStringTranslator.mock.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">

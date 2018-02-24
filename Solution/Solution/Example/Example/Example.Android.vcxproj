@@ -81,6 +81,7 @@
     <ClCompile Include="ExampleApp.cpp" />
     <ClCompile Include="ExampleWindow.cpp" />
     <ClCompile Include="ExtraWindow.cpp" />
+    <ClCompile Include="ReadFileData.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

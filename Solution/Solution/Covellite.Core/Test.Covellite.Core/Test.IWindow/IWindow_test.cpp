@@ -59,7 +59,7 @@ TEST_F(IWindow_test, /*DISABLED_*/Test_VirtualDestructor)
     void Subscribe(const EventHandlerPtr_t &) override {}
 
   public:
-    ~Tested(void)
+    ~Tested(void) noexcept
     {
       Proxy::GetInstance()->Destructor();
     }

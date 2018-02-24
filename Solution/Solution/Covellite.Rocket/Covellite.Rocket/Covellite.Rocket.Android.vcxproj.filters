@@ -26,6 +26,7 @@
     <ClInclude Include="stdafx.h">
       <Filter>Common</Filter>
     </ClInclude>
+    <ClInclude Include="IStringTranslator.mock.hpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Window.inl" />

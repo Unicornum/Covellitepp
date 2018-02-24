@@ -58,7 +58,7 @@ TEST_F(ILayer_test, /*DISABLED_*/Test_VirtualDestructor)
     void Hide(void) override {}
 
   public:
-    ~Tested(void)
+    ~Tested(void) noexcept
     {
       Proxy::GetInstance()->Destructor();
     }

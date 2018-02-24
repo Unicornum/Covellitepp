@@ -3,30 +3,9 @@
 #include <alicorn\settings.mock.hpp>
 #include <Covellite\Core\Settings.hpp>
 
-namespace covellite
-{
+using ::covellite::core::Settings_t;
 
-namespace core
+inline /*static*/ ::covellite::core::SectionPtr_t Settings_t::Make(void)
 {
-
-inline /*static*/ const Settings & Settings::GetInstance(void)
-{
-  static const Settings Instance;
-  return Instance;
+  return ::std::make_unique<::covellite::core::Section_t>(uT("MockSection"));
 }
-
-inline auto Settings::GetFrameworkSection(void) const -> Section_t
-{
-  Section_t m_FrameworkSection{ uT("MockSection") };
-  SetDefaultValues(m_FrameworkSection);
-  return m_FrameworkSection;
-}
-
-inline /*static*/ void Settings::SetDefaultValues(Section_t &)
-{
-
-}
-
-} // namespace core
-
-} // namespace covellite

@@ -299,13 +299,8 @@ TEST_F(Window_test, /*DISABLED_*/Test_FullScreenMode)
     .WillOnce(Return(Title));
 
   EXPECT_CALL(SettingsProxy, Constructor())
-    .Times(3)
-    .WillOnce(Return(0))
-    .WillOnce(Return(0))
+    .Times(1)
     .WillOnce(Return(WindowSectionId));
-
-  EXPECT_CALL(SettingsProxy, GetChildSectionImpl(_, uT("MockSection")))
-    .Times(1);
 
   EXPECT_CALL(SettingsProxy, GetChildSectionImpl(_, uT("Window")))
     .Times(1);

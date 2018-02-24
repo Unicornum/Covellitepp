@@ -493,7 +493,7 @@ TEST_F(Application_test, /*DISABLED_*/Test_CallDestructorOrder_OnClose)
     {
 
     }
-    ~ExampleWindow(void)
+    ~ExampleWindow(void) noexcept
     {
       Proxy::GetInstance()->Destructor(m_Id);
     }

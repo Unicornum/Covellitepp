@@ -808,8 +808,7 @@ TEST_F(EventHandler_test, /*DISABLED_*/Test_OnStop)
   AndroidApp.onAppCmd(&AndroidApp, APP_CMD_STOP);
 }
 
-  // ************************************************************************** //
-  // cppcheck-suppress syntaxError
+// ************************************************************************** //
 TEST_F(EventHandler_test, /*DISABLED_*/Test_OnPause)
 {
   android_app AndroidApp;

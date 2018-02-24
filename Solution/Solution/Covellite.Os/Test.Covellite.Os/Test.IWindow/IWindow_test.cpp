@@ -60,7 +60,7 @@ TEST_F(IWindow_test, /*DISABLED_*/Test_VirtualDestructor)
     const Configuration_t & GetConfiguration(void) const override { throw ::std::exception{}; }
 
   public:
-    ~Tested(void)
+    ~Tested(void) noexcept
     {
       Proxy::GetInstance()->Destructor();
     }

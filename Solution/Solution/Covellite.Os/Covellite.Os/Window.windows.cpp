@@ -27,8 +27,7 @@ static Handle_t CreateWindow(void)
   const auto ScreenWidth = GetSystemMetrics(SM_CXSCREEN);
   const auto ScreenHeight = GetSystemMetrics(SM_CYSCREEN);
 
-  const auto CovelliteppSection =
-    ::covellite::core::Settings::GetInstance().GetFrameworkSection();
+  const auto CovelliteppSection = ::covellite::core::Settings_t::GetInstance();
   const auto WindowSection = CovelliteppSection[uT("Window")];
 
   auto WindowFlags = WS_POPUP;
@@ -51,8 +50,8 @@ static Handle_t CreateWindow(void)
     WindowFlagsEx = WS_EX_APPWINDOW | WS_EX_WINDOWEDGE;
 
     RECT WindowRect = { 0, 0, ClientWidth, ClientHeight };
-    WINAPI_CALL USING_MOCK(AdjustWindowRectEx(&WindowRect,
-      WindowFlags, FALSE, WindowFlagsEx));
+    WINAPI_CALL USING_MOCK ::AdjustWindowRectEx(&WindowRect,
+      WindowFlags, FALSE, WindowFlagsEx);
 
     const auto CalculatedWindowWidth = WindowRect.right - WindowRect.left;
     WindowWidth = (CalculatedWindowWidth > ScreenWidth) ?
@@ -66,10 +65,10 @@ static Handle_t CreateWindow(void)
     Y = (ScreenHeight - WindowHeight) / 2;
   }
 
-  const auto hWnd = USING_MOCK(CreateWindowEx(WindowFlagsEx, 
+  const auto hWnd = USING_MOCK ::CreateWindowEx(WindowFlagsEx, 
     ::covellite::core::ClassName, ApplicationName.c_str(), WindowFlags,
     X, Y, WindowWidth, WindowHeight, nullptr, nullptr, 
-    GetModuleHandle(nullptr), nullptr));
+    GetModuleHandle(nullptr), nullptr);
   WINAPI_CALL (hWnd != NULL);  
 
   // Игнорирование предупреждений при анализе кода (анализатор не понимает,
@@ -77,7 +76,7 @@ static Handle_t CreateWindow(void)
   // m_Handle и что в этом случае последующий код не может быть выполнен).
 # pragma warning(push)
 # pragma warning(disable: 6387)
-  USING_MOCK(ShowWindow(hWnd, SW_SHOW));
+  USING_MOCK ::ShowWindow(hWnd, SW_SHOW);
 # pragma warning(pop)
 
   return hWnd;
@@ -90,7 +89,7 @@ Window::Window(void) :
 
 Window::~Window(void) noexcept
 {
-  USING_MOCK(DestroyWindow(m_Handle));
+  USING_MOCK ::DestroyWindow(m_Handle);
 }
 
 } // namespace os

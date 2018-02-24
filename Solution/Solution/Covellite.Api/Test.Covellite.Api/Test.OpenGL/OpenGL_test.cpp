@@ -591,17 +591,6 @@ TEST_F(OpenGL_test, /*DISABLED_*/Test_DoStartDrawing)
   {
     InSequence Dummy;
 
-    EXPECT_CALL(SectionImplProxy, Constructor())
-      .Times(1)
-      .WillOnce(Return(0));
-
-    EXPECT_CALL(SectionImplProxy, GetChildSectionImpl(_, _))
-      .Times(1);
-
-    EXPECT_CALL(SectionImplProxy, Constructor())
-      .Times(1)
-      .WillOnce(Return(0));
-
     EXPECT_CALL(SectionImplProxy, GetChildSectionImpl(_, uT("Window")))
       .Times(1);
 

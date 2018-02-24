@@ -1,8 +1,16 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug.Product|ARM">
+      <Configuration>Debug.Product</Configuration>
+      <Platform>ARM</Platform>
+    </ProjectConfiguration>
     <ProjectConfiguration Include="Debug|ARM">
       <Configuration>Debug</Configuration>
+      <Platform>ARM</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release.Product|ARM">
+      <Configuration>Release.Product</Configuration>
       <Platform>ARM</Platform>
     </ProjectConfiguration>
     <ProjectConfiguration Include="Release|ARM">
@@ -25,7 +33,17 @@
     <ConfigurationType>Application</ConfigurationType>
     <AndroidAPILevel>android-27</AndroidAPILevel>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug.Product|ARM'" Label="Configuration">
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <ConfigurationType>Application</ConfigurationType>
+    <AndroidAPILevel>android-27</AndroidAPILevel>
+  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM'" Label="Configuration">
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <ConfigurationType>Application</ConfigurationType>
+    <AndroidAPILevel>android-27</AndroidAPILevel>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release.Product|ARM'" Label="Configuration">
     <UseDebugLibraries>false</UseDebugLibraries>
     <ConfigurationType>Application</ConfigurationType>
     <AndroidAPILevel>android-27</AndroidAPILevel>
@@ -36,7 +54,13 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">
     <OutDir>$(SolutionDir)$(Configuration)\</OutDir>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug.Product|ARM'">
+    <OutDir>$(SolutionDir)$(Configuration)\</OutDir>
+  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">
+    <OutDir>$(SolutionDir)$(Configuration)\</OutDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release.Product|ARM'">
     <OutDir>$(SolutionDir)$(Configuration)\</OutDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">
@@ -45,9 +69,23 @@
       <ApplicationName>UnicornumVerum.$(RootNamespace).$(Configuration)</ApplicationName>
     </AntPackage>
   </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug.Product|ARM'">
+    <AntPackage>
+      <AndroidAppLibName>
+      </AndroidAppLibName>
+      <ApplicationName>UnicornumVerum.$(RootNamespace).$(Configuration)</ApplicationName>
+    </AntPackage>
+  </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">
     <AntPackage>
       <AndroidAppLibName />
+      <ApplicationName>UnicornumVerum.$(RootNamespace).$(Configuration)</ApplicationName>
+    </AntPackage>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release.Product|ARM'">
+    <AntPackage>
+      <AndroidAppLibName>
+      </AndroidAppLibName>
       <ApplicationName>UnicornumVerum.$(RootNamespace).$(Configuration)</ApplicationName>
     </AntPackage>
   </ItemDefinitionGroup>

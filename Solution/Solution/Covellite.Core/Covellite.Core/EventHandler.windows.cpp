@@ -18,7 +18,7 @@ EventHandler::EventHandler(void) :
   m_pClickEventListener(::std::make_unique<ClickEventListener>(OnRocket, OnFramework)),
   m_fnCleaner([](void)
   {
-    USING_MOCK(UnregisterClass(ClassName, GetModuleHandle(nullptr)));
+    USING_MOCK ::UnregisterClass(ClassName, GetModuleHandle(nullptr));
     pEvents = nullptr;
   })
 {
@@ -31,19 +31,17 @@ EventHandler::EventHandler(void) :
   WindowClass.hInstance = hInstance;
   WindowClass.lpszClassName = ClassName;
   WindowClass.hCursor = LoadCursor(NULL, IDC_ARROW);
-  WindowClass.hIcon = USING_MOCK(LoadIcon(hInstance, L"ApplicationIcon"));
-  WindowClass.hIconSm = USING_MOCK(LoadIcon(hInstance, L"ApplicationIcon"));
+  WindowClass.hIcon = USING_MOCK ::LoadIcon(hInstance, L"ApplicationIcon");
+  WindowClass.hIconSm = USING_MOCK ::LoadIcon(hInstance, L"ApplicationIcon");
 
   WindowClass.lpfnWndProc = 
     [](HWND _hWnd, UINT _Message, WPARAM _wParam, LPARAM _lParam) -> LRESULT 
   {
-    using USING_MOCK(DefWindowProcW);
-
     if (pEvents == nullptr) return 0;
 
     const auto Result = pEvents->CommandHandler({ _Message, _wParam, _lParam });
     return (Result) ? 0 : 
-      USING_MOCK(DefWindowProc(_hWnd, _Message, _wParam, _lParam));
+      USING_MOCK ::DefWindowProc(_hWnd, _Message, _wParam, _lParam);
   };
 
   WINAPI_CALL RegisterClassEx(&WindowClass);

@@ -95,17 +95,17 @@ bool Application::PostCommand(bool _IsWaitMessage) const
     MSG Message;
 
     const auto Result = (_IsWaitMessage) ?
-      USING_MOCK(GetMessage(&Message, NULL, 0, 0)) :
-      USING_MOCK(PeekMessage(&Message, 0, 0, 0, PM_REMOVE));
+      USING_MOCK ::GetMessage(&Message, NULL, 0, 0) :
+      USING_MOCK ::PeekMessage(&Message, 0, 0, 0, PM_REMOVE);
     if (Result == -1) WINAPI_CALL FALSE;
     if (_IsWaitMessage || Result != FALSE)
     {
       if (Message.message == WM_QUIT) break;
-      USING_MOCK(TranslateMessage(&Message));
+      USING_MOCK ::TranslateMessage(&Message);
 
       // 23 Октябрь 2017 13:39 (unicornum.verum@gmail.com)
       TODO("Напрямую вызывать m_pEvents->CommandHandler()?");
-      USING_MOCK(DispatchMessage(&Message));
+      USING_MOCK ::DispatchMessage(&Message);
     }
 
     m_pEvents->PostCommandDrawWindow();

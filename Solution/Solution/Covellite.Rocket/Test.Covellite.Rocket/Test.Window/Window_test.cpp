@@ -441,7 +441,6 @@ TEST_F(Window_test, /*DISABLED_*/Test_Subscribe)
 }
 
 // ************************************************************************** //
-// cppcheck-suppress syntaxError
 TEST_F(Window_test, /*DISABLED_*/Test_Set)
 {
   using RocketCoreProxy_t = ::mock::Rocket::Core::Proxy;

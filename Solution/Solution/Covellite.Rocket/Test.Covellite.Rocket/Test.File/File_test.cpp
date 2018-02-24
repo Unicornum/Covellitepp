@@ -15,8 +15,9 @@
 // Расположение класса File
 #include <Covellite\Rocket\File.hpp>
 
-#include <alicorn\boost\filesystem\load-binary-file.hpp>
 #include <alicorn\std\vector.hpp>
+#include <alicorn\std\singleton.hpp>
+#include <alicorn\vfs.hpp>
 
 // Общий тестовый класс класса File
 class File_test :
@@ -44,6 +45,23 @@ protected:
 // нужно чтобы тестовая функция была расположена В ТОМ ЖЕ ПРОСТРАНСТВЕ ИМЕН, 
 // что и тестируемый класс).
 // FRIEND_TEST(File_test, Test_Function);
+
+using Vfs_t = ::alicorn::modules::vfs::Core;
+using VfsPtr_t = ::std::unique_ptr<Vfs_t>;
+using Singleton_t = ::alicorn::extension::std::Singleton<Vfs_t>;
+
+/*static*/ VfsPtr_t Singleton_t::Make(void)
+{
+  using ImplPtr_t = ::std::shared_ptr<::alicorn::modules::vfs::IImplementation>;
+
+  return ::std::make_unique<Vfs_t>(::std::vector<ImplPtr_t>
+  {
+    // Это позволяет задавать как полный путь, так и путь оносительно
+    // папки этого самого файла.
+    ::std::make_shared<::alicorn::modules::vfs::FileSystem>(""),
+    ::std::make_shared<::alicorn::modules::vfs::FileSystem>(THIS_DIRECTORY)
+  });
+}
 
 // ************************************************************************** //
 TEST_F(File_test, /*DISABLED_*/Test_Read_UnknownHandle)
@@ -94,8 +112,7 @@ TEST_F(File_test, /*DISABLED_*/Test_ReadExcessData)
   Tested_t Example;
   ITested_t & IExample = Example;
 
-  const auto File = 
-    IExample.Open((THIS_DIRECTORY / L"1234567890.txt").string().c_str());
+  const auto File = IExample.Open("1234567890.txt");
   EXPECT_TRUE(File != 0);
   EXPECT_EQ(0, IExample.Tell(File));
 
@@ -123,8 +140,7 @@ TEST_F(File_test, /*DISABLED_*/Test_ReadFile)
   Tested_t Example;
   ITested_t & IExample = Example;
 
-  const auto File = 
-    IExample.Open((THIS_DIRECTORY / L"1234567890.txt").string().c_str());
+  const auto File = IExample.Open("1234567890.txt");
   EXPECT_TRUE(File != 0);
   EXPECT_EQ(0, IExample.Tell(File));
 
@@ -158,13 +174,11 @@ TEST_F(File_test, /*DISABLED_*/Test_ReadSameFile)
   Tested_t Example;
   ITested_t & IExample = Example;
 
-  const auto File1 = 
-    IExample.Open((THIS_DIRECTORY / L"1234567890.txt").string().c_str());
+  const auto File1 = IExample.Open("1234567890.txt");
   EXPECT_TRUE(File1 != 0);
   EXPECT_EQ(0, IExample.Tell(File1));
 
-  const auto File2 = 
-    IExample.Open((THIS_DIRECTORY / L"1234567890.txt").string().c_str());
+  const auto File2 = IExample.Open("1234567890.txt");
   EXPECT_TRUE(File2 != 0);
   EXPECT_EQ(0, IExample.Tell(File2));
 
@@ -220,13 +234,11 @@ TEST_F(File_test, /*DISABLED_*/Test_ReadAnotherFile)
   Tested_t Example;
   ITested_t & IExample = Example;
 
-  const auto File1 = 
-    IExample.Open((THIS_DIRECTORY / L"1234567890.txt").string().c_str());
+  const auto File1 = IExample.Open("1234567890.txt");
   EXPECT_TRUE(File1 != 0);
   EXPECT_EQ(0, IExample.Tell(File1));
 
-  const auto File2 = 
-    IExample.Open((THIS_DIRECTORY / L"0987654321.txt").string().c_str());
+  const auto File2 = IExample.Open("0987654321.txt");
   EXPECT_TRUE(File2 != 0);
   EXPECT_EQ(0, IExample.Tell(File2));
 
@@ -306,8 +318,7 @@ TEST_F(File_test, /*DISABLED_*/Test_Seek_Set)
   Tested_t Example;
   ITested_t & IExample = Example;
 
-  const auto File = 
-    IExample.Open((THIS_DIRECTORY / L"1234567890.txt").string().c_str());
+  const auto File = IExample.Open("1234567890.txt");
   EXPECT_TRUE(File != 0);
   EXPECT_EQ(0, IExample.Tell(File));
 
@@ -375,8 +386,7 @@ TEST_F(File_test, /*DISABLED_*/Test_Seek_Cur)
   Tested_t Example;
   ITested_t & IExample = Example;
 
-  const auto File = 
-    IExample.Open((THIS_DIRECTORY / L"1234567890.txt").string().c_str());
+  const auto File = IExample.Open("1234567890.txt");
   EXPECT_TRUE(File != 0);
   EXPECT_EQ(0, IExample.Tell(File));
 
@@ -444,8 +454,7 @@ TEST_F(File_test, /*DISABLED_*/Test_Seek_End)
   Tested_t Example;
   ITested_t & IExample = Example;
 
-  const auto File = 
-    IExample.Open((THIS_DIRECTORY / L"1234567890.txt").string().c_str());
+  const auto File = IExample.Open("1234567890.txt");
   EXPECT_TRUE(File != 0);
   EXPECT_EQ(0, IExample.Tell(File));
 
@@ -523,16 +532,14 @@ TEST_F(File_test, /*DISABLED_*/Test_Length)
   ITested_t & IExample = Example;
 
   {
-    const auto File = 
-      IExample.Open((THIS_DIRECTORY / L"1234567890.txt").string().c_str());
+    const auto File = IExample.Open("1234567890.txt");
     EXPECT_EQ(10, IExample.Length(File));
 
     IExample.Close(File);
   }
 
   {
-    const auto File = 
-      IExample.Open((THIS_DIRECTORY / L"3.txt").string().c_str());
+    const auto File = IExample.Open("3.txt");
     EXPECT_EQ(3, IExample.Length(File));
 
     IExample.Close(File);

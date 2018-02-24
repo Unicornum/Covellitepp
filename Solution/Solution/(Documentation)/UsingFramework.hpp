@@ -1,14 +1,14 @@
 
 /**
-* \page UsingFrameworkPage Использование фреймворка
+* \page UsingFrameworkPage Manual
 *  
-*  Подключение к проекту
+*  Подключение к решению
 *  ---------------------
 *
 *  - Установить свойство svn:externals с именем Externals и путем
 * \code
 
-https://svn/svn/Prebuilt.no.backup/Solution/Solution
+https://svn/svn/Prebuilt.no.backup/Solution/Properties/Utilities/Externals/Alicorn/Covellite/_Root
 
 * \endcode
 *  - Подключить к страницам свойств решения файл Covellite++.props из папки
@@ -17,12 +17,23 @@ https://svn/svn/Prebuilt.no.backup/Solution/Solution
 *  Использование фреймворка
 *  ========================
 *  
-*  - Создать проект сборки основного модуля программы.
-*  - Создать .rcss и .rml файлы описания отдельных экранов программы.
-*  - Создать классы отдельных экранов программы.
-*  - Создать класс главного окна программы.
-*  - Создать класс программы.
+*  - Создать проект сборки основного модуля программы
+*  (\ref MainModuleWindowsUsingFrameworkAnchor "Windows"/
+*  \ref MainModuleAndroidUsingFrameworkAnchor "Android").
+*  - Создать .rcss и .rml файлы описания отдельных 
+*  \ref ScreenDescriptionUsingFrameworkAnchor "экранов программы".
+*  - Создать \ref ScreenClassesUsingFrameworkAnchor "классы" отдельных экранов 
+*  программы.
+*  - Создать \ref MainWindowClassUsingFrameworkAnchor "класс" главного окна 
+*  программы.
+*  - Создать \ref MainApplicationClassUsingFrameworkAnchor "класс" программы.
+*  - Добавить рализация функции установки 
+*  \ref SettingsUsingFrameworkAnchor "параметров" фреймворка по умолчанию.
+*  - Добавить реализацию функции создания 
+*  \ref ReadFileDataUsingFrameworkAnchor "объекта виртуальной файловой системы",
+*  который будет использоваться программой для чтения данных из файлов.
 *  
+* \anchor MainModuleWindowsUsingFrameworkAnchor
 *  Создание проекта сборки основного модуля программы для Windows
 *  --------------------------------------------------------------
 *
@@ -43,6 +54,7 @@ https://svn/svn/Prebuilt.no.backup/Solution/Solution
 *  задаются в настройках приложения (название параметров см. в описаниях 
 *  классов окон).
 *  
+* \anchor MainModuleAndroidUsingFrameworkAnchor
 *  Создание проекта сборки основного модуля программы для Android
 *  --------------------------------------------------------------
 *
@@ -75,6 +87,7 @@ https://svn/svn/Prebuilt.no.backup/Solution/Solution
 *  запись загрузки именно этого модуля (подробнее см. 
 *  \subpage InputRussianLettersPage).
 *  
+* \anchor ScreenDescriptionUsingFrameworkAnchor
 *  Создание .rcss и .rml файлов описания отдельных экранов программы
 *  -----------------------------------------------------------------
 *  
@@ -89,6 +102,12 @@ https://svn/svn/Prebuilt.no.backup/Solution/Solution
 *  случае их следует сохранять как utf8, а используемые шрифты должны 
 *  поддерживать соответствующие Unicode символы.
 *  
+* \note
+*  Файлы .rcss не должны сохраняться как utf8, т.к. они включаются целиком
+*  в состав файлов .rml при парсинге, что приводит к появлению Assert'ов при
+*  запуске Debug версии программы.
+*  
+* \anchor ScreenClassesUsingFrameworkAnchor
 *  Создать классы отдельных экранов программы
 *  ------------------------------------------
 *  
@@ -104,6 +123,7 @@ https://svn/svn/Prebuilt.no.backup/Solution/Solution
 *
 * \snippet .\Solution\Example\Example\ExampleWindow.cpp Title layer
 *
+* \anchor MainWindowClassUsingFrameworkAnchor
 *  Создание класса главного окна программы
 *  ---------------------------------------
 *  
@@ -158,6 +178,7 @@ body
 *  Другие события, которые может обрабатывать окно, см. в описании класса
 *  covellite::core::Event.
 *  
+* \anchor MainApplicationClassUsingFrameworkAnchor
 *  Создание класса программы
 *  -------------------------
 *  
@@ -196,6 +217,7 @@ body
 *  
 * \snippet .\Solution\Example\Example\ExampleApp.cpp Create entry point
 *  
+* \anchor SettingsUsingFrameworkAnchor
 *  Настройки по умолчанию
 *  ----------------------
 *  
@@ -204,6 +226,16 @@ body
 *  
 * \include .\Solution\Example\Example\DefaultSettings.cpp
 *
-*  [libRocket]: https://github.com/libRocket/libRocket "libRocket"
-*  [libRocket CSS]: http://librocket.com/wiki/documentation/RCSS "libRocket CSS"
+* \anchor ReadFileDataUsingFrameworkAnchor
+*  Настройка чтения данных из файлов
+*  ---------------------------------
+*
+*  В код проекта необходимо также добавить реализацию функции настройки
+*  способа чтения данных из файлов (в качестве примера приведено использование
+*  класса виртуальной файловой системы, который просто читает данные с диска):
+*
+* \include .\Solution\Example\Example\ReadFileData.cpp
+*
+*  [libRocket]: https://barotto.github.io/libRocketDoc/ "libRocket"
+*  [libRocket CSS]: https://barotto.github.io/libRocketDoc/pages/rcss.html "libRocket CSS"
 */

@@ -80,7 +80,6 @@ void RenderOpenGL::SetScissorRegion(int _X, int _Y,
   glScissor(_X, ViewPort[3] - (_Y + _Height + m_StatusBarHeight), _Width, _Height);
 }
 
-// cppcheck-suppress unusedFunction
 bool RenderOpenGL::LoadTexture(
   Rocket::Core::TextureHandle & _hTexture,
   Rocket::Core::Vector2i & _TextureDimensions,

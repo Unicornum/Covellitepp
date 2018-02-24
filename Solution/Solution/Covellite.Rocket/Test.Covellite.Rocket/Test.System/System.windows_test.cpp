@@ -59,10 +59,7 @@ TEST_F(System_test, /*DISABLED_*/Test_GetElapsedTime)
 {
   using Time_t = ::std::chrono::microseconds;
 
-  // 30 Октябрь 2017 11:50 (unicornum.verum@gmail.com)
-  TODO("Заменить на ::mock::std::chrono::system_clock::Proxy, когда там будут микросекунды");
-
-  using Proxy_t = ::mock2::std::chrono::system_clock::Proxy;
+  using Proxy_t = ::mock::std::chrono::system_clock::Proxy;
   Proxy_t Proxy;
   Proxy_t::GetInstance() = &Proxy;
 

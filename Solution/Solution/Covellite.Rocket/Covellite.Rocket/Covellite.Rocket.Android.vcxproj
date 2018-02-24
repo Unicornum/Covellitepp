@@ -63,6 +63,7 @@
     <ClInclude Include="Initializer.hpp" />
     <ClInclude Include="Initializer.mock.hpp" />
     <ClInclude Include="IStringTranslator.hpp" />
+    <ClInclude Include="IStringTranslator.mock.hpp" />
     <ClInclude Include="Layer.hpp" />
     <ClInclude Include="Layer.mock.hpp" />
     <ClInclude Include="Layers.hpp" />

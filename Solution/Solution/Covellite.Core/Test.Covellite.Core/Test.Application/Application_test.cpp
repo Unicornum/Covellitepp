@@ -51,7 +51,7 @@ protected:
 
   public:
     Tested(void) : Tested_t([](void) {}) {}
-    ~Tested(void)
+    ~Tested(void) noexcept
     {
       Proxy::GetInstance()->Destructor();
     }
@@ -123,7 +123,7 @@ TEST_F(Application_test, /*DISABLED_*/Test_MakeWindow)
     {
 
     }
-    ~ExampleWindow(void) 
+    ~ExampleWindow(void) noexcept
     { 
       Proxy::GetInstance()->Destructor(m_Id); 
     }

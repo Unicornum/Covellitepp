@@ -63,7 +63,7 @@ TEST_F(IWindow_test, /*DISABLED_*/Test_VirtualDestructor)
     RenderInterfacePtr_t MakeRenderInterface(void) const override { throw ::std::exception{}; }
 
   public:
-    ~Tested(void)
+    ~Tested(void) noexcept
     {
       Proxy::GetInstance()->Destructor();
     }

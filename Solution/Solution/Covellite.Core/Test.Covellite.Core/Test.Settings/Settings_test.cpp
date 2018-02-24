@@ -20,7 +20,7 @@ class Settings_test :
   public ::testing::Test
 {
 protected:
-  using Tested_t = ::covellite::core::Settings;
+  using Tested_t = ::covellite::core::Settings_t;
   using String_t = ::alicorn::extension::std::String;
 
   // Вызывается ПЕРЕД запуском каждого теста
@@ -40,12 +40,20 @@ protected:
 // что и тестируемый класс).
 // FRIEND_TEST(Settings_test, Test_Function);
 
-using namespace covellite::core;
-
-/*static*/ void Settings::SetDefaultValues(Section_t & _Covellitepp)
+/// [SetDefaultValues]
+using namespace ::covellite::core;
+  
+/*static*/ SectionPtr_t Settings_t::Make(void)
 {
-  _Covellitepp.SetDefault(uT("Name"), uT("Value"), uT("Description"));
+  // Создаем объект настроек...
+  auto pSettings = ::std::make_unique<Section_t>(uT("Part1802231330"));
+
+  // Устанавливаем значения параметров по умолчанию...
+  pSettings->SetDefault(uT("Name"), uT("Value"), uT("Description"));
+    
+  return pSettings;
 }
+/// [SetDefaultValues]
 
 // ************************************************************************** //
 TEST_F(Settings_test, /*DISABLED_*/Test_Using)
@@ -58,9 +66,7 @@ TEST_F(Settings_test, /*DISABLED_*/Test_Using)
   const ::mock::Id_t CovelliteppSectionId = 1711081103;
   const auto Name = uT("Name1711081105");
   const auto Value = uT("Value1711081106");
-
-  const auto & Settings = Tested_t::GetInstance();
-
+  
   using namespace ::testing;
 
   InSequence Dummy;
@@ -70,7 +76,7 @@ TEST_F(Settings_test, /*DISABLED_*/Test_Using)
     .WillOnce(Return(RootSectionId));
 
   EXPECT_CALL(SettingsProxy,
-    GetChildSectionImpl(RootSectionId, uT("Covellitepp")))
+    GetChildSectionImpl(RootSectionId, uT("Part1802231330")))
     .Times(1);
 
   EXPECT_CALL(SettingsProxy, Constructor())
@@ -81,7 +87,7 @@ TEST_F(Settings_test, /*DISABLED_*/Test_Using)
     uT("Name"), uT("Value"), uT("Description")))
     .Times(1);
 
-  const auto Example = Settings.GetFrameworkSection();
+  const auto & Example = Tested_t::GetInstance();
 
   EXPECT_CALL(SettingsProxy, GetValue(CovelliteppSectionId, Name))
     .Times(1)

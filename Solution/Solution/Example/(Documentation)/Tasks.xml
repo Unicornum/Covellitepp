@@ -8,14 +8,11 @@
   </Options>
   <Process/>
   <Complete>
-    <Week6151>
-      <Task8 Text="Удаление инициализации логгера из дочернего потока." Type="Red" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="true" ParentTaskText="false"/>
-    </Week6151>
-    <Week6150/>
-    <Week6149/>
-    <Week6148>
-      <Task6 Text="Промежуточное окно для примера." Type="Red" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="false"/>
-      <Task7 Text="Игнорирование загрузки шрифтов в Android версии примера использования фреймворка." Type="Bug" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="true" ParentTaskText="false"/>
-    </Week6148>
+    <Week6164>
+      <Task6 Text="Изменен способ формирования настроек по умолчанию и доступа к файлам." Type="Red" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="false"/>
+    </Week6164>
+    <Week6163/>
+    <Week6162/>
+    <Week6161/>
   </Complete>
 </Tasks>

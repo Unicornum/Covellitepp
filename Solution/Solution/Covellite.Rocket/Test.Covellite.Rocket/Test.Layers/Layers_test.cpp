@@ -24,13 +24,11 @@ protected:
   using Tested_t = ::covellite::rocket::Layers;
 
   // Вызывается ПЕРЕД запуском каждого теста
-  // cppcheck-suppress unusedFunction
   void SetUp(void) override
   {
   }
 
   // Вызывается ПОСЛЕ запуска каждого теста
-  // cppcheck-suppress unusedFunction
   void TearDown(void) override
   {
   }

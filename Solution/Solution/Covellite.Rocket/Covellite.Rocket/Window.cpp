@@ -195,8 +195,7 @@ void Window::DoDrawWindow(void)
     }
   };
 
-  const auto & CovelliteppSection =
-    ::covellite::core::Settings::GetInstance().GetFrameworkSection();
+  const auto CovelliteppSection = ::covellite::core::Settings_t::GetInstance();
 
   const auto PathToFontsDirectory =
     CovelliteppSection.Get<Path_t>(uT("PathToFontsDirectory"));

@@ -11,8 +11,7 @@ namespace api
 
 static OpenGLCommon::Color GetBackgroundColor(void)
 {
-  const auto CovelliteppSection =
-    ::covellite::core::Settings::GetInstance().GetFrameworkSection();
+  const auto CovelliteppSection = ::covellite::core::Settings_t::GetInstance();
   auto BkColorSection = CovelliteppSection[uT("Window")][uT("BackgroundColor")];
 
   const auto R = BkColorSection.Get<float>(uT("R")) / 255.0f;

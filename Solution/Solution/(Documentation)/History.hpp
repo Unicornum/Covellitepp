@@ -4,6 +4,45 @@
 *  
 *  История изменений
 *  =================
+*  <table frame=void><tr><td></td></tr></table>
+*  
+*  Версия: 2.1.1.575
+*  -----
+*  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект \ref CovelliteRocketPage : </td></tr></table>
+*  <table frame=void border=1 bordercolor=#FFFFFF cellpadding=5 cellspacing=0 width=98%><tr>
+*    <td width=10px></td>
+*    <td bgcolor=#B8CCE4 width=125px align=center> 24.02.2018 10:21 </td>
+*    <td bgcolor=#C0FFC0> Изменение способа доступа к файлам. </td>
+*  </tr></table>
+*  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект \ref CovelliteCorePage : </td></tr></table>
+*  <table frame=void border=1 bordercolor=#FFFFFF cellpadding=5 cellspacing=0 width=98%><tr>
+*    <td width=10px></td>
+*    <td bgcolor=#B8CCE4 width=125px align=center> 23.02.2018 13:32 </td>
+*    <td bgcolor=#C0FFC0> Изменен способ доступа к настройкам программы. </td>
+*  </tr></table>
+*  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект \ref CovelliteRocketPage : </td></tr></table>
+*  <table frame=void border=1 bordercolor=#FFFFFF cellpadding=5 cellspacing=0 width=98%><tr>
+*    <td width=10px></td>
+*    <td bgcolor=#B8CCE4 width=125px align=center> 22.02.2018 13:38 </td>
+*    <td bgcolor=#C0FFC0> Стилистические исправления кода: перенос подставного класса для класса IStringTranslator. </td>
+*  </tr></table>
+*  <table frame=void border=1 bordercolor=#FFFFFF cellpadding=5 cellspacing=0 width=98%><tr>
+*    <td width=10px></td>
+*    <td bgcolor=#B8CCE4 width=125px align=center> 22.02.2018 13:12 </td>
+*    <td bgcolor=#C0FFC0> Реорганизация ссылок на подставные классы. </td>
+*  </tr></table>
+*  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект \ref ExamplePage : </td></tr></table>
+*  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект \ref CovelliteCorePage : </td></tr></table>
+*  <table frame=void border=1 bordercolor=#FFFFFF cellpadding=5 cellspacing=0 width=98%><tr>
+*    <td width=10px></td>
+*    <td bgcolor=#B8CCE4 width=125px align=center> 21.02.2018 13:35 </td>
+*    <td bgcolor=#C0FFC0> Сборка скриптом: полная обработка решения CppCheck. </td>
+*  </tr></table>
+*  <table frame=void border=1 bordercolor=#FFFFFF cellpadding=5 cellspacing=0 width=98%><tr>
+*    <td width=10px></td>
+*    <td bgcolor=#B8CCE4 width=125px align=center> 20.02.2018 11:04 </td>
+*    <td bgcolor=#C0FFC0> Сборка скриптом: настройка вычисления метрик кода в решении. </td>
+*  </tr></table>
 *  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект \ref ExamplePage : </td></tr></table>
 *  <table frame=void border=1 bordercolor=#FFFFFF cellpadding=5 cellspacing=0 width=98%><tr>
 *    <td width=10px></td>

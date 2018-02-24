@@ -9,4 +9,4 @@
 //*
 
 functionStatic:Solution\Solution\Covellite.Jni\Test.Covellite.Jni\mock.hpp
-functionStatic:Solution\Solution\*\*\Mock\*.hpp
+functionStatic:*\mock.hpp

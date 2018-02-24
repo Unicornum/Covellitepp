@@ -426,7 +426,6 @@ namespace core
 {
 
 // ************************************************************************** //
-// cppcheck-suppress syntaxError
 TEST_F(Application_test, /*DISABLED_*/Test_PostCommand)
 {
   using AEventProxy_t = ::mock::AEventProxy;
@@ -544,7 +543,7 @@ TEST_F(Application_test, /*DISABLED_*/Test_CallDestructorOrder_OnClose)
     {
 
     }
-    ~ExampleWindow(void)
+    ~ExampleWindow(void) noexcept
     {
       Proxy::GetInstance()->Destructor(m_Id);
     }

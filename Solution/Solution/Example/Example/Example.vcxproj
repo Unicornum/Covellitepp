@@ -112,6 +112,7 @@ set EXCLUDE=-x!Package -x!Test -x!arm -x!x86 -x!Example.apk* -x!*.7z -x!*.lastco
     <ClCompile Include="ExampleApp.cpp" />
     <ClCompile Include="ExampleWindow.cpp" />
     <ClCompile Include="ExtraWindow.cpp" />
+    <ClCompile Include="ReadFileData.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
