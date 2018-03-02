@@ -3,9 +3,9 @@
 
 #pragma warning(push)
 #pragma warning(disable: 4996)
-#include <boost\signals2\signal.hpp>
+#include <memory>
 #pragma warning(pop)
 
-#include <Testing\Test.Front\Test.Class.hpp>
+#include <alicorn\testing.app\Test.Class.hpp>
 
 #include "..\mock.hpp"

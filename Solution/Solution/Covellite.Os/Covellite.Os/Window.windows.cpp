@@ -41,13 +41,19 @@ static Handle_t CreateWindow(void)
   const auto IsFullScreen = WindowSection.Get<String>(uT("IsFullScreen"));
   if (IsFullScreen == uT("false"))
   {
+    WindowFlags = WS_CLIPSIBLINGS | WS_CLIPCHILDREN | WS_OVERLAPPEDWINDOW;
+    WindowFlagsEx = WS_EX_APPWINDOW | WS_EX_WINDOWEDGE;
+
+    const auto IsResized = WindowSection.Get<String>(uT("IsResized"));
+    if (IsResized == uT("false"))
+    {
+      WindowFlags ^= WS_THICKFRAME | WS_MAXIMIZEBOX;
+    }
+
     const auto & SizeSection = WindowSection[uT("Size")];
 
     const auto ClientWidth = SizeSection.Get<int>(uT("Width"));
     const auto ClientHeight = SizeSection.Get<int>(uT("Height"));
-
-    WindowFlags = WS_CLIPSIBLINGS | WS_CLIPCHILDREN | WS_OVERLAPPEDWINDOW;
-    WindowFlagsEx = WS_EX_APPWINDOW | WS_EX_WINDOWEDGE;
 
     RECT WindowRect = { 0, 0, ClientWidth, ClientHeight };
     WINAPI_CALL USING_MOCK ::AdjustWindowRectEx(&WindowRect,

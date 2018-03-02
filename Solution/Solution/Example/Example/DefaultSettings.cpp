@@ -19,15 +19,14 @@ template<>
 {
   auto pSettings = ::std::make_unique<Section_t>(uT("Covellitepp"));
     
-  const auto PathToRootDirectory =
-    ::alicorn::system::application::CurrentModule::GetAppRootPath();
+  (*pSettings).AddExtra(uT("AppRootPath"),
+    ::alicorn::system::application::CurrentModule::GetAppRootPath());
     
+  // Общие параметры для всех платформ
   (*pSettings).SetDefault(uT("PathToFontsDirectory"),
-    PathToRootDirectory / "data" / "fonts",
+    uT("{AppRootPath}/data/fonts"),
     uT("Путь к папке расположения шрифтов, которые используются в .rcss файлах."));
     
-  (*pSettings)[uT("Window")].SetDefault(uT("IsFullScreen"), false,
-    uT("Полноэкранный/оконный режим работы программы (только для Windows)."));
   (*pSettings)[uT("Window")][uT("BackgroundColor")].SetDefault(uT("R"), 0,
     uT("Цвет фона окна программы по умолчанию: красная компонента [0...255]."));
   (*pSettings)[uT("Window")][uT("BackgroundColor")].SetDefault(uT("G"), 0,
@@ -36,10 +35,29 @@ template<>
     uT("Цвет фона окна программы по умолчанию: синяя компонента [0...255]."));
   (*pSettings)[uT("Window")][uT("BackgroundColor")].SetDefault(uT("A"), 255,
     uT("Цвет фона окна программы по умолчанию: прозрачность [0...255]."));
+    
+# if BOOST_OS_WINDOWS
+    
+  // Параметры, используемые только в Windows
+  (*pSettings)[uT("Window")].SetDefault(uT("GraphicsApi"), uT("OpenGL"),
+    uT("Используемый для рендеринга графический Api."));
+  (*pSettings)[uT("Window")].SetDefault(uT("IsFullScreen"), false,
+    uT("Полноэкранный/оконный режим работы программы."));
+  (*pSettings)[uT("Window")].SetDefault(uT("IsResized"), false,
+    uT("Разрешение/запрет изменения размеров окна программы мышью."));
+    
   (*pSettings)[uT("Window")][uT("Size")].SetDefault(uT("Width"), 480,
-    uT("Ширина клиентской области окна программы (только для Windows)."));
+    uT("Ширина клиентской области окна программы."));
   (*pSettings)[uT("Window")][uT("Size")].SetDefault(uT("Height"), 762,
-    uT("Высота клиентской области окна программы (только для Windows)."));
+    uT("Высота клиентской области окна программы."));
+    
+# elif BOOST_OS_ANDROID
+    
+  // Параметры, используемые только в Android
+  (*pSettings)[uT("Window")].SetDefault(uT("GraphicsApi"), uT("OpenGLES"),
+    uT("Используемый для рендеринга графический Api."));
+    
+# endif
     
   return pSettings;
 }

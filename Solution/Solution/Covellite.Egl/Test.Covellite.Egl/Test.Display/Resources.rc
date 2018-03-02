@@ -1,6 +1,6 @@
 
 #ifndef APSTUDIO_INVOKED
 
-# include <Testing\Test.Front\Test.Class.rc>
+# include <alicorn\testing.app\Test.Class.rc>
 
 #endif

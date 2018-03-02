@@ -2,17 +2,17 @@
 <Tasks>
   <Options>
     <Width>1394</Width>
-    <Height>928</Height>
+    <Height>944</Height>
+    <X>319</X>
+    <Y>68</Y>
   </Options>
   <Process/>
   <Complete>
-    <Week6109>
-      <Task6 Text="Класс Environment." Type="Red" Version="None" ExternalProgram="None" Expanded="false" Completed="true" History="false" ParentTaskText="false">
-        <Task7 Text="Наследование от класса из Alicorn." Type="None" Version="None" ExternalProgram="RootPart" Expanded="false" Completed="true" History="true" ParentTaskText="true"/>
-      </Task6>
-    </Week6109>
-    <Week6108/>
-    <Week6107/>
-    <Week6106/>
+    <Week6164>
+      <Task6 Text="Дополнение/исправление тестов деструкторов классов." Type="Red" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="false"/>
+    </Week6164>
+    <Week6163/>
+    <Week6162/>
+    <Week6161/>
   </Complete>
 </Tasks>

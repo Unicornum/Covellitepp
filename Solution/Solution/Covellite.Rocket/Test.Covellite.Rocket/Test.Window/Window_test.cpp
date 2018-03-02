@@ -350,6 +350,13 @@ TEST_F(Window_test, /*DISABLED_*/Test_Constructor_LoadFontFace)
 }
 
 // ************************************************************************** //
+TEST_F(Window_test, /*DISABLED_*/Test_DefaultDestructor)
+{
+  EXPECT_TRUE(::std::has_virtual_destructor<Tested_t>::value);
+  EXPECT_TRUE(::std::is_nothrow_destructible<Tested_t>::value);
+}
+
+// ************************************************************************** //
 TEST_F(Window_test, /*DISABLED_*/Test_Destructor)
 {
   using EventHandlerProxy_t = ::mock::covellite::core::EventHandler::Proxy;

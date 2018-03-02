@@ -57,6 +57,13 @@ protected:
 // FRIEND_TEST(OpenGL_test, Test_Function);
 
 // ************************************************************************** //
+TEST_F(OpenGL_test, /*DISABLED_*/Test_Destructor)
+{
+  EXPECT_TRUE(::std::has_virtual_destructor<Tested_t>::value);
+  EXPECT_TRUE(::std::is_nothrow_destructible<Tested_t>::value);
+}
+
+// ************************************************************************** //
 TEST_F(OpenGL_test, /*DISABLED_*/Test_EmptyFormatDescriptor)
 {
   EXPECT_EQ(0, PixelFormatDescriptor.nSize);
@@ -153,12 +160,9 @@ TEST_F(OpenGL_test, /*DISABLED_*/Test_ChoosePixelFormat)
     PixelFormatDescriptor.dwFlags);
   EXPECT_EQ(PFD_TYPE_RGBA, PixelFormatDescriptor.iPixelType);
   EXPECT_EQ(32, PixelFormatDescriptor.cColorBits);
-  EXPECT_EQ(8, PixelFormatDescriptor.cRedBits);
-  EXPECT_EQ(8, PixelFormatDescriptor.cGreenBits);
-  EXPECT_EQ(8, PixelFormatDescriptor.cBlueBits);
   EXPECT_EQ(8, PixelFormatDescriptor.cAlphaBits);
-  EXPECT_EQ(24, PixelFormatDescriptor.cDepthBits);
-  EXPECT_EQ(8, PixelFormatDescriptor.cStencilBits);
+  EXPECT_EQ(32, PixelFormatDescriptor.cDepthBits);
+  EXPECT_EQ(PFD_MAIN_PLANE, PixelFormatDescriptor.iLayerType);
 
   const HDC hDC = (HDC)1710282115;
   const int PixelFormat = 1710282129;

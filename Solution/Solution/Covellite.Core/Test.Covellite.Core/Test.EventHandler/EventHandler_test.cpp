@@ -86,6 +86,13 @@ protected:
 // FRIEND_TEST(EventHandler_test, Test_Function);
 
 // ************************************************************************** //
+TEST_F(EventHandler_test, /*DISABLED_*/Test_Destructor)
+{
+  EXPECT_FALSE(::std::has_virtual_destructor<Tested_t>::value);
+  EXPECT_TRUE(::std::is_nothrow_destructible<Tested_t>::value);
+}
+
+// ************************************************************************** //
 TEST_F(EventHandler_test, /*DISABLED_*/Test_Subscribe_Document)
 {
   android_app AndroidApp;

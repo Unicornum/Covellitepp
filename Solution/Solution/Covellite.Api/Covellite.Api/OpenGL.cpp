@@ -22,12 +22,9 @@ OpenGL::OpenGL(const WindowOsPtr_t & _pWindow) :
   PixelFormatDescriptor.dwFlags = PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER;
   PixelFormatDescriptor.iPixelType = PFD_TYPE_RGBA;
   PixelFormatDescriptor.cColorBits = 32;
-  PixelFormatDescriptor.cRedBits = 8;
-  PixelFormatDescriptor.cGreenBits = 8;
-  PixelFormatDescriptor.cBlueBits = 8;
   PixelFormatDescriptor.cAlphaBits = 8;
-  PixelFormatDescriptor.cDepthBits = 24;
-  PixelFormatDescriptor.cStencilBits = 8;
+  PixelFormatDescriptor.cDepthBits = 32;
+  PixelFormatDescriptor.iLayerType = PFD_MAIN_PLANE;
 
   // Игнорирование предупреждений при анализе кода (анализатор не понимает,
   // что макрос WINAPI_CALL вызывает исключение при нулевом значении 

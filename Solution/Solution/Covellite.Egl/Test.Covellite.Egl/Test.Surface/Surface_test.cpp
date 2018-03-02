@@ -33,7 +33,8 @@ protected:
   }
 
 protected:
-  void SetConfig(::mock::covellite::egl::Config & _Config, ::covellite::egl::EGLConfig _MockConfig)
+  void SetConfig(::mock::covellite::egl::Config & _Config, 
+    const ::covellite::egl::EGLConfig & _MockConfig)
   {
     _Config.m_Config = _MockConfig;
   }
@@ -44,6 +45,13 @@ protected:
 // нужно чтобы тестовая функция была расположена В ТОМ ЖЕ ПРОСТРАНСТВЕ ИМЕН, 
 // что и тестируемый класс).
 // FRIEND_TEST(Surface_test, Test_Function);
+
+// ************************************************************************** //
+TEST_F(Surface_test, /*DISABLED_*/Test_Destructor)
+{
+  EXPECT_FALSE(::std::has_virtual_destructor<Tested_t>::value);
+  EXPECT_TRUE(::std::is_nothrow_destructible<Tested_t>::value);
+}
 
 namespace covellite
 {

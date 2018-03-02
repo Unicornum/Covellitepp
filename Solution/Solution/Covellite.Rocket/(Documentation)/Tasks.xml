@@ -3,13 +3,14 @@
   <Options>
     <Width>1398</Width>
     <Height>942</Height>
-    <X>318</X>
-    <Y>71</Y>
+    <X>319</X>
+    <Y>67</Y>
   </Options>
   <Process/>
   <Complete>
     <Week6164>
-      <Task6 Text="Изменение способа доступа к файлам." Type="Red" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="true" ParentTaskText="false"/>
+      <Task3 Text="Изменение способа доступа к файлам." Type="Red" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="true" ParentTaskText="false"/>
+      <Task7 Text="Добавление/исправление тестов деструкторов классов." Type="Red" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="false"/>
     </Week6164>
     <Week6163/>
     <Week6162/>

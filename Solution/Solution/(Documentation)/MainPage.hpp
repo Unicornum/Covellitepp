@@ -41,7 +41,7 @@
 *  
 * \image html ".\Solution\(Documentation)\Covellitepp.png"
 *
-*  Дополнительно
+*  \n
 *  -------------
 *  
 * \subpage UsingFrameworkPage

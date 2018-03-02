@@ -55,7 +55,7 @@ protected:
 // FRIEND_TEST(Window_test, Test_Function);
 
 // ************************************************************************** //
-TEST_F(Window_test, /*DISABLED_*/Test_WindowMode)
+TEST_F(Window_test, /*DISABLED_*/Test_WindowMode_Resized)
 {
   using SettingsProxy_t = ::mock::alicorn::modules::settings::SectionImplProxy;
   SettingsProxy_t SettingsProxy;
@@ -79,8 +79,8 @@ TEST_F(Window_test, /*DISABLED_*/Test_WindowMode)
   const auto ClientHeight = 1711091108;
   const HWND hWnd = (HWND)1710240002;
   const HMODULE hModule = (HMODULE)1710240005;
-  const auto WindowFlags =
-    WS_CLIPSIBLINGS | WS_CLIPCHILDREN | WS_OVERLAPPEDWINDOW;
+  const auto WindowFlags = WS_CLIPSIBLINGS | WS_CLIPCHILDREN | WS_OVERLAPPED | 
+    WS_CAPTION | WS_SYSMENU | WS_THICKFRAME | WS_MINIMIZEBOX | WS_MAXIMIZEBOX;
   const auto WindowFlagsEx =
     WS_EX_APPWINDOW | WS_EX_WINDOWEDGE;
   const auto WindowWidth = 1711091129;
@@ -122,6 +122,10 @@ TEST_F(Window_test, /*DISABLED_*/Test_WindowMode)
     .Times(1)
     .WillOnce(Return(uT("false")));
 
+  EXPECT_CALL(SettingsProxy, GetValue(WindowSectionId, uT("IsResized")))
+    .Times(1)
+    .WillOnce(Return(uT("true")));
+
   EXPECT_CALL(SettingsProxy, GetValue(SizeSectionId, uT("Width")))
     .Times(1)
     .WillOnce(Return(lexical_cast<String_t>(ClientWidth)));
@@ -160,6 +164,132 @@ TEST_F(Window_test, /*DISABLED_*/Test_WindowMode)
       .WillOnce(Return(TRUE));
 
     EXPECT_CALL(WindowsProxy, CreateWindowExW1(WindowFlagsEx, 
+      Eq(::covellite::core::ClassName), Eq(string_cast<::std::wstring>(Title)),
+      WindowFlags, X, Y, WindowWidth, WindowHeight, nullptr, nullptr))
+      .Times(1);
+
+    EXPECT_CALL(WindowsProxy, CreateWindowExW2(hModule, nullptr))
+      .Times(1)
+      .WillOnce(Return(hWnd));
+
+    EXPECT_CALL(WindowsProxy, ShowWindow(hWnd, SW_SHOW))
+      .Times(1)
+      .WillOnce(Return(TRUE));
+
+    const Tested_t Example;
+    const ITested_t & IExample = Example;
+    EXPECT_EQ(hWnd, IExample.GetHandle());
+
+    EXPECT_CALL(WindowsProxy, DestroyWindow(hWnd))
+      .Times(1);
+  }
+}
+
+// ************************************************************************** //
+TEST_F(Window_test, /*DISABLED_*/Test_WindowMode_NoResized)
+{
+  using SettingsProxy_t = ::mock::alicorn::modules::settings::SectionImplProxy;
+  SettingsProxy_t SettingsProxy;
+  SettingsProxy_t::GetInstance() = &SettingsProxy;
+
+  using InfoProxy_t = ::mock::alicorn::system::version::Info::Proxy;
+  InfoProxy_t InfoProxy;
+  InfoProxy_t::GetInstance() = &InfoProxy;
+
+  using WindowsProxy_t = ::mock::WindowsProxy;
+  WindowsProxy_t WindowsProxy;
+  WindowsProxy_t::GetInstance() = &WindowsProxy;
+
+  const ::mock::Id_t InfoId = 1711032335;
+  const auto Title = uT("Title1711032336");
+  const ::mock::Id_t RootSectionId = 1711091118;
+  const ::mock::Id_t MainSectionId = 1711091120;
+  const ::mock::Id_t WindowSectionId = 1711091058;
+  const ::mock::Id_t SizeSectionId = 1711091059;
+  const auto ClientWidth = 1711091107;
+  const auto ClientHeight = 1711091108;
+  const HWND hWnd = (HWND)1710240002;
+  const HMODULE hModule = (HMODULE)1710240005;
+  const auto WindowFlags = WS_CLIPSIBLINGS | WS_CLIPCHILDREN | WS_OVERLAPPED |
+    WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX;
+  const auto WindowFlagsEx =
+    WS_EX_APPWINDOW | WS_EX_WINDOWEDGE;
+  const auto WindowWidth = 1711091129;
+  const auto WindowHeight = 1711091130;
+  const RECT WindowRect = { 1134, 1135, 1134 + WindowWidth, 1135 + WindowHeight };
+  const auto ScreenWidth = 1711091224;
+  const auto ScreenHeight = 1711091234;
+  const auto X = (ScreenWidth - WindowWidth) / 2;
+  const auto Y = (ScreenHeight - WindowHeight) / 2;
+
+  using namespace ::testing;
+
+  EXPECT_CALL(InfoProxy, Constructor())
+    .Times(1)
+    .WillOnce(Return(InfoId));
+
+  EXPECT_CALL(InfoProxy, GetValue(InfoId, uT("ApplicationName")))
+    .Times(1)
+    .WillOnce(Return(Title));
+
+  EXPECT_CALL(SettingsProxy, Constructor())
+    .WillOnce(Return(WindowSectionId))
+    .WillOnce(Return(SizeSectionId));
+
+  EXPECT_CALL(SettingsProxy, GetChildSectionImpl(_, uT("Window")))
+    .Times(1);
+
+  EXPECT_CALL(SettingsProxy, GetChildSectionImpl(WindowSectionId, uT("Size")))
+    .Times(1);
+
+  using ::boost::lexical_cast;
+
+  EXPECT_CALL(SettingsProxy, GetValue(WindowSectionId, uT("IsFullScreen")))
+    .Times(1)
+    .WillOnce(Return(uT("false")));
+
+  EXPECT_CALL(SettingsProxy, GetValue(WindowSectionId, uT("IsResized")))
+    .Times(1)
+    .WillOnce(Return(uT("false")));
+
+  EXPECT_CALL(SettingsProxy, GetValue(SizeSectionId, uT("Width")))
+    .Times(1)
+    .WillOnce(Return(lexical_cast<String_t>(ClientWidth)));
+
+  EXPECT_CALL(SettingsProxy, GetValue(SizeSectionId, uT("Height")))
+    .Times(1)
+    .WillOnce(Return(lexical_cast<String_t>(ClientHeight)));
+
+  EXPECT_CALL(WindowsProxy, GetModuleHandleW(nullptr))
+    .Times(1)
+    .WillOnce(Return(hModule));
+
+  EXPECT_CALL(WindowsProxy, GetSystemMetrics(SM_CXSCREEN))
+    .Times(1)
+    .WillOnce(Return(ScreenWidth));
+
+  EXPECT_CALL(WindowsProxy, GetSystemMetrics(SM_CYSCREEN))
+    .Times(1)
+    .WillOnce(Return(ScreenHeight));
+
+  {
+    using namespace ::alicorn::extension::std;
+
+    InSequence Dummy;
+
+    EXPECT_CALL(WindowsProxy, SetClientRect(0, 0, ClientWidth, ClientHeight))
+      .Times(1);
+
+    EXPECT_CALL(WindowsProxy, GetWindowRect())
+      .Times(1)
+      .WillOnce(Return(WindowRect));
+
+    EXPECT_CALL(WindowsProxy,
+      AdjustWindowRectEx(WindowFlags, FALSE, WindowFlagsEx))
+      .Times(1)
+      .WillOnce(Return(TRUE));
+
+    EXPECT_CALL(WindowsProxy, CreateWindowExW1(WindowFlagsEx,
       Eq(::covellite::core::ClassName), Eq(string_cast<::std::wstring>(Title)),
       WindowFlags, X, Y, WindowWidth, WindowHeight, nullptr, nullptr))
       .Times(1);

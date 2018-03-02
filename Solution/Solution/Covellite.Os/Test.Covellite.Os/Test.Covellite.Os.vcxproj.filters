@@ -32,6 +32,9 @@
     <ClCompile Include="Test.Window\Window.windows_test.cpp">
       <Filter>Tests\Window</Filter>
     </ClCompile>
+    <ClCompile Include="Test.Window\Window_test.cpp">
+      <Filter>Tests\Window</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">

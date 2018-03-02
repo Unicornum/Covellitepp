@@ -80,6 +80,9 @@
     <ClCompile Include="Test.Settings\Settings_test.cpp">
       <Filter>Tests\Settings</Filter>
     </ClCompile>
+    <ClCompile Include="Test.Window\Window_test.cpp">
+      <Filter>Tests\Window</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">

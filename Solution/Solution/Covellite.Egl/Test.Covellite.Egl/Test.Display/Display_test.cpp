@@ -40,6 +40,13 @@ protected:
 // FRIEND_TEST(Display_test, Test_Function);
 
 // ************************************************************************** //
+TEST_F(Display_test, /*DISABLED_*/Test_Destructor)
+{
+  EXPECT_FALSE(::std::has_virtual_destructor<Tested_t>::value);
+  EXPECT_TRUE(::std::is_nothrow_destructible<Tested_t>::value);
+}
+
+// ************************************************************************** //
 TEST_F(Display_test, /*DISABLED_*/Test_InitializeSuccess)
 {
   using EglProxy_t = ::mock::EglProxy;

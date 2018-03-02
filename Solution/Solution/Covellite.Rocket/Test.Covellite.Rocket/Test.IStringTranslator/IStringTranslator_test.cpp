@@ -40,40 +40,8 @@ protected:
 // FRIEND_TEST(IStringTranslator_test, Test_Function);
 
 // ************************************************************************** //
-TEST_F(IStringTranslator_test, /*DISABLED_*/Test_VirtualDestructor)
+TEST_F(IStringTranslator_test, /*DISABLED_*/Test_Destructor)
 {
-  class Tested :
-    public Tested_t
-  {
-  public:
-    class Proxy :
-      public ::alicorn::extension::testing::Proxy<Proxy>
-    {
-    public:
-      MOCK_METHOD0(Destructor, void(void));
-    };
-
-  public:
-    Utf8String_t Translate(const Utf8String_t &) override { throw ::std::exception{}; }
-
-  public:
-    ~Tested(void) noexcept
-    {
-      Proxy::GetInstance()->Destructor();
-    }
-  };
-
-  // Почему не работает ::std::make_shared<>()???
-  Tested_t * pExample = new Tested;
-
-  using Proxy_t = Tested::Proxy;
-  Proxy_t Proxy;
-  Proxy_t::GetInstance() = &Proxy;
-
-  using namespace ::testing;
-
-  EXPECT_CALL(Proxy, Destructor())
-    .Times(1);
-
-  delete pExample;
+  EXPECT_TRUE(::std::has_virtual_destructor<Tested_t>::value);
+  EXPECT_TRUE(::std::is_nothrow_destructible<Tested_t>::value);
 }

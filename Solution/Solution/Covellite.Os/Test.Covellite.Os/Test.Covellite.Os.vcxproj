@@ -82,6 +82,7 @@
     <ClCompile Include="Test.IWindow\IWindow_test.cpp" />
     <ClCompile Include="Test.Window\Window.android_test.cpp" />
     <ClCompile Include="Test.Window\Window.windows_test.cpp" />
+    <ClCompile Include="Test.Window\Window_test.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Covellite.Os\IWindow.hpp" />

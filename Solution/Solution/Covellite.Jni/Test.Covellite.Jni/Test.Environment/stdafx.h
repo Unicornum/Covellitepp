@@ -1,5 +1,5 @@
 
 #pragma once
-#include <Testing\Test.Front\Test.Class.hpp>
+#include <alicorn\testing.app\Test.Class.hpp>
 
 #include "..\mock.hpp"

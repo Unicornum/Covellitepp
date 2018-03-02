@@ -2,13 +2,18 @@
 /**
 * \page SolutionPage Структура решения
 *
+* \subpage SolutionStatisticsPage
+*
+* \subpage SolutionTasksPage
+*
 *  Структура проектов решения
 *  --------------------------
 *  
 * \image html ".\Solution\(Documentation)\CovelliteProjects.png"
 *
-*  Build
-*  -----
+*  Раздел Build
+*  ------------
+*  
 *  Описание раздела \subpage BuildPage
 *
 *  Проекты решения
@@ -85,9 +90,5 @@
 *
 * \subpage ExternalsPage
 *
-* \subpage SolutionTasksPage
-*
-* \subpage SolutionStatisticsPage
-*  
 *  ---------------------------------------------------------------------------
 */

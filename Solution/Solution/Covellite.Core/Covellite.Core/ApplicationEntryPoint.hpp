@@ -32,7 +32,7 @@
 #include <windows.h>
 
 #define APPLICATION_ENTRY_POINT(MainApplicationClass) \
-  int WINAPI WinMain(HINSTANCE, HINSTANCE, char * _pParams, int) \
+  int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR _pParams, int) \
   { \
     covellite::core::Application::Main<MainApplicationClass>(_pParams); \
     return 0; \

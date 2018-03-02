@@ -157,7 +157,7 @@ void Window::DoDrawWindow(void)
 
   public:
     static void Iterate(const Path_t & _PathToFontsDirectory, 
-      fnCallBack_t _fnCallBack)
+      const fnCallBack_t & _fnCallBack)
     {
 # if BOOST_OS_WINDOWS
 

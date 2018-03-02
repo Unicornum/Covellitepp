@@ -46,6 +46,8 @@ protected:
 // что и тестируемый класс).
 // FRIEND_TEST(File_test, Test_Function);
 
+/// \cond DoxygenWarningSuppress
+
 using Vfs_t = ::alicorn::modules::vfs::Core;
 using VfsPtr_t = ::std::unique_ptr<Vfs_t>;
 using Singleton_t = ::alicorn::extension::std::Singleton<Vfs_t>;
@@ -61,6 +63,15 @@ using Singleton_t = ::alicorn::extension::std::Singleton<Vfs_t>;
     ::std::make_shared<::alicorn::modules::vfs::FileSystem>(""),
     ::std::make_shared<::alicorn::modules::vfs::FileSystem>(THIS_DIRECTORY)
   });
+}
+
+/// \endcond
+
+// ************************************************************************** //
+TEST_F(File_test, /*DISABLED_*/Test_Destructor)
+{
+  EXPECT_TRUE(::std::has_virtual_destructor<Tested_t>::value);
+  EXPECT_TRUE(::std::is_nothrow_destructible<Tested_t>::value);
 }
 
 // ************************************************************************** //

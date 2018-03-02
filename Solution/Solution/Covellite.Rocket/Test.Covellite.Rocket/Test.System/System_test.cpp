@@ -58,6 +58,13 @@ TEST_F(System_test, /*DISABLED_*/Test_Constructor_Exception)
 }
 
 // ************************************************************************** //
+TEST_F(System_test, /*DISABLED_*/Test_Destructor)
+{
+  EXPECT_TRUE(::std::has_virtual_destructor<Tested_t>::value);
+  EXPECT_TRUE(::std::is_nothrow_destructible<Tested_t>::value);
+}
+
+// ************************************************************************** //
 TEST_F(System_test, /*DISABLED_*/Test_TranslateString)
 {
   const char * Source = "Source1612212335";

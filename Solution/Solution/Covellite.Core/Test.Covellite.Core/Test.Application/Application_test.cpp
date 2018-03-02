@@ -36,26 +36,6 @@ protected:
   void TearDown(void) override
   {
   }
-
-protected:
-  class Tested :
-    public Tested_t
-  {
-  public:
-    class Proxy :
-      public ::alicorn::extension::testing::Proxy<Proxy>
-    {
-    public:
-      MOCK_METHOD0(Destructor, void(void));
-    };
-
-  public:
-    Tested(void) : Tested_t([](void) {}) {}
-    ~Tested(void) noexcept
-    {
-      Proxy::GetInstance()->Destructor();
-    }
-  };
 };
 
 // Образец макроса для подстановки в класс Application 
@@ -65,21 +45,10 @@ protected:
 // FRIEND_TEST(Application_test, Test_Function);
 
 // ************************************************************************** //
-TEST_F(Application_test, /*DISABLED_*/Test_VirtualDestructor)
+TEST_F(Application_test, /*DISABLED_*/Test_Destructor)
 {
-  using Proxy_t = Tested::Proxy;
-  Proxy_t Proxy;
-  Proxy_t::GetInstance() = &Proxy;
-
-  // Почему не работает ::std::make_shared<>()???
-  Tested_t * pExample = new Tested;
-
-  using namespace ::testing;
-
-  EXPECT_CALL(Proxy, Destructor())
-    .Times(1);
-
-  delete pExample;
+  EXPECT_TRUE(::std::has_virtual_destructor<Tested_t>::value);
+  EXPECT_TRUE(::std::is_nothrow_destructible<Tested_t>::value);
 }
 
 namespace covellite
@@ -137,7 +106,7 @@ TEST_F(Application_test, /*DISABLED_*/Test_MakeWindow)
   const ::mock::Id_t WindowId2 = 1709261038;
   const ::mock::Id_t WindowId3 = 1710302034;
 
-  Tested Example;
+  Tested_t Example{ [](void) {} };
 
   int Count = 0;
 

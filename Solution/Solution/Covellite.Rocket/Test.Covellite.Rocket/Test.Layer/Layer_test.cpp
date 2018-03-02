@@ -181,6 +181,13 @@ TEST_F(Layer_test, /*DISABLED_*/Test_Constructor_Title)
 }
 
 // ************************************************************************** //
+TEST_F(Layer_test, /*DISABLED_*/Test_Destructor)
+{
+  EXPECT_TRUE(::std::has_virtual_destructor<Tested_t>::value);
+  EXPECT_TRUE(::std::is_nothrow_destructible<Tested_t>::value);
+}
+
+// ************************************************************************** //
 TEST_F(Layer_test, /*DISABLED_*/Test_Show)
 {
   Context_t Context;

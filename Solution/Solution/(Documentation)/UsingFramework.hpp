@@ -34,6 +34,7 @@ https://svn/svn/Prebuilt.no.backup/Solution/Properties/Utilities/Externals/Alico
 *  который будет использоваться программой для чтения данных из файлов.
 *  
 * \anchor MainModuleWindowsUsingFrameworkAnchor
+*  
 *  Создание проекта сборки основного модуля программы для Windows
 *  --------------------------------------------------------------
 *
@@ -55,6 +56,7 @@ https://svn/svn/Prebuilt.no.backup/Solution/Properties/Utilities/Externals/Alico
 *  классов окон).
 *  
 * \anchor MainModuleAndroidUsingFrameworkAnchor
+*  
 *  Создание проекта сборки основного модуля программы для Android
 *  --------------------------------------------------------------
 *
@@ -88,15 +90,18 @@ https://svn/svn/Prebuilt.no.backup/Solution/Properties/Utilities/Externals/Alico
 *  \subpage InputRussianLettersPage).
 *  
 * \anchor ScreenDescriptionUsingFrameworkAnchor
+*  
 *  Создание .rcss и .rml файлов описания отдельных экранов программы
 *  -----------------------------------------------------------------
 *  
-*  Как это делается см. в документации/примерах [libRocket]. \n
-*  Доступные css свойства: [libRocket CSS].
+*  Как это делается см. в документации/примерах [libRocket].
 *  
-*  Все файлы (.rml, .rcss, .png) следует поместить в папку assets проекта
-*  Packaging (пути к этим файлам в программе задаются относительно этой папки,
-*  а в самом файле - относительно папки расположения файла).
+*  [Доступные css свойства].
+*  
+*  Все файлы (.rml, .rcss, .png) следует поместить в папку (Windows - корневая
+*  папка программы, Android - папка assets проекта Packaging), пути к этим 
+*  файлам в программе задаются относительно этой папки, а в самом файле - 
+*  относительно папки расположения этого файла.
 *  
 *  Файлы .rml могут содержать в качестве текста не ASCII символы, но в этом 
 *  случае их следует сохранять как utf8, а используемые шрифты должны 
@@ -108,6 +113,7 @@ https://svn/svn/Prebuilt.no.backup/Solution/Properties/Utilities/Externals/Alico
 *  запуске Debug версии программы.
 *  
 * \anchor ScreenClassesUsingFrameworkAnchor
+*  
 *  Создать классы отдельных экранов программы
 *  ------------------------------------------
 *  
@@ -124,6 +130,7 @@ https://svn/svn/Prebuilt.no.backup/Solution/Properties/Utilities/Externals/Alico
 * \snippet .\Solution\Example\Example\ExampleWindow.cpp Title layer
 *
 * \anchor MainWindowClassUsingFrameworkAnchor
+*  
 *  Создание класса главного окна программы
 *  ---------------------------------------
 *  
@@ -142,7 +149,14 @@ https://svn/svn/Prebuilt.no.backup/Solution/Properties/Utilities/Externals/Alico
 * \snippet .\Solution\Example\Example\ExampleWindow.cpp Subscribe
 *  
 * \note
-*  Цвет фона можно задавать как поле \b background-color для body в .rcss файле, 
+*  - Идентификаторы элементов управления передаются в функцию-обработчик
+*  события Event::Click в нижнем регистре независимо от того, каким образом
+*  они были заданы в .rml файле.
+*  - Класс слоя должен сохранять созданные слоты и отключать их в деструкторе,
+*  т.к. после нажатия кнопки \b BACK объект слоя уничтожается и при повторном
+*  входе на этот же слой (это будет уже новый объект) будет вызвана функци 
+*  не существующего объекта.
+*  - Цвет фона можно задавать как поле \b background-color для body в .rcss файле, 
 *  но в этом случае для заполнения всего окна следует в стилях rml и body 
 *  поставить
 * \code
@@ -164,11 +178,6 @@ body
   background-color: blue;
 
 * \endcode
-*  
-* \note
-*  Идентификаторы элементов управления передаются в функцию-обработчик 
-*  события Event::Click в нижнем регистре независимо от того, каким образом 
-*  они были заданы в .rml файле.
 *
 *  В классе окна событие Event::Click будет вызываться для всех элементов 
 *  управления всех активных пользовательских экранов, при этом здесь имеет 
@@ -179,6 +188,7 @@ body
 *  covellite::core::Event.
 *  
 * \anchor MainApplicationClassUsingFrameworkAnchor
+*  
 *  Создание класса программы
 *  -------------------------
 *  
@@ -218,15 +228,46 @@ body
 * \snippet .\Solution\Example\Example\ExampleApp.cpp Create entry point
 *  
 * \anchor SettingsUsingFrameworkAnchor
-*  Настройки по умолчанию
-*  ----------------------
 *  
-*  В код проекта необходимо также добавить реализацию функции установки
-*  значения параметров по умолчанию:
+*  Настройки
+*  ---------
+*  
+* ### Для всех платформ
+*  
+*  | Параметр             | Раздел                        | Описание                                                                |
+*  | :------------------- | :---------------------------- | :---------------------------------------------------------------------- |
+*  | PathToFontsDirectory | Root                          | Путь к папке расположения шрифтов, которые используются в .rcss файлах. |
+*  | R                    | Root\\Window\\BackgroundColor | Цвет фона окна программы по умолчанию: красная компонента [0...255].    |
+*  | G                    | Root\\Window\\BackgroundColor | Цвет фона окна программы по умолчанию: зеленая компонента [0...255].    |
+*  | B                    | Root\\Window\\BackgroundColor | Цвет фона окна программы по умолчанию: синяя компонента [0...255].      |
+*  | A                    | Root\\Window\\BackgroundColor | Цвет фона окна программы по умолчанию: прозрачность [0...255].          |
+*  
+* ### Только для Windows
+*  
+*  | Параметр     | Раздел             | Описание                                                   |
+*  | :----------- | :----------------- | :--------------------------------------------------------- |
+*  | GraphicsApi  | Root\\Window       | Используемый для рендеринга графический Api (OpenGL).      |
+*  | IsFullScreen | Root\\Window       | Полноэкранный/оконный режим работы программы.              |
+*  | IsResized    | Root\\Window       | Разрешение/запрет изменения размеров окна программы мышью. |
+*  | Width        | Root\\Window\\Size | Ширина клиентской области окна программы.                  |
+*  | Height       | Root\\Window\\Size | Высота клиентской области окна программы.                  |
+*  
+* ### Только для Android
+*  
+*  | Параметр    | Раздел       | Описание                                                |
+*  | :---------- | :----------- | :------------------------------------------------------ |
+*  | GraphicsApi | Root\\Window | Используемый для рендеринга графический Api (OpenGLES). |
+*  
+* ### Настройки по умолчанию
+*  
+*  В код проекта необходимо также добавить реализацию функции установки 
+*  значений параметров по умолчанию. Функция \b в \b обязательном \b порядке 
+*  должна устанавливать значения по умолчанию для всех параметров.
 *  
 * \include .\Solution\Example\Example\DefaultSettings.cpp
 *
 * \anchor ReadFileDataUsingFrameworkAnchor
+*  
 *  Настройка чтения данных из файлов
 *  ---------------------------------
 *
@@ -237,5 +278,5 @@ body
 * \include .\Solution\Example\Example\ReadFileData.cpp
 *
 *  [libRocket]: https://barotto.github.io/libRocketDoc/ "libRocket"
-*  [libRocket CSS]: https://barotto.github.io/libRocketDoc/pages/rcss.html "libRocket CSS"
+*  [Доступные css свойства]: https://barotto.github.io/libRocketDoc/pages/rcss.html "libRocket CSS"
 */

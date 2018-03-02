@@ -1,3 +1,3 @@
 
 #include "stdafx.h"
-#include <Testing\Test.Front\Test.Class.cpp>
+#include <alicorn\testing.app\Test.Class.cpp>

@@ -6,6 +6,34 @@
 *  =================
 *  <table frame=void><tr><td></td></tr></table>
 *  
+*  Версия: 2.1.2.609
+*  -----
+*  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект \ref CovelliteOsPage : </td></tr></table>
+*  <table frame=void border=1 bordercolor=#FFFFFF cellpadding=5 cellspacing=0 width=98%><tr>
+*    <td width=10px></td>
+*    <td bgcolor=#B8CCE4 width=125px align=center> 02.03.2018 10:38 </td>
+*    <td bgcolor=#C0FFC0> Флаг разрешения изменений размеров окна мышью. </td>
+*  </tr></table>
+*  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект \ref ExamplePage : </td></tr></table>
+*  <table frame=void border=1 bordercolor=#FFFFFF cellpadding=5 cellspacing=0 width=98%><tr>
+*    <td width=10px></td>
+*    <td bgcolor=#B8CCE4 width=125px align=center> 28.02.2018 13:58 </td>
+*    <td bgcolor=#C0FFC0> Изменение способа задания пути к папке шрифтов. </td>
+*  </tr></table>
+*  <table frame=void border=1 bordercolor=#FFFFFF cellpadding=5 cellspacing=0 width=98%><tr>
+*    <td width=10px></td>
+*    <td bgcolor=#B8CCE4 width=125px align=center> 28.02.2018 13:22 </td>
+*    <td bgcolor=#C0FFC0> Разделение настроек, специфичных для Windows и Android версий. </td>
+*  </tr></table>
+*  <table frame=void><tr><td></td></tr></table>
+*  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект \ref ExamplePage : </td></tr></table>
+*  <table frame=void border=1 bordercolor=#FFFFFF cellpadding=5 cellspacing=0 width=98%><tr>
+*    <td width=10px></td>
+*    <td bgcolor=#B8CCE4 width=125px align=center> 28.02.2018 11:21 </td>
+*    <td bgcolor=#FFC0C0> fix: Падение программы при нажатии кнопки при повторном входе на дочерний слой. </td>
+*  </tr></table>
+*  <table frame=void><tr><td></td></tr></table>
+*  
 *  Версия: 2.1.1.575
 *  -----
 *  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект \ref CovelliteRocketPage : </td></tr></table>

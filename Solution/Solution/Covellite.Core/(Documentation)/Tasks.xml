@@ -8,16 +8,17 @@
   </Options>
   <Process>
     <Task1 Text="Вспомогательные." Type="Info" Version="None" ExternalProgram="Solution" Expanded="true" Completed="false" History="false" ParentTaskText="false">
-      <Task3 Text="Фиксация решения." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="false"/>
-      <Task2 Text="Завершение спринта." Type="None" Version="Younger" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="false"/>
+      <Task2 Text="Фиксация решения." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="false"/>
+      <Task3 Text="Завершение спринта." Type="None" Version="Younger" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="false"/>
     </Task1>
   </Process>
   <Complete>
     <Week6164>
       <Task6 Text="+ 0.1.0" Type="None" Version="None" ExternalProgram="None" Expanded="false" Completed="true" History="false" ParentTaskText="false"/>
+      <Task7 Text="Дополнение/исправление тестов деструкторов классов." Type="Red" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="false"/>
     </Week6164>
     <Week6163>
-      <Task8 Text="Изменен способ доступа к настройкам программы." Type="Red" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="false"/>
+      <Task9 Text="Изменен способ доступа к настройкам программы." Type="Red" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="false"/>
     </Week6163>
     <Week6162/>
     <Week6161/>

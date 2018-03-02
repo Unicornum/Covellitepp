@@ -43,7 +43,10 @@ public:
     using ::std::placeholders::_1;
       
     // Подписываемся на событие нажатия кнопки с идентификатором "id_hello".
-    (*_pEvents)[Event::Click]["id_hello"]
+    // Необходимо сохранить созданный сигнал и отключить его в деструкторе,
+    // чтобы исключить вызов фунции не существующего объекта при повторном
+    // открытии слоя.
+    m_Hello = (*_pEvents)[Event::Click]["id_hello"]
       .connect(::std::bind(&DemoLayer2::DoHello, this, _1));
   }
     
@@ -52,7 +55,7 @@ private:
   {
     // Функция будет вызвана при нажатии кнопки id_hello.
       
-    // Проверяем, что событие произошло для текущего окна (это позволит
+    // Проверяем, что событие произошло для текущего слоя (это позволит
     // делать элементы управления с одинаковыми идентификаторами в разных .rml 
     // файлах; если все идентификаторы всех элементов во всех .rml файлах 
     // гарантированно уникальны, проверку можно опустить).
@@ -61,11 +64,18 @@ private:
     // Выполняем действие, необходимое при нажатии на кнопку.
     GetElement("multiline_text").SetText(u8"Привет!");
   }
+
+private:
+  ::boost::signals2::connection m_Hello;
     
 public:
   explicit DemoLayer2(Context_t * _pContex) : 
     Layer_t(_pContex, PathToDataDirectory / "demo2.rml")
   {
+  }
+  ~DemoLayer2(void)
+  {
+    m_Hello.disconnect();
   }
 };
 /// [Layer example]

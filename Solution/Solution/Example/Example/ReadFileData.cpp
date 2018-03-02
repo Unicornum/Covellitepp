@@ -2,6 +2,8 @@
 #include "stdafx.h"
 #include <alicorn\std\singleton.hpp>
 #include <alicorn\vfs.hpp>
+
+/// \cond DoxygenWarningSuppress
   
 namespace alicorn
 {
@@ -15,6 +17,7 @@ namespace std
 using namespace ::alicorn::modules::vfs;
     
 template<>
+// cppcheck-suppress syntaxError
 /*static*/ ::std::unique_ptr<Core> Singleton<Core>::Make(void)
 {
   using ImplPtr_t = ::std::shared_ptr<IImplementation>;
@@ -30,3 +33,5 @@ template<>
 } // namespace extension
   
 } // namespace alicorn
+
+/// \endcond

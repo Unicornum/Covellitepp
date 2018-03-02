@@ -9,7 +9,9 @@
   <Process/>
   <Complete>
     <Week6164>
-      <Task6 Text="Изменен способ формирования настроек по умолчанию и доступа к файлам." Type="Red" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="false"/>
+      <Task3 Text="Изменен способ формирования настроек по умолчанию и доступа к файлам." Type="Red" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="false"/>
+      <Task4 Text="Разделение настроек, специфичных для Windows и Android версий." Type="Red" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="true" ParentTaskText="false"/>
+      <Task8 Text="Изменение способа задания пути к папке шрифтов." Type="Red" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="true" ParentTaskText="false"/>
     </Week6164>
     <Week6163/>
     <Week6162/>

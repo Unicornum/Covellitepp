@@ -40,6 +40,8 @@ protected:
 // что и тестируемый класс).
 // FRIEND_TEST(Settings_test, Test_Function);
 
+/// \cond DoxygenWarningSuppress
+
 /// [SetDefaultValues]
 using namespace ::covellite::core;
   
@@ -54,6 +56,8 @@ using namespace ::covellite::core;
   return pSettings;
 }
 /// [SetDefaultValues]
+
+/// \endcond
 
 // ************************************************************************** //
 TEST_F(Settings_test, /*DISABLED_*/Test_Using)

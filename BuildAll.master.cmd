@@ -6,8 +6,8 @@ rem ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 set MSBuild="%ProgramFiles% (x86)\MSBuild\14.0\Bin\msbuild.exe"
 set Clean=/t:Solution\Build\Clean:Rebuild
+set Prebuild=/t:Solution\Build\Prebuild:Rebuild
 set BuildAll=/t:Solution\Build\BuildAll:Rebuild
-set Android=/t:Solution\Build\Android:Rebuild
 
 rem ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 rem Признак того, что сборка производится из скрипта
@@ -35,5 +35,7 @@ for %%S in (*.sln) do (
 )
 
 )
+
+rename .\Release\Example.apk Covellitepp.apk
 
 pause
