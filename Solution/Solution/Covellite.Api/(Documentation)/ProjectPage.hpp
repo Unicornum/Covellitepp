@@ -1,11 +1,18 @@
 
 /**
+* \page CovelliteApiBriefPage
+*  Проект классов-оберток для графического API.
+*/
+
+/**
 * \page CovelliteApiPage Covellite.Api
 *  
 *  Список классов проекта \ref gCovelliteApiClasses
 *  
-* \section sCovelliteApiBrief Введение
-*  Проект классов-оберток для графического API.
+*  Введение
+*  --------
+*  
+* \copydoc CovelliteApiBriefPage
 *  
 *  Подробнее
 *  ---------

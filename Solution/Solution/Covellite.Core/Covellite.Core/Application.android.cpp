@@ -107,14 +107,14 @@ Application::Application(EventBased) :
   {
     auto * pApp = reinterpret_cast<android_app *>(_pParams);
 
-    using AppInfo_t = ::alicorn::system::platform::AppInfo;
     const AppInfo_t Info
-    { 
+    {
       pApp, 
-      pApp->activity, 
+      pApp->activity,
+      pApp->activity->vm,
       &pApp->activity, 
       &pApp->window, 
-      &pApp->config 
+      &pApp->config,
     };
 
     _fnCreateApp()->Run();

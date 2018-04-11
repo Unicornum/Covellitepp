@@ -2,8 +2,9 @@
 #include "stdafx.h"
 #include <Covellite\Api\OpenGLES.hpp>
 #include <alicorn\std\string.hpp>
+#include <alicorn\platform\environment.hpp>
+#include <Covellite\Core.hpp>
 #include <Covellite.Egl\Egl.hpp>
-#include <Covellite\Core\EventHandler.hpp>
 #include <Covellite\Os\Window.hpp>
 #include <Covellite\Api\RenderOpenGL.hpp>
 
@@ -76,7 +77,7 @@ int32_t OpenGLES::GetHeight(void) const /*override*/
 OpenGLES::RenderInterfacePtr_t OpenGLES::MakeRenderInterface(void) const /*override*/
 {
   return ::std::make_shared<covellite::api::RenderOpenGL>(
-    covellite::jni::Environment().GetStatusBarHeight());
+    ::alicorn::system::platform::Environment{}.GetStatusBarHeight());
 }
 
 void OpenGLES::GlOrtho(int32_t _Width, int32_t _Height) /*override*/

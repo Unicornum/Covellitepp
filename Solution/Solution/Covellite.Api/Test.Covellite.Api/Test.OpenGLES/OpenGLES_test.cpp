@@ -247,7 +247,7 @@ TEST_F(OpenGLES_test, /*DISABLED_*/Test_GetHeight)
 // ************************************************************************** //
 TEST_F(OpenGLES_test, /*DISABLED_*/Test_MakeRenderInterface)
 {
-  using EnvironmentProxy_t = ::mock::covellite::jni::Environment::Proxy;
+  using EnvironmentProxy_t = ::alicorn::system::platform::proxy::Environment;
   EnvironmentProxy_t EnvironmentProxy;
   EnvironmentProxy_t::GetInstance() = &EnvironmentProxy;
 

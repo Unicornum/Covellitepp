@@ -14,7 +14,7 @@ using namespace covellite::core;
 */
 int32_t Window::GetStatusBarHeight(void) const
 {
-  return covellite::jni::Environment().GetStatusBarHeight();
+  return ::alicorn::system::platform::Environment{}.GetStatusBarHeight();
 }
 
 /**

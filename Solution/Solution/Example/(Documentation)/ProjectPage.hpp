@@ -1,9 +1,16 @@
 
 /**
+* \page ExampleBriefPage
+*  Раздел примера использования фреймворка.
+*/
+
+/**
 * \page ExamplePage Example
 *  
-* \section sExampleBrief Введение
-*  Раздел примера использования фреймворка.
+*  Введение
+*  --------
+*  
+* \copydoc ExampleBriefPage
 *  
 *  Проект Packaging
 *  ----------------

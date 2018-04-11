@@ -143,6 +143,7 @@ TEST_F(Application_test, /*DISABLED_*/Test_Main)
 
           EXPECT_EQ(&GetApp(), &AppInfo_t::Get<android_app>());
           EXPECT_EQ(GetApp().activity, &AppInfo_t::Get<ANativeActivity>());
+          EXPECT_EQ(GetApp().activity->vm, &AppInfo_t::Get<JavaVM>());
           EXPECT_EQ(GetApp().activity, AppInfo_t::Get<ANativeActivity *>());
           EXPECT_EQ(GetApp().window, AppInfo_t::Get<ANativeWindow *>());
           EXPECT_EQ(GetApp().config, AppInfo_t::Get<AConfiguration *>());
@@ -151,7 +152,10 @@ TEST_F(Application_test, /*DISABLED_*/Test_Main)
     }
   };
 
+  JavaVM VM;
   ANativeActivity Activity;
+  Activity.vm = &VM;
+
   ANativeWindow Window;
   AConfiguration Configuration;
 
@@ -184,7 +188,10 @@ TEST_F(Application_test, /*DISABLED_*/Test_Main_StdException)
   AndroidLogProxy_t AndroidLogProxy;
   AndroidLogProxy_t::GetInstance() = &AndroidLogProxy;
 
+  JavaVM VM;
   ANativeActivity Activity;
+  Activity.vm = &VM;
+
   ANativeWindow Window;
   AConfiguration Configuration;
 
@@ -236,7 +243,10 @@ TEST_F(Application_test, /*DISABLED_*/Test_Main_UnknownException)
   AndroidLogProxy_t AndroidLogProxy;
   AndroidLogProxy_t::GetInstance() = &AndroidLogProxy;
 
+  JavaVM VM;
   ANativeActivity Activity;
+  Activity.vm = &VM;
+
   ANativeWindow Window;
   AConfiguration Configuration;
 

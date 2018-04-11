@@ -142,6 +142,7 @@
     <ClInclude Include="StringTranslator.hpp" />
     <ClInclude Include="System.hpp" />
     <ClInclude Include="targetver.h" />
+    <ClInclude Include="Vfs.hpp" />
     <ClInclude Include="Window.hpp" />
     <ClInclude Include="Window.mock.hpp" />
   </ItemGroup>

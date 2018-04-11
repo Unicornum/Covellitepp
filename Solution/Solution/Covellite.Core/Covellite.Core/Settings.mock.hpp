@@ -5,11 +5,27 @@
 
 /// \cond DoxygenWarningSuppress
 
-using ::covellite::core::Settings_t;
-
-inline /*static*/ ::covellite::core::SectionPtr_t Settings_t::Make(void)
+namespace alicorn
 {
-  return ::std::make_unique<::covellite::core::Section_t>(uT("MockSection"));
+
+namespace extension
+{
+
+namespace std
+{
+
+using namespace ::covellite::core;
+
+template<>
+inline /*static*/ SectionPtr_t Singleton<Section_t>::Make(void)
+{
+  return ::std::make_unique<Section_t>(uT("MockSection"));
 }
+
+} // namespace std
+
+} // namespace extension
+
+} // namespace alicorn
 
 /// \endcond

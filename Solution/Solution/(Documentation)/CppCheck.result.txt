@@ -1,1 +1,4 @@
+P:\projects\Covellitepp\Solution\Solution\Covellite.Api\Test.Covellite.Api\Test.RenderOpenGL\RenderOpenGL_test.cpp(350): performance (suppress_id = passedByValue): Function parameter '_hHandle' should be passed by reference.
+P:\projects\Covellitepp\Solution\Solution\Example\Example\ReadFileData.cpp(21): information (suppress_id = unmatchedSuppression): Unmatched suppression: syntaxError
+*\mock.hpp(0): information (suppress_id = unmatchedSuppression): Unmatched suppression: functionStatic
 (): information (suppress_id = missingIncludeSystem): Cppcheck cannot find all the include files (use --check-config for details)

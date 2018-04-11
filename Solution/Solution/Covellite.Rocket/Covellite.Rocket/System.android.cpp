@@ -2,6 +2,8 @@
 #include "stdafx.h"
 #include <Covellite\Rocket\System.hpp>
 #include <alicorn\platform\app-info.hpp>
+#include <alicorn\platform\environment.hpp>
+#include <alicorn\std\memory\trivial-ptr.inl>
 
 namespace covellite
 {
@@ -31,7 +33,7 @@ float System::GetElapsedTime(void) /*override*/
 */
 void System::ActivateKeyboard(void) /*override*/
 {
-  covellite::jni::Environment().ShowSoftKeyboard();
+  ::alicorn::system::platform::Environment{}.ShowSoftKeyboard();
 }
 
 /**

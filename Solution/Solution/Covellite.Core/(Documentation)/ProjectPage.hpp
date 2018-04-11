@@ -1,11 +1,18 @@
 
 /**
+* \page CovelliteCoreBriefPage
+*  Проект для кода ядра фреймворка.
+*/
+
+/**
 * \page CovelliteCorePage Covellite.Core
 *  
 *  Список классов проекта \ref gCovelliteCoreClasses
 *  
-* \section sCovelliteCoreBrief Введение
-*  Проект для кода ядра фреймворка.
+*  Введение
+*  --------
+*  
+* \copydoc CovelliteCoreBriefPage
 *  
 *  Подробнее
 *  ---------

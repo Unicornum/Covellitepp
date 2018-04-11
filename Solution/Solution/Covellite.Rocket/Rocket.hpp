@@ -12,4 +12,5 @@
 
 #include "Rocket\Layer.hpp"
 #include "Rocket\Window.hpp"
+#include "Rocket\Vfs.hpp"
 #include "lib-info\Covellite.Rocket.hpp"

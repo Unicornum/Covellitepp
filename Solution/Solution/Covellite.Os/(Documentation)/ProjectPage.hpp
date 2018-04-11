@@ -1,11 +1,18 @@
 
 /**
+* \page CovelliteOsBriefPage
+*  Проект классов, обеспечивающих взаимодействие с операционной системой.
+*/
+
+/**
 * \page CovelliteOsPage Covellite.Os
 *  
 *  Список классов проекта \ref gCovelliteOsClasses
 *  
-* \section sCovelliteOsBrief Введение
-*  Проект классов, обеспечивающих взаимодействие с операционной системой.
+*  Введение
+*  --------
+*  
+*  \copydoc CovelliteOsBriefPage
 *  
 *  Подробнее
 *  ---------

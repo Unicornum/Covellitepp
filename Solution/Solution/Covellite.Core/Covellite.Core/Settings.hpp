@@ -34,8 +34,28 @@ using SectionPtr_t = ::std::unique_ptr<Section_t>;
 * \copyright
 *  © CTAPOBEP 2017 - 2018
 */
-using Settings_t = ::alicorn::extension::std::Singleton<Section_t>;
+using Settings_t = ::alicorn::extension::std::Singleton<const Section_t &>;
 
 } // namespace core
 
 } // namespace covellite
+
+namespace alicorn
+{
+
+namespace extension
+{
+
+namespace std
+{
+
+using namespace ::covellite::core;
+
+template<>
+/*static*/ SectionPtr_t Singleton<Section_t>::Make(void);
+
+} // namespace std
+
+} // namespace extension
+
+} // namespace alicorn

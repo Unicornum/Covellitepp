@@ -95,10 +95,10 @@ public:
       "<h2><font30>Название доски</font30></h2>");
 
     GetElement("id_list").SetText(
-      "<button class=\"left\"><font42>×</font42></button>"
-      "<p class=\"textleft\"><font36>CSS example</font36></p>"
-      "<button class=\"right\"><font42>×</font42></button>"
-      "<button class=\"right\"><font42>×</font42></button>");
+      u8"<button class=\"left\"><font42>\u00D7</font42></button>"
+      u8"<p class=\"textleft\"><font36>CSS example</font36></p>"
+      u8"<button class=\"right\"><font42>\u00D7</font42></button>"
+      u8"<button class=\"right\"><font42>\u00D7</font42></button>");
 
     GetElement("multiline_text").SetText(
       "Строки:\r\n"

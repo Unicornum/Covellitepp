@@ -97,7 +97,7 @@ TEST_F(System_test, /*DISABLED_*/Test_GetElapsedTime)
 // ************************************************************************** //
 TEST_F(System_test, /*DISABLED_*/Test_ActivateKeyboard)
 {
-  using EnvironmentProxy_t = ::mock::covellite::jni::Environment::Proxy;
+  using EnvironmentProxy_t = ::alicorn::system::platform::proxy::Environment;
   EnvironmentProxy_t EnvironmentProxy;
   EnvironmentProxy_t::GetInstance() = &EnvironmentProxy;
 

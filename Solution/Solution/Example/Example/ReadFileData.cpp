@@ -1,7 +1,7 @@
 
 #include "stdafx.h"
 #include <alicorn\std\singleton.hpp>
-#include <alicorn\vfs.hpp>
+#include <Covellite\Rocket\Vfs.hpp>
 
 /// \cond DoxygenWarningSuppress
   
@@ -14,17 +14,17 @@ namespace extension
 namespace std
 {
   
-using namespace ::alicorn::modules::vfs;
+using namespace ::covellite::rocket;
     
 template<>
 // cppcheck-suppress syntaxError
-/*static*/ ::std::unique_ptr<Core> Singleton<Core>::Make(void)
+/*static*/ VfsPtr_t Singleton<VfsCore_t>::Make(void)
 {
-  using ImplPtr_t = ::std::shared_ptr<IImplementation>;
+  using ImplPtr_t = ::std::shared_ptr<::alicorn::modules::vfs::IImplementation>;
     
-  return ::std::make_unique<Core>(::std::vector<ImplPtr_t>
+  return ::std::make_unique<VfsCore_t>(::std::vector<ImplPtr_t>
   {
-    ::std::make_shared<FileSystem>("")
+    ::std::make_shared<::alicorn::modules::vfs::FileSystem>("")
   });
 }
   

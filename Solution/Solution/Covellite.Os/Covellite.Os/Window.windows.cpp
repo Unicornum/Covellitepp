@@ -3,7 +3,7 @@
 #include <Covellite\Os\Window.hpp>
 #include <alicorn\std\string.hpp>
 #include <alicorn\std\string-cast.hpp>
-#include <alicorn\platform\winapi-call.hpp>
+#include <alicorn\platform\winapi-check.hpp>
 #include <alicorn\version.hpp>
 #include <Covellite\Core\ClassName.windows.hpp>
 #include <Covellite\Core\Settings.hpp>
@@ -56,7 +56,7 @@ static Handle_t CreateWindow(void)
     const auto ClientHeight = SizeSection.Get<int>(uT("Height"));
 
     RECT WindowRect = { 0, 0, ClientWidth, ClientHeight };
-    WINAPI_CALL USING_MOCK ::AdjustWindowRectEx(&WindowRect,
+    WINAPI_CHECK USING_MOCK ::AdjustWindowRectEx(&WindowRect,
       WindowFlags, FALSE, WindowFlagsEx);
 
     const auto CalculatedWindowWidth = WindowRect.right - WindowRect.left;
@@ -75,10 +75,10 @@ static Handle_t CreateWindow(void)
     ::covellite::core::ClassName, ApplicationName.c_str(), WindowFlags,
     X, Y, WindowWidth, WindowHeight, nullptr, nullptr, 
     GetModuleHandle(nullptr), nullptr);
-  WINAPI_CALL (hWnd != NULL);  
+  WINAPI_CHECK (hWnd != NULL);  
 
   // Игнорирование предупреждений при анализе кода (анализатор не понимает,
-  // что макрос WINAPI_CALL вызывает исключение при нулевом значении 
+  // что макрос WINAPI_CHECK вызывает исключение при нулевом значении 
   // m_Handle и что в этом случае последующий код не может быть выполнен).
 # pragma warning(push)
 # pragma warning(disable: 6387)

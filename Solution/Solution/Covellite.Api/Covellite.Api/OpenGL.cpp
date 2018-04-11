@@ -1,8 +1,8 @@
 
 #include "stdafx.h"
 #include <Covellite\Api\OpenGL.hpp>
-#include <alicorn\platform\winapi-call.hpp>
 #include <alicorn\std\string.hpp>
+#include <alicorn\platform\winapi-check.hpp>
 #include <Covellite\Core\EventHandler.hpp>
 #include <Covellite\Os\Window.hpp>
 #include <Covellite\Api\RenderOpenGL.hpp>
@@ -15,7 +15,7 @@ OpenGL::OpenGL(const WindowOsPtr_t & _pWindow) :
   m_hWnd(_pWindow->GetHandle()),
   m_hDeviceContex(USING_MOCK ::GetDC(m_hWnd))
 {
-  WINAPI_CALL (m_hDeviceContex != NULL);
+  WINAPI_CHECK (m_hDeviceContex != NULL);
 
   PixelFormatDescriptor.nSize = sizeof(PIXELFORMATDESCRIPTOR);
   PixelFormatDescriptor.nVersion = 1;
@@ -27,24 +27,24 @@ OpenGL::OpenGL(const WindowOsPtr_t & _pWindow) :
   PixelFormatDescriptor.iLayerType = PFD_MAIN_PLANE;
 
   // Игнорирование предупреждений при анализе кода (анализатор не понимает,
-  // что макрос WINAPI_CALL вызывает исключение при нулевом значении 
+  // что макрос WINAPI_CHECK вызывает исключение при нулевом значении 
   // m_hDeviceContex и последующий код не может быть выполнен).
 # pragma warning(push)
 # pragma warning(disable: 6387)
 
   const auto PixelFormat = USING_MOCK ::ChoosePixelFormat(m_hDeviceContex, 
     &PixelFormatDescriptor);
-  WINAPI_CALL (PixelFormat != 0);
+  WINAPI_CHECK (PixelFormat != 0);
 
-  WINAPI_CALL USING_MOCK ::SetPixelFormat(m_hDeviceContex, PixelFormat, 
+  WINAPI_CHECK USING_MOCK ::SetPixelFormat(m_hDeviceContex, PixelFormat, 
     &PixelFormatDescriptor);
 
 # pragma warning(pop)
 
   m_hRenderContex = USING_MOCK ::wglCreateContext(m_hDeviceContex);
-  WINAPI_CALL (m_hRenderContex != NULL);
+  WINAPI_CHECK (m_hRenderContex != NULL);
 
-  WINAPI_CALL USING_MOCK ::wglMakeCurrent(m_hDeviceContex, m_hRenderContex);
+  WINAPI_CHECK USING_MOCK ::wglMakeCurrent(m_hDeviceContex, m_hRenderContex);
 
   UpdateWindow(GetWidth(), GetHeight());
 }
@@ -71,7 +71,7 @@ void OpenGL::Subscribe(const EventHandlerPtr_t & _pEvents) /*override*/
     .connect([&](const Params &) { ClearWindow(); });
   (*_pEvents)[Event::FinishDrawing]
     .connect([&](const params::Empty &) 
-      { WINAPI_CALL USING_MOCK ::SwapBuffers(m_hDeviceContex); });
+      { WINAPI_CHECK USING_MOCK ::SwapBuffers(m_hDeviceContex); });
 }
 
 /**
@@ -96,7 +96,7 @@ auto OpenGL::GetUsingApi(void) const -> String_t /*override*/
 int32_t OpenGL::GetWidth(void) const /*override*/
 {
   RECT ClientRect;
-  WINAPI_CALL USING_MOCK ::GetClientRect(m_hWnd, &ClientRect);
+  WINAPI_CHECK USING_MOCK ::GetClientRect(m_hWnd, &ClientRect);
   return (ClientRect.right - ClientRect.left);
 }
 
@@ -107,7 +107,7 @@ int32_t OpenGL::GetWidth(void) const /*override*/
 int32_t OpenGL::GetHeight(void) const /*override*/
 {
   RECT ClientRect;
-  WINAPI_CALL USING_MOCK ::GetClientRect(m_hWnd, &ClientRect);
+  WINAPI_CHECK USING_MOCK ::GetClientRect(m_hWnd, &ClientRect);
   return (ClientRect.bottom - ClientRect.top);
 }
 

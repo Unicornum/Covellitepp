@@ -1,8 +1,7 @@
 ﻿
 #include "stdafx.h"
 #include <Covellite\Rocket\File.hpp>
-#include <alicorn\std\singleton.hpp>
-#include <alicorn\vfs.hpp>
+#include <Covellite\Rocket\Vfs.hpp>
 
 namespace covellite
 {
@@ -19,9 +18,6 @@ File::Handle_t File::Open(const Path_t & _PathToFile) /*override*/
   try
   {
     const auto Handle = File::MakeUniqueHandle();
-
-    using Vfs_t = 
-      ::alicorn::extension::std::Singleton<::alicorn::modules::vfs::Core>;
 
     m_Infos[Handle].Data = Vfs_t::GetInstance().GetData(_PathToFile.CString());
     m_Infos[Handle].Position = 0;

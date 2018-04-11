@@ -15,30 +15,20 @@ namespace std
 using namespace ::covellite::core;
   
 template<>
-/*static*/ SectionPtr_t Settings_t::Make(void)
+/*static*/ SectionPtr_t Singleton<Section_t>::Make(void)
 {
   auto pSettings = ::std::make_unique<Section_t>(uT("Covellitepp"));
     
+# if BOOST_OS_WINDOWS
+
+  // Параметры, используемые только в Windows
   (*pSettings).AddExtra(uT("AppRootPath"),
     ::alicorn::system::application::CurrentModule::GetAppRootPath());
-    
-  // Общие параметры для всех платформ
+
   (*pSettings).SetDefault(uT("PathToFontsDirectory"),
     uT("{AppRootPath}/data/fonts"),
     uT("Путь к папке расположения шрифтов, которые используются в .rcss файлах."));
     
-  (*pSettings)[uT("Window")][uT("BackgroundColor")].SetDefault(uT("R"), 0,
-    uT("Цвет фона окна программы по умолчанию: красная компонента [0...255]."));
-  (*pSettings)[uT("Window")][uT("BackgroundColor")].SetDefault(uT("G"), 0,
-    uT("Цвет фона окна программы по умолчанию: зеленая компонента [0...255]."));
-  (*pSettings)[uT("Window")][uT("BackgroundColor")].SetDefault(uT("B"), 255,
-    uT("Цвет фона окна программы по умолчанию: синяя компонента [0...255]."));
-  (*pSettings)[uT("Window")][uT("BackgroundColor")].SetDefault(uT("A"), 255,
-    uT("Цвет фона окна программы по умолчанию: прозрачность [0...255]."));
-    
-# if BOOST_OS_WINDOWS
-    
-  // Параметры, используемые только в Windows
   (*pSettings)[uT("Window")].SetDefault(uT("GraphicsApi"), uT("OpenGL"),
     uT("Используемый для рендеринга графический Api."));
   (*pSettings)[uT("Window")].SetDefault(uT("IsFullScreen"), false,
@@ -54,10 +44,24 @@ template<>
 # elif BOOST_OS_ANDROID
     
   // Параметры, используемые только в Android
+  (*pSettings).SetDefault(uT("PathToFontsDirectory"),
+    uT("data/fonts"),
+    uT("Путь к папке расположения шрифтов, которые используются в .rcss файлах."));
+
   (*pSettings)[uT("Window")].SetDefault(uT("GraphicsApi"), uT("OpenGLES"),
     uT("Используемый для рендеринга графический Api."));
     
 # endif
+
+  // Общие параметры для всех платформ
+  (*pSettings)[uT("Window")][uT("BackgroundColor")].SetDefault(uT("R"), 0,
+    uT("Цвет фона окна программы по умолчанию: красная компонента [0...255]."));
+  (*pSettings)[uT("Window")][uT("BackgroundColor")].SetDefault(uT("G"), 0,
+    uT("Цвет фона окна программы по умолчанию: зеленая компонента [0...255]."));
+  (*pSettings)[uT("Window")][uT("BackgroundColor")].SetDefault(uT("B"), 255,
+    uT("Цвет фона окна программы по умолчанию: синяя компонента [0...255]."));
+  (*pSettings)[uT("Window")][uT("BackgroundColor")].SetDefault(uT("A"), 255,
+    uT("Цвет фона окна программы по умолчанию: прозрачность [0...255]."));
     
   return pSettings;
 }

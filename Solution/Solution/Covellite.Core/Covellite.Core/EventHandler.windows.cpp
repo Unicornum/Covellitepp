@@ -3,8 +3,8 @@
 #include <Covellite\Core\EventHandler.hpp>
 #include <windows.h>
 #include <windowsx.h>
-#include <alicorn\platform\winapi-call.hpp>
 #include <alicorn\std\exception.hpp>
+#include <alicorn\platform\winapi-check.hpp>
 #include <Covellite\Core\Message.hpp>
 #include <Covellite\Core\ClassName.windows.hpp>
 #include <Covellite\Core\ClickEventListener.hpp>
@@ -44,7 +44,7 @@ EventHandler::EventHandler(void) :
       USING_MOCK ::DefWindowProc(_hWnd, _Message, _wParam, _lParam);
   };
 
-  WINAPI_CALL RegisterClassEx(&WindowClass);
+  WINAPI_CHECK RegisterClassEx(&WindowClass);
 
   (*this)[Event::Destroy]
     .connect(::std::bind(&EventHandler::OnDestroy, this));

@@ -27,6 +27,7 @@
       <Filter>Common</Filter>
     </ClInclude>
     <ClInclude Include="IStringTranslator.mock.hpp" />
+    <ClInclude Include="Vfs.hpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Window.inl" />

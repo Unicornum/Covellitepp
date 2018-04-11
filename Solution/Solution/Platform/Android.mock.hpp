@@ -1,6 +1,31 @@
 
 #pragma once
-#include <alicorn\android.mock.hpp>
+
+////////////////////////////////////////////////////////////////////////////////
+// 11 Апрель 2018 12:22 (unicornum.verum@gmail.com)
+TODO("Вернуть ссылку, когда будет дополнен ANativeActivity");
+//#include <alicorn\android.mock.hpp>
+
+class jobject_impl {};
+using jobject = jobject_impl *;
+
+class jclass_impl {};
+using jclass = jclass_impl *;
+
+class JNIEnv {};
+class JavaVM {};
+
+class AAssetManager {};
+
+struct ANativeActivity
+{
+  const char * externalDataPath = nullptr;
+  AAssetManager * assetManager = nullptr;
+  JavaVM * vm = nullptr;
+};
+
+#include <alicorn\platform\environment.mock.hpp>
+////////////////////////////////////////////////////////////////////////////////
 
 struct AInputEvent {};
 struct ANativeWindow {};

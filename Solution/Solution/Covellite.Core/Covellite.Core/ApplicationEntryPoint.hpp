@@ -1,6 +1,5 @@
 
 #pragma once
-#include <memory>
 #include <Covellite\Core\Application.hpp>
 
 /**
@@ -32,7 +31,7 @@
 #include <windows.h>
 
 #define APPLICATION_ENTRY_POINT(MainApplicationClass) \
-  int WINAPI WinMain(HINSTANCE, HINSTANCE, LPSTR _pParams, int) \
+  int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR _pParams, _In_ int) \
   { \
     covellite::core::Application::Main<MainApplicationClass>(_pParams); \
     return 0; \

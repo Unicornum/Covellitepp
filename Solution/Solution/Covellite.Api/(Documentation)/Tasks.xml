@@ -8,11 +8,11 @@
   </Options>
   <Process/>
   <Complete>
-    <Week6164>
-      <Task6 Text="Дополнение/исправление деструкторов классов." Type="Red" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="false"/>
-    </Week6164>
-    <Week6163/>
-    <Week6162/>
-    <Week6161/>
+    <Week6170>
+      <Task6 Text="Тест функции RenderOpenGL::LoadTexture()." Type="Red" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="false"/>
+    </Week6170>
+    <Week6169/>
+    <Week6168/>
+    <Week6167/>
   </Complete>
 </Tasks>

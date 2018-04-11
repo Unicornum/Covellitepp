@@ -43,9 +43,18 @@ protected:
 /// \cond DoxygenWarningSuppress
 
 /// [SetDefaultValues]
+namespace alicorn
+{
+
+namespace extension
+{
+
+namespace std
+{
+
 using namespace ::covellite::core;
-  
-/*static*/ SectionPtr_t Settings_t::Make(void)
+
+/*static*/ SectionPtr_t Singleton<Section_t>::Make(void)
 {
   // Создаем объект настроек...
   auto pSettings = ::std::make_unique<Section_t>(uT("Part1802231330"));
@@ -55,6 +64,13 @@ using namespace ::covellite::core;
     
   return pSettings;
 }
+
+} // namespace std
+
+} // namespace extension
+
+} // namespace alicorn
+
 /// [SetDefaultValues]
 
 /// \endcond

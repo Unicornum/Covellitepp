@@ -318,6 +318,82 @@ TEST_F(RenderOpenGL_test, /*DISABLED_*/Test_SetScissorRegion)
 }
 
 // ************************************************************************** //
+TEST_F(RenderOpenGL_test, /*DISABLED_*/Test_LoadTexture)
+{
+  using TextureHandle_t = ::mock::Rocket::Core::TextureHandle;
+  using TextureData_t = ::std::vector<::mock::Rocket::Core::byte>;
+  using TextureDimensions_t = ::mock::Rocket::Core::Vector2i;
+
+  class Tested :
+    public Tested_t
+  {
+  public:
+    MOCK_METHOD2(DoGenerateTexture, bool(TextureData_t, TextureDimensions_t));
+
+  public:
+    bool GenerateTexture(TextureHandle_t & _hTexture,
+      const ::mock::Rocket::Core::byte * _pData, 
+      const TextureDimensions_t & _TextureDimensions) override
+    {
+      _hTexture = m_hHandle;
+      TextureData_t TextureData(m_TextureDataSize);
+      memcpy_s(TextureData.data(), TextureData.size(), _pData, TextureData.size());
+
+      return DoGenerateTexture(TextureData, _TextureDimensions);
+    }
+
+  private:
+    const TextureHandle_t m_hHandle;
+    const size_t m_TextureDataSize;
+
+  public:
+    Tested(TextureHandle_t _hHandle, const size_t _TextureDataSize) :
+      Tested_t(1804101138),
+      m_hHandle(_hHandle),
+      m_TextureDataSize(_TextureDataSize)
+    {
+
+    }
+  };
+
+  using namespace ::boost::filesystem;
+
+  const ::mock::GLuint TextureId = 1804101114;
+  const path PathToSourceImage = THIS_DIRECTORY / "Image.png";
+  const TextureDimensions_t ExpectTextureDimensions{ 4, 3 };
+  const TextureData_t TextureData =
+  {
+    0xFF, 0xFF, 0xFF, 0xFF,  0xFF, 0xFF, 0xFF, 0xFF,  0xFF, 0xFF, 0xFF, 0xFF,  0xFF, 0xFF, 0xFF, 0xFF,
+    0x00, 0x00, 0xFF, 0xFF,  0x00, 0x00, 0xFF, 0xFF,  0x00, 0x00, 0xFF, 0xFF,  0x00, 0x00, 0xFF, 0xFF,
+    0xFF, 0x00, 0x00, 0xFF,  0xFF, 0x00, 0x00, 0xFF,  0xFF, 0x00, 0x00, 0xFF,  0xFF, 0x00, 0x00, 0xFF,
+  };
+
+  for (const auto IsGenerate : { true, false })
+  {
+    Tested Example(static_cast<TextureHandle_t>(TextureId), TextureData.size());
+    ITested_t & IExample = Example;
+
+    using namespace ::testing;
+
+    EXPECT_CALL(Example, DoGenerateTexture(TextureData, ExpectTextureDimensions))
+      .Times(1)
+      .WillOnce(Return(IsGenerate));
+
+    ::mock::Rocket::Core::TextureHandle hTexture = 0;
+    ::mock::Rocket::Core::Vector2i TextureDimensions{ 0, 0 };
+
+    EXPECT_FALSE(hTexture == static_cast<TextureHandle_t>(TextureId));
+    EXPECT_FALSE(ExpectTextureDimensions == TextureDimensions);
+
+    const auto Result = IExample.LoadTexture(hTexture, TextureDimensions, 
+      PathToSourceImage.string().c_str());
+    EXPECT_EQ(IsGenerate, Result);
+    EXPECT_TRUE(hTexture == static_cast<TextureHandle_t>(TextureId));
+    EXPECT_TRUE(ExpectTextureDimensions == TextureDimensions);
+  }
+}
+
+// ************************************************************************** //
 TEST_F(RenderOpenGL_test, /*DISABLED_*/Test_GenerateTexture)
 {
   using GLProxy_t = ::mock::GLProxy;

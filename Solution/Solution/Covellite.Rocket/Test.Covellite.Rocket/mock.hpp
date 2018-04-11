@@ -6,6 +6,7 @@
 #include <alicorn\std\string.hpp>
 #include <alicorn\std\chrono.mock.hpp>
 #include <alicorn\platform\app-info.hpp>
+#include <alicorn\platform\environment.mock.hpp>
 #include <alicorn\logger.mock.hpp>
 #include <alicorn\settings.mock.hpp>
 #include <Rocket\Rocket.mock.hpp>
@@ -31,7 +32,6 @@ inline void PrintTo(const ::boost::filesystem::path & p, ::std::ostream * os)
 #include "Mock\Namespaces.hpp"
 
 #include <Covellite\Core.mock.hpp>
-#include <Covellite.Jni\Jni.mock.hpp>
 #include <Covellite\Rocket.inside.mock.hpp>
 
 #include "Mock\Time.hpp"

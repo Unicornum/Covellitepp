@@ -5,7 +5,7 @@
 #undef GetCommandLine
 
 #include <Covellite\Core\Application.hpp>
-#include <alicorn\platform\winapi-call.hpp>
+#include <alicorn\platform\winapi-check.hpp>
 #include <Covellite\Core\EventHandler.hpp>
 
 using namespace covellite::core;
@@ -97,7 +97,7 @@ bool Application::PostCommand(bool _IsWaitMessage) const
     const auto Result = (_IsWaitMessage) ?
       USING_MOCK ::GetMessage(&Message, NULL, 0, 0) :
       USING_MOCK ::PeekMessage(&Message, 0, 0, 0, PM_REMOVE);
-    if (Result == -1) WINAPI_CALL FALSE;
+    if (Result == -1) WINAPI_CHECK FALSE;
     if (_IsWaitMessage || Result != FALSE)
     {
       if (Message.message == WM_QUIT) break;

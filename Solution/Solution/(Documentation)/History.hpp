@@ -568,7 +568,7 @@
 *    <td bgcolor=#B8CCE4 width=125px align=center> 09.02.2017 13:13 </td>
 *    <td bgcolor=#C0FFC0> Класс Layer: функция установки базового рамера шрифта документа в процентах от длинной стороны экрана. </td>
 *  </tr></table>
-*  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект \ref CovelliteJniPage : </td></tr></table>
+*  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект CovelliteJniPage : </td></tr></table>
 *  <table frame=void border=1 bordercolor=#FFFFFF cellpadding=5 cellspacing=0 width=98%><tr>
 *    <td width=10px></td>
 *    <td bgcolor=#B8CCE4 width=125px align=center> 09.02.2017 11:20 </td>
@@ -976,7 +976,7 @@
 *    <td bgcolor=#B8CCE4 width=125px align=center> 18.12.2016 12:36 </td>
 *    <td bgcolor=#C0FFC0> Класс File. </td>
 *  </tr></table>
-*  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект \ref CovelliteJniPage : </td></tr></table>
+*  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект CovelliteJniPage : </td></tr></table>
 *  <table frame=void border=1 bordercolor=#FFFFFF cellpadding=5 cellspacing=0 width=98%><tr>
 *    <td width=10px></td>
 *    <td bgcolor=#B8CCE4 width=125px align=center> 18.12.2016 11:13 </td>
@@ -1057,7 +1057,7 @@
 *    <td bgcolor=#B8CCE4 width=125px align=center> 15.12.2016 23:45 </td>
 *    <td bgcolor=#C0FFC0> Общий проект тестирования. </td>
 *  </tr></table>
-*  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект \ref CovelliteJniPage : </td></tr></table>
+*  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект CovelliteJniPage : </td></tr></table>
 *  <table frame=void border=1 bordercolor=#FFFFFF cellpadding=5 cellspacing=0 width=98%><tr>
 *    <td width=10px></td>
 *    <td bgcolor=#B8CCE4 width=125px align=center> 15.12.2016 23:19 </td>
@@ -1169,7 +1169,7 @@
 *    <td bgcolor=#B8CCE4 width=125px align=center> 14.12.2016 11:50 </td>
 *    <td bgcolor=#C0FFC0> Класс Window: функция ShowSoftKeyboard(). </td>
 *  </tr></table>
-*  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект \ref CovelliteJniPage : </td></tr></table>
+*  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект CovelliteJniPage : </td></tr></table>
 *  <table frame=void border=1 bordercolor=#FFFFFF cellpadding=5 cellspacing=0 width=98%><tr>
 *    <td width=10px></td>
 *    <td bgcolor=#B8CCE4 width=125px align=center> 14.12.2016 11:36 </td>
@@ -1255,7 +1255,7 @@
 *    <td bgcolor=#B8CCE4 width=125px align=center> 12.12.2016 12:11 </td>
 *    <td bgcolor=#C0FFC0> Решение: общий проект тестирования. </td>
 *  </tr></table>
-*  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект \ref CovelliteJniPage : </td></tr></table>
+*  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект CovelliteJniPage : </td></tr></table>
 *  <table frame=void border=1 bordercolor=#FFFFFF cellpadding=5 cellspacing=0 width=98%><tr>
 *    <td width=10px></td>
 *    <td bgcolor=#B8CCE4 width=125px align=center> 12.12.2016 12:06 </td>

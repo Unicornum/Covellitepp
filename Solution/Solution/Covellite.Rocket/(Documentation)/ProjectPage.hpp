@@ -1,11 +1,20 @@
 
 /**
+* \page CovelliteRocketBriefPage
+*  Проект реализации работы с GUI при помощи [libRocket].
+*  
+*  [libRocket]: https://github.com/libRocket/libRocket "libRocket"
+*/
+
+/**
 * \page CovelliteRocketPage Covellite.Rocket
 *  
 *  Список классов проекта \ref gCovelliteRocketClasses
 *  
-* \section sCovelliteRocketBrief Введение
-*  Проект реализации работы с GUI при помощи [libRocket].
+*  Введение
+*  --------
+*  
+* \copydoc CovelliteRocketBriefPage
 *  
 *  Подробнее
 *  ---------

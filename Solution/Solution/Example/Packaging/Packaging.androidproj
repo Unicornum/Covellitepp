@@ -113,6 +113,10 @@
     <AntProjectPropertiesFile Include="project.properties" />
     <Content Include="res\values\version.auto.xml" />
     <JavaCompile Include="src\com\Example\Example.java" />
+    <JavaCompile Include="src\externals\Activity.java" />
+    <JavaCompile Include="src\externals\Context.java" />
+    <JavaCompile Include="src\externals\Cpp.java" />
+    <JavaCompile Include="src\externals\MainActivity.java" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Example\Example.Android.vcxproj" />

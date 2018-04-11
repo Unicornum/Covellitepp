@@ -49,7 +49,7 @@ protected:
 // ************************************************************************** //
 TEST_F(Window_test, /*DISABLED_*/Test_GetStatusBarHeight)
 {
-  using EnvironmentProxy_t = ::mock::covellite::jni::Environment::Proxy;
+  using EnvironmentProxy_t = ::alicorn::system::platform::proxy::Environment;
   EnvironmentProxy_t EnvironmentProxy;
   EnvironmentProxy_t::GetInstance() = &EnvironmentProxy;
 
