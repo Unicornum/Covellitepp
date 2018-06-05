@@ -57,7 +57,7 @@
 *  Лицензия
 *  --------
 *  
-* \include "Solution\(Documentation)\License.txt"
+*  [Boost Software License](http://www.boost.org/LICENSE_1_0.txt)
 *
 *  Автор(ы)
 *  --------

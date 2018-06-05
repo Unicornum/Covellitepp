@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|x64">
       <Configuration>Debug</Configuration>
@@ -14,19 +14,19 @@
     <ProjectGuid>{5200C065-9E58-4933-99FF-A64E20F6AB5E}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>VersionSetup</RootNamespace>
-    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.17134.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Utility</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>$(DefaultPlatformToolset)</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Utility</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>$(DefaultPlatformToolset)</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
@@ -70,6 +70,12 @@ set PathToAndroidManifest="$(ProjectDir)..\Packaging\AndroidManifest.xml"
 set PathToAndroidVersionFile="$(ProjectDir)..\Packaging\res\values\version.auto.xml"
 
 %Version% --file=%PathToVersionFile% --update-android-manifest=%PathToAndroidManifest% --build-android-version=%PathToAndroidVersionFile% --configuration=ARM
+
+echo warning: Using .props for update revision...
+
+set PathToVersionHpp=$(SolutionDir)Solution\Version.hpp
+
+%Version% --file=%PathToVersionHpp% --update --configuration=$(Platform)
 </Command>
     </PostBuildEvent>
     <PostBuildEvent>
@@ -100,6 +106,12 @@ set PathToAndroidManifest="$(ProjectDir)..\Packaging\AndroidManifest.xml"
 set PathToAndroidVersionFile="$(ProjectDir)..\Packaging\res\values\version.auto.xml"
 
 %Version% --file=%PathToVersionFile% --update-android-manifest=%PathToAndroidManifest% --build-android-version=%PathToAndroidVersionFile% --configuration=ARM
+
+echo warning: Using .props for update revision...
+
+set PathToVersionHpp=$(SolutionDir)Solution\Version.hpp
+
+%Version% --file=%PathToVersionHpp% --update --configuration=$(Platform)
 </Command>
     </PostBuildEvent>
     <PostBuildEvent>

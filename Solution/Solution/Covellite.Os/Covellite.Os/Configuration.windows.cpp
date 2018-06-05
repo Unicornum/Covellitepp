@@ -2,7 +2,6 @@
 #include "stdafx.h"
 #include <Covellite\Os\Configuration.hpp>
 #include <alicorn\std\string.hpp>
-#include <alicorn\platform\winapi-call.hpp>
 
 using namespace covellite::os;
 

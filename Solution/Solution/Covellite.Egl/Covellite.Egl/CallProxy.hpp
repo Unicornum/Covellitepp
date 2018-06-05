@@ -1,7 +1,7 @@
 
 #pragma once
 #include <alicorn\std\exception.hpp>
-#include <alicorn\std\call-proxy.hpp>
+#include <alicorn\std\check-proxy.hpp>
 
 namespace covellite
 {
@@ -25,7 +25,7 @@ namespace egl
 *  © CTAPOBEP 2016
 */
 class CallProxy final :
-  public ::alicorn::extension::std::CallProxy<CallProxy>
+  public ::alicorn::extension::std::CheckProxy<CallProxy>
 {
 public:
   static bool IsSuccessfull(const EGLBoolean);
@@ -37,4 +37,4 @@ public:
 } // namespace covellite
 
 #define EGL_CALL \
-  CALL_PROXY(::covellite::egl::CallProxy)
+  CHECK_PROXY(::covellite::egl::CallProxy)
