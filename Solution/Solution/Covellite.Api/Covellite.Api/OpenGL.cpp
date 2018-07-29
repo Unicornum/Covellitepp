@@ -4,15 +4,20 @@
 #include <alicorn\std\string.hpp>
 #include <alicorn\platform\winapi-check.hpp>
 #include <Covellite\Core\EventHandler.hpp>
-#include <Covellite\Os\Window.hpp>
+#include <Covellite\Events.hpp>
+#include <Covellite\App\Events.hpp>
+#include <Covellite\Os\IWindow.hpp>
+#include <Covellite\Os\Events.hpp>
+#include <Covellite\Api\Events.hpp>
 #include <Covellite\Api\RenderOpenGL.hpp>
 
 using namespace covellite::api;
 
 static PIXELFORMATDESCRIPTOR PixelFormatDescriptor = {0};
 
-OpenGL::OpenGL(const WindowOsPtr_t & _pWindow) :
-  m_hWnd(_pWindow->GetHandle()),
+OpenGL::OpenGL(const WindowOs_t & _Window) :
+  m_Events(_Window),
+  m_hWnd(_Window.GetHandle()),
   m_hDeviceContex(USING_MOCK ::GetDC(m_hWnd))
 {
   WINAPI_CHECK (m_hDeviceContex != NULL);
@@ -47,6 +52,21 @@ OpenGL::OpenGL(const WindowOsPtr_t & _pWindow) :
   WINAPI_CHECK USING_MOCK ::wglMakeCurrent(m_hDeviceContex, m_hRenderContex);
 
   UpdateWindow(GetWidth(), GetHeight());
+
+  using namespace ::covellite::events;
+
+  m_Events[Application.Update].Connect([&](void)
+  {
+    ClearWindow();
+    m_Events[Drawing.Do]();
+    WINAPI_CHECK USING_MOCK ::SwapBuffers(m_hDeviceContex);
+  });
+
+  m_Events[Window.Resize].Connect([&](void) 
+  {
+    const auto Rect = GetClientRect();
+    UpdateWindow(Rect.Width, Rect.Height);
+  });
 }
 
 OpenGL::~OpenGL(void) noexcept
@@ -63,7 +83,10 @@ OpenGL::~OpenGL(void) noexcept
 */
 void OpenGL::Subscribe(const EventHandlerPtr_t & _pEvents) /*override*/
 {
+#pragma warning(push)
+#pragma warning(disable: 4996)
   using namespace ::covellite::core;
+#pragma warning(pop)
 
   (*_pEvents)[Event::Resize]
     .connect([&](const Params &) { UpdateWindow(GetWidth(), GetHeight()); });
@@ -72,6 +95,15 @@ void OpenGL::Subscribe(const EventHandlerPtr_t & _pEvents) /*override*/
   (*_pEvents)[Event::FinishDrawing]
     .connect([&](const params::Empty &) 
       { WINAPI_CHECK USING_MOCK ::SwapBuffers(m_hDeviceContex); });
+}
+
+/**
+* \brief
+*  Оператор доступа к объекту событий фреймворка.
+*/
+OpenGL::operator OpenGL::Events_t (void) const /*override*/
+{
+  return m_Events;
 }
 
 /**
@@ -113,11 +145,26 @@ int32_t OpenGL::GetHeight(void) const /*override*/
 
 /**
 * \brief
+*  Функция получения положения и размеров клинтской области окна программы.
+*/
+OpenGL::Rect OpenGL::GetClientRect(void) const /*override*/
+{
+  RECT ClientRect;
+  WINAPI_CHECK USING_MOCK ::GetClientRect(m_hWnd, &ClientRect);
+  return { 0, 0,
+    ClientRect.right - ClientRect.left, ClientRect.bottom - ClientRect.top };
+}
+
+/**
+* \brief
 *  Функция создания объекта Rocket::Core::RenderInterface.
 */
 OpenGL::RenderInterfacePtr_t OpenGL::MakeRenderInterface(void) const /*override*/
 {
-  return ::std::make_shared<covellite::api::RenderOpenGL>(0);
+  // 22 Июль 2018 11:01 (unicornum.verum@gmail.com)
+  TODO("Реализация совпадает с OpenGLES() - обобщить.");
+
+  return ::std::make_shared<covellite::api::RenderOpenGL>(GetClientRect().Top);
 }
 
 void OpenGL::GlOrtho(int32_t _Width, int32_t _Height) /*override*/

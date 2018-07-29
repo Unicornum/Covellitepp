@@ -60,6 +60,7 @@
   <ItemGroup>
     <ClInclude Include="Configuration.hpp" />
     <ClInclude Include="Configuration.mock.hpp" />
+    <ClInclude Include="Events.hpp" />
     <ClInclude Include="IWindow.hpp" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="Predefined.hpp" />

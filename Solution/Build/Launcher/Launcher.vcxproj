@@ -18,6 +18,9 @@
       <Platform>x64</Platform>
     </ProjectConfiguration>
   </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Time.cpp" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{B0FD6DE1-7A2E-4AD3-A81C-775B83D5569B}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
@@ -32,7 +35,7 @@
     <PlatformToolset>$(DefaultPlatformToolset)</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
-    <ConfigurationType>Utility</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <CharacterSet>Unicode</CharacterSet>
     <PlatformToolset>$(DefaultPlatformToolset)</PlatformToolset>
@@ -45,7 +48,7 @@
     <PlatformToolset>$(DefaultPlatformToolset)</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
-    <ConfigurationType>Utility</ConfigurationType>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
@@ -114,7 +117,10 @@
     </Link>
     <PostBuildEvent>
       <Message>Установка и запуск собранной программы.</Message>
-      <Command>if NOT "%USING_SCRIPT_BILDING%" == "" goto EndLaunch
+      <Command>em Это обеспечивает пересборку проекта при каждой сборке
+echo //%TIME% &gt; $(ProjectDir)Time.cpp
+
+if NOT "%USING_SCRIPT_BILDING%" == "" goto EndLaunch
 
 set ROOT_NAMESPACE=Example
 set _ACTIVITY_NAME=com.Covellitepp.Example
@@ -167,7 +173,10 @@ set RUN_ADB=$(ANDROID_SDK_ROOT)\platform-tools\adb.exe
     </Link>
     <PostBuildEvent>
       <Message>Установка и запуск собранной программы.</Message>
-      <Command>if NOT "%USING_SCRIPT_BILDING%" == "" goto EndLaunch
+      <Command>em Это обеспечивает пересборку проекта при каждой сборке
+echo //%TIME% &gt; $(ProjectDir)Time.cpp
+
+if NOT "%USING_SCRIPT_BILDING%" == "" goto EndLaunch
 
 set ROOT_NAMESPACE=Example
 set _ACTIVITY_NAME=com.Covellitepp.Example
@@ -183,9 +192,6 @@ set RUN_ADB=$(ANDROID_SDK_ROOT)\platform-tools\adb.exe
 </Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
-  <ItemGroup>
-    <Text Include="NotExists.txt" />
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

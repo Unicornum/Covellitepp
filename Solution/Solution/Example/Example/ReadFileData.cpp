@@ -17,7 +17,6 @@ namespace std
 using namespace ::covellite::rocket;
     
 template<>
-// cppcheck-suppress syntaxError
 /*static*/ VfsPtr_t Singleton<VfsCore_t>::Make(void)
 {
   using ImplPtr_t = ::std::shared_ptr<::alicorn::modules::vfs::IImplementation>;

@@ -9,7 +9,7 @@ namespace covellite
 namespace api
 {
 
-static OpenGLCommon::Color GetBackgroundColor(void)
+static OpenGLCommon::Color GetBackgroundColor(void) noexcept
 {
   const auto CovelliteppSection = ::covellite::core::Settings_t::GetInstance();
   auto BkColorSection = CovelliteppSection[uT("Window")][uT("BackgroundColor")];

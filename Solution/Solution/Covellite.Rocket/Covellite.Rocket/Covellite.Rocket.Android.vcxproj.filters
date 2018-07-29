@@ -28,6 +28,9 @@
     </ClInclude>
     <ClInclude Include="IStringTranslator.mock.hpp" />
     <ClInclude Include="Vfs.hpp" />
+    <ClInclude Include="IWindow.hpp" />
+    <ClInclude Include="ClickEventListener.hpp" />
+    <ClInclude Include="Events.hpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Window.inl" />
@@ -42,5 +45,7 @@
     <ClCompile Include="System.android.cpp" />
     <ClCompile Include="System.cpp" />
     <ClCompile Include="Layer.android.cpp" />
+    <ClCompile Include="SystemToRocketKeyCode.android.cpp" />
+    <ClCompile Include="ClickEventListener.cpp" />
   </ItemGroup>
 </Project>

@@ -21,9 +21,6 @@ auto KeyCode::ToRocketKeyCode(void) const -> RocketKeyCode_t
     { AKEYCODE_DEL, Rocket::Core::Input::KI_BACK }, // BackSpace
   };
 
-  // 01 Ноябрь 2017 10:59 (unicornum.verum@gmail.com)
-  TODO("Преобразование остальных виртуальных кодов.");
-
   auto itKey = Keys.find(AsciiKeyCode);
   if (itKey == Keys.end()) return RocketKeyCode_t::KI_UNKNOWN;
 

@@ -29,6 +29,8 @@ public:
   MOCK_METHOD1(RegisterClassExW, ATOM(WNDCLASSEXW *));
   MOCK_METHOD1(GetModuleHandleW, HMODULE(LPCWSTR));
   MOCK_METHOD2(UnregisterClassW, BOOL(::std::wstring, HINSTANCE));
+  MOCK_METHOD2(GetWindowLongPtrW, LONG_PTR (HWND, int));
+  MOCK_METHOD2(SetWindowLongPtrW, LONG_PTR (HWND, int));
   MOCK_METHOD4(DefWindowProcW, LRESULT(HWND, UINT, WPARAM, LPARAM));
   MOCK_METHOD4(PeekMessageW, BOOL(HWND, UINT, UINT, UINT));
   MOCK_METHOD3(GetMessageW, BOOL(HWND, UINT, UINT));
@@ -60,6 +62,9 @@ public:
   MOCK_METHOD0(GetWindowRect, RECT(void));
   MOCK_METHOD3(AdjustWindowRectEx, BOOL (DWORD, BOOL, DWORD));
   MOCK_METHOD1(GetSystemMetrics, int (int));
+
+public:
+  LONG_PTR m_NewLongPtr = NULL;
 };
 
 inline int MessageBoxA(HWND _hWnd, LPCSTR _Text, LPCSTR _Caption, UINT _Type)
@@ -85,6 +90,17 @@ inline ATOM RegisterClassExW(WNDCLASSEXW * _pWindowClass)
 inline BOOL UnregisterClassW(LPCWSTR _ClassName, HINSTANCE _hInstance)
 {
   return WindowsProxy::GetInstance()->UnregisterClassW(_ClassName, _hInstance);
+}
+
+inline LONG_PTR GetWindowLongPtrW(HWND _hWnd, int _Index)
+{
+  return WindowsProxy::GetInstance()->GetWindowLongPtrW(_hWnd, _Index);
+}
+
+inline LONG_PTR SetWindowLongPtrW(HWND _hWnd, int _Index, LONG_PTR _NewLong)
+{
+  WindowsProxy::GetInstance()->m_NewLongPtr = _NewLong;
+  return WindowsProxy::GetInstance()->SetWindowLongPtrW(_hWnd, _Index);
 }
 
 inline LRESULT DefWindowProcW(HWND _hWnd, UINT _Msg, WPARAM _wParam, LPARAM _lParam)
@@ -264,6 +280,27 @@ using ::mock::GetCommandLineA;
 
 } // namespace core
 
+namespace app
+{
+
+using ::mock::MessageBoxA;
+using ::mock::GetModuleHandleW;
+using ::mock::RegisterClassExW;
+using ::mock::UnregisterClassW;
+using ::mock::GetWindowLongPtrW;
+using ::mock::DefWindowProcW;
+using ::mock::PeekMessageW;
+using ::mock::GetMessageW;
+using ::mock::Sleep;
+using ::mock::TranslateMessage;
+using ::mock::DispatchMessage;
+using ::mock::LoadCursorW;
+using ::mock::LoadIconW;
+using ::mock::GetCommandLineA;
+using ::mock::PostQuitMessage;
+
+} // namespace app
+
 namespace os
 {
 
@@ -274,6 +311,8 @@ using ::mock::DestroyWindow;
 using ::mock::GetUserDefaultLocaleName;
 using ::mock::AdjustWindowRectEx;
 using ::mock::GetSystemMetrics;
+using ::mock::PostQuitMessage;
+using ::mock::SetWindowLongPtrW;
 
 } // namespace os
 

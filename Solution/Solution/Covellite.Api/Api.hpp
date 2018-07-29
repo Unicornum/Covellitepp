@@ -10,5 +10,6 @@
 *  Группа классов проекта \ref CovelliteApiPage.
 */
 
+#include "Api\Events.hpp"
 #include "Api\Window.hpp"
-#include "lib-info\Covellite.Api.hpp"
+#include "Covellite.Api.lib.hpp"

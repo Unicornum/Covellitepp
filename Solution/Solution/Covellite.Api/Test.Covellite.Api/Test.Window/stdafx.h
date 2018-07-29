@@ -3,7 +3,7 @@
 
 #pragma warning(push)
 #pragma warning(disable: 4996)
-#include <boost\signals2\signal.hpp>
+#include <memory>
 #pragma warning(pop)
 
 #include <alicorn\testing.app\Test.Class.hpp>

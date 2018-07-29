@@ -1,6 +1,7 @@
 
 #pragma once
 #include <typeinfo>
+#include <Covellite\Events\Events.hpp>
 #include <Covellite\Api\Window.mock.hpp>
 #include <Covellite\Core\Window.mock.hpp>
 
@@ -41,9 +42,11 @@ namespace rocket
 {
 
 class Window :
+  public ::covellite::rocket::IWindow,
   public ::covellite::core::IWindow,
   public ::mock::covellite::core::Window
 {
+  using WindowApi_t = ::covellite::api::IWindow;
   using WindowApiPtr_t = ::std::shared_ptr<::covellite::api::IWindow>;
   using Path_t = ::boost::filesystem::path;
   using Utf8String_t = ::std::string;
@@ -54,9 +57,10 @@ public:
     public ::alicorn::extension::testing::Proxy<Proxy>
   {
   public:
-    MOCK_METHOD1(Constructor, Id_t(void *));
+    MOCK_METHOD1(Constructor, Id_t(const void *));
     MOCK_METHOD1(Set, void(StringBank_t));
     MOCK_METHOD2(AddLayer, Id_t(Id_t, ::std::string));
+    MOCK_METHOD2(PushLayer, void(Id_t, ::std::string));
     MOCK_METHOD1(Back, void(Id_t));
 
   public:
@@ -81,6 +85,14 @@ public:
       .connect(::std::bind(&Window::DoDrawWindow, this));
   }
 
+public:
+  // Èםעונפויס events::IEvents:
+  operator Events_t (void) const override
+  {
+    return m_Events;
+  }
+
+public:
   void Set(const StringBank_t & _Bank)
   {
     Proxy::GetInstance()->Set(_Bank);
@@ -93,14 +105,28 @@ public:
     return ::std::make_shared<TLayer>(Id);
   }
 
+  template<class TLayer>
+  void PushLayer(void)
+  {
+    Proxy::GetInstance()->PushLayer(m_Id, typeid(TLayer).name());
+  }
+
   void Back(void)
   {
     Proxy::GetInstance()->Back(m_Id);
   }
 
+private:
+  Events_t m_Events;
+
 public:
+  explicit Window(const WindowApi_t & _WindowsApi) :
+    m_Id(Proxy::GetInstance()->Constructor(&_WindowsApi))
+  {
+
+  }
   explicit Window(const WindowApiPtr_t & _pWindowsApi) :
-    m_Id(Proxy::GetInstance()->Constructor(_pWindowsApi.get()))
+    Window(*_pWindowsApi)
   {
   }
 };

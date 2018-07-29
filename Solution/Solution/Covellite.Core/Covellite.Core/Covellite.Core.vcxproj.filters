@@ -25,7 +25,6 @@
     <ClInclude Include="ApplicationEntryPoint.hpp" />
     <ClInclude Include="ApplicationEntryPoint.mock.hpp" />
     <ClInclude Include="ClassName.windows.hpp" />
-    <ClInclude Include="Message.hpp" />
     <ClInclude Include="Params.mock.hpp" />
     <ClInclude Include="Settings.hpp" />
     <ClInclude Include="Settings.mock.hpp" />

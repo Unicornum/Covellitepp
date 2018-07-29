@@ -50,7 +50,8 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;_LIB;TESTDLL_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalOptions>-Zm200 %(AdditionalOptions)</AdditionalOptions>
-      <DisableSpecificWarnings>6326;4503</DisableSpecificWarnings>
+      <DisableSpecificWarnings>4996</DisableSpecificWarnings>
+      <SDLCheck>false</SDLCheck>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -64,7 +65,8 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;_LIB;TESTDLL_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalOptions>-Zm200 %(AdditionalOptions)</AdditionalOptions>
-      <DisableSpecificWarnings>6326;4503</DisableSpecificWarnings>
+      <DisableSpecificWarnings>4996</DisableSpecificWarnings>
+      <SDLCheck>false</SDLCheck>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -81,7 +83,9 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="Test.IWindow\IWindow_test.cpp" />
+    <ClCompile Include="Test.Window\Window.android.deprecated_test.cpp" />
     <ClCompile Include="Test.Window\Window.android_test.cpp" />
+    <ClCompile Include="Test.Window\Window.windows.deprecated_test.cpp" />
     <ClCompile Include="Test.Window\Window.windows_test.cpp" />
     <ClCompile Include="Test.Window\Window_test.cpp" />
   </ItemGroup>

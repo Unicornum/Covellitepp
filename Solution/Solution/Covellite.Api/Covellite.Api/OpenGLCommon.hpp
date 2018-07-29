@@ -1,5 +1,6 @@
 
 #pragma once
+#include <Covellite/Api/GL.hpp>
 
 namespace covellite
 {
@@ -47,6 +48,7 @@ private:
 
 public:
   OpenGLCommon(void);
+  virtual ~OpenGLCommon(void) = default;
 };
 
 } // namespace api

@@ -3,23 +3,43 @@
 #include <Covellite\Api\OpenGLES.hpp>
 #include <alicorn\std\string.hpp>
 #include <alicorn\platform\environment.hpp>
+#include <Covellite\Events.hpp>
 #include <Covellite\Core.hpp>
 #include <Covellite.Egl\Egl.hpp>
-#include <Covellite\Os\Window.hpp>
+#include <Covellite\App\Events.hpp>
+#include <Covellite\Os\IWindow.hpp>
+#include <Covellite\Os\Events.hpp>
+#include <Covellite\Api\Events.hpp>
 #include <Covellite\Api\RenderOpenGL.hpp>
 
 using namespace covellite::api;
 
-OpenGLES::OpenGLES(const WindowOsPtr_t & _pWindow) :
+OpenGLES::OpenGLES(const WindowOs_t & _Window) :
+  m_Events(_Window),
   m_pDisplay(::std::make_unique<covellite::egl::Display>()),
-  m_pConfig(::std::make_unique<covellite::egl::Config>(*m_pDisplay, _pWindow->GetHandle())),
-  m_pSurface(::std::make_unique<covellite::egl::Surface>(*m_pDisplay, *m_pConfig, _pWindow->GetHandle())),
+  m_pConfig(::std::make_unique<covellite::egl::Config>(*m_pDisplay, _Window.GetHandle())),
+  m_pSurface(::std::make_unique<covellite::egl::Surface>(*m_pDisplay, *m_pConfig, _Window.GetHandle())),
   m_pContext(::std::make_unique<covellite::egl::Context>(*m_pDisplay, *m_pConfig))
 {
   m_pContext->MakeCurrent(*m_pSurface);
+
+  using namespace ::covellite::events;
+
+  m_Events[Application.Update].Connect([&](void)
+  {
+    ClearWindow();
+    m_Events[Drawing.Do]();
+    m_pSurface->SwapBuffers();
+  });
+
+  m_Events[Window.Resize].Connect([&](void)
+  {
+    const auto Rect = GetClientRect();
+    UpdateWindow(Rect.Width, Rect.Height);
+  });
 }
 
-OpenGLES::~OpenGLES(void) noexcept = default;
+OpenGLES::~OpenGLES(void) = default;
 
 /**
 * \brief
@@ -35,6 +55,15 @@ void OpenGLES::Subscribe(const EventHandlerPtr_t & _pEvents) /*override*/
     .connect([&](const Params &) { ClearWindow(); });
   (*_pEvents)[Event::FinishDrawing]
     .connect([&](const Params &) { m_pSurface->SwapBuffers(); });
+}
+
+/**
+* \brief
+*  Оператор доступа к объекту событий фреймворка.
+*/
+OpenGLES::operator OpenGLES::Events_t (void) const /*override*/
+{
+  return m_Events;
 }
 
 /**
@@ -72,12 +101,21 @@ int32_t OpenGLES::GetHeight(void) const /*override*/
 
 /**
 * \brief
+*  Функция получения положения и размеров клинтской области окна программы.
+*/
+OpenGLES::Rect OpenGLES::GetClientRect(void) const /*override*/
+{
+  return { 0, ::alicorn::system::platform::Environment{}.GetStatusBarHeight(),
+    m_pSurface->GetWidth(), m_pSurface->GetHeight() };
+}
+
+/**
+* \brief
 *  Функция создания объекта Rocket::Core::RenderInterface.
 */
 OpenGLES::RenderInterfacePtr_t OpenGLES::MakeRenderInterface(void) const /*override*/
 {
-  return ::std::make_shared<covellite::api::RenderOpenGL>(
-    ::alicorn::system::platform::Environment{}.GetStatusBarHeight());
+  return ::std::make_shared<covellite::api::RenderOpenGL>(GetClientRect().Top);
 }
 
 void OpenGLES::GlOrtho(int32_t _Width, int32_t _Height) /*override*/

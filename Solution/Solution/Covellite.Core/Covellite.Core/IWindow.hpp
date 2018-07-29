@@ -21,14 +21,10 @@ class EventHandler;
 *  
 * \version
 *  1.0.0.0        \n
-*  1.0.1.0        \n
-*  1.1.0.0        \n
 *  2.0.0.0        \n
 *  2.1.0.0        \n
 * \date
 *  19 Ноябрь 2016    \n
-*  09 Декабрь 2016    \n
-*  18 Сентябрь 2017    \n
 *  19 Сентябрь 2017    \n
 *  24 Сентябрь 2017    \n
 * \author
@@ -46,7 +42,7 @@ public:
   virtual void Subscribe(const EventHandlerPtr_t &) = 0;
 
 public:
-  virtual ~IWindow(void) noexcept {}
+  virtual ~IWindow(void) = default;
 };
 
 } // namespace core

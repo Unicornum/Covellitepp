@@ -1,6 +1,6 @@
 
 #pragma once
-#include <boost\variant.hpp>
+#include <boost/any.hpp>
 
 /**
 * \defgroup gCovelliteCoreParamsClasses Params
@@ -187,12 +187,11 @@ public:
 */
 class Params final
 {
-  using Params_t = ::boost::variant<params::Empty, params::Motion,
-    params::KeyPressed, params::KeyCode, params::Error, params::Click>;
+  using Params_t = ::boost::any;
 
 public:
   template<class T>
-  inline operator const T & (void) const { return ::boost::get<T>(m_Params); }
+  inline operator const T & (void) const { return ::boost::any_cast<const T &>(m_Params); }
 
 private:
   const Params_t m_Params;

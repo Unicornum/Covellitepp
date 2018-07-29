@@ -1,72 +1,87 @@
 ﻿
 #include "stdafx.h"
-#include <Covellite\Api\Window.hpp>
-#include <alicorn\std\string.hpp>
+#include <Covellite/Api/Window.hpp>
+#include <alicorn/std/string.hpp>
+#include <alicorn/patterns/factory.hpp>
+#include <Covellite/Core/Settings.hpp>
+#include <Covellite/Events.hpp>
+
+#ifndef __USING_GTEST
+
+#include <alicorn/logger.hpp>
+
+# if BOOST_OS_WINDOWS
+#include "OpenGL.hpp"
+# elif BOOST_OS_ANDROID
+#include "OpenGLES.hpp"
+# endif
+
+#endif
 
 using namespace covellite::api;
 
-#ifdef __USING_GTEST
-
-template class Window<::mock::ApiImpl>;
-
-#else
-
-#include <alicorn\logger.hpp>
-
-#if BOOST_OS_WINDOWS
-
-// Реализации, доступные в Windows:
-#include <Covellite\Api\OpenGL.hpp>
-
-template class Window<OpenGL>;
-
-#elif BOOST_OS_ANDROID
-
-// Реализации, доступные в Android:
-#include <Covellite\Api\OpenGLES.hpp>
-
-template class Window<OpenGLES>;
-
-#endif
-
-#endif
-
-template<class TApiImpl>
-Window<TApiImpl>::Window(const WindowOsPtr_t & _pWindow) :
-  m_pImpl(::std::make_unique<TApiImpl>(_pWindow))
+Window::Window(const WindowOs_t & _Window) :
+  m_pImpl(MakeApiImpl(_Window))
 {
   LOGGER(Info) << uT("Using graphics API: ") << m_pImpl->GetUsingApi();
 }
 
-template<class TApiImpl>
-Window<TApiImpl>::~Window(void) noexcept = default;
-
-template<class TApiImpl>
-void Window<TApiImpl>::Subscribe(const EventHandlerPtr_t & _pEvents) /*override*/
+/**
+* \deprecated
+*  Устаревший конструктор, используемый совместно с классами из проекта
+*  Covellite.Core, вместо них использовать классы из Covellite.Events и 
+*  Covellite.App.
+*/
+Window::Window(const WindowOsPtr_t & _pWindow) :
+  Window(*_pWindow)
 {
-  m_pImpl->Subscribe(_pEvents);
 }
 
-template<class TApiImpl>
-auto Window<TApiImpl>::GetUsingApi(void) const -> String_t /*override*/
+Window::~Window(void) = default;
+
+void Window::Subscribe(const EventHandlerPtr_t & _pEvents) /*override*/
+{
+  dynamic_cast<::covellite::core::IWindow &>(*m_pImpl).Subscribe(_pEvents);
+}
+
+Window::operator Window::Events_t (void) const /*override*/
+{
+  return *m_pImpl;
+}
+
+auto Window::GetUsingApi(void) const -> String_t /*override*/
 {
   throw STD_EXCEPTION << "Implementation is not required.";
 }
 
-template<class TApiImpl>
-int32_t Window<TApiImpl>::GetWidth(void) const /*override*/
+int32_t Window::GetWidth(void) const /*override*/
 {
   return m_pImpl->GetWidth();
 }
 
-template<class TApiImpl>
-int32_t Window<TApiImpl>::GetHeight(void) const /*override*/
+int32_t Window::GetHeight(void) const /*override*/
 {
   return m_pImpl->GetHeight();
 }
 
-template<class TApiImpl>
-auto Window<TApiImpl>::MakeRenderInterface(void) const -> RenderInterfacePtr_t /*override*/
+Window::Rect Window::GetClientRect(void) const /*override*/
+{
+  return m_pImpl->GetClientRect();
+}
+
+auto Window::MakeRenderInterface(void) const -> RenderInterfacePtr_t /*override*/
 {
   return m_pImpl->MakeRenderInterface();
+}
+
+/*static*/ auto Window::MakeApiImpl(const WindowOs_t & _Window) -> IApiPtr_t
+{
+  const auto CovelliteppSection = ::covellite::core::Settings_t::GetInstance();
+
+  const auto NameOfImplClass =
+    CovelliteppSection[uT("Window")].Get<String_t>(uT("GraphicsApi"));
+
+  using namespace ::alicorn::modules::patterns;
+
+  return factory::make_unique<IWindow_t>(NameOfImplClass, _Window);
 }

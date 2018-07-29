@@ -1,0 +1,72 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source">
+      <UniqueIdentifier>{0b32bfba-a2e6-498f-b78b-da37c9bc83e4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Tests">
+      <UniqueIdentifier>{8c9b3b90-01b4-4c5a-9f59-393719bfa270}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Tests\ApplicationEntryPoint">
+      <UniqueIdentifier>{d8e7a505-4f69-4d9b-af41-9890a3d64303}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Tests\Settings">
+      <UniqueIdentifier>{70f9415a-628c-446d-8939-beac722b5a8d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Tests\Application">
+      <UniqueIdentifier>{ca33740e-82d6-48d9-829a-396078efdad2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Tests\IWindow">
+      <UniqueIdentifier>{4d254b79-98d1-4bd9-a40c-052803aba0b0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Tests\IApplication">
+      <UniqueIdentifier>{3374f569-9b2f-4f67-9658-faf2191202d5}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="Resources.rc">
+      <Filter>Source</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="stdafx.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Test.ApplicationEntryPoint\ApplicationEntryPoint.android.test.cpp">
+      <Filter>Tests\ApplicationEntryPoint</Filter>
+    </ClCompile>
+    <ClCompile Include="Test.ApplicationEntryPoint\ApplicationEntryPoint.test.cpp">
+      <Filter>Tests\ApplicationEntryPoint</Filter>
+    </ClCompile>
+    <ClCompile Include="Test.Settings\Settings_test.cpp">
+      <Filter>Tests\Settings</Filter>
+    </ClCompile>
+    <ClCompile Include="Test.Application\Application.android_test.cpp">
+      <Filter>Tests\Application</Filter>
+    </ClCompile>
+    <ClCompile Include="Test.Application\Application.windows_test.cpp">
+      <Filter>Tests\Application</Filter>
+    </ClCompile>
+    <ClCompile Include="Test.Application\Application_test.cpp">
+      <Filter>Tests\Application</Filter>
+    </ClCompile>
+    <ClCompile Include="Test.IWindow\IWindow_test.cpp">
+      <Filter>Tests\IWindow</Filter>
+    </ClCompile>
+    <ClCompile Include="Test.IApplication\IApplication_test.cpp">
+      <Filter>Tests\IApplication</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="stdafx.h">
+      <Filter>Source</Filter>
+    </ClInclude>
+    <ClInclude Include="mock.hpp" />
+    <ClInclude Include="..\Covellite.App\IWindow.hpp">
+      <Filter>Tests\IWindow</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Covellite.App\IApplication.hpp">
+      <Filter>Tests\IApplication</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>

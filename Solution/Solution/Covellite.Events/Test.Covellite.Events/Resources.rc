@@ -1,0 +1,6 @@
+
+#ifndef APSTUDIO_INVOKED
+
+# include <alicorn\testing.app\test.project.rc>
+
+#endif

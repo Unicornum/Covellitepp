@@ -1,6 +1,7 @@
 
 #pragma once
 #include <Covellite\Core\IWindow.hpp>
+#include <Covellite\Rocket\IWindow.hpp>
 
 /*
 An example of use:
@@ -46,6 +47,7 @@ class Layer :
   using Utf8String_t = ::std::string;
   using DocumentId_t = ::std::string;
   using ElementId_t = ::std::string;
+  using IWindow_t = ::covellite::rocket::IWindow;
 
 protected:
   using Context_t = ::mock::Rocket::Core::Context;
@@ -56,6 +58,7 @@ public:
     public ::alicorn::extension::testing::Proxy<Proxy>
   {
   public:
+    MOCK_METHOD2(Constructor, Id_t(IWindow_t *, Path_t));
     MOCK_METHOD2(Constructor, Id_t(Context_t *, Path_t));
     MOCK_METHOD1(Constructor, Id_t(Id_t));
     MOCK_METHOD2(SetText, void(Id_t, Utf8String_t));
@@ -149,6 +152,13 @@ public:
   {
     Proxy::GetInstance()->SetFontSize(m_Id, _Value);
   }
+
+  public:
+    explicit Layer(IWindow_t * _Param1, const Path_t & _Param2) :
+      m_Id(Proxy::GetInstance()->Constructor(_Param1, _Param2))
+    {
+
+    }
 
   explicit Layer(Context_t * _Param1, const Path_t & _Param2) :
     m_Id(Proxy::GetInstance()->Constructor(_Param1, _Param2))

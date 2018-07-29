@@ -68,7 +68,6 @@ public:
   void Unsubscribe(TSource *);
 
 private:
-  bool CommandHandler(const Message &) noexcept;
   void OnDestroy(void);
 
 private:

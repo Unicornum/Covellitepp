@@ -23,7 +23,7 @@ public:
 
 public:
   explicit IStringTranslator(Id_t _Id) : m_Id(_Id) {}
-  virtual ~IStringTranslator(void)  noexcept {}
+  virtual ~IStringTranslator(void) = default;
 };
 
 } // namespace rocket

@@ -58,6 +58,8 @@
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Api.forward.hpp" />
+    <ClInclude Include="Events.hpp" />
     <ClInclude Include="GL.hpp" />
     <ClInclude Include="IWindow.hpp" />
     <ClInclude Include="OpenGLCommon.hpp" />

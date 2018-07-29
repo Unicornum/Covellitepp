@@ -102,9 +102,6 @@ bool Application::PostCommand(bool _IsWaitMessage) const
     {
       if (Message.message == WM_QUIT) break;
       USING_MOCK ::TranslateMessage(&Message);
-
-      // 23 Октябрь 2017 13:39 (unicornum.verum@gmail.com)
-      TODO("Напрямую вызывать m_pEvents->CommandHandler()?");
       USING_MOCK ::DispatchMessage(&Message);
     }
 

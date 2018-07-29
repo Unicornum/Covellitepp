@@ -98,6 +98,8 @@ public:
   {
 
   }
+
+  virtual ~Application(void) = default;
 };
 
 } // namespace core

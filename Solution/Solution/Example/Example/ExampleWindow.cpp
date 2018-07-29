@@ -9,6 +9,22 @@
 static const auto PathToDataDirectory =
   ::alicorn::system::application::CurrentModule::GetAppRootPath() / "data";
 
+/// [Example events ids]
+class Example_t
+{
+public:
+  // Идентификаторы событий уровня проекта примера.
+  enum Id
+  {
+    Button1 = 0,
+    Button2,
+    Button3,
+  };
+};
+  
+namespace { Example_t Example; }
+/// [Example events ids]
+
 /// [Title layer]
 class ExampleWindow::DemoLayer1 final :
   public Layer_t
@@ -18,15 +34,29 @@ public:
   void Subscribe(const EventHandlerPtr_t &) override {}
     
 public:
-  explicit DemoLayer1(Context_t * _pContex) :
-    Layer_t(_pContex, PathToDataDirectory / "demo.rml", "title")
+  explicit DemoLayer1(IWindowRocket_t & _Window) :
+    Layer_t(_Window, PathToDataDirectory / "demo.rml", "title")
   {
-    ::alicorn::system::version::Info Info;
     using namespace ::alicorn::extension::std;
+
+    ::alicorn::system::version::Info Info;
       
     GetElement("id_header").SetText(
       "<h1>Covellite++ v" + string_cast<::std::string, Locale::UTF8>(
         Info.GetValue(uT("FileVersionShort"))) + "</h1>");
+
+    using namespace ::covellite;
+
+    // При нажатии кнопок слоя генерируем события уровня проекта примера,
+    // которые обрабатываются в классе окна.
+    m_Events[events::Click.DocumentId(GetId()).ElementId("button1")]
+      .Connect([&]() { m_Events[Example.Button1](); });
+    m_Events[events::Click.DocumentId(GetId()).ElementId("button2")]
+      .Connect([&]() { m_Events[Example.Button2](); });
+    m_Events[events::Click.DocumentId(GetId()).ElementId("button3")]
+      .Connect([&]() { m_Events[Example.Button3](); });
+    m_Events[events::Click.DocumentId(GetId()).ElementId("exit")]
+      .Connect([&]() { m_Events[events::Application.Exit](); });
   }
 };
 /// [Title layer]
@@ -37,45 +67,21 @@ class ExampleWindow::DemoLayer2 final :
 {
 public:
   // Интерфейс IWindow:
-  void Subscribe(const EventHandlerPtr_t & _pEvents) override
-  {
-    using ::covellite::core::Event;
-    using ::std::placeholders::_1;
-      
-    // Подписываемся на событие нажатия кнопки с идентификатором "id_hello".
-    // Необходимо сохранить созданный сигнал и отключить его в деструкторе,
-    // чтобы исключить вызов фунции не существующего объекта при повторном
-    // открытии слоя.
-    m_Hello = (*_pEvents)[Event::Click]["id_hello"]
-      .connect(::std::bind(&DemoLayer2::DoHello, this, _1));
-  }
-    
-private:
-  void DoHello(const ::covellite::core::params::Click & _Value)
-  {
-    // Функция будет вызвана при нажатии кнопки id_hello.
-      
-    // Проверяем, что событие произошло для текущего слоя (это позволит
-    // делать элементы управления с одинаковыми идентификаторами в разных .rml 
-    // файлах; если все идентификаторы всех элементов во всех .rml файлах 
-    // гарантированно уникальны, проверку можно опустить).
-    if (_Value.m_DocumentId != GetId()) return;
-      
-    // Выполняем действие, необходимое при нажатии на кнопку.
-    GetElement("multiline_text").SetText(u8"Привет!");
-  }
-
-private:
-  ::boost::signals2::connection m_Hello;
+  void Subscribe(const EventHandlerPtr_t &) override {}
     
 public:
-  explicit DemoLayer2(Context_t * _pContex) : 
-    Layer_t(_pContex, PathToDataDirectory / "demo2.rml")
+  explicit DemoLayer2(IWindowRocket_t & _Window) :
+    Layer_t(_Window, PathToDataDirectory / "demo2.rml")
   {
-  }
-  ~DemoLayer2(void)
-  {
-    m_Hello.disconnect();
+    using namespace ::covellite::events;
+
+    // Подписываемся на событие нажатия кнопки с идентификатором "id_hello".
+    m_Events[Click.DocumentId(GetId()).ElementId("id_hello")]
+      .Connect([&](const Click_t::Info &) 
+    {
+      // Действие, выполняемое при нажатии на кнопку id_hello.
+      GetElement("multiline_text").SetText(u8"Привет!");
+    });
   }
 };
 /// [Layer example]
@@ -88,11 +94,11 @@ public:
   void Subscribe(const EventHandlerPtr_t &) override {}
 
 public:
-  explicit TableLayer(Context_t * _pContex) :
-    Layer_t(_pContex, PathToDataDirectory / "table.rml")
+  explicit TableLayer(IWindowRocket_t & _Window) :
+    Layer_t(_Window, PathToDataDirectory / "table.rml")
   {
     GetElement("id_board_name").SetText(
-      "<h2><font30>Название доски</font30></h2>");
+      u8"<h2><font30>Название доски</font30></h2>");
 
     GetElement("id_list").SetText(
       u8"<button class=\"left\"><font42>\u00D7</font42></button>"
@@ -101,13 +107,13 @@ public:
       u8"<button class=\"right\"><font42>\u00D7</font42></button>");
 
     GetElement("multiline_text").SetText(
-      "Строки:\r\n"
-      "- Первая.\r\n"
-      "- Вторая.\r\n"
-      "- Третья.\r\n"
-      "- Четвертая.\r\n"
-      "- Пятая.\r\n"
-      "- Шестая.");
+      u8"Строки:\r\n"
+      u8"- Первая.\r\n"
+      u8"- Вторая.\r\n"
+      u8"- Третья.\r\n"
+      u8"- Четвертая.\r\n"
+      u8"- Пятая.\r\n"
+      u8"- Шестая.");
   }
 };
 
@@ -119,8 +125,8 @@ public:
   void Subscribe(const EventHandlerPtr_t &) override {}
 
 public:
-  explicit ScrollLayer(Context_t * _pContex) :
-    Layer_t(_pContex, PathToDataDirectory / "scroll.rml")
+  explicit ScrollLayer(IWindowRocket_t & _Window) :
+    Layer_t(_Window, PathToDataDirectory / "scroll.rml")
   {
     const auto Height = ::std::max(GetWidth(), GetHeight());
 
@@ -132,34 +138,27 @@ public:
 // ************************************************************************** //
 
 /// [Constructor main window]
-ExampleWindow::ExampleWindow(const WindowRocketPtr_t & _pWindowRocket) :
-  m_pWindowRocket(_pWindowRocket)
+ExampleWindow::ExampleWindow(WindowRocket_t & _WindowRocket) :
+  m_WindowRocket(_WindowRocket),
+  m_Events(_WindowRocket)
 {
   // Набор строк локализации приложения.
-  m_pWindowRocket->Set(
+  m_WindowRocket.Set(
   {
     { u8"[HELLO]", u8"Привет" },
   });
     
   // Экран, который будет отображаться при старте программы.
-  m_pWindowRocket->AddLayer<DemoLayer1>();
+  m_WindowRocket.PushLayer<DemoLayer1>();
+
+  using namespace ::covellite::events;
+
+  // Подписка на события перехода к другому экрану.
+  m_Events[Example.Button1]
+    .Connect([&]() { m_WindowRocket.PushLayer<DemoLayer2>(); });
+  m_Events[Example.Button2]
+    .Connect([&]() { m_WindowRocket.PushLayer<TableLayer>(); });
+  m_Events[Example.Button3]
+    .Connect([&]() { m_WindowRocket.PushLayer<ScrollLayer>(); });
 }
 /// [Constructor main window]
-
-/// [Subscribe]
-void ExampleWindow::Subscribe(const EventHandlerPtr_t & _pEvents) /*override*/
-{
-  using ::covellite::core::Event;
-  using ::covellite::rocket::Window;
-    
-  // Подписка на события выбора элементов управления.
-  (*_pEvents)[Event::Click]["button1"]
-    .connect(::std::bind(&Window::AddLayer<DemoLayer2>, m_pWindowRocket));
-  (*_pEvents)[Event::Click]["button2"]
-    .connect(::std::bind(&Window::AddLayer<TableLayer>, m_pWindowRocket));
-  (*_pEvents)[Event::Click]["button3"]
-    .connect(::std::bind(&Window::AddLayer<ScrollLayer>, m_pWindowRocket));
-  (*_pEvents)[Event::Click]["exit"]
-    .connect(::std::bind(&ExampleWindow::Exit, this));
-}
-/// [Subscribe]

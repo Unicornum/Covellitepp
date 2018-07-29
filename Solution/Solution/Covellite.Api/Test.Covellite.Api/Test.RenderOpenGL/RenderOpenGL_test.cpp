@@ -347,7 +347,7 @@ TEST_F(RenderOpenGL_test, /*DISABLED_*/Test_LoadTexture)
     const size_t m_TextureDataSize;
 
   public:
-    Tested(TextureHandle_t _hHandle, const size_t _TextureDataSize) :
+    Tested(const TextureHandle_t & _hHandle, const size_t _TextureDataSize) :
       Tested_t(1804101138),
       m_hHandle(_hHandle),
       m_TextureDataSize(_TextureDataSize)

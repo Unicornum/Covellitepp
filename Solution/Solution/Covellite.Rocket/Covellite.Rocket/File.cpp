@@ -80,11 +80,11 @@ bool File::Seek(Handle_t _hFile, long _BeginPosition, int _Origin) /*override*/
   }
   else if (_Origin == SEEK_CUR)
   {
-    NewPosition = static_cast<long>(FileInfo.Position) + _BeginPosition;
+    NewPosition = FileInfo.Position + static_cast<size_t>(_BeginPosition);
   }
   else if (_Origin == SEEK_END)
   {
-    NewPosition = static_cast<long>(FileInfo.Data.size()) + _BeginPosition;
+    NewPosition = FileInfo.Data.size() + static_cast<size_t>(_BeginPosition);
   }
 
   if (NewPosition > FileInfo.Data.size()) return false;

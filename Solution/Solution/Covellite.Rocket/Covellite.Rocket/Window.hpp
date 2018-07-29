@@ -3,9 +3,12 @@
 #include <map>
 #include <memory>
 #include <alicorn\boost\filesystem.forward.hpp>
+#include <Covellite\Events\Events.hpp>
 #include <Covellite\Core\IWindow.hpp>
 #include <Covellite\Core\Window.hpp>
 #include <Covellite\Core\Params.hpp>
+#include <Covellite\App\IWindow.hpp>
+#include <Covellite\Rocket\IWindow.hpp>
 #include <Covellite\Rocket\Rocket.forward.hpp>
 #include <Covellite\Rocket\Layers.hpp>
 
@@ -35,45 +38,51 @@ class StringTranslator;
 *  
 * \version
 *  1.0.0.0        \n
-*  1.1.0.0        \n
-*  1.2.0.0        \n
-*  1.3.0.0        \n
-*  1.4.0.0        \n
-*  1.5.0.0        \n
+*  2.0.0.0        \n
 * \date
 *  28 Ноябрь 2016    \n
-*  20 Декабрь 2016    \n
-*  26 Декабрь 2016    \n
-*  28 Декабрь 2016    \n
-*  19 Сентябрь 2017    \n
-*  13 Октябрь 2017    \n
+*  23 Июль 2018    \n
 * \author
 *  CTAPOBEP (unicornum.verum@gmail.com)
 * \copyright
-*  © CTAPOBEP 2016 - 2017
+*  © CTAPOBEP 2016 - 2018
 */
 class Window final :
+  public ::covellite::rocket::IWindow,
   public ::covellite::core::IWindow,
+  public ::covellite::app::IWindow,
   public covellite::core::Window
 {
-  using WindowApiPtr_t = ::std::shared_ptr<::covellite::api::IWindow>;
-  using StringTranslatorPtr_t = 
-    ::std::shared_ptr<covellite::rocket::StringTranslator>;
+  using WindowApi_t = ::covellite::api::IWindow;
+  using WindowApiPtr_t = ::std::shared_ptr<WindowApi_t>;
   using Utf8String_t = ::std::string;
   using StringBank_t = ::std::map<Utf8String_t, Utf8String_t>;
   using Path_t = ::boost::filesystem::path;
-  using Document_t = Rocket::Core::ElementDocument;
-  using Vector_t = Rocket::Core::Vector2i;
-  using Initializer_t = covellite::rocket::Initializer;
-  using InitializerPtr_t = ::std::unique_ptr<Initializer_t>;
   using LayerPtr_t = ::std::shared_ptr<ILayer>;
   using Layers_t = covellite::rocket::Layers;
+  using Initializer_t = covellite::rocket::Initializer;
+  using InitializerPtr_t = ::std::unique_ptr<Initializer_t>;
+  using StringTranslator_t = covellite::rocket::StringTranslator;
+  using StringTranslatorPtr_t = ::std::shared_ptr<StringTranslator_t>;
   using Context_t = Rocket::Core::Context;
   using ContextPtr_t = ::std::unique_ptr<Context_t, void(*)(Context_t *)>;
+  using Vector_t = Rocket::Core::Vector2i;
 
 public:
-  // Интерфейс IWindow:
+  class ClickEventListener;
+  using ClickEventListenerPtr_t = ::std::shared_ptr<ClickEventListener>;
+
+public:
+  // Интерфейс core::IWindow:
   void Subscribe(const EventHandlerPtr_t & _Events) override;
+
+public:
+  // Интерфейс events::IEvents:
+  operator Events_t (void) const override;
+
+public:
+  // Интерфейс rocket::IWindow:
+  Document_t * LoadDocument(const PathToFile_t &) override;
 
 public:
   void Set(const StringBank_t &);
@@ -82,6 +91,8 @@ public:
   // Функции работы со слоями (экранами) окна.
   template<class TLayer>
   ::std::shared_ptr<TLayer> AddLayer(void);
+  template<class TLayer>
+  void PushLayer(void);
   void Back(void);
 
 private:
@@ -90,15 +101,17 @@ private:
   static void LoadFonts(void);
 
 private:
-  Layers_t                m_Layers;
-  WindowApiPtr_t          m_pWindowApi;
-  const int32_t           m_StatusBarHeight;
-  StringTranslatorPtr_t   m_pStringTranslator;
+  const WindowApi_t     & m_WindowApi;
+  Events_t                m_Events;
+  ClickEventListenerPtr_t m_pClickEventListener;
   EventHandlerPtr_t       m_pEvents;
+  StringTranslatorPtr_t   m_pStringTranslator;
   InitializerPtr_t        m_pInitializer;
   ContextPtr_t            m_pContext;
+  Layers_t                m_Layers;
 
 public:
+  explicit Window(const WindowApi_t &);
   explicit Window(const WindowApiPtr_t &);
   ~Window(void) noexcept;
 };

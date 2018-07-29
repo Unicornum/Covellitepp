@@ -10,15 +10,17 @@
 *  
 * \version
 *  1.0.0.0        \n
+*  2.0.0.0        \n
 * \date
 *  17 Ноябрь 2016    \n
+*  28 Июль 2018    \n
 * \author
 *  CTAPOBEP (unicornum.verum@gmail.com)
 * \copyright
-*  © CTAPOBEP 2016
+*  © CTAPOBEP 2016 - 2018
 */
 class ExampleApp final :
-  public covellite::core::Application
+  public ::covellite::app::Application
 {
 private:
   void DoInitLogger(void);

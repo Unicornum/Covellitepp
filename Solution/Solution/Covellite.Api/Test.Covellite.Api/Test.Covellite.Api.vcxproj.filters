@@ -50,6 +50,9 @@
     <ClCompile Include="Test.OpenGL\OpenGL_test.cpp">
       <Filter>Tests\OpenGL</Filter>
     </ClCompile>
+    <ClCompile Include="..\Covellite.Api\Window.cpp">
+      <Filter>Tests\Window</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">

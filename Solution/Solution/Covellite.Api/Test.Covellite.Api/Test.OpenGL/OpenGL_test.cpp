@@ -1,5 +1,6 @@
 
 #include "stdafx.h"
+#include <alicorn/patterns/factory.hpp>
 
 // Примеры макросов библиотеки Google Test
 #include <alicorn\google\test\example.hpp>
@@ -13,6 +14,9 @@
 */
 
 #include <Covellite\Os.mock.hpp>
+#include <Covellite\Os\Events.hpp>
+#include <Covellite\App\Events.hpp>
+#include <Covellite\Api\Events.hpp>
 
 #define OpenGLCommon OpenGLCommon_windows
 
@@ -30,11 +34,13 @@ protected:
   using ITestedCore_t = ::covellite::core::IWindow;
   using WindowOs_t = ::mock::covellite::os::Window;
   using String_t = ::alicorn::extension::std::String;
+  using Events_t = ::covellite::events::Events;
 
   // Вызывается ПЕРЕД запуском каждого теста
   void SetUp(void) override
   {
     ::testing::DefaultValue<int>::Set(1710282125);
+    ::testing::DefaultValue<HDC>::Set((HDC)1806101721);
     ::testing::DefaultValue<HGLRC>::Set((HGLRC)1710282204);
     ::testing::DefaultValue<RECT>::Set({ 0, 0, 1, 1 });
     ::testing::DefaultValue<String_t>::Set(uT("0"));
@@ -45,6 +51,7 @@ protected:
   {
     ::testing::DefaultValue<int>::Clear();
     ::testing::DefaultValue<HGLRC>::Clear();
+    ::testing::DefaultValue<HDC>::Clear();
     ::testing::DefaultValue<RECT>::Clear();
     ::testing::DefaultValue<String_t>::Clear();
   }
@@ -66,6 +73,10 @@ TEST_F(OpenGL_test, /*DISABLED_*/Test_Destructor)
 // ************************************************************************** //
 TEST_F(OpenGL_test, /*DISABLED_*/Test_EmptyFormatDescriptor)
 {
+  // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! ВАЖНО !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! //
+  // Эта функция должна выполняться до создания первого объекта!
+  // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! ВАЖНО !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! //
+
   EXPECT_EQ(0, PixelFormatDescriptor.nSize);
   EXPECT_EQ(0, PixelFormatDescriptor.nVersion);
   EXPECT_EQ(0, PixelFormatDescriptor.dwFlags);
@@ -95,6 +106,17 @@ TEST_F(OpenGL_test, /*DISABLED_*/Test_EmptyFormatDescriptor)
 }
 
 // ************************************************************************** //
+TEST_F(OpenGL_test, /*DISABLED_*/Test_RegisterIntoFactory)
+{
+  using namespace ::alicorn::modules::patterns;
+
+  const WindowOs_t WindowOs;
+  const ::covellite::os::IWindow & IWindowOs = WindowOs;
+  auto pExample = factory::make_unique<ITestedApi_t>(uT("OpenGL"), IWindowOs);
+  EXPECT_NO_THROW(dynamic_cast<Tested_t &>(*pExample));
+}
+
+// ************************************************************************** //
 TEST_F(OpenGL_test, /*DISABLED_*/Test_DeviceContex)
 {
   using WindowsProxy_t = ::mock::WindowsProxy;
@@ -120,11 +142,13 @@ TEST_F(OpenGL_test, /*DISABLED_*/Test_DeviceContex)
       .Times(1)
       .WillOnce(Return(hWnd));
 
+    const WindowOs_t WindowOs;
+
     EXPECT_CALL(WindowsProxy, GetDC(hWnd))
       .Times(1)
       .WillOnce(Return(hDC));
 
-    Tested_t Example(::std::make_shared<WindowOs_t>());
+    const Tested_t Example{ WindowOs };
 
     EXPECT_CALL(WindowsProxy, ReleaseDC(hWnd, hDC))
       .Times(1);
@@ -144,7 +168,8 @@ TEST_F(OpenGL_test, /*DISABLED_*/Test_GetDeviceContex_Error)
     .Times(1)
     .WillOnce(Return((HDC)NULL));
 
-  EXPECT_THROW(Tested_t{ ::std::make_shared<WindowOs_t>() }, ::std::exception);
+  const WindowOs_t WindowOs;
+  EXPECT_THROW(Tested_t{ WindowOs }, ::std::exception);
 }
 
 // ************************************************************************** //
@@ -176,8 +201,9 @@ TEST_F(OpenGL_test, /*DISABLED_*/Test_ChoosePixelFormat)
     .WillOnce(Return(PixelFormat))
     .WillOnce(Return(0));
 
-  Tested_t Example(::std::make_shared<WindowOs_t>());
-  EXPECT_THROW(Tested_t{ ::std::make_shared<WindowOs_t>() }, ::std::exception);
+  const WindowOs_t WindowOs;
+  Tested_t Example{ WindowOs };
+  EXPECT_THROW(Tested_t{ WindowOs }, ::std::exception);
 }
 
 // ************************************************************************** //
@@ -203,8 +229,9 @@ TEST_F(OpenGL_test, /*DISABLED_*/Test_SetPixelFormat)
     .WillOnce(Return(TRUE))
     .WillOnce(Return(FALSE));
 
-  Tested_t Example(::std::make_shared<WindowOs_t>());
-  EXPECT_THROW(Tested_t{ ::std::make_shared<WindowOs_t>() }, ::std::exception);
+  const WindowOs_t WindowOs;
+  Tested_t Example{ WindowOs };
+  EXPECT_THROW(Tested_t{ WindowOs }, ::std::exception);
 }
 
 // ************************************************************************** //
@@ -234,7 +261,8 @@ TEST_F(OpenGL_test, /*DISABLED_*/Test_RenderContext)
       .Times(1)
       .WillOnce(Return(TRUE));
 
-    Tested_t Example(::std::make_shared<WindowOs_t>());
+    const WindowOs_t WindowOs;
+    Tested_t Example{ WindowOs };
 
     EXPECT_CALL(WindowsProxy, wglMakeCurrent(NULL, NULL))
       .Times(1);
@@ -263,7 +291,8 @@ TEST_F(OpenGL_test, /*DISABLED_*/Test_wglCreateContext_Error)
     .Times(1)
     .WillOnce(Return((HGLRC)NULL));
 
-  EXPECT_THROW(Tested_t{ ::std::make_shared<WindowOs_t>() }, ::std::exception);
+  const WindowOs_t WindowOs;
+  EXPECT_THROW(Tested_t{ WindowOs }, ::std::exception);
 }
 
 // ************************************************************************** //
@@ -285,7 +314,8 @@ TEST_F(OpenGL_test, /*DISABLED_*/Test_wglMakeCurrent_Error)
     .Times(1)
     .WillOnce(Return(FALSE));
 
-  EXPECT_THROW(Tested_t{ ::std::make_shared<WindowOs_t>() }, ::std::exception);
+  const WindowOs_t WindowOs;
+  EXPECT_THROW(Tested_t{ WindowOs }, ::std::exception);
 }
 
 // ************************************************************************** //
@@ -309,7 +339,6 @@ TEST_F(OpenGL_test, /*DISABLED_*/Test_Constructor_UpdateScreen)
   const int Width = 1710291013;
   const int Height = 1710291014;
   const RECT ClientRect = { Left, Top, Left + Width, Top + Height };
-  const auto pWindowOs = ::std::make_shared<WindowOs_t>();
 
   using namespace ::testing;
 
@@ -353,7 +382,310 @@ TEST_F(OpenGL_test, /*DISABLED_*/Test_Constructor_UpdateScreen)
   EXPECT_CALL(GLProxy, Ortho(0, Width, Height, 0, -1, 1))
     .Times(1);
 
-  Tested_t Example(pWindowOs);
+  const WindowOs_t WindowOs;
+  Tested_t Example{ WindowOs };
+}
+
+// ************************************************************************** //
+TEST_F(OpenGL_test, /*DISABLED_*/Test_GetEvents)
+{
+  class Proxy
+  {
+  public:
+    MOCK_METHOD0(DoEvent, void(void));
+  };
+
+  Proxy oProxy;
+  static const int Id = 1807221121;
+
+  const WindowOs_t WindowOs;
+  Events_t SourceEvents = WindowOs;
+  SourceEvents[Id].Connect([&]() { oProxy.DoEvent(); });
+  SourceEvents[::covellite::events::Error.Exception].Connect([]() {});
+
+  const Tested_t Example{ WindowOs };
+
+  using namespace ::testing;
+
+  EXPECT_CALL(oProxy, DoEvent())
+    .Times(1);
+
+  Events_t ExampleEvents = Example;
+  ExampleEvents[Id]();
+}
+
+// ************************************************************************** //
+TEST_F(OpenGL_test, /*DISABLED_*/Test_WindowResize)
+{
+  using GLProxy_t = ::mock::GLProxy;
+  GLProxy_t GLProxy;
+  GLProxy_t::GetInstance() = &GLProxy;
+
+  class Tested :
+    public Tested_t
+  {
+  public:
+    MOCK_CONST_METHOD0(GetClientRect, Rect(void));
+
+  public:
+    explicit Tested(const WindowOs_t & _Window) :
+      Tested_t(_Window)
+    {
+
+    }
+  };
+
+  const int Left = 10291057;
+  const int Top = 10291058;
+  const int Width = 1710291059;
+  const int Height = 1710291100;
+  const Tested::Rect Rect = { Left, Top, Width, Height };
+
+  const WindowOs_t WindowOs;
+  const Tested Example{ WindowOs };
+
+  using namespace ::testing;
+
+  InSequence Dummy;
+
+  EXPECT_CALL(Example, GetClientRect())
+    .Times(1)
+    .WillOnce(Return(Rect));
+
+  EXPECT_CALL(GLProxy, Viewport(0, 0, Width, Height))
+    .Times(1);
+
+  EXPECT_CALL(GLProxy, MatrixMode(GL_PROJECTION))
+    .Times(1);
+
+  EXPECT_CALL(GLProxy, LoadIdentity())
+    .Times(1);
+
+  EXPECT_CALL(GLProxy, MatrixMode(GL_MODELVIEW))
+    .Times(1);
+
+  EXPECT_CALL(GLProxy, LoadIdentity())
+    .Times(1);
+
+  EXPECT_CALL(GLProxy, Ortho(0, Width, Height, 0, -1, 1))
+    .Times(1);
+
+  Events_t Events = Example;
+  Events[::covellite::events::Window.Resize]();
+}
+
+// ************************************************************************** //
+TEST_F(OpenGL_test, /*DISABLED_*/Test_ApplicationUpdate)
+{
+  using SectionImplProxy_t = ::mock::alicorn::modules::settings::SectionImplProxy;
+  SectionImplProxy_t SectionImplProxy;
+  SectionImplProxy_t::GetInstance() = &SectionImplProxy;
+
+  using WindowsProxy_t = ::mock::WindowsProxy;
+  WindowsProxy_t WindowsProxy;
+  WindowsProxy_t::GetInstance() = &WindowsProxy;
+
+  using GLProxy_t = ::mock::GLProxy;
+  GLProxy_t GLProxy;
+  GLProxy_t::GetInstance() = &GLProxy;
+
+  class Tested :
+    public Tested_t
+  {
+  public:
+    MOCK_CONST_METHOD0(DoDrawing, void(void));
+    MOCK_CONST_METHOD0(DoException, void(void));
+
+  public:
+    explicit Tested(const WindowOs_t & _Window) :
+      Tested_t(_Window)
+    {
+    }
+  };
+
+  const auto hDC = (HDC)1710291106;
+  const ::mock::Id_t WindowSectionId = 1711061132;
+  const ::mock::Id_t BackgroundColorSectionId = 1711061133;
+
+  using namespace ::testing;
+
+  {
+    InSequence Dummy;
+
+    EXPECT_CALL(SectionImplProxy, GetChildSectionImpl(_, uT("Window")))
+      .Times(1);
+
+    EXPECT_CALL(SectionImplProxy, Constructor())
+      .Times(1)
+      .WillOnce(Return(WindowSectionId));
+
+    EXPECT_CALL(SectionImplProxy,
+      GetChildSectionImpl(WindowSectionId, uT("BackgroundColor")))
+      .Times(1);
+
+    EXPECT_CALL(SectionImplProxy, Constructor())
+      .Times(1)
+      .WillOnce(Return(BackgroundColorSectionId));
+
+    EXPECT_CALL(SectionImplProxy, GetValue(BackgroundColorSectionId, uT("R")))
+      .Times(1)
+      .WillOnce(Return(uT("25.5")));
+
+    EXPECT_CALL(SectionImplProxy, GetValue(BackgroundColorSectionId, uT("G")))
+      .Times(1)
+      .WillOnce(Return(uT("51")));
+
+    EXPECT_CALL(SectionImplProxy, GetValue(BackgroundColorSectionId, uT("B")))
+      .Times(1)
+      .WillOnce(Return(uT("76.5")));
+
+    EXPECT_CALL(SectionImplProxy, GetValue(BackgroundColorSectionId, uT("A")))
+      .Times(1)
+      .WillOnce(Return(uT("102")));
+  }
+
+  EXPECT_CALL(WindowsProxy, GetDC(_))
+    .Times(1)
+    .WillOnce(Return(hDC));
+
+  const WindowOs_t WindowOs;
+  const Tested Example{ WindowOs };
+  Events_t Events = Example;
+
+  using namespace ::covellite::events;
+
+  Events[Drawing.Do].Connect([&]() { Example.DoDrawing(); });
+  Events[Error.Exception].Connect([&]() { Example.DoException(); });
+
+  InSequence Dummy;
+
+  EXPECT_CALL(GLProxy, Disable(GL_BLEND))
+    .Times(1);
+
+  EXPECT_CALL(GLProxy, ClearColor(0.1f, 0.2f, 0.3f, 0.4f))
+    .Times(1);
+
+  EXPECT_CALL(GLProxy, Clear(GL_COLOR_BUFFER_BIT))
+    .Times(1);
+
+  EXPECT_CALL(Example, DoDrawing())
+    .Times(1);
+
+  EXPECT_CALL(WindowsProxy, SwapBuffers(hDC))
+    .Times(1)
+    .WillOnce(Return(TRUE));
+
+  EXPECT_CALL(Example, DoException())
+    .Times(0);
+
+  Events[::covellite::events::Application.Update]();
+}
+
+// ************************************************************************** //
+TEST_F(OpenGL_test, /*DISABLED_*/Test_ApplicationUpdate_SwapBuffersFail)
+{
+  using SectionImplProxy_t = ::mock::alicorn::modules::settings::SectionImplProxy;
+  SectionImplProxy_t SectionImplProxy;
+  SectionImplProxy_t::GetInstance() = &SectionImplProxy;
+
+  using WindowsProxy_t = ::mock::WindowsProxy;
+  WindowsProxy_t WindowsProxy;
+  WindowsProxy_t::GetInstance() = &WindowsProxy;
+
+  using GLProxy_t = ::mock::GLProxy;
+  GLProxy_t GLProxy;
+  GLProxy_t::GetInstance() = &GLProxy;
+
+  class Tested :
+    public Tested_t
+  {
+  public:
+    MOCK_CONST_METHOD0(DoDrawing, void(void));
+    MOCK_CONST_METHOD0(DoException, void(void));
+
+  public:
+    explicit Tested(const WindowOs_t & _Window) :
+      Tested_t(_Window)
+    {
+    }
+  };
+
+  const auto hDC = (HDC)1710291106;
+  const ::mock::Id_t WindowSectionId = 1711061132;
+  const ::mock::Id_t BackgroundColorSectionId = 1711061133;
+
+  using namespace ::testing;
+
+  {
+    InSequence Dummy;
+
+    EXPECT_CALL(SectionImplProxy, GetChildSectionImpl(_, uT("Window")))
+      .Times(1);
+
+    EXPECT_CALL(SectionImplProxy, Constructor())
+      .Times(1)
+      .WillOnce(Return(WindowSectionId));
+
+    EXPECT_CALL(SectionImplProxy,
+      GetChildSectionImpl(WindowSectionId, uT("BackgroundColor")))
+      .Times(1);
+
+    EXPECT_CALL(SectionImplProxy, Constructor())
+      .Times(1)
+      .WillOnce(Return(BackgroundColorSectionId));
+
+    EXPECT_CALL(SectionImplProxy, GetValue(BackgroundColorSectionId, uT("R")))
+      .Times(1)
+      .WillOnce(Return(uT("25.5")));
+
+    EXPECT_CALL(SectionImplProxy, GetValue(BackgroundColorSectionId, uT("G")))
+      .Times(1)
+      .WillOnce(Return(uT("51")));
+
+    EXPECT_CALL(SectionImplProxy, GetValue(BackgroundColorSectionId, uT("B")))
+      .Times(1)
+      .WillOnce(Return(uT("76.5")));
+
+    EXPECT_CALL(SectionImplProxy, GetValue(BackgroundColorSectionId, uT("A")))
+      .Times(1)
+      .WillOnce(Return(uT("102")));
+  }
+
+  EXPECT_CALL(WindowsProxy, GetDC(_))
+    .Times(1)
+    .WillOnce(Return(hDC));
+
+  const WindowOs_t WindowOs;
+  const Tested Example{ WindowOs };
+  Events_t Events = Example;
+
+  using namespace ::covellite::events;
+
+  Events[Drawing.Do].Connect([&]() { Example.DoDrawing(); });
+  Events[Error.Exception].Connect([&]() { Example.DoException(); });
+
+  InSequence Dummy;
+
+  EXPECT_CALL(GLProxy, Disable(GL_BLEND))
+    .Times(1);
+
+  EXPECT_CALL(GLProxy, ClearColor(0.1f, 0.2f, 0.3f, 0.4f))
+    .Times(1);
+
+  EXPECT_CALL(GLProxy, Clear(GL_COLOR_BUFFER_BIT))
+    .Times(1);
+
+  EXPECT_CALL(Example, DoDrawing())
+    .Times(1);
+
+  EXPECT_CALL(WindowsProxy, SwapBuffers(hDC))
+    .Times(1)
+    .WillOnce(Return(FALSE));
+
+  EXPECT_CALL(Example, DoException())
+    .Times(1);
+
+  Events[::covellite::events::Application.Update]();
 }
 
 // ************************************************************************** //
@@ -379,8 +711,9 @@ TEST_F(OpenGL_test, /*DISABLED_*/Test_GetUsingApi)
     .Times(1)
     .WillOnce(Return((HDC)1710311052));
 
-  Tested_t Example{ ::std::make_shared<WindowOs_t>() };
-  ITestedApi_t & IExample = Example;
+  const WindowOs_t WindowOs;
+  const Tested_t Example{ WindowOs };
+  const ITestedApi_t & IExample = Example;
 
   EXPECT_CALL(GLProxy, GetString(GL_VERSION))
     .Times(1)
@@ -416,8 +749,9 @@ TEST_F(OpenGL_test, /*DISABLED_*/Test_GetWidth)
     .Times(1)
     .WillOnce(Return((HDC)1710291047));
 
-  Tested_t Example{ ::std::make_shared<WindowOs_t>() };
-  ITestedApi_t & IExample = Example;
+  const WindowOs_t WindowOs;
+  const Tested_t Example{ WindowOs };
+  const ITestedApi_t & IExample = Example;
 
   EXPECT_CALL(WindowsProxy, BuildClientRect())
     .WillRepeatedly(Return(ClientRect));
@@ -458,8 +792,9 @@ TEST_F(OpenGL_test, /*DISABLED_*/Test_GetHeight)
     .Times(1)
     .WillOnce(Return((HDC)1710291047));
 
-  Tested_t Example{ ::std::make_shared<WindowOs_t>() };
-  ITestedApi_t & IExample = Example;
+  const WindowOs_t WindowOs;
+  const Tested_t Example{ WindowOs };
+  const ITestedApi_t & IExample = Example;
 
   EXPECT_CALL(WindowsProxy, BuildClientRect())
     .WillRepeatedly(Return(ClientRect));
@@ -475,6 +810,54 @@ TEST_F(OpenGL_test, /*DISABLED_*/Test_GetHeight)
 }
 
 // ************************************************************************** //
+TEST_F(OpenGL_test, /*DISABLED_*/Test_GetClientRect)
+{
+  using WindowOsProxy_t = ::mock::covellite::os::Window::Proxy;
+  WindowOsProxy_t WindowOsProxy;
+  WindowOsProxy_t::GetInstance() = &WindowOsProxy;
+
+  using WindowsProxy_t = ::mock::WindowsProxy;
+  WindowsProxy_t WindowsProxy;
+  WindowsProxy_t::GetInstance() = &WindowsProxy;
+
+  const HWND hWnd = (HWND)1807211305;
+  const int Left = 07211310;
+  const int Width = 1807211311;
+  const int Top = 07211307;
+  const int Height = 1807211308;
+  const RECT ClientRect = { Left, Top, Left + Width, Top + Height };
+
+  using namespace ::testing;
+
+  EXPECT_CALL(WindowOsProxy, GetHandle(_))
+    .Times(1)
+    .WillOnce(Return(hWnd));
+
+  EXPECT_CALL(WindowsProxy, GetDC(_))
+    .Times(1)
+    .WillOnce(Return((HDC)1807211309));
+
+  const WindowOs_t WindowOs;
+  const Tested_t Example{ WindowOs };
+  const ITestedApi_t & IExample = Example;
+
+  EXPECT_CALL(WindowsProxy, BuildClientRect())
+    .WillRepeatedly(Return(ClientRect));
+
+  EXPECT_CALL(WindowsProxy, GetClientRect(hWnd))
+    .Times(2)
+    .WillOnce(Return(FALSE))
+    .WillOnce(Return(TRUE));
+
+  EXPECT_THROW(IExample.GetClientRect(), ::std::exception);
+  const auto Result = IExample.GetClientRect();
+  EXPECT_EQ(0, Result.Left);
+  EXPECT_EQ(0, Result.Top);
+  EXPECT_EQ(Width, Result.Width);
+  EXPECT_EQ(Height, Result.Height);
+}
+
+// ************************************************************************** //
 TEST_F(OpenGL_test, /*DISABLED_*/Test_MakeRenderInterface)
 {
   using WindowsProxy_t = ::mock::WindowsProxy;
@@ -485,7 +868,22 @@ TEST_F(OpenGL_test, /*DISABLED_*/Test_MakeRenderInterface)
   RenderOpenGLProxy_t RenderOpenGLProxy;
   RenderOpenGLProxy_t::GetInstance() = &RenderOpenGLProxy;
 
+  class Tested :
+    public Tested_t
+  {
+  public:
+    MOCK_CONST_METHOD0(GetClientRect, Rect (void));
+
+  public:
+    explicit Tested(const WindowOs_t & _Window) :
+      Tested_t(_Window)
+    {
+
+    }
+  };
+
   const ::mock::Id_t RenderOpenGLId = 1710291052;
+  const auto Top = 1807221057;
 
   using namespace ::testing;
 
@@ -493,10 +891,15 @@ TEST_F(OpenGL_test, /*DISABLED_*/Test_MakeRenderInterface)
     .Times(1)
     .WillOnce(Return((HDC)1710291054));
 
-  const Tested_t Example{ ::std::make_shared<WindowOs_t>() };
+  const WindowOs_t WindowOs;
+  const Tested Example{ WindowOs };
   const ITestedApi_t & IExample = Example;
 
-  EXPECT_CALL(RenderOpenGLProxy, Constructor(0))
+  EXPECT_CALL(Example, GetClientRect())
+    .Times(1)
+    .WillOnce(Return(Tested::Rect{ 0, Top, 0, 0 }));
+
+  EXPECT_CALL(RenderOpenGLProxy, Constructor(Top))
     .Times(1)
     .WillOnce(Return(RenderOpenGLId));
 
@@ -508,7 +911,7 @@ TEST_F(OpenGL_test, /*DISABLED_*/Test_MakeRenderInterface)
 }
 
 // ************************************************************************** //
-TEST_F(OpenGL_test, /*DISABLED_*/Test_DoResize)
+TEST_F(OpenGL_test, /*DISABLED_*/Test_DoResize_Deprecated)
 {
   using WindowsProxy_t = ::mock::WindowsProxy;
   WindowsProxy_t WindowsProxy;
@@ -539,7 +942,8 @@ TEST_F(OpenGL_test, /*DISABLED_*/Test_DoResize)
     .Times(1)
     .WillOnce(Return((HDC)1710291054));
 
-  Tested_t Example{ ::std::make_shared<WindowOs_t>() };
+  const WindowOs_t WindowOs;
+  Tested_t Example{ WindowOs };
   ITestedCore_t & IExample = Example;
 
   IExample.Subscribe(pEventHandler);
@@ -570,7 +974,7 @@ TEST_F(OpenGL_test, /*DISABLED_*/Test_DoResize)
 }
 
 // ************************************************************************** //
-TEST_F(OpenGL_test, /*DISABLED_*/Test_DoStartDrawing)
+TEST_F(OpenGL_test, /*DISABLED_*/Test_DoStartDrawing_Deprecated)
 {
   using SectionImplProxy_t = ::mock::alicorn::modules::settings::SectionImplProxy;
   SectionImplProxy_t SectionImplProxy;
@@ -631,7 +1035,8 @@ TEST_F(OpenGL_test, /*DISABLED_*/Test_DoStartDrawing)
     .Times(1)
     .WillOnce(Return((HDC)1710291103));
 
-  Tested_t Example{ ::std::make_shared<WindowOs_t>() };
+  const WindowOs_t WindowOs;
+  Tested_t Example{ WindowOs };
   ITestedCore_t & IExample = Example;
 
   IExample.Subscribe(pEventHandler);
@@ -653,7 +1058,7 @@ TEST_F(OpenGL_test, /*DISABLED_*/Test_DoStartDrawing)
 }
 
 // ************************************************************************** //
-TEST_F(OpenGL_test, /*DISABLED_*/Test_DoFinishDrawing)
+TEST_F(OpenGL_test, /*DISABLED_*/Test_DoFinishDrawing_Deprecated)
 {
   using WindowsProxy_t = ::mock::WindowsProxy;
   WindowsProxy_t WindowsProxy;
@@ -667,7 +1072,8 @@ TEST_F(OpenGL_test, /*DISABLED_*/Test_DoFinishDrawing)
     .Times(1)
     .WillOnce(Return(hDC));
 
-  Tested_t Example{ ::std::make_shared<WindowOs_t>() };
+  const WindowOs_t WindowOs;
+  Tested_t Example{ WindowOs };
   ITestedCore_t & IExample = Example;
 
   auto pEventHandler =

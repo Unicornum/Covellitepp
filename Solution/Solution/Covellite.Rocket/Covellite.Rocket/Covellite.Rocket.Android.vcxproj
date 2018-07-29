@@ -58,12 +58,15 @@
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="ClickEventListener.hpp" />
+    <ClInclude Include="Events.hpp" />
     <ClInclude Include="File.hpp" />
     <ClInclude Include="ILayer.hpp" />
     <ClInclude Include="Initializer.hpp" />
     <ClInclude Include="Initializer.mock.hpp" />
     <ClInclude Include="IStringTranslator.hpp" />
     <ClInclude Include="IStringTranslator.mock.hpp" />
+    <ClInclude Include="IWindow.hpp" />
     <ClInclude Include="Layer.hpp" />
     <ClInclude Include="Layer.mock.hpp" />
     <ClInclude Include="Layers.hpp" />
@@ -81,6 +84,7 @@
     <None Include="Window.inl" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="ClickEventListener.cpp" />
     <ClCompile Include="File.cpp" />
     <ClCompile Include="Initializer.cpp" />
     <ClCompile Include="Layer.android.cpp" />
@@ -89,6 +93,7 @@
     <ClCompile Include="StringTranslator.cpp" />
     <ClCompile Include="System.android.cpp" />
     <ClCompile Include="System.cpp" />
+    <ClCompile Include="SystemToRocketKeyCode.android.cpp" />
     <ClCompile Include="Window.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

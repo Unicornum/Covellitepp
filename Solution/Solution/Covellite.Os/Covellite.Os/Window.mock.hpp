@@ -4,6 +4,7 @@
 #include <Covellite\Os\Configuration.mock.hpp>
 #include <Covellite\Os\IWindow.hpp>
 #include <Covellite\Core\EventHandler.hpp>
+#include <Covellite\Events.hpp>
 
 /*
 An example of use:
@@ -70,6 +71,13 @@ public:
   }
 
 public:
+  // Èםעונפויס events::IEvents:
+  operator Events_t (void) const override
+  {
+    return m_Events;
+  }
+
+public:
   Handle_t Window::GetHandle(void) const override
   {
     return Proxy::GetInstance()->GetHandle(m_Id);
@@ -79,6 +87,9 @@ public:
   {
     throw::std::exception{};
   }
+
+private:
+  Events_t m_Events;
 
 public:
   Window(void) :

@@ -16,41 +16,7 @@
 #include "..\..\Covellite.Rocket\Layer.cpp"
 #include "..\..\Covellite.Rocket\Layer.windows.cpp"
 
-// Общий тестовый класс класса Layer
-class Layer_test :
-  public ::testing::Test
-{
-protected:
-  using Tested_t = ::covellite::rocket::Layer;
-  using ITested_t = ::covellite::rocket::ILayer;
-  using Context_t = ::mock::Rocket::Core::Context;
-  using Document_t = ::mock::Rocket::Core::ElementDocument;
-  using String_t = ::mock::Rocket::Core::String;
-  using Path_t = ::boost::filesystem::path;
-
-  // Вызывается ПЕРЕД запуском каждого теста
-  void SetUp(void) override
-  {
-    ::testing::DefaultValue<String_t>::Set("DefaultString");
-  }
-
-  // Вызывается ПОСЛЕ запуска каждого теста
-  void TearDown(void) override
-  {
-    ::testing::DefaultValue<String_t>::Clear();
-  }
-
-protected:
-  class Tested :
-    public Tested_t
-  {
-  public:
-    void Subscribe(const EventHandlerPtr_t &) override {}
-
-  public:
-    using Tested_t::Tested_t;
-  };
-};
+#include "Common_test.hpp"
 
 // Образец макроса для подстановки в класс Layer 
 // для доступа тестовой функции к закрытым функциям класса (чтобы это сработало, 
@@ -59,26 +25,32 @@ protected:
 // FRIEND_TEST(Layer_test, Test_Function);
 
 // ************************************************************************** //
-TEST_F(Layer_test, /*DISABLED_*/Test_Constructor_LoadDocument_Nullptr)
+TEST_F(Layer_test, /*DISABLED_*/Test_Destructor)
 {
-  Context_t Context;
-  const char * PathToFile = "Path1710032313";
+  EXPECT_TRUE(::std::has_virtual_destructor<Tested_t>::value);
+  EXPECT_TRUE(::std::is_nothrow_destructible<Tested_t>::value);
+}
+
+// ************************************************************************** //
+TEST_F(Layer_test, /*DISABLED_*/Test_Constructor_NullptrDocument)
+{
+  Window Window;
+  ::covellite::rocket::IWindow & IWindow = Window;
 
   using namespace ::testing;
 
-  EXPECT_CALL(Context, LoadDocument(Eq(PathToFile)))
+  EXPECT_CALL(Window, LoadDocument(_))
     .Times(1)
     .WillOnce(Return(nullptr));
 
-  EXPECT_STDEXCEPTION(Tested( &Context, Path_t(PathToFile) ),
-    (::std::string(".*Document null pointer: \"") + PathToFile + "\"").c_str());
+  EXPECT_THROW(Tested(IWindow, ""), ::std::exception);
 }
 
 // ************************************************************************** //
 TEST_F(Layer_test, /*DISABLED_*/Test_Constructor)
 {
-  const ::mock::Id_t EventHandlerId = 1710121239;
-  Context_t Context;
+  Window Window;
+  ::covellite::rocket::IWindow & IWindow = Window;
   Document_t Document;
 
   {
@@ -86,11 +58,11 @@ TEST_F(Layer_test, /*DISABLED_*/Test_Constructor)
 
     using namespace ::testing;
 
-    EXPECT_CALL(Context, LoadDocument(Eq(PathToFile)))
+    EXPECT_CALL(Window, LoadDocument(Eq(PathToFile)))
       .Times(1)
       .WillOnce(Return(&Document));
 
-    const Tested Example{ &Context, Path_t{ PathToFile } };
+    const Tested Example{ IWindow, Path_t{ PathToFile } };
 
     InSequence Dummy;
 
@@ -100,25 +72,46 @@ TEST_F(Layer_test, /*DISABLED_*/Test_Constructor)
 }
 
 // ************************************************************************** //
-TEST_F(Layer_test, /*DISABLED_*/Test_Constructor_Title_Nullptr)
+TEST_F(Layer_test, /*DISABLED_*/Test_Constructor_Events)
 {
-  Context_t Context;
-  const char * PathToFile = "Path1710040009";
+  Window Window;
+  ::covellite::rocket::IWindow & IWindow = Window;
+  Document_t Document;
 
   using namespace ::testing;
 
-  EXPECT_CALL(Context, LoadDocument(Eq(PathToFile)))
+  EXPECT_CALL(Window, LoadDocument(_))
+    .Times(1)
+    .WillOnce(Return(&Document));
+
+  Tested Example{ IWindow, "" };
+
+  EXPECT_CALL(Example, DoMessage1())
+    .Times(1);
+
+  Window.m_Events[Tested::Message1]();
+}
+
+// ************************************************************************** //
+TEST_F(Layer_test, /*DISABLED_*/Test_Constructor_Title_NullptrDocument)
+{
+  Window Window;
+  ::covellite::rocket::IWindow & IWindow = Window;
+
+  using namespace ::testing;
+
+  EXPECT_CALL(Window, LoadDocument(_))
     .Times(1)
     .WillOnce(Return(nullptr));
 
-  EXPECT_STDEXCEPTION(Tested(&Context, Path_t(PathToFile), ""),
-    (::std::string(".*Document null pointer: \"") + PathToFile + "\"").c_str());
+  EXPECT_THROW(Tested(IWindow, "", ""), ::std::exception);
 }
 
 // ************************************************************************** //
 TEST_F(Layer_test, /*DISABLED_*/Test_Constructor_Title_UnknownTitle)
 {
-  Context_t Context;
+  Window Window;
+  ::covellite::rocket::IWindow & IWindow = Window;
   const char * PathToFile = "Path1710040012";
   Document_t Document;
   const char * TitleId = "Unknown1612201113";
@@ -127,7 +120,7 @@ TEST_F(Layer_test, /*DISABLED_*/Test_Constructor_Title_UnknownTitle)
 
   InSequence Dummy;
 
-  EXPECT_CALL(Context, LoadDocument(Eq(PathToFile)))
+  EXPECT_CALL(Window, LoadDocument(Eq(PathToFile)))
     .Times(1)
     .WillOnce(Return(&Document));
 
@@ -138,15 +131,15 @@ TEST_F(Layer_test, /*DISABLED_*/Test_Constructor_Title_UnknownTitle)
   EXPECT_CALL(Document, RemoveReference())
     .Times(1);
 
-  EXPECT_STDEXCEPTION(Tested(&Context, Path_t(PathToFile), TitleId),
+  EXPECT_STDEXCEPTION(Tested(IWindow, Path_t(PathToFile), TitleId),
     (".*Unexpected title id: " + ::std::string(TitleId)).c_str());
 }
 
 // ************************************************************************** //
 TEST_F(Layer_test, /*DISABLED_*/Test_Constructor_Title)
 {
-  const ::mock::Id_t EventHandlerId = 1710121244;
-  Context_t Context;
+  Window Window;
+  ::covellite::rocket::IWindow & IWindow = Window;
   const char * PathToFile = "Path1710040013";
   Document_t Document;
   ::mock::Rocket::Core::Element Title;
@@ -157,7 +150,7 @@ TEST_F(Layer_test, /*DISABLED_*/Test_Constructor_Title)
 
   InSequence Dummy;
 
-  EXPECT_CALL(Context, LoadDocument(Eq(PathToFile)))
+  EXPECT_CALL(Window, LoadDocument(Eq(PathToFile)))
     .Times(1)
     .WillOnce(Return(&Document));
 
@@ -173,7 +166,7 @@ TEST_F(Layer_test, /*DISABLED_*/Test_Constructor_Title)
     .Times(1);
 
   {
-    Tested Example{ &Context, Path_t(PathToFile), TitleId };
+    Tested Example{ IWindow, Path_t(PathToFile), TitleId };
 
     EXPECT_CALL(Document, RemoveReference())
       .Times(1);
@@ -181,27 +174,47 @@ TEST_F(Layer_test, /*DISABLED_*/Test_Constructor_Title)
 }
 
 // ************************************************************************** //
-TEST_F(Layer_test, /*DISABLED_*/Test_Destructor)
+TEST_F(Layer_test, /*DISABLED_*/Test_Constructor_Title_Events)
 {
-  EXPECT_TRUE(::std::has_virtual_destructor<Tested_t>::value);
-  EXPECT_TRUE(::std::is_nothrow_destructible<Tested_t>::value);
+  Window Window;
+  ::covellite::rocket::IWindow & IWindow = Window;
+  Document_t Document;
+  ::mock::Rocket::Core::Element Title;
+
+  using namespace ::testing;
+
+  EXPECT_CALL(Window, LoadDocument(_))
+    .Times(1)
+    .WillOnce(Return(&Document));
+
+  EXPECT_CALL(Document, GetElementById(_))
+    .Times(1)
+    .WillOnce(Return(&Title));
+
+  Tested Example{ IWindow, "", "" };
+
+  EXPECT_CALL(Example, DoMessage2())
+    .Times(1);
+
+  Window.m_Events[Tested::Message2]();
 }
 
 // ************************************************************************** //
 TEST_F(Layer_test, /*DISABLED_*/Test_Show)
 {
-  Context_t Context;
+  Window Window;
+  ::covellite::rocket::IWindow & IWindow = Window;
   Document_t Document;
 
   using namespace ::testing;
 
   InSequence Dummy;
 
-  EXPECT_CALL(Context, LoadDocument(_))
+  EXPECT_CALL(Window, LoadDocument(_))
     .Times(1)
     .WillOnce(Return(&Document));
 
-  Tested Example{ &Context, Path_t{} };
+  Tested Example{ IWindow, Path_t{} };
   ITested_t & IExampe = Example;
 
   EXPECT_CALL(Document, Show())
@@ -213,18 +226,19 @@ TEST_F(Layer_test, /*DISABLED_*/Test_Show)
 // ************************************************************************** //
 TEST_F(Layer_test, /*DISABLED_*/Test_Hide)
 {
-  Context_t Context;
+  Window Window;
+  ::covellite::rocket::IWindow & IWindow = Window;
   Document_t Document;
 
   using namespace ::testing;
 
   InSequence Dummy;
 
-  EXPECT_CALL(Context, LoadDocument(_))
+  EXPECT_CALL(Window, LoadDocument(_))
     .Times(1)
     .WillOnce(Return(&Document));
 
-  Tested Example{ &Context, Path_t{} };
+  Tested Example{ IWindow, Path_t{} };
   ITested_t & IExampe = Example;
 
   EXPECT_CALL(Document, Hide())
@@ -236,7 +250,8 @@ TEST_F(Layer_test, /*DISABLED_*/Test_Hide)
 // ************************************************************************** //
 TEST_F(Layer_test, /*DISABLED_*/Test_GetElement)
 {
-  Context_t Context;
+  Window Window;
+  ::covellite::rocket::IWindow & IWindow = Window;
   Document_t Document;
   ::mock::Rocket::Core::Element Element;
   const char * Id = "1701031206";
@@ -245,11 +260,11 @@ TEST_F(Layer_test, /*DISABLED_*/Test_GetElement)
 
   InSequence Dummy;
 
-  EXPECT_CALL(Context, LoadDocument(_))
+  EXPECT_CALL(Window, LoadDocument(_))
     .Times(1)
     .WillOnce(Return(&Document));
 
-  const Tested Example{ &Context, Path_t{} };
+  const Tested Example{ IWindow, Path_t{} };
 
   EXPECT_CALL(Document, GetElementById(Eq(Id)))
     .Times(2)
@@ -257,7 +272,6 @@ TEST_F(Layer_test, /*DISABLED_*/Test_GetElement)
     .WillOnce(Return(&Element));
 
   EXPECT_THROW(Example.GetElement(Id), ::std::exception);
-
   Example.GetElement(Id);
 }
 
@@ -265,6 +279,8 @@ TEST_F(Layer_test, /*DISABLED_*/Test_GetElement)
 TEST_F(Layer_test, /*DISABLED_*/Test_GetWidth)
 {
   Context_t Context;
+  Window Window;
+  ::covellite::rocket::IWindow & IWindow = Window;
   Document_t Document;
   const ::mock::Rocket::Core::Vector2i Size = { 1701131210, 0 };
 
@@ -272,11 +288,11 @@ TEST_F(Layer_test, /*DISABLED_*/Test_GetWidth)
 
   InSequence Dummy;
 
-  EXPECT_CALL(Context, LoadDocument(_))
+  EXPECT_CALL(Window, LoadDocument(_))
     .Times(1)
     .WillOnce(Return(&Document));
 
-  const Tested Example{ &Context, Path_t{} };
+  const Tested Example{ IWindow, Path_t{} };
 
   EXPECT_CALL(Document, GetContext())
     .Times(2)
@@ -297,6 +313,8 @@ TEST_F(Layer_test, /*DISABLED_*/Test_GetWidth)
 TEST_F(Layer_test, /*DISABLED_*/Test_GetHeight)
 {
   Context_t Context;
+  Window Window;
+  ::covellite::rocket::IWindow & IWindow = Window;
   Document_t Document;
   const ::mock::Rocket::Core::Vector2i Size = { 0, 1701131212 };
 
@@ -304,11 +322,11 @@ TEST_F(Layer_test, /*DISABLED_*/Test_GetHeight)
 
   InSequence Dummy;
 
-  EXPECT_CALL(Context, LoadDocument(_))
+  EXPECT_CALL(Window, LoadDocument(_))
     .Times(1)
     .WillOnce(Return(&Document));
 
-  const Tested Example{ &Context, Path_t{} };
+  const Tested Example{ IWindow, Path_t{} };
 
   EXPECT_CALL(Document, GetContext())
     .Times(2)
@@ -329,6 +347,8 @@ TEST_F(Layer_test, /*DISABLED_*/Test_GetHeight)
 TEST_F(Layer_test, /*DISABLED_*/Test_SetFontSize_InvalidDocumentTagName)
 {
   Context_t Context;
+  Window Window;
+  ::covellite::rocket::IWindow & IWindow = Window;
   Document_t Document;
   const ::mock::Rocket::Core::String TagName = "Tag1702091254";
 
@@ -336,11 +356,11 @@ TEST_F(Layer_test, /*DISABLED_*/Test_SetFontSize_InvalidDocumentTagName)
 
   InSequence Dummy;
 
-  EXPECT_CALL(Context, LoadDocument(_))
+  EXPECT_CALL(Window, LoadDocument(_))
     .Times(1)
     .WillOnce(Return(&Document));
 
-  Tested Example{ &Context, Path_t{} };
+  Tested Example{ IWindow, Path_t{} };
 
   using namespace ::testing;
 
@@ -355,15 +375,17 @@ TEST_F(Layer_test, /*DISABLED_*/Test_SetFontSize_InvalidDocumentTagName)
 TEST_F(Layer_test, /*DISABLED_*/Test_SetFontSize)
 {
   Context_t Context;
+  Window Window;
+  ::covellite::rocket::IWindow & IWindow = Window;
   Document_t Document;
 
   using namespace ::testing;
 
-  EXPECT_CALL(Context, LoadDocument(_))
+  EXPECT_CALL(Window, LoadDocument(_))
     .Times(1)
     .WillOnce(Return(&Document));
 
-  Tested Example{ &Context, Path_t{} };
+  Tested Example{ IWindow, Path_t{} };
 
   EXPECT_CALL(Document, GetTagName())
     .WillRepeatedly(Return("body"));
@@ -408,6 +430,8 @@ TEST_F(Layer_test, /*DISABLED_*/Test_SetFontSize)
 TEST_F(Layer_test, /*DISABLED_*/Test_GetId)
 {
   Context_t Context;
+  Window Window;
+  ::covellite::rocket::IWindow & IWindow = Window;
   Document_t Document;
   const char * DocumentId = "Id1710102335";
 
@@ -415,11 +439,11 @@ TEST_F(Layer_test, /*DISABLED_*/Test_GetId)
 
   InSequence Dummy;
 
-  EXPECT_CALL(Context, LoadDocument(_))
+  EXPECT_CALL(Window, LoadDocument(_))
     .Times(1)
     .WillOnce(Return(&Document));
 
-  const Tested Example{ &Context, Path_t{} };
+  const Tested Example{ IWindow, Path_t{} };
 
   EXPECT_CALL(Document, GetId())
     .Times(1)
@@ -433,17 +457,19 @@ TEST_F(Layer_test, /*DISABLED_*/Test_GetId)
 TEST_F(Layer_test, /*DISABLED_*/Test_SetText_TextElement)
 {
   Context_t Context;
+  Window Window;
+  ::covellite::rocket::IWindow & IWindow = Window;
   Document_t Document;
   ::mock::Rocket::Core::Element Element;
   const char * Text = "Text1701031215";
 
   using namespace ::testing;
 
-  EXPECT_CALL(Context, LoadDocument(_))
+  EXPECT_CALL(Window, LoadDocument(_))
     .Times(1)
     .WillOnce(Return(&Document));
 
-  Tested Example{ &Context, Path_t{} };
+  Tested Example{ IWindow, Path_t{} };
 
   using namespace ::testing;
 
@@ -494,6 +520,8 @@ TEST_F(Layer_test, /*DISABLED_*/Test_SetText_TextElement)
 TEST_F(Layer_test, /*DISABLED_*/Test_SetText_AnotherElement)
 {
   Context_t Context;
+  Window Window;
+  ::covellite::rocket::IWindow & IWindow = Window;
   Document_t Document;
   ::mock::Rocket::Core::Element Element;
   const char * Text = "Text1701121406";
@@ -502,11 +530,11 @@ TEST_F(Layer_test, /*DISABLED_*/Test_SetText_AnotherElement)
 
   InSequence Dummy;
 
-  EXPECT_CALL(Context, LoadDocument(_))
+  EXPECT_CALL(Window, LoadDocument(_))
     .Times(1)
     .WillOnce(Return(&Document));
 
-  Tested Example{ &Context, Path_t{} };
+  Tested Example{ IWindow, Path_t{} };
 
   EXPECT_CALL(Document, GetElementById(_))
     .Times(1)
@@ -530,17 +558,19 @@ TEST_F(Layer_test, /*DISABLED_*/Test_SetText_AnotherElement)
 TEST_F(Layer_test, /*DISABLED_*/Test_GetText_TextElement)
 {
   Context_t Context;
+  Window Window;
+  ::covellite::rocket::IWindow & IWindow = Window;
   Document_t Document;
   ::mock::Rocket::Core::Element Element;
   const char * Text = "Text1701121412";
 
   using namespace ::testing;
 
-  EXPECT_CALL(Context, LoadDocument(_))
+  EXPECT_CALL(Window, LoadDocument(_))
     .Times(1)
     .WillOnce(Return(&Document));
 
-  Tested Example{ &Context, Path_t{} };
+  Tested Example{ IWindow, Path_t{} };
 
   using namespace ::testing;
 
@@ -595,6 +625,8 @@ TEST_F(Layer_test, /*DISABLED_*/Test_GetText_TextElement)
 TEST_F(Layer_test, /*DISABLED_*/Test_GetText_AnotherElement)
 {
   Context_t Context;
+  Window Window;
+  ::covellite::rocket::IWindow & IWindow = Window;
   Document_t Document;
   ::mock::Rocket::Core::Element Element;
   const char * Text = "Text1701121413";
@@ -603,11 +635,11 @@ TEST_F(Layer_test, /*DISABLED_*/Test_GetText_AnotherElement)
 
   InSequence Dummy;
 
-  EXPECT_CALL(Context, LoadDocument(_))
+  EXPECT_CALL(Window, LoadDocument(_))
     .Times(1)
     .WillOnce(Return(&Document));
 
-  Tested Example{ &Context, Path_t{} };
+  Tested Example{ IWindow, Path_t{} };
 
   EXPECT_CALL(Document, GetElementById(_))
     .Times(1)
@@ -633,6 +665,8 @@ TEST_F(Layer_test, /*DISABLED_*/Test_GetText_AnotherElement)
 TEST_F(Layer_test, /*DISABLED_*/Test_SetStyle)
 {
   Context_t Context;
+  Window Window;
+  ::covellite::rocket::IWindow & IWindow = Window;
   Document_t Document;
   ::mock::Rocket::Core::Element Element;
   const char * Text = "Text1701131203";
@@ -641,11 +675,11 @@ TEST_F(Layer_test, /*DISABLED_*/Test_SetStyle)
 
   InSequence Dummy;
 
-  EXPECT_CALL(Context, LoadDocument(_))
+  EXPECT_CALL(Window, LoadDocument(_))
     .Times(1)
     .WillOnce(Return(&Document));
 
-  Tested Example{ &Context, Path_t{} };
+  Tested Example{ IWindow, Path_t{} };
 
   EXPECT_CALL(Document, GetElementById(_))
     .Times(1)
@@ -661,6 +695,8 @@ TEST_F(Layer_test, /*DISABLED_*/Test_SetStyle)
 TEST_F(Layer_test, /*DISABLED_*/Test_Focus)
 {
   Context_t Context;
+  Window Window;
+  ::covellite::rocket::IWindow & IWindow = Window;
   Document_t Document;
   ::mock::Rocket::Core::Element Element;
 
@@ -668,11 +704,11 @@ TEST_F(Layer_test, /*DISABLED_*/Test_Focus)
 
   InSequence Dummy;
 
-  EXPECT_CALL(Context, LoadDocument(_))
+  EXPECT_CALL(Window, LoadDocument(_))
     .Times(1)
     .WillOnce(Return(&Document));
 
-  Tested Example{ &Context, Path_t{} };
+  Tested Example{ IWindow, Path_t{} };
 
   EXPECT_CALL(Document, GetElementById(_))
     .Times(1)

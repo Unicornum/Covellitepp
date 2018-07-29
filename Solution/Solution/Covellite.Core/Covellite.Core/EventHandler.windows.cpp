@@ -5,7 +5,6 @@
 #include <windowsx.h>
 #include <alicorn\std\exception.hpp>
 #include <alicorn\platform\winapi-check.hpp>
-#include <Covellite\Core\Message.hpp>
 #include <Covellite\Core\ClassName.windows.hpp>
 #include <Covellite\Core\ClickEventListener.hpp>
 
@@ -13,6 +12,108 @@ using namespace covellite::core;
 
 static EventHandler * pEvents = nullptr;
 static WNDCLASSEX WindowClass = { 0 };
+
+/**
+* \brief
+*  Функция преобразования событий операционной системы в события фреймворка.
+*
+* \param [in] _Message
+*  Информация о произошедшем событии операционной системы.
+*
+* \return \b true
+*  Событие было обработано.
+* \return \b false
+*  Событие не было обработано, требуется обработка по умолчанию.
+*/
+bool CommandHandler(UINT _Message, WPARAM _wParam, LPARAM _lParam) noexcept
+{
+  if (pEvents == nullptr) return false;
+
+  static const ::std::map<UINT, Event::System> System =
+  {
+    { WM_CLOSE, Event::Stop },
+  };
+
+  auto itSystemCommand = System.find(_Message);
+  if (itSystemCommand != System.end())
+  {
+    return pEvents->DoCommand(itSystemCommand->second, params::Empty{});
+  }
+
+  static const ::std::map<UINT, Event::Window> Window =
+  {
+    // Не должно быть здесь, Application вызывает Event::Create при запуске, 
+    // а Event::Destroy - при завершении цикла обработки сообщений.
+    //{ WM_CREATE, Event::Create },
+    //{ WM_DESTROY, Event::Destroy },
+
+    { WM_KILLFOCUS, Event::LostFocus },
+    { WM_SETFOCUS, Event::GainedFocus },
+    { WM_SIZE, Event::Resize },
+  };
+
+  auto itWindowCommand = Window.find(_Message);
+  if (itWindowCommand != Window.end())
+  {
+    return pEvents->DoCommand(itWindowCommand->second, params::Empty{});
+  }
+
+  static const ::std::map<UINT, Event::Input> Input =
+  {
+    { WM_LBUTTONDOWN, Event::Touch },
+    { WM_LBUTTONUP, Event::Release },
+  };
+
+  auto itInputCommand = Input.find(_Message);
+  if (itInputCommand != Input.end())
+  {
+    return pEvents->DoCommand(itInputCommand->second, params::Empty{});
+  }
+
+  if (_Message == WM_MOUSEMOVE)
+  {
+    return pEvents->DoCommand(Event::Motion, params::Motion{
+      GET_X_LPARAM(_lParam), GET_Y_LPARAM(_lParam) });
+  }
+
+  auto GetKeyCode =
+    [&]() -> int32_t { return static_cast<int32_t>(_wParam); };
+
+  if (_Message == WM_CHAR)
+  {
+    auto KeyCode = GetKeyCode();
+
+    // Управляющие символы (кроме перевода строки) должны передавать через 
+    // сигнал KeyUp.
+    if (KeyCode < VK_SPACE && KeyCode != VK_RETURN) return false;
+
+    // Это преобразование виртуального кода кнопки ENTER в Unicode код символа 
+    // переноса строки.
+    if (KeyCode == VK_RETURN) KeyCode = 0x0A;
+
+    return pEvents->DoCommand(Event::KeyPressed, params::KeyPressed{ KeyCode });
+  }
+
+  if (_Message == WM_KEYUP)
+  {
+    return pEvents->DoCommand(Event::KeyUp, params::KeyCode{ GetKeyCode() });
+  }
+
+  if (_Message == WM_KEYDOWN)
+  {
+    return pEvents->DoCommand(Event::KeyDown, params::KeyCode{ GetKeyCode() });
+  }
+
+  if (_Message == WM_SYSKEYUP)
+  {
+    if (GetKeyCode() == VK_LEFT)
+    {
+      return pEvents->DoCommand(Event::Back, params::Empty{});
+    }
+  }
+
+  return false;
+}
 
 EventHandler::EventHandler(void) :
   m_pClickEventListener(::std::make_unique<ClickEventListener>(OnRocket, OnFramework)),
@@ -37,9 +138,7 @@ EventHandler::EventHandler(void) :
   WindowClass.lpfnWndProc = 
     [](HWND _hWnd, UINT _Message, WPARAM _wParam, LPARAM _lParam) -> LRESULT 
   {
-    if (pEvents == nullptr) return 0;
-
-    const auto Result = pEvents->CommandHandler({ _Message, _wParam, _lParam });
+    const auto Result = ::CommandHandler(_Message, _wParam, _lParam);
     return (Result) ? 0 : 
       USING_MOCK ::DefWindowProc(_hWnd, _Message, _wParam, _lParam);
   };
@@ -48,104 +147,4 @@ EventHandler::EventHandler(void) :
 
   (*this)[Event::Destroy]
     .connect(::std::bind(&EventHandler::OnDestroy, this));
-}
-
-/**
-* \brief
-*  Функция преобразования событий операционной системы в события фреймворка.
-*  
-* \param [in] _Message
-*  Информация о произошедшем событии операционной системы.
-*
-* \return \b true
-*  Событие было обработано.
-* \return \b false
-*  Событие не было обработано, требуется обработка по умолчанию.
-*/
-bool EventHandler::CommandHandler(const Message & _Message) noexcept
-{
-  static const ::std::map<UINT, Event::System> System =
-  {
-    { WM_CLOSE, Event::Stop },
-  };
-
-  auto itSystemCommand = System.find(_Message.Command);
-  if (itSystemCommand != System.end())
-  {
-    return DoCommand(itSystemCommand->second, params::Empty{});
-  }
-
-  static const ::std::map<UINT, Event::Window> Window =
-  {
-    // Не должно быть здесь, Application вызывает Event::Create при запуске, 
-    // а Event::Destroy - при завершении цикла обработки сообщений.
-    //{ WM_CREATE, Event::Create },
-    //{ WM_DESTROY, Event::Destroy },
-
-    { WM_KILLFOCUS, Event::LostFocus },
-    { WM_SETFOCUS, Event::GainedFocus },
-    { WM_SIZE, Event::Resize },
-  };
-
-  auto itWindowCommand = Window.find(_Message.Command);
-  if (itWindowCommand != Window.end())
-  {
-    return DoCommand(itWindowCommand->second, params::Empty{});
-  }
-
-  static const ::std::map<UINT, Event::Input> Input =
-  {
-    { WM_LBUTTONDOWN, Event::Touch },
-    { WM_LBUTTONUP, Event::Release },
-  };
-
-  auto itInputCommand = Input.find(_Message.Command);
-  if (itInputCommand != Input.end())
-  {
-    return DoCommand(itInputCommand->second, params::Empty{});
-  }
-
-  if (_Message.Command == WM_MOUSEMOVE)
-  {
-    return DoCommand(Event::Motion, params::Motion{ 
-      GET_X_LPARAM(_Message.lParam), GET_Y_LPARAM(_Message.lParam) });
-  }
-
-  auto GetKeyCode = 
-    [&]() ->int32_t { return static_cast<int32_t>(_Message.wParam); };
-
-  if (_Message.Command == WM_CHAR)
-  {
-    auto KeyCode = GetKeyCode();
-
-    // Это преобразование виртуального кода кнопки ENTER в Unicode код символа 
-    // переноса строки.
-    if (KeyCode == VK_RETURN) KeyCode = 0x0A;
-
-    // Управляющие символы (кроме перевода строки) должны передавать через 
-    // сигнал KeyUp.
-    if (KeyCode < 32 && KeyCode != 10) return false;
-
-    return DoCommand(Event::KeyPressed, params::KeyPressed{ KeyCode });
-  }
-
-  if (_Message.Command == WM_KEYUP)
-  {
-    return DoCommand(Event::KeyUp, params::KeyCode{ GetKeyCode() });
-  }
-
-  if (_Message.Command == WM_KEYDOWN)
-  {
-    return DoCommand(Event::KeyDown, params::KeyCode{ GetKeyCode() });
-  }
-
-  if (_Message.Command == WM_SYSKEYUP)
-  {
-    if (GetKeyCode() == VK_LEFT)
-    {
-      return DoCommand(Event::Back, params::Empty{});
-    }
-  }
-
-  return false;
 }

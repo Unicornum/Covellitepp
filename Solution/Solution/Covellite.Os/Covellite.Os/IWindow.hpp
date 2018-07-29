@@ -1,7 +1,8 @@
 ﻿
 #pragma once
-#include <Covellite\Os\Predefined.hpp>
-#include <Covellite\Os\Configuration.hpp>
+#include <Covellite/Os/Predefined.hpp>
+#include <Covellite/Os/Configuration.hpp>
+#include <Covellite/Events/IEvents.hpp>
 
 namespace covellite
 {
@@ -24,7 +25,8 @@ namespace os
 * \copyright
 *  © CTAPOBEP 2017
 */
-class IWindow
+class IWindow :
+  public ::covellite::events::IEvents
 {
   using Configuration_t = covellite::os::Configuration;
 
@@ -33,7 +35,7 @@ public:
   virtual const Configuration_t & GetConfiguration(void) const = 0;
 
 public:
-  virtual ~IWindow(void) noexcept {}
+  virtual ~IWindow(void) = default;
 };
 
 } // namespace os

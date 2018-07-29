@@ -18,6 +18,7 @@
     <ClInclude Include="Predefined.hpp" />
     <ClInclude Include="Window.hpp" />
     <ClInclude Include="Window.mock.hpp" />
+    <ClInclude Include="Events.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">

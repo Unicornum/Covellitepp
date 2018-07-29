@@ -2,7 +2,9 @@
 #pragma once
 #include <Covellite\Rocket\Rocket.forward.hpp>
 #include <Covellite\Core\IWindow.hpp>
+#include <Covellite\Events\Events.hpp>
 #include <Covellite\Rocket\ILayer.hpp>
+#include <Covellite\Rocket\IWindow.hpp>
 #include <alicorn\boost\filesystem.forward.hpp>
 
 namespace covellite
@@ -88,8 +90,15 @@ public:
 private:
   static String_t Convert(const Path_t &);
 
+protected:
+  ::covellite::events::Events m_Events;
+
 private:
   Document_t * const m_pDocument;
+
+protected:
+  Layer(rocket::IWindow &, const Path_t &);
+  Layer(rocket::IWindow &, const Path_t &, const ::std::string &);
 
 public:
   Layer(Context_t *, const Path_t &);

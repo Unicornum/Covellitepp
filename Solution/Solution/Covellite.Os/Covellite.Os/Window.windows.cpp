@@ -1,12 +1,19 @@
 ﻿
 #include "stdafx.h"
-#include <Covellite\Os\Window.hpp>
-#include <alicorn\std\string.hpp>
-#include <alicorn\std\string-cast.hpp>
-#include <alicorn\platform\winapi-check.hpp>
-#include <alicorn\version.hpp>
-#include <Covellite\Core\ClassName.windows.hpp>
-#include <Covellite\Core\Settings.hpp>
+#include <Covellite/Os/Window.hpp>
+#include <windowsx.h>
+#include <alicorn/std/string.hpp>
+#include <alicorn/std/string-cast.hpp>
+#include <alicorn/platform/winapi-check.hpp>
+#include <alicorn/version.hpp>
+#include <Covellite/Core/ClassName.windows.hpp>
+#include <Covellite/Core/Settings.hpp>
+#include <Covellite/Events.hpp>
+#include <Covellite/App/IApplication.hpp>
+#include <Covellite/App/ClassName.windows.hpp>
+#include <Covellite/App/Settings.hpp>
+#include <Covellite/App/Events.hpp>
+#include <Covellite/Os/Events.hpp>
 
 #undef CreateWindow
 
@@ -16,7 +23,8 @@ namespace covellite
 namespace os
 {
 
-static Handle_t CreateWindow(void)
+static Handle_t CreateWindow(const wchar_t * _ClassName,
+  const alicorn::modules::settings::Section & _WindowSettings)
 {
   using Info_t = alicorn::system::version::Info;
   using namespace ::alicorn::extension::std;
@@ -27,9 +35,6 @@ static Handle_t CreateWindow(void)
   const auto ScreenWidth = GetSystemMetrics(SM_CXSCREEN);
   const auto ScreenHeight = GetSystemMetrics(SM_CYSCREEN);
 
-  const auto CovelliteppSection = ::covellite::core::Settings_t::GetInstance();
-  const auto WindowSection = CovelliteppSection[uT("Window")];
-
   auto WindowFlags = WS_POPUP;
   auto WindowFlagsEx = 0;
 
@@ -38,19 +43,19 @@ static Handle_t CreateWindow(void)
   auto WindowWidth = ScreenWidth;
   auto WindowHeight = ScreenHeight;
 
-  const auto IsFullScreen = WindowSection.Get<String>(uT("IsFullScreen"));
+  const auto IsFullScreen = _WindowSettings.Get<String>(uT("IsFullScreen"));
   if (IsFullScreen == uT("false"))
   {
     WindowFlags = WS_CLIPSIBLINGS | WS_CLIPCHILDREN | WS_OVERLAPPEDWINDOW;
     WindowFlagsEx = WS_EX_APPWINDOW | WS_EX_WINDOWEDGE;
 
-    const auto IsResized = WindowSection.Get<String>(uT("IsResized"));
+    const auto IsResized = _WindowSettings.Get<String>(uT("IsResized"));
     if (IsResized == uT("false"))
     {
       WindowFlags ^= WS_THICKFRAME | WS_MAXIMIZEBOX;
     }
 
-    const auto & SizeSection = WindowSection[uT("Size")];
+    const auto & SizeSection = _WindowSettings[uT("Size")];
 
     const auto ClientWidth = SizeSection.Get<int>(uT("Width"));
     const auto ClientHeight = SizeSection.Get<int>(uT("Height"));
@@ -72,7 +77,7 @@ static Handle_t CreateWindow(void)
   }
 
   const auto hWnd = USING_MOCK ::CreateWindowEx(WindowFlagsEx, 
-    ::covellite::core::ClassName, ApplicationName.c_str(), WindowFlags,
+    _ClassName, ApplicationName.c_str(), WindowFlags,
     X, Y, WindowWidth, WindowHeight, nullptr, nullptr, 
     GetModuleHandle(nullptr), nullptr);
   WINAPI_CHECK (hWnd != NULL);  
@@ -88,9 +93,84 @@ static Handle_t CreateWindow(void)
   return hWnd;
 }
 
+/**
+* \deprecated
+*  Устаревший конструктор, используемый совместно с классами из проекта
+*  Covellite.Core, вместо них использовать классы из Covellite.App.
+*/
 Window::Window(void) :
-  m_Handle(::covellite::os::CreateWindow())
+  m_Handle(::covellite::os::CreateWindow(::covellite::core::ClassName,
+    ::covellite::core::Settings_t::GetInstance()[uT("Window")]))
 {
+}
+
+Window::Window(const ::covellite::app::IApplication & _Application) :
+  m_Events(_Application),
+  m_Handle(::covellite::os::CreateWindow(::covellite::app::ClassName,
+    ::covellite::app::Settings_t::GetInstance()[uT("Window")]))
+{
+  const auto Result = USING_MOCK ::SetWindowLongPtrW(m_Handle, GWLP_USERDATA,
+    reinterpret_cast<LONG_PTR>(&m_Events));
+  //if (Result == NULL)
+  //{
+  //  USING_MOCK ::DestroyWindow(m_Handle);
+  //  WINAPI_CHECK FALSE;
+  //}
+
+  using RawParams_t = ::std::pair<WPARAM, LPARAM>;
+  using Position_t = events::Cursor_t::Position;
+
+  m_Events[(UINT)WM_CLOSE].Connect([&]()
+  { 
+    m_Events[events::Application.Exit]();
+  });
+  m_Events[(UINT)WM_SIZE].Connect([&]()
+  { 
+    m_Events[events::Window.Resize]();
+  });
+  m_Events[(UINT)WM_MOUSEMOVE].Connect([&](const RawParams_t & _Params)
+  {
+    const auto X = GET_X_LPARAM(_Params.second);
+    const auto Y = GET_Y_LPARAM(_Params.second);
+    m_Events[events::Cursor.Motion](Position_t{ X, Y });
+  });
+  m_Events[(UINT)WM_LBUTTONDOWN].Connect([&]()
+  { 
+    m_Events[events::Cursor.Touch]();
+  });
+  m_Events[(UINT)WM_LBUTTONUP].Connect([&]()
+  { 
+    m_Events[events::Cursor.Release]();
+  });
+  m_Events[(UINT)WM_CHAR].Connect([&](const RawParams_t & _Params)
+  {
+    auto KeyCode = static_cast<int32_t>(_Params.first);
+
+    // Управляющие символы (кроме перевода строки) должны передавать через 
+    // сигнал KeyUp.
+    if (KeyCode < VK_SPACE && KeyCode != VK_RETURN) return;
+
+    // Это преобразование виртуального кода кнопки ENTER в Unicode код символа 
+    // переноса строки.
+    if (KeyCode == VK_RETURN) KeyCode = 0x0A;
+
+    m_Events[events::Key.Pressed](KeyCode);
+  });
+  m_Events[(UINT)WM_KEYDOWN].Connect([&](const RawParams_t & _Params)
+  {
+    m_Events[events::Key.Down](static_cast<int32_t>(_Params.first));
+  });
+  m_Events[(UINT)WM_KEYUP].Connect([&](const RawParams_t & _Params)
+  {
+    m_Events[events::Key.Up](static_cast<int32_t>(_Params.first));
+  });
+  m_Events[(UINT)WM_SYSKEYUP].Connect([&](const RawParams_t & _Params)
+  {
+    if (static_cast<int32_t>(_Params.first) == VK_LEFT)
+    {
+      m_Events[events::Key.Back]();
+    }
+  });
 }
 
 Window::~Window(void) noexcept

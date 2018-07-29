@@ -19,6 +19,8 @@
     <ClInclude Include="OpenGL.hpp" />
     <ClInclude Include="GL.hpp" />
     <ClInclude Include="OpenGLCommon.hpp" />
+    <ClInclude Include="Api.forward.hpp" />
+    <ClInclude Include="Events.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">

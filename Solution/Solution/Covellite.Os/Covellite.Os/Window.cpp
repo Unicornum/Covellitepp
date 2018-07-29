@@ -1,11 +1,17 @@
 ﻿
 #include "stdafx.h"
-#include <Covellite\Os\Window.hpp>
+#include <Covellite/Os/Window.hpp>
+#include <Covellite/Events/Events.hpp>
 
 using namespace covellite::os;
 
 void Window::Subscribe(const EventHandlerPtr_t &) /*override*/
 {
+}
+
+Window::operator Window::Events_t (void) const /*override*/
+{ 
+  return m_Events; 
 }
 
 /**

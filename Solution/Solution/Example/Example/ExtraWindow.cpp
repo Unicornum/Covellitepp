@@ -3,15 +3,18 @@
 #include "ExtraWindow.hpp"
 #include <Covellite\Api\GL.hpp>
 
-void ExtraWindow::Subscribe(const EventHandlerPtr_t & _pEvents) /*override*/
+ExtraWindow::ExtraWindow(const WindowApi_t & _WindowApi) :
+  m_WindowApi(_WindowApi),
+  m_Events(_WindowApi)
 {
-  using namespace ::covellite::core;
-
-  auto DoDrawing = [](const params::Empty &)
+  m_Events[::covellite::events::Drawing.Do].Connect([]()
   {
     glClearColor(0.4f, 0.0f, 1.0f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
-  };
-    
-  (*_pEvents)[Event::Drawing].connect(DoDrawing);
+  });
+}
+
+ExtraWindow::operator const WindowApi_t & (void) const
+{
+  return m_WindowApi;
 }

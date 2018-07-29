@@ -29,7 +29,7 @@ public:
   virtual void Hide(void) = 0;
 
 public:
-  virtual ~ILayer(void) noexcept {}
+  virtual ~ILayer(void) = default;
 };
 
 } // namespace rocket

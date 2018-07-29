@@ -6,27 +6,17 @@
 #include "ExampleWindow.hpp"
 #include "ExtraWindow.hpp"
 
-namespace alicorn { namespace modules { namespace logger { namespace report {
-
-#if BOOST_OS_WINDOWS
-using DebugOutput_t = windows::VisualStudioOutput;
-#elif BOOST_OS_ANDROID
-using DebugOutput_t = android::LogCat;
-#endif
-
-} } } }
-
 /// [Constructor main application class]
 ExampleApp::ExampleApp(void) :
   Application(EventBased{})
 {
-  using ::covellite::core::Event;
+  using namespace ::covellite;
     
-  (*m_pEvents)[Event::Create]
-    .connect(::std::bind(&ExampleApp::DoInitWindow, this));
-  (*m_pEvents)[Event::Error]
-    .connect([](const ::covellite::core::params::Error & _Description)
-      { LOGGER(Error) << _Description.Description.c_str(); });
+  m_Events[events::Application.Start]
+    .Connect([&]() { DoInitWindow(); } );
+  m_Events[events::Error.Exception]
+    .Connect([](const events::Error_t::Description & _Description)
+      { LOGGER(Error) << _Description.c_str(); });
   // ...
   /// [Constructor main application class]
 
@@ -59,23 +49,16 @@ void ExampleApp::DoInitLogger(void)
 /// [Create main window]
 void ExampleApp::DoInitWindow(void)
 {
-# if BOOST_OS_WINDOWS
-  using ApiImpl_t = ::covellite::api::OpenGL;
-# elif BOOST_OS_ANDROID
-  using ApiImpl_t = ::covellite::api::OpenGLES;
-# endif
-    
   LOGGER(Info) << "Create main window.";
-    
-  // Дополнительный код (для примера), производящий заливку окна цветом перед 
-  // отрисовкой GUI.
-  MakeWindow<ExtraWindow>();
     
   // Создание обязательного набора объектов окон приложения.
   MakeWindow<ExampleWindow>(
     MakeWindow<::covellite::rocket::Window>(
-      MakeWindow<::covellite::api::Window<ApiImpl_t>>(
-        MakeWindow<::covellite::os::Window>())));
+      // Дополнительный код (для примера), производящий заливку окна цветом 
+      // перед отрисовкой GUI.
+      MakeWindow<ExtraWindow>(
+        MakeWindow<::covellite::api::Window>(
+          MakeWindow<::covellite::os::Window>(*this)))));
 }
 /// [Create main window]
 

@@ -17,4 +17,4 @@
 #include "Core\Application.hpp"
 #include "Core\ApplicationEntryPoint.hpp"
 #include "Core\Settings.hpp"
-#include "lib-info\Covellite.Core.hpp"
+#include "Covellite.Core.lib.hpp"

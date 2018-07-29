@@ -1,0 +1,30 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Common">
+      <UniqueIdentifier>{0d1eec46-6242-4f1c-aa93-d8fe2606e2ed}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="pch.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="ApplicationEntryPoint.hpp" />
+    <ClInclude Include="ApplicationEntryPoint.mock.hpp" />
+    <ClInclude Include="Application.mock.hpp" />
+    <ClInclude Include="IWindow.hpp" />
+    <ClInclude Include="Settings.hpp" />
+    <ClInclude Include="Settings.mock.hpp" />
+    <ClInclude Include="android_native_app_glue.h" />
+    <ClInclude Include="Application.hpp" />
+    <ClInclude Include="Events.hpp" />
+    <ClInclude Include="IApplication.hpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="android_native_app_glue.c" />
+    <ClCompile Include="Application.android.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Application.inl" />
+  </ItemGroup>
+</Project>

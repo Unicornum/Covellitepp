@@ -1,8 +1,8 @@
 ﻿
 #include "stdafx.h"
-#include <Covellite\Rocket\Layer.hpp>
-#include <boost\format.hpp>
-#include <Covellite\Core\EventHandler.hpp>
+#include <Covellite/Rocket/Layer.hpp>
+#include <boost/format.hpp>
+#include <Covellite/Core/EventHandler.hpp>
 
 #ifdef max
 # undef max
@@ -107,6 +107,81 @@ void Layer::Element::SetFocus(void)
 /**
 * \brief
 *  Конструктор создания простого слоя.
+*
+* \param [in] _Window
+*  Объект родительского окна слоя (передается в функции создания слоя, поэтому
+*  класс-наследник должен в конструкторе получать этот объект и передавать
+*  его родителю).
+* \param [in] _PathToFile
+*  Путь к rml файлу, из которого должен загружаться слой (рекомендуется
+*  из класса-наследника конкретного слоя передавать конкретный путь, содержащий
+*  описание этого слоя).
+* \note
+*  В силу специфики работы libRocket в пути к корневой папке программы
+*  допустимы символы системного языка операционной системы, в путях же внутри
+*  этой папки следует использовать исключительно латиницу.
+*
+* \exception std::exception
+*  - Действие невозможно (подробнее см. описание исключения).
+*/
+Layer::Layer(::covellite::rocket::IWindow & _Window, const Path_t & _PathToFile) :
+  m_Events(_Window),
+  m_pDocument(_Window.LoadDocument(Convert(_PathToFile)))
+{
+  if (m_pDocument == nullptr)
+  {
+    throw STD_EXCEPTION << "Document null pointer: " << _PathToFile;
+  }
+}
+
+/**
+* \brief
+*  Конструктор создания слоя с заголовком.
+* \details
+*  - Документ libRocket может содержать заголовок окна, для примера объявления
+*  заголовка ниже в качестве _TitleId следует передать "title", тогда
+*  в качестве текста заголовка будет выведено "Layer example".
+*
+* \code
+
+<rml>
+<head>
+<title>Layer example</title>
+...
+
+* \endcode
+*
+* \param [in] _pContext
+*  Объект контекста окна libRocket.
+* \param [in] _PathToFile
+*  Путь к rml файлу, из которого должен загружаться слой.
+* \param [in] _TitleId
+*  Идентификатор заголовка, указанного в .rml файле.
+*
+* \exception std::exception
+*  - Заголовок с указанным идентификатором не найден.
+*  - Действие невозможно (подробнее см. описание исключения).
+*/
+Layer::Layer(::covellite::rocket::IWindow & _Window, const Path_t & _PathToFile,
+  const ::std::string & _TitleId) :
+  Layer(_Window, _PathToFile)
+{
+  auto * pTitle = m_pDocument->GetElementById(_TitleId.c_str());
+  if (pTitle == nullptr)
+  {
+    throw STD_EXCEPTION << "Unexpected title id: " << _TitleId;
+  }
+
+  pTitle->SetInnerRML(m_pDocument->GetTitle());
+}
+
+/**
+* \deprecated
+*  Конструктор устарел и будет удален в следующей стабильной версии, следует
+*  использовать функцию PushLayer() для создания слоев и конструкторы, 
+*  получающие интерфейс окна Rocket.
+* \brief
+*  Конструктор создания простого слоя.
 *  
 * \param [in] _pContext
 *  Объект контекста окна libRocket.
@@ -132,6 +207,10 @@ Layer::Layer(Context_t * _pContext, const Path_t & _PathToFile) :
 }
 
 /**
+* \deprecated
+*  Конструктор устарел и будет удален в следующей стабильной версии, следует
+*  использовать функцию PushLayer() для создания слоев и конструкторы,
+*  получающие интерфейс окна Rocket.
 * \brief
 *  Конструктор создания слоя с заголовком.
 * \details

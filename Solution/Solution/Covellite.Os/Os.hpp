@@ -10,5 +10,6 @@
 *  Группа классов проекта \ref CovelliteOsPage.
 */
 
+#include "Os\Events.hpp"
 #include "Os\Window.hpp"
-#include "lib-info\Covellite.Os.hpp"
+#include "Covellite.Os.lib.hpp"

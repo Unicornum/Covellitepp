@@ -18,7 +18,7 @@
       <Filter>Common</Filter>
     </ClCompile>
     <ClCompile Include="Window_test.cpp" />
-    <ClCompile Include="..\..\Covellite.Rocket\Window.cpp" />
+    <ClCompile Include="Window_test.deprecated.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">

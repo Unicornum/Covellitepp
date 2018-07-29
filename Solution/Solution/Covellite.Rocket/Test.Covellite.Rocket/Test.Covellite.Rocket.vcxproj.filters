@@ -34,6 +34,15 @@
     <Filter Include="Tests\IStringTranslator">
       <UniqueIdentifier>{1eb62e50-df29-4c6b-854e-27dbaf342e6a}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Tests\IWindow">
+      <UniqueIdentifier>{b786020a-2b36-4c2d-9ed8-a090cfdd9bc9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Tests\SystemToRocketKeyCode">
+      <UniqueIdentifier>{b8253565-d85f-4afc-b245-9fb0dfc532e4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Tests\ClickEventListener">
+      <UniqueIdentifier>{a7014373-bdbe-43ac-960b-f5f612a51a1c}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Resources.rc">
@@ -63,9 +72,6 @@
       <Filter>Tests\Initializer</Filter>
     </ClCompile>
     <ClCompile Include="Test.Window\Window_test.cpp">
-      <Filter>Tests\Window</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Covellite.Rocket\Window.cpp">
       <Filter>Tests\Window</Filter>
     </ClCompile>
     <ClCompile Include="Test.Layers\Layers_test.cpp">
@@ -98,6 +104,21 @@
     <ClCompile Include="Test.Layer\Layer.windows_test.cpp">
       <Filter>Tests\Layer</Filter>
     </ClCompile>
+    <ClCompile Include="Test.IWindow\IWindow_test.cpp">
+      <Filter>Tests\IWindow</Filter>
+    </ClCompile>
+    <ClCompile Include="Test.Window\Window_test.deprecated.cpp">
+      <Filter>Tests\Window</Filter>
+    </ClCompile>
+    <ClCompile Include="Test.SystemToRocketKeyCode\SystemToRocketKeyCode_test.cpp">
+      <Filter>Tests\SystemToRocketKeyCode</Filter>
+    </ClCompile>
+    <ClCompile Include="Test.ClickEventListener\ClickEventListener_test.cpp">
+      <Filter>Tests\ClickEventListener</Filter>
+    </ClCompile>
+    <ClCompile Include="Test.Layer\Layer_test.deprecated.cpp">
+      <Filter>Tests\Layer</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">
@@ -118,6 +139,9 @@
     </ClInclude>
     <ClInclude Include="..\Covellite.Rocket\IStringTranslator.hpp">
       <Filter>Tests\IStringTranslator</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Covellite.Rocket\IWindow.hpp">
+      <Filter>Tests\IWindow</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

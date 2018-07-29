@@ -20,6 +20,7 @@
     <ClCompile Include="Layer_test.cpp" />
     <ClCompile Include="Layer.android_test.cpp" />
     <ClCompile Include="Layer.windows_test.cpp" />
+    <ClCompile Include="Layer_test.deprecated.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">

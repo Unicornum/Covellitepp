@@ -15,6 +15,8 @@
 #undef BOOST_OS_WINDOWS
 #undef BOOST_OS_ANDROID
 #define BOOST_OS_ANDROID 1
+#define CommandHandlerApp CommandHandlerApp_dummy
+#define CommandHandlerInput CommandHandlerInput_dummy
 
 // Расположение класса EventHandler
 #include "..\..\Covellite.Core\EventHandler.android.cpp"
@@ -28,6 +30,7 @@ class EventHandler_test :
 protected:
   using Tested_t = ::covellite::core::EventHandler;
   using EventListener_t = ::mock::Rocket::Core::EventListener;
+  using AppInfo_t = ::alicorn::system::platform::AppInfo;
 
   // Вызывается ПЕРЕД запуском каждого теста
   void SetUp(void) override

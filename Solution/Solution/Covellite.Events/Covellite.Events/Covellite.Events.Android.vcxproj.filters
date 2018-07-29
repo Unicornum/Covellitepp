@@ -1,0 +1,26 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Common">
+      <UniqueIdentifier>{72520c21-8a06-4206-9e35-a9c28b3fbbea}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="pch.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="Error.hpp" />
+    <ClInclude Include="Params.hpp" />
+    <ClInclude Include="Events.hpp" />
+    <ClInclude Include="Signal.hpp" />
+    <ClInclude Include="Signals.hpp" />
+    <ClInclude Include="IEvents.hpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Events.cpp" />
+    <ClCompile Include="Signal.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Events.inl" />
+  </ItemGroup>
+</Project>

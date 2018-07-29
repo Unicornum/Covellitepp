@@ -28,6 +28,9 @@
     <ClInclude Include="Window.mock.hpp" />
     <ClInclude Include="IStringTranslator.mock.hpp" />
     <ClInclude Include="Vfs.hpp" />
+    <ClInclude Include="IWindow.hpp" />
+    <ClInclude Include="ClickEventListener.hpp" />
+    <ClInclude Include="Events.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -42,6 +45,8 @@
     <ClCompile Include="System.cpp" />
     <ClCompile Include="Window.cpp" />
     <ClCompile Include="Layer.windows.cpp" />
+    <ClCompile Include="SystemToRocketKeyCode.windows.cpp" />
+    <ClCompile Include="ClickEventListener.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Window.inl" />

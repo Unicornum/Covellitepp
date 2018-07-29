@@ -1,0 +1,58 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Tasks>
+  <Options>
+    <X>322</X>
+    <Y>68</Y>
+    <Width>1407</Width>
+    <Height>945</Height>
+  </Options>
+  <Process/>
+  <Complete>
+    <Week6184>
+      <Task3 Text="Класс Application." Type="Red" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="false">
+        <Task4 Text="Доступ к объекту событий через интерфейсный класс." Type="None" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+        <Task5 Text="Функция создания объектов окон возвращает ссылку на созданный объект." Type="None" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+        <Task6 Text="Изменение логики использования события завершения работы программы." Type="None" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+      </Task3>
+      <Task38 Text="Изменение способа доступа к объекту событий." Type="Red" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="false"/>
+    </Week6184>
+    <Week6183/>
+    <Week6182>
+      <Task9 Text="Перенос кода." Type="Red" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="false">
+        <Task10 Text="APPLICATION_ENTRY_POINT." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+        <Task11 Text="Settings." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+        <Task12 Text="Интерфейс IWindow." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+        <Task13 Text="Обработка события закрытия окна программы." Type="None" Version="None" ExternalProgram="None" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+        <Task14 Text="Класс Application." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true">
+          <Task15 Text="Компилируемость тестов." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+          <Task16 Text="Функция входа в программу." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+          <Task17 Text="Создание нового окна." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+          <Task18 Text="Разрушение объектов окон при уничтожении объекта приложения." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+          <Task19 Text="Версия для Windows." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true">
+            <Task20 Text="Функция получения параметров командной строки." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+            <Task21 Text="Регистрация класса окна." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+            <Task22 Text="Вызов сигналов системных событий." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+            <Task23 Text="Генерация событий уровня приложения." Type="None" Version="None" ExternalProgram="None" Expanded="false" Completed="true" History="false" ParentTaskText="true">
+              <Task24 Text="Работа по событиям." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+              <Task25 Text="Работа в непрерывном режиме." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+            </Task23>
+            <Task26 Text="Обработка потери фокуса ввода." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true">
+              <Task27 Text="Реорганизация кода." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+            </Task26>
+          </Task19>
+          <Task28 Text="Реорганизация кода." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+          <Task29 Text="Версия для Android." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true">
+            <Task30 Text="Функция получения параметров командной строки." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+            <Task31 Text="Обновление состояния программы по событиям." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+            <Task32 Text="Обновление состояния программы при работе в непрерывном режиме." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+            <Task33 Text="Обработка событий получения/потери фокуса." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+            <Task34 Text="Обработка события закрытия окна программы." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+            <Task35 Text="Генерация событий уровня приложения." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+            <Task36 Text="Генерация событий системы/ввода пользователя." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+          </Task29>
+        </Task14>
+      </Task9>
+    </Week6182>
+    <Week6181/>
+  </Complete>
+</Tasks>

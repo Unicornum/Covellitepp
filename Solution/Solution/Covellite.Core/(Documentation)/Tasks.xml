@@ -1,9 +1,9 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Tasks>
   <Options>
-    <Width>1414</Width>
-    <Height>945</Height>
-    <X>317</X>
+    <Width>1408</Width>
+    <Height>942</Height>
+    <X>323</X>
     <Y>69</Y>
   </Options>
   <Process>
@@ -13,14 +13,9 @@
     </Task1>
   </Process>
   <Complete>
-    <Week6164>
-      <Task6 Text="+ 0.1.0" Type="None" Version="None" ExternalProgram="None" Expanded="false" Completed="true" History="false" ParentTaskText="false"/>
-      <Task7 Text="Дополнение/исправление тестов деструкторов классов." Type="Red" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="false"/>
-    </Week6164>
-    <Week6163>
-      <Task9 Text="Изменен способ доступа к настройкам программы." Type="Red" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="false"/>
-    </Week6163>
-    <Week6162/>
-    <Week6161/>
+    <Week6186/>
+    <Week6185/>
+    <Week6184/>
+    <Week6183/>
   </Complete>
 </Tasks>

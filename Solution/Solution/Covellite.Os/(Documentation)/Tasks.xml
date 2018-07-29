@@ -1,18 +1,36 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Tasks>
   <Options>
-    <X>319</X>
+    <X>323</X>
     <Y>67</Y>
-    <Width>1408</Width>
+    <Width>1404</Width>
     <Height>944</Height>
   </Options>
   <Process/>
   <Complete>
-    <Week6164>
-      <Task6 Text="Флаг разрешения изменений размеров окна мышью." Type="Red" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="true" ParentTaskText="false"/>
-    </Week6164>
-    <Week6163/>
-    <Week6162/>
-    <Week6161/>
+    <Week6184>
+      <Task3 Text="Изменение способа доступа к объекту событий." Type="Red" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="false"/>
+      <Task20 Text="Связывание объекта доступа к событиям с хэндлом созданного окна Windows." Type="Red" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="false"/>
+    </Week6184>
+    <Week6183>
+      <Task5 Text="Изменение способа работы с событиями." Type="Red" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="false">
+        <Task6 Text="Конструктор окна, получающий объект приложения." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+        <Task7 Text="Класс параметра положения курсора." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+        <Task8 Text="Windows" Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true">
+          <Task9 Text="Завершение работы программы при закрытии окна." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+          <Task10 Text="Генерация событий окна." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+          <Task11 Text="Генерация событий курсора." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+          <Task12 Text="Генерация событий клавиатуры." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+        </Task8>
+        <Task13 Text="Android" Type="None" Version="None" ExternalProgram="None" Expanded="false" Completed="true" History="false" ParentTaskText="true">
+          <Task14 Text="Дополнительный конструктор." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+          <Task15 Text="Генерация событий окна." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+          <Task16 Text="Генерация событий курсора." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+          <Task17 Text="Генерация событий клавиатуры." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+        </Task13>
+      </Task5>
+    </Week6183>
+    <Week6182/>
+    <Week6181/>
   </Complete>
 </Tasks>

@@ -79,7 +79,6 @@
     <ClInclude Include="EventHandler.hpp" />
     <ClInclude Include="EventHandler.mock.hpp" />
     <ClInclude Include="IWindow.hpp" />
-    <ClInclude Include="Message.hpp" />
     <ClInclude Include="Params.hpp" />
     <ClInclude Include="Params.mock.hpp" />
     <ClInclude Include="pch.h" />

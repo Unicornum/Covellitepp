@@ -12,8 +12,6 @@ namespace extension
 namespace std
 {
   
-using namespace ::covellite::core;
-  
 template<>
 /*static*/ SectionPtr_t Singleton<Section_t>::Make(void)
 {

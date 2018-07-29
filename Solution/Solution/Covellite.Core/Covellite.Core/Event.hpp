@@ -4,6 +4,10 @@
 namespace covellite
 {
 
+#if BOOST_COMP_MSVC
+namespace[[deprecated("Deprecated namespace. Use classes from сovellite::events и covellite::app.")]] core{}
+#endif
+
 namespace core
 {
 
@@ -12,6 +16,10 @@ namespace core
 * \brief
 *  Класс входит в проект \ref CovelliteCorePage \n
 *  Класс универсальных идентификаторов событий фреймворка.
+* \deprecated
+*  Система работы с событиями, использующая этот класс устарела и будет удалена
+*  в следующей стабильной версии, используйте вместо нее классы из раздела
+*  CovelliteEventsGroup.
 *
 * \version
 *  1.0.0.0        \n

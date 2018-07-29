@@ -49,6 +49,18 @@
 *
 *  Страница проекта \subpage CovelliteCorePage
 *
+*  ### Covellite.App
+*
+* \copydoc CovelliteAppBriefPage
+*
+*  Страница проекта \subpage CovelliteAppPage
+*
+*  ### Covellite.Events
+*
+* \copydoc CovelliteEventsBriefPage
+*
+*  Страница проекта \subpage CovelliteEventsPage
+*
 *  ### Example
 *
 * \copydoc ExampleBriefPage

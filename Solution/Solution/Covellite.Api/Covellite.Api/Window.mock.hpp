@@ -44,7 +44,8 @@ class Window :
   public ::covellite::core::IWindow,
   public ::covellite::api::IWindow
 {
-  using WindowOsPtr_t = ::std::shared_ptr<::covellite::os::IWindow>;
+  using WindowOs_t = ::covellite::os::IWindow;
+  using WindowOsPtr_t = ::std::shared_ptr<WindowOs_t>;
 
 public:
   class Proxy :
@@ -56,6 +57,7 @@ public:
     MOCK_METHOD1(GetUsingApi, String_t(Id_t));
     MOCK_METHOD1(GetWidth, int32_t(Id_t));
     MOCK_METHOD1(GetHeight, int32_t(Id_t));
+    MOCK_METHOD1(GetClientRect, Rect(Id_t));
     MOCK_METHOD1(MakeRenderInterface, RenderInterfacePtr_t(Id_t));
     MOCK_METHOD1(DoDrawWindow, void(Id_t));
   };
@@ -81,6 +83,12 @@ public:
   }
 
 public:
+  operator Events_t (void) const override
+  {
+    return m_Events;
+  }
+
+public:
   String_t GetUsingApi(void) const override
   {
     return Proxy::GetInstance()->GetUsingApi(m_Id);
@@ -96,12 +104,27 @@ public:
     return Proxy::GetInstance()->GetHeight(m_Id);
   }
 
+  Rect GetClientRect(void) const override
+  {
+    return Proxy::GetInstance()->GetClientRect(m_Id);
+  }
+
   RenderInterfacePtr_t MakeRenderInterface(void) const override
   {
     return Proxy::GetInstance()->MakeRenderInterface(m_Id);
   }
 
+private:
+  Events_t m_Events;
+
 public:
+  explicit Window(const WindowOs_t & _Window) :
+    m_Events(_Window),
+    m_Id(Proxy::GetInstance()->Constructor(
+      dynamic_cast<const ::mock::covellite::os::Window &>(_Window).m_Id))
+  {
+
+  }
   explicit Window(const WindowOsPtr_t & _pWindow) :
     m_Id(Proxy::GetInstance()->Constructor((_pWindow) ? 
       dynamic_cast<::mock::covellite::os::Window &>(*_pWindow).m_Id : 0))

@@ -18,8 +18,18 @@
 *  © CTAPOBEP 2017
 */
 class ExtraWindow final :
-  public covellite::core::IWindow
+  public ::covellite::app::IWindow
 {
+  using Events_t = ::covellite::events::Events;
+  using WindowApi_t = ::covellite::api::IWindow;
+
 public:
-  void Subscribe(const EventHandlerPtr_t &) override;
+  operator const WindowApi_t & (void) const;
+
+private:
+  const WindowApi_t & m_WindowApi;
+  Events_t m_Events;
+
+public:
+  explicit ExtraWindow(const WindowApi_t &);
 };

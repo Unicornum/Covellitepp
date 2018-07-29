@@ -7,6 +7,3 @@
 ///  Формат записей: '[ErrorId]:[File]:[Line]'.
 
 //*
-
-functionStatic:Solution\Solution\Covellite.Jni\Test.Covellite.Jni\mock.hpp
-functionStatic:*\mock.hpp

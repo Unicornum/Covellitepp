@@ -37,7 +37,7 @@ public:
   virtual Utf8String_t Translate(const Utf8String_t &) = 0;
 
 public:
-  virtual ~IStringTranslator(void) noexcept {}
+  virtual ~IStringTranslator(void) = default;
 };
 
 } // namespace rocket

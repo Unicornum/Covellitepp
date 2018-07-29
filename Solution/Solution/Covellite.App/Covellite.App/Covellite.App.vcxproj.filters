@@ -1,0 +1,35 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Common">
+      <UniqueIdentifier>{6d932a82-06bb-4a62-a46f-6a43d7ca79c3}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="stdafx.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="targetver.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="ApplicationEntryPoint.hpp" />
+    <ClInclude Include="ApplicationEntryPoint.mock.hpp" />
+    <ClInclude Include="Application.mock.hpp" />
+    <ClInclude Include="IWindow.hpp" />
+    <ClInclude Include="Settings.hpp" />
+    <ClInclude Include="Settings.mock.hpp" />
+    <ClInclude Include="Application.hpp" />
+    <ClInclude Include="ClassName.windows.hpp" />
+    <ClInclude Include="Events.hpp" />
+    <ClInclude Include="IApplication.hpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="stdafx.cpp">
+      <Filter>Common</Filter>
+    </ClCompile>
+    <ClCompile Include="Application.windows.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Application.inl" />
+  </ItemGroup>
+</Project>

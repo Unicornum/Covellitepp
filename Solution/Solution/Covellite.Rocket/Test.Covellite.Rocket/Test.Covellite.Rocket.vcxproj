@@ -56,8 +56,9 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;_LIB;TESTDLL_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalOptions>-Zm400 %(AdditionalOptions)</AdditionalOptions>
-      <DisableSpecificWarnings>6326;4503</DisableSpecificWarnings>
+      <DisableSpecificWarnings>4996</DisableSpecificWarnings>
       <EnablePREfast>false</EnablePREfast>
+      <SDLCheck>false</SDLCheck>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -72,8 +73,9 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;_LIB;TESTDLL_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AdditionalOptions>-Zm400 %(AdditionalOptions)</AdditionalOptions>
-      <DisableSpecificWarnings>6326;4503</DisableSpecificWarnings>
+      <DisableSpecificWarnings>4996</DisableSpecificWarnings>
       <EnablePREfast>false</EnablePREfast>
+      <SDLCheck>false</SDLCheck>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -90,30 +92,35 @@
     <ClCompile Include="..\Covellite.Rocket\Initializer.cpp" />
     <ClCompile Include="..\Covellite.Rocket\Layers.cpp" />
     <ClCompile Include="..\Covellite.Rocket\StringTranslator.cpp" />
-    <ClCompile Include="..\Covellite.Rocket\Window.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="Test.ClickEventListener\ClickEventListener_test.cpp" />
     <ClCompile Include="Test.File\File_test.cpp" />
     <ClCompile Include="Test.ILayer\ILayer_test.cpp" />
     <ClCompile Include="Test.Initializer\Initializer_test.cpp" />
     <ClCompile Include="Test.IStringTranslator\IStringTranslator_test.cpp" />
+    <ClCompile Include="Test.IWindow\IWindow_test.cpp" />
     <ClCompile Include="Test.Layers\Layers_test.cpp" />
     <ClCompile Include="Test.Layer\Layer.android_test.cpp" />
     <ClCompile Include="Test.Layer\Layer.windows_test.cpp" />
     <ClCompile Include="Test.Layer\Layer_test.cpp" />
+    <ClCompile Include="Test.Layer\Layer_test.deprecated.cpp" />
     <ClCompile Include="Test.StringTranslator\StringTranslator_test.cpp" />
+    <ClCompile Include="Test.SystemToRocketKeyCode\SystemToRocketKeyCode_test.cpp" />
     <ClCompile Include="Test.System\System.android_test.cpp" />
     <ClCompile Include="Test.System\System.windows_test.cpp" />
     <ClCompile Include="Test.System\System_test.cpp" />
     <ClCompile Include="Test.Window\Window_test.cpp" />
+    <ClCompile Include="Test.Window\Window_test.deprecated.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Covellite.Rocket\File.hpp" />
     <ClInclude Include="..\Covellite.Rocket\ILayer.hpp" />
     <ClInclude Include="..\Covellite.Rocket\Initializer.hpp" />
     <ClInclude Include="..\Covellite.Rocket\IStringTranslator.hpp" />
+    <ClInclude Include="..\Covellite.Rocket\IWindow.hpp" />
     <ClInclude Include="..\Covellite.Rocket\StringTranslator.hpp" />
     <ClInclude Include="mock.hpp" />
     <ClInclude Include="stdafx.h" />

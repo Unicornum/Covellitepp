@@ -32,8 +32,10 @@ inline void PrintTo(const ::boost::filesystem::path & p, ::std::ostream * os)
 #include "Mock\Namespaces.hpp"
 
 #include <Covellite\Core.mock.hpp>
+#include <Covellite\Core\Settings.mock.hpp>
 #include <Covellite\Rocket.inside.mock.hpp>
 
 #include "Mock\Time.hpp"
 #include "Mock\StringTranslator.hpp"
 #include "Mock\RocketInterfaces.hpp"
+#include "Mock\SystemToRocketKeyCode.inl"

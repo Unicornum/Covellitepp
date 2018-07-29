@@ -1,5 +1,7 @@
 
 #include "stdafx.h"
+#include <Covellite/App/Settings.mock.hpp>
+#include <Covellite/Events.hpp>
 
 // Примеры макросов библиотеки Google Test
 #include <alicorn\google\test\example.hpp>
@@ -30,6 +32,7 @@ protected:
   using Tested_t = ::covellite::os::Window;
   using ITested_t = ::covellite::os::IWindow;
   using String_t = ::alicorn::extension::std::String;
+  using Application_t = ::mock::covellite::app::Application;
 
   // Вызывается ПЕРЕД запуском каждого теста
   void SetUp(void) override
@@ -37,6 +40,8 @@ protected:
     ::testing::DefaultValue<String_t>::Set(uT("0"));
     ::testing::DefaultValue<RECT>::Set({ 0, 0, 0, 0 });
     ::testing::DefaultValue<BOOL>::Set(TRUE);
+    ::testing::DefaultValue<HWND>::Set((HWND)1807061251);
+    ::testing::DefaultValue<LONG_PTR>::Set((LONG_PTR)1807191107);
   }
 
   // Вызывается ПОСЛЕ запуска каждого теста
@@ -45,7 +50,58 @@ protected:
     ::testing::DefaultValue<String_t>::Clear();
     ::testing::DefaultValue<RECT>::Clear();
     ::testing::DefaultValue<BOOL>::Clear();
+    ::testing::DefaultValue<HWND>::Clear();
+    ::testing::DefaultValue<LONG_PTR>::Clear();
   }
+
+protected:
+  class Application :
+    public Application_t
+  {
+  public:
+    MOCK_METHOD0(OnExit, void(void));
+    MOCK_METHOD0(OnResize, void(void));
+    MOCK_METHOD2(OnMotion, void(int, int));
+    MOCK_METHOD0(OnTouch, void(void));
+    MOCK_METHOD0(OnRelease, void(void));
+    MOCK_METHOD1(OnPressed, void(int));
+    MOCK_METHOD1(OnDown, void(int));
+    MOCK_METHOD1(OnUp, void(int));
+    MOCK_METHOD0(OnBack, void(void));
+
+  public:
+    Application(void) :
+      Application_t(Application_t::EventBased{})
+    {
+      using namespace ::covellite;
+
+      m_Events[events::Application.Exit]
+        .Connect([&]() { OnExit(); });
+
+      m_Events[events::Window.Resize]
+        .Connect([&]() { OnResize(); });
+
+      using Position_t = events::Cursor_t::Position;
+
+      m_Events[events::Cursor.Motion]
+        .Connect([&](const Position_t & _Pos) { OnMotion(_Pos.X, _Pos.Y); });
+      m_Events[events::Cursor.Touch]
+        .Connect([&]() { OnTouch(); });
+      m_Events[events::Cursor.Release]
+        .Connect([&]() { OnRelease(); });
+
+      using KeyCode_t = events::Key_t::Code;
+
+      m_Events[events::Key.Pressed]
+        .Connect([&](const KeyCode_t & _Code) { OnPressed(_Code); });
+      m_Events[events::Key.Down]
+        .Connect([&](const KeyCode_t & _Code) { OnDown(_Code); });
+      m_Events[events::Key.Up]
+        .Connect([&](const KeyCode_t & _Code) { OnUp(_Code); });
+      m_Events[events::Key.Back]
+        .Connect([&]() { OnBack(); });
+    }
+  };
 };
 
 // Образец макроса для подстановки в класс Window 
@@ -102,15 +158,15 @@ TEST_F(Window_test, /*DISABLED_*/Test_WindowMode_Resized)
     .WillOnce(Return(Title));
 
   EXPECT_CALL(SettingsProxy, Constructor())
-    .WillOnce(Return(RootSectionId))
-    .WillOnce(Return(MainSectionId))
+    //.WillOnce(Return(RootSectionId))
+    //.WillOnce(Return(MainSectionId))
     .WillOnce(Return(WindowSectionId))
     .WillOnce(Return(SizeSectionId));
 
-  EXPECT_CALL(SettingsProxy, GetChildSectionImpl(RootSectionId, _))
-    .Times(1);
+  //EXPECT_CALL(SettingsProxy, GetChildSectionImpl(RootSectionId, _))
+  //  .Times(1);
 
-  EXPECT_CALL(SettingsProxy, GetChildSectionImpl(MainSectionId, uT("Window")))
+  EXPECT_CALL(SettingsProxy, GetChildSectionImpl(/*MainSectionId*/_, uT("Window")))
     .Times(1);
 
   EXPECT_CALL(SettingsProxy, GetChildSectionImpl(WindowSectionId, uT("Size")))
@@ -164,7 +220,7 @@ TEST_F(Window_test, /*DISABLED_*/Test_WindowMode_Resized)
       .WillOnce(Return(TRUE));
 
     EXPECT_CALL(WindowsProxy, CreateWindowExW1(WindowFlagsEx, 
-      Eq(::covellite::core::ClassName), Eq(string_cast<::std::wstring>(Title)),
+      Eq(::covellite::app::ClassName), Eq(string_cast<::std::wstring>(Title)),
       WindowFlags, X, Y, WindowWidth, WindowHeight, nullptr, nullptr))
       .Times(1);
 
@@ -176,7 +232,8 @@ TEST_F(Window_test, /*DISABLED_*/Test_WindowMode_Resized)
       .Times(1)
       .WillOnce(Return(TRUE));
 
-    const Tested_t Example;
+    const Application_t Application{ Application_t::EventBased{} };
+    const Tested_t Example{ Application };
     const ITested_t & IExample = Example;
     EXPECT_EQ(hWnd, IExample.GetHandle());
 
@@ -290,7 +347,7 @@ TEST_F(Window_test, /*DISABLED_*/Test_WindowMode_NoResized)
       .WillOnce(Return(TRUE));
 
     EXPECT_CALL(WindowsProxy, CreateWindowExW1(WindowFlagsEx,
-      Eq(::covellite::core::ClassName), Eq(string_cast<::std::wstring>(Title)),
+      Eq(::covellite::app::ClassName), Eq(string_cast<::std::wstring>(Title)),
       WindowFlags, X, Y, WindowWidth, WindowHeight, nullptr, nullptr))
       .Times(1);
 
@@ -302,7 +359,8 @@ TEST_F(Window_test, /*DISABLED_*/Test_WindowMode_NoResized)
       .Times(1)
       .WillOnce(Return(TRUE));
 
-    const Tested_t Example;
+    const Application_t Application{ Application_t::EventBased{} };
+    const Tested_t Example{ Application };
     const ITested_t & IExample = Example;
     EXPECT_EQ(hWnd, IExample.GetHandle());
 
@@ -357,7 +415,8 @@ TEST_F(Window_test, /*DISABLED_*/Test_BoundWindowSize)
     .Times(1)
     .WillOnce(Return((HWND)1711091232));
 
-  const Tested_t Example;
+  const Application_t Application{ Application_t::EventBased{} };
+  const Tested_t Example{ Application };
 }
 
 // ************************************************************************** //
@@ -389,7 +448,8 @@ TEST_F(Window_test, /*DISABLED_*/Test_AdjustWindowRectEx_Failed)
   EXPECT_CALL(WindowsProxy, CreateWindowExW2(_, _))
     .Times(0);
 
-  EXPECT_THROW(Tested_t{}, ::std::exception);
+  const Application_t Application{ Application_t::EventBased{} };
+  EXPECT_THROW(Tested_t{ Application }, ::std::exception);
 }
 
 // ************************************************************************** //
@@ -457,7 +517,7 @@ TEST_F(Window_test, /*DISABLED_*/Test_FullScreenMode)
     InSequence Dummy;
 
     EXPECT_CALL(WindowsProxy, CreateWindowExW1(WindowFlagsEx,
-      Eq(::covellite::core::ClassName), Eq(string_cast<::std::wstring>(Title)),
+      Eq(::covellite::app::ClassName), Eq(string_cast<::std::wstring>(Title)),
       WindowFlags, 0, 0, ScreenWidth, ScreenHeight, nullptr, nullptr))
       .Times(1);
 
@@ -469,7 +529,8 @@ TEST_F(Window_test, /*DISABLED_*/Test_FullScreenMode)
       .Times(1)
       .WillOnce(Return(TRUE));
 
-    const Tested_t Example;
+    const Application_t Application{ Application_t::EventBased{} };
+    const Tested_t Example{ Application };
     const ITested_t & IExample = Example;
     EXPECT_EQ(hWnd, IExample.GetHandle());
 
@@ -491,7 +552,289 @@ TEST_F(Window_test, /*DISABLED_*/Test_CreateWindowFailed)
     .Times(1)
     .WillOnce(Return((HWND)NULL));
 
-  EXPECT_THROW(Tested_t{}, ::std::exception);
+  const Application_t Application{ Application_t::EventBased{} };
+  EXPECT_THROW(Tested_t{ Application }, ::std::exception);
+}
+
+namespace covellite
+{
+
+namespace os
+{
+
+// ************************************************************************** //
+TEST_F(Window_test, /*DISABLED_*/Test_SetWindowLongPtr)
+{
+  using WindowsProxy_t = ::mock::WindowsProxy;
+  WindowsProxy_t WindowsProxy;
+  WindowsProxy_t::GetInstance() = &WindowsProxy;
+
+  const HWND hWnd = (HWND)1807191040;
+  const LONG_PTR OldLongPtr = (LONG_PTR)1807191049;
+
+  using namespace ::testing;
+
+  InSequence Dummy;
+
+  EXPECT_CALL(WindowsProxy, CreateWindowExW2(_, _))
+    .Times(1)
+    .WillOnce(Return(hWnd));
+
+  EXPECT_CALL(WindowsProxy, SetWindowLongPtrW(hWnd, GWLP_USERDATA))
+    .Times(1)
+    .WillOnce(Return(OldLongPtr));
+
+  const Application_t Application{ Application_t::EventBased{} };
+  Tested_t Example{ Application };
+  EXPECT_EQ(WindowsProxy.m_NewLongPtr, (LONG_PTR)&Example.m_Events);
+
+  EXPECT_CALL(WindowsProxy, DestroyWindow(hWnd))
+    .Times(1);
+}
+
+} // namespace os
+
+} // namespace covellite
+
+// ************************************************************************** //
+TEST_F(Window_test, DISABLED_Test_SetWindowLongPtr_Fail)
+{
+  using WindowsProxy_t = ::mock::WindowsProxy;
+  WindowsProxy_t WindowsProxy;
+  WindowsProxy_t::GetInstance() = &WindowsProxy;
+
+  const HWND hWnd = (HWND)1807191050;
+
+  using namespace ::testing;
+
+  InSequence Dummy;
+
+  EXPECT_CALL(WindowsProxy, CreateWindowExW2(_, _))
+    .Times(1)
+    .WillOnce(Return(hWnd));
+
+  EXPECT_CALL(WindowsProxy, SetWindowLongPtrW(hWnd, GWLP_USERDATA))
+    .Times(1)
+    .WillOnce(Return((LONG_PTR)NULL));
+
+  EXPECT_CALL(WindowsProxy, DestroyWindow(hWnd))
+    .Times(1);
+
+  const Application_t Application{ Application_t::EventBased{} };
+  EXPECT_THROW(Tested_t{ Application }, ::std::exception);
+}
+
+// ************************************************************************** //
+TEST_F(Window_test, /*DISABLED_*/Test_CloseWindow)
+{
+  using WindowsProxy_t = ::mock::WindowsProxy;
+  WindowsProxy_t WindowsProxy;
+  WindowsProxy_t::GetInstance() = &WindowsProxy;
+
+  const UINT Message = WM_CLOSE;
+
+  Application Application;
+  ::covellite::events::Events Events = Application;
+
+  Events[::covellite::events::Error.Exception].Connect([]() {});
+
+  const Tested_t Example{ Application };
+
+  using namespace ::testing;
+
+  EXPECT_CALL(Application, OnExit())
+    .Times(1);
+
+  Events[Message]();
+}
+
+// ************************************************************************** //
+TEST_F(Window_test, /*DISABLED_*/Test_Resize)
+{
+  const UINT Message = WM_SIZE;
+
+  Application Application;
+  const Tested_t Example{ Application };
+
+  using namespace ::testing;
+
+  EXPECT_CALL(Application, OnResize())
+    .Times(1);
+
+  ::covellite::events::Events Events = Application;
+  Events[Message]();
+}
+
+// ************************************************************************** //
+TEST_F(Window_test, /*DISABLED_*/Test_Motion)
+{
+  const UINT Message = WM_MOUSEMOVE;
+  const int32_t X = 1234;
+  const int32_t Y = 5678;
+
+  Application Application;
+  const Tested_t Example{ Application };
+
+  using namespace ::testing;
+
+  EXPECT_CALL(Application, OnMotion(X, Y))
+    .Times(1);
+
+  ::covellite::events::Events Events = Application;
+  Events[Message](::std::pair<WPARAM, LPARAM>{ 1807071427, MAKELPARAM(X, Y) });
+}
+
+// ************************************************************************** //
+TEST_F(Window_test, /*DISABLED_*/Test_Touch)
+{
+  const UINT Message = WM_LBUTTONDOWN;
+
+  Application Application;
+  const Tested_t Example{ Application };
+
+  using namespace ::testing;
+
+  EXPECT_CALL(Application, OnTouch())
+    .Times(1);
+
+  ::covellite::events::Events Events = Application;
+  Events[Message]();
+}
+
+// ************************************************************************** //
+TEST_F(Window_test, /*DISABLED_*/Test_Release)
+{
+  const UINT Message = WM_LBUTTONUP;
+
+  Application Application;
+  const Tested_t Example{ Application };
+
+  using namespace ::testing;
+
+  EXPECT_CALL(Application, OnRelease())
+    .Times(1);
+
+  ::covellite::events::Events Events = Application;
+  Events[Message]();
+}
+
+// ************************************************************************** //
+TEST_F(Window_test, /*DISABLED_*/Test_Pressed)
+{
+  const UINT Message = WM_CHAR;
+  const int32_t KeyCode = 1807071510;
+
+  Application Application;
+  const Tested_t Example{ Application };
+
+  using namespace ::testing;
+
+  EXPECT_CALL(Application, OnPressed(KeyCode))
+    .Times(1);
+
+  ::covellite::events::Events Events = Application;
+  Events[Message](::std::pair<WPARAM, LPARAM>{ KeyCode, 1807071511 });
+}
+
+// ************************************************************************** //
+TEST_F(Window_test, /*DISABLED_*/Test_Pressed_Enter)
+{
+  const UINT Message = WM_CHAR;
+  const int32_t KeyCode = VK_RETURN;
+
+  Application Application;
+  const Tested_t Example{ Application };
+
+  using namespace ::testing;
+
+  EXPECT_CALL(Application, OnPressed(0x0A))
+    .Times(1);
+
+  ::covellite::events::Events Events = Application;
+  Events[Message](::std::pair<WPARAM, LPARAM>{ KeyCode, 1807071512 });
+}
+
+// ************************************************************************** //
+TEST_F(Window_test, /*DISABLED_*/Test_Pressed_Controls)
+{
+  const UINT Message = WM_CHAR;
+
+  for (int32_t KeyCode = 0; KeyCode < VK_SPACE; KeyCode++)
+  {
+    if (KeyCode == VK_RETURN) continue;
+
+    Application Application;
+    const Tested_t Example{ Application };
+
+    using namespace ::testing;
+
+    EXPECT_CALL(Application, OnPressed(_))
+      .Times(0);
+
+    ::covellite::events::Events Events = Application;
+    Events[Message](::std::pair<WPARAM, LPARAM>{ KeyCode, 1807071513 });
+  }
+}
+
+// ************************************************************************** //
+TEST_F(Window_test, /*DISABLED_*/Test_Down)
+{
+  const UINT Message = WM_KEYDOWN;
+  const int32_t KeyCode = 1807071428;
+
+  Application Application;
+  const Tested_t Example{ Application };
+
+  using namespace ::testing;
+
+  EXPECT_CALL(Application, OnDown(KeyCode))
+    .Times(1);
+
+  ::covellite::events::Events Events = Application;
+  Events[Message](::std::pair<WPARAM, LPARAM>{ KeyCode, 1807071426 });
+}
+
+// ************************************************************************** //
+TEST_F(Window_test, /*DISABLED_*/Test_Up)
+{
+  const UINT Message = WM_KEYUP;
+  const int32_t KeyCode = 1807071429;
+
+  Application Application;
+  const Tested_t Example{ Application };
+
+  using namespace ::testing;
+
+  EXPECT_CALL(Application, OnUp(KeyCode))
+    .Times(1);
+
+  ::covellite::events::Events Events = Application;
+  Events[Message](::std::pair<WPARAM, LPARAM>{ KeyCode, 1807071430 });
+}
+
+// ************************************************************************** //
+TEST_F(Window_test, /*DISABLED_*/Test_Back)
+{
+  const UINT Message = WM_SYSKEYUP;
+  const int32_t KeyCode = VK_LEFT;
+
+  Application Application;
+  const Tested_t Example{ Application };
+
+  using namespace ::testing;
+
+  InSequence Dummy;
+
+  EXPECT_CALL(Application, OnBack())
+    .Times(1);
+
+  ::covellite::events::Events Events = Application;
+  Events[Message](::std::pair<WPARAM, LPARAM>{ KeyCode, 1807071431 });
+
+  EXPECT_CALL(Application, OnBack())
+    .Times(0);
+
+  Events[Message](::std::pair<WPARAM, LPARAM>{ 1807071432, 1807071431 });
 }
 
 // ************************************************************************** //
@@ -507,7 +850,8 @@ TEST_F(Window_test, /*DISABLED_*/Test_GetSystemLanguage)
     .Times(1)
     .WillOnce(Return((HWND)1710240026));
 
-  const Tested_t Example;
+  const Application_t Application{ Application_t::EventBased{} };
+  const Tested_t Example{ Application };
   const ITested_t & IExample = Example;
 
   InSequence Dummy;
@@ -548,7 +892,8 @@ TEST_F(Window_test, /*DISABLED_*/Test_GetSystemLanguage_Error)
     .Times(1)
     .WillOnce(Return((HWND)1710241058));
 
-  const Tested_t Example;
+  const Application_t Application{ Application_t::EventBased{} };
+  const Tested_t Example{ Application };
   const ITested_t & IExample = Example;
 
   EXPECT_CALL(WindowsProxy, GetLocaleName())

@@ -6,4 +6,3 @@
 #include "Core\Window.mock.hpp"
 #include "Core\Application.mock.hpp"
 #include "Core\ApplicationEntryPoint.mock.hpp"
-#include "Core\Settings.mock.hpp"
