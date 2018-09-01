@@ -3,8 +3,8 @@
 #include <boost/any.hpp>
 
 /**
-* \defgroup gCovelliteCoreParamsClasses Params
-* \ingroup gCovelliteCoreClasses
+* \defgroup CovelliteCoreParamsGroup Params
+* \ingroup CovelliteCoreGroup
 *  Группа классов параметров, передаваемых обработчикам событий.
 */
 
@@ -18,7 +18,7 @@ namespace params
 {
 
 /**
-* \ingroup gCovelliteCoreParamsClasses
+* \ingroup CovelliteCoreParamsGroup
 * \brief
 *  Класс входит в проект \ref CovelliteCorePage \n
 *  Класс-заглушка для использования совместно с сигналами без параметров.
@@ -40,7 +40,7 @@ class Empty final
 };
 
 /**
-* \ingroup gCovelliteCoreParamsClasses
+* \ingroup CovelliteCoreParamsGroup
 * \brief
 *  Класс входит в проект \ref CovelliteCorePage \n
 *  Параметры, передаваемые событию движения пальца по экрану.
@@ -64,7 +64,7 @@ public:
 };
 
 /**
-* \ingroup gCovelliteCoreParamsClasses
+* \ingroup CovelliteCoreParamsGroup
 * \brief
 *  Класс входит в проект \ref CovelliteCorePage \n
 *  Параметры, передаваемые событию нажатия кнопки клавиатуры.
@@ -85,7 +85,7 @@ public:
 };
 
 /**
-* \ingroup gCovelliteCoreParamsClasses
+* \ingroup CovelliteCoreParamsGroup
 * \brief
 *  Класс входит в проект \ref CovelliteCorePage \n
 *  Параметры, передаваемые событиям нажатия/отпускания кнопок клавиатуры.
@@ -116,7 +116,7 @@ public:
 };
 
 /**
-* \ingroup gCovelliteCoreParamsClasses
+* \ingroup CovelliteCoreParamsGroup
 * \brief
 *  Класс входит в проект \ref CovelliteCorePage \n
 *  Параметры, передаваемые событию ошибки.
@@ -137,7 +137,7 @@ public:
 };
 
 /**
-* \ingroup gCovelliteCoreParamsClasses
+* \ingroup CovelliteCoreParamsGroup
 * \brief
 *  Класс входит в проект \ref CovelliteCorePage \n
 *  Класс информации об элементе, вызвавшем появление события.
@@ -165,14 +165,14 @@ public:
 } // namespace params
 
 /**
-* \ingroup gCovelliteCoreClasses
+* \ingroup CovelliteCoreGroup
 * \brief
 *  Класс входит в проект \ref CovelliteCorePage \n
 *  Вспомогательный класс для передачи параметров обработчикам событий.
 * \details
 *  - Нужен для того, чтобы у функций-обработчиков событий в качестве параметра
 *  можно было указывать непосредственно один из классов
-*  \ref gCovelliteCoreParamsClasses.
+*  \ref CovelliteCoreParamsGroup.
 *
 * \version
 *  1.0.0.0        \n

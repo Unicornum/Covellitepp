@@ -13,7 +13,7 @@ namespace rocket
 class ILayer;
 
 /**
-* \ingroup gCovelliteRocketClasses
+* \ingroup CovelliteRocketGroup
 * \brief
 *  Класс входит в проект \ref CovelliteRocketPage \n
 *  Класс списка слоев.

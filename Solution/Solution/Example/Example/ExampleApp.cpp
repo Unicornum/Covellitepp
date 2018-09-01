@@ -7,7 +7,7 @@
 #include "ExtraWindow.hpp"
 
 /// [Constructor main application class]
-ExampleApp::ExampleApp(void) :
+ExampleApp::ExampleApp(void) noexcept :
   Application(EventBased{})
 {
   using namespace ::covellite;
@@ -52,13 +52,15 @@ void ExampleApp::DoInitWindow(void)
   LOGGER(Info) << "Create main window.";
     
   // Создание обязательного набора объектов окон приложения.
-  MakeWindow<ExampleWindow>(
-    MakeWindow<::covellite::rocket::Window>(
-      // Дополнительный код (для примера), производящий заливку окна цветом 
-      // перед отрисовкой GUI.
-      MakeWindow<ExtraWindow>(
-        MakeWindow<::covellite::api::Window>(
-          MakeWindow<::covellite::os::Window>(*this)))));
+    
+  MakeWindow<ExampleWindow>(                          // Клиенсткий код программы.
+    MakeWindow<::covellite::gui::Window>(          // Класс, обеспечивающий отрисовку GUI
+      MakeWindow<ExtraWindow>(                        // Дополнительный код (для примера), производящий 
+                                                      // заливку окна цветом перед отрисовкой GUI.
+        MakeWindow<::covellite::api::Window>(         // Класс окна графического Api
+                                                      // (OpenGL или DirectX, задается в настройках).
+          MakeWindow<::covellite::os::Window>(*this)  // Класс окна операционной системы.
+            ))));
 }
 /// [Create main window]
 

@@ -195,6 +195,7 @@ TEST_F(Application_test, /*DISABLED_*/Test_CallWindowDestructorOrder)
     {
 
     }
+    ExampleWindow & operator=(const ExampleWindow &) = default;
     ~ExampleWindow(void) noexcept
     {
       Proxy::GetInstance()->Destructor(m_Id);

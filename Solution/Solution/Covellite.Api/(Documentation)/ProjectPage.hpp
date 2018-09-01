@@ -7,7 +7,7 @@
 /**
 * \page CovelliteApiPage Covellite.Api
 *  
-*  Список классов проекта \ref gCovelliteApiClasses
+*  Список классов проекта \ref CovelliteApiGroup
 *  
 *  Введение
 *  --------
@@ -22,4 +22,6 @@
 *  - Для каждого конкретного графического API создается отдельный класс.
 *  - Каждый класс доступен только для использования в коде для конкретной 
 *  платформы.
+*  
+* \image html ".\Solution\Covellite.Api\(Documentation)\Classes.png"
 */

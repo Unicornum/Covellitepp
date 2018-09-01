@@ -68,6 +68,7 @@ protected:
     MOCK_METHOD1(OnDown, void(int));
     MOCK_METHOD1(OnUp, void(int));
     MOCK_METHOD0(OnBack, void(void));
+    MOCK_METHOD0(OnMenu, void(void));
 
   public:
     Application(void) :
@@ -100,6 +101,8 @@ protected:
         .Connect([&](const KeyCode_t & _Code) { OnUp(_Code); });
       m_Events[events::Key.Back]
         .Connect([&]() { OnBack(); });
+      m_Events[events::Key.Menu]
+        .Connect([&]() { OnMenu(); });
     }
   };
 };
@@ -597,34 +600,6 @@ TEST_F(Window_test, /*DISABLED_*/Test_SetWindowLongPtr)
 } // namespace covellite
 
 // ************************************************************************** //
-TEST_F(Window_test, DISABLED_Test_SetWindowLongPtr_Fail)
-{
-  using WindowsProxy_t = ::mock::WindowsProxy;
-  WindowsProxy_t WindowsProxy;
-  WindowsProxy_t::GetInstance() = &WindowsProxy;
-
-  const HWND hWnd = (HWND)1807191050;
-
-  using namespace ::testing;
-
-  InSequence Dummy;
-
-  EXPECT_CALL(WindowsProxy, CreateWindowExW2(_, _))
-    .Times(1)
-    .WillOnce(Return(hWnd));
-
-  EXPECT_CALL(WindowsProxy, SetWindowLongPtrW(hWnd, GWLP_USERDATA))
-    .Times(1)
-    .WillOnce(Return((LONG_PTR)NULL));
-
-  EXPECT_CALL(WindowsProxy, DestroyWindow(hWnd))
-    .Times(1);
-
-  const Application_t Application{ Application_t::EventBased{} };
-  EXPECT_THROW(Tested_t{ Application }, ::std::exception);
-}
-
-// ************************************************************************** //
 TEST_F(Window_test, /*DISABLED_*/Test_CloseWindow)
 {
   using WindowsProxy_t = ::mock::WindowsProxy;
@@ -835,6 +810,71 @@ TEST_F(Window_test, /*DISABLED_*/Test_Back)
     .Times(0);
 
   Events[Message](::std::pair<WPARAM, LPARAM>{ 1807071432, 1807071431 });
+}
+
+// ************************************************************************** //
+TEST_F(Window_test, /*DISABLED_*/Test_Menu)
+{
+  const UINT Message = WM_SYSKEYUP;
+  const int32_t KeyCode = VK_SPACE;
+
+  Application Application;
+  const Tested_t Example{ Application };
+
+  using namespace ::testing;
+
+  InSequence Dummy;
+
+  EXPECT_CALL(Application, OnMenu())
+    .Times(1);
+
+  ::covellite::events::Events Events = Application;
+  Events[Message](::std::pair<WPARAM, LPARAM>{ KeyCode, 1807311240 });
+
+  EXPECT_CALL(Application, OnMenu())
+    .Times(0);
+
+  Events[Message](::std::pair<WPARAM, LPARAM>{ 1807311241, 1807311242 });
+}
+
+// ************************************************************************** //
+TEST_F(Window_test, /*DISABLED_*/Test_GetClientRect)
+{
+  using WindowsProxy_t = ::mock::WindowsProxy;
+  WindowsProxy_t WindowsProxy;
+  WindowsProxy_t::GetInstance() = &WindowsProxy;
+
+  const auto hWnd = (HWND)1808221137;
+  const int Left = 8221142;
+  const int Width = 1808221143;
+  const int Top = 8221144;
+  const int Height = 1808221145;
+  const RECT ClientRect = { Left, Top, Left + Width, Top + Height };
+
+  using namespace ::testing;
+
+  EXPECT_CALL(WindowsProxy, CreateWindowExW2(_, _))
+    .Times(1)
+    .WillOnce(Return(hWnd));
+
+  const Application_t Application{ Application_t::EventBased{} };
+  const Tested_t Example{ Application };
+  const ITested_t & IExample = Example;
+
+  EXPECT_CALL(WindowsProxy, BuildClientRect())
+    .WillRepeatedly(Return(ClientRect));
+
+  EXPECT_CALL(WindowsProxy, GetClientRect(hWnd))
+    .Times(2)
+    .WillOnce(Return(FALSE))
+    .WillOnce(Return(TRUE));
+
+  EXPECT_THROW(IExample.GetClientRect(), ::std::exception);
+  const auto Result = IExample.GetClientRect();
+  EXPECT_EQ(0, Result.Left);
+  EXPECT_EQ(0, Result.Top);
+  EXPECT_EQ(Width, Result.Width);
+  EXPECT_EQ(Height, Result.Height);
 }
 
 // ************************************************************************** //

@@ -3,7 +3,7 @@
 #include <Covellite\Covellite.hpp>
 
 /**
-* \ingroup gExampleClasses
+* \ingroup ExampleGroup
 * \brief
 *  Класс входит в проект \ref ExamplePage \n
 *  Простой пример класса промежуточного кода.

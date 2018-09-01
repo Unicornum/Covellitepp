@@ -2,28 +2,34 @@
 #include "stdafx.h"
 #include <Covellite/Api/Window.hpp>
 #include <alicorn/std/string.hpp>
-#include <alicorn/patterns/factory.hpp>
+#include <Covellite/Core/EventHandler.hpp>
 #include <Covellite/Core/Settings.hpp>
 #include <Covellite/Events.hpp>
-
-#ifndef __USING_GTEST
-
-#include <alicorn/logger.hpp>
-
-# if BOOST_OS_WINDOWS
-#include "OpenGL.hpp"
-# elif BOOST_OS_ANDROID
-#include "OpenGLES.hpp"
-# endif
-
-#endif
+#include <Covellite/App/Events.hpp>
+#include <Covellite/Os/IWindow.hpp>
+#include <Covellite/Os/Events.hpp>
+#include <Covellite/Api/Events.hpp>
+#include "Render/Render.hpp"
 
 using namespace covellite::api;
 
 Window::Window(const WindowOs_t & _Window) :
-  m_pImpl(MakeApiImpl(_Window))
+  m_WindowOs(_Window),
+  m_Events(_Window),
+  m_pImpl(MakeRender(_Window))
 {
-  LOGGER(Info) << uT("Using graphics API: ") << m_pImpl->GetUsingApi();
+  m_Events[events::Application.Update].Connect([&]()
+  {
+    m_pImpl->ClearWindow();
+    m_Events[events::Drawing.Do]();
+    m_pImpl->Present();
+  });
+
+  m_Events[events::Window.Resize].Connect([&]()
+  {
+    const auto Rect = GetClientRect();
+    m_pImpl->ResizeWindow(Rect.Width, Rect.Height);
+  });
 }
 
 /**
@@ -39,49 +45,88 @@ Window::Window(const WindowOsPtr_t & _pWindow) :
 
 Window::~Window(void) = default;
 
-void Window::Subscribe(const EventHandlerPtr_t & _pEvents) /*override*/
-{
-  dynamic_cast<::covellite::core::IWindow &>(*m_pImpl).Subscribe(_pEvents);
-}
-
 Window::operator Window::Events_t (void) const /*override*/
 {
-  return *m_pImpl;
+  return m_Events;
 }
 
-auto Window::GetUsingApi(void) const -> String_t /*override*/
+Window::Rect_t Window::GetClientRect(void) const /*override*/
 {
-  throw STD_EXCEPTION << "Implementation is not required.";
+  return m_WindowOs.GetClientRect();
+}
+
+auto Window::GetRenderInterface(void) const -> RenderInterfacePtr_t /*override*/
+{
+  return m_pImpl;
 }
 
 int32_t Window::GetWidth(void) const /*override*/
 {
-  return m_pImpl->GetWidth();
+  return m_WindowOs.GetClientRect().Width;
 }
 
 int32_t Window::GetHeight(void) const /*override*/
 {
-  return m_pImpl->GetHeight();
-}
-
-Window::Rect Window::GetClientRect(void) const /*override*/
-{
-  return m_pImpl->GetClientRect();
+  return m_WindowOs.GetClientRect().Height;
 }
 
 auto Window::MakeRenderInterface(void) const -> RenderInterfacePtr_t /*override*/
 {
-  return m_pImpl->MakeRenderInterface();
+  return m_pImpl;
 }
 
-/*static*/ auto Window::MakeApiImpl(const WindowOs_t & _Window) -> IApiPtr_t
+void Window::Subscribe(const EventHandlerPtr_t & _pEvents) /*override*/
 {
-  const auto CovelliteppSection = ::covellite::core::Settings_t::GetInstance();
+#pragma warning(push)
+#pragma warning(disable: 4996)
+  using namespace ::covellite::core;
+#pragma warning(pop)
 
-  const auto NameOfImplClass =
-    CovelliteppSection[uT("Window")].Get<String_t>(uT("GraphicsApi"));
 
-  using namespace ::alicorn::modules::patterns;
+  (*_pEvents)[Event::StartDrawing].connect([&](const Params &) 
+  { 
+    m_pImpl->ClearWindow();
+  });
 
-  return factory::make_unique<IWindow_t>(NameOfImplClass, _Window);
+  (*_pEvents)[Event::FinishDrawing].connect([&](const Params &) 
+  { 
+    m_pImpl->Present(); 
+  });
+
+  (*_pEvents)[Event::Resize].connect([&](const Params &) 
+  { 
+    const auto Rect = GetClientRect();
+    m_pImpl->ResizeWindow(Rect.Width, Rect.Height);
+  });
+}
+
+/*static*/ Window::RenderPtr_t Window::MakeRender(const WindowOs_t & _Window)
+{
+  render::IRender::Data Data;
+  Data.Handle = _Window.GetHandle();
+  Data.Top = _Window.GetClientRect().Top;
+
+  using String_t = ::alicorn::extension::std::String;
+
+  const auto MainSection = ::covellite::core::Settings_t::GetInstance();
+  const auto WindowSection = MainSection[uT("Window")];
+
+# if BOOST_OS_WINDOWS
+  Data.IsFullScreen = WindowSection.Get<bool>(uT("IsFullScreen"));
+# endif
+
+  auto BkColorSection = WindowSection[uT("BackgroundColor")];
+
+  Data.BkColor = 
+  {
+    BkColorSection.Get<float>(uT("R")) / 255.0f,
+    BkColorSection.Get<float>(uT("G")) / 255.0f,
+    BkColorSection.Get<float>(uT("B")) / 255.0f,
+    BkColorSection.Get<float>(uT("A")) / 255.0f
+  };
+
+  const auto NameOfApiClass = WindowSection.Get<String_t>(uT("GraphicsApi"));
+
+  return ::std::make_shared<covellite::api::render::Render>(
+    NameOfApiClass, Data);
 }

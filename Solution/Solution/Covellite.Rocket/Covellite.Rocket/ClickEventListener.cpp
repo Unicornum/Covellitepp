@@ -4,7 +4,7 @@
 #include <alicorn/std/exception.hpp>
 #include <Covellite/Events/Events.hpp>
 #include <Covellite/Events.hpp>
-#include <Covellite/Rocket/Events.hpp>
+#include <Covellite/Gui/Events.hpp>
 
 using namespace covellite::rocket;
 

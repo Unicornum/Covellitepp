@@ -11,7 +11,7 @@
 /**
 * \page CovelliteCorePage Covellite.Core
 *  
-*  Список классов проекта \ref gCovelliteCoreClasses
+*  Список классов проекта \ref CovelliteCoreGroup
 *  
 *  Введение
 *  --------

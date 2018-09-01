@@ -5,12 +5,12 @@
 * \file
 *  Общий заголовочный файл для всех заголовочных файлов проекта 
 *  \ref CovelliteRocketPage.
-* \defgroup gCovelliteRocketClasses Rocket
-* \ingroup gCovelliteClasses
+* \defgroup CovelliteRocketGroup Rocket
+* \ingroup CovelliteGroup
 *  Группа классов проекта \ref CovelliteRocketPage.
 */
 
-#include "Rocket\Events.hpp"
+#include "Gui\Events.hpp"
 #include "Rocket\Layer.hpp"
 #include "Rocket\Window.hpp"
 #include "Rocket\Vfs.hpp"

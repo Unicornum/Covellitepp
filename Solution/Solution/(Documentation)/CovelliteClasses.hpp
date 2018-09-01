@@ -1,6 +1,6 @@
 
 /**
-* \defgroup gCovelliteClasses Covellite++
+* \defgroup CovelliteGroup Covellite++
 *  Группа классов фреймворка.
 *  
 *  Диаграмма взаимодействия основных классов фреймворка

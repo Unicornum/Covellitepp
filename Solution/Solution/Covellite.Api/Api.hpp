@@ -5,8 +5,8 @@
 * \file
 *  Общий заголовочный файл для всех заголовочных файлов проекта
 *  \ref CovelliteApiPage.
-* \defgroup gCovelliteApiClasses Api
-* \ingroup gCovelliteClasses
+* \defgroup CovelliteApiGroup Api
+* \ingroup CovelliteGroup
 *  Группа классов проекта \ref CovelliteApiPage.
 */
 

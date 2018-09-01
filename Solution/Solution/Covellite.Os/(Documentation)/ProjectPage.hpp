@@ -7,7 +7,7 @@
 /**
 * \page CovelliteOsPage Covellite.Os
 *  
-*  Список классов проекта \ref gCovelliteOsClasses
+*  Список классов проекта \ref CovelliteOsGroup
 *  
 *  Введение
 *  --------

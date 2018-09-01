@@ -4,8 +4,8 @@
 /**
 *  Общий заголовочный файл для всех заголовочных файлов проекта
 *  \ref CovelliteEglPage.
-* \defgroup gCovelliteEglClasses Egl
-* \ingroup gCovelliteClasses
+* \defgroup CovelliteEglGroup Egl
+* \ingroup CovelliteGroup
 *  Группа классов проекта \ref CovelliteEglPage.
 */
 

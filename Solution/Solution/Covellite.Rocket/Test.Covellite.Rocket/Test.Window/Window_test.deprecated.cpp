@@ -49,7 +49,7 @@ protected:
     ::testing::DefaultValue<RenderInterfacePtr_t>::Set(m_pRenderInterface);
     ::testing::DefaultValue<String_t>::Set("DefaultString");
     ::testing::DefaultValue<String>::Set(string_cast<String>(m_PathToFontsDirectory));
-    ::testing::DefaultValue<IWindowApi_t::Rect>::Set({ 0, 0, 1, 1 });
+    ::testing::DefaultValue<WindowOs_t::Rect>::Set({ 0, 0, 1, 1 });
   }
 
   // Вызывается ПОСЛЕ запуска каждого теста
@@ -61,7 +61,7 @@ protected:
     ::testing::DefaultValue<RenderInterfacePtr_t>::Clear();
     ::testing::DefaultValue<String_t>::Clear();
     ::testing::DefaultValue<String>::Clear();
-    ::testing::DefaultValue<IWindowApi_t::Rect>::Clear();
+    ::testing::DefaultValue<WindowOs_t::Rect>::Clear();
   }
 
 protected:
@@ -194,7 +194,7 @@ TEST_F(Window_test, /*DISABLED_*/Test_Constructor)
 
   EXPECT_CALL(WindowApiProxy, GetClientRect(WindowApiId))
     .Times(1)
-    .WillOnce(Return(IWindowApi_t::Rect{ 0, StatusBarHeight, Width, Height }));
+    .WillOnce(Return(WindowOs_t::Rect{ 0, StatusBarHeight, Width, Height }));
 
   EXPECT_CALL(RocketCoreProxy, CreateContext(Eq("main"), ContextSize, nullptr))
     .Times(1)
@@ -783,7 +783,7 @@ TEST_F(Window_test, /*DISABLED_*/Test_OnResize)
 
   EXPECT_CALL(WindowApiProxy, GetClientRect(WindowApiId))
     .Times(1)
-    .WillOnce(Return(IWindowApi_t::Rect{ 0, StatusBarHeight, Width, Height }));
+    .WillOnce(Return(WindowOs_t::Rect{ 0, StatusBarHeight, Width, Height }));
 
   EXPECT_CALL(Context, SetDimensions(ContextSize))
     .Times(1);
@@ -832,7 +832,7 @@ TEST_F(Window_test, /*DISABLED_*/Test_OnMotion)
 
   EXPECT_CALL(WindowApiProxy, GetClientRect(_))
     .Times(1)
-    .WillOnce(Return(IWindowApi_t::Rect{ 0, StatusBarHeight, 0, 0 }));
+    .WillOnce(Return(WindowOs_t::Rect{ 0, StatusBarHeight, 0, 0 }));
 
   EXPECT_CALL(Context, ProcessMouseMove(X, Y - StatusBarHeight, 0))
     .Times(1);

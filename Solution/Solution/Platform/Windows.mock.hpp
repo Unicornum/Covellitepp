@@ -313,6 +313,7 @@ using ::mock::AdjustWindowRectEx;
 using ::mock::GetSystemMetrics;
 using ::mock::PostQuitMessage;
 using ::mock::SetWindowLongPtrW;
+using ::mock::GetClientRect;
 
 } // namespace os
 

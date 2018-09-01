@@ -30,7 +30,6 @@
     <ClInclude Include="Vfs.hpp" />
     <ClInclude Include="IWindow.hpp" />
     <ClInclude Include="ClickEventListener.hpp" />
-    <ClInclude Include="Events.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">

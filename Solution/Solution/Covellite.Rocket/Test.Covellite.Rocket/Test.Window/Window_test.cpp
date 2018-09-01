@@ -51,7 +51,7 @@ protected:
     ::testing::DefaultValue<RenderInterfacePtr_t>::Set(m_pRenderInterface);
     ::testing::DefaultValue<String_t>::Set("DefaultString");
     ::testing::DefaultValue<String>::Set(string_cast<String>(m_PathToFontsDirectory));
-    ::testing::DefaultValue<IWindowApi_t::Rect>::Set({ 0, 0, 1, 1});
+    ::testing::DefaultValue<WindowOs_t::Rect>::Set({ 0, 0, 1, 1});
     ::testing::DefaultValue<Context_t *>::Set(&m_Context);
   }
 
@@ -64,7 +64,7 @@ protected:
     ::testing::DefaultValue<RenderInterfacePtr_t>::Clear();
     ::testing::DefaultValue<String_t>::Clear();
     ::testing::DefaultValue<String>::Clear();
-    ::testing::DefaultValue<IWindowApi_t::Rect>::Clear();
+    ::testing::DefaultValue<WindowOs_t::Rect>::Clear();
     ::testing::DefaultValue<Context_t *>::Clear();
   }
 
@@ -85,6 +85,13 @@ private:
 // нужно чтобы тестовая функция была расположена В ТОМ ЖЕ ПРОСТРАНСТВЕ ИМЕН, 
 // что и тестируемый класс).
 // FRIEND_TEST(Window_test, Test_Function);
+
+// ************************************************************************** //
+TEST_F(Window_test, /*DISABLED_*/Test_AppIWindow)
+{
+  EXPECT_TRUE((::std::is_convertible<Tested_t &,
+    ::covellite::app::IWindow &>::value));
+}
 
 // ************************************************************************** //
 TEST_F(Window_test, /*DISABLED_*/Test_Constructor_CreateContext_Fail)
@@ -203,7 +210,7 @@ TEST_F(Window_test, /*DISABLED_*/Test_Constructor)
 
   EXPECT_CALL(WindowApiProxy, GetClientRect(WindowApiId))
     .Times(1)
-    .WillOnce(Return(IWindowApi_t::Rect{ 0, StatusBarHeight, Width, Height }));
+    .WillOnce(Return(WindowOs_t::Rect{ 0, StatusBarHeight, Width, Height }));
 
   EXPECT_CALL(RocketCoreProxy, CreateContext(Eq("main"), ContextSize, nullptr))
     .Times(1)
@@ -693,7 +700,7 @@ TEST_F(Window_test, /*DISABLED_*/Test_OnResize)
 
   EXPECT_CALL(WindowApiProxy, GetClientRect(_))
     .Times(1)
-    .WillOnce(Return(IWindowApi_t::Rect{ 0, StatusBarHeight, Width, Height }));
+    .WillOnce(Return(WindowOs_t::Rect{ 0, StatusBarHeight, Width, Height }));
 
   EXPECT_CALL(Context, SetDimensions(ContextSize))
     .Times(1);
@@ -735,7 +742,7 @@ TEST_F(Window_test, /*DISABLED_*/Test_OnMotion)
 
   EXPECT_CALL(WindowApiProxy, GetClientRect(_))
     .Times(1)
-    .WillOnce(Return(IWindowApi_t::Rect{ 0, StatusBarHeight, 0, 0 }));
+    .WillOnce(Return(WindowOs_t::Rect{ 0, StatusBarHeight, 0, 0 }));
 
   EXPECT_CALL(Context, ProcessMouseMove(X, Y - StatusBarHeight, 0))
     .Times(1);

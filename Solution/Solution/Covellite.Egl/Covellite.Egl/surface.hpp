@@ -12,7 +12,7 @@ class Config;
 class Context;
 
 /**
-* \ingroup gCovelliteEglClasses
+* \ingroup CovelliteEglGroup
 * \brief
 *  Класс входит в проект \ref CovelliteEglPage \n
 *  Класс-обертка для EGLSurface.

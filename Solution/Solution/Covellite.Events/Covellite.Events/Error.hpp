@@ -9,7 +9,7 @@ namespace events
 {
 
 /**
-* \ingroup CovelliteEventsGroup
+* \ingroup CovelliteEventsTypeGroup
 * \brief
 *  Класс входит в проект \ref CovelliteEventsPage \n
 *  Класс событий ошибок во время работы приложения.
@@ -34,14 +34,14 @@ public:
   enum Id
   {
     Exception = 0,  ///< При вызове обработчика события было перехвачено
-                    ///< исключение (параметр - Description, описание исключения).
+                    ///< исключение (параметр - Error_t::Description).
   };
 
 public:
   /**
   * \ingroup CovelliteEventsParamsGroup
   * \brief
-  *  Класс входит в проект \ref CovelliteOsPage \n
+  *  Класс входит в проект \ref CovelliteEventsPage \n
   *  Класс параметра для передачи сигналу описания ошибки.
   */
   using Description = ::std::string;

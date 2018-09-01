@@ -8,7 +8,7 @@ namespace core
 {
 
 /**
-* \ingroup gCovelliteCoreClasses
+* \ingroup CovelliteCoreGroup
 * \brief
 *  Класс входит в проект \ref CovelliteCorePage \n
 *  Базовый класс для всех классов окон.

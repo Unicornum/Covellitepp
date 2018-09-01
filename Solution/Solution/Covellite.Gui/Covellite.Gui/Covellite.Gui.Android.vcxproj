@@ -1,0 +1,101 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|ARM">
+      <Configuration>Debug</Configuration>
+      <Platform>ARM</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|ARM">
+      <Configuration>Release</Configuration>
+      <Platform>ARM</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{5F10F7EC-C470-499A-AB96-C19485CCD7AC}</ProjectGuid>
+    <Keyword>Android</Keyword>
+    <RootNamespace>Covellite_Rocket</RootNamespace>
+    <MinimumVisualStudioVersion>14.0</MinimumVisualStudioVersion>
+    <ApplicationType>Android</ApplicationType>
+    <ApplicationTypeRevision>2.0</ApplicationTypeRevision>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>Gcc_4_9</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>Gcc_4_9</PlatformToolset>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings" />
+  <ImportGroup Label="Shared" />
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">
+    <Import Project="..\..\..\Solution.ARM.props" />
+    <Import Project="..\..\Externals\Externals.Build.props" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">
+    <Import Project="..\..\..\Solution.ARM.props" />
+    <Import Project="..\..\Externals\Externals.Build.props" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">
+    <ClCompile>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">
+    <ClCompile>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClInclude Include="ClickEventListener.hpp" />
+    <ClInclude Include="Events.hpp" />
+    <ClInclude Include="File.hpp" />
+    <ClInclude Include="ILayer.hpp" />
+    <ClInclude Include="Initializer.hpp" />
+    <ClInclude Include="Initializer.mock.hpp" />
+    <ClInclude Include="IStringTranslator.hpp" />
+    <ClInclude Include="IStringTranslator.mock.hpp" />
+    <ClInclude Include="IWindow.hpp" />
+    <ClInclude Include="Layer.hpp" />
+    <ClInclude Include="Layer.mock.hpp" />
+    <ClInclude Include="Layers.hpp" />
+    <ClInclude Include="Layers.mock.hpp" />
+    <ClInclude Include="pch.h" />
+    <ClInclude Include="Rocket.forward.hpp" />
+    <ClInclude Include="stdafx.h" />
+    <ClInclude Include="StringTranslator.hpp" />
+    <ClInclude Include="System.hpp" />
+    <ClInclude Include="Vfs.hpp" />
+    <ClInclude Include="Window.hpp" />
+    <ClInclude Include="Window.mock.hpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Window.inl" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="ClickEventListener.cpp" />
+    <ClCompile Include="File.cpp" />
+    <ClCompile Include="Initializer.cpp" />
+    <ClCompile Include="Layer.android.cpp" />
+    <ClCompile Include="Layer.cpp" />
+    <ClCompile Include="Layers.cpp" />
+    <ClCompile Include="StringTranslator.cpp" />
+    <ClCompile Include="System.android.cpp" />
+    <ClCompile Include="System.cpp" />
+    <ClCompile Include="SystemToRocketKeyCode.android.cpp" />
+    <ClCompile Include="Window.cpp" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets" />
+</Project>

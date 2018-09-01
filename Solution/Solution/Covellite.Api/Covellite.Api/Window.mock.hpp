@@ -46,6 +46,8 @@ class Window :
 {
   using WindowOs_t = ::covellite::os::IWindow;
   using WindowOsPtr_t = ::std::shared_ptr<WindowOs_t>;
+  using String_t = ::alicorn::extension::std::String;
+  using Rect_t = WindowOs_t::Rect;
 
 public:
   class Proxy :
@@ -53,12 +55,13 @@ public:
   {
   public:
     MOCK_METHOD1(Constructor, Id_t(Id_t));
-    MOCK_METHOD2(Subscribe, void(Id_t, EventHandlerPtr_t));
-    MOCK_METHOD1(GetUsingApi, String_t(Id_t));
+    MOCK_METHOD1(GetClientRect, Rect_t(Id_t));
+    MOCK_METHOD1(GetRenderInterface, RenderInterfacePtr_t(Id_t));
+
     MOCK_METHOD1(GetWidth, int32_t(Id_t));
     MOCK_METHOD1(GetHeight, int32_t(Id_t));
-    MOCK_METHOD1(GetClientRect, Rect(Id_t));
     MOCK_METHOD1(MakeRenderInterface, RenderInterfacePtr_t(Id_t));
+    MOCK_METHOD2(Subscribe, void(Id_t, EventHandlerPtr_t));
     MOCK_METHOD1(DoDrawWindow, void(Id_t));
   };
 
@@ -74,25 +77,23 @@ public:
   bool operator== (const Window & _Value) const { return (m_Id == _Value.m_Id); }
 
 public:
-  void Subscribe(const EventHandlerPtr_t & _pEvents) override
-  {
-    Proxy::GetInstance()->Subscribe(m_Id, _pEvents);
-
-    (*_pEvents)[::covellite::core::Event::Drawing]
-      .connect(::std::bind(&Window::DoDrawWindow, this));
-  }
-
-public:
   operator Events_t (void) const override
   {
     return m_Events;
   }
 
 public:
-  String_t GetUsingApi(void) const override
+  Rect_t GetClientRect(void) const override
   {
-    return Proxy::GetInstance()->GetUsingApi(m_Id);
+    return Proxy::GetInstance()->GetClientRect(m_Id);
   }
+
+  RenderInterfacePtr_t GetRenderInterface(void) const override
+  {
+    return Proxy::GetInstance()->GetRenderInterface(m_Id);
+  }
+
+  // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!! DEPRECATED !!!!!!!!!!!!!!!!!!!!!!!!!!!!!! //
 
   int32_t GetWidth(void) const override
   {
@@ -104,15 +105,21 @@ public:
     return Proxy::GetInstance()->GetHeight(m_Id);
   }
 
-  Rect GetClientRect(void) const override
-  {
-    return Proxy::GetInstance()->GetClientRect(m_Id);
-  }
-
   RenderInterfacePtr_t MakeRenderInterface(void) const override
   {
     return Proxy::GetInstance()->MakeRenderInterface(m_Id);
   }
+
+public:
+  void Subscribe(const EventHandlerPtr_t & _pEvents) override
+  {
+    Proxy::GetInstance()->Subscribe(m_Id, _pEvents);
+
+    (*_pEvents)[::covellite::core::Event::Drawing]
+      .connect(::std::bind(&Window::DoDrawWindow, this));
+  }
+
+  // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!! DEPRECATED !!!!!!!!!!!!!!!!!!!!!!!!!!!!!! //
 
 private:
   Events_t m_Events;

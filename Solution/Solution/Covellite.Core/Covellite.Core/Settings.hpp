@@ -13,7 +13,7 @@ using Section_t = alicorn::modules::settings::Section;
 using SectionPtr_t = ::std::unique_ptr<Section_t>;
 
 /**
-* \ingroup gCovelliteCoreClasses
+* \ingroup CovelliteCoreGroup
 * \brief
 *  Класс входит в проект \ref CovelliteCorePage \n
 *  Класс доступа к настройкам фреймворка.
@@ -49,7 +49,10 @@ namespace extension
 namespace std
 {
 
+#pragma warning(push)
+#pragma warning(disable: 4996)
 using namespace ::covellite::core;
+#pragma warning(pop)
 
 template<>
 /*static*/ SectionPtr_t Singleton<Section_t>::Make(void);

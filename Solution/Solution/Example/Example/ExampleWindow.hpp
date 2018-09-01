@@ -3,7 +3,7 @@
 #include <Covellite\Covellite.hpp>
 
 /**
-* \ingroup gExampleClasses
+* \ingroup ExampleGroup
 * \brief
 *  Класс входит в проект \ref ExamplePage \n
 *  Класс GUI окна программы.
@@ -23,10 +23,10 @@ class ExampleWindow final :
   public ::covellite::app::IWindow
 {
   using Events_t = ::covellite::events::Events;
-  using WindowRocket_t = ::covellite::rocket::Window;
+  using WindowRocket_t = ::covellite::gui::Window;
   using Path_t = ::boost::filesystem::path;
-  using IWindowRocket_t = ::covellite::rocket::IWindow;
-  using Layer_t = ::covellite::rocket::Layer;
+  using IWindowRocket_t = ::covellite::gui::IWindow;
+  using Layer_t = ::covellite::gui::Layer;
   class DemoLayer1;
   class DemoLayer2;
   class TableLayer;

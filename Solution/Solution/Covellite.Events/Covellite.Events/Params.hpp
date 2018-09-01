@@ -2,12 +2,6 @@
 #pragma once
 #include <boost/any.hpp>
 
-/**
-* \defgroup CovelliteEventsParamsGroup Params
-* \ingroup CovelliteEventsGroup
-*  Группа классов параметров, передаваемых обработчикам событий.
-*/
-
 namespace covellite
 {
 

@@ -8,7 +8,7 @@ namespace events
 {
 
 /**
-* \ingroup CovelliteEventsGroup
+* \ingroup CovelliteEventsTypeGroup
 * \brief
 *  Класс входит в проект \ref CovelliteOsPage \n
 *  Класс событий окна операционной системы.
@@ -39,7 +39,7 @@ public:
 namespace { Window_t Window; }
 
 /**
-* \ingroup CovelliteEventsGroup
+* \ingroup CovelliteEventsTypeGroup
 * \brief
 *  Класс входит в проект \ref CovelliteOsPage \n
 *  Класс событий курсора.
@@ -91,7 +91,7 @@ public:
 namespace { Cursor_t Cursor; }
 
 /**
-* \ingroup CovelliteEventsGroup
+* \ingroup CovelliteEventsTypeGroup
 * \brief
 *  Класс входит в проект \ref CovelliteOsPage \n
 *  Класс событий кнопок клавиатуры.
@@ -115,14 +115,14 @@ public:
   */
   enum Id
   {
-    Pressed = 0,  ///< Нажатие символьной клавиши клавиатуры (параметр - Code, 
-                  ///< содержащий UNICODE код нажатой клавиши).
-    Down,         ///< Нажатие клавиши клавиатуры (параметр - Code, 
+    Pressed = 0,  ///< Нажатие символьной клавиши клавиатуры (параметр - 
+                  ///< Key_t::Code, содержащий UNICODE код нажатой клавиши).
+    Down,         ///< Нажатие клавиши клавиатуры (параметр - Key_t::Code, 
                   ///< содержащий ASCII код нажатой клавиши).
-    Up,           ///< Отпускание клавиши клавиатуры (параметр - Code, 
+    Up,           ///< Отпускание клавиши клавиатуры (параметр - Key_t::Code, 
                   ///< содержащий ASCII код нажатой клавиши).
-    Settings,     ///< Нажатие кнопки настроек программ; левая нижняя кнопка в
-                  ///< Android (без параметров).
+    Menu,         ///< Нажатие кнопки меню программы; ALT + ПРОБЕЛ в Windows,
+                  ///< левая нижняя кнопка в Android,  (без параметров).
     Back,         ///< Нажатие кнопки возврата к предыдущему слою; 
                   ///< ALT + <- в Windows, правая нижняя кнопка в Android
                   ///< (без параметров).

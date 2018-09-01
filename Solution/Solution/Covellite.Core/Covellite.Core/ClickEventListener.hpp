@@ -9,7 +9,7 @@ namespace core
 {
 
 /**
-* \ingroup gCovelliteCoreClasses
+* \ingroup CovelliteCoreGroup
 * \brief
 *  Класс входит в \ref CovelliteCorePage \n
 *  Вспомогательный класс для передачи событий libRocket классам окон/слоев.

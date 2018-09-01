@@ -20,7 +20,7 @@
 *  Проект Example
 *  --------------
 *  
-*  Список классов проекта \ref gExampleClasses
+*  Список классов проекта \ref ExampleGroup
 *  
 *  Проект главного запускаемого модуля примера программы ('точка входа').
 *
@@ -65,6 +65,6 @@
 */
 
 /**
-* \defgroup gExampleClasses Example
+* \defgroup ExampleGroup Example
 *  Группа классов проекта примера программы.
 */

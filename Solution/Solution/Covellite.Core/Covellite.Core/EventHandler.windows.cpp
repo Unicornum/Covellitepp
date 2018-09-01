@@ -8,7 +8,10 @@
 #include <Covellite\Core\ClassName.windows.hpp>
 #include <Covellite\Core\ClickEventListener.hpp>
 
+#pragma warning(push)
+#pragma warning(disable: 4996)
 using namespace covellite::core;
+#pragma warning(pop)
 
 static EventHandler * pEvents = nullptr;
 static WNDCLASSEX WindowClass = { 0 };

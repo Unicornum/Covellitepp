@@ -88,6 +88,7 @@ TEST_F(SystemToRocketKeyCode_test, /*DISABLED_*/Test_Android_UnknownCode)
 {
   using namespace ::covellite::rocket;
 
+  // cppcheck-suppress ConfigurationNotChecked
   const auto Result = SystemToRocketKeyCode(1807241224);
   EXPECT_EQ(::mock::Rocket::Core::Input::KI_UNKNOWN, Result);
 }
@@ -97,6 +98,7 @@ TEST_F(SystemToRocketKeyCode_test, /*DISABLED_*/Test_Android)
 {
   using namespace ::covellite::rocket;
 
+  // cppcheck-suppress ConfigurationNotChecked
   const auto Result = SystemToRocketKeyCode(AKEYCODE_DEL);
   EXPECT_EQ(::mock::Rocket::Core::Input::KI_BACK, Result);
 }

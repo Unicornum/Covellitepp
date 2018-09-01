@@ -5,8 +5,8 @@
 * \file
 *  Общий заголовочный файл для всех заголовочных файлов проекта
 *  \ref CovelliteOsPage.
-* \defgroup gCovelliteOsClasses Os
-* \ingroup gCovelliteClasses
+* \defgroup CovelliteOsGroup Os
+* \ingroup CovelliteGroup
 *  Группа классов проекта \ref CovelliteOsPage.
 */
 

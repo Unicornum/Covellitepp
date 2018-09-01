@@ -20,6 +20,8 @@ public:
   MOCK_METHOD1(Finish, void(ANativeActivity *));
   MOCK_METHOD2(HideSoftInput, void(ANativeActivity *, uint32_t));
   MOCK_METHOD3(OnCreate, void(ANativeActivity *, void *, size_t));
+  MOCK_METHOD1(GetWidth, int32_t(ANativeWindow *));
+  MOCK_METHOD1(GetHeight, int32_t(ANativeWindow *));
 
 public:
   void * m_pOutData = nullptr;
@@ -94,4 +96,14 @@ inline void ANativeActivity_onCreate(ANativeActivity * _pActivity,
 {
   ::mock::AEventProxy::GetInstance()->OnCreate(_pActivity, _pSavedState,
     _SavedStateSize);
+}
+
+inline int32_t ANativeWindow_getWidth(ANativeWindow * _pWindow)
+{
+  return ::mock::AEventProxy::GetInstance()->GetWidth(_pWindow);
+}
+
+inline int32_t ANativeWindow_getHeight(ANativeWindow * _pWindow)
+{
+  return ::mock::AEventProxy::GetInstance()->GetHeight(_pWindow);
 }

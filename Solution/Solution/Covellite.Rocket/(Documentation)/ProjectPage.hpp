@@ -9,7 +9,7 @@
 /**
 * \page CovelliteRocketPage Covellite.Rocket
 *  
-*  Список классов проекта \ref gCovelliteRocketClasses
+*  Список классов проекта \ref CovelliteRocketGroup
 *  
 *  Введение
 *  --------
@@ -21,6 +21,10 @@
 *
 *  - Классы проекта представляют собой универсальный код, зависящий только
 *  от кода [libRocket].
+*  
+* \deprecated
+*  Проект устарел и будет удален в следующей стабильной версии, вместо него
+*  использовать классы из \ref CovelliteGuiGroup.
 *  
 *  [libRocket]: https://github.com/libRocket/libRocket "libRocket"
 */

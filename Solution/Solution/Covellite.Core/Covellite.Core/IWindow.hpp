@@ -12,12 +12,10 @@ namespace core
 class EventHandler;
 
 /**
-* \ingroup gCovelliteCoreClasses
+* \ingroup CovelliteCoreGroup
 * \brief
 *  Класс входит в проект \ref CovelliteCorePage \n
 *  Интерфейсный класс, предоставляющий классам окон доступ к событиям фреймворка.
-* \todo
-*  Неудачное название класса.
 *  
 * \version
 *  1.0.0.0        \n

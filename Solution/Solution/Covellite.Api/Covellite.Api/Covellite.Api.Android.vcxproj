@@ -58,22 +58,23 @@
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="Api.forward.hpp" />
     <ClInclude Include="Events.hpp" />
-    <ClInclude Include="GL.hpp" />
     <ClInclude Include="IWindow.hpp" />
-    <ClInclude Include="OpenGLCommon.hpp" />
-    <ClInclude Include="OpenGLES.hpp" />
     <ClInclude Include="pch.h" />
-    <ClInclude Include="RenderOpenGL.hpp" />
+    <ClInclude Include="Render\Api.forward.hpp" />
+    <ClInclude Include="Render\IGraphicApi.hpp" />
+    <ClInclude Include="Render\IRender.hpp" />
+    <ClInclude Include="Render\OpenGLCommon.hpp" />
+    <ClInclude Include="Render\OpenGLES.hpp" />
+    <ClInclude Include="Render\Render.hpp" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="Window.hpp" />
     <ClInclude Include="Window.mock.hpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="OpenGLCommon.cpp" />
-    <ClCompile Include="OpenGLES.cpp" />
-    <ClCompile Include="RenderOpenGL.cpp" />
+    <ClCompile Include="Render\OpenGLCommon.cpp" />
+    <ClCompile Include="Render\OpenGLES.cpp" />
+    <ClCompile Include="Render\Render.cpp" />
     <ClCompile Include="Window.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

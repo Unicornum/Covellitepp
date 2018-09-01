@@ -57,6 +57,7 @@ public:
     MOCK_METHOD0(Constructor, Id_t(void));
     MOCK_METHOD2(Subscribe, void(Id_t, EventHandlerPtr_t));
     MOCK_METHOD1(GetHandle, Handle_t(Id_t));
+    MOCK_METHOD1(GetClientRect, Rect(Id_t));
   };
 
 public:
@@ -81,6 +82,11 @@ public:
   Handle_t Window::GetHandle(void) const override
   {
     return Proxy::GetInstance()->GetHandle(m_Id);
+  }
+
+  Rect GetClientRect(void) const override
+  {
+    return Proxy::GetInstance()->GetClientRect(m_Id);
   }
 
   const Configuration_t & GetConfiguration(void) const override

@@ -210,7 +210,7 @@ enum {
 };
 
 /**
-* \ingroup gCovelliteCoreClasses
+* \ingroup CovelliteCoreGroup
 * \brief
 *  Системные события.
 * \anchor aSystemCommand

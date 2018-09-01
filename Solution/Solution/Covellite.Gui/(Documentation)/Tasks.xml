@@ -1,0 +1,59 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Tasks>
+  <Options>
+    <Width>1398</Width>
+    <Height>942</Height>
+    <X>327</X>
+    <Y>71</Y>
+  </Options>
+  <Process>
+    <Task1 Text="Класс Window." Type="Orange" Version="None" ExternalProgram="Project" Expanded="true" Completed="false" History="true" ParentTaskText="false">
+      <Task2 Text="Использование api::IWindow::GetClientRect()." Type="None" Version="None" ExternalProgram="Project" Expanded="true" Completed="false" History="false" ParentTaskText="true"/>
+      <Task3 Text="Завершение работы при выходе из последнего слоя - через событие (+ удалить наследование от core::Window)." Type="None" Version="None" ExternalProgram="Project" Expanded="false" Completed="false" History="false" ParentTaskText="true"/>
+    </Task1>
+  </Process>
+  <Complete>
+    <Week6186>
+      <Task38 Text="Тест сравнения хешей объектов идентификаторов событий клика по элементу управления." Type="None" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="false"/>
+    </Week6186>
+    <Week6185>
+      <Task7 Text="Изменение способа работы с событиями фреймворка." Type="Red" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="false">
+        <Task8 Text="Класс IWindow." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true">
+          <Task9 Text="Класс-наследник от events::IEvents." Type="None" Version="None" ExternalProgram="None" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+          <Task10 Text="Функция загрузки объекта документа libRocket." Type="None" Version="None" ExternalProgram="None" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+        </Task8>
+        <Task11 Text="Генерация событий фреймворка." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true">
+          <Task12 Text="Заготовка тестов." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+          <Task13 Text="Создание объекта подписчика на события." Type="None" Version="None" ExternalProgram="None" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+          <Task14 Text="Клик мышью по элементу управления." Type="None" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+        </Task11>
+        <Task15 Text="Класс Window." Type="None" Version="None" ExternalProgram="None" Expanded="false" Completed="true" History="false" ParentTaskText="true">
+          <Task16 Text="Конструктор, получающий ссылку на интерфейсный класс окна графического Api." Type="None" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+          <Task17 Text="Реализация оператора получения объекта событий." Type="None" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+          <Task18 Text="Реализация функции загрузки документа." Type="None" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+          <Task19 Text="Восстановление компилируемости тестового проекта." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+          <Task20 Text="Функция PushLayer()." Type="None" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="true">
+            <Task21 Text="Дополнительная к существующей." Type="None" Version="None" ExternalProgram="None" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+            <Task22 Text="Возвращать ссылку на созданный объект или вообще ничего не возвращать?" Type="None" Version="None" ExternalProgram="None" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+            <Task23 Text="Проверка наследования от интерфейсного класса слоя." Type="None" Version="None" ExternalProgram="None" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+          </Task20>
+          <Task24 Text="Обработка событий фреймворка и вызов нужных функций libRocket." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+          <Task25 Text="Преобразование для нажатых кнопок кодов операционной системы в коды libRocket." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+          <Task26 Text="Подписка на события libRocket." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+          <Task27 Text="Исправление подставного класса." Type="None" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+          <Task28 Text="Удаление проверки указателя на созданный документ и преобразования слешей в путях." Type="None" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+        </Task15>
+        <Task29 Text="Класс Layer." Type="None" Version="None" ExternalProgram="None" Expanded="false" Completed="true" History="false" ParentTaskText="true">
+          <Task30 Text="Интерфейсный класс - наследник от events::IEvents." Type="None" Version="None" ExternalProgram="None" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+          <Task31 Text="Реализация функции доступа к объекту событий фреймворка (final)." Type="None" Version="None" ExternalProgram="None" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+          <Task32 Text="Защищенные конструкторы, получающие ссылку на класс rocket::IWindow." Type="None" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+          <Task33 Text="Перенос проверки указателя на документ в конструктор класса слоя." Type="None" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+          <Task34 Text="Преобразование слешей в пути к документу в классе слоя." Type="None" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+          <Task35 Text="Защищенный объект событий фреймворка." Type="None" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+        </Task29>
+      </Task7>
+    </Week6185>
+    <Week6184/>
+    <Week6183/>
+  </Complete>
+</Tasks>

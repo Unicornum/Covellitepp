@@ -109,13 +109,8 @@ Window::Window(const ::covellite::app::IApplication & _Application) :
   m_Handle(::covellite::os::CreateWindow(::covellite::app::ClassName,
     ::covellite::app::Settings_t::GetInstance()[uT("Window")]))
 {
-  const auto Result = USING_MOCK ::SetWindowLongPtrW(m_Handle, GWLP_USERDATA,
+  USING_MOCK ::SetWindowLongPtrW(m_Handle, GWLP_USERDATA,
     reinterpret_cast<LONG_PTR>(&m_Events));
-  //if (Result == NULL)
-  //{
-  //  USING_MOCK ::DestroyWindow(m_Handle);
-  //  WINAPI_CHECK FALSE;
-  //}
 
   using RawParams_t = ::std::pair<WPARAM, LPARAM>;
   using Position_t = events::Cursor_t::Position;
@@ -166,9 +161,13 @@ Window::Window(const ::covellite::app::IApplication & _Application) :
   });
   m_Events[(UINT)WM_SYSKEYUP].Connect([&](const RawParams_t & _Params)
   {
-    if (static_cast<int32_t>(_Params.first) == VK_LEFT)
+    if (_Params.first == VK_LEFT)
     {
       m_Events[events::Key.Back]();
+    }
+    else if (_Params.first == VK_SPACE)
+    {
+      m_Events[events::Key.Menu]();
     }
   });
 }
@@ -176,6 +175,14 @@ Window::Window(const ::covellite::app::IApplication & _Application) :
 Window::~Window(void) noexcept
 {
   USING_MOCK ::DestroyWindow(m_Handle);
+}
+
+Window::Rect Window::GetClientRect(void) const /*override*/
+{
+  RECT ClientRect;
+  WINAPI_CHECK USING_MOCK ::GetClientRect(m_Handle, &ClientRect);
+  return { 0, 0,
+    ClientRect.right - ClientRect.left, ClientRect.bottom - ClientRect.top };
 }
 
 } // namespace os

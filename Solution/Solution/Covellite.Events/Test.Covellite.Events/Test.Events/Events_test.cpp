@@ -81,6 +81,13 @@ class Window2 :
   public ::covellite::events::IEvents
 {
 public:
+  enum Id
+  {
+    One = 0,
+    Two,
+  };
+
+public:
   operator ::covellite::events::Events (void) const override
   {
     return m_Events;
@@ -381,4 +388,15 @@ TEST_F(Events_test, /*DISABLED_*/Test_DisconnectSlots)
 
   const auto Result = Events[Application::Two]();
   EXPECT_TRUE(Result);
+}
+
+// ************************************************************************** //
+TEST_F(Events_test, /*DISABLED_*/Test_ActivateEmptySlot)
+{
+  Application Example;
+  Window2 Window{ Example };
+  Tested_t Events = Window;
+
+  const auto Result = Events[Window2::Two]();
+  EXPECT_FALSE(Result);
 }

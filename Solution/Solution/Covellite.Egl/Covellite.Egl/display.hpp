@@ -11,7 +11,7 @@ class Surface;
 class Context;
 
 /**
-* \ingroup gCovelliteEglClasses
+* \ingroup CovelliteEglGroup
 * \brief
 *  Класс входит в проект \ref CovelliteEglPage \n
 *  Класс-обетка для EGLDisplay.

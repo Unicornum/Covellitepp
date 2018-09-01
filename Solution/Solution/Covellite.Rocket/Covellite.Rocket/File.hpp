@@ -9,7 +9,7 @@ namespace rocket
 {
 
 /**
-* \ingroup gCovelliteRocketClasses
+* \ingroup CovelliteRocketGroup
 * \brief
 *  Класс входит в проект \ref CovelliteRocketPage \n
 *  Реализация интерфейса libRocket для чтения файлов из assets.

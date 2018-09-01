@@ -30,7 +30,7 @@ namespace rocket
 using RocketKeyCode_t = Rocket::Core::Input::KeyIdentifier;
 
 /**
-* \ingroup gCovelliteRocketClasses
+* \ingroup CovelliteRocketGroup
 * \brief
 *  Функция входит в проект \ref CovelliteRocketPage \n
 *  Функция преобразования системных кодов нажатых кнопок в коды libRocket.

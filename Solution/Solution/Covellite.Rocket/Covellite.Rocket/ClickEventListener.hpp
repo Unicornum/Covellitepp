@@ -9,7 +9,7 @@ namespace rocket
 {
 
 /**
-* \ingroup gCovelliteRocketClasses
+* \ingroup CovelliteRocketGroup
 * \brief
 *  Класс входит в \ref CovelliteRocketPage \n
 *  Вспомогательный класс для передачи событий libRocket классам окон/слоев.

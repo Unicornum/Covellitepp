@@ -14,7 +14,7 @@ namespace os
 {
 
 /**
-* \ingroup gCovelliteOsClasses
+* \ingroup CovelliteOsGroup
 * \brief
 *  Класс входит в проект \ref CovelliteOsPage \n
 *  Класс окна операционной системы программы.
@@ -57,6 +57,7 @@ public:
 public:
   // Интерфейс os::IWindow:
   Handle_t GetHandle(void) const override;
+  Rect GetClientRect(void) const override;
   const Configuration_t & GetConfiguration(void) const override;
 
 private:

@@ -11,7 +11,7 @@ namespace os
 {
 
 /**
-* \ingroup gCovelliteOsClasses
+* \ingroup CovelliteOsGroup
 * \brief
 *  Класс входит в проект \ref CovelliteOsPage \n
 *  Интерфейсный класс окна операционной системы программы.
@@ -31,7 +31,18 @@ class IWindow :
   using Configuration_t = covellite::os::Configuration;
 
 public:
+  class Rect final
+  {
+  public:
+    int32_t Left;
+    int32_t Top;
+    int32_t Width;
+    int32_t Height;
+  };
+
+public:
   virtual Handle_t GetHandle(void) const = 0;
+  virtual Rect GetClientRect(void) const = 0;
   virtual const Configuration_t & GetConfiguration(void) const = 0;
 
 public:

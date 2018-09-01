@@ -52,6 +52,7 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <SDLCheck>false</SDLCheck>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -64,6 +65,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <SDLCheck>false</SDLCheck>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -72,27 +74,44 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="Api.forward.hpp" />
     <ClInclude Include="Events.hpp" />
-    <ClInclude Include="GL.hpp" />
     <ClInclude Include="IWindow.hpp" />
-    <ClInclude Include="OpenGL.hpp" />
-    <ClInclude Include="OpenGLCommon.hpp" />
-    <ClInclude Include="RenderOpenGL.hpp" />
+    <ClInclude Include="Render\Api.forward.hpp" />
+    <ClInclude Include="Render\DirectX10.hpp" />
+    <ClInclude Include="Render\DirectX9.hpp" />
+    <ClInclude Include="Render\DxCheck.hpp" />
+    <ClInclude Include="Render\DirectX11.hpp" />
+    <ClInclude Include="Render\fx\Render.auto.hpp" />
+    <ClInclude Include="Render\IGraphicApi.hpp" />
+    <ClInclude Include="Render\IRender.hpp" />
+    <ClInclude Include="Render\OpenGL.hpp" />
+    <ClInclude Include="Render\OpenGLCommon.hpp" />
+    <ClInclude Include="Render\Render.hpp" />
+    <ClInclude Include="Render\stdafx.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="Window.hpp" />
     <ClInclude Include="Window.mock.hpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="OpenGL.cpp" />
-    <ClCompile Include="OpenGLCommon.cpp" />
-    <ClCompile Include="RenderOpenGL.cpp" />
+    <ClCompile Include="Render\DirectX10.cpp" />
+    <ClCompile Include="Render\DirectX9.cpp" />
+    <ClCompile Include="Render\DirectX11.cpp" />
+    <ClCompile Include="Render\DxCheck.cpp" />
+    <ClCompile Include="Render\OpenGL.cpp" />
+    <ClCompile Include="Render\OpenGLCommon.cpp" />
+    <ClCompile Include="Render\Render.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="Window.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="Render\fx\Render.fx">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </FxCompile>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

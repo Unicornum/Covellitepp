@@ -10,7 +10,7 @@ namespace egl
 {
 
 /**
-* \ingroup gCovelliteEglClasses
+* \ingroup CovelliteEglGroup
 * \brief
 *  Класс входит в проект \ref CovelliteEglPage \n
 *  Вспомогательный класс для работы макроса проверки вызова функций EGL.

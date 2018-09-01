@@ -3,7 +3,7 @@
 #include <Covellite\Core\Application.hpp>
 
 /**
-* \ingroup gCovelliteCoreClasses
+* \ingroup CovelliteCoreGroup
 * \def APPLICATION_ENTRY_POINT
 * \brief
 *  Макрос входит в проект \ref CovelliteCorePage \n

@@ -18,16 +18,16 @@ template<>
   auto pSettings = ::std::make_unique<Section_t>(uT("Covellitepp"));
     
 # if BOOST_OS_WINDOWS
-
+    
   // Параметры, используемые только в Windows
   (*pSettings).AddExtra(uT("AppRootPath"),
     ::alicorn::system::application::CurrentModule::GetAppRootPath());
-
+    
   (*pSettings).SetDefault(uT("PathToFontsDirectory"),
     uT("{AppRootPath}/data/fonts"),
     uT("Путь к папке расположения шрифтов, которые используются в .rcss файлах."));
     
-  (*pSettings)[uT("Window")].SetDefault(uT("GraphicsApi"), uT("OpenGL"),
+  (*pSettings)[uT("Window")].SetDefault(uT("GraphicsApi"), uT("DirectX11"),
     uT("Используемый для рендеринга графический Api."));
   (*pSettings)[uT("Window")].SetDefault(uT("IsFullScreen"), false,
     uT("Полноэкранный/оконный режим работы программы."));
@@ -45,12 +45,12 @@ template<>
   (*pSettings).SetDefault(uT("PathToFontsDirectory"),
     uT("data/fonts"),
     uT("Путь к папке расположения шрифтов, которые используются в .rcss файлах."));
-
+    
   (*pSettings)[uT("Window")].SetDefault(uT("GraphicsApi"), uT("OpenGLES"),
     uT("Используемый для рендеринга графический Api."));
     
 # endif
-
+    
   // Общие параметры для всех платформ
   (*pSettings)[uT("Window")][uT("BackgroundColor")].SetDefault(uT("R"), 0,
     uT("Цвет фона окна программы по умолчанию: красная компонента [0...255]."));

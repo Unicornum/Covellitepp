@@ -14,7 +14,7 @@ namespace rocket
 class IStringTranslator;
 
 /**
-* \ingroup gCovelliteRocketClasses
+* \ingroup CovelliteRocketGroup
 * \brief
 *  Класс входит в проект \ref CovelliteRocketPage \n
 *  Класс, инкапсулирующий инициализацию/разрушение библиотеки libRocket.

@@ -8,6 +8,7 @@ namespace covellite
 namespace rocket
 {
 
+// cppcheck-suppress ConfigurationNotChecked
 RocketKeyCode_t SystemToRocketKeyCode(int32_t _AsciiKeyCode)
 {
   static const ::std::map<int32_t, RocketKeyCode_t> Keys =

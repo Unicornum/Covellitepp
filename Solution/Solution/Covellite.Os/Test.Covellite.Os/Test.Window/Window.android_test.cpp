@@ -60,6 +60,7 @@ protected:
     MOCK_METHOD1(OnDown, void(int));
     MOCK_METHOD1(OnUp, void(int));
     MOCK_METHOD0(OnBack, void(void));
+    MOCK_METHOD0(OnMenu, void(void));
 
   public:
     Application(void) :
@@ -89,6 +90,8 @@ protected:
         .Connect([&](const KeyCode_t & _Code) { OnUp(_Code); });
       m_Events[events::Key.Back]
         .Connect([&]() { OnBack(); });
+      m_Events[events::Key.Menu]
+        .Connect([&]() { OnMenu(); });
     }
   };
 };
@@ -145,6 +148,7 @@ TEST_F(Window_test, /*DISABLED_*/Test_Motion)
   const auto X = 7081012;
   const auto Y = 7081013;
   const int32_t Message = 
+    // cppcheck-suppress integerOverflow
     (AINPUT_EVENT_TYPE_MOTION << 8) | AMOTION_EVENT_ACTION_MOVE;
 
   AInputEvent InputEvent;
@@ -183,6 +187,7 @@ TEST_F(Window_test, /*DISABLED_*/Test_Touch)
   const auto X = 7081047;
   const auto Y = 7081048;
   const int32_t Message = 
+    // cppcheck-suppress integerOverflow
     (AINPUT_EVENT_TYPE_MOTION << 8) | AMOTION_EVENT_ACTION_DOWN;
 
   AInputEvent InputEvent;
@@ -226,6 +231,7 @@ TEST_F(Window_test, /*DISABLED_*/Test_Release)
   const auto X = 7081050;
   const auto Y = 7081051;
   const int32_t Message =
+    // cppcheck-suppress integerOverflow
     (AINPUT_EVENT_TYPE_MOTION << 8) | AMOTION_EVENT_ACTION_UP;
 
   AInputEvent InputEvent;
@@ -267,6 +273,7 @@ TEST_F(Window_test, /*DISABLED_*/Test_Pressed)
   AEventProxy_t::GetInstance() = &AEventProxy;
 
   const auto Code = 1807081055;
+  // cppcheck-suppress integerOverflow
   const int32_t Message = (AINPUT_EVENT_TYPE_KEY << 8) | 
     ::covellite::events::Key_t::APP_CMD_KEY_PRESSED;
 
@@ -301,6 +308,7 @@ TEST_F(Window_test, /*DISABLED_*/Test_Down)
 
   const auto Code = 1807081110;
   const int32_t Message =
+    // cppcheck-suppress integerOverflow
     (AINPUT_EVENT_TYPE_KEY << 8) | AKEY_EVENT_ACTION_DOWN;
 
   AInputEvent InputEvent;
@@ -334,6 +342,7 @@ TEST_F(Window_test, /*DISABLED_*/Test_Up)
 
   const auto Code = 1807081112;
   const int32_t Message =
+    // cppcheck-suppress integerOverflow
     (AINPUT_EVENT_TYPE_KEY << 8) | AKEY_EVENT_ACTION_UP;
 
   AInputEvent InputEvent;
@@ -362,12 +371,6 @@ TEST_F(Window_test, /*DISABLED_*/Test_Up)
 }
 
 // ************************************************************************** //
-TEST_F(Window_test, DISABLED_Test_Settings)
-{
-  FAIL() << u8"Добавить тесты";
-}
-
-// ************************************************************************** //
 TEST_F(Window_test, /*DISABLED_*/Test_Back)
 {
   using AEventProxy_t = ::mock::AEventProxy;
@@ -376,6 +379,7 @@ TEST_F(Window_test, /*DISABLED_*/Test_Back)
 
   const auto Code = AKEYCODE_BACK;
   const int32_t Message =
+    // cppcheck-suppress integerOverflow
     (AINPUT_EVENT_TYPE_KEY << 8) | AKEY_EVENT_ACTION_UP;
 
   AInputEvent InputEvent;
@@ -396,11 +400,104 @@ TEST_F(Window_test, /*DISABLED_*/Test_Back)
   EXPECT_CALL(Application, OnBack())
     .Times(1);
 
+  EXPECT_CALL(Application, OnMenu())
+    .Times(0);
+
   EXPECT_CALL(Application, OnUp(_))
     .Times(0);
 
   ::covellite::events::Events Events = Example;
   Events[Message](&InputEvent);
+}
+
+// ************************************************************************** //
+TEST_F(Window_test, /*DISABLED_*/Test_Menu)
+{
+  using AEventProxy_t = ::mock::AEventProxy;
+  AEventProxy_t AEventProxy;
+  AEventProxy_t::GetInstance() = &AEventProxy;
+
+  const auto Code = AKEYCODE_MENU;
+  const int32_t Message =
+    // cppcheck-suppress integerOverflow
+    (AINPUT_EVENT_TYPE_KEY << 8) | AKEY_EVENT_ACTION_UP;
+
+  AInputEvent InputEvent;
+  ANativeWindow Window;
+  auto * pWindow = &Window;
+
+  const AppInfo_t Info{ &pWindow };
+
+  Application Application;
+  Tested_t Example{ Application };
+
+  using namespace ::testing;
+
+  EXPECT_CALL(AEventProxy, GetKeyCode(&InputEvent))
+    .Times(1)
+    .WillOnce(Return(Code));
+
+  EXPECT_CALL(Application, OnMenu())
+    .Times(1);
+
+  EXPECT_CALL(Application, OnBack())
+    .Times(0);
+
+  EXPECT_CALL(Application, OnUp(_))
+    .Times(0);
+
+  ::covellite::events::Events Events = Example;
+  Events[Message](&InputEvent);
+}
+
+// ************************************************************************** //
+TEST_F(Window_test, /*DISABLED_*/Test_GetClientRect)
+{
+  using AEventProxy_t = ::mock::AEventProxy;
+  AEventProxy_t AEventProxy;
+  AEventProxy_t::GetInstance() = &AEventProxy;
+
+  using EnvironmentProxy_t = ::alicorn::system::platform::proxy::Environment;
+  EnvironmentProxy_t EnvironmentProxy;
+  EnvironmentProxy_t::GetInstance() = &EnvironmentProxy;
+
+  const int32_t Top = 1808221157;
+  const int32_t Width = 1808221158;
+  const int32_t Height = 1808221159;
+  const ::mock::Id_t EnvironmentId = 1808221200;
+
+  ANativeWindow Window;
+  auto * pWindow = &Window;
+
+  const AppInfo_t Info{ &pWindow };
+
+  const Application Application;
+  const Tested_t Example{ Application };
+  const ITested_t & IExample = Example;
+
+  using namespace ::testing;
+
+  EXPECT_CALL(EnvironmentProxy, Constructor())
+    .Times(1)
+    .WillOnce(Return(EnvironmentId));
+
+  EXPECT_CALL(EnvironmentProxy, GetStatusBarHeight(EnvironmentId))
+    .Times(1)
+    .WillOnce(Return(Top));
+
+  EXPECT_CALL(AEventProxy, GetWidth(pWindow))
+    .Times(1)
+    .WillOnce(Return(Width));
+
+  EXPECT_CALL(AEventProxy, GetHeight(pWindow))
+    .Times(1)
+    .WillOnce(Return(Height));
+
+  const auto Result = IExample.GetClientRect();
+  EXPECT_EQ(0, Result.Left);
+  EXPECT_EQ(Top, Result.Top);
+  EXPECT_EQ(Width, Result.Width);
+  EXPECT_EQ(Height, Result.Height);
 }
 
 // ************************************************************************** //

@@ -7,7 +7,7 @@
 /**
 * \page CovelliteEglPage Covellite.Egl
 *  
-*  Список классов проекта \ref gCovelliteEglClasses
+*  Список классов проекта \ref CovelliteEglGroup
 *  
 *  Введение
 *  --------

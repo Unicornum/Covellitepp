@@ -16,7 +16,7 @@ class IWindow;
 class EventHandler;
 
 /**
-* \ingroup gCovelliteCoreClasses
+* \ingroup CovelliteCoreGroup
 * \brief
 *  Класс входит в проект \ref CovelliteCorePage \n
 *  Базовый класс приложения для Android.

@@ -8,7 +8,7 @@ namespace rocket
 {
 
 /**
-* \ingroup gCovelliteRocketClasses
+* \ingroup CovelliteRocketGroup
 * \brief
 *  Класс входит в проект \ref CovelliteRocketPage \n
 *  Интерфейсный класс преобразователя строк libRocket.

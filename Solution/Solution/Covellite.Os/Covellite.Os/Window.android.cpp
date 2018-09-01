@@ -1,6 +1,7 @@
 ﻿
 #include "stdafx.h"
 #include <Covellite/Os/Window.hpp>
+#include <alicorn/platform/environment.hpp>
 #include <Covellite/Events.hpp>
 #include <Covellite/App/IApplication.hpp>
 #include <Covellite/Os/Events.hpp>
@@ -30,8 +31,14 @@ Window::Window(const ::covellite::app::IApplication & _Application) :
 
   using AInputEvent_t = AInputEvent *;
 
-  const int32_t Motion = 
-    (AINPUT_EVENT_TYPE_MOTION << 8) | AMOTION_EVENT_ACTION_MOVE;
+  auto BuildMessage = [](int32_t _Type, int32_t _Value) -> int32_t
+  {
+    // cppcheck-suppress integerOverflow
+    return (_Type << 8) | _Value;
+  };
+
+  const auto Motion = 
+    BuildMessage(AINPUT_EVENT_TYPE_MOTION, AMOTION_EVENT_ACTION_MOVE);
 
   m_Events[Motion].Connect([&](const AInputEvent_t & _pEvent)
   {
@@ -41,38 +48,36 @@ Window::Window(const ::covellite::app::IApplication & _Application) :
     m_Events[events::Cursor.Motion](events::Cursor_t::Position{ X, Y });
   });
 
-  const int32_t Touch =
-    (AINPUT_EVENT_TYPE_MOTION << 8) | AMOTION_EVENT_ACTION_DOWN;
+  const auto Touch =
+    BuildMessage(AINPUT_EVENT_TYPE_MOTION, AMOTION_EVENT_ACTION_DOWN);
 
   m_Events[Touch].Connect([&](const AInputEvent_t & _pEvent)
   {
-    // 08 Июль 2018 10:53 (unicornum.verum@gmail.com)
-    TODO("Отдельный Motion не нужен?");
-
     const auto X = static_cast<int32_t>(AMotionEvent_getX(_pEvent, 0));
     const auto Y = static_cast<int32_t>(AMotionEvent_getY(_pEvent, 0));
 
+    // Отдельный Motion необходим, т.к. Android не генерирует отдельное
+    // сообщение при касании пальцем экрана.
     m_Events[events::Cursor.Motion](events::Cursor_t::Position{ X, Y });
     m_Events[events::Cursor.Touch]();
   });
 
-  const int32_t Release =
-    (AINPUT_EVENT_TYPE_MOTION << 8) | AMOTION_EVENT_ACTION_UP;
+  const auto Release =
+    BuildMessage(AINPUT_EVENT_TYPE_MOTION, AMOTION_EVENT_ACTION_UP);
 
   m_Events[Release].Connect([&](const AInputEvent_t & _pEvent)
   {
-    // 08 Июль 2018 10:53 (unicornum.verum@gmail.com)
-    TODO("Отдельный Motion не нужен?");
-
     const auto X = static_cast<int32_t>(AMotionEvent_getX(_pEvent, 0));
     const auto Y = static_cast<int32_t>(AMotionEvent_getY(_pEvent, 0));
 
+    // Отдельный Motion необходим, т.к. Android не генерирует отдельное
+    // сообщение при отпускании пальцем экрана.
     m_Events[events::Cursor.Motion](events::Cursor_t::Position{ X, Y });
     m_Events[events::Cursor.Release]();
   });
 
-  const int32_t Pressed =
-    (AINPUT_EVENT_TYPE_KEY << 8) | events::Key_t::APP_CMD_KEY_PRESSED;
+  const auto Pressed =
+    BuildMessage(AINPUT_EVENT_TYPE_KEY, events::Key_t::APP_CMD_KEY_PRESSED);
 
   m_Events[Pressed].Connect([&](const AInputEvent_t & _pEvent)
   {
@@ -81,8 +86,8 @@ Window::Window(const ::covellite::app::IApplication & _Application) :
     m_Events[events::Key.Pressed](Code);
   });
 
-  const int32_t Down =
-    (AINPUT_EVENT_TYPE_KEY << 8) | AKEY_EVENT_ACTION_DOWN;
+  const auto Down =
+    BuildMessage(AINPUT_EVENT_TYPE_KEY, AKEY_EVENT_ACTION_DOWN);
 
   m_Events[Down].Connect([&](const AInputEvent_t & _pEvent)
   {
@@ -91,8 +96,8 @@ Window::Window(const ::covellite::app::IApplication & _Application) :
     m_Events[events::Key.Down](Code);
   });
 
-  const int32_t Up =
-    (AINPUT_EVENT_TYPE_KEY << 8) | AKEY_EVENT_ACTION_UP;
+  const auto Up =
+    BuildMessage(AINPUT_EVENT_TYPE_KEY, AKEY_EVENT_ACTION_UP);
 
   m_Events[Up].Connect([&](const AInputEvent_t & _pEvent)
   {
@@ -102,11 +107,9 @@ Window::Window(const ::covellite::app::IApplication & _Application) :
     {
       m_Events[events::Key.Back]();
     }
-    else if (Code == AKEYCODE_UNKNOWN)
+    else if (Code == AKEYCODE_MENU)
     {
-      // 08 Июль 2018 11:21 (unicornum.verum@gmail.com)
-      TODO("Код кнопки Settings?");
-      m_Events[events::Key.Settings]();
+      m_Events[events::Key.Menu]();
     }
     else
     {
@@ -116,3 +119,14 @@ Window::Window(const ::covellite::app::IApplication & _Application) :
 }
 
 Window::~Window(void) = default;
+
+Window::Rect Window::GetClientRect(void) const /*override*/
+{
+  return 
+  {
+    0,
+    ::alicorn::system::platform::Environment{}.GetStatusBarHeight(),
+    ANativeWindow_getWidth(m_Handle),
+    ANativeWindow_getHeight(m_Handle)
+  };
+}

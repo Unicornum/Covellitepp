@@ -10,17 +10,32 @@
     <Filter Include="Tests\Window">
       <UniqueIdentifier>{d0617cde-65f0-432f-b00f-a50f7730b49d}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Tests\RenderOpenGL">
-      <UniqueIdentifier>{5d9f2d3d-229d-4b87-b319-4052fdc56470}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Tests\IWindow">
       <UniqueIdentifier>{e7583767-c3f1-42cf-874a-7e3a621da096}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Tests\OpenGLES">
-      <UniqueIdentifier>{7e4e0ed3-0317-4aad-83ef-14248c4bb315}</UniqueIdentifier>
+    <Filter Include="Tests\IRender">
+      <UniqueIdentifier>{73875b0a-29d7-4215-9785-b7ce72472fe6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Tests\Render">
+      <UniqueIdentifier>{055fb21a-65f4-487c-b637-dd1da7f72d2c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Tests\IGraphicApi">
+      <UniqueIdentifier>{fe4a0f6f-22b9-4b0e-9edc-1903f9d5e923}</UniqueIdentifier>
     </Filter>
     <Filter Include="Tests\OpenGL">
-      <UniqueIdentifier>{81b74a6f-fcfa-4b75-9365-464c0c1bbe71}</UniqueIdentifier>
+      <UniqueIdentifier>{cb147f30-3a51-40b1-baec-3f1012a92018}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Tests\OpenGLES">
+      <UniqueIdentifier>{fd1a3329-2102-4b41-9059-58e935c7ef33}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Tests\Fx">
+      <UniqueIdentifier>{900921bd-f6fa-419f-8f22-8b725dce1005}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Tests\DirectX11">
+      <UniqueIdentifier>{cd85736b-783e-47ff-a09f-efbe5657d20c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Tests\DxCheck">
+      <UniqueIdentifier>{736ba1c0-6b15-4629-80dc-5dc6f4db670c}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -35,23 +50,41 @@
     <ClCompile Include="Test.Window\Window_test.cpp">
       <Filter>Tests\Window</Filter>
     </ClCompile>
-    <ClCompile Include="Test.RenderOpenGL\RenderOpenGL_test.cpp">
-      <Filter>Tests\RenderOpenGL</Filter>
-    </ClCompile>
-    <ClCompile Include="..\Covellite.Api\RenderOpenGL.cpp">
-      <Filter>Tests\RenderOpenGL</Filter>
-    </ClCompile>
     <ClCompile Include="Test.IWindow\IWindow_test.cpp">
       <Filter>Tests\IWindow</Filter>
     </ClCompile>
-    <ClCompile Include="Test.OpenGLES\OpenGLES_test.cpp">
-      <Filter>Tests\OpenGLES</Filter>
+    <ClCompile Include="Test.IRender\IRender_test.cpp">
+      <Filter>Tests\IRender</Filter>
+    </ClCompile>
+    <ClCompile Include="Test.Render\Render_test.cpp">
+      <Filter>Tests\Render</Filter>
+    </ClCompile>
+    <ClCompile Include="Test.IGraphicApi\IGraphicApi_test.cpp">
+      <Filter>Tests\IGraphicApi</Filter>
     </ClCompile>
     <ClCompile Include="Test.OpenGL\OpenGL_test.cpp">
       <Filter>Tests\OpenGL</Filter>
     </ClCompile>
-    <ClCompile Include="..\Covellite.Api\Window.cpp">
-      <Filter>Tests\Window</Filter>
+    <ClCompile Include="Test.OpenGLES\OpenGLES_test.cpp">
+      <Filter>Tests\OpenGLES</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Covellite.Api\Render\Render.cpp">
+      <Filter>Tests\Render</Filter>
+    </ClCompile>
+    <ClCompile Include="Test.Fx\Fx_test.cpp">
+      <Filter>Tests\Fx</Filter>
+    </ClCompile>
+    <ClCompile Include="Test.DirectX11\DirectX11_test.cpp">
+      <Filter>Tests\DirectX11</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Covellite.Api\Render\DirectX11.cpp">
+      <Filter>Tests\DirectX11</Filter>
+    </ClCompile>
+    <ClCompile Include="Test.DxCheck\DxCheck_test.cpp">
+      <Filter>Tests\DxCheck</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Covellite.Api\Render\DxCheck.cpp">
+      <Filter>Tests\DxCheck</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -59,11 +92,20 @@
       <Filter>Source</Filter>
     </ClInclude>
     <ClInclude Include="mock.hpp" />
-    <ClInclude Include="..\Covellite.Api\RenderOpenGL.hpp">
-      <Filter>Tests\RenderOpenGL</Filter>
-    </ClInclude>
     <ClInclude Include="..\Covellite.Api\IWindow.hpp">
       <Filter>Tests\IWindow</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Covellite.Api\Render\IRender.hpp">
+      <Filter>Tests\IRender</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Covellite.Api\Render\IGraphicApi.hpp">
+      <Filter>Tests\IGraphicApi</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Covellite.Api\Render\DirectX11.hpp">
+      <Filter>Tests\DirectX11</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Covellite.Api\Render\DxCheck.hpp">
+      <Filter>Tests\DxCheck</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

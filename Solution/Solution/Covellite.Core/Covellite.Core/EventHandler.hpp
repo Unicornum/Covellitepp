@@ -17,7 +17,7 @@ class Params;
 class Message;
 
 /**
-* \ingroup gCovelliteCoreClasses
+* \ingroup CovelliteCoreGroup
 * \brief
 *  Класс входит в проект \ref CovelliteCorePage \n
 *  Класс обработчика сообщений операционной системы.

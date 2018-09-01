@@ -18,7 +18,7 @@
 #include <Covellite/Rocket/ClickEventListener.hpp>
 
 #include "../../Covellite.Rocket/ClickEventListener.cpp"
-#include <Covellite/Rocket/Events.hpp>
+#include <Covellite/Gui/Events.hpp>
 
 // Общий тестовый класс класса ClickEventListener
 class ClickEventListener_test :

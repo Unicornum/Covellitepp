@@ -3,7 +3,7 @@
 #include <Covellite\Covellite.hpp>
 
 /**
-* \ingroup gExampleClasses
+* \ingroup ExampleGroup
 * \brief
 *  Класс входит в проект \ref ExamplePage \n
 *  Класс главного объекта (точка входа) программы.
@@ -27,6 +27,6 @@ private:
   void DoInitWindow(void);
 
 public:
-  ExampleApp(void);
+  ExampleApp(void) noexcept;
   ~ExampleApp(void) noexcept;
 };

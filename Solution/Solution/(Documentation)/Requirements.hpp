@@ -4,6 +4,7 @@
 *  
 *  v1
 *  ==
+*  
 *  - \checked Фреймворк для создания Android приложений в Visual Studio
 *  с использованием OpenGL ES v1.
 *  - \checked Отрисовка GUI, созданного в формате html//css.
@@ -23,10 +24,14 @@
 *  
 *  - \checked Кроссплатформенный фреймворк с возможностью выбора используемого
 *  графического API:
-*   + \checked Android (OpenGL ES v1).
 *   + \checked Windows (OpenGL v4.5).
-*   + \unchecked Android (OpenGL ES v2).
-*   + \unchecked Windows (DirectX v11).
+*   + \checked Windows (DirectX v9/10/11).
+*   + \unchecked Windows (DirectX v12).
+*   + \unchecked Windows (Vulkan).
+*   + \checked Android (OpenGLES v1).
+*   + \unchecked Android (Vulkan).
+*   + \unchecked Автоматический выбор наиболее подходящей реализации для
+*  платформы, на которой запускается приложение.
 *  - \checked Создание приложения с единственным окном, которое строится из 
 *  набора классов окон:
 *   + \checked Окно операционной системы (параметры которого при его 
@@ -42,4 +47,5 @@
 *  отрисовкой окна графического API и окна GUI).
 *  - \checked Фреймворк должен быть рассчитан на построение приложения 
 *  в формате MVC.
+*  - \unchecked Одновременное отображение нескольких независимых панелей GUI.
 */

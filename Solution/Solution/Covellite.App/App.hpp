@@ -6,7 +6,7 @@
 *  Общий заголовочный файл для всех заголовочных файлов проекта 
 *  \ref CovelliteAppPage.
 * \defgroup CovelliteAppGroup App
-* \ingroup gCovelliteClasses
+* \ingroup CovelliteGroup
 *  Группа классов проекта \ref CovelliteAppPage.
 */
 

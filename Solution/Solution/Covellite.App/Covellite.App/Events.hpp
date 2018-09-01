@@ -8,7 +8,7 @@ namespace events
 {
 
 /**
-* \ingroup CovelliteEventsGroup
+* \ingroup CovelliteEventsTypeGroup
 * \brief
 *  Класс входит в проект \ref CovelliteAppPage \n
 *  Класс событий уровня приложения.

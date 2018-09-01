@@ -24,7 +24,7 @@ class Initializer;
 class StringTranslator;
 
 /**
-* \ingroup gCovelliteRocketClasses
+* \ingroup CovelliteRocketGroup
 * \brief
 *  Класс входит в проект \ref CovelliteRocketPage \n
 *  Класс окна, отрисовывающий GUI при помощи libRocket.

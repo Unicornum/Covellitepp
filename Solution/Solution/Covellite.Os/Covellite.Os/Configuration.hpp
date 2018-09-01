@@ -9,7 +9,7 @@ namespace os
 {
 
 /**
-* \ingroup gCovelliteOsClasses
+* \ingroup CovelliteOsGroup
 * \brief
 *  Класс входит в проект \ref CovelliteOsPage \n
 *  Класс доступа к текущим настройкам системы.

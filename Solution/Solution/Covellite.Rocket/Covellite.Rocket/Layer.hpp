@@ -14,7 +14,7 @@ namespace rocket
 {
 
 /**
-* \ingroup gCovelliteRocketClasses
+* \ingroup CovelliteRocketGroup
 * \brief
 *  Класс входит в проект \ref CovelliteRocketPage \n
 *  Класс одного слоя (пользовательского экрана) программы.
@@ -27,21 +27,16 @@ namespace rocket
 *  covellite::core::IWindow::Subscribe(), в которой может подписаться на
 *  нужные ему события.
 *  
-* \todo
-*  ILayer наследовать от IWindow???
-*  
 * \version
 *  1.0.0.0        \n
-*  1.1.0.0        \n
-*  1.2.0.0        \n
+*  2.0.0.0        \n
 * \date
 *  20 Декабрь 2016    \n
-*  28 Декабрь 2016    \n
-*  12 Октябрь 2017    \n
+*  31 Июль 2018    \n
 * \author
 *  CTAPOBEP (unicornum.verum@gmail.com)
 * \copyright
-*  © CTAPOBEP 2016 - 2017
+*  © CTAPOBEP 2016 - 2018
 */
 class Layer :
   public ::covellite::core::IWindow,

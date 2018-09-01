@@ -12,7 +12,7 @@ namespace rocket
 {
 
 /**
-* \ingroup gCovelliteRocketClasses
+* \ingroup CovelliteRocketGroup
 * \brief
 *  Класс входит в проект \ref CovelliteRocketPage \n
 *  Класс реализации системного интерфейса libRocket.
