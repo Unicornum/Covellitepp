@@ -1,11 +1,6 @@
-P:\projects\Covellitepp\Solution\Solution\Covellite.Api\Test.Covellite.Api\Test.OpenGL\OpenGL_test.cpp(686): error (suppress_id = syntaxError): syntax error
-P:\projects\Covellitepp\Solution\Solution\Covellite.Api\Test.Covellite.Api\Test.OpenGLES\OpenGLES_test.cpp(464): error (suppress_id = syntaxError): syntax error
-P:\projects\Covellitepp\Solution\Solution\Covellite.Api\Test.Covellite.Api\mock.hpp(35): warning (suppress_id = duplInheritedMember): The class 'Render' defines member variable with name 'm_Id' also defined in its parent class 'RenderInterface'.
+P:\projects\Covellitepp\Solution\Solution\Covellite.Api\Test.Covellite.Api\Mock\DirectX11.hpp(996): style (suppress_id = cstyleCast): C-style pointer casting
 P:\projects\Covellitepp\Solution\Solution\Covellite.Api\Covellite.Api\Render\DxCheck.cpp(14): style (suppress_id = unusedFunction): The function 'GetMessageText' is never used.
-P:\projects\Covellitepp\Solution\Solution\Covellite.Api\Covellite.Api\Render\DirectX10.cpp(84): style (suppress_id = unusedFunction): The function 'GetRender' is never used.
 P:\projects\Covellitepp\Solution\Solution\Covellite.Api\Covellite.Api\Render\DxCheck.cpp(9): style (suppress_id = unusedFunction): The function 'IsSuccessfull' is never used.
-P:\projects\Covellitepp\Solution\Solution\Covellite.Api\Test.Covellite.Api\Test.DirectX11\DirectX11_test.cpp(26): style (suppress_id = unusedFunction): The function 'SetUp' is never used.
-P:\projects\Covellitepp\Solution\Solution\Covellite.Api\Test.Covellite.Api\Test.DirectX11\DirectX11_test.cpp(31): style (suppress_id = unusedFunction): The function 'TearDown' is never used.
 P:\projects\Covellitepp\Solution\Solution\Covellite.Api\Test.Covellite.Api\Test.IWindow\IWindow_test.cpp(28): information (suppress_id = unmatchedSuppression): Unmatched suppression: unusedFunction
 P:\projects\Covellitepp\Solution\Solution\Covellite.Api\Test.Covellite.Api\Test.IWindow\IWindow_test.cpp(34): information (suppress_id = unmatchedSuppression): Unmatched suppression: unusedFunction
 P:\projects\Covellitepp\Solution\Solution\Covellite.Core\Covellite.Core\android_native_app_glue.c(513): information (suppress_id = unmatchedSuppression): Unmatched suppression: unusedFunction

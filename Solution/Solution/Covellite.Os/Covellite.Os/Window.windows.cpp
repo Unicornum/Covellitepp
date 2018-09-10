@@ -7,7 +7,6 @@
 #include <alicorn/platform/winapi-check.hpp>
 #include <alicorn/version.hpp>
 #include <Covellite/Core/ClassName.windows.hpp>
-#include <Covellite/Core/Settings.hpp>
 #include <Covellite/Events.hpp>
 #include <Covellite/App/IApplication.hpp>
 #include <Covellite/App/ClassName.windows.hpp>
@@ -100,7 +99,7 @@ static Handle_t CreateWindow(const wchar_t * _ClassName,
 */
 Window::Window(void) :
   m_Handle(::covellite::os::CreateWindow(::covellite::core::ClassName,
-    ::covellite::core::Settings_t::GetInstance()[uT("Window")]))
+    ::covellite::app::Settings_t::GetInstance()[uT("Window")]))
 {
 }
 

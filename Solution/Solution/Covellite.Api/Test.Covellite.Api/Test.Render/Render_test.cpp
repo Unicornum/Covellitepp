@@ -16,7 +16,8 @@
 #include "../Mock/RenderImpl.hpp"
 
 // Расположение класса Render
-#include "../../Covellite.Api/Render/Render.hpp"
+#include "../../Covellite.Api/Render/Render.cpp"
+#include "../../Covellite.Api/Render/Render.windows.cpp"
 
 // Общий тестовый класс класса Render
 class Render_test :

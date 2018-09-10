@@ -63,6 +63,7 @@ public:
 
 private:
   static ImplPtr_t MakeImpl(const String_t &, const Data &);
+  static ::std::vector<String_t> GetRenders(void);
 
 private:
   const ImplPtr_t m_pImpl;

@@ -7,3 +7,6 @@
 ///  Формат записей: '[ErrorId]:[File]:[Line]'.
 
 //*
+
+syntaxError:*\*_test.cpp
+unusedFunction:*\*_test.cpp

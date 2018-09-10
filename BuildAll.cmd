@@ -21,14 +21,15 @@ rem ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 set BuildAll=BuildAll:Rebuild /p:RunCodeAnalysis=true
 
-call %PathToExternals%\BuildSolution.cmd "Release:x64,Debug:x64" "Prebuild:Rebuild,%BuildAll%"
+call %PathToExternals%\BuildSolution.cmd "Release:x64,Debug:x64" "Clean:Rebuild,Prebuild:Rebuild,%BuildAll%"
 
 goto End
 
 rem ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 :DoMaster
 
-call %PathToExternals%\BuildSolution.cmd "Debug.Product:x64,Release.Product:x64" "Prebuild:Rebuild,BuildAll:Rebuild"
+call %PathToExternals%\BuildSolution.cmd "Debug.Product:x64,Release.Product:x64" "Clean:Rebuild,Prebuild:Rebuild,BuildAll:Rebuild"
+call %PathToExternals%\BuildSolution.cmd "Release.Product:ARM" "Prebuild:Rebuild,BuildAll:Rebuild"
 
 rename .\Release\Example.apk Covellitepp.apk
 

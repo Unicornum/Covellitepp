@@ -74,6 +74,7 @@
   <ItemGroup>
     <ClCompile Include="Render\OpenGLCommon.cpp" />
     <ClCompile Include="Render\OpenGLES.cpp" />
+    <ClCompile Include="Render\Render.android.cpp" />
     <ClCompile Include="Render\Render.cpp" />
     <ClCompile Include="Window.cpp" />
   </ItemGroup>

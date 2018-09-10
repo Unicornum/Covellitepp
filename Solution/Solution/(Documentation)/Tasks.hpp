@@ -8,7 +8,7 @@
 *  Список задач всех проектов решения
 *  ==================================
 
-*  Список задач проекта Covellite.Core
+*  Список задач проекта Example
 *  -----
 *  <table frame=void border=1 bordercolor=#FFFFFF cellpadding=5 cellspacing=0 width=98%><tr>
 *    <td width=1px>\image html ".\Solution\Externals\Utilities\Doxygen\TaskIcons\Info.png"</td>

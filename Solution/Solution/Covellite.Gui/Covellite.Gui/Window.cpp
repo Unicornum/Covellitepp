@@ -4,11 +4,11 @@
 #include <alicorn/platform/app-info.hpp>
 #include <alicorn/std/string.hpp>
 #include <alicorn/boost/string-cast.hpp>
-#include <Covellite/Events.hpp>
-#include <Covellite/Core/Settings.hpp>
 #include <Covellite/Core/Event.hpp>
 #include <Covellite/Core/EventHandler.hpp>
 #include <Covellite/Core/ClickEventListener.hpp>
+#include <Covellite/Events.hpp>
+#include <Covellite/App/Settings.hpp>
 #include <Covellite/Os/Events.hpp>
 #include <Covellite/Api/IWindow.hpp>
 #include <Covellite/Api/Events.hpp>
@@ -118,10 +118,16 @@ void Window::Subscribe(const EventHandlerPtr_t & _pEvents) /*override*/
   m_pEvents = _pEvents;
   m_pEvents->Subscribe(m_pContext.get());
 
-#pragma warning(push)
-#pragma warning(disable: 4996)
+#if BOOST_COMP_MSVC
+# pragma warning(push)
+# pragma warning(disable: 4996)
+#endif
+
   using namespace ::covellite::core;
-#pragma warning(pop)
+
+#if BOOST_COMP_MSVC
+# pragma warning(pop)
+#endif
 
   (*m_pEvents)[Event::Drawing]
     .connect(::std::bind(&Window::DoDrawWindow, this));
@@ -271,10 +277,7 @@ void Window::DoDrawWindow(void)
     }
   };
 
-#pragma warning(push)
-#pragma warning(disable: 4996)
-  const auto CovelliteppSection = ::covellite::core::Settings_t::GetInstance();
-#pragma warning(pop)
+  const auto CovelliteppSection = ::covellite::app::Settings_t::GetInstance();
 
   const auto PathToFontsDirectory =
     CovelliteppSection.Get<Path_t>(uT("PathToFontsDirectory"));

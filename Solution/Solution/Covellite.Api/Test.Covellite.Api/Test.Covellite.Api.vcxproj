@@ -49,8 +49,7 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;_LIB;TESTDLL_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalOptions>-Zm200 %(AdditionalOptions)</AdditionalOptions>
-      <DisableSpecificWarnings>4996;26439</DisableSpecificWarnings>
+      <DisableSpecificWarnings>4996;26439;4324</DisableSpecificWarnings>
       <SDLCheck>false</SDLCheck>
     </ClCompile>
     <Link>
@@ -64,8 +63,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;_LIB;TESTDLL_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalOptions>-Zm200 %(AdditionalOptions)</AdditionalOptions>
-      <DisableSpecificWarnings>4996;26439</DisableSpecificWarnings>
+      <DisableSpecificWarnings>4996;26439;4324</DisableSpecificWarnings>
       <SDLCheck>false</SDLCheck>
     </ClCompile>
     <Link>
@@ -80,7 +78,6 @@
   <ItemGroup>
     <ClCompile Include="..\Covellite.Api\Render\DirectX11.cpp" />
     <ClCompile Include="..\Covellite.Api\Render\DxCheck.cpp" />
-    <ClCompile Include="..\Covellite.Api\Render\Render.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
@@ -93,7 +90,9 @@
     <ClCompile Include="Test.IWindow\IWindow_test.cpp" />
     <ClCompile Include="Test.OpenGLES\OpenGLES_test.cpp" />
     <ClCompile Include="Test.OpenGL\OpenGL_test.cpp" />
+    <ClCompile Include="Test.Render\Render_test.android.cpp" />
     <ClCompile Include="Test.Render\Render_test.cpp" />
+    <ClCompile Include="Test.Render\Render_test.windows.cpp" />
     <ClCompile Include="Test.Window\Window_test.cpp" />
   </ItemGroup>
   <ItemGroup>

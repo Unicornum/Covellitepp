@@ -97,7 +97,7 @@ xcopy %SOURCE% "%COVELLITEPP_DIR%"Data /Y /I /E
 rem ===================================================
 echo Pack Example.zip...
 set ARCHIVER="$(SolutionDir)Solution\Solution\Externals\Utilities\Compression\7zip\7z.exe"
-set EXCLUDE=-x!Package -x!Test -x!arm -x!x86 -x!*.apk -x!*.zip -x!*.lastcodeanalysissucceeded -x!Version.exe -x!ProcessingMetrics.exe -x!*.pdb -x!*.ilk -x!*.iobj -x!*.ipdb
+set EXCLUDE=-x!Package -x!Test -x!arm -x!x86 -x!*.apk -x!*.apk.recipe* -x!*.zip -x!*.lastcodeanalysissucceeded -x!Resource.exe -x!Version.exe -x!ProcessingMetrics.exe -x!*.pdb -x!*.ilk -x!*.iobj -x!*.ipdb
 
 %ARCHIVER% a -r -w "%COVELLITEPP_DIR%\Covellitepp.zip" "%COVELLITEPP_DIR%*" %EXCLUDE%
 </Command>

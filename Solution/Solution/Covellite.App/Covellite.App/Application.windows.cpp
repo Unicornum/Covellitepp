@@ -60,32 +60,7 @@ Application::Application(const Run_t & _Run) :
 *  окна программы.
 */
 Application::Application(Continuous) :
-  Application([&](void) 
-  { 
-    m_Events[events::Application.Start]();
-
-    MSG Message = { 0 };
-    bool IsLostFocus = false;
-
-    while (true)
-    {
-      const auto Result = (IsLostFocus) ?
-        USING_MOCK ::GetMessage(&Message, NULL, 0, 0) :
-        USING_MOCK ::PeekMessage(&Message, 0, 0, 0, PM_REMOVE);
-      if (Result != FALSE)
-      {
-        if (Message.message == WM_SETFOCUS) IsLostFocus = false;
-        if (Message.message == WM_KILLFOCUS) IsLostFocus = true;
-        if (Message.message == WM_QUIT) break;
-        USING_MOCK ::TranslateMessage(&Message);
-        USING_MOCK ::DispatchMessage(&Message);
-      }
-
-      m_Events[events::Application.Update]();
-
-      Sleep(0);
-    }
-  })
+  Application([&](void) { PostCommand(false); })
 {
 }
 
@@ -95,26 +70,7 @@ Application::Application(Continuous) :
 *  после события.
 */
 Application::Application(EventBased) :
-  Application([&](void) 
-  { 
-    m_Events[events::Application.Start]();
-
-    MSG Message = { 0 };
-
-    while (true)
-    {
-      const auto Result = USING_MOCK ::GetMessage(&Message, NULL, 0, 0);
-      if (Result == -1) WINAPI_CHECK FALSE;
-      if (Message.message == WM_QUIT) break;
-
-      USING_MOCK ::TranslateMessage(&Message);
-      USING_MOCK ::DispatchMessage(&Message);
-
-      m_Events[events::Application.Update]();
-    }
-
-    return true;
-  })
+  Application([&](void) { PostCommand(true); })
 {
 }
 
@@ -165,7 +121,54 @@ Application::Application(EventBased) :
   return (pCommandLine == nullptr) ? "" : pCommandLine;
 }
 
-bool Application::PostCommand(bool /*_IsWaitMessage*/)
+bool Application::PostCommand(bool _IsWaitMessage)
 {
+  using ProcessEvents_t = void(*)(MSG &, bool &);
+
+  ProcessEvents_t ProcessEventsContinuous = 
+    [](MSG & _Message, bool & _IsLostFocus)
+  {
+    const auto Result = (_IsLostFocus) ?
+      USING_MOCK ::GetMessage(&_Message, NULL, 0, 0) :
+      USING_MOCK ::PeekMessage(&_Message, 0, 0, 0, PM_REMOVE);
+    if (Result == FALSE) return;
+
+    if (_Message.message == WM_SETFOCUS) _IsLostFocus = false;
+    if (_Message.message == WM_KILLFOCUS) _IsLostFocus = true;
+    if (_Message.message == WM_QUIT) return;
+
+    USING_MOCK::TranslateMessage(&_Message);
+    USING_MOCK::DispatchMessage(&_Message);
+  };
+
+  ProcessEvents_t ProcessEventsEventBased = 
+    [](MSG & _Message, bool & /*_IsLostFocus*/)
+  {
+    const auto Result = USING_MOCK ::GetMessage(&_Message, NULL, 0, 0);
+    if (Result == -1) WINAPI_CHECK FALSE;
+    if (_Message.message == WM_QUIT) return;
+
+    USING_MOCK ::TranslateMessage(&_Message);
+    USING_MOCK ::DispatchMessage(&_Message);
+  };
+
+  auto ProcessEvents = (_IsWaitMessage) ?
+    ProcessEventsEventBased : ProcessEventsContinuous;
+
+  MSG Message = { 0 };
+  bool IsLostFocus = false;
+
+  m_Events[events::Application.Start]();
+
+  while (true)
+  {
+    ProcessEvents(Message, IsLostFocus);
+    if (Message.message == WM_QUIT) break;
+
+    m_Events[events::Application.Update]();
+
+    Sleep(0);
+  }
+
   return true;
 }

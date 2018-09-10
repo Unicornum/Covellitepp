@@ -3,9 +3,9 @@
 #include <Covellite/Api/Window.hpp>
 #include <alicorn/std/string.hpp>
 #include <Covellite/Core/EventHandler.hpp>
-#include <Covellite/Core/Settings.hpp>
 #include <Covellite/Events.hpp>
 #include <Covellite/App/Events.hpp>
+#include <Covellite/App/Settings.hpp>
 #include <Covellite/Os/IWindow.hpp>
 #include <Covellite/Os/Events.hpp>
 #include <Covellite/Api/Events.hpp>
@@ -77,11 +77,16 @@ auto Window::MakeRenderInterface(void) const -> RenderInterfacePtr_t /*override*
 
 void Window::Subscribe(const EventHandlerPtr_t & _pEvents) /*override*/
 {
-#pragma warning(push)
-#pragma warning(disable: 4996)
-  using namespace ::covellite::core;
-#pragma warning(pop)
+#if BOOST_COMP_MSVC
+# pragma warning(push)
+# pragma warning(disable: 4996)
+#endif
 
+  using namespace ::covellite::core;
+
+#if BOOST_COMP_MSVC
+# pragma warning(pop)
+#endif
 
   (*_pEvents)[Event::StartDrawing].connect([&](const Params &) 
   { 
@@ -108,7 +113,7 @@ void Window::Subscribe(const EventHandlerPtr_t & _pEvents) /*override*/
 
   using String_t = ::alicorn::extension::std::String;
 
-  const auto MainSection = ::covellite::core::Settings_t::GetInstance();
+  const auto MainSection = ::covellite::app::Settings_t::GetInstance();
   const auto WindowSection = MainSection[uT("Window")];
 
 # if BOOST_OS_WINDOWS

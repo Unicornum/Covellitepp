@@ -3,10 +3,16 @@
 #include <Covellite\Core\EventHandler.hpp>
 #include <Covellite\Core\ClickEventListener.hpp>
 
-#pragma warning(push)
-#pragma warning(disable: 4996)
+#if BOOST_COMP_MSVC
+# pragma warning(push)
+# pragma warning(disable: 4996)
+#endif
+
 using namespace covellite::core;
-#pragma warning(pop)
+
+#if BOOST_COMP_MSVC
+# pragma warning(pop)
+#endif
 
 EventHandler::EventHandler(Dummy) :
   m_fnCleaner([](void) {})

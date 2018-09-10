@@ -15,3 +15,12 @@
 #include "Rocket\Window.hpp"
 #include "Rocket\Vfs.hpp"
 #include "Covellite.Rocket.lib.hpp"
+
+namespace covellite
+{
+
+#if BOOST_COMP_MSVC
+namespace[[deprecated("Deprecated namespace. Use classes from ñovellite::gui.")]] rocket{}
+#endif
+
+} // namespace covellite

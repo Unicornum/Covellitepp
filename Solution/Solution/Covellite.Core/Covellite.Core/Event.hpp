@@ -4,10 +4,6 @@
 namespace covellite
 {
 
-#if BOOST_COMP_MSVC
-namespace[[deprecated("Deprecated namespace. Use classes from ñovellite::events è covellite::app.")]] core{}
-#endif
-
 namespace core
 {
 

@@ -18,3 +18,12 @@
 #include "Core\ApplicationEntryPoint.hpp"
 #include "Core\Settings.hpp"
 #include "Covellite.Core.lib.hpp"
+
+namespace covellite
+{
+
+#if BOOST_COMP_MSVC
+namespace[[deprecated("Deprecated namespace. Use classes from ñovellite::events and covellite::app.")]] core{}
+#endif
+
+} // namespace covellite

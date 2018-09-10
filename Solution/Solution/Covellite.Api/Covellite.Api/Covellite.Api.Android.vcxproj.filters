@@ -49,5 +49,8 @@
     <ClCompile Include="Render\OpenGLCommon.cpp">
       <Filter>Render</Filter>
     </ClCompile>
+    <ClCompile Include="Render\Render.android.cpp">
+      <Filter>Render</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

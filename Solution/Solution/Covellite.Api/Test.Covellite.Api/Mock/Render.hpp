@@ -33,9 +33,6 @@ public:
   };
 
 public:
-  const ::mock::Id_t m_Id;
-
-public:
   void ClearWindow(void) override
   {
     Proxy::GetInstance()->ClearWindow(m_Id);
@@ -53,7 +50,7 @@ public:
 
 public:
   Render(const String_t & _ApiName, const Data & _Data) :
-    m_Id(Proxy::GetInstance()->Constructor(_ApiName, _Data))
+    RenderInterface(Proxy::GetInstance()->Constructor(_ApiName, _Data))
   {
 
   }

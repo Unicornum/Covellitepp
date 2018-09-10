@@ -1,6 +1,5 @@
 
 #include "stdafx.h"
-#include <alicorn/patterns/factory.hpp>
 
 // Примеры макросов библиотеки Google Test
 #include <alicorn/google/test/example.hpp>

@@ -22,6 +22,7 @@ public:
   {
   public:
     MOCK_METHOD1(Constructor, ::mock::Id_t(const Data &));
+    MOCK_METHOD2(SetClassName, void(::mock::Id_t, const String_t &));
     MOCK_METHOD1(ClearWindow, void(::mock::Id_t));
     MOCK_METHOD1(Present, void(::mock::Id_t));
     MOCK_METHOD3(ResizeWindow, void(::mock::Id_t, int32_t, int32_t));
@@ -106,5 +107,19 @@ public:
 };
 
 FACTORY_REGISTER_STRING_NAME(RenderImpl);
+
+#define DEFINE_RENDER_IMPL(ClassName) \
+  class ClassName : \
+    public RenderImpl\
+  {\
+  public:\
+    explicit ClassName(const Data & _Data) :\
+      RenderImpl(_Data)\
+    {\
+      Proxy::GetInstance()->SetClassName(m_Id, uT(#ClassName));\
+    }\
+  };\
+  \
+  FACTORY_REGISTER_STRING_NAME(ClassName);
 
 } // namespace mock

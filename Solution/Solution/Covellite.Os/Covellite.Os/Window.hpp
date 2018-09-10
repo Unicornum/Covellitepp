@@ -37,10 +37,7 @@ namespace os
 *  © CTAPOBEP 2016 - 2018
 */
 class Window final :
-#pragma warning(push)
-#pragma warning(disable: 4996)
   public ::covellite::core::IWindow,
-#pragma warning(pop)
   public ::covellite::app::IWindow,
   public ::covellite::os::IWindow
 {

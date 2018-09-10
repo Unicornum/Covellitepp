@@ -81,6 +81,7 @@ private:
   {
   public:
     inline static UINT GetFlag(void) { return D3D10_BIND_VERTEX_BUFFER; }
+    // cppcheck-suppress unusedFunction
     static Render_t GetRender(void)
     {
       return [](const D3D10Buffer & _Buffer)

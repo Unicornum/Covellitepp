@@ -170,6 +170,25 @@ void Render::ResizeWindow(int32_t _X, int32_t _Y) /*override*/
 {
   using namespace ::alicorn::modules::patterns;
 
+  if (_Api == uT("Auto"))
+  {
+    for (const auto & Name : GetRenders())
+    {
+      try
+      {
+        return factory::make_unique<IGraphicApi>(Name, _Data);
+      }
+      catch (const ::std::exception & _Ex)
+      {
+        // Сюда попадаем, если указанного рендера нет или при он недоступен 
+        // на текущем устройстве.
+
+        LOGGER(Warning) << uT("Create graphics API ") << Name << " error: " 
+          << _Ex.what();
+      }
+    }
+  }
+
   return factory::make_unique<IGraphicApi>(_Api, _Data);
 }
 

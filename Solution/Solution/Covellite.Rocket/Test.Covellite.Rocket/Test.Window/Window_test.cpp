@@ -964,7 +964,7 @@ TEST_F(Window_test, /*DISABLED_*/Test_OnKeyPressed)
   RocketCoreProxy_t RocketCoreProxy;
   RocketCoreProxy_t::GetInstance() = &RocketCoreProxy;
 
-  const auto KeyCode = 1711012121;
+  const ::mock::Rocket::Core::word KeyCode = 12121;
 
   using namespace ::testing;
 
@@ -982,12 +982,11 @@ TEST_F(Window_test, /*DISABLED_*/Test_OnKeyPressed)
 
   Tested_t Example{ IWindowApi };
 
-  EXPECT_CALL(Context, ProcessTextInput(
-    static_cast<::mock::Rocket::Core::word>(KeyCode)))
+  EXPECT_CALL(Context, ProcessTextInput(KeyCode))
     .Times(1);
 
   using namespace ::covellite::events;
 
   Events Events = IWindowApi;
-  Events[::covellite::events::Key.Pressed](KeyCode);
+  Events[::covellite::events::Key.Pressed](static_cast<int>(KeyCode));
 }

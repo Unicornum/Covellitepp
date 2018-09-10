@@ -49,10 +49,7 @@ namespace extension
 namespace std
 {
 
-#pragma warning(push)
-#pragma warning(disable: 4996)
 using namespace ::covellite::core;
-#pragma warning(pop)
 
 template<>
 /*static*/ SectionPtr_t Singleton<Section_t>::Make(void);

@@ -1,7 +1,6 @@
 
 #pragma once
 #include <wrl.h>
-#include <directxmath.h>
 #include <alicorn/std/string.hpp>
 #include "IGraphicApi.hpp"
 #include "Api.forward.hpp"
@@ -51,14 +50,6 @@ class DirectX11 final :
   using ComPtr_t = ::Microsoft::WRL::ComPtr<T>;
 
 public:
-  struct ConstantBuffer
-  {
-    ::DirectX::XMMATRIX mWorld;       // Матрица мира
-    ::DirectX::XMMATRIX mProjection;  // Матрица проекции
-    ::DirectX::XMFLOAT2 IsTextureDisabled;
-  };
-
-public:
   // Интерфейс IRender:
   void ClearWindow(void) override;
   void Present(void) override;
@@ -78,8 +69,9 @@ public:
   void Render(void) override;
 
 private:
-  void SetupEffect(void);
+  void CreateDeviceAndSwapChain(const Data &);
   void SetViewport(int, int);
+  void SetupEffect(void);
 
 private:
   ComPtr_t<ID3D11Device>            m_pd3dDevice;
@@ -87,14 +79,17 @@ private:
   ComPtr_t<IDXGISwapChain>          m_pSwapChain;
   ComPtr_t<ID3D11RenderTargetView>  m_pRenderTargetView;
 
+  ComPtr_t<ID3D11RasterizerState>   m_pScissorTestEnable;
+  ComPtr_t<ID3D11RasterizerState>   m_pScissorTestDisable;
   ComPtr_t<ID3D11InputLayout>       m_pVertexLayout;
   ComPtr_t<ID3D11VertexShader>      m_pVertexShader;
   ComPtr_t<ID3D11PixelShader>       m_pPixelShader;
-  ComPtr_t<ID3D11BlendState>        m_pBlendEnable;
-  ComPtr_t<ID3D11RasterizerState>   m_pScissorTestEnable;
-  ComPtr_t<ID3D11RasterizerState>   m_pScissorTestDisable;
-  ComPtr_t<ID3D11Buffer>            m_pConstantBuffer;
   ComPtr_t<ID3D11SamplerState>      m_pSamplerState;
+  ComPtr_t<ID3D11BlendState>        m_pBlendEnable;
+
+  ComPtr_t<ID3D11Buffer>            m_pConstantBuffer;
+
+  FLOAT m_BkColor[4];
 
 private:
   class Texture;

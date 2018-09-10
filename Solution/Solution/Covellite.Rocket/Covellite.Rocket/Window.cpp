@@ -118,10 +118,16 @@ void Window::Subscribe(const EventHandlerPtr_t & _pEvents) /*override*/
   m_pEvents = _pEvents;
   m_pEvents->Subscribe(m_pContext.get());
 
-#pragma warning(push)
-#pragma warning(disable: 4996)
+#if BOOST_COMP_MSVC
+# pragma warning(push)
+# pragma warning(disable: 4996)
+#endif
+
   using namespace ::covellite::core;
-#pragma warning(pop)
+
+#if BOOST_COMP_MSVC
+# pragma warning(pop)
+#endif
 
   (*m_pEvents)[Event::Drawing]
     .connect(::std::bind(&Window::DoDrawWindow, this));
@@ -271,10 +277,16 @@ void Window::DoDrawWindow(void)
     }
   };
 
-#pragma warning(push)
-#pragma warning(disable: 4996)
+#if BOOST_COMP_MSVC
+# pragma warning(push)
+# pragma warning(disable: 4996)
+#endif
+
   const auto CovelliteppSection = ::covellite::core::Settings_t::GetInstance();
-#pragma warning(pop)
+
+#if BOOST_COMP_MSVC
+# pragma warning(pop)
+#endif
 
   const auto PathToFontsDirectory =
     CovelliteppSection.Get<Path_t>(uT("PathToFontsDirectory"));

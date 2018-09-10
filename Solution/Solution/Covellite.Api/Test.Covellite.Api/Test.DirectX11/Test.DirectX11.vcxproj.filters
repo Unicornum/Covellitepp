@@ -19,6 +19,9 @@
     </ClCompile>
     <ClCompile Include="DirectX11_test.cpp" />
     <ClCompile Include="..\..\Covellite.Api\Render\DirectX11.cpp" />
+    <ClCompile Include="..\..\Covellite.Api\Render\DxCheck.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">
