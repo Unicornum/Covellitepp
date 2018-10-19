@@ -7,6 +7,9 @@
 // Примеры макросов библиотеки Google Mock
 #include <alicorn\google\mock\example.hpp>
 
+#pragma warning(push)
+#pragma warning(disable: 26444)
+
 /**
 * \file
 *  Тесты класса EventHandler.
@@ -1594,3 +1597,5 @@ TEST_F(EventHandler_test, /*DISABLED_*/Test_PostCommandDrawWindow)
 
   Example.PostCommandDrawWindow();
 }
+
+#pragma warning(pop)

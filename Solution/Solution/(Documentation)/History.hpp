@@ -6,6 +6,16 @@
 *  =================
 *  <table frame=void><tr><td></td></tr></table>
 *  
+*  Version: 2.1.6.986 Unknown
+*  -----
+*  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект \ref CovelliteAppPage : </td></tr></table>
+*  <table frame=void border=1 bordercolor=#FFFFFF cellpadding=5 cellspacing=0 width=98%><tr>
+*    <td width=10px></td>
+*    <td bgcolor=#B8CCE4 width=125px align=center> 08.10.2018 15:35 </td>
+*    <td bgcolor=#FFC0C0> fix: Попытка отрисовки окна после того, как оно стало невалидным в Android версии. </td>
+*  </tr></table>
+*  <table frame=void><tr><td></td></tr></table>
+*  
 *  Version: 2.1.5.933 Unknown
 *  -----
 *  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект \ref CovelliteApiPage : </td></tr></table>

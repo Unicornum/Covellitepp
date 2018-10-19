@@ -76,8 +76,8 @@
     <ResourceCompile Include="Resources.rc" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\Covellite.Api\Render\DirectX11.cpp" />
-    <ClCompile Include="..\Covellite.Api\Render\DxCheck.cpp" />
+    <ClCompile Include="..\Covellite.Api\Renderer\DirectX11.cpp" />
+    <ClCompile Include="..\Covellite.Api\Renderer\DxCheck.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
@@ -86,21 +86,19 @@
     <ClCompile Include="Test.DirectX11\DirectX11_test.cpp" />
     <ClCompile Include="Test.DxCheck\DxCheck_test.cpp" />
     <ClCompile Include="Test.IGraphicApi\IGraphicApi_test.cpp" />
-    <ClCompile Include="Test.IRender\IRender_test.cpp" />
+    <ClCompile Include="Test.IRenderer\IRenderer_test.cpp" />
     <ClCompile Include="Test.IWindow\IWindow_test.cpp" />
     <ClCompile Include="Test.OpenGLES\OpenGLES_test.cpp" />
     <ClCompile Include="Test.OpenGL\OpenGL_test.cpp" />
-    <ClCompile Include="Test.Render\Render_test.android.cpp" />
-    <ClCompile Include="Test.Render\Render_test.cpp" />
-    <ClCompile Include="Test.Render\Render_test.windows.cpp" />
+    <ClCompile Include="Test.Renderer\Renderer_test.android.cpp" />
+    <ClCompile Include="Test.Renderer\Renderer_test.cpp" />
+    <ClCompile Include="Test.Renderer\Renderer_test.windows.cpp" />
     <ClCompile Include="Test.Window\Window_test.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Covellite.Api\IWindow.hpp" />
-    <ClInclude Include="..\Covellite.Api\Render\DirectX11.hpp" />
-    <ClInclude Include="..\Covellite.Api\Render\DxCheck.hpp" />
-    <ClInclude Include="..\Covellite.Api\Render\IGraphicApi.hpp" />
-    <ClInclude Include="..\Covellite.Api\Render\IRender.hpp" />
+    <ClInclude Include="..\Covellite.Api\Renderer\DirectX11.hpp" />
+    <ClInclude Include="..\Covellite.Api\Renderer\DxCheck.hpp" />
     <ClInclude Include="mock.hpp" />
     <ClInclude Include="stdafx.h" />
   </ItemGroup>

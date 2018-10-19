@@ -2,63 +2,63 @@
 @startuml
 
 IWindow : {abstract} + Rect GetClientRect()
-IWindow : {abstract} + RenderInterface * GetRenderInterface()
+IWindow : {abstract} + RendererInterface * GetRendererInterface()
 IWindow : ---
 
 IWindow <|-.- Window
 
-Rocket_Core_RenderInterface : {abstract} + void Functions()
-Rocket_Core_RenderInterface : ---
+Rocket_Core_RendererInterface : {abstract} + void Functions()
+Rocket_Core_RendererInterface : ---
 
-render_IRender : {abstract} + void ClearWindow()
-render_IRender : {abstract} + void Present()
-render_IRender : {abstract} + void ResizeWindow(int, int)
+renderer_IRenderer : {abstract} + void ClearWindow()
+renderer_IRenderer : {abstract} + void Present()
+renderer_IRenderer : {abstract} + void ResizeWindow(int, int)
 
-render_IRender <|-.- render_Render
+renderer_IRenderer <|-.- renderer_Renderer
 
-render_Render : + IRender:: ...
-render_Render : ---
-render_Render : + RenderInterface:: ...
-render_Render : ---
-render_Render : Render(String _ApiName, Data)
+renderer_Renderer : + IRenderer:: ...
+renderer_Renderer : ---
+renderer_Renderer : + RendererInterface:: ...
+renderer_Renderer : ---
+renderer_Renderer : Renderer(String _ApiName, Data)
 
-Rocket_Core_RenderInterface <|-.- render_Render
+Rocket_Core_RendererInterface <|-.- renderer_Renderer
 
 Window : + IWindow:: ...
 Window : ---
 Window : Window(os_Window &)
 
-Window --* render_Render
+Window --* renderer_Renderer
 
-render_IRender <|-.- render_IGraphicApi
+renderer_IRenderer <|-.- renderer_IGraphicApi
 
-render_IGraphicApi : {abstract} + String GetUsingApi()
-render_IGraphicApi : ---
-render_IGraphicApi : {abstract} + ITexture * Create(const ITexture::Data &)
-render_IGraphicApi : {abstract} + void Destroy(ITexture *)
-render_IGraphicApi : {abstract} + IGeometry * Create(const IGeometry::Data &)
-render_IGraphicApi : {abstract} + void Destroy(IGeometry *)
-render_IGraphicApi : {abstract} + void EnableScissorRegion(int, int, int, int)
-render_IGraphicApi : {abstract} + void DisableScissorRegion()
-render_IGraphicApi : {abstract} + void Render()
+renderer_IGraphicApi : {abstract} + String GetUsingApi()
+renderer_IGraphicApi : ---
+renderer_IGraphicApi : {abstract} + ITexture * Create(const ITexture::Data &)
+renderer_IGraphicApi : {abstract} + void Destroy(ITexture *)
+renderer_IGraphicApi : {abstract} + IGeometry * Create(const IGeometry::Data &)
+renderer_IGraphicApi : {abstract} + void Destroy(IGeometry *)
+renderer_IGraphicApi : {abstract} + void EnableScissorRegion(int, int, int, int)
+renderer_IGraphicApi : {abstract} + void DisableScissorRegion()
+renderer_IGraphicApi : {abstract} + void Render()
 
 ITexture : {abstract} + void Render()
 ITexture : ---
 
-ITexture *-- render_IGraphicApi
+ITexture *-- renderer_IGraphicApi
 
 IGeometry : {abstract} + void Update(float, float)
 IGeometry : {abstract} + void Render()
 IGeometry : ---
 
-IGeometry *-- render_IGraphicApi
+IGeometry *-- renderer_IGraphicApi
 
-render_Render --* render_IGraphicApi
+renderer_Renderer --* renderer_IGraphicApi
 
-render_IGraphicApi <|-.- render_OpenGLES
-render_IGraphicApi <|-.- render_OpenGL
-render_IGraphicApi <|-.- render_DirectX9
-render_IGraphicApi <|-.- render_DirectX10
-render_IGraphicApi <|-.- render_DirectX11
+renderer_IGraphicApi <|-.- renderer_OpenGLES
+renderer_IGraphicApi <|-.- renderer_OpenGL
+renderer_IGraphicApi <|-.- renderer_DirectX9
+renderer_IGraphicApi <|-.- renderer_DirectX10
+renderer_IGraphicApi <|-.- renderer_DirectX11
 
 @enduml

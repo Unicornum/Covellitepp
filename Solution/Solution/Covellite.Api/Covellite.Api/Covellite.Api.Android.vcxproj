@@ -61,21 +61,23 @@
     <ClInclude Include="Events.hpp" />
     <ClInclude Include="IWindow.hpp" />
     <ClInclude Include="pch.h" />
-    <ClInclude Include="Render\Api.forward.hpp" />
-    <ClInclude Include="Render\IGraphicApi.hpp" />
-    <ClInclude Include="Render\IRender.hpp" />
-    <ClInclude Include="Render\OpenGLCommon.hpp" />
-    <ClInclude Include="Render\OpenGLES.hpp" />
-    <ClInclude Include="Render\Render.hpp" />
+    <ClInclude Include="Renderer\Api.forward.hpp" />
+    <ClInclude Include="Renderer\GL.hpp" />
+    <ClInclude Include="Renderer\IGraphicApi.hpp" />
+    <ClInclude Include="Renderer\IRenderer.hpp" />
+    <ClInclude Include="Renderer\OpenGLCommon.hpp" />
+    <ClInclude Include="Renderer\OpenGLES.hpp" />
+    <ClInclude Include="Renderer\Renderer.hpp" />
+    <ClInclude Include="Renderer\stdafx.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="Window.hpp" />
     <ClInclude Include="Window.mock.hpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Render\OpenGLCommon.cpp" />
-    <ClCompile Include="Render\OpenGLES.cpp" />
-    <ClCompile Include="Render\Render.android.cpp" />
-    <ClCompile Include="Render\Render.cpp" />
+    <ClCompile Include="Renderer\OpenGLCommon.cpp" />
+    <ClCompile Include="Renderer\OpenGLES.cpp" />
+    <ClCompile Include="Renderer\Renderer.android.cpp" />
+    <ClCompile Include="Renderer\Renderer.cpp" />
     <ClCompile Include="Window.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

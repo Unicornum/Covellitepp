@@ -9,7 +9,7 @@
 #include <Covellite/Os/IWindow.hpp>
 #include <Covellite/Os/Events.hpp>
 #include <Covellite/Api/Events.hpp>
-#include "Render/Render.hpp"
+#include "Renderer/Renderer.hpp"
 
 using namespace covellite::api;
 
@@ -105,9 +105,9 @@ void Window::Subscribe(const EventHandlerPtr_t & _pEvents) /*override*/
   });
 }
 
-/*static*/ Window::RenderPtr_t Window::MakeRender(const WindowOs_t & _Window)
+/*static*/ Window::RendererPtr_t Window::MakeRender(const WindowOs_t & _Window)
 {
-  render::IRender::Data Data;
+  renderer::IRenderer::Data Data;
   Data.Handle = _Window.GetHandle();
   Data.Top = _Window.GetClientRect().Top;
 
@@ -132,6 +132,6 @@ void Window::Subscribe(const EventHandlerPtr_t & _pEvents) /*override*/
 
   const auto NameOfApiClass = WindowSection.Get<String_t>(uT("GraphicsApi"));
 
-  return ::std::make_shared<covellite::api::render::Render>(
+  return ::std::make_shared<covellite::api::renderer::Renderer>(
     NameOfApiClass, Data);
 }

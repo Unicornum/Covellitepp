@@ -19,7 +19,7 @@ goto End
 rem ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 :DoRelease
 
-set BuildAll=BuildAll:Rebuild /p:RunCodeAnalysis=true
+set BuildAll=BuildAll:Rebuild /p:RunCodeAnalysis=true /p:EnableCppCoreCheck=true
 
 call %PathToExternals%\BuildSolution.cmd "Release:x64,Debug:x64" "Clean:Rebuild,Prebuild:Rebuild,%BuildAll%"
 

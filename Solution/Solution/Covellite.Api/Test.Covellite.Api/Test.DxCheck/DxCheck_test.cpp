@@ -13,7 +13,7 @@
 */
 
 // Расположение класса DxCheck
-#include "..\..\Covellite.Api\Render\DxCheck.hpp"
+#include "..\..\Covellite.Api\Renderer\DxCheck.hpp"
 
 // Общий тестовый класс класса DxCheck
 class DxCheck_test :

@@ -7,6 +7,9 @@
 // Примеры макросов библиотеки Google Mock
 #include <alicorn\google\mock\example.hpp>
 
+#pragma warning(push)
+#pragma warning(disable: 26444)
+
 /**
 * \file
 *  Тесты класса Application.
@@ -617,3 +620,5 @@ TEST_F(Application_test, /*DISABLED_*/Test_CallDestructorOrder_OnClose)
       .Times(0);
   }
 }
+
+#pragma warning(pop)

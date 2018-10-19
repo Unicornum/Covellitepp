@@ -38,5 +38,5 @@ protected:
 TEST_F(Fx_test, /*DISABLED_*/Test_Render)
 {
   EXPECT_FILES_STREQ(THIS_DIRECTORY / L"Render.expected.fx", 
-    THIS_DIRECTORY / L"../../Covellite.Api/Render/fx/Render.fx");
+    THIS_DIRECTORY / L"../../Covellite.Api/Renderer/fx/Render.fx");
 }

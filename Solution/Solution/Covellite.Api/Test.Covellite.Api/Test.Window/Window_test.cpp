@@ -17,7 +17,7 @@
 #include <Covellite/Os/Events.hpp>
 #include <Covellite/Api/Events.hpp>
 
-#include "../Mock/Render.hpp"
+#include "../Mock/Renderer.hpp"
 #include "../Mock/Eq.hpp"
 
 // Расположение класса Window
@@ -29,7 +29,7 @@ class Window_test :
 {
 protected:
   using Tested_t = ::covellite::api::Window;
-  using Render_t = ::mock::covellite::api::render::Render;
+  using Render_t = ::mock::covellite::api::renderer::Renderer;
   using IWindowApi_t = ::covellite::api::IWindow;
   using IWindowCore_t = ::covellite::core::IWindow;
   using WindowOs_t = ::mock::covellite::os::Window;
@@ -110,7 +110,7 @@ TEST_F(Window_test, /*DISABLED_*/Test_Constructor)
 
   for (const auto IsFullScreen : { true, false })
   {
-    ::covellite::api::render::IRender::Data Data;
+    ::covellite::api::renderer::IRenderer::Data Data;
     Data.Handle = (HWND)1808221257;
     Data.Top = 1808271300;
     Data.BkColor = { 0.1f, 0.2f, 0.3f, 0.4f };
@@ -197,7 +197,7 @@ TEST_F(Window_test, /*DISABLED_*/Test_DoApplicationUpdate)
   SettingsProxy_t SettingsProxy;
   SettingsProxy_t::GetInstance() = &SettingsProxy;
 
-  using RenderProxy_t = ::mock::covellite::api::render::Render::Proxy;
+  using RenderProxy_t = ::mock::covellite::api::renderer::Renderer::Proxy;
   RenderProxy_t RenderProxy;
   RenderProxy_t::GetInstance() = &RenderProxy;
 
@@ -247,7 +247,7 @@ TEST_F(Window_test, /*DISABLED_*/Test_DoWindowResize)
   SettingsProxy_t SettingsProxy;
   SettingsProxy_t::GetInstance() = &SettingsProxy;
 
-  using RenderProxy_t = ::mock::covellite::api::render::Render::Proxy;
+  using RenderProxy_t = ::mock::covellite::api::renderer::Renderer::Proxy;
   RenderProxy_t RenderProxy;
   RenderProxy_t::GetInstance() = &RenderProxy;
 
@@ -409,7 +409,7 @@ TEST_F(Window_test, /*DISABLED_*/Test_Constructor_Deprecated)
 
   for (const auto IsFullScreen : { true, false })
   {
-    ::covellite::api::render::IRender::Data Data;
+    ::covellite::api::renderer::IRenderer::Data Data;
     Data.Handle = (HWND)1808241139;
     Data.Top = 1808271313;
     Data.BkColor = { 0.1f, 0.2f, 0.3f, 0.4f };
@@ -589,7 +589,7 @@ TEST_F(Window_test, /*DISABLED_*/Test_DoStartDrawing_Deprecated)
   SettingsProxy_t SettingsProxy;
   SettingsProxy_t::GetInstance() = &SettingsProxy;
 
-  using RenderProxy_t = ::mock::covellite::api::render::Render::Proxy;
+  using RenderProxy_t = ::mock::covellite::api::renderer::Renderer::Proxy;
   RenderProxy_t RenderProxy;
   RenderProxy_t::GetInstance() = &RenderProxy;
 
@@ -628,7 +628,7 @@ TEST_F(Window_test, /*DISABLED_*/Test_DoFinishDrawing_Deprecated)
   SettingsProxy_t SettingsProxy;
   SettingsProxy_t::GetInstance() = &SettingsProxy;
 
-  using RenderProxy_t = ::mock::covellite::api::render::Render::Proxy;
+  using RenderProxy_t = ::mock::covellite::api::renderer::Renderer::Proxy;
   RenderProxy_t RenderProxy;
   RenderProxy_t::GetInstance() = &RenderProxy;
 
@@ -670,7 +670,7 @@ TEST_F(Window_test, /*DISABLED_*/Test_DoResize_Deprecated)
   SettingsProxy_t SettingsProxy;
   SettingsProxy_t::GetInstance() = &SettingsProxy;
 
-  using RenderProxy_t = ::mock::covellite::api::render::Render::Proxy;
+  using RenderProxy_t = ::mock::covellite::api::renderer::Renderer::Proxy;
   RenderProxy_t RenderProxy;
   RenderProxy_t::GetInstance() = &RenderProxy;
 

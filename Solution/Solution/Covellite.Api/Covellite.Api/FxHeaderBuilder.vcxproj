@@ -63,7 +63,7 @@
       <SubSystem>Console</SubSystem>
     </Link>
     <PostBuildEvent>
-      <Command>$(ResultDir)Resource.exe --path=$(ProjectDir)Render\fx
+      <Command>$(ResultDir)Resource.exe --path=$(ProjectDir)Renderer\fx
 %(Command)</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
@@ -83,7 +83,7 @@
       <SubSystem>Console</SubSystem>
     </Link>
     <PostBuildEvent>
-      <Command>$(ResultDir)Resource.exe --path=$(ProjectDir)Render\fx
+      <Command>$(ResultDir)Resource.exe --path=$(ProjectDir)Renderer\fx
 %(Command)</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>

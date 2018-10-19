@@ -1,6 +1,6 @@
 
 #pragma once
-#include <boost/any.hpp>
+#include <Covellite/Predefined.hpp>
 
 namespace covellite
 {
@@ -35,11 +35,11 @@ public:
   template<class T>
   inline operator const T & (void) const 
   { 
-    return ::boost::any_cast<const T &>(m_Params); 
+    return ::covellite::any_cast<const T &>(m_Params);
   }
 
 private:
-  const ::boost::any m_Params;
+  const Any_t m_Params;
 
 public:
   template<class T>

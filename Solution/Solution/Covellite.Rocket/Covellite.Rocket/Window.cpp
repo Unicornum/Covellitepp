@@ -121,13 +121,10 @@ void Window::Subscribe(const EventHandlerPtr_t & _pEvents) /*override*/
 #if BOOST_COMP_MSVC
 # pragma warning(push)
 # pragma warning(disable: 4996)
+# pragma warning(disable: 26444)
 #endif
 
   using namespace ::covellite::core;
-
-#if BOOST_COMP_MSVC
-# pragma warning(pop)
-#endif
 
   (*m_pEvents)[Event::Drawing]
     .connect(::std::bind(&Window::DoDrawWindow, this));
@@ -150,6 +147,10 @@ void Window::Subscribe(const EventHandlerPtr_t & _pEvents) /*override*/
   (*m_pEvents)[Event::KeyDown]
     .connect([&](const params::KeyCode & _KeyCode)
       { m_pContext->ProcessKeyDown(_KeyCode.ToRocketKeyCode(), 0); });
+
+#if BOOST_COMP_MSVC
+# pragma warning(pop)
+#endif
 }
 
 /**

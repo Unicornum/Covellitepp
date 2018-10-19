@@ -4,10 +4,10 @@
     <Filter Include="Common">
       <UniqueIdentifier>{c429762f-de2b-4d7f-90e6-8413abbec256}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Render">
+    <Filter Include="Renderer">
       <UniqueIdentifier>{23fbb0b7-28d1-4755-81a8-16494792a8b1}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Render\fx">
+    <Filter Include="Renderer\fx">
       <UniqueIdentifier>{0c0c957e-a39b-434a-b19c-ae5cde62b5ad}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
@@ -22,44 +22,47 @@
     <ClInclude Include="Window.hpp" />
     <ClInclude Include="Window.mock.hpp" />
     <ClInclude Include="Events.hpp" />
-    <ClInclude Include="Render\fx\Render.auto.hpp">
-      <Filter>Render\fx</Filter>
+    <ClInclude Include="Renderer\Api.forward.hpp">
+      <Filter>Renderer</Filter>
     </ClInclude>
-    <ClInclude Include="Render\IRender.hpp">
-      <Filter>Render</Filter>
+    <ClInclude Include="Renderer\ConstantBuffer.hpp">
+      <Filter>Renderer</Filter>
     </ClInclude>
-    <ClInclude Include="Render\Render.hpp">
-      <Filter>Render</Filter>
+    <ClInclude Include="Renderer\DirectX9.hpp">
+      <Filter>Renderer</Filter>
     </ClInclude>
-    <ClInclude Include="Render\stdafx.h">
-      <Filter>Render</Filter>
+    <ClInclude Include="Renderer\DirectX10.hpp">
+      <Filter>Renderer</Filter>
     </ClInclude>
-    <ClInclude Include="Render\IGraphicApi.hpp">
-      <Filter>Render</Filter>
+    <ClInclude Include="Renderer\DirectX11.hpp">
+      <Filter>Renderer</Filter>
     </ClInclude>
-    <ClInclude Include="Render\Api.forward.hpp">
-      <Filter>Render</Filter>
+    <ClInclude Include="Renderer\DxCheck.hpp">
+      <Filter>Renderer</Filter>
     </ClInclude>
-    <ClInclude Include="Render\DirectX10.hpp">
-      <Filter>Render</Filter>
+    <ClInclude Include="Renderer\GL.hpp">
+      <Filter>Renderer</Filter>
     </ClInclude>
-    <ClInclude Include="Render\OpenGL.hpp">
-      <Filter>Render</Filter>
+    <ClInclude Include="Renderer\IGraphicApi.hpp">
+      <Filter>Renderer</Filter>
     </ClInclude>
-    <ClInclude Include="Render\OpenGLCommon.hpp">
-      <Filter>Render</Filter>
+    <ClInclude Include="Renderer\IRenderer.hpp">
+      <Filter>Renderer</Filter>
     </ClInclude>
-    <ClInclude Include="Render\DirectX9.hpp">
-      <Filter>Render</Filter>
+    <ClInclude Include="Renderer\OpenGL.hpp">
+      <Filter>Renderer</Filter>
     </ClInclude>
-    <ClInclude Include="Render\DirectX11.hpp">
-      <Filter>Render</Filter>
+    <ClInclude Include="Renderer\OpenGLCommon.hpp">
+      <Filter>Renderer</Filter>
     </ClInclude>
-    <ClInclude Include="Render\DxCheck.hpp">
-      <Filter>Render</Filter>
+    <ClInclude Include="Renderer\Renderer.hpp">
+      <Filter>Renderer</Filter>
     </ClInclude>
-    <ClInclude Include="Render\ConstantBuffer.hpp">
-      <Filter>Render</Filter>
+    <ClInclude Include="Renderer\stdafx.h">
+      <Filter>Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="Renderer\CommonImpl.hpp">
+      <Filter>Renderer</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -67,34 +70,49 @@
       <Filter>Common</Filter>
     </ClCompile>
     <ClCompile Include="Window.cpp" />
-    <ClCompile Include="Render\Render.cpp">
-      <Filter>Render</Filter>
+    <ClCompile Include="Renderer\DirectX9.cpp">
+      <Filter>Renderer</Filter>
     </ClCompile>
-    <ClCompile Include="Render\DirectX10.cpp">
-      <Filter>Render</Filter>
+    <ClCompile Include="Renderer\DirectX10.cpp">
+      <Filter>Renderer</Filter>
     </ClCompile>
-    <ClCompile Include="Render\OpenGL.cpp">
-      <Filter>Render</Filter>
+    <ClCompile Include="Renderer\DirectX11.cpp">
+      <Filter>Renderer</Filter>
     </ClCompile>
-    <ClCompile Include="Render\OpenGLCommon.cpp">
-      <Filter>Render</Filter>
+    <ClCompile Include="Renderer\DxCheck.cpp">
+      <Filter>Renderer</Filter>
     </ClCompile>
-    <ClCompile Include="Render\DirectX9.cpp">
-      <Filter>Render</Filter>
+    <ClCompile Include="Renderer\OpenGL.cpp">
+      <Filter>Renderer</Filter>
     </ClCompile>
-    <ClCompile Include="Render\DirectX11.cpp">
-      <Filter>Render</Filter>
+    <ClCompile Include="Renderer\OpenGLCommon.cpp">
+      <Filter>Renderer</Filter>
     </ClCompile>
-    <ClCompile Include="Render\DxCheck.cpp">
-      <Filter>Render</Filter>
+    <ClCompile Include="Renderer\Renderer.cpp">
+      <Filter>Renderer</Filter>
     </ClCompile>
-    <ClCompile Include="Render\Render.windows.cpp">
-      <Filter>Render</Filter>
+    <ClCompile Include="Renderer\Renderer.windows.cpp">
+      <Filter>Renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="Renderer\CommonImpl.cpp">
+      <Filter>Renderer</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="Render\fx\Render.fx">
-      <Filter>Render\fx</Filter>
+    <FxCompile Include="Renderer\fx\Vertex.fx">
+      <Filter>Renderer\fx</Filter>
+    </FxCompile>
+    <FxCompile Include="Renderer\fx\Pixel.fx">
+      <Filter>Renderer\fx</Filter>
+    </FxCompile>
+    <FxCompile Include="Renderer\fx\Render.fx">
+      <Filter>Renderer\fx</Filter>
+    </FxCompile>
+    <FxCompile Include="Renderer\fx\PixelInput.fx">
+      <Filter>Renderer\fx</Filter>
+    </FxCompile>
+    <FxCompile Include="Renderer\fx\VertexInput.fx">
+      <Filter>Renderer\fx</Filter>
     </FxCompile>
   </ItemGroup>
 </Project>

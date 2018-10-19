@@ -509,7 +509,6 @@ static void onContentRectChanged(ANativeActivity* activity, const ARect* rect)
   android_app_write_cmd(android_app, APP_CMD_CONTENT_RECT_CHANGED);
 }
 
-// cppcheck-suppress unusedFunction
 void ANativeActivity_onCreate(ANativeActivity * activity,
                               void * savedState, size_t savedStateSize)
 {

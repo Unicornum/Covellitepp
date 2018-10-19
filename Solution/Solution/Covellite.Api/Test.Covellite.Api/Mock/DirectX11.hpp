@@ -4,10 +4,15 @@
 #include <vector>
 #include <d3d11.h>
 #include <d3dcompiler.h>
-#include "..\..\Covellite.Api\Render\ConstantBuffer.hpp"
+#include "..\..\Covellite.Api\Renderer\ConstantBuffer.hpp"
 
 #pragma warning(push)
 #pragma warning(disable: 4100)
+#pragma warning(disable: 6011)
+#pragma warning(disable: 6101)
+#pragma warning(disable: 6387)
+#pragma warning(disable: 6388)
+#pragma warning(disable: 28196)
 
 namespace DirectX
 {
@@ -97,7 +102,7 @@ namespace covellite
 namespace api
 {
 
-namespace render
+namespace renderer
 {
 
 inline bool operator== (
@@ -111,7 +116,7 @@ inline bool operator== (
   return true;
 }
 
-} // namespace render
+} // namespace renderer
 
 } // namespace api
 
@@ -973,7 +978,7 @@ public:
     /* [annotation] */
     _In_  ID3D11Resource *pSrcResource) {}
 
-  using ConstantBuffer_t = ::covellite::api::render::ConstantBuffer;
+  using ConstantBuffer_t = ::covellite::api::renderer::ConstantBuffer;
 
   MOCK_METHOD6(UpdateSubresource, void(ID3D11Resource *, UINT, 
     const D3D11_BOX *, ConstantBuffer_t, UINT, UINT));
@@ -993,7 +998,8 @@ public:
     _In_  UINT SrcDepthPitch)
   {
     UpdateSubresource(pDstResource, DstSubresource, pDstBox,
-      *(const ConstantBuffer_t *)pSrcData, SrcRowPitch, SrcDepthPitch);
+      *reinterpret_cast<const ConstantBuffer_t *>(pSrcData), 
+      SrcRowPitch, SrcDepthPitch);
   }
 
   virtual void STDMETHODCALLTYPE CopyStructureCount(

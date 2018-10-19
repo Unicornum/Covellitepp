@@ -13,7 +13,7 @@ using namespace covellite::core;
 * \details
 *  - При первом старте, а также повторном старте после прерывания главной
 *  кнопкой программа (в обоих случаях заново запускается функция
-*  androi_main()) получает сообщения:
+*  android_main()) получает сообщения:
 *   + APP_CMD_START
 *   + APP_CMD_RESUME
 *   + APP_CMD_INPUT_CHANGED

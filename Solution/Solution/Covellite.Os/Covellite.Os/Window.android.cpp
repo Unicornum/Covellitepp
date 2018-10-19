@@ -33,7 +33,6 @@ Window::Window(const ::covellite::app::IApplication & _Application) :
 
   auto BuildMessage = [](int32_t _Type, int32_t _Value) -> int32_t
   {
-    // cppcheck-suppress integerOverflow
     return (_Type << 8) | _Value;
   };
 

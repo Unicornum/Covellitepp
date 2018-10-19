@@ -76,33 +76,35 @@
   <ItemGroup>
     <ClInclude Include="Events.hpp" />
     <ClInclude Include="IWindow.hpp" />
-    <ClInclude Include="Render\Api.forward.hpp" />
-    <ClInclude Include="Render\ConstantBuffer.hpp" />
-    <ClInclude Include="Render\DirectX10.hpp" />
-    <ClInclude Include="Render\DirectX9.hpp" />
-    <ClInclude Include="Render\DxCheck.hpp" />
-    <ClInclude Include="Render\DirectX11.hpp" />
-    <ClInclude Include="Render\fx\Render.auto.hpp" />
-    <ClInclude Include="Render\IGraphicApi.hpp" />
-    <ClInclude Include="Render\IRender.hpp" />
-    <ClInclude Include="Render\OpenGL.hpp" />
-    <ClInclude Include="Render\OpenGLCommon.hpp" />
-    <ClInclude Include="Render\Render.hpp" />
-    <ClInclude Include="Render\stdafx.h" />
+    <ClInclude Include="Renderer\Api.forward.hpp" />
+    <ClInclude Include="Renderer\CommonImpl.hpp" />
+    <ClInclude Include="Renderer\ConstantBuffer.hpp" />
+    <ClInclude Include="Renderer\DirectX10.hpp" />
+    <ClInclude Include="Renderer\DirectX11.hpp" />
+    <ClInclude Include="Renderer\DirectX9.hpp" />
+    <ClInclude Include="Renderer\DxCheck.hpp" />
+    <ClInclude Include="Renderer\GL.hpp" />
+    <ClInclude Include="Renderer\IGraphicApi.hpp" />
+    <ClInclude Include="Renderer\IRenderer.hpp" />
+    <ClInclude Include="Renderer\OpenGL.hpp" />
+    <ClInclude Include="Renderer\OpenGLCommon.hpp" />
+    <ClInclude Include="Renderer\Renderer.hpp" />
+    <ClInclude Include="Renderer\stdafx.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="Window.hpp" />
     <ClInclude Include="Window.mock.hpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Render\DirectX10.cpp" />
-    <ClCompile Include="Render\DirectX9.cpp" />
-    <ClCompile Include="Render\DirectX11.cpp" />
-    <ClCompile Include="Render\DxCheck.cpp" />
-    <ClCompile Include="Render\OpenGL.cpp" />
-    <ClCompile Include="Render\OpenGLCommon.cpp" />
-    <ClCompile Include="Render\Render.cpp" />
-    <ClCompile Include="Render\Render.windows.cpp" />
+    <ClCompile Include="Renderer\CommonImpl.cpp" />
+    <ClCompile Include="Renderer\DirectX10.cpp" />
+    <ClCompile Include="Renderer\DirectX11.cpp" />
+    <ClCompile Include="Renderer\DirectX9.cpp" />
+    <ClCompile Include="Renderer\DxCheck.cpp" />
+    <ClCompile Include="Renderer\OpenGL.cpp" />
+    <ClCompile Include="Renderer\OpenGLCommon.cpp" />
+    <ClCompile Include="Renderer\Renderer.cpp" />
+    <ClCompile Include="Renderer\Renderer.windows.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
@@ -110,7 +112,23 @@
     <ClCompile Include="Window.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="Render\fx\Render.fx">
+    <FxCompile Include="Renderer\fx\Pixel.fx">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </FxCompile>
+    <FxCompile Include="Renderer\fx\PixelInput.fx">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </FxCompile>
+    <FxCompile Include="Renderer\fx\Render.fx">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </FxCompile>
+    <FxCompile Include="Renderer\fx\Vertex.fx">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </FxCompile>
+    <FxCompile Include="Renderer\fx\VertexInput.fx">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </FxCompile>

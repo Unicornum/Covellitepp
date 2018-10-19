@@ -142,6 +142,9 @@ protected:
 // что и тестируемый класс).
 // FRIEND_TEST(Application_test, Test_Function);
 
+#pragma warning(push)
+#pragma warning(disable: 6011)
+
 // ************************************************************************** //
 TEST_F(Application_test, /*DISABLED_*/Test_Main)
 {
@@ -397,7 +400,7 @@ TEST_F(Application_test, /*DISABLED_*/Test_GenerateApplicationEvents)
     EXPECT_CALL(Example, DoStop())
       .Times(1);
 
-    Events[(int32_t)APP_CMD_TERM_WINDOW]();
+    Events[(int32_t)APP_CMD_STOP]();
   }
 }
 
@@ -599,6 +602,102 @@ TEST_F(Application_test, /*DISABLED_*/Test_Run_DrawingMode_EventBased)
   Example.Run();
 }
 
+namespace covellite
+{
+
+namespace app
+{
+
+// ************************************************************************** //
+TEST_F(Application_test, /*DISABLED_*/Test_OnTermWindow)
+{
+  class ExampleWindow :
+    public ::covellite::app::IWindow
+  {
+  public:
+    class Proxy :
+      public ::alicorn::extension::testing::Proxy<Proxy>
+    {
+    public:
+      MOCK_METHOD0(Constructor, ::mock::Id_t(void));
+      MOCK_METHOD1(Destructor, void(::mock::Id_t));
+    };
+
+  public:
+    const ::mock::Id_t m_Id;
+
+  public:
+    ExampleWindow(void) :
+      m_Id(Proxy::GetInstance()->Constructor())
+    {
+
+    }
+    ~ExampleWindow(void) noexcept
+    {
+      Proxy::GetInstance()->Destructor(m_Id);
+    }
+  };
+
+  using WindowProxy_t = ExampleWindow::Proxy;
+  WindowProxy_t WindowProxy;
+  WindowProxy_t::GetInstance() = &WindowProxy;
+
+  android_app AndroidApp = { 0 };
+  const AppInfo_t Info{ &AndroidApp };
+
+  using namespace ::testing;
+
+  const ::std::vector<::mock::Id_t> WindowIds = 
+  {
+    1810081517,
+    1810081518,
+    1810081519
+  };
+
+  Tested_t Example{ [](void) {} };
+
+  using namespace ::testing;
+
+  InSequence Dummy;
+
+  for (int i = 0; i < WindowIds.size(); i++)
+  {
+    EXPECT_CALL(WindowProxy, Constructor())
+      .Times(1)
+      .WillOnce(Return(WindowIds[i]));
+
+    auto & Window = Example.MakeWindow<ExampleWindow>();
+    EXPECT_EQ(WindowIds[i], Window.m_Id);
+    ASSERT_EQ(i + 1, Example.m_Windows.size());
+  }
+
+  EXPECT_CALL(WindowProxy, Destructor(WindowIds[2]))
+    .Times(1);
+
+  EXPECT_CALL(WindowProxy, Destructor(WindowIds[1]))
+    .Times(1);
+
+  EXPECT_CALL(WindowProxy, Destructor(WindowIds[0]))
+    .Times(1);
+
+  ::covellite::events::Events Events = Example;
+  Events[(int32_t)APP_CMD_TERM_WINDOW]();
+
+  {
+    // Это чтобы убедиться, что окна были разрушены по событию, а не 
+    // в деструкторе.
+
+    EXPECT_CALL(WindowProxy, Constructor())
+      .Times(1)
+      .WillOnce(Return(0));
+
+    Example.MakeWindow<ExampleWindow>();
+
+    EXPECT_CALL(WindowProxy, Destructor(0))
+      .Times(1);
+  }
+}
+
 // ************************************************************************** //
 TEST_F(Application_test, /*DISABLED_*/Test_OnExit)
 {
@@ -637,12 +736,6 @@ TEST_F(Application_test, /*DISABLED_*/Test_OnExit)
     Events[::covellite::events::Application.Exit]();
   }
 }
-
-namespace covellite
-{
-
-namespace app
-{
 
 // ************************************************************************** //
 TEST_F(Application_test, /*DISABLED_*/Test_PostCommand)
@@ -730,3 +823,5 @@ TEST_F(Application_test, /*DISABLED_*/Test_PostCommand)
 } // namespace app
 
 } // namespace covellite
+
+#pragma warning(pop)

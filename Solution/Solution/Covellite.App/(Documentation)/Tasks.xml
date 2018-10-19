@@ -8,11 +8,11 @@
   </Options>
   <Process/>
   <Complete>
-    <Week6191>
-      <Task6 Text="Обработка событий в функции PostCommand()." Type="Red" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="false"/>
-    </Week6191>
-    <Week6190/>
-    <Week6189/>
-    <Week6188/>
+    <Week6196>
+      <Task6 Text="Попытка отрисовки окна после того, как оно стало невалидным в Android версии." Type="Bug" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="true" ParentTaskText="false"/>
+    </Week6196>
+    <Week6195/>
+    <Week6194/>
+    <Week6193/>
   </Complete>
 </Tasks>

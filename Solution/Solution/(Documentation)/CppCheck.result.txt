@@ -1,10 +1,3 @@
-P:\projects\Covellitepp\Solution\Solution\Covellite.Api\Test.Covellite.Api\Mock\DirectX11.hpp(996): style (suppress_id = cstyleCast): C-style pointer casting
-P:\projects\Covellitepp\Solution\Solution\Covellite.Api\Covellite.Api\Render\DxCheck.cpp(14): style (suppress_id = unusedFunction): The function 'GetMessageText' is never used.
-P:\projects\Covellitepp\Solution\Solution\Covellite.Api\Covellite.Api\Render\DxCheck.cpp(9): style (suppress_id = unusedFunction): The function 'IsSuccessfull' is never used.
-P:\projects\Covellitepp\Solution\Solution\Covellite.Api\Test.Covellite.Api\Test.IWindow\IWindow_test.cpp(28): information (suppress_id = unmatchedSuppression): Unmatched suppression: unusedFunction
-P:\projects\Covellitepp\Solution\Solution\Covellite.Api\Test.Covellite.Api\Test.IWindow\IWindow_test.cpp(34): information (suppress_id = unmatchedSuppression): Unmatched suppression: unusedFunction
-P:\projects\Covellitepp\Solution\Solution\Covellite.Core\Covellite.Core\android_native_app_glue.c(513): information (suppress_id = unmatchedSuppression): Unmatched suppression: unusedFunction
-P:\projects\Covellitepp\Solution\Solution\Covellite.Egl\Covellite.Egl\CallProxy.cpp(8): information (suppress_id = unmatchedSuppression): Unmatched suppression: unusedFunction
-P:\projects\Covellitepp\Solution\Solution\Covellite.Egl\Covellite.Egl\CallProxy.cpp(14): information (suppress_id = unmatchedSuppression): Unmatched suppression: unusedFunction
-P:\projects\Covellitepp\Solution\Solution\Covellite.Os\Covellite.Os\Window.android.cpp(37): information (suppress_id = unmatchedSuppression): Unmatched suppression: integerOverflow
+P:\projects\Covellitepp\Solution\Solution\Covellite.Api\Covellite.Api\Renderer\CommonImpl.cpp(13): performance (suppress_id = useInitializationList): Variable 'm_DefaultRenders' is assigned in constructor body. Consider performing initialization in initialization list.
+P:\projects\Covellitepp\Solution\Solution\Covellite.Api\Covellite.Api\Renderer\DirectX11.cpp(80): style (suppress_id = unusedFunction): The function 'GetRender' is never used.
 (): information (suppress_id = missingIncludeSystem): Cppcheck cannot find all the include files (use --check-config for details)

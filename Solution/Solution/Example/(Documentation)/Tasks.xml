@@ -7,16 +7,14 @@
     <Y>68</Y>
   </Options>
   <Process>
-    <Task7 Text="Вспомогательные." Type="Info" Version="None" ExternalProgram="Solution" Expanded="true" Completed="false" History="false" ParentTaskText="false">
-      <Task8 Text="Завершение спринта." Type="None" Version="Younger" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="false"/>
-    </Task7>
+    <Task1 Text="Вспомогательные." Type="Info" Version="None" ExternalProgram="Solution" Expanded="true" Completed="false" History="false" ParentTaskText="false">
+      <Task2 Text="Завершение спринта." Type="None" Version="Younger" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="false"/>
+    </Task1>
   </Process>
   <Complete>
-    <Week6192/>
-    <Week6191>
-      <Task4 Text="Лишние файлы в архиве примера для Windows." Type="Bug" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="false"/>
-    </Week6191>
-    <Week6190/>
-    <Week6189/>
+    <Week6197/>
+    <Week6196/>
+    <Week6195/>
+    <Week6194/>
   </Complete>
 </Tasks>

@@ -14,7 +14,7 @@ namespace os { class IWindow; }
 namespace api
 {
 
-namespace render { class Render; }
+namespace renderer { class Renderer; }
 
 /**
 * \ingroup CovelliteApiGroup
@@ -42,7 +42,7 @@ class Window final :
 {
   using WindowOs_t = ::covellite::os::IWindow;
   using WindowOsPtr_t = ::std::shared_ptr<WindowOs_t>;
-  using RenderPtr_t = ::std::shared_ptr<covellite::api::render::Render>;
+  using RendererPtr_t = ::std::shared_ptr<covellite::api::renderer::Renderer>;
 
 public:
   // Èםעונפויס events::IEvents:
@@ -61,12 +61,12 @@ public:
   void Subscribe(const EventHandlerPtr_t &) override;
 
 private:
-  static RenderPtr_t MakeRender(const WindowOs_t &);
+  static RendererPtr_t MakeRender(const WindowOs_t &);
 
 private:
   const WindowOs_t &  m_WindowOs;
   Events_t            m_Events;
-  const RenderPtr_t   m_pImpl;
+  const RendererPtr_t m_pImpl;
 
 public:
   explicit Window(const WindowOs_t &);

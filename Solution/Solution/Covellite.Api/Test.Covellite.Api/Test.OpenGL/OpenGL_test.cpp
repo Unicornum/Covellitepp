@@ -15,18 +15,18 @@
 #define OpenGLCommon OpenGLCommon_windows
 
 // Расположение класса OpenGL
-#include "../../Covellite.Api/Render/OpenGL.cpp"
-#include "../../Covellite.Api/Render/OpenGLCommon.cpp"
+#include "../../Covellite.Api/Renderer/OpenGL.cpp"
+#include "../../Covellite.Api/Renderer/OpenGLCommon.cpp"
 
 // Общий тестовый класс класса OpenGL
 class OpenGL_test :
   public ::testing::Test
 {
 protected:
-  using Tested_t = ::covellite::api::render::OpenGL;
-  using ITested_t = ::covellite::api::render::IGraphicApi;
+  using Tested_t = ::covellite::api::renderer::OpenGL;
+  using ITested_t = ::covellite::api::renderer::IGraphicApi;
   using String_t = ::alicorn::extension::std::String;
-  using Data_t = ::covellite::api::render::IGraphicApi::Data;
+  using Data_t = ::covellite::api::renderer::IGraphicApi::Data;
 
   // Вызывается ПЕРЕД запуском каждого теста
   void SetUp(void) override
@@ -69,7 +69,7 @@ TEST_F(OpenGL_test, /*DISABLED_*/Test_EmptyFormatDescriptor)
   // Эта функция должна выполняться до создания первого объекта!
   // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! ВАЖНО !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! //
 
-  using ::covellite::api::render::PixelFormatDescriptor;
+  using ::covellite::api::renderer::PixelFormatDescriptor;
 
   EXPECT_EQ(0, PixelFormatDescriptor.nSize);
   EXPECT_EQ(0, PixelFormatDescriptor.nVersion);
@@ -158,7 +158,7 @@ TEST_F(OpenGL_test, /*DISABLED_*/Test_ChoosePixelFormat)
   WindowsProxy_t WindowsProxy;
   WindowsProxy_t::GetInstance() = &WindowsProxy;
 
-  using ::covellite::api::render::PixelFormatDescriptor;
+  using ::covellite::api::renderer::PixelFormatDescriptor;
 
   EXPECT_EQ(sizeof(PIXELFORMATDESCRIPTOR), PixelFormatDescriptor.nSize);
   EXPECT_EQ(1, PixelFormatDescriptor.nVersion);
@@ -193,7 +193,7 @@ TEST_F(OpenGL_test, /*DISABLED_*/Test_SetPixelFormat)
   WindowsProxy_t WindowsProxy;
   WindowsProxy_t::GetInstance() = &WindowsProxy;
 
-  using ::covellite::api::render::PixelFormatDescriptor;
+  using ::covellite::api::renderer::PixelFormatDescriptor;
 
   const HDC hDC = (HDC)1710282138;
   const int PixelFormat = 1710282139;
@@ -666,12 +666,12 @@ namespace covellite
 namespace api
 {
 
-namespace render
+namespace renderer
 {
 
 inline bool operator== (
-  const ::covellite::api::render::IGraphicApi::Vertex & _Left,
-  const ::covellite::api::render::IGraphicApi::Vertex & _Right)
+  const ::covellite::api::renderer::IGraphicApi::Vertex & _Left,
+  const ::covellite::api::renderer::IGraphicApi::Vertex & _Right)
 {
   if (_Left.x != _Right.x) return false;
   if (_Left.y != _Right.y) return false;
@@ -917,7 +917,7 @@ TEST_F(OpenGL_test, /*DISABLED_*/Test_CreateGeometry)
   delete pGeometry;
 }
 
-} // namespace render
+} // namespace renderer
 
 } // namespace api
 

@@ -13,12 +13,6 @@
     <Filter Include="Tests\IWindow">
       <UniqueIdentifier>{e7583767-c3f1-42cf-874a-7e3a621da096}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Tests\IRender">
-      <UniqueIdentifier>{73875b0a-29d7-4215-9785-b7ce72472fe6}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Tests\Render">
-      <UniqueIdentifier>{055fb21a-65f4-487c-b637-dd1da7f72d2c}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Tests\IGraphicApi">
       <UniqueIdentifier>{fe4a0f6f-22b9-4b0e-9edc-1903f9d5e923}</UniqueIdentifier>
     </Filter>
@@ -37,6 +31,12 @@
     <Filter Include="Tests\DxCheck">
       <UniqueIdentifier>{736ba1c0-6b15-4629-80dc-5dc6f4db670c}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Tests\Renderer">
+      <UniqueIdentifier>{055fb21a-65f4-487c-b637-dd1da7f72d2c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Tests\IRenderer">
+      <UniqueIdentifier>{73875b0a-29d7-4215-9785-b7ce72472fe6}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Resources.rc">
@@ -53,12 +53,6 @@
     <ClCompile Include="Test.IWindow\IWindow_test.cpp">
       <Filter>Tests\IWindow</Filter>
     </ClCompile>
-    <ClCompile Include="Test.IRender\IRender_test.cpp">
-      <Filter>Tests\IRender</Filter>
-    </ClCompile>
-    <ClCompile Include="Test.Render\Render_test.cpp">
-      <Filter>Tests\Render</Filter>
-    </ClCompile>
     <ClCompile Include="Test.IGraphicApi\IGraphicApi_test.cpp">
       <Filter>Tests\IGraphicApi</Filter>
     </ClCompile>
@@ -74,20 +68,26 @@
     <ClCompile Include="Test.DirectX11\DirectX11_test.cpp">
       <Filter>Tests\DirectX11</Filter>
     </ClCompile>
-    <ClCompile Include="..\Covellite.Api\Render\DirectX11.cpp">
-      <Filter>Tests\DirectX11</Filter>
-    </ClCompile>
     <ClCompile Include="Test.DxCheck\DxCheck_test.cpp">
       <Filter>Tests\DxCheck</Filter>
     </ClCompile>
-    <ClCompile Include="..\Covellite.Api\Render\DxCheck.cpp">
+    <ClCompile Include="Test.IRenderer\IRenderer_test.cpp">
+      <Filter>Tests\IRenderer</Filter>
+    </ClCompile>
+    <ClCompile Include="Test.Renderer\Renderer_test.android.cpp">
+      <Filter>Tests\Renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="Test.Renderer\Renderer_test.cpp">
+      <Filter>Tests\Renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="Test.Renderer\Renderer_test.windows.cpp">
+      <Filter>Tests\Renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Covellite.Api\Renderer\DirectX11.cpp">
+      <Filter>Tests\DirectX11</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Covellite.Api\Renderer\DxCheck.cpp">
       <Filter>Tests\DxCheck</Filter>
-    </ClCompile>
-    <ClCompile Include="Test.Render\Render_test.windows.cpp">
-      <Filter>Tests\Render</Filter>
-    </ClCompile>
-    <ClCompile Include="Test.Render\Render_test.android.cpp">
-      <Filter>Tests\Render</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -98,16 +98,10 @@
     <ClInclude Include="..\Covellite.Api\IWindow.hpp">
       <Filter>Tests\IWindow</Filter>
     </ClInclude>
-    <ClInclude Include="..\Covellite.Api\Render\IRender.hpp">
-      <Filter>Tests\IRender</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Covellite.Api\Render\IGraphicApi.hpp">
-      <Filter>Tests\IGraphicApi</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Covellite.Api\Render\DirectX11.hpp">
+    <ClInclude Include="..\Covellite.Api\Renderer\DirectX11.hpp">
       <Filter>Tests\DirectX11</Filter>
     </ClInclude>
-    <ClInclude Include="..\Covellite.Api\Render\DxCheck.hpp">
+    <ClInclude Include="..\Covellite.Api\Renderer\DxCheck.hpp">
       <Filter>Tests\DxCheck</Filter>
     </ClInclude>
   </ItemGroup>

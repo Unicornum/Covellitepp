@@ -40,8 +40,10 @@ Application::Application(const Run_t & _Run) :
 
   m_Events[(int32_t)APP_CMD_INIT_WINDOW]
     .Connect([&]() { m_Events[events::Application.Start](); });
-  m_Events[(int32_t)APP_CMD_TERM_WINDOW]
+  m_Events[(int32_t)APP_CMD_STOP]
     .Connect([&]() { m_Events[events::Application.Exit](); });
+  m_Events[(int32_t)APP_CMD_TERM_WINDOW]
+    .Connect([&]() { m_Windows = Windows_t{}; });
   m_Events[events::Application.Exit]
     .Connect([=]() { ANativeActivity_finish(App.activity); });
 }

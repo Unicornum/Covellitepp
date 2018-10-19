@@ -1,6 +1,6 @@
 
 #pragma once
-#include <Covellite.Api/Covellite.Api/Render/IRender.hpp>
+#include <Covellite.Api/Covellite.Api/Renderer/IRenderer.hpp>
 
 namespace covellite
 {
@@ -8,12 +8,12 @@ namespace covellite
 namespace api
 {
 
-namespace render
+namespace renderer
 {
 
 inline bool operator!= (
-  const ::covellite::api::render::IRender::Data::Color & _Left,
-  const ::covellite::api::render::IRender::Data::Color & _Right)
+  const ::covellite::api::renderer::IRenderer::Data::Color & _Left,
+  const ::covellite::api::renderer::IRenderer::Data::Color & _Right)
 {
   static_assert(sizeof(_Left) ==
     (sizeof(_Left.R) +
@@ -30,8 +30,8 @@ inline bool operator!= (
 }
 
 inline bool operator== (
-  const ::covellite::api::render::IRender::Data & _Left,
-  const ::covellite::api::render::IRender::Data & _Right)
+  const ::covellite::api::renderer::IRenderer::Data & _Left,
+  const ::covellite::api::renderer::IRenderer::Data & _Right)
 {
   static_assert(sizeof(_Left) ==
     (sizeof(_Left.Handle) + 
@@ -48,7 +48,7 @@ inline bool operator== (
   return true;
 }
 
-} // namespace render
+} // namespace renderer
 
 } // namespace api
 

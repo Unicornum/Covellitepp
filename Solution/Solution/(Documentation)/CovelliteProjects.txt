@@ -2,14 +2,16 @@
 @startuml
 
 [Covellite.Rocket] -- [Covellite.Api]
+[Covellite.Gui] -- [Covellite.Api]
 [Covellite.Api] -- [Covellite.Os]
 [Covellite.Api] -- [Covellite.Egl]
-[Covellite.Os] -- [Covellite.Core]
 [Covellite.Os] -- [Covellite.App]
 [Covellite.App] -- [Covellite.Events]
+[Covellite.Os] -- [Covellite.Core]
 
-note "deprecated" as NoteOs
+note "deprecated" as NoteCore
 
-[Covellite.Core] .left. NoteOs
+NoteCore .. [Covellite.Core]
+[Covellite.Rocket] .. NoteCore
 
 @enduml

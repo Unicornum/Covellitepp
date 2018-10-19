@@ -18,12 +18,12 @@
       <Filter>Common</Filter>
     </ClCompile>
     <ClCompile Include="DxCheck_test.cpp" />
-    <ClCompile Include="..\..\Covellite.Api\Render\DxCheck.cpp" />
+    <ClCompile Include="..\..\Covellite.Api\Renderer\DxCheck.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">
       <Filter>Common</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Covellite.Api\Render\DxCheck.hpp" />
+    <ClInclude Include="..\..\Covellite.Api\Renderer\DxCheck.hpp" />
   </ItemGroup>
 </Project>

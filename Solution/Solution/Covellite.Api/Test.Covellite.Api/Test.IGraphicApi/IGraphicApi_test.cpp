@@ -13,14 +13,14 @@
 */
 
 // Расположение класса IGraphicApi
-#include "..\..\Covellite.Api\Render\IGraphicApi.hpp"
+#include "..\..\Covellite.Api\Renderer\IGraphicApi.hpp"
 
 // Общий тестовый класс класса IGraphicApi
 class IGraphicApi_test :
   public ::testing::Test
 {
 protected:
-  using Tested_t = ::covellite::api::render::IGraphicApi;
+  using Tested_t = ::covellite::api::renderer::IGraphicApi;
 
   // Вызывается ПЕРЕД запуском каждого теста
   void SetUp(void) override

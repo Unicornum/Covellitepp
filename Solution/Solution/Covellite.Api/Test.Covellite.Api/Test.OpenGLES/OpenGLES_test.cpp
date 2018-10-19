@@ -20,18 +20,18 @@
 #include <Covellite.Egl/Egl.mock.hpp>
 
 // Расположение класса OpenGLES
-#include "../../Covellite.Api/Render/OpenGLES.cpp"
-#include "../../Covellite.Api/Render/OpenGLCommon.cpp"
+#include "../../Covellite.Api/Renderer/OpenGLES.cpp"
+#include "../../Covellite.Api/Renderer/OpenGLCommon.cpp"
 
 // Общий тестовый класс класса OpenGLES
 class OpenGLES_test :
   public ::testing::Test
 {
 protected:
-  using Tested_t = ::covellite::api::render::OpenGLES;
-  using ITested_t = ::covellite::api::render::IGraphicApi;
+  using Tested_t = ::covellite::api::renderer::OpenGLES;
+  using ITested_t = ::covellite::api::renderer::IGraphicApi;
   using String_t = ::alicorn::extension::std::String;
-  using Data_t = ::covellite::api::render::IGraphicApi::Data;
+  using Data_t = ::covellite::api::renderer::IGraphicApi::Data;
   using AppInfo_t = ::alicorn::system::platform::AppInfo;
 
   // Вызывается ПЕРЕД запуском каждого теста
@@ -444,12 +444,12 @@ namespace covellite
 namespace api
 {
 
-namespace render
+namespace renderer
 {
 
 inline bool operator== (
-  const ::covellite::api::render::IGraphicApi::Vertex & _Left,
-  const ::covellite::api::render::IGraphicApi::Vertex & _Right)
+  const ::covellite::api::renderer::IGraphicApi::Vertex & _Left,
+  const ::covellite::api::renderer::IGraphicApi::Vertex & _Right)
 {
   if (_Left.x != _Right.x) return false;
   if (_Left.y != _Right.y) return false;
@@ -701,7 +701,7 @@ TEST_F(OpenGLES_test, /*DISABLED_*/Test_CreateGeometry)
   delete pGeometry;
 }
 
-} // namespace render
+} // namespace renderer
 
 } // namespace api
 

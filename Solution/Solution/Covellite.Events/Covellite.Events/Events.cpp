@@ -17,7 +17,7 @@ Events::Events(const Events & _Events) :
 
 }
 
-/*virtual*/ Events::~Events(void)
+Events::~Events(void)
 {
   for (auto & Connection : m_Connections)
   {

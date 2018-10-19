@@ -96,6 +96,7 @@ public:
 private:
   friend Application_test;
   FRIEND_TEST(Application_test, /*DISABLED_*/Test_MakeWindow);
+  FRIEND_TEST(Application_android_test, /*DISABLED_*/Test_OnTermWindow);
   FRIEND_TEST(Application_android_test, /*DISABLED_*/Test_PostCommand);
 };
 

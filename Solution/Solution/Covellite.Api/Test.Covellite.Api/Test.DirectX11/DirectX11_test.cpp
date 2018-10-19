@@ -13,18 +13,18 @@
 */
 
 // Расположение класса DirectX11
-#include "..\..\Covellite.Api\Render\DirectX11.hpp"
+#include "..\..\Covellite.Api\Renderer\DirectX11.hpp"
 
-#include "../../Covellite.Api/Render/fx/Render.auto.hpp"
+#include "../../Covellite.Api/Renderer/fx/Render.auto.hpp"
 
 // Общий тестовый класс класса DirectX11
 class DirectX11_test :
   public ::testing::Test
 {
 protected:
-  using Tested_t = ::covellite::api::render::DirectX11;
-  using IRender_t = ::covellite::api::render::IRender;
-  using IGraphicApi_t = ::covellite::api::render::IGraphicApi;
+  using Tested_t = ::covellite::api::renderer::DirectX11;
+  using IRender_t = ::covellite::api::renderer::IRenderer;
+  using IGraphicApi_t = ::covellite::api::renderer::IGraphicApi;
 
   // Вызывается ПЕРЕД запуском каждого теста
   void SetUp(void) override
@@ -897,7 +897,7 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_CreateTexture_CreateShaderResourceView_
 TEST_F(DirectX11_test, /*DISABLED_*/Test_DestroyTexture)
 {
   class Texture :
-    public ::covellite::api::render::DirectX11::ITexture
+    public ::covellite::api::renderer::DirectX11::ITexture
   {
   public:
     class Proxy :
@@ -1162,13 +1162,14 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_CreateGeometry_Update_WithTexture)
   Viewport.Width = (FLOAT)Width;
   Viewport.Height = (FLOAT)Height;
 
-  ::covellite::api::render::ConstantBuffer ConstantBuffer;
-  ConstantBuffer.World = ::DirectX::XMMatrixTranspose(
-    ::DirectX::XMMatrixTranslation(X, Y, 0));
-  ConstantBuffer.Projection = ::DirectX::XMMatrixTranspose(
-    ::DirectX::XMMatrixOrthographicOffCenterLH(0, (float)Width, (float)Height, 
-      0, -1, 1));
-  ConstantBuffer.IsTextureDisabled = ::DirectX::XMFLOAT2{ 1.0f, 1.0f };
+  ::covellite::api::renderer::ConstantBuffer ConstantBuffer =
+  {
+    ::DirectX::XMMatrixTranspose(::DirectX::XMMatrixTranslation(X, Y, 0)),
+    ::DirectX::XMMatrixTranspose(
+      ::DirectX::XMMatrixOrthographicOffCenterLH(0, (float)Width, (float)Height,
+        0, -1, 1)),
+    ::DirectX::XMFLOAT2{ 1.0f, 1.0f },
+  };
 
   Tested_t::IGeometry::Data Data = { 0 };
   Data.pTexture = &Texture;
@@ -1218,13 +1219,14 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_CreateGeometry_Update_WithoutTexture)
   Viewport.Width = (FLOAT)Width;
   Viewport.Height = (FLOAT)Height;
 
-  ::covellite::api::render::ConstantBuffer ConstantBuffer;
-  ConstantBuffer.World = ::DirectX::XMMatrixTranspose(
-    ::DirectX::XMMatrixTranslation(X, Y, 0));
-  ConstantBuffer.Projection = ::DirectX::XMMatrixTranspose(
-    ::DirectX::XMMatrixOrthographicOffCenterLH(0, (float)Width, (float)Height,
-      0, -1, 1));
-  ConstantBuffer.IsTextureDisabled = ::DirectX::XMFLOAT2{ 0.0f, 0.0f };
+  ::covellite::api::renderer::ConstantBuffer ConstantBuffer =
+  {
+    ::DirectX::XMMatrixTranspose(::DirectX::XMMatrixTranslation(X, Y, 0)),
+    ::DirectX::XMMatrixTranspose(
+      ::DirectX::XMMatrixOrthographicOffCenterLH(0, (float)Width, (float)Height,
+        0, -1, 1)),
+    ::DirectX::XMFLOAT2{ 0.0f, 0.0f },
+  };
 
   Tested_t::IGeometry::Data Data = { 0 };
 
@@ -1283,7 +1285,7 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_CreateGeometry_Render_WithTexture)
 
   D3D11_BUFFER_DESC ConstantBufferDesc = { 0 };
   ConstantBufferDesc.Usage = D3D11_USAGE_DEFAULT;
-  ConstantBufferDesc.ByteWidth = sizeof(::covellite::api::render::ConstantBuffer);
+  ConstantBufferDesc.ByteWidth = sizeof(::covellite::api::renderer::ConstantBuffer);
   ConstantBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
 
   D3D11_SUBRESOURCE_DATA InitData = { 0 };
@@ -1367,7 +1369,7 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_CreateGeometry_Render_WithoutTexture)
 
   D3D11_BUFFER_DESC ConstantBufferDesc = { 0 };
   ConstantBufferDesc.Usage = D3D11_USAGE_DEFAULT;
-  ConstantBufferDesc.ByteWidth = sizeof(::covellite::api::render::ConstantBuffer);
+  ConstantBufferDesc.ByteWidth = sizeof(::covellite::api::renderer::ConstantBuffer);
   ConstantBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
 
   D3D11_SUBRESOURCE_DATA InitData = { 0 };
@@ -1432,7 +1434,7 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_CreateGeometry_Render_WithoutTexture)
 TEST_F(DirectX11_test, /*DISABLED_*/Test_DestroyGeometry)
 {
   class Geometry :
-    public ::covellite::api::render::DirectX11::IGeometry
+    public ::covellite::api::renderer::DirectX11::IGeometry
   {
   public:
     class Proxy :
@@ -1668,7 +1670,8 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_CompileVS_Fail)
     .WillOnce(Return(Error));
 
   EXPECT_CALL(ErrorMessage, Release())
-    .Times(1);
+    .Times(1)
+    .WillOnce(Return(0));
 
   EXPECT_STDEXCEPTION(Tested_t{ Tested_t::Data{} },
     (".+directx11\\.cpp\\([0-9]+\\): Failed: -2147467259 \\[" + 
@@ -1831,7 +1834,8 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_CompilePS_Fail)
     .WillOnce(Return(Error));
 
   EXPECT_CALL(ErrorMessage, Release())
-    .Times(1);
+    .Times(1)
+    .WillOnce(Return(0));
 
   EXPECT_STDEXCEPTION(Tested_t{ Tested_t::Data{} },
     (".+directx11\\.cpp\\([0-9]+\\): Failed: -2147467259 \\[" +

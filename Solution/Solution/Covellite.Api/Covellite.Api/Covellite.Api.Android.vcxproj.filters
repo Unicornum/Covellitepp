@@ -4,7 +4,7 @@
     <Filter Include="Common">
       <UniqueIdentifier>{051438be-9e43-4426-bee1-d0d0c427743e}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Render">
+    <Filter Include="Renderer">
       <UniqueIdentifier>{e7edf978-1411-408b-ab34-f625349a1bd3}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
@@ -19,38 +19,44 @@
     </ClInclude>
     <ClInclude Include="Window.hpp" />
     <ClInclude Include="Events.hpp" />
-    <ClInclude Include="Render\IRender.hpp">
-      <Filter>Render</Filter>
+    <ClInclude Include="Renderer\Api.forward.hpp">
+      <Filter>Renderer</Filter>
     </ClInclude>
-    <ClInclude Include="Render\Render.hpp">
-      <Filter>Render</Filter>
+    <ClInclude Include="Renderer\GL.hpp">
+      <Filter>Renderer</Filter>
     </ClInclude>
-    <ClInclude Include="Render\IGraphicApi.hpp">
-      <Filter>Render</Filter>
+    <ClInclude Include="Renderer\IGraphicApi.hpp">
+      <Filter>Renderer</Filter>
     </ClInclude>
-    <ClInclude Include="Render\Api.forward.hpp">
-      <Filter>Render</Filter>
+    <ClInclude Include="Renderer\IRenderer.hpp">
+      <Filter>Renderer</Filter>
     </ClInclude>
-    <ClInclude Include="Render\OpenGLES.hpp">
-      <Filter>Render</Filter>
+    <ClInclude Include="Renderer\OpenGLCommon.hpp">
+      <Filter>Renderer</Filter>
     </ClInclude>
-    <ClInclude Include="Render\OpenGLCommon.hpp">
-      <Filter>Render</Filter>
+    <ClInclude Include="Renderer\OpenGLES.hpp">
+      <Filter>Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="Renderer\Renderer.hpp">
+      <Filter>Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="Renderer\stdafx.h">
+      <Filter>Renderer</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Window.cpp" />
-    <ClCompile Include="Render\Render.cpp">
-      <Filter>Render</Filter>
+    <ClCompile Include="Renderer\OpenGLCommon.cpp">
+      <Filter>Renderer</Filter>
     </ClCompile>
-    <ClCompile Include="Render\OpenGLES.cpp">
-      <Filter>Render</Filter>
+    <ClCompile Include="Renderer\OpenGLES.cpp">
+      <Filter>Renderer</Filter>
     </ClCompile>
-    <ClCompile Include="Render\OpenGLCommon.cpp">
-      <Filter>Render</Filter>
+    <ClCompile Include="Renderer\Renderer.android.cpp">
+      <Filter>Renderer</Filter>
     </ClCompile>
-    <ClCompile Include="Render\Render.android.cpp">
-      <Filter>Render</Filter>
+    <ClCompile Include="Renderer\Renderer.cpp">
+      <Filter>Renderer</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

@@ -53,7 +53,7 @@ public:
   Events(const Events &);
 
 public:
-  virtual ~Events(void);
+  ~Events(void);
 };
 
 } // namespace events
