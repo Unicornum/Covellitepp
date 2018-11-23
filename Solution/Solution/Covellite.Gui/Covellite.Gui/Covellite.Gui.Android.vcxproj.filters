@@ -31,6 +31,7 @@
     <ClInclude Include="IWindow.hpp" />
     <ClInclude Include="ClickEventListener.hpp" />
     <ClInclude Include="Events.hpp" />
+    <ClInclude Include="Renderer.hpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Window.inl" />
@@ -47,5 +48,6 @@
     <ClCompile Include="Layer.android.cpp" />
     <ClCompile Include="SystemToRocketKeyCode.android.cpp" />
     <ClCompile Include="ClickEventListener.cpp" />
+    <ClCompile Include="Renderer.cpp" />
   </ItemGroup>
 </Project>

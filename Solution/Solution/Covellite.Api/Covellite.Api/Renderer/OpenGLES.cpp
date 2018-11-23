@@ -12,7 +12,7 @@ namespace api
 namespace renderer
 {
 
-OpenGLES::OpenGLES(const Data & _Data) :
+OpenGLES::OpenGLES(const Renderer::Data & _Data) :
   OpenGLCommon(_Data, uT("")),
   m_pDisplay(::std::make_unique<covellite::egl::Display>()),
   m_pConfig(::std::make_unique<covellite::egl::Config>(*m_pDisplay, _Data.Handle)),
@@ -24,7 +24,7 @@ OpenGLES::OpenGLES(const Data & _Data) :
 
 OpenGLES::~OpenGLES(void) = default;
 
-void OpenGLES::Present(void) /*override*/
+void OpenGLES::PresentFrame(void) /*override*/
 {
   m_pSurface->SwapBuffers();
 }

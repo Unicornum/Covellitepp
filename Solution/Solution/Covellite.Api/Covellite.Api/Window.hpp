@@ -26,10 +26,12 @@ namespace renderer { class Renderer; }
 *  1.0.0.0        \n
 *  2.0.0.0        \n
 *  3.0.0.0        \n
+*  3.1.0.0        \n
 * \date
 *  16 Октябрь 2017    \n
 *  10 Июнь 2018    \n
 *  20 Август 2018    \n
+*  19 Ноябрь 2018    \n
 * \author
 *  CTAPOBEP (unicornum.verum@gmail.com)
 * \copyright
@@ -42,7 +44,8 @@ class Window final :
 {
   using WindowOs_t = ::covellite::os::IWindow;
   using WindowOsPtr_t = ::std::shared_ptr<WindowOs_t>;
-  using RendererPtr_t = ::std::shared_ptr<covellite::api::renderer::Renderer>;
+  using Renderer_t = covellite::api::renderer::Renderer;
+  using RendererPtr_t = ::std::shared_ptr<Renderer_t>;
 
 public:
   // Интерфейс events::IEvents:
@@ -51,6 +54,7 @@ public:
 public:
   // Интерфейс api::IWindow:
   Rect_t GetClientRect(void) const override;
+  RendersPtr_t GetRenders(void) const override;
   RenderInterfacePtr_t GetRenderInterface(void) const override;
   int32_t GetWidth(void) const override;
   int32_t GetHeight(void) const override;

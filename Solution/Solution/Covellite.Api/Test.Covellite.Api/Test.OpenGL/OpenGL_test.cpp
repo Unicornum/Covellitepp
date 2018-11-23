@@ -26,7 +26,8 @@ protected:
   using Tested_t = ::covellite::api::renderer::OpenGL;
   using ITested_t = ::covellite::api::renderer::IGraphicApi;
   using String_t = ::alicorn::extension::std::String;
-  using Data_t = ::covellite::api::renderer::IGraphicApi::Data;
+  using Data_t = ::covellite::api::renderer::Renderer::Data;
+  using Component_t = ::covellite::api::Component;
 
   // Вызывается ПЕРЕД запуском каждого теста
   void SetUp(void) override
@@ -357,7 +358,41 @@ TEST_F(OpenGL_test, /*DISABLED_*/Test_Constructor_UpdateScreen)
 }
 
 // ************************************************************************** //
-TEST_F(OpenGL_test, /*DISABLED_*/Test_ClearWindow)
+TEST_F(OpenGL_test, /*DISABLED_*/Test_GetUsingApi)
+{
+  using WindowsProxy_t = ::mock::WindowsProxy;
+  WindowsProxy_t WindowsProxy;
+  WindowsProxy_t::GetInstance() = &WindowsProxy;
+
+  using GLProxy_t = ::mock::GLProxy;
+  GLProxy_t GLProxy;
+  GLProxy_t::GetInstance() = &GLProxy;
+
+  using namespace ::alicorn::extension::std;
+
+  const char * Version = "Version1710311100";
+  const auto Expected = uT("OpenGL %VERSION%").Replace(uT("%VERSION%"), 
+    string_cast<String, Locale::Default>(::std::string{ Version }));
+
+  using namespace ::testing;
+
+  EXPECT_CALL(WindowsProxy, GetDC(_))
+    .Times(1)
+    .WillOnce(Return((HDC)1710311052));
+
+  const Tested_t Example{ Data_t{} };
+  const ITested_t & IExample = Example;
+
+  EXPECT_CALL(GLProxy, GetString(GL_VERSION))
+    .Times(1)
+    .WillOnce(Return(reinterpret_cast<const unsigned char *>(Version)));
+
+  const auto Result = IExample.GetUsingApi();
+  EXPECT_EQ(Expected, Result);
+}
+
+// ************************************************************************** //
+TEST_F(OpenGL_test, /*DISABLED_*/Test_ClearFrame)
 {
   using GLProxy_t = ::mock::GLProxy;
   GLProxy_t GLProxy;
@@ -376,9 +411,6 @@ TEST_F(OpenGL_test, /*DISABLED_*/Test_ClearWindow)
 
   InSequence Dummy;
 
-  EXPECT_CALL(GLProxy, Disable(GL_BLEND))
-    .Times(1);
-
   EXPECT_CALL(GLProxy, ClearColor(Data.BkColor.R, Data.BkColor.G,
     Data.BkColor.B, Data.BkColor.A))
     .Times(1);
@@ -386,11 +418,11 @@ TEST_F(OpenGL_test, /*DISABLED_*/Test_ClearWindow)
   EXPECT_CALL(GLProxy, Clear(GL_COLOR_BUFFER_BIT))
     .Times(1);
 
-  IExample.ClearWindow();
+  IExample.ClearFrame();
 }
 
 // ************************************************************************** //
-TEST_F(OpenGL_test, /*DISABLED_*/Test_Present)
+TEST_F(OpenGL_test, /*DISABLED_*/Test_PresentFrame)
 {
   using WindowsProxy_t = ::mock::WindowsProxy;
   WindowsProxy_t WindowsProxy;
@@ -411,8 +443,8 @@ TEST_F(OpenGL_test, /*DISABLED_*/Test_Present)
     .WillOnce(Return(TRUE))
     .WillOnce(Return(FALSE));
 
-  IExample.Present();
-  EXPECT_THROW(IExample.Present(), ::std::exception);
+  IExample.PresentFrame();
+  EXPECT_THROW(IExample.PresentFrame(), ::std::exception);
 }
 
 // ************************************************************************** //
@@ -454,594 +486,26 @@ TEST_F(OpenGL_test, /*DISABLED_*/Test_ResizeWindow)
 }
 
 // ************************************************************************** //
-TEST_F(OpenGL_test, /*DISABLED_*/Test_GetUsingApi)
+TEST_F(OpenGL_test, /*DISABLED_*/Test_Camera)
 {
-  using WindowsProxy_t = ::mock::WindowsProxy;
-  WindowsProxy_t WindowsProxy;
-  WindowsProxy_t::GetInstance() = &WindowsProxy;
-
   using GLProxy_t = ::mock::GLProxy;
   GLProxy_t GLProxy;
   GLProxy_t::GetInstance() = &GLProxy;
-
-  using namespace ::alicorn::extension::std;
-
-  const char * Version = "Version1710311100";
-  const auto Expected = uT("OpenGL %VERSION%").Replace(uT("%VERSION%"), 
-    string_cast<String, Locale::Default>(::std::string{ Version }));
-
-  using namespace ::testing;
-
-  EXPECT_CALL(WindowsProxy, GetDC(_))
-    .Times(1)
-    .WillOnce(Return((HDC)1710311052));
 
   const Tested_t Example{ Data_t{} };
   const ITested_t & IExample = Example;
 
-  EXPECT_CALL(GLProxy, GetString(GL_VERSION))
-    .Times(1)
-    .WillOnce(Return(reinterpret_cast<const unsigned char *>(Version)));
+  auto itCreator = IExample.GetCreators().find(uT("Camera"));
+  ASSERT_NE(IExample.GetCreators().end(), itCreator);
 
-  const auto Result = IExample.GetUsingApi();
-  EXPECT_EQ(Expected, Result);
-}
-
-// ************************************************************************** //
-TEST_F(OpenGL_test, /*DISABLED_*/Test_CreateTexture)
-{
-  using GLProxy_t = ::mock::GLProxy;
-  GLProxy_t GLProxy;
-  GLProxy_t::GetInstance() = &GLProxy;
-
-  uint8_t Source[] = { 0 };
-
-  Tested_t::ITexture::Data Data = { 0 };
-  Data.pData = Source;
-  Data.Width = 1808261902;
-  Data.Height = 1808261903;
-  const ::mock::GLuint TextureId = 1612182301;
-
-  Tested_t Example{ Data_t{} };
-  ITested_t & IExample = Example;
+  auto Render = itCreator->second(Component_t::Make({}));
 
   using namespace ::testing;
 
   InSequence Dummy;
 
-  EXPECT_CALL(GLProxy, GenTextures(1))
-    .Times(1)
-    .WillOnce(Return(TextureId));
-
-  EXPECT_CALL(GLProxy, BindTexture(GL_TEXTURE_2D, TextureId))
+  EXPECT_CALL(GLProxy, Disable(GL_BLEND))
     .Times(1);
-
-  EXPECT_CALL(GLProxy, TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,
-    GL_LINEAR))
-    .Times(1);
-
-  EXPECT_CALL(GLProxy, TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER,
-    GL_LINEAR))
-    .Times(1);
-
-  EXPECT_CALL(GLProxy, TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S,
-    GL_CLAMP_TO_EDGE))
-    .Times(1);
-
-  EXPECT_CALL(GLProxy, TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T,
-    GL_CLAMP_TO_EDGE))
-    .Times(1);
-
-  EXPECT_CALL(GLProxy, TexImage2D(GL_TEXTURE_2D, 0, GL_RGBA,
-    Data.Width, Data.Height, 0,
-    GL_RGBA, GL_UNSIGNED_BYTE, Source))
-    .Times(1);
-
-  EXPECT_CALL(GLProxy, GetError())
-    .Times(1)
-    .WillOnce(Return(GL_NO_ERROR));
-
-  auto * pTexture = IExample.Create(Data);
-  ASSERT_TRUE(pTexture != nullptr);
-
-  EXPECT_CALL(GLProxy, Enable(GL_TEXTURE_2D))
-    .Times(1);
-
-  EXPECT_CALL(GLProxy, BindTexture(GL_TEXTURE_2D, TextureId))
-    .Times(1);
-
-  pTexture->Render();
-
-  EXPECT_CALL(GLProxy, DeleteTextures(1, TextureId))
-    .Times(1);
-
-  delete pTexture;
-}
-
-// ************************************************************************** //
-TEST_F(OpenGL_test, /*DISABLED_*/Test_CreateTexture_Fail)
-{
-  using GLProxy_t = ::mock::GLProxy;
-  GLProxy_t GLProxy;
-  GLProxy_t::GetInstance() = &GLProxy;
-
-  uint8_t Source[] = { 0 };
-
-  Tested_t::ITexture::Data Data = { 0 };
-  Data.pData = Source;
-  Data.Width = 1808261902;
-  Data.Height = 1808261903;
-  const ::mock::GLuint TextureId = 1612182301;
-
-  Tested_t Example{ Data_t{} };
-  ITested_t & IExample = Example;
-
-   using namespace ::testing;
-
-  InSequence Dummy;
-
-  EXPECT_CALL(GLProxy, GenTextures(1))
-    .Times(1)
-    .WillOnce(Return(TextureId));
-
-  EXPECT_CALL(GLProxy, BindTexture(GL_TEXTURE_2D, TextureId))
-    .Times(1);
-
-  EXPECT_CALL(GLProxy, TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,
-    GL_LINEAR))
-    .Times(1);
-
-  EXPECT_CALL(GLProxy, TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER,
-    GL_LINEAR))
-    .Times(1);
-
-  EXPECT_CALL(GLProxy, TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S,
-    GL_CLAMP_TO_EDGE))
-    .Times(1);
-
-  EXPECT_CALL(GLProxy, TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T,
-    GL_CLAMP_TO_EDGE))
-    .Times(1);
-
-  EXPECT_CALL(GLProxy, TexImage2D(GL_TEXTURE_2D, 0, GL_RGBA,
-    Data.Width, Data.Height, 0,
-    GL_RGBA, GL_UNSIGNED_BYTE, Source))
-    .Times(1);
-
-  EXPECT_CALL(GLProxy, GetError())
-    .Times(1)
-    .WillOnce(Return(1808261916));
-
-  EXPECT_THROW(IExample.Create(Data), ::std::exception);
-}
-
-// ************************************************************************** //
-TEST_F(OpenGL_test, /*DISABLED_*/Test_DestroyTexture)
-{
-  class Texture :
-    public Tested_t::ITexture
-  {
-  public:
-    class Proxy :
-      public ::alicorn::extension::testing::Proxy<Proxy>
-    {
-    public:
-      MOCK_METHOD1(Destructor, void(::mock::Id_t));
-    };
-
-  public:
-    void Render(void) override {}
-
-  private:
-    const ::mock::Id_t m_Id;
-
-  public:
-    explicit Texture(::mock::Id_t _Id) : m_Id(_Id) {}
-    ~Texture(void) 
-    {
-      Proxy::GetInstance()->Destructor(m_Id);
-    }
-  };
-
-  Texture::Proxy Proxy;
-  Texture::Proxy::GetInstance() = &Proxy;
-
-  const ::mock::Id_t TextureId = 1808261831;
-  Tested_t::ITexture * pTexture = new Texture{ TextureId };
-
-  Tested_t Example{ Data_t{} };
-  ITested_t & IExample = Example;
-
-  using namespace ::testing;
-
-  EXPECT_CALL(Proxy, Destructor(TextureId))
-    .Times(1);
-
-  IExample.Destroy(pTexture);
-}
-
-namespace covellite
-{
-
-namespace api
-{
-
-namespace renderer
-{
-
-inline bool operator== (
-  const ::covellite::api::renderer::IGraphicApi::Vertex & _Left,
-  const ::covellite::api::renderer::IGraphicApi::Vertex & _Right)
-{
-  if (_Left.x != _Right.x) return false;
-  if (_Left.y != _Right.y) return false;
-  if (_Left.Color != _Right.Color) return false;
-  if (_Left.u != _Right.u) return false;
-  if (_Left.v != _Right.v) return false;
-  return true;
-}
-
-// ************************************************************************** //
-TEST_F(OpenGL_test, /*DISABLED_*/Test_CreateGeometry_WithoutTexture)
-{
-  using GLProxy_t = ::mock::GLProxy;
-  GLProxy_t GLProxy;
-  GLProxy_t::GetInstance() = &GLProxy;
-
-  ::std::vector<Tested_t::Vertex> m_Vertices = 
-  {
-    { 1808261932.0f, 1808261933.0f, 1808261934, 1808261935.0f, 1808261936.0f},
-    { 1808261932.0f, 1808261933.0f, 1808261934, 1808261935.0f, 1808261936.0f},
-  };
-
-  ::std::vector<int> m_Indices = 
-  { 
-    1808261927, 
-    1808261928, 
-    1808261929, 
-    1808261930,
-    1808261931
-  };
-
-  Tested_t::IGeometry::Data Data = { 0 };
-  Data.pVertices = m_Vertices.data();
-  Data.VerticesCount = (int)m_Vertices.size();
-  Data.pIndices = m_Indices.data();
-  Data.IndicesCount = (int)m_Indices.size();
-  Data.pTexture = nullptr;
-
-  const float X = 1808261937.0f;
-  const float Y = 1808261938.0f;
-
-  Tested_t Example{ Data_t{} };
-  ITested_t & IExample = Example;
-
-  auto * pGeometry = IExample.Create(Data);
-  auto * pOpenGLGeometry = dynamic_cast<OpenGLGeometry *>(pGeometry);
-  ASSERT_TRUE(pOpenGLGeometry != nullptr);
-
-  EXPECT_TRUE(m_Vertices == pOpenGLGeometry->m_Vertices);
-  EXPECT_TRUE(m_Indices == pOpenGLGeometry->m_Indices);
-
-  using namespace ::testing;
-
-  InSequence Dummy;
-
-  EXPECT_CALL(GLProxy, PushMatrix())
-    .Times(1);
-
-  EXPECT_CALL(GLProxy, Translatef(X, Y, 0))
-    .Times(1);
-
-  pGeometry->Update(X, Y);
-
-  EXPECT_CALL(GLProxy, VertexPointer(2, GL_FLOAT, sizeof(Tested_t::Vertex), 
-    &pOpenGLGeometry->m_Vertices[0].x))
-    .Times(1);
-
-  EXPECT_CALL(GLProxy, EnableClientState(GL_VERTEX_ARRAY))
-    .Times(1);
-
-  EXPECT_CALL(GLProxy, ColorPointer(4, GL_UNSIGNED_BYTE,
-    sizeof(Tested_t::Vertex), &pOpenGLGeometry->m_Vertices[0].Color))
-    .Times(1);
-
-  EXPECT_CALL(GLProxy, EnableClientState(GL_COLOR_ARRAY))
-    .Times(1);
-
-  EXPECT_CALL(GLProxy, Enable(GL_TEXTURE_2D))
-    .Times(0);
-
-  EXPECT_CALL(GLProxy, BindTexture(GL_TEXTURE_2D, _))
-    .Times(0);
-
-  EXPECT_CALL(GLProxy, TexCoordPointer(_, _, _, _))
-    .Times(0);
-
-  EXPECT_CALL(GLProxy, EnableClientState(GL_TEXTURE_COORD_ARRAY))
-    .Times(0);
-
-  EXPECT_CALL(GLProxy, DrawElements(GL_TRIANGLES, (int)m_Indices.size(),
-    GL_UNSIGNED_INT, pOpenGLGeometry->m_Indices.data()))
-    .Times(1);
-
-  EXPECT_CALL(GLProxy, DisableClientState(GL_VERTEX_ARRAY))
-    .Times(1);
-
-  EXPECT_CALL(GLProxy, DisableClientState(GL_COLOR_ARRAY))
-    .Times(1);
-
-  EXPECT_CALL(GLProxy, DisableClientState(GL_TEXTURE_COORD_ARRAY))
-    .Times(1);
-
-  EXPECT_CALL(GLProxy, Disable(GL_TEXTURE_2D))
-    .Times(1);
-
-  EXPECT_CALL(GLProxy, PopMatrix())
-    .Times(1);
-
-  pGeometry->Render();
-
-  delete pGeometry;
-}
-
-// ************************************************************************** //
-TEST_F(OpenGL_test, /*DISABLED_*/Test_CreateGeometry)
-{
-  class Texture :
-    public Tested_t::ITexture
-  {
-  public:
-    class Proxy :
-      public ::alicorn::extension::testing::Proxy<Proxy>
-    {
-    public:
-      MOCK_METHOD1(Render, void(::mock::Id_t));
-    };
-
-  public:
-    void Render(void) override 
-    {
-      Proxy::GetInstance()->Render(m_Id);
-    }
-
-  private:
-    const ::mock::Id_t m_Id;
-
-  public:
-    explicit Texture(::mock::Id_t _Id) : m_Id(_Id) {}
-  };
-
-  Texture::Proxy Proxy;
-  Texture::Proxy::GetInstance() = &Proxy;
-
-  using GLProxy_t = ::mock::GLProxy;
-  GLProxy_t GLProxy;
-  GLProxy_t::GetInstance() = &GLProxy;
-
-  ::std::vector<Tested_t::Vertex> m_Vertices =
-  {
-    { 1808261932.0f, 1808261933.0f, 1808261934, 1808261935.0f, 1808261936.0f},
-    { 1808261932.0f, 1808261933.0f, 1808261934, 1808261935.0f, 1808261936.0f},
-  };
-
-  ::std::vector<int> m_Indices =
-  {
-    1808261927,
-    1808261928,
-    1808261929,
-    1808261930,
-    1808261931
-  };
-
-  const ::mock::Id_t TextureId = 1808261946;
-  Texture Texture{ TextureId };
-
-  Tested_t::IGeometry::Data Data = { 0 };
-  Data.pVertices = m_Vertices.data();
-  Data.VerticesCount = (int)m_Vertices.size();
-  Data.pIndices = m_Indices.data();
-  Data.IndicesCount = (int)m_Indices.size();
-  Data.pTexture = &Texture;
-
-  const float X = 1808261937.0f;
-  const float Y = 1808261938.0f;
-
-  Tested_t Example{ Data_t{} };
-  ITested_t & IExample = Example;
-
-  auto * pGeometry = IExample.Create(Data);
-  auto * pOpenGLGeometry = dynamic_cast<OpenGLGeometry *>(pGeometry);
-  ASSERT_TRUE(pOpenGLGeometry != nullptr);
-
-  EXPECT_TRUE(m_Vertices == pOpenGLGeometry->m_Vertices);
-  EXPECT_TRUE(m_Indices == pOpenGLGeometry->m_Indices);
-
-  using namespace ::testing;
-
-  InSequence Dummy;
-
-  EXPECT_CALL(GLProxy, PushMatrix())
-    .Times(1);
-
-  EXPECT_CALL(GLProxy, Translatef(X, Y, 0))
-    .Times(1);
-
-  pGeometry->Update(X, Y);
-
-  EXPECT_CALL(GLProxy, VertexPointer(2, GL_FLOAT, sizeof(Tested_t::Vertex),
-    &pOpenGLGeometry->m_Vertices[0].x))
-    .Times(1);
-
-  EXPECT_CALL(GLProxy, EnableClientState(GL_VERTEX_ARRAY))
-    .Times(1);
-
-  EXPECT_CALL(GLProxy, ColorPointer(4, GL_UNSIGNED_BYTE,
-    sizeof(Tested_t::Vertex), &pOpenGLGeometry->m_Vertices[0].Color))
-    .Times(1);
-
-  EXPECT_CALL(GLProxy, EnableClientState(GL_COLOR_ARRAY))
-    .Times(1);
-
-  EXPECT_CALL(Proxy, Render(TextureId))
-    .Times(1);
-
-  EXPECT_CALL(GLProxy, TexCoordPointer(2, GL_FLOAT,
-    sizeof(Tested_t::Vertex), &pOpenGLGeometry->m_Vertices[0].u))
-    .Times(1);
-
-  EXPECT_CALL(GLProxy, EnableClientState(GL_TEXTURE_COORD_ARRAY))
-    .Times(1);
-
-  EXPECT_CALL(GLProxy, DrawElements(GL_TRIANGLES, (int)m_Indices.size(),
-    GL_UNSIGNED_INT, pOpenGLGeometry->m_Indices.data()))
-    .Times(1);
-
-  EXPECT_CALL(GLProxy, DisableClientState(GL_VERTEX_ARRAY))
-    .Times(1);
-
-  EXPECT_CALL(GLProxy, DisableClientState(GL_COLOR_ARRAY))
-    .Times(1);
-
-  EXPECT_CALL(GLProxy, DisableClientState(GL_TEXTURE_COORD_ARRAY))
-    .Times(1);
-
-  EXPECT_CALL(GLProxy, Disable(GL_TEXTURE_2D))
-    .Times(1);
-
-  EXPECT_CALL(GLProxy, PopMatrix())
-    .Times(1);
-
-  pGeometry->Render();
-
-  delete pGeometry;
-}
-
-} // namespace renderer
-
-} // namespace api
-
-} // namespace covellite
-
-// ************************************************************************** //
-TEST_F(OpenGL_test, /*DISABLED_*/Test_DestroyGeometry)
-{
-  class Geometry :
-    public Tested_t::IGeometry
-  {
-  public:
-    class Proxy :
-      public ::alicorn::extension::testing::Proxy<Proxy>
-    {
-    public:
-      MOCK_METHOD1(Destructor, void(::mock::Id_t));
-    };
-
-  public:
-    void Update(float, float) override {}
-    void Render(void) override {}
-
-  private:
-    const ::mock::Id_t m_Id;
-
-  public:
-    explicit Geometry(::mock::Id_t _Id) : m_Id(_Id) {}
-    ~Geometry(void)
-    {
-      Proxy::GetInstance()->Destructor(m_Id);
-    }
-  };
-
-  Geometry::Proxy Proxy;
-  Geometry::Proxy::GetInstance() = &Proxy;
-
-  const ::mock::Id_t GeometryId = 1808261843;
-  Tested_t::IGeometry * pGeometry = new Geometry{ GeometryId };
-
-  Tested_t Example{ Data_t{} };
-  ITested_t & IExample = Example;
-
-  using namespace ::testing;
-
-  EXPECT_CALL(Proxy, Destructor(GeometryId))
-    .Times(1);
-
-  IExample.Destroy(pGeometry);
-}
-
-// ************************************************************************** //
-TEST_F(OpenGL_test, /*DISABLED_*/Test_EnableScissorRegion)
-{
-  using GLProxy_t = ::mock::GLProxy;
-  GLProxy_t GLProxy;
-  GLProxy_t::GetInstance() = &GLProxy;
-
-  const int StatusBarHeight = 0;
-  const int X = 1509;
-  const int Y = 1510;
-  const int Width = 1511;
-  const int Height = 1512;
-  const int WindowHeight = 1513;
-  const int Yo = WindowHeight - (Y + Height + StatusBarHeight);
-
-  Tested_t Example{ Data_t{} };
-  ITested_t & IExample = Example;
-
-  using namespace ::testing;
-
-  InSequence Dummy;
-
-  EXPECT_CALL(GLProxy, Enable(GL_SCISSOR_TEST))
-    .Times(1);
-
-  EXPECT_CALL(GLProxy, GetIntegerv(GL_VIEWPORT))
-    .Times(1);
-
-  EXPECT_CALL(GLProxy, GetIntValue(_))
-    .Times(3)
-    .WillRepeatedly(Return(0));
-
-  EXPECT_CALL(GLProxy, GetIntValue(Eq("height")))
-    .Times(1)
-    .WillOnce(Return(WindowHeight));
-
-  EXPECT_CALL(GLProxy, Scissor(X, Yo, Width, Height))
-    .Times(1);
-
-  IExample.EnableScissorRegion(X, Y, Width, Height);
-}
-
-// ************************************************************************** //
-TEST_F(OpenGL_test, /*DISABLED_*/Test_DisableScissorRegion)
-{
-  using GLProxy_t = ::mock::GLProxy;
-  GLProxy_t GLProxy;
-  GLProxy_t::GetInstance() = &GLProxy;
-
-  Tested_t Example{ Data_t{} };
-  ITested_t & IExample = Example;
-
-  using namespace ::testing;
-
-  EXPECT_CALL(GLProxy, Disable(GL_SCISSOR_TEST))
-    .Times(1);
-
-  IExample.DisableScissorRegion();
-}
-
-// ************************************************************************** //
-TEST_F(OpenGL_test, /*DISABLED_*/Test_Render)
-{
-  using GLProxy_t = ::mock::GLProxy;
-  GLProxy_t GLProxy;
-  GLProxy_t::GetInstance() = &GLProxy;
-
-  Tested_t Example{ Data_t{} };
-  ITested_t & IExample = Example;
-
-  using namespace ::testing;
-
-  InSequence Dummy;
 
   EXPECT_CALL(GLProxy, Disable(GL_DEPTH_TEST))
     .Times(1);
@@ -1052,26 +516,508 @@ TEST_F(OpenGL_test, /*DISABLED_*/Test_Render)
   EXPECT_CALL(GLProxy, Disable(GL_LIGHTING))
     .Times(1);
 
+  EXPECT_CALL(GLProxy, ShadeModel(GL_SMOOTH))
+    .Times(1);
+
+  EXPECT_CALL(GLProxy, Enable(GL_CULL_FACE))
+    .Times(1);
+
+  EXPECT_CALL(GLProxy, FrontFace(GL_CCW))
+    .Times(1);
+
+  EXPECT_CALL(GLProxy, CullFace(GL_BACK))
+    .Times(1);
+
+  EXPECT_CALL(GLProxy, Hint(GL_PERSPECTIVE_CORRECTION_HINT, GL_FASTEST))
+    .Times(1);
+
+  Render();
+}
+
+// ************************************************************************** //
+TEST_F(OpenGL_test, /*DISABLED_*/Test_BlendState)
+{
+  using GLProxy_t = ::mock::GLProxy;
+  GLProxy_t GLProxy;
+  GLProxy_t::GetInstance() = &GLProxy;
+
+  const Tested_t Example{ Data_t{} };
+  const ITested_t & IExample = Example;
+
+  auto itCreator = IExample.GetCreators().find(uT("State"));
+  ASSERT_NE(IExample.GetCreators().end(), itCreator);
+
+  auto Render = itCreator->second(Component_t::Make(
+    {
+      { uT("kind"), uT("Blend") }
+    }));
+
+  using namespace ::testing;
+
+  InSequence Dummy;
+
   EXPECT_CALL(GLProxy, Enable(GL_BLEND))
     .Times(1);
 
   EXPECT_CALL(GLProxy, BlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA))
     .Times(1);
 
-  EXPECT_CALL(GLProxy, Hint(GL_PERSPECTIVE_CORRECTION_HINT, GL_FASTEST))
+  Render();
+}
+
+// ************************************************************************** //
+TEST_F(OpenGL_test, /*DISABLED_*/Test_SamplerState)
+{
+  using GLProxy_t = ::mock::GLProxy;
+  GLProxy_t GLProxy;
+  GLProxy_t::GetInstance() = &GLProxy;
+
+  const Tested_t Example{ Data_t{} };
+  const ITested_t & IExample = Example;
+
+  auto itCreator = IExample.GetCreators().find(uT("State"));
+  ASSERT_NE(IExample.GetCreators().end(), itCreator);
+
+  auto Render = itCreator->second(Component_t::Make(
+    {
+      { uT("kind"), uT("Sampler") }
+    }));
+
+  using namespace ::testing;
+
+  InSequence Dummy;
+
+  EXPECT_CALL(GLProxy, TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,
+    GL_LINEAR))
     .Times(1);
 
-  EXPECT_CALL(GLProxy, ShadeModel(GL_SMOOTH))
+  EXPECT_CALL(GLProxy, TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER,
+    GL_LINEAR))
     .Times(1);
 
-  EXPECT_CALL(GLProxy, FrontFace(GL_CCW))
+  EXPECT_CALL(GLProxy, TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S,
+    GL_CLAMP_TO_EDGE))
     .Times(1);
 
-  EXPECT_CALL(GLProxy, Enable(GL_CULL_FACE))
+  EXPECT_CALL(GLProxy, TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T,
+    GL_CLAMP_TO_EDGE))
     .Times(1);
 
-  EXPECT_CALL(GLProxy, CullFace(GL_BACK))
+  Render();
+}
+
+// ************************************************************************** //
+TEST_F(OpenGL_test, /*DISABLED_*/Test_Scissor_Enable)
+{
+  using GLProxy_t = ::mock::GLProxy;
+  GLProxy_t GLProxy;
+  GLProxy_t::GetInstance() = &GLProxy;
+
+  const Tested_t Example{ Data_t{} };
+  const ITested_t & IExample = Example;
+
+  auto itCreator = IExample.GetCreators().find(uT("State"));
+  ASSERT_NE(IExample.GetCreators().end(), itCreator);
+
+  const auto pComponent = Component_t::Make(
+    {
+      { uT("kind"), uT("Scissor") },
+      { uT("is_enabled"), true },
+    });
+
+  auto Render = itCreator->second(pComponent);
+
+  using namespace ::testing;
+
+  // Первый вызов
+  {
+    const int StatusBarHeight = 0;
+    const int X = 1509;
+    const int Y = 1510;
+    const int Width = 1511;
+    const int Height = 1512;
+    const int WindowHeight = 1513;
+    const int Yo = WindowHeight - (Y + Height + StatusBarHeight);
+
+    pComponent->SetValue(uT("left"), X);
+    pComponent->SetValue(uT("top"), Y);
+    pComponent->SetValue(uT("right"), X + Width);
+    pComponent->SetValue(uT("bottom"), Y + Height);
+
+    InSequence Dummy;
+
+    EXPECT_CALL(GLProxy, Enable(GL_SCISSOR_TEST))
+      .Times(1);
+
+    EXPECT_CALL(GLProxy, GetIntegerv(GL_VIEWPORT))
+      .Times(1);
+
+    EXPECT_CALL(GLProxy, GetIntValue(_))
+      .Times(3)
+      .WillRepeatedly(Return(0));
+
+    EXPECT_CALL(GLProxy, GetIntValue(Eq("height")))
+      .Times(1)
+      .WillOnce(Return(WindowHeight));
+
+    EXPECT_CALL(GLProxy, Scissor(X, Yo, Width, Height))
+      .Times(1);
+
+    Render();
+  }
+
+  // Второй вызов
+  {
+    const int StatusBarHeight = 0;
+    const int X = 1514;
+    const int Y = 1514;
+    const int Width = 1516;
+    const int Height = 1517;
+    const int WindowHeight = 1518;
+    const int Yo = WindowHeight - (Y + Height + StatusBarHeight);
+
+    pComponent->SetValue(uT("left"), X);
+    pComponent->SetValue(uT("top"), Y);
+    pComponent->SetValue(uT("right"), X + Width);
+    pComponent->SetValue(uT("bottom"), Y + Height);
+
+    InSequence Dummy;
+
+    EXPECT_CALL(GLProxy, Enable(GL_SCISSOR_TEST))
+      .Times(1);
+
+    EXPECT_CALL(GLProxy, GetIntegerv(GL_VIEWPORT))
+      .Times(1);
+
+    EXPECT_CALL(GLProxy, GetIntValue(_))
+      .Times(3)
+      .WillRepeatedly(Return(0));
+
+    EXPECT_CALL(GLProxy, GetIntValue(Eq("height")))
+      .Times(1)
+      .WillOnce(Return(WindowHeight));
+
+    EXPECT_CALL(GLProxy, Scissor(X, Yo, Width, Height))
+      .Times(1);
+
+    Render();
+  }
+}
+
+// ************************************************************************** //
+TEST_F(OpenGL_test, /*DISABLED_*/Test_Scissor_Disable)
+{
+  using GLProxy_t = ::mock::GLProxy;
+  GLProxy_t GLProxy;
+  GLProxy_t::GetInstance() = &GLProxy;
+
+  const Tested_t Example{ Data_t{} };
+  const ITested_t & IExample = Example;
+
+  auto itCreator = IExample.GetCreators().find(uT("State"));
+  ASSERT_NE(IExample.GetCreators().end(), itCreator);
+
+  const auto pComponent = Component_t::Make(
+    {
+      { uT("kind"), uT("Scissor") },
+      { uT("is_enabled"), false },
+    });
+
+  auto Render = itCreator->second(pComponent);
+
+  using namespace ::testing;
+
+  EXPECT_CALL(GLProxy, Disable(GL_SCISSOR_TEST))
     .Times(1);
 
-  IExample.Render();
+  Render();
+}
+
+// ************************************************************************** //
+TEST_F(OpenGL_test, /*DISABLED_*/Test_Position)
+{
+  using GLProxy_t = ::mock::GLProxy;
+  GLProxy_t GLProxy;
+  GLProxy_t::GetInstance() = &GLProxy;
+
+  const Tested_t Example{ Data_t{} };
+  const ITested_t & IExample = Example;
+
+  auto itCreator = IExample.GetCreators().find(uT("Position"));
+  ASSERT_NE(IExample.GetCreators().end(), itCreator);
+
+  auto pPosition = Component_t::Make({});
+
+  auto Render = itCreator->second(pPosition);
+
+  using namespace ::testing;
+
+  // Первый вызов
+  {
+    const float X = 1811221956.0f;
+    const float Y = 1811221957.0f;
+    const float Z = 1811221958.0f;
+
+    pPosition->SetValue(uT("x"), X);
+    pPosition->SetValue(uT("y"), Y);
+    pPosition->SetValue(uT("z"), Z);
+
+    InSequence Dummy;
+
+    EXPECT_CALL(GLProxy, PushMatrix())
+      .Times(1);
+
+    EXPECT_CALL(GLProxy, Translatef(X, Y, Z))
+      .Times(1);
+
+    Render();
+  }
+
+  // Второй вызов
+  {
+    const float X = 1811221959.0f;
+    const float Y = 1811221960.0f;
+    const float Z = 1811221961.0f;
+
+    pPosition->SetValue(uT("x"), X);
+    pPosition->SetValue(uT("y"), Y);
+    pPosition->SetValue(uT("z"), Z);
+
+    InSequence Dummy;
+
+    EXPECT_CALL(GLProxy, PushMatrix())
+      .Times(1);
+
+    EXPECT_CALL(GLProxy, Translatef(X, Y, Z))
+      .Times(1);
+
+    Render();
+  }
+}
+
+// ************************************************************************** //
+TEST_F(OpenGL_test, /*DISABLED_*/Test_VertexBuffer)
+{
+  using GLProxy_t = ::mock::GLProxy;
+  GLProxy_t GLProxy;
+  GLProxy_t::GetInstance() = &GLProxy;
+
+  const ::std::vector<Tested_t::Vertex> m_Vertices =
+  {
+    { 1808261932.0f, 1808261933.0f, 1808261934, 1808261935.0f, 1808261936.0f},
+    { 1808261932.0f, 1808261933.0f, 1808261934, 1808261935.0f, 1808261936.0f},
+  };
+
+  const Tested_t Example{ Data_t{} };
+  const ITested_t & IExample = Example;
+
+  auto itCreator = IExample.GetCreators().find(uT("Buffer"));
+  ASSERT_NE(IExample.GetCreators().end(), itCreator);
+
+  const auto pComponent = Component_t::Make(
+    {
+      { uT("kind"), uT("Vertex") },
+      { uT("data"), m_Vertices.data() },
+      { uT("count"), m_Vertices.size() },
+    });
+
+  auto Render = itCreator->second(pComponent);
+
+  using namespace ::testing;
+
+  InSequence Dummy;
+
+  EXPECT_CALL(GLProxy, VertexPointer(2, GL_FLOAT, 
+    sizeof(Tested_t::Vertex), &m_Vertices[0].x))
+    .Times(1);
+
+  EXPECT_CALL(GLProxy, EnableClientState(GL_VERTEX_ARRAY))
+    .Times(1);
+
+  EXPECT_CALL(GLProxy, ColorPointer(4, GL_UNSIGNED_BYTE,
+    sizeof(Tested_t::Vertex), &m_Vertices[0].Color))
+    .Times(1);
+
+  EXPECT_CALL(GLProxy, EnableClientState(GL_COLOR_ARRAY))
+    .Times(1);
+
+  EXPECT_CALL(GLProxy, TexCoordPointer(2, GL_FLOAT,
+    sizeof(Tested_t::Vertex), &m_Vertices[0].u))
+    .Times(1);
+
+  EXPECT_CALL(GLProxy, EnableClientState(GL_TEXTURE_COORD_ARRAY))
+    .Times(1);
+
+  Render();
+}
+
+// ************************************************************************** //
+TEST_F(OpenGL_test, /*DISABLED_*/Test_IndexBuffer)
+{
+  using GLProxy_t = ::mock::GLProxy;
+  GLProxy_t GLProxy;
+  GLProxy_t::GetInstance() = &GLProxy;
+
+  const ::std::vector<int> m_Indices =
+  {
+    1808261927,
+    1808261928,
+    1808261929,
+    1808261930,
+    1808261931
+  };
+
+  const Tested_t Example{ Data_t{} };
+  const ITested_t & IExample = Example;
+
+  auto itCreator = IExample.GetCreators().find(uT("Buffer"));
+  ASSERT_NE(IExample.GetCreators().end(), itCreator);
+
+  const auto pComponent = Component_t::Make(
+    {
+      { uT("kind"), uT("Index") },
+      { uT("data"), m_Indices.data() },
+      { uT("count"), m_Indices.size() },
+    });
+
+  auto Render = itCreator->second(pComponent);
+
+  using namespace ::testing;
+
+  EXPECT_CALL(GLProxy, DrawElements(GL_TRIANGLES, (int)m_Indices.size(),
+    GL_UNSIGNED_INT, m_Indices.data()))
+    .Times(1);
+
+  Render();
+}
+
+// ************************************************************************** //
+TEST_F(OpenGL_test, /*DISABLED_*/Test_DrawCall)
+{
+  using GLProxy_t = ::mock::GLProxy;
+  GLProxy_t GLProxy;
+  GLProxy_t::GetInstance() = &GLProxy;
+
+  const Tested_t Example{ Data_t{} };
+  const ITested_t & IExample = Example;
+
+  auto itCreator = IExample.GetCreators().find(uT("DrawCall"));
+  ASSERT_NE(IExample.GetCreators().end(), itCreator);
+
+  auto Render = itCreator->second(Component_t::Make({}));
+
+  using namespace ::testing;
+
+  EXPECT_CALL(GLProxy, DisableClientState(GL_VERTEX_ARRAY))
+    .Times(1);
+
+  EXPECT_CALL(GLProxy, DisableClientState(GL_COLOR_ARRAY))
+    .Times(1);
+
+  EXPECT_CALL(GLProxy, DisableClientState(GL_TEXTURE_COORD_ARRAY))
+    .Times(1);
+
+  EXPECT_CALL(GLProxy, Disable(GL_TEXTURE_2D))
+    .Times(1);
+
+  EXPECT_CALL(GLProxy, PopMatrix())
+    .Times(1);
+
+  Render();
+}
+
+// ************************************************************************** //
+TEST_F(OpenGL_test, /*DISABLED_*/Test_Texture_glTexImage2D_Fail)
+{
+  using GLProxy_t = ::mock::GLProxy;
+  GLProxy_t GLProxy;
+  GLProxy_t::GetInstance() = &GLProxy;
+
+  const ::mock::GLuint TextureId = 1612182301;
+
+  const Tested_t Example{ Data_t{} };
+  const ITested_t & IExample = Example;
+
+  auto itCreator = IExample.GetCreators().find(uT("Texture"));
+  ASSERT_NE(IExample.GetCreators().end(), itCreator);
+
+  using namespace ::testing;
+
+  InSequence Dummy;
+
+  EXPECT_CALL(GLProxy, GenTextures(1))
+    .Times(1)
+    .WillOnce(Return(TextureId));
+
+  EXPECT_CALL(GLProxy, BindTexture(GL_TEXTURE_2D, TextureId))
+    .Times(1);
+
+  EXPECT_CALL(GLProxy, TexImage2D(_, _, _, _, _, _, _, _, _))
+    .Times(1);
+
+  EXPECT_CALL(GLProxy, GetError())
+    .Times(1)
+    .WillOnce(Return(1808261916));
+
+  EXPECT_THROW(itCreator->second(Component_t::Make({})), ::std::exception);
+}
+
+// ************************************************************************** //
+TEST_F(OpenGL_test, /*DISABLED_*/Test_Texture)
+{
+  using GLProxy_t = ::mock::GLProxy;
+  GLProxy_t GLProxy;
+  GLProxy_t::GetInstance() = &GLProxy;
+
+  const uint8_t * pSource = (uint8_t *)1811222026;
+
+  const int Width = 1808261902;
+  const int Height = 1808261903;
+  const ::mock::GLuint TextureId = 1612182301;
+
+  const Tested_t Example{ Data_t{} };
+  const ITested_t & IExample = Example;
+
+  auto itCreator = IExample.GetCreators().find(uT("Texture"));
+  ASSERT_NE(IExample.GetCreators().end(), itCreator);
+
+  const auto pComponent = Component_t::Make(
+    {
+      { uT("data"), pSource },
+      { uT("width"), Width },
+      { uT("height"), Height },
+    });
+
+  using namespace ::testing;
+
+  InSequence Dummy;
+
+  EXPECT_CALL(GLProxy, GenTextures(1))
+    .Times(1)
+    .WillOnce(Return(TextureId));
+
+  EXPECT_CALL(GLProxy, BindTexture(GL_TEXTURE_2D, TextureId))
+    .Times(1);
+
+  EXPECT_CALL(GLProxy, TexImage2D(GL_TEXTURE_2D, 0, GL_RGBA,
+    Width, Height, 0,
+    GL_RGBA, GL_UNSIGNED_BYTE, pSource))
+    .Times(1);
+
+  EXPECT_CALL(GLProxy, GetError())
+    .Times(1)
+    .WillOnce(Return(GL_NO_ERROR));
+
+  auto Render = itCreator->second(pComponent);
+
+  EXPECT_CALL(GLProxy, Enable(GL_TEXTURE_2D))
+    .Times(1);
+
+  EXPECT_CALL(GLProxy, BindTexture(GL_TEXTURE_2D, TextureId))
+    .Times(1);
+
+  Render();
+
+  EXPECT_CALL(GLProxy, DeleteTextures(1, TextureId))
+    .Times(1);
 }

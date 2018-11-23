@@ -31,6 +31,7 @@
     <ClInclude Include="IWindow.hpp" />
     <ClInclude Include="ClickEventListener.hpp" />
     <ClInclude Include="Events.hpp" />
+    <ClInclude Include="Renderer.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -47,6 +48,7 @@
     <ClCompile Include="Layer.windows.cpp" />
     <ClCompile Include="SystemToRocketKeyCode.windows.cpp" />
     <ClCompile Include="ClickEventListener.cpp" />
+    <ClCompile Include="Renderer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Window.inl" />

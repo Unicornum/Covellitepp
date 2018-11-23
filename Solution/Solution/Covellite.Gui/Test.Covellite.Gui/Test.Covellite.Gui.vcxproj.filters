@@ -43,6 +43,9 @@
     <Filter Include="Tests\ClickEventListener">
       <UniqueIdentifier>{a7014373-bdbe-43ac-960b-f5f612a51a1c}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Tests\Renderer">
+      <UniqueIdentifier>{e9b38aa4-cc64-432a-9c73-e8b39681d080}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Resources.rc">
@@ -118,6 +121,9 @@
     </ClCompile>
     <ClCompile Include="Test.Layer\Layer.windows_test.cpp">
       <Filter>Tests\Layer</Filter>
+    </ClCompile>
+    <ClCompile Include="Test.Renderer\Renderer_test.cpp">
+      <Filter>Tests\Renderer</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

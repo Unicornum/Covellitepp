@@ -18,7 +18,6 @@
 #include <Covellite/Api/Events.hpp>
 
 #include "../Mock/Renderer.hpp"
-#include "../Mock/Eq.hpp"
 
 // Расположение класса Window
 #include "../../Covellite.Api/Window.cpp"
@@ -29,11 +28,12 @@ class Window_test :
 {
 protected:
   using Tested_t = ::covellite::api::Window;
-  using Render_t = ::mock::covellite::api::renderer::Renderer;
+  using String_t = ::alicorn::extension::std::String;
+  using Renderer_t = ::mock::covellite::api::renderer::Renderer;
+  using RenderInterfacePtr_t = ::std::shared_ptr<::covellite::api::RenderInterface>;
   using IWindowApi_t = ::covellite::api::IWindow;
   using IWindowCore_t = ::covellite::core::IWindow;
   using WindowOs_t = ::mock::covellite::os::Window;
-  using String_t = ::alicorn::extension::std::String;
   using Rect_t = ::covellite::os::IWindow::Rect;
 
   // Вызывается ПЕРЕД запуском каждого теста
@@ -99,9 +99,9 @@ TEST_F(Window_test, /*DISABLED_*/Test_Constructor)
   SettingsProxy_t SettingsProxy;
   SettingsProxy_t::GetInstance() = &SettingsProxy;
 
-  using RenderProxy_t = Render_t::Proxy;
-  RenderProxy_t RenderProxy;
-  RenderProxy_t::GetInstance() = &RenderProxy;
+  using RendererProxy_t = Renderer_t::Proxy;
+  RendererProxy_t RendererProxy;
+  RendererProxy_t::GetInstance() = &RendererProxy;
 
   const ::mock::Id_t WindowOsId = 1710311123;
   const ::mock::Id_t WindowSectionId = 1806101824;
@@ -110,7 +110,7 @@ TEST_F(Window_test, /*DISABLED_*/Test_Constructor)
 
   for (const auto IsFullScreen : { true, false })
   {
-    ::covellite::api::renderer::IRenderer::Data Data;
+    Renderer_t::Data Data;
     Data.Handle = (HWND)1808221257;
     Data.Top = 1808271300;
     Data.BkColor = { 0.1f, 0.2f, 0.3f, 0.4f };
@@ -173,7 +173,7 @@ TEST_F(Window_test, /*DISABLED_*/Test_Constructor)
       .Times(1)
       .WillOnce(Return(ApiName));
 
-    EXPECT_CALL(RenderProxy, Constructor(ApiName, Eq(Data)))
+    EXPECT_CALL(RendererProxy, Constructor(ApiName, Eq(Data)))
       .Times(1);
 
     const Tested_t Example{ WindowOs };
@@ -197,9 +197,9 @@ TEST_F(Window_test, /*DISABLED_*/Test_DoApplicationUpdate)
   SettingsProxy_t SettingsProxy;
   SettingsProxy_t::GetInstance() = &SettingsProxy;
 
-  using RenderProxy_t = ::mock::covellite::api::renderer::Renderer::Proxy;
-  RenderProxy_t RenderProxy;
-  RenderProxy_t::GetInstance() = &RenderProxy;
+  using RendererProxy_t = Renderer_t::Proxy;
+  RendererProxy_t RendererProxy;
+  RendererProxy_t::GetInstance() = &RendererProxy;
 
   const ::mock::Id_t RenderId = 1808221312;
   WindowOs_t WindowOs;
@@ -216,7 +216,7 @@ TEST_F(Window_test, /*DISABLED_*/Test_DoApplicationUpdate)
     .WillOnce(Return(uT("false")))
     .WillRepeatedly(Return(uT("0")));
 
-  EXPECT_CALL(RenderProxy, Constructor(_, _))
+  EXPECT_CALL(RendererProxy, Constructor(_, _))
     .Times(1)
     .WillOnce(Return(RenderId));
 
@@ -224,13 +224,13 @@ TEST_F(Window_test, /*DISABLED_*/Test_DoApplicationUpdate)
 
   InSequence Dummy;
 
-  EXPECT_CALL(RenderProxy, ClearWindow(RenderId))
+  EXPECT_CALL(RendererProxy, StartDrawingFrame(RenderId))
     .Times(1);
 
   EXPECT_CALL(Proxy, DoDrawing())
     .Times(1);
 
-  EXPECT_CALL(RenderProxy, Present(RenderId))
+  EXPECT_CALL(RendererProxy, PresentFrame(RenderId))
     .Times(1);
 
   Events[Application.Update]();
@@ -247,9 +247,9 @@ TEST_F(Window_test, /*DISABLED_*/Test_DoWindowResize)
   SettingsProxy_t SettingsProxy;
   SettingsProxy_t::GetInstance() = &SettingsProxy;
 
-  using RenderProxy_t = ::mock::covellite::api::renderer::Renderer::Proxy;
-  RenderProxy_t RenderProxy;
-  RenderProxy_t::GetInstance() = &RenderProxy;
+  using RendererProxy_t = Renderer_t::Proxy;
+  RendererProxy_t RendererProxy;
+  RendererProxy_t::GetInstance() = &RendererProxy;
 
   const ::mock::Id_t RenderId = 1808221411;
   const auto Width = 1808221412;
@@ -266,7 +266,7 @@ TEST_F(Window_test, /*DISABLED_*/Test_DoWindowResize)
     .WillOnce(Return(uT("false")))
     .WillRepeatedly(Return(uT("0")));
 
-  EXPECT_CALL(RenderProxy, Constructor(_, _))
+  EXPECT_CALL(RendererProxy, Constructor(_, _))
     .Times(1)
     .WillOnce(Return(RenderId));
 
@@ -278,7 +278,7 @@ TEST_F(Window_test, /*DISABLED_*/Test_DoWindowResize)
     .Times(1)
     .WillOnce(Return(Rect_t{ 0, 0, Width, Height }));
 
-  EXPECT_CALL(RenderProxy, ResizeWindow(RenderId, Width, Height))
+  EXPECT_CALL(RendererProxy, ResizeWindow(RenderId, Width, Height))
     .Times(1);
 
   Events[events::Window.Resize]();
@@ -361,9 +361,9 @@ TEST_F(Window_test, /*DISABLED_*/Test_GetRenderInterface)
   SettingsProxy_t SettingsProxy;
   SettingsProxy_t::GetInstance() = &SettingsProxy;
 
-  using RenderProxy_t = Render_t::Proxy;
-  RenderProxy_t RenderProxy;
-  RenderProxy_t::GetInstance() = &RenderProxy;
+  using RendererProxy_t = Renderer_t::Proxy;
+  RendererProxy_t RendererProxy;
+  RendererProxy_t::GetInstance() = &RendererProxy;
 
   const ::mock::Id_t RenderId = 1808202112;
 
@@ -375,7 +375,7 @@ TEST_F(Window_test, /*DISABLED_*/Test_GetRenderInterface)
     .WillOnce(Return(uT("false")))
     .WillRepeatedly(Return(uT("0")));
 
-  EXPECT_CALL(RenderProxy, Constructor(_, _))
+  EXPECT_CALL(RendererProxy, Constructor(_, _))
     .Times(1)
     .WillOnce(Return(RenderId));
 
@@ -383,8 +383,8 @@ TEST_F(Window_test, /*DISABLED_*/Test_GetRenderInterface)
   const Tested_t Example{ WindowOs };
   const IWindowApi_t & IExample = Example;
 
-  const auto pResult = IExample.GetRenderInterface();
-  EXPECT_EQ(RenderId, dynamic_cast<const Render_t &>(*pResult).m_Id);
+  const RenderInterfacePtr_t pResult = IExample.GetRenderInterface();
+  EXPECT_EQ(RenderId, dynamic_cast<const Renderer_t &>(*pResult).m_RendererId);
 }
 
 // ************************************************************************** //
@@ -398,9 +398,9 @@ TEST_F(Window_test, /*DISABLED_*/Test_Constructor_Deprecated)
   SettingsProxy_t SettingsProxy;
   SettingsProxy_t::GetInstance() = &SettingsProxy;
 
-  using RenderProxy_t = Render_t::Proxy;
-  RenderProxy_t RenderProxy;
-  RenderProxy_t::GetInstance() = &RenderProxy;
+  using RendererProxy_t = Renderer_t::Proxy;
+  RendererProxy_t RendererProxy;
+  RendererProxy_t::GetInstance() = &RendererProxy;
 
   const ::mock::Id_t WindowOsId = 1808211304;
   const ::mock::Id_t WindowSectionId = 1808211305;
@@ -409,7 +409,7 @@ TEST_F(Window_test, /*DISABLED_*/Test_Constructor_Deprecated)
 
   for (const auto IsFullScreen : { true, false })
   {
-    ::covellite::api::renderer::IRenderer::Data Data;
+    Renderer_t::Data Data;
     Data.Handle = (HWND)1808241139;
     Data.Top = 1808271313;
     Data.BkColor = { 0.1f, 0.2f, 0.3f, 0.4f };
@@ -470,7 +470,7 @@ TEST_F(Window_test, /*DISABLED_*/Test_Constructor_Deprecated)
       .Times(1)
       .WillOnce(Return(ApiName));
 
-    EXPECT_CALL(RenderProxy, Constructor(ApiName, Eq(Data)))
+    EXPECT_CALL(RendererProxy, Constructor(ApiName, Eq(Data)))
       .Times(1);
 
     const Tested_t Example{ ::std::make_shared<WindowOs_t>() };
@@ -489,7 +489,7 @@ TEST_F(Window_test, /*DISABLED_*/Test_GetWidth_Deprecated)
   SettingsProxy_t::GetInstance() = &SettingsProxy;
 
   const ::mock::Id_t WindowOsId = 1808221243;
-  const ::covellite::os::IWindow::Rect Rect = { 0, 0, 1808221242, 0 };
+  const Rect_t Rect = { 0, 0, 1808221242, 0 };
 
   using namespace ::testing;
 
@@ -514,7 +514,7 @@ TEST_F(Window_test, /*DISABLED_*/Test_GetWidth_Deprecated)
 }
 
 // ************************************************************************** //
-TEST_F(Window_test,/* DISABLED_*/Test_GetHeight_Deprecated)
+TEST_F(Window_test, /*DISABLED_*/Test_GetHeight_Deprecated)
 {
   using WindowOsProxy_t = ::mock::covellite::os::Window::Proxy;
   WindowOsProxy_t WindowOsProxy;
@@ -525,7 +525,7 @@ TEST_F(Window_test,/* DISABLED_*/Test_GetHeight_Deprecated)
   SettingsProxy_t::GetInstance() = &SettingsProxy;
 
   const ::mock::Id_t WindowOsId = 1808221243;
-  const ::covellite::os::IWindow::Rect Rect = { 0, 0, 0, 1808221244 };
+  const Rect_t Rect = { 0, 0, 0, 1808221244 };
 
   using namespace ::testing;
 
@@ -556,9 +556,9 @@ TEST_F(Window_test, /*DISABLED_*/Test_MakeRenderInterface_Deprecated)
   SettingsProxy_t SettingsProxy;
   SettingsProxy_t::GetInstance() = &SettingsProxy;
 
-  using RenderProxy_t = Render_t::Proxy;
-  RenderProxy_t RenderProxy;
-  RenderProxy_t::GetInstance() = &RenderProxy;
+  using RendererProxy_t = Renderer_t::Proxy;
+  RendererProxy_t RendererProxy;
+  RendererProxy_t::GetInstance() = &RendererProxy;
 
   const ::mock::Id_t RenderId = 1808211442;
 
@@ -570,7 +570,7 @@ TEST_F(Window_test, /*DISABLED_*/Test_MakeRenderInterface_Deprecated)
     .WillOnce(Return(uT("false")))
     .WillRepeatedly(Return(uT("0")));
 
-  EXPECT_CALL(RenderProxy, Constructor(_, _))
+  EXPECT_CALL(RendererProxy, Constructor(_, _))
     .Times(1)
     .WillOnce(Return(RenderId));
 
@@ -578,8 +578,8 @@ TEST_F(Window_test, /*DISABLED_*/Test_MakeRenderInterface_Deprecated)
   const Tested_t Example{ WindowOs };
   const IWindowApi_t & IExample = Example;
 
-  const auto pResult = IExample.MakeRenderInterface();
-  EXPECT_EQ(RenderId, dynamic_cast<const Render_t &>(*pResult).m_Id);
+  const RenderInterfacePtr_t pResult = IExample.MakeRenderInterface();
+  EXPECT_EQ(RenderId, dynamic_cast<const Renderer_t &>(*pResult).m_RendererId);
 }
 
 // ************************************************************************** //
@@ -589,9 +589,9 @@ TEST_F(Window_test, /*DISABLED_*/Test_DoStartDrawing_Deprecated)
   SettingsProxy_t SettingsProxy;
   SettingsProxy_t::GetInstance() = &SettingsProxy;
 
-  using RenderProxy_t = ::mock::covellite::api::renderer::Renderer::Proxy;
-  RenderProxy_t RenderProxy;
-  RenderProxy_t::GetInstance() = &RenderProxy;
+  using RendererProxy_t = Renderer_t::Proxy;
+  RendererProxy_t RendererProxy;
+  RendererProxy_t::GetInstance() = &RendererProxy;
 
   const ::mock::Id_t WindowSectionId = 1808231107;
   const ::mock::Id_t RenderId = 1808221312;
@@ -605,7 +605,7 @@ TEST_F(Window_test, /*DISABLED_*/Test_DoStartDrawing_Deprecated)
     .WillOnce(Return(uT("false")))
     .WillRepeatedly(Return(uT("0")));
 
-  EXPECT_CALL(RenderProxy, Constructor(_, _))
+  EXPECT_CALL(RendererProxy, Constructor(_, _))
     .Times(1)
     .WillOnce(Return(RenderId));
 
@@ -613,7 +613,7 @@ TEST_F(Window_test, /*DISABLED_*/Test_DoStartDrawing_Deprecated)
   IWindowCore_t & IExample = Example;
   IExample.Subscribe(pEventHandler);
 
-  EXPECT_CALL(RenderProxy, ClearWindow(RenderId))
+  EXPECT_CALL(RendererProxy, StartDrawingFrame(RenderId))
     .Times(1);
 
   using namespace ::covellite::core;
@@ -628,9 +628,9 @@ TEST_F(Window_test, /*DISABLED_*/Test_DoFinishDrawing_Deprecated)
   SettingsProxy_t SettingsProxy;
   SettingsProxy_t::GetInstance() = &SettingsProxy;
 
-  using RenderProxy_t = ::mock::covellite::api::renderer::Renderer::Proxy;
-  RenderProxy_t RenderProxy;
-  RenderProxy_t::GetInstance() = &RenderProxy;
+  using RendererProxy_t = Renderer_t::Proxy;
+  RendererProxy_t RendererProxy;
+  RendererProxy_t::GetInstance() = &RendererProxy;
 
   const ::mock::Id_t RenderId = 1808221312;
   auto pWindow = ::std::make_shared<WindowOs_t>();
@@ -643,7 +643,7 @@ TEST_F(Window_test, /*DISABLED_*/Test_DoFinishDrawing_Deprecated)
     .WillOnce(Return(uT("false")))
     .WillRepeatedly(Return(uT("0")));
 
-  EXPECT_CALL(RenderProxy, Constructor(_, _))
+  EXPECT_CALL(RendererProxy, Constructor(_, _))
     .Times(1)
     .WillOnce(Return(RenderId));
 
@@ -651,7 +651,7 @@ TEST_F(Window_test, /*DISABLED_*/Test_DoFinishDrawing_Deprecated)
   IWindowCore_t & IExample = Example;
   IExample.Subscribe(pEventHandler);
 
-  EXPECT_CALL(RenderProxy, Present(RenderId))
+  EXPECT_CALL(RendererProxy, PresentFrame(RenderId))
     .Times(1);
 
   using namespace ::covellite::core;
@@ -670,9 +670,9 @@ TEST_F(Window_test, /*DISABLED_*/Test_DoResize_Deprecated)
   SettingsProxy_t SettingsProxy;
   SettingsProxy_t::GetInstance() = &SettingsProxy;
 
-  using RenderProxy_t = ::mock::covellite::api::renderer::Renderer::Proxy;
-  RenderProxy_t RenderProxy;
-  RenderProxy_t::GetInstance() = &RenderProxy;
+  using RendererProxy_t = Renderer_t::Proxy;
+  RendererProxy_t RendererProxy;
+  RendererProxy_t::GetInstance() = &RendererProxy;
 
   const ::mock::Id_t RenderId = 1808221423;
   const auto Width = 1808221424;
@@ -687,7 +687,7 @@ TEST_F(Window_test, /*DISABLED_*/Test_DoResize_Deprecated)
     .WillOnce(Return(uT("false")))
     .WillRepeatedly(Return(uT("0")));
 
-  EXPECT_CALL(RenderProxy, Constructor(_, _))
+  EXPECT_CALL(RendererProxy, Constructor(_, _))
     .Times(1)
     .WillOnce(Return(RenderId));
 
@@ -701,7 +701,7 @@ TEST_F(Window_test, /*DISABLED_*/Test_DoResize_Deprecated)
     .Times(1)
     .WillOnce(Return(Rect_t{ 0, 0, Width, Height }));
 
-  EXPECT_CALL(RenderProxy, ResizeWindow(RenderId, Width, Height))
+  EXPECT_CALL(RendererProxy, ResizeWindow(RenderId, Width, Height))
     .Times(1);
 
   using namespace ::covellite::core;

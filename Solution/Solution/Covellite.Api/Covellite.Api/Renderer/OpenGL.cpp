@@ -14,7 +14,7 @@ namespace renderer
 
 static PIXELFORMATDESCRIPTOR PixelFormatDescriptor = {0};
 
-OpenGL::OpenGL(const Data & _Data) :
+OpenGL::OpenGL(const Renderer::Data & _Data) :
   OpenGLCommon(_Data, uT("OpenGL ")),
   m_hWnd(_Data.Handle),
   m_hDeviceContex(USING_MOCK ::GetDC(m_hWnd))
@@ -65,7 +65,7 @@ OpenGL::~OpenGL(void)
   USING_MOCK ::ReleaseDC(m_hWnd, m_hDeviceContex);
 }
 
-void OpenGL::Present(void) /*override*/
+void OpenGL::PresentFrame(void) /*override*/
 {
   WINAPI_CHECK USING_MOCK ::SwapBuffers(m_hDeviceContex);
 }

@@ -35,34 +35,34 @@ class OpenGLCommon :
   public Registator_t<IGraphicApi>
 {
 public:
-  // Èםעונפויס IRender:
-  void ClearWindow(void) final;
-  void ResizeWindow(int32_t, int32_t) final;
-
-public:
   // Èםעונפויס IGraphicApi:
   String_t GetUsingApi(void) const final;
-
-public:
-  // Èםעונפויס IGraphicApi:
-  ITexture * Create(const ITexture::Data &) final;
-  void Destroy(ITexture *) final;
-  IGeometry * Create(const IGeometry::Data &) final;
-  void Destroy(IGeometry *) final;
-  void EnableScissorRegion(int, int, int, int) final;
-  void DisableScissorRegion(void) final;
-  void Render(void) final;
+  void ClearFrame(void) final;
+  void ResizeWindow(int32_t, int32_t) final;
+  const Creators_t & GetCreators(void) const final;
 
 protected:
   virtual void DoOrtho(int32_t, int32_t) = 0;
 
 private:
-  const Data::Color m_BackgroundColor;
-  const int         m_Top;
-  const String_t    m_PreVersion;
+  Render_t CreateCamera(const ComponentPtr_t &);
+  Render_t CreateState(const ComponentPtr_t &) const;
+  Render_t CreatePosition(const ComponentPtr_t &);
+  Render_t CreateBuffer(const ComponentPtr_t &) const;
+  Render_t CreateDrawCall(const ComponentPtr_t &) const;
+  Render_t CreateTexture(const ComponentPtr_t &) const;
+
+private:
+  const Renderer::Data::Color m_BackgroundColor;
+  const int                   m_Top;
+  const String_t              m_PreVersion;
+  Creators_t                  m_Creators;
+
+private:
+  class Texture;
 
 public:
-  OpenGLCommon(const Data &, const String_t &);
+  OpenGLCommon(const Renderer::Data &, const String_t &);
 };
 
 } // namespace renderer

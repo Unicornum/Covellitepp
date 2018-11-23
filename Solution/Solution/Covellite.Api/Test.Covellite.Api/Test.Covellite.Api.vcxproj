@@ -78,29 +78,36 @@
   <ItemGroup>
     <ClCompile Include="..\Covellite.Api\Renderer\DirectX11.cpp" />
     <ClCompile Include="..\Covellite.Api\Renderer\DxCheck.cpp" />
+    <ClCompile Include="..\Covellite.Api\Renders.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="Test.Component\Component_test.cpp" />
     <ClCompile Include="Test.Fx\Fx_test.cpp" />
     <ClCompile Include="Test.DirectX11\DirectX11_test.cpp" />
     <ClCompile Include="Test.DxCheck\DxCheck_test.cpp" />
     <ClCompile Include="Test.IGraphicApi\IGraphicApi_test.cpp" />
-    <ClCompile Include="Test.IRenderer\IRenderer_test.cpp" />
     <ClCompile Include="Test.IWindow\IWindow_test.cpp" />
     <ClCompile Include="Test.OpenGLES\OpenGLES_test.cpp" />
     <ClCompile Include="Test.OpenGL\OpenGL_test.cpp" />
     <ClCompile Include="Test.Renderer\Renderer_test.android.cpp" />
     <ClCompile Include="Test.Renderer\Renderer_test.cpp" />
     <ClCompile Include="Test.Renderer\Renderer_test.windows.cpp" />
+    <ClCompile Include="Test.Renders\Renders_test.cpp" />
     <ClCompile Include="Test.Window\Window_test.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\Covellite.Api\Component.hpp" />
     <ClInclude Include="..\Covellite.Api\IWindow.hpp" />
     <ClInclude Include="..\Covellite.Api\Renderer\DirectX11.hpp" />
     <ClInclude Include="..\Covellite.Api\Renderer\DxCheck.hpp" />
+    <ClInclude Include="..\Covellite.Api\Renders.hpp" />
     <ClInclude Include="mock.hpp" />
     <ClInclude Include="stdafx.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\Covellite.Api\Component.inl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

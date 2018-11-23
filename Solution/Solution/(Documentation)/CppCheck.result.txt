@@ -1,3 +1,4 @@
-P:\projects\Covellitepp\Solution\Solution\Covellite.Api\Covellite.Api\Renderer\CommonImpl.cpp(13): performance (suppress_id = useInitializationList): Variable 'm_DefaultRenders' is assigned in constructor body. Consider performing initialization in initialization list.
-P:\projects\Covellitepp\Solution\Solution\Covellite.Api\Covellite.Api\Renderer\DirectX11.cpp(80): style (suppress_id = unusedFunction): The function 'GetRender' is never used.
-(): information (suppress_id = missingIncludeSystem): Cppcheck cannot find all the include files (use --check-config for details)
+P:\projects\Covellitepp\Solution\Solution\Covellite.Api\Covellite.Api\Renderer\DirectX10.cpp(25): warning (suppress_id = memsetZeroBytes): memset() called to fill 0 bytes.
+P:\projects\Covellitepp\Solution\Solution\Covellite.Api\Covellite.Api\Renderer\Renderer.cpp(279): style (suppress_id = duplicateBreak): Consecutive return, break, continue, goto or throw statements are unnecessary.
+P:\projects\Covellitepp\Solution\Solution\Covellite.Gui\Covellite.Gui\Renderer.cpp(263): style (suppress_id = duplicateBreak): Consecutive return, break, continue, goto or throw statements are unnecessary.
+(): information (suppress_id = missingInclude): Cppcheck cannot find all the include files (use --check-config for details)

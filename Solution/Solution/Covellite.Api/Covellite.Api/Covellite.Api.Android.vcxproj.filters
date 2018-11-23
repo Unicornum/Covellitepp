@@ -28,35 +28,42 @@
     <ClInclude Include="Renderer\IGraphicApi.hpp">
       <Filter>Renderer</Filter>
     </ClInclude>
-    <ClInclude Include="Renderer\IRenderer.hpp">
+    <ClInclude Include="Renderer\stdafx.h">
       <Filter>Renderer</Filter>
     </ClInclude>
-    <ClInclude Include="Renderer\OpenGLCommon.hpp">
+    <ClInclude Include="Component.hpp" />
+    <ClInclude Include="Renderer\Renderer.hpp">
+      <Filter>Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="Renders.hpp" />
+    <ClInclude Include="RenderInterface.hpp" />
+    <ClInclude Include="Renderer\Component.hpp">
       <Filter>Renderer</Filter>
     </ClInclude>
     <ClInclude Include="Renderer\OpenGLES.hpp">
       <Filter>Renderer</Filter>
     </ClInclude>
-    <ClInclude Include="Renderer\Renderer.hpp">
-      <Filter>Renderer</Filter>
-    </ClInclude>
-    <ClInclude Include="Renderer\stdafx.h">
+    <ClInclude Include="Renderer\OpenGLCommon.hpp">
       <Filter>Renderer</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Window.cpp" />
-    <ClCompile Include="Renderer\OpenGLCommon.cpp">
-      <Filter>Renderer</Filter>
-    </ClCompile>
-    <ClCompile Include="Renderer\OpenGLES.cpp">
-      <Filter>Renderer</Filter>
-    </ClCompile>
     <ClCompile Include="Renderer\Renderer.android.cpp">
       <Filter>Renderer</Filter>
     </ClCompile>
     <ClCompile Include="Renderer\Renderer.cpp">
       <Filter>Renderer</Filter>
     </ClCompile>
+    <ClCompile Include="Renders.cpp" />
+    <ClCompile Include="Renderer\OpenGLES.cpp">
+      <Filter>Renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="Renderer\OpenGLCommon.cpp">
+      <Filter>Renderer</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Component.inl" />
   </ItemGroup>
 </Project>

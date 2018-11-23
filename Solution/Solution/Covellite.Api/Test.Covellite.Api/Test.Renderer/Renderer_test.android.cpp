@@ -14,10 +14,15 @@
 */
 
 #define Renderer Renderer_android
+#define Renderer_deprecated Renderer_deprecated_android
 #define RendererImpl RendererImpl_android
 #define IGraphicApi IGraphicApi_android
 
-#include "../Mock/Eq.hpp"
+// Расположение класса Renderer
+#include "../../Covellite.Api/Renderer/Renderer.cpp"
+#include "../../Covellite.Api/Renderer/Renderer.android.cpp"
+
+#include "../Mock/Equal.hpp"
 #include "../Mock/RendererImpl.hpp"
 
 namespace mock
@@ -33,30 +38,32 @@ DEFINE_RENDER_IMPL(OpenGLES);
 
 } // namespace mock
 
-// Расположение класса Renderer
-#include "../../Covellite.Api/Renderer/Renderer.cpp"
-#include "../../Covellite.Api/Renderer/Renderer.android.cpp"
-
 // Общий тестовый класс класса Renderer
 class Renderer_android_test :
   public ::testing::Test
 {
 protected:
   using Tested_t = ::covellite::api::renderer::Renderer;
-  using Data_t = ::covellite::api::renderer::IRenderer::Data;
+  using Data_t = ::covellite::api::renderer::Renderer::Data;
   using String_t = ::alicorn::extension::std::String;
+  using Renders_t = ::covellite::api::Component::Renders;
 
   // Вызывается ПЕРЕД запуском каждого теста
   void SetUp(void) override
   {
     ::testing::DefaultValue<String_t>::Set(uT("DefaultString"));
+    ::testing::DefaultValue<const Renders_t::Creators_t &>::Set(m_EmptyCreators);
   }
 
   // Вызывается ПОСЛЕ запуска каждого теста
   void TearDown(void) override
   {
     ::testing::DefaultValue<String_t>::Clear();
+    ::testing::DefaultValue<const Renders_t::Creators_t &>::Clear();
   }
+
+private:
+  Renders_t::Creators_t m_EmptyCreators;
 };
 
 // Образец макроса для подстановки в класс Renderer 

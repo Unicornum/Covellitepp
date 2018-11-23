@@ -72,6 +72,7 @@
     <ResourceCompile Include="Resources.rc" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\Covellite.Api\Renders.cpp" />
     <ClCompile Include="Renderer_test.android.cpp" />
     <ClCompile Include="Renderer_test.cpp" />
     <ClCompile Include="Renderer_test.windows.cpp" />
@@ -81,6 +82,7 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\Covellite.Api\Renders.hpp" />
     <ClInclude Include="stdafx.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

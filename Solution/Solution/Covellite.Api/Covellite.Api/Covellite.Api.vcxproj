@@ -74,10 +74,11 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Component.hpp" />
     <ClInclude Include="Events.hpp" />
     <ClInclude Include="IWindow.hpp" />
     <ClInclude Include="Renderer\Api.forward.hpp" />
-    <ClInclude Include="Renderer\CommonImpl.hpp" />
+    <ClInclude Include="Renderer\Component.hpp" />
     <ClInclude Include="Renderer\ConstantBuffer.hpp" />
     <ClInclude Include="Renderer\DirectX10.hpp" />
     <ClInclude Include="Renderer\DirectX11.hpp" />
@@ -85,18 +86,18 @@
     <ClInclude Include="Renderer\DxCheck.hpp" />
     <ClInclude Include="Renderer\GL.hpp" />
     <ClInclude Include="Renderer\IGraphicApi.hpp" />
-    <ClInclude Include="Renderer\IRenderer.hpp" />
     <ClInclude Include="Renderer\OpenGL.hpp" />
     <ClInclude Include="Renderer\OpenGLCommon.hpp" />
     <ClInclude Include="Renderer\Renderer.hpp" />
     <ClInclude Include="Renderer\stdafx.h" />
+    <ClInclude Include="RenderInterface.hpp" />
+    <ClInclude Include="Renders.hpp" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="Window.hpp" />
     <ClInclude Include="Window.mock.hpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Renderer\CommonImpl.cpp" />
     <ClCompile Include="Renderer\DirectX10.cpp" />
     <ClCompile Include="Renderer\DirectX11.cpp" />
     <ClCompile Include="Renderer\DirectX9.cpp" />
@@ -105,6 +106,7 @@
     <ClCompile Include="Renderer\OpenGLCommon.cpp" />
     <ClCompile Include="Renderer\Renderer.cpp" />
     <ClCompile Include="Renderer\Renderer.windows.cpp" />
+    <ClCompile Include="Renders.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
@@ -120,10 +122,6 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </FxCompile>
-    <FxCompile Include="Renderer\fx\Render.fx">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-    </FxCompile>
     <FxCompile Include="Renderer\fx\Vertex.fx">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
@@ -132,6 +130,9 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </FxCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Component.inl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -1,10 +1,14 @@
-
+п»ї
 #include "stdafx.h"
 #include "Renderer.hpp"
-#include <alicorn/std/string.hpp>
+#include <alicorn/std/vector.hpp>
 #include <alicorn/patterns/factory.hpp>
 #include <alicorn/boost/filesystem.hpp>
 #include <alicorn/image.hpp>
+#include <Covellite/Api/Component.inl>
+#include "IGraphicApi.hpp"
+#include "fx/Vertex.auto.hpp"
+#include "fx/Pixel.auto.hpp"
 
 #ifndef __USING_GTEST
 
@@ -35,9 +39,50 @@ namespace renderer
 {
 
 Renderer::Renderer(const String_t & _Api, const Data & _Data) :
-  m_pImpl(MakeImpl(_Api, _Data))
+  m_pImpl(MakeImpl(_Api, _Data)),
+  m_pRenders(::std::make_shared<Component::Renders>(m_pImpl->GetCreators())),
+  m_DefaultRenders(m_pRenders->Obtain(
+    {
+      Component::Make(
+        {
+          { uT("type"), uT("Camera") },
+          { uT("id"), uT("Covellite.Api.Camera") }
+        }),
+      Component::Make(
+        {
+          { uT("type"), uT("State") },
+          { uT("kind"), uT("Blend") },
+          { uT("id"), uT("Covellite.Api.State.Blend") }
+        }),
+      Component::Make(
+        {
+          { uT("type"), uT("State") },
+          { uT("kind"), uT("Sampler") },
+          { uT("id"), uT("Covellite.Api.State.Sampler") }
+        }),
+      Component::Make(
+        {
+          { uT("type"), uT("Shader") },
+          { uT("kind"), uT("Vertex") },
+          { uT("version"), uT("vs_4_0") },
+          { uT("entry"), uT("VS") },
+          { uT("id"), uT("Covellite.Api.Shader.Vertex") },
+          { uT("data"), ::Vertex.data() },
+          { uT("count"), ::Vertex.size() },
+        }),
+    })),
+  m_pScissorEnabled(Component::Make(
+    {
+      { uT("type"), uT("State") },
+      { uT("kind"), uT("Scissor") },
+      { uT("id"), uT("Covellite.Api.State.Scissor.Enabled") },
+      { uT("is_enabled"), uT("true") },
+    }))
 {
   LOGGER(Info) << uT("Using graphics API: ") << m_pImpl->GetUsingApi();
+
+  // 27 РћРєС‚СЏР±СЂСЊ 2018 19:59 (unicornum.verum@gmail.com)
+  TODO("_Api РґРѕР±Р°РІРёС‚СЊ РєР°Рє РїРѕР»Рµ РІ РєР»Р°СЃСЃ Data?");
 }
 
 void Renderer::RenderGeometry(
@@ -46,7 +91,8 @@ void Renderer::RenderGeometry(
   Rocket::Core::TextureHandle _hTexture, 
   const Rocket::Core::Vector2f & _Position) /*override*/ 
 {
-  auto hGeometry = CompileGeometry(_pVertex, _VertexCount, _pIndex, _IndexCount,
+  const auto hGeometry = CompileGeometry(_pVertex, _VertexCount, 
+    _pIndex, _IndexCount,
     _hTexture);
   RenderCompiledGeometry(hGeometry, _Position);
   ReleaseCompiledGeometry(hGeometry);
@@ -60,56 +106,154 @@ Rocket::Core::CompiledGeometryHandle Renderer::CompileGeometry(
   static_assert(sizeof(IGraphicApi::Vertex) == sizeof(Rocket::Core::Vertex),
     "Unexpected framework vertex data size.");
 
-  IGraphicApi::IGeometry::Data SourceData;
-  SourceData.pVertices = reinterpret_cast<IGraphicApi::Vertex *>(_pVertex);
-  SourceData.VerticesCount = _VertexCount;
-  SourceData.pIndices = _pIndex;
-  SourceData.IndicesCount = _IndexCount;
-  SourceData.pTexture = reinterpret_cast<IGraphicApi::ITexture *>(_hTexture);
+  Object_t Object;
 
-  auto * pGeometry = m_pImpl->Create(SourceData);
+  if (_hTexture == 0)
+  {
+    Object.push_back(Component::Make(
+      {
+        { uT("type"), uT("Shader") },
+        { uT("kind"), uT("Pixel") },
+        { uT("version"), uT("ps_4_0") },
+        { uT("entry"), uT("psColored") },
+        { uT("id"), uT("Covellite.Api.Shader.Pixel.Colored") },
+        { uT("data"), ::Pixel.data() },
+        { uT("count"), ::Pixel.size() }
+      }));
+  }
+  else
+  {
+    Object.push_back(Component::Make(
+      {
+        { uT("type"), uT("Shader") },
+        { uT("kind"), uT("Pixel") },
+        { uT("version"), uT("ps_4_0") },
+        { uT("entry"), uT("psTextured") },
+        { uT("id"), uT("Covellite.Api.Shader.Pixel.Textured") },
+        { uT("data"), ::Pixel.data() },
+        { uT("count"), ::Pixel.size() }
+      }));
 
-  return reinterpret_cast<Rocket::Core::CompiledGeometryHandle>(pGeometry);
+    const auto strTextureId = uT("Covellite.Api.Texture.{ID}")
+      .Replace(uT("{ID}"), (size_t)_hTexture);
+
+    Object.push_back(Component::Make(
+      {
+        { uT("type"), uT("Texture") },
+        { uT("id"), strTextureId },
+      }));
+  }
+
+  static size_t ObjectId = 0;
+
+  const auto strObjectId = uT("{ID}").Replace(uT("{ID}"), (size_t)++ObjectId);
+
+  m_Objects[ObjectId].pPosition = Component::Make(
+    {
+      { uT("type"), uT("Position") },
+      { uT("id"), uT("Covellite.Api.Position.") + strObjectId },
+    });
+
+  Object.push_back(m_Objects[ObjectId].pPosition);
+
+  Object.push_back(Component::Make(
+    {
+      { uT("type"), uT("Buffer") },
+      { uT("id"), uT("Covellite.Api.Buffer.Vertex.") + strObjectId },
+      { uT("kind"), uT("Vertex") },
+      { uT("data"), reinterpret_cast<const IGraphicApi::Vertex *>(_pVertex) },
+      { uT("count"), (size_t)_VertexCount }
+    }));
+
+  Object.push_back(Component::Make(
+    {
+      { uT("type"), uT("Buffer") },
+      { uT("id"), uT("Covellite.Api.Buffer.Index.") + strObjectId },
+      { uT("kind"), uT("Index") },
+      { uT("data"), static_cast<const int *>(_pIndex) },
+      { uT("count"), (size_t)_IndexCount }
+    }));
+
+  Object.push_back(Component::Make(
+    {
+      { uT("type"), uT("DrawCall") },
+      { uT("id"), uT("Covellite.Api.DrawCall") },
+    }));
+
+  m_Objects[ObjectId].Renders = m_pRenders->Obtain(Object);
+
+  return (Rocket::Core::CompiledGeometryHandle)ObjectId;
 }
 
 void Renderer::RenderCompiledGeometry(
   Rocket::Core::CompiledGeometryHandle _hGeometry,
   const Rocket::Core::Vector2f & _Position) /*override*/ 
 {
-  auto * pGeometry = reinterpret_cast<IGraphicApi::IGeometry *>(_hGeometry);
+  auto itObject = m_Objects.find((size_t)_hGeometry);
+  if (itObject == m_Objects.end()) return;
 
-  // 11 Октябрь 2018 17:21 (unicornum.verum@gmail.com)
-  TODO("Добавить тест вызова функции.");
-  m_pImpl->Render(pGeometry, _Position.x, _Position.y);
+  using namespace ::alicorn::extension::std;
 
-  {
-    // 11 Октябрь 2018 17:20 (unicornum.verum@gmail.com)
-    TODO("Удалить блок после изменения логики работы.");
+  itObject->second.pPosition->SetValue(uT("x"), _Position.x);
+  itObject->second.pPosition->SetValue(uT("y"), _Position.y);
 
-    m_pImpl->Render();
-
-    pGeometry->Update(_Position.x, _Position.y);
-    pGeometry->Render();
-  }
+  m_RenderQueue += itObject->second.Renders;
 }
 
 void Renderer::ReleaseCompiledGeometry(
   Rocket::Core::CompiledGeometryHandle _hGeometry) /*override*/
 {
-  m_pImpl->Destroy(reinterpret_cast<IGraphicApi::IGeometry *>(_hGeometry));
+  const auto strObjectId = uT("{ID}").Replace(uT("{ID}"), (size_t)_hGeometry);
+
+  m_pRenders->Remove({
+    Component::Make(
+      {
+        { uT("id"), uT("Covellite.Api.Position.") + strObjectId }
+      }),
+    Component::Make(
+      {
+        { uT("id"), uT("Covellite.Api.Buffer.Vertex.") + strObjectId }
+      }),
+    Component::Make(
+      {
+        { uT("id"), uT("Covellite.Api.Buffer.Index.") + strObjectId }
+      }),
+    });
+
+  m_Objects.erase((size_t)_hGeometry);
 }
 
 void Renderer::EnableScissorRegion(bool _IsEnable) /*override*/ 
 {
-  if (!_IsEnable)
-  {
-    m_pImpl->DisableScissorRegion();
-  }
+  if (_IsEnable) return;
+
+  using namespace ::alicorn::extension::std;
+
+  m_RenderQueue += m_pRenders->Obtain(
+    {
+      Component::Make(
+      {
+        { uT("type"), uT("State") },
+        { uT("kind"), uT("Scissor") },
+        { uT("id"), uT("Covellite.Api.State.Scissor.Disabled") },
+        { uT("is_enabled"), uT("false") }
+      })
+    });
 }
 
-void Renderer::SetScissorRegion(int _X, int _Y, int _W, int _H) /*override*/ 
+void Renderer::SetScissorRegion(int _X, int _Y, int _Width, int _Height) /*override*/
 {
-  m_pImpl->EnableScissorRegion(_X, _Y, _W, _H);
+  m_RenderQueue.push_back([&, _X, _Y, _Width, _Height]()
+  {
+    m_pScissorEnabled->SetValue(uT("left"), _X);
+    m_pScissorEnabled->SetValue(uT("right"), _X + _Width);
+    m_pScissorEnabled->SetValue(uT("top"), _Y);
+    m_pScissorEnabled->SetValue(uT("bottom"), _Y + _Height);
+  });
+
+  using namespace ::alicorn::extension::std;
+
+  m_RenderQueue += m_pRenders->Obtain({ m_pScissorEnabled });
 }
 
 bool Renderer::LoadTexture(
@@ -117,7 +261,7 @@ bool Renderer::LoadTexture(
   Rocket::Core::Vector2i & _TextureDimensions,
   const Rocket::Core::String & _PathToFile) /*override*/
 {
-  // Один файл грузится один раз, оптимизировать загрузку не нужно.
+  // РћРґРёРЅ С„Р°Р№Р» РіСЂСѓР·РёС‚СЃСЏ РѕРґРёРЅ СЂР°Р·, РѕРїС‚РёРјРёР·РёСЂРѕРІР°С‚СЊ Р·Р°РіСЂСѓР·РєСѓ РЅРµ РЅСѓР¶РЅРѕ.
 
   using namespace ::alicorn::source;
 
@@ -131,6 +275,8 @@ bool Renderer::LoadTexture(
 
   return GenerateTexture(_hTexture,
     Image.GetData().Buffer.data(), _TextureDimensions);
+
+  return true;
 }
 
 bool Renderer::GenerateTexture(
@@ -138,15 +284,28 @@ bool Renderer::GenerateTexture(
   const Rocket::Core::byte * _pSource,
   const Rocket::Core::Vector2i & _SourceDimensions) /*override*/
 {
-  IGraphicApi::ITexture::Data SourceData;
-  SourceData.pData = _pSource;
-  SourceData.Width = _SourceDimensions.x;
-  SourceData.Height = _SourceDimensions.y;
+  static Rocket::Core::TextureHandle TextureId = 0;
 
   try
   {
-    auto * pTexture = m_pImpl->Create(SourceData);
-    _hTexture = reinterpret_cast<Rocket::Core::TextureHandle>(pTexture);
+    TextureId++;
+
+    const auto strTextureId = uT("Covellite.Api.Texture.{ID}")
+      .Replace(uT("{ID}"), TextureId);
+
+    m_pRenders->Obtain(
+      {
+        Component::Make(
+        {
+          { uT("type"), uT("Texture") },
+          { uT("id"), strTextureId },
+          { uT("data"), _pSource },
+          { uT("width"), _SourceDimensions.x },
+          { uT("height"), _SourceDimensions.y },
+        })
+      });
+
+    _hTexture = TextureId;
   }
   catch (const ::std::exception &)
   {
@@ -158,26 +317,46 @@ bool Renderer::GenerateTexture(
 
 void Renderer::ReleaseTexture(Rocket::Core::TextureHandle _hTexture) /*override*/
 {
-  m_pImpl->Destroy(reinterpret_cast<IGraphicApi::ITexture *>(_hTexture));
+  const auto strTextureId = uT("Covellite.Api.Texture.{ID}")
+    .Replace(uT("{ID}"), _hTexture);
+
+  m_pRenders->Remove(
+    {
+      Component::Make(
+        {
+          { uT("type"), uT("Texture") },
+          { uT("id"), strTextureId },
+        })
+    });
 }
 
-void Renderer::ClearWindow(void) /*override*/
+auto Renderer::GetRenders(void) const /*override*/ -> RendersPtr_t
 {
-  m_pImpl->ClearWindow();
+  return m_pRenders;
 }
 
-void Renderer::Present(void) /*override*/ 
+void Renderer::StartDrawingFrame(void)
 {
-  m_pImpl->Present();
+  m_pImpl->ClearFrame();
 }
 
-void Renderer::ResizeWindow(int32_t _X, int32_t _Y) /*override*/
+void Renderer::PresentFrame(void)
+{
+  for (const auto & Render : m_DefaultRenders) Render();
+  for (const auto & Render : m_RenderQueue) Render();
+
+  m_RenderQueue.clear();
+ 
+  m_pImpl->PresentFrame();
+}
+
+void Renderer::ResizeWindow(int32_t _X, int32_t _Y)
 {
   m_pImpl->ResizeWindow(_X, _Y);
 }
 
-/*static*/ Renderer::ImplPtr_t Renderer::MakeImpl(const String_t & _Api, 
-  const Data & _Data)
+/*static*/ auto Renderer::MakeImpl(const String_t & _Api, const Data & _Data)
+  -> IGraphicApiPtr_t
 {
   using namespace ::alicorn::modules::patterns;
 
@@ -191,8 +370,8 @@ void Renderer::ResizeWindow(int32_t _X, int32_t _Y) /*override*/
       }
       catch (const ::std::exception & _Ex)
       {
-        // Сюда попадаем, если указанного рендера нет или при он недоступен 
-        // на текущем устройстве.
+        // РЎСЋРґР° РїРѕРїР°РґР°РµРј, РµСЃР»Рё СѓРєР°Р·Р°РЅРЅРѕРіРѕ СЂРµРЅРґРµСЂР° РЅРµС‚ РёР»Рё РїСЂРё РѕРЅ РЅРµРґРѕСЃС‚СѓРїРµРЅ 
+        // РЅР° С‚РµРєСѓС‰РµРј СѓСЃС‚СЂРѕР№СЃС‚РІРµ.
 
         LOGGER(Warning) << uT("Create graphics API ") << Name << " error: " 
           << _Ex.what();

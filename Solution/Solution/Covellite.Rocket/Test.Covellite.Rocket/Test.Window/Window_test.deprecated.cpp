@@ -31,9 +31,9 @@ protected:
   using WindowOs_t = ::mock::covellite::os::Window;
   using IWindowApi_t = ::covellite::api::IWindow;
   using IWindowApiPtr_t = ::std::shared_ptr<IWindowApi_t>;
-  using WindowApi_t = ::mock::covellite::api::Window<int>;
+  using WindowApi_t = ::mock::covellite::api::Window;
   using RenderInterfacePtr_t = 
-    ::std::shared_ptr<::mock::Rocket::Core::RenderInterface>;
+    ::std::shared_ptr<::covellite::api::RenderInterface>;
   using Vector_t = ::mock::Rocket::Core::Vector2i;
   using String_t = ::mock::Rocket::Core::String;
   using AppInfo_t = ::alicorn::system::platform::AppInfo;
@@ -112,7 +112,7 @@ TEST_F(Window_test, /*DISABLED_*/Test_Constructor)
   StringTranslatorProxy_t StringTranslatorProxy;
   StringTranslatorProxy_t::GetInstance() = &StringTranslatorProxy;
 
-  using WindowApiProxy_t = ::mock::covellite::api::Window<int>::Proxy;
+  using WindowApiProxy_t = WindowApi_t::Proxy;
   WindowApiProxy_t WindowApiProxy;
   WindowApiProxy_t::GetInstance() = &WindowApiProxy;
 
@@ -741,7 +741,7 @@ TEST_F(Window_test, /*DISABLED_*/Test_OnDrawWindow)
 // ************************************************************************** //
 TEST_F(Window_test, /*DISABLED_*/Test_OnResize)
 {
-  using WindowApiProxy_t = ::mock::covellite::api::Window<int>::Proxy;
+  using WindowApiProxy_t = WindowApi_t::Proxy;
   WindowApiProxy_t WindowApiProxy;
   WindowApiProxy_t::GetInstance() = &WindowApiProxy;
 
@@ -796,7 +796,7 @@ TEST_F(Window_test, /*DISABLED_*/Test_OnResize)
 // ************************************************************************** //
 TEST_F(Window_test, /*DISABLED_*/Test_OnMotion)
 {
-  using WindowApiProxy_t = ::mock::covellite::api::Window<int>::Proxy;
+  using WindowApiProxy_t = WindowApi_t::Proxy;
   WindowApiProxy_t WindowApiProxy;
   WindowApiProxy_t::GetInstance() = &WindowApiProxy;
 

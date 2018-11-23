@@ -12,7 +12,9 @@
 #pragma warning(disable: 6101)
 #pragma warning(disable: 6387)
 #pragma warning(disable: 6388)
+#pragma warning(disable: 26495)
 #pragma warning(disable: 28196)
+#pragma warning(disable: 28251)
 
 namespace DirectX
 {
@@ -111,7 +113,6 @@ inline bool operator== (
 {
   if (!(_Left.World == _Right.World)) return false;
   if (!(_Left.Projection == _Right.Projection)) return false;
-  if (!(_Left.IsTextureDisabled == _Right.IsTextureDisabled)) return false;
 
   return true;
 }
@@ -1289,14 +1290,17 @@ public:
 
   }
 
+  MOCK_METHOD2(IAGetIndexBuffer, ID3D11Buffer *(DXGI_FORMAT, UINT));
+
   virtual void STDMETHODCALLTYPE IAGetIndexBuffer(
     /* [annotation] */
     _Out_opt_  ID3D11Buffer **pIndexBuffer,
     /* [annotation] */
     _Out_opt_  DXGI_FORMAT *Format,
     /* [annotation] */
-    _Out_opt_  UINT *Offset) {
-
+    _Out_opt_  UINT *Offset) 
+  {
+    *pIndexBuffer = IAGetIndexBuffer(*Format, *Offset);
   }
 
   virtual void STDMETHODCALLTYPE GSGetConstantBuffers(
@@ -1869,10 +1873,14 @@ public:
   virtual UINT STDMETHODCALLTYPE GetEvictionPriority(void) { return 0; }
 
 public:
-    virtual void STDMETHODCALLTYPE GetDesc(
-      /* [annotation] */
-      _Out_  D3D11_BUFFER_DESC *pDesc) { }
+  MOCK_METHOD0(GetDesc, D3D11_BUFFER_DESC(void));
 
+  virtual void STDMETHODCALLTYPE GetDesc(
+    /* [annotation] */
+    _Out_  D3D11_BUFFER_DESC *pDesc) 
+  {
+    *pDesc = GetDesc();
+  }
 };
 
 class Blob :
@@ -2375,7 +2383,7 @@ inline HRESULT D3DCompile(
   *_ppErrorMsgs = ::mock::DirectX11::Proxy::GetInstance()->CompileGetErrorMsg();
 
   ::mock::DirectX11::CompileDesc Desc;
-  Desc.SrcData = ::std::vector<uint8_t>{ 
+  Desc.SrcData = ::std::vector<uint8_t>{
     (uint8_t *)_pSrcData , (uint8_t *)_pSrcData + _SrcDataSize };
   Desc.SourceName = _pSourceName;
   Desc.pDefines = _pDefines;

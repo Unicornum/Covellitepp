@@ -8,44 +8,70 @@
   </Options>
   <Process/>
   <Complete>
-    <Week6197>
-      <Task9 Text="DirectX10." Type="Red" Version="None" ExternalProgram="None" Expanded="false" Completed="true" History="false" ParentTaskText="false">
-        <Task10 Text="Изменение способа работы с шейдерами." Type="None" Version="None" ExternalProgram="None" Expanded="false" Completed="true" History="false" ParentTaskText="true">
-          <Task11 Text="Разбиение файла шейдеров на отдельные файлы." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
-          <Task12 Text="Перераспределение кода шейдеров." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
-          <Task13 Text="Использование двух отдельных пиксельных шейдеров." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
-        </Task10>
-        <Task14 Text="Объект геометрии как простой набор компонентов." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
-        <Task15 Text="Использование указателя на объект геометрии как идентификатора объекта." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
-        <Task16 Text="Использование очереди рендеринга." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
-        <Task17 Text="Компонентная система на лямбдах." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
-        <Task18 Text="Работа с текстурой через идентификатор." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
-        <Task19 Text="Функции создания различных типов буферов." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
-        <Task20 Text="Работа с компонентами как с набором рендеров." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
-        <Task21 Text="Изменение способа передачи типа и идентификатора компонента." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
-        <Task22 Text="Изменение способа передачи данных между компонентами." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
-        <Task23 Text="Передача через класс компонента произвольных параметров." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
-        <Task24 Text="Работа с текстурами через общий список компонентов." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
-        <Task25 Text="Работа с набором компонентов и рендеров." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
-        <Task26 Text="Создание геометрии как набора компонентов." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
-        <Task27 Text="Функция удаления набора компонентов." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
-        <Task28 Text="Логика работы на уровне объектов сцены вынесена в базовый класс." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
-        <Task29 Text="Реорганизация кода." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
-      </Task9>
-      <Task1 Text="Прототип компонентной системы." Type="Red" Version="None" ExternalProgram="None" Expanded="false" Completed="true" History="false" ParentTaskText="false">
-        <Task2 Text="Обмен данными между рендерами через ссылки в классах компонентов." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
-        <Task3 Text="Внутренний буфер данных для компонента буфера." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
-        <Task4 Text="Передача данных шейдеров через класс компонента." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
-        <Task5 Text="Обобщенный компонент шейдера." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
-        <Task6 Text="Объединение Layout'a и вертексного шейдера." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
-        <Task34 Text="Компонент Position." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
-        <Task35 Text="Реорганизация кода." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
-      </Task1>
-    </Week6197>
-    <Week6196>
-      <Task31 Text="Переименование раздела\класса Render в Renderer." Type="Red" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="false"/>
-    </Week6196>
-    <Week6195/>
-    <Week6194/>
+    <Week6202>
+      <Task3 Text="Удаление ненужных файлов." Type="Red" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="false"/>
+      <Task4 Text="Рендеринг GUI на основе компонентной системы." Type="Red" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="true" ParentTaskText="false">
+        <Task5 Text="Схема взаимодействия классов проекта." Type="None" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+        <Task6 Text="Класс Renders." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true">
+          <Task7 Text="Заготовка класса." Type="None" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+          <Task8 Text="Заготовка тестов класса." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+          <Task9 Text="Функция получения набора рендеров." Type="None" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+          <Task10 Text="Функция удаления набора рендеров." Type="None" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+        </Task6>
+        <Task11 Text="Исправление схемы взаимодействия классов." Type="None" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+        <Task12 Text="Класс компонента." Type="None" Version="None" ExternalProgram="None" Expanded="false" Completed="true" History="false" ParentTaskText="true">
+          <Task13 Text="Прототип класса." Type="None" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+          <Task14 Text="Тестовый проект класса." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+          <Task15 Text="Тип и идентификатор компонента." Type="None" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+          <Task16 Text="Получение значений параметров указанного типа." Type="None" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+          <Task17 Text="Установка значений параметров." Type="None" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+          <Task18 Text="Обобщение функций получения значения параметра." Type="None" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+          <Task19 Text="Функция создания объектов компонентов." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+          <Task20 Text="Передача указателей." Type="None" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+        </Task12>
+        <Task21 Text="Реализация рендерера." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true">
+          <Task22 Text="Переименование файлов." Type="None" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+          <Task23 Text="Переименование класса устаревшей реализации." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+          <Task24 Text="Заготовка тестов/класса." Type="None" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+          <Task25 Text="Заготовка новой версии интерфейса IGraphicApi." Type="None" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+          <Task26 Text="Создание объекта реализации графического API." Type="None" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+          <Task27 Text="Запись в лог версии используемого графического API." Type="None" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+          <Task28 Text="Автоматический выбор наиболее подходящего рендера для текущего устройства." Type="None" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+          <Task29 Text="Реализация функции RenderGeometry()." Type="None" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+          <Task30 Text="Реализация функции LoadTexture()." Type="None" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+          <Task31 Text="Заготовки тестов." Type="None" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+          <Task32 Text="Реализация функции ResizeWindow()." Type="None" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+          <Task33 Text="Функция получения объекта доступа к рендерам компонентов." Type="None" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+          <Task34 Text="Рендеры по умолчанию." Type="None" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+          <Task35 Text="Реорганизация кода." Type="None" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+          <Task36 Text="Функция создания текстуры." Type="None" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+          <Task37 Text="Обработка ошибки при создании тектуры." Type="None" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+          <Task38 Text="Функция удаления текстуры." Type="None" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+          <Task39 Text="Функция EnableScissorRegion()." Type="None" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+          <Task40 Text="Функция SetScissorRegion()." Type="None" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+          <Task41 Text="Рендеринг геометрии без текстуры." Type="None" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+          <Task42 Text="Рендеринг текстурированной геометрии." Type="None" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+          <Task43 Text="Удаление уникальных компонентов прекомпилированной геометрии." Type="None" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+        </Task21>
+        <Task44 Text="Изменение логики работы класса окна с учетом изменения рендерера." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+        <Task45 Text="Реализация DirectX10." Type="None" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+        <Task46 Text="Обобщение SamplerState и BlendState в единый компонент State." Type="None" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+        <Task47 Text="Классы извлечения данных о компонентах." Type="None" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+        <Task48 Text="Реализация DirectX9." Type="None" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+        <Task49 Text="Компонент Scissor как разновидность State." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+        <Task50 Text="Получение объекта создания рендеров у окна графического Api." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+        <Task51 Text="Реализация OpenGL." Type="None" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+        <Task52 Text="Реализация DirectX11" Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true">
+          <Task53 Text="Тесты." Type="None" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+        </Task52>
+        <Task54 Text="Реализация OpenGLES." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true">
+          <Task55 Text="Тесты." Type="None" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+        </Task54>
+      </Task4>
+      <Task59 Text="Описание компонентов и их параметров." Type="Red" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="false"/>
+    </Week6202>
+    <Week6201/>
+    <Week6200/>
+    <Week6199/>
   </Complete>
 </Tasks>

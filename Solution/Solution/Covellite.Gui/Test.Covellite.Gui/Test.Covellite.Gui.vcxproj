@@ -107,6 +107,7 @@
     <ClCompile Include="Test.Layer\Layer.windows_test.cpp" />
     <ClCompile Include="Test.Layer\Layer_test.cpp" />
     <ClCompile Include="Test.Layer\Layer_test.deprecated.cpp" />
+    <ClCompile Include="Test.Renderer\Renderer_test.cpp" />
     <ClCompile Include="Test.StringTranslator\StringTranslator_test.cpp" />
     <ClCompile Include="Test.SystemToRocketKeyCode\SystemToRocketKeyCode_test.cpp" />
     <ClCompile Include="Test.System\System.android_test.cpp" />

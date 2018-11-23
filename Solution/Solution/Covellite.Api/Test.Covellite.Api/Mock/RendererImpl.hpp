@@ -8,7 +8,7 @@
 namespace mock
 {
 
-using Data_t = ::covellite::api::renderer::IRenderer::Data;
+using Data_t = ::covellite::api::renderer::Renderer::Data;
 template<class T>
 using Registator_t =
   ::alicorn::modules::patterns::factory::Registrator<T, const Data_t &>;
@@ -21,40 +21,17 @@ public:
     public ::alicorn::extension::testing::Proxy<Proxy>
   {
   public:
-    MOCK_METHOD1(Constructor, ::mock::Id_t(const Data &));
+    MOCK_METHOD1(Constructor, ::mock::Id_t(const Data_t &));
     MOCK_METHOD2(SetClassName, void(::mock::Id_t, const String_t &));
-    MOCK_METHOD1(ClearWindow, void(::mock::Id_t));
-    MOCK_METHOD1(Present, void(::mock::Id_t));
-    MOCK_METHOD3(ResizeWindow, void(::mock::Id_t, int32_t, int32_t));
     MOCK_METHOD1(GetUsingApi, String_t(::mock::Id_t));
-    MOCK_METHOD2(CreateTexture, ITexture * (::mock::Id_t, const ITexture::Data &));
-    MOCK_METHOD2(DestroyTexture, void(::mock::Id_t, ITexture *));
-    MOCK_METHOD2(CreateGeometry, IGeometry * (::mock::Id_t, const IGeometry::Data &));
-    MOCK_METHOD2(DestroyGeometry, void(::mock::Id_t, IGeometry *));
-    MOCK_METHOD5(EnableScissorRegion, void(::mock::Id_t, int, int, int, int));
-    MOCK_METHOD1(DisableScissorRegion, void(::mock::Id_t));
-    MOCK_METHOD1(Renderer, void(::mock::Id_t));
+    MOCK_METHOD1(ClearFrame, void(::mock::Id_t));
+    MOCK_METHOD1(PresentFrame, void(::mock::Id_t));
+    MOCK_METHOD3(ResizeWindow, void(::mock::Id_t, int32_t, int32_t));
+    MOCK_METHOD1(GetCreators, const Creators_t &(::mock::Id_t));
   };
 
 public:
   const ::mock::Id_t m_Id;
-
-public:
-  // Èםעונפויס IRenderer:
-  void ClearWindow(void) override
-  {
-    Proxy::GetInstance()->ClearWindow(m_Id);
-  }
-
-  void Present(void) override
-  {
-    Proxy::GetInstance()->Present(m_Id);
-  }
-
-  void ResizeWindow(int32_t _X, int32_t _Y) override
-  {
-    Proxy::GetInstance()->ResizeWindow(m_Id, _X, _Y);
-  }
 
 public:
   String_t GetUsingApi(void) const override
@@ -62,44 +39,28 @@ public:
     return Proxy::GetInstance()->GetUsingApi(m_Id);
   }
 
-public:
-  ITexture * Create(const ITexture::Data & _Data) override 
+  void ClearFrame(void) override
   {
-    return Proxy::GetInstance()->CreateTexture(m_Id, _Data);
+    Proxy::GetInstance()->ClearFrame(m_Id);
   }
 
-  void Destroy(ITexture * _pTexture) override 
+  void PresentFrame(void) override
   {
-    Proxy::GetInstance()->DestroyTexture(m_Id, _pTexture);
+    Proxy::GetInstance()->PresentFrame(m_Id);
   }
 
-  IGeometry * Create(const IGeometry::Data & _Data) override
+  void ResizeWindow(int32_t _W, int32_t _H) override
   {
-    return Proxy::GetInstance()->CreateGeometry(m_Id, _Data);
+    Proxy::GetInstance()->ResizeWindow(m_Id, _W, _H);
   }
 
-  void Destroy(IGeometry * _pGeometry) override 
+  const Creators_t & GetCreators(void) const override
   {
-    Proxy::GetInstance()->DestroyGeometry(m_Id, _pGeometry);
-  }
-
-  void EnableScissorRegion(int _X, int _Y, int _W, int _H) override 
-  {
-    Proxy::GetInstance()->EnableScissorRegion(m_Id, _X, _Y, _W, _H);
-  }
-
-  void DisableScissorRegion(void) override 
-  {
-    Proxy::GetInstance()->DisableScissorRegion(m_Id);
-  }
-
-  void Render(void) override 
-  {
-    Proxy::GetInstance()->Renderer(m_Id);
+    return Proxy::GetInstance()->GetCreators(m_Id);
   }
 
 public:
-  explicit RendererImpl(const Data & _Data) :
+  explicit RendererImpl(const Data_t & _Data) :
     m_Id(Proxy::GetInstance()->Constructor(_Data))
   {
 
@@ -113,7 +74,7 @@ FACTORY_REGISTER_STRING_NAME(RendererImpl);
     public RendererImpl\
   {\
   public:\
-    explicit ClassName(const Data & _Data) :\
+    explicit ClassName(const Data_t & _Data) :\
       RendererImpl(_Data)\
     {\
       Proxy::GetInstance()->SetClassName(m_Id, uT(#ClassName));\

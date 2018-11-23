@@ -1,13 +1,21 @@
 
 #pragma once
+#include <functional>
 #include <alicorn/std/string.forward.hpp>
-#include "IRenderer.hpp"
+
+/**
+* \defgroup CovelliteApiRendererGroup Renderer
+* \ingroup CovelliteApiGroup
+*  Группа классов реализаций рендеринга при помощи конкретных графических Api.
+*/
 
 namespace covellite
 {
 
 namespace api
 {
+
+class Component;
 
 namespace renderer
 {
@@ -20,18 +28,23 @@ namespace renderer
 *  
 * \version
 *  1.0.0.0        \n
+*  2.0.0.0        \n
 * \date
 *  24 Август 2018    \n
+*  18 Ноябрь 2018    \n
 * \author
 *  CTAPOBEP (unicornum.verum@gmail.com)
 * \copyright
 *  © CTAPOBEP 2018
 */
-class IGraphicApi :
-  public IRenderer
+class IGraphicApi
 {
 protected:
   using String_t = ::alicorn::extension::std::String;
+  using Render_t = ::std::function<void(void)>;
+  using ComponentPtr_t = ::std::shared_ptr<Component>;
+  using Creator_t = ::std::function<Render_t(const ComponentPtr_t &)>;
+  using Creators_t = ::std::map<String_t, Creator_t>;
 
 public:
   /// \brief
@@ -46,57 +59,15 @@ public:
     float u, v;
   };
 
-  class ITexture
-  {
-  public:
-    class Data final
-    {
-    public:
-      const uint8_t * pData = nullptr;
-      int Width = 0;
-      int Height = 0;
-    };
-
-  public:
-    virtual void Render(void) = 0;
-
-  public:
-    virtual ~ITexture(void) {}
-  };
-
-  class IGeometry
-  {
-  public:
-    class Data
-    {
-    public:
-      Vertex * pVertices = nullptr;
-      int VerticesCount = 0;
-      int * pIndices = nullptr;
-      int IndicesCount = 0;
-      ITexture * pTexture = nullptr;
-    };
-
-  public:
-    virtual void Update(float, float) = 0;
-    virtual void Render(void) = 0;
-
-  public:
-    virtual ~IGeometry(void) {}
-  };
-
 public:
   virtual String_t GetUsingApi(void) const = 0;
+  virtual void ClearFrame(void) = 0;
+  virtual void PresentFrame(void) = 0;
+  virtual void ResizeWindow(int32_t, int32_t) = 0;
+  virtual const Creators_t & GetCreators(void) const = 0;
 
 public:
-  virtual ITexture * Create(const ITexture::Data &) = 0;
-  virtual void Destroy(ITexture *) = 0;
-  virtual IGeometry * Create(const IGeometry::Data &) = 0;
-  virtual void Destroy(IGeometry *) = 0;
-  virtual void EnableScissorRegion(int, int, int, int) = 0;
-  virtual void DisableScissorRegion(void) = 0;
-  virtual void Render(void) = 0;
-  virtual void Render(IGeometry *, float, float) {};
+  virtual ~IGraphicApi(void) = default;
 };
 
 } // namespace renderer

@@ -18,12 +18,12 @@
       <Filter>Common</Filter>
     </ClCompile>
     <ClCompile Include="Initializer_test.cpp" />
-    <ClCompile Include="..\..\Covellite.Rocket\Initializer.cpp" />
+    <ClCompile Include="..\..\Covellite.Gui\Initializer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">
       <Filter>Common</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Covellite.Rocket\Initializer.hpp" />
+    <ClInclude Include="..\..\Covellite.Gui\Initializer.hpp" />
   </ItemGroup>
 </Project>

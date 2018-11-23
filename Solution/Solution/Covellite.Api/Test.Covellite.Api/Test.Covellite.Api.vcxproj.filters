@@ -34,8 +34,11 @@
     <Filter Include="Tests\Renderer">
       <UniqueIdentifier>{055fb21a-65f4-487c-b637-dd1da7f72d2c}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Tests\IRenderer">
-      <UniqueIdentifier>{73875b0a-29d7-4215-9785-b7ce72472fe6}</UniqueIdentifier>
+    <Filter Include="Tests\Component">
+      <UniqueIdentifier>{f725e3ab-9291-4e5b-83a5-095ec9cb5b56}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Tests\Renders">
+      <UniqueIdentifier>{fa672da2-c98e-4ba0-8fb8-712e6b17d935}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -71,13 +74,7 @@
     <ClCompile Include="Test.DxCheck\DxCheck_test.cpp">
       <Filter>Tests\DxCheck</Filter>
     </ClCompile>
-    <ClCompile Include="Test.IRenderer\IRenderer_test.cpp">
-      <Filter>Tests\IRenderer</Filter>
-    </ClCompile>
     <ClCompile Include="Test.Renderer\Renderer_test.android.cpp">
-      <Filter>Tests\Renderer</Filter>
-    </ClCompile>
-    <ClCompile Include="Test.Renderer\Renderer_test.cpp">
       <Filter>Tests\Renderer</Filter>
     </ClCompile>
     <ClCompile Include="Test.Renderer\Renderer_test.windows.cpp">
@@ -88,6 +85,18 @@
     </ClCompile>
     <ClCompile Include="..\Covellite.Api\Renderer\DxCheck.cpp">
       <Filter>Tests\DxCheck</Filter>
+    </ClCompile>
+    <ClCompile Include="Test.Component\Component_test.cpp">
+      <Filter>Tests\Component</Filter>
+    </ClCompile>
+    <ClCompile Include="Test.Renderer\Renderer_test.cpp">
+      <Filter>Tests\Renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="Test.Renders\Renders_test.cpp">
+      <Filter>Tests\Renders</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Covellite.Api\Renders.cpp">
+      <Filter>Tests\Renders</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -104,5 +113,16 @@
     <ClInclude Include="..\Covellite.Api\Renderer\DxCheck.hpp">
       <Filter>Tests\DxCheck</Filter>
     </ClInclude>
+    <ClInclude Include="..\Covellite.Api\Component.hpp">
+      <Filter>Tests\Component</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Covellite.Api\Renders.hpp">
+      <Filter>Tests\Renders</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\Covellite.Api\Component.inl">
+      <Filter>Tests\Component</Filter>
+    </None>
   </ItemGroup>
 </Project>

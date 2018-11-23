@@ -11,7 +11,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{833168D9-E5E1-48F2-9918-50EBF16C70E4}</ProjectGuid>
+    <ProjectGuid>{88FE23D4-4503-4748-AE23-98852B13CCA2}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>TestClass</RootNamespace>
     <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
@@ -48,7 +48,6 @@
     <ClCompile>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <SDLCheck>false</SDLCheck>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -60,7 +59,6 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <SDLCheck>false</SDLCheck>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -72,14 +70,18 @@
     <ResourceCompile Include="Resources.rc" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="IRenderer_test.cpp" />
+    <ClCompile Include="Component_test.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\Covellite.Api\Component.hpp" />
     <ClInclude Include="stdafx.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\Covellite.Api\Component.inl" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

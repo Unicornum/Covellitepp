@@ -13,7 +13,7 @@ namespace renderer
 {
 
 /**
-* \ingroup CovelliteApiRenderGroup
+* \ingroup CovelliteApiRendererGroup
 * \brief
 *  Класс входит в проект \ref CovelliteApiPage \n
 *  Вспомогательный класс логики работы макроса DX_CHECK.
@@ -42,7 +42,7 @@ public:
 } // namespace covellite
 
 /**
-* \ingroup CovelliteApiRenderGroup
+* \ingroup CovelliteApiRendererGroup
 * \brief
 *  Класс входит в проект \ref CovelliteApiPage \n
 *  Макрос проверок вызова функций DirectX.

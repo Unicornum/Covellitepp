@@ -11,6 +11,7 @@
 #include <Covellite/Core/ClickEventListener.hpp>
 #include <Covellite/Os/Events.hpp>
 #include <Covellite/Api/IWindow.hpp>
+#include <Covellite/Api/RenderInterface.hpp>
 #include <Covellite/Api/Events.hpp>
 #include <Covellite/Rocket/Initializer.hpp>
 #include <Covellite/Rocket/StringTranslator.hpp>

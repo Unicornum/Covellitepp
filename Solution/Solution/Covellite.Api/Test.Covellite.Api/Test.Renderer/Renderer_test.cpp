@@ -12,12 +12,75 @@
 *  Тесты класса Renderer.
 */
 
-#include "../Mock/Eq.hpp"
-#include "../Mock/RendererImpl.hpp"
-
 // Расположение класса Renderer
 #include "../../Covellite.Api/Renderer/Renderer.cpp"
 #include "../../Covellite.Api/Renderer/Renderer.windows.cpp"
+
+#include <Covellite/Api/Component.inl>
+#include <Covellite/Api/Renders.hpp>
+
+#include "../Mock/Equal.hpp"
+#include "../Mock/RendererImpl.hpp"
+
+namespace std
+{
+
+bool operator== (
+  const ::covellite::Any_t & _Left,
+  const ::covellite::Any_t & _Right)
+{
+  using String_t = ::alicorn::extension::std::String;
+
+  if (_Left.type() != _Right.type()) return false;
+
+  if (_Left.type() == typeid(String_t))
+  {
+    return ::covellite::any_cast<String_t>(_Left) == 
+      ::covellite::any_cast<String_t>(_Right);
+  }
+
+  if (_Left.type() == typeid(int))
+  {
+    return ::covellite::any_cast<int>(_Left) ==
+      ::covellite::any_cast<int>(_Right);
+  }
+
+  if (_Left.type() == typeid(size_t))
+  {
+    return ::covellite::any_cast<size_t>(_Left) ==
+      ::covellite::any_cast<size_t>(_Right);
+  }
+
+  if (_Left.type() == typeid(float))
+  {
+    return ::covellite::any_cast<float>(_Left) ==
+      ::covellite::any_cast<float>(_Right);
+  }
+
+  if (_Left.type() == typeid(const uint8_t *))
+  {
+    return ::covellite::any_cast<const uint8_t *>(_Left) ==
+      ::covellite::any_cast<const uint8_t *>(_Right);
+  }
+
+  if (_Left.type() == typeid(const int *))
+  {
+    return ::covellite::any_cast<const int *>(_Left) ==
+      ::covellite::any_cast<const int *>(_Right);
+  }
+
+  using Vertex_t = ::covellite::api::renderer::IGraphicApi::Vertex;
+
+  if (_Left.type() == typeid(const Vertex_t *))
+  {
+    return ::covellite::any_cast<const Vertex_t *>(_Left) ==
+      ::covellite::any_cast<const Vertex_t *>(_Right);
+  }
+
+  throw STD_EXCEPTION << "Unknown type values.";
+}
+
+} // namespace std
 
 // Общий тестовый класс класса Renderer
 class Renderer_test :
@@ -25,69 +88,65 @@ class Renderer_test :
 {
 protected:
   using Tested_t = ::covellite::api::renderer::Renderer;
-  using RenderInterface_t = ::mock::Rocket::Core::RenderInterface;
-  using ITested_t = ::covellite::api::renderer::IRenderer;
+  using RenderInterface_t = ::covellite::api::RenderInterface;
+  using Data_t = Tested_t::Data;
   using String_t = ::alicorn::extension::std::String;
-  using Data_t = ::covellite::api::renderer::IRenderer::Data;
-  using ITexture_t = ::covellite::api::renderer::IGraphicApi::ITexture;
+  using Component_t = ::covellite::api::Component;
+  using Renders_t = ::covellite::api::Component::Renders;
+  using Values_t = ::std::vector<::covellite::Any_t>;
+  using Vertex_t = ::covellite::api::renderer::IGraphicApi::Vertex;
 
   // Вызывается ПЕРЕД запуском каждого теста
   void SetUp(void) override
   {
     ::testing::DefaultValue<String_t>::Set(uT("DefaultString"));
+    ::testing::DefaultValue<const Renders_t::Creators_t &>::Set(m_EmptyCreators);
   }
 
   // Вызывается ПОСЛЕ запуска каждого теста
   void TearDown(void) override
   {
     ::testing::DefaultValue<String_t>::Clear();
+    ::testing::DefaultValue<const Renders_t::Creators_t &>::Clear();
   }
 
 protected:
-  class Texture :
-    public ITexture_t
+  class ComponentData
   {
   public:
-    void Render(void) override {}
+    template<class T>
+    ComponentData & AddValue(const String_t & _Name, const T & _DefaultValue)
+    {
+      m_Values.push_back(m_pComponent->GetValue<T>(_Name, _DefaultValue));
+      return *this;
+    }
+
+    inline Values_t GetValues(void) const
+    {
+      return m_Values;
+    }
+
+  private:
+    Component_t::ComponentPtr_t m_pComponent;
+    Values_t m_Values;
+
+  public:
+    explicit ComponentData(const Component_t::ComponentPtr_t & _pComponent) :
+      m_pComponent(_pComponent)
+    {
+
+    }
   };
+
+  class RenderProxy
+  {
+  public:
+    MOCK_METHOD1(Render, void(Values_t));
+  };
+
+private:
+  Renders_t::Creators_t m_EmptyCreators;
 };
-
-namespace covellite
-{
-
-namespace api
-{
-
-namespace renderer
-{
-
-inline bool operator== (
-  const IGraphicApi::ITexture::Data & _Left,
-  const IGraphicApi::ITexture::Data & _Right)
-{
-  if (_Left.pData != _Right.pData) return false;
-  if (_Left.Width != _Right.Width) return false;
-  if (_Left.Height != _Right.Height) return false;
-  return true;
-}
-
-inline bool operator== (
-  const IGraphicApi::IGeometry::Data & _Left,
-  const IGraphicApi::IGeometry::Data & _Right)
-{
-  if (_Left.pVertices != _Right.pVertices) return false;
-  if (_Left.VerticesCount != _Right.VerticesCount) return false;
-  if (_Left.pIndices != _Right.pIndices) return false;
-  if (_Left.IndicesCount != _Right.IndicesCount) return false;
-  if (_Left.pTexture != _Right.pTexture) return false;
-  return true;
-}
-
-} // namespace renderer
-
-} // namespace api
-
-} // namespace covellite
 
 // Образец макроса для подстановки в класс Renderer 
 // для доступа тестовой функции к закрытым функциям класса (чтобы это сработало, 
@@ -156,7 +215,7 @@ TEST_F(Renderer_test, /*DISABLED_*/Test_Constructor_GraphicApiNameToLog)
 }
 
 // ************************************************************************** //
-TEST_F(Renderer_test, /*DISABLED_*/Test_RendererGeometry)
+TEST_F(Renderer_test, /*DISABLED_*/Test_RenderGeometry)
 {
   class Tested :
     public Tested_t
@@ -179,7 +238,7 @@ TEST_F(Renderer_test, /*DISABLED_*/Test_RendererGeometry)
     }
   };
 
-  ::std::vector<::mock::Rocket::Core::Vertex> Vertex{ 10 };
+  ::std::vector<::mock::Rocket::Core::Vertex> Vertices{ 10 };
   const int VertexSize = 1808251051;
   ::std::vector<int> Index{ 20 };
   const int IndexSize = 1808251052;
@@ -195,7 +254,7 @@ TEST_F(Renderer_test, /*DISABLED_*/Test_RendererGeometry)
   InSequence Dummy;
 
   EXPECT_CALL(Example,
-    CompileGeometry(Vertex.data(), VertexSize, Index.data(), IndexSize, hTexture))
+    CompileGeometry(Vertices.data(), VertexSize, Index.data(), IndexSize, hTexture))
     .Times(1)
     .WillOnce(Return(hGeometry));
 
@@ -206,188 +265,972 @@ TEST_F(Renderer_test, /*DISABLED_*/Test_RendererGeometry)
     .Times(1);
 
   IExample.RenderGeometry(
-    Vertex.data(), VertexSize, Index.data(), IndexSize, hTexture, Position);
+    Vertices.data(), VertexSize, Index.data(), IndexSize, hTexture, Position);
 }
 
 // ************************************************************************** //
-TEST_F(Renderer_test, /*DISABLED_*/Test_CompiledGeometry)
+TEST_F(Renderer_test, /*DISABLED_*/Test_CompileGeometry_UniqueHahdlers)
 {
-  using RendererImplProxy_t = ::mock::RendererImpl::Proxy;
-  RendererImplProxy_t RendererImplProxy;
-  RendererImplProxy_t::GetInstance() = &RendererImplProxy;
-
-  const ::mock::Id_t RendererId = 1808251110;
-  auto * pVertex = (::mock::Rocket::Core::Vertex *)1808251124;
-  ::mock::Rocket::Core::TextureHandle hTexture = 1808251125;
-  ::mock::Rocket::Core::CompiledGeometryHandle hGeometry = (void *)1808251116;
-
-  ::covellite::api::renderer::IGraphicApi::IGeometry::Data Data;
-  Data.pVertices = (::covellite::api::renderer::IGraphicApi::Vertex *)pVertex;
-  Data.VerticesCount = 1808251119;
-  Data.pIndices = (int *)1808251121;
-  Data.IndicesCount = 1808251122;
-  Data.pTexture = (::covellite::api::renderer::IGraphicApi::ITexture *)hTexture;
-
-  using namespace ::testing;
-
-  EXPECT_CALL(RendererImplProxy, Constructor(_))
-    .Times(1)
-    .WillOnce(Return(RendererId));
-
   Tested_t Example{ uT("RendererImpl"), Data_t{} };
   RenderInterface_t & IExample = Example;
 
-  EXPECT_CALL(RendererImplProxy, CreateGeometry(RendererId, Data))
-    .Times(1)
-    .WillOnce(Return((::covellite::api::renderer::IGraphicApi::IGeometry *)hGeometry));
+  ::std::set<::mock::Rocket::Core::CompiledGeometryHandle> Handles;
 
-  const auto pGeometry = IExample.CompileGeometry(pVertex, Data.VerticesCount, 
-    Data.pIndices, Data.IndicesCount, hTexture);
-  EXPECT_EQ((void *)pGeometry, hGeometry);
+  const size_t RepeatCount = 10;
+
+  for (size_t i = 0; i < RepeatCount; i++)
+  {
+    Handles.insert(IExample.CompileGeometry(nullptr, 0, nullptr, 0, 0));
+  }
+
+  EXPECT_EQ(RepeatCount, Handles.size());
 }
 
 // ************************************************************************** //
-TEST_F(Renderer_test, /*DISABLED_*/Test_RendererCompiledGeometry)
+TEST_F(Renderer_test, /*DISABLED_*/Test_RenderCompiledGeometry_Textured)
 {
+  RenderProxy RenderProxy;
+
   using RendererImplProxy_t = ::mock::RendererImpl::Proxy;
   RendererImplProxy_t RendererImplProxy;
   RendererImplProxy_t::GetInstance() = &RendererImplProxy;
 
-  class Geometry :
-    ::covellite::api::renderer::IGraphicApi::IGeometry
+  auto ShaderCreator =
+    [&](const Component_t::ComponentPtr_t & _pComponent) -> Renders_t::Render_t
   {
-  public:
-    MOCK_METHOD2(Update, void (float, float));
-    MOCK_METHOD0(Render, void(void));
+    const auto Kind = _pComponent->GetValue(uT("kind"), uT(""));
+
+    if (Kind == uT("Vertex"))
+    {
+      return [&, _pComponent]()
+      {
+        RenderProxy.Render(ComponentData{ _pComponent }
+          .AddValue(uT("type"), uT(""))
+          .AddValue(uT("id"), uT(""))
+          .GetValues());
+      };
+    }
+    if (Kind == uT("Pixel"))
+    {
+      return [&, _pComponent]()
+      {
+        RenderProxy.Render(ComponentData{ _pComponent }
+          .AddValue(uT("type"), uT(""))
+          .AddValue(uT("kind"), uT(""))
+          .AddValue(uT("version"), uT(""))
+          .AddValue(uT("entry"), uT(""))
+          .AddValue(uT("id"), uT(""))
+          .AddValue(uT("data"), (const uint8_t *)nullptr)
+          .AddValue(uT("count"), (size_t)0)
+          .GetValues());
+      };
+    }
+
+    throw ::std::exception{ "Unknown shader kind." };
   };
 
-  const ::mock::Id_t RendererId = 1808251949;
-  Geometry Geometry;
-  ::mock::Rocket::Core::Vector2f Position = { 1808251126.0f, 1808251127.0f };
+  auto PositionCreator =
+    [&](const Component_t::ComponentPtr_t & _pComponent) -> Renders_t::Render_t
+  {
+    return [&, _pComponent]()
+    {
+      RenderProxy.Render(ComponentData{ _pComponent }
+        .AddValue(uT("type"), uT(""))
+        .AddValue(uT("id"), uT(""))
+        .AddValue(uT("x"), 0.0f)
+        .AddValue(uT("y"), 0.0f)
+        .GetValues());
+    };
+  };
+
+  auto BufferCreator =
+    [&](const Component_t::ComponentPtr_t & _pComponent) -> Renders_t::Render_t
+  {
+    const auto Kind = _pComponent->GetValue(uT("kind"), uT(""));
+
+    if (Kind == uT("Vertex"))
+    {
+      return [&, _pComponent]()
+      {
+        RenderProxy.Render(ComponentData{ _pComponent }
+          .AddValue(uT("type"), uT(""))
+          .AddValue(uT("id"), uT(""))
+          .AddValue(uT("kind"), uT(""))
+          .AddValue(uT("data"), (const Vertex_t *)nullptr)
+          .AddValue(uT("count"), (size_t)0)
+          .GetValues());
+      };
+    }
+    else if (Kind == uT("Index"))
+    {
+      return [&, _pComponent]()
+      {
+        RenderProxy.Render(ComponentData{ _pComponent }
+          .AddValue(uT("type"), uT(""))
+          .AddValue(uT("id"), uT(""))
+          .AddValue(uT("kind"), uT(""))
+          .AddValue(uT("data"), (const int *)nullptr)
+          .AddValue(uT("count"), (size_t)0)
+          .GetValues());
+      };
+    }
+
+    throw ::std::exception{ "Unknown buffer kind." };
+  };
+
+  auto SimpleCreator =
+    [&](const Component_t::ComponentPtr_t & _pComponent) -> Renders_t::Render_t
+  {
+    return [&, _pComponent]()
+    {
+      RenderProxy.Render(ComponentData{ _pComponent }
+        .AddValue(uT("type"), uT(""))
+        .AddValue(uT("id"), uT(""))
+        .GetValues());
+    };
+  };
+
+  const Renders_t::Creators_t Creators =
+  {
+    { uT("Shader"), ShaderCreator },
+    { uT("Texture"), SimpleCreator },
+    { uT("Position"), PositionCreator },
+    { uT("Buffer"), BufferCreator },
+    { uT("DrawCall"), SimpleCreator },
+  };
+
+  const Values_t DefaultValues =
+  {
+    uT("Shader"),
+    uT("Covellite.Api.Shader.Vertex")
+  };
 
   using namespace ::testing;
-
-  EXPECT_CALL(RendererImplProxy, Constructor(_))
-    .Times(1)
-    .WillOnce(Return(RendererId));
-
-  Tested_t Example{ uT("RendererImpl"), Data_t{} };
-  RenderInterface_t & IExample = Example;
 
   InSequence Dummy;
 
-  EXPECT_CALL(RendererImplProxy, Renderer(RendererId))
-    .Times(1);
-
-  EXPECT_CALL(Geometry, Update(Position.x, Position.y))
-    .Times(1);
-
-  EXPECT_CALL(Geometry, Render())
-    .Times(1);
-
-  IExample.RenderCompiledGeometry(&Geometry, Position);
-}
-
-// ************************************************************************** //
-TEST_F(Renderer_test, /*DISABLED_*/Test_ReleaseCompiledGeometry)
-{
-  using RendererImplProxy_t = ::mock::RendererImpl::Proxy;
-  RendererImplProxy_t RendererImplProxy;
-  RendererImplProxy_t::GetInstance() = &RendererImplProxy;
-
-  const ::mock::Id_t RendererId = 1808251140;
-  auto hGeometry = (::mock::Rocket::Core::CompiledGeometryHandle)1808251141;
-
-  using namespace ::testing;
-
-  EXPECT_CALL(RendererImplProxy, Constructor(_))
+  EXPECT_CALL(RendererImplProxy, GetCreators(_))
     .Times(1)
-    .WillOnce(Return(RendererId));
+    .WillOnce(ReturnRef(Creators));
 
   Tested_t Example{ uT("RendererImpl"), Data_t{} };
   RenderInterface_t & IExample = Example;
 
-  EXPECT_CALL(RendererImplProxy, DestroyGeometry(RendererId, 
-    (::covellite::api::renderer::IGraphicApi::IGeometry *)hGeometry))
-    .Times(1);
+  auto * const pVertex = (::mock::Rocket::Core::Vertex *)1811161257;
+  const int VertexCount = 1811161258;
+  auto * const pIndex = (int *)1811161259;
+  const int IndexCount = 1811161300;
+  const size_t TextureId = 1811161754;
+
+  const auto hGeometry =
+    IExample.CompileGeometry(pVertex, VertexCount, pIndex, IndexCount, TextureId);
+
+  const auto strObjectId = uT("{ID}").Replace(uT("{ID}"), (size_t)hGeometry);
+
+  const Values_t PixelShaderValues =
+  {
+    uT("Shader"),
+    uT("Pixel"),
+    uT("ps_4_0"),
+    uT("psTextured"),
+    uT("Covellite.Api.Shader.Pixel.Textured"),
+    ::Pixel.data(),
+    ::Pixel.size(),
+  };
+
+  const Values_t TextureValues =
+  {
+    uT("Texture"),
+    uT("Covellite.Api.Texture.{ID}").Replace(uT("{ID}"), TextureId)
+  };
+
+  const Values_t VertexBufferValues =
+  {
+    uT("Buffer"),
+    uT("Covellite.Api.Buffer.Vertex.") + strObjectId,
+    uT("Vertex"),
+    (const Vertex_t *)pVertex,
+    (size_t)VertexCount,
+  };
+
+  const Values_t IndexBufferValues =
+  {
+    uT("Buffer"),
+    uT("Covellite.Api.Buffer.Index.") + strObjectId,
+    uT("Index"),
+    (const int *)pIndex,
+    (size_t)IndexCount,
+  };
+
+  const Values_t DrawCallValues =
+  {
+    uT("DrawCall"),
+    uT("Covellite.Api.DrawCall")
+  };
+
+  // Первый вызов
+  {
+    const float X = 1811161750.0f;
+    const float Y = 1811161751.0f;
+
+    const Values_t PositionValues =
+    {
+      uT("Position"),
+      uT("Covellite.Api.Position.") + strObjectId,
+      X,
+      Y,
+    };
+
+    IExample.RenderCompiledGeometry(hGeometry, { X, Y });
+
+    EXPECT_CALL(RenderProxy, Render(DefaultValues))
+      .Times(1);
+
+    EXPECT_CALL(RenderProxy, Render(PixelShaderValues))
+      .Times(1);
+
+    EXPECT_CALL(RenderProxy, Render(TextureValues))
+      .Times(1);
+
+    EXPECT_CALL(RenderProxy, Render(PositionValues))
+      .Times(1);
+
+    EXPECT_CALL(RenderProxy, Render(VertexBufferValues))
+      .Times(1);
+
+    EXPECT_CALL(RenderProxy, Render(IndexBufferValues))
+      .Times(1);
+
+    EXPECT_CALL(RenderProxy, Render(DrawCallValues))
+      .Times(1);
+
+    Example.PresentFrame();
+  }
+
+  // Второй вызов
+  {
+    const float X = 1811161752.0f;
+    const float Y = 1811161753.0f;
+
+    const Values_t PositionValues =
+    {
+      uT("Position"),
+      uT("Covellite.Api.Position.") + strObjectId,
+      X,
+      Y,
+    };
+
+    IExample.RenderCompiledGeometry(hGeometry, { X, Y });
+
+    EXPECT_CALL(RenderProxy, Render(DefaultValues))
+      .Times(1);
+
+    EXPECT_CALL(RenderProxy, Render(PixelShaderValues))
+      .Times(1);
+
+    EXPECT_CALL(RenderProxy, Render(TextureValues))
+      .Times(1);
+
+    EXPECT_CALL(RenderProxy, Render(PositionValues))
+      .Times(1);
+
+    EXPECT_CALL(RenderProxy, Render(VertexBufferValues))
+      .Times(1);
+
+    EXPECT_CALL(RenderProxy, Render(IndexBufferValues))
+      .Times(1);
+
+    EXPECT_CALL(RenderProxy, Render(DrawCallValues))
+      .Times(1);
+
+    Example.PresentFrame();
+  }
 
   IExample.ReleaseCompiledGeometry(hGeometry);
+
+  // Вызов для проверки удаления рендеров
+  {
+    IExample.RenderCompiledGeometry(hGeometry, { 0, 0 });
+
+    EXPECT_CALL(RenderProxy, Render(DefaultValues))
+      .Times(1);
+
+    EXPECT_CALL(RenderProxy, Render(_))
+      .Times(0);
+
+    Example.PresentFrame();
+  }
+}
+
+// ************************************************************************** //
+TEST_F(Renderer_test, /*DISABLED_*/Test_RenderCompiledGeometry_NonTextured)
+{
+  RenderProxy RenderProxy;
+
+  using RendererImplProxy_t = ::mock::RendererImpl::Proxy;
+  RendererImplProxy_t RendererImplProxy;
+  RendererImplProxy_t::GetInstance() = &RendererImplProxy;
+
+  auto ShaderCreator =
+    [&](const Component_t::ComponentPtr_t & _pComponent) -> Renders_t::Render_t
+  {
+    const auto Kind = _pComponent->GetValue(uT("kind"), uT(""));
+
+    if (Kind == uT("Vertex"))
+    {
+      return [&, _pComponent]()
+      {
+        RenderProxy.Render(ComponentData{ _pComponent }
+          .AddValue(uT("type"), uT(""))
+          .AddValue(uT("id"), uT(""))
+          .GetValues());
+      };
+    }
+    if (Kind == uT("Pixel"))
+    {
+      return [&, _pComponent]()
+      {
+        RenderProxy.Render(ComponentData{ _pComponent }
+          .AddValue(uT("type"), uT(""))
+          .AddValue(uT("kind"), uT(""))
+          .AddValue(uT("version"), uT(""))
+          .AddValue(uT("entry"), uT(""))
+          .AddValue(uT("id"), uT(""))
+          .AddValue(uT("data"), (const uint8_t *)nullptr)
+          .AddValue(uT("count"), (size_t)0)
+          .GetValues());
+      };
+    }
+
+    throw ::std::exception{ "Unknown shader kind." };
+  };
+
+  auto PositionCreator =
+    [&](const Component_t::ComponentPtr_t & _pComponent) -> Renders_t::Render_t
+  {
+    return [&, _pComponent]()
+    {
+      RenderProxy.Render(ComponentData{ _pComponent }
+        .AddValue(uT("type"), uT(""))
+        .AddValue(uT("id"), uT(""))
+        .AddValue(uT("x"), 0.0f)
+        .AddValue(uT("y"), 0.0f)
+        .GetValues());
+    };
+  };
+
+  auto BufferCreator =
+    [&](const Component_t::ComponentPtr_t & _pComponent) -> Renders_t::Render_t
+  {
+    const auto Kind = _pComponent->GetValue(uT("kind"), uT(""));
+
+    if (Kind == uT("Vertex"))
+    {
+      return [&, _pComponent]()
+      {
+        RenderProxy.Render(ComponentData{ _pComponent }
+          .AddValue(uT("type"), uT(""))
+          .AddValue(uT("id"), uT(""))
+          .AddValue(uT("kind"), uT(""))
+          .AddValue(uT("data"), (const Vertex_t *)nullptr)
+          .AddValue(uT("count"), (size_t)0)
+          .GetValues());
+      };
+    }
+    else if (Kind == uT("Index"))
+    {
+      return [&, _pComponent]()
+      {
+        RenderProxy.Render(ComponentData{ _pComponent }
+          .AddValue(uT("type"), uT(""))
+          .AddValue(uT("id"), uT(""))
+          .AddValue(uT("kind"), uT(""))
+          .AddValue(uT("data"), (const int *)nullptr)
+          .AddValue(uT("count"), (size_t)0)
+          .GetValues());
+      };
+    }
+
+    throw ::std::exception{ "Unknown buffer kind." };
+  };
+
+  auto SimpleCreator =
+    [&](const Component_t::ComponentPtr_t & _pComponent) -> Renders_t::Render_t
+  {
+    return [&, _pComponent]()
+    {
+      RenderProxy.Render(ComponentData{ _pComponent }
+        .AddValue(uT("type"), uT(""))
+        .AddValue(uT("id"), uT(""))
+        .GetValues());
+    };
+  };
+
+  const Renders_t::Creators_t Creators =
+  {
+    { uT("Shader"), ShaderCreator },
+    { uT("Position"), PositionCreator },
+    { uT("Buffer"), BufferCreator },
+    { uT("DrawCall"), SimpleCreator },
+  };
+
+  const Values_t DefaultValues = 
+  { 
+    uT("Shader"), 
+    uT("Covellite.Api.Shader.Vertex") 
+  };
+
+  using namespace ::testing;
+
+  InSequence Dummy;
+
+  EXPECT_CALL(RendererImplProxy, GetCreators(_))
+    .Times(1)
+    .WillOnce(ReturnRef(Creators));
+
+  Tested_t Example{ uT("RendererImpl"), Data_t{} };
+  RenderInterface_t & IExample = Example;
+
+  auto * const pVertex = (::mock::Rocket::Core::Vertex *)1811161257;
+  const int VertexCount = 1811161258;
+  auto * const pIndex = (int *)1811161259;
+  const int IndexCount = 1811161300;
+
+  const auto hGeometry = 
+    IExample.CompileGeometry(pVertex, VertexCount, pIndex, IndexCount, 0);
+
+  const auto strObjectId = uT("{ID}").Replace(uT("{ID}"), (size_t)hGeometry);
+
+  const Values_t PixelShaderValues =
+  {
+    uT("Shader"),
+    uT("Pixel"),
+    uT("ps_4_0"),
+    uT("psColored"),
+    uT("Covellite.Api.Shader.Pixel.Colored"),
+    ::Pixel.data(),
+    ::Pixel.size(),
+  };
+
+  const Values_t VertexBufferValues =
+  {
+    uT("Buffer"),
+    uT("Covellite.Api.Buffer.Vertex.") + strObjectId,
+    uT("Vertex"),
+    (const Vertex_t *)pVertex,
+    (size_t)VertexCount,
+  };
+
+  const Values_t IndexBufferValues =
+  {
+    uT("Buffer"),
+    uT("Covellite.Api.Buffer.Index.") + strObjectId,
+    uT("Index"),
+    (const int *)pIndex,
+    (size_t)IndexCount,
+  };
+
+  const Values_t DrawCallValues = 
+  { 
+    uT("DrawCall"), 
+    uT("Covellite.Api.DrawCall") 
+  };
+
+  // Первый вызов
+  {
+    const float X = 1811161301.0f;
+    const float Y = 1811161302.0f;
+
+    const Values_t PositionValues =
+    {
+      uT("Position"),
+      uT("Covellite.Api.Position.") + strObjectId,
+      X,
+      Y,
+    };
+
+    IExample.RenderCompiledGeometry(hGeometry, { X, Y });
+
+    EXPECT_CALL(RenderProxy, Render(DefaultValues))
+      .Times(1);
+
+    EXPECT_CALL(RenderProxy, Render(PixelShaderValues))
+      .Times(1);
+
+    EXPECT_CALL(RenderProxy, Render(PositionValues))
+      .Times(1);
+
+    EXPECT_CALL(RenderProxy, Render(VertexBufferValues))
+      .Times(1);
+
+    EXPECT_CALL(RenderProxy, Render(IndexBufferValues))
+      .Times(1);
+
+    EXPECT_CALL(RenderProxy, Render(DrawCallValues))
+      .Times(1);
+
+    Example.PresentFrame();
+  }
+
+  // Второй вызов
+  {
+    const float X = 1811161303.0f;
+    const float Y = 1811161304.0f;
+
+    const Values_t PositionValues =
+    {
+      uT("Position"),
+      uT("Covellite.Api.Position.") + strObjectId,
+      X,
+      Y,
+    };
+
+    IExample.RenderCompiledGeometry(hGeometry, { X, Y });
+
+    EXPECT_CALL(RenderProxy, Render(DefaultValues))
+      .Times(1);
+
+    EXPECT_CALL(RenderProxy, Render(PixelShaderValues))
+      .Times(1);
+
+    EXPECT_CALL(RenderProxy, Render(PositionValues))
+      .Times(1);
+
+    EXPECT_CALL(RenderProxy, Render(VertexBufferValues))
+      .Times(1);
+
+    EXPECT_CALL(RenderProxy, Render(IndexBufferValues))
+      .Times(1);
+
+    EXPECT_CALL(RenderProxy, Render(DrawCallValues))
+      .Times(1);
+
+    Example.PresentFrame();
+  }
+
+  IExample.ReleaseCompiledGeometry(hGeometry);
+
+  // Вызов для проверки удаления рендеров
+  {
+    IExample.RenderCompiledGeometry(hGeometry, { 0, 0 });
+
+    EXPECT_CALL(RenderProxy, Render(DefaultValues))
+      .Times(1);
+
+    EXPECT_CALL(RenderProxy, Render(_))
+      .Times(0);
+
+    Example.PresentFrame();
+  }
+}
+
+// ************************************************************************** //
+TEST_F(Renderer_test, /*DISABLED_*/Test_ReleaseCompiledGeometry_RemoveUniqueComponents)
+{
+  RenderProxy RenderProxy;
+
+  using RendererImplProxy_t = ::mock::RendererImpl::Proxy;
+  RendererImplProxy_t RendererImplProxy;
+  RendererImplProxy_t::GetInstance() = &RendererImplProxy;
+
+  auto Creator = [&](const Component_t::ComponentPtr_t & _pComponent) -> Renders_t::Render_t
+  {
+    return [&, _pComponent]()
+    {
+      RenderProxy.Render(ComponentData{ _pComponent }
+        .AddValue(uT("type"), uT(""))
+        .AddValue(uT("id"), uT(""))
+        .AddValue(uT("data"), uT(""))
+        .GetValues());
+    };
+  };
+
+  const Renders_t::Creators_t Creators =
+  {
+    { uT("Position"), Creator },
+    { uT("Buffer"), Creator },
+  };
+
+  using namespace ::testing;
+
+  EXPECT_CALL(RendererImplProxy, GetCreators(_))
+    .Times(1)
+    .WillOnce(ReturnRef(Creators));
+
+  Tested_t Example{ uT("RendererImpl"), Data_t{} };
+  RenderInterface_t & IExample = Example;
+
+  const size_t ObjectId = 1811161821;
+  const auto strObjectId = uT("{ID}").Replace(uT("{ID}"), ObjectId);
+
+  auto pRenders = IExample.GetRenders();
+
+  {
+    auto Renders = pRenders->Obtain(
+      {
+        Component_t::Make(
+        {
+          { uT("type"), uT("Position") },
+          { uT("id"), uT("Covellite.Api.Position.") + strObjectId },
+          { uT("data"), uT("Position.1811161820") },
+         }),
+        Component_t::Make(
+        {
+          { uT("type"), uT("Buffer") },
+          { uT("id"), uT("Covellite.Api.Buffer.Vertex.") + strObjectId },
+          { uT("data"), uT("Vertex.1811161832") },
+         }),
+        Component_t::Make(
+        {
+          { uT("type"), uT("Buffer") },
+          { uT("id"), uT("Covellite.Api.Buffer.Index.") + strObjectId },
+          { uT("data"), uT("Index.1811161840") },
+         }),
+      });
+
+    const Values_t ExpectedPositionData =
+    {
+      uT("Position"),
+      uT("Covellite.Api.Position.") + strObjectId,
+      uT("Position.1811161820")
+    };
+
+    const Values_t ExpectedVertexBufferData =
+    {
+      uT("Buffer"),
+      uT("Covellite.Api.Buffer.Vertex.") + strObjectId,
+      uT("Vertex.1811161832")
+    };
+
+    const Values_t ExpectedIndexBufferData =
+    {
+      uT("Buffer"),
+      uT("Covellite.Api.Buffer.Index.") + strObjectId,
+      uT("Index.1811161840")
+    };
+
+    EXPECT_CALL(RenderProxy, Render(ExpectedPositionData))
+      .Times(1);
+
+    EXPECT_CALL(RenderProxy, Render(ExpectedVertexBufferData))
+      .Times(1);
+
+    EXPECT_CALL(RenderProxy, Render(ExpectedIndexBufferData))
+      .Times(1);
+
+    EXPECT_EQ(3, Renders.size());
+    for (auto & Render : Renders) Render();
+  }
+
+  IExample.ReleaseCompiledGeometry(
+    (::mock::Rocket::Core::CompiledGeometryHandle)ObjectId);
+
+  {
+    auto Renders = pRenders->Obtain(
+      {
+        Component_t::Make(
+        {
+          { uT("type"), uT("Position") },
+          { uT("id"), uT("Covellite.Api.Position.") + strObjectId },
+        }),
+        Component_t::Make(
+        {
+          { uT("type"), uT("Buffer") },
+          { uT("id"), uT("Covellite.Api.Buffer.Vertex.") + strObjectId },
+         }),
+        Component_t::Make(
+        {
+          { uT("type"), uT("Buffer") },
+          { uT("id"), uT("Covellite.Api.Buffer.Index.") + strObjectId },
+         }),
+      });
+
+    const Values_t ExpectedPositionData =
+    {
+      uT("Position"),
+      uT("Covellite.Api.Position.") + strObjectId,
+      uT("")
+    };
+
+    const Values_t ExpectedVertexBufferData =
+    {
+      uT("Buffer"),
+      uT("Covellite.Api.Buffer.Vertex.") + strObjectId,
+      uT("")
+    };
+
+    const Values_t ExpectedIndexBufferData =
+    {
+      uT("Buffer"),
+      uT("Covellite.Api.Buffer.Index.") + strObjectId,
+      uT("")
+    };
+
+    EXPECT_CALL(RenderProxy, Render(ExpectedPositionData))
+      .Times(1);
+
+    EXPECT_CALL(RenderProxy, Render(ExpectedVertexBufferData))
+      .Times(1);
+
+    EXPECT_CALL(RenderProxy, Render(ExpectedIndexBufferData))
+      .Times(1);
+
+    EXPECT_EQ(3, Renders.size());
+    for (auto & Render : Renders) Render();
+  }
 }
 
 // ************************************************************************** //
 TEST_F(Renderer_test, /*DISABLED_*/Test_EnableScissorRegion_True)
 {
+  RenderProxy RenderProxy;
+
   using RendererImplProxy_t = ::mock::RendererImpl::Proxy;
   RendererImplProxy_t RendererImplProxy;
   RendererImplProxy_t::GetInstance() = &RendererImplProxy;
 
-  const ::mock::Id_t RendererId = 1808242032;
+  auto Creator = [&](const Component_t::ComponentPtr_t & _pComponent) -> Renders_t::Render_t
+  {
+    return [&, _pComponent]()
+    {
+      RenderProxy.Render(ComponentData{ _pComponent }
+        .AddValue(uT("type"), uT(""))
+        .AddValue(uT("id"), uT(""))
+        .AddValue(uT("kind"), uT(""))
+        .GetValues());
+    };
+  };
+
+  const Renders_t::Creators_t Creators =
+  {
+    { uT("State"), Creator },
+  };
 
   using namespace ::testing;
 
-  EXPECT_CALL(RendererImplProxy, Constructor(_))
+  InSequence Dummy;
+
+  EXPECT_CALL(RendererImplProxy, GetCreators(_))
     .Times(1)
-    .WillOnce(Return(RendererId));
+    .WillOnce(ReturnRef(Creators));
 
   Tested_t Example{ uT("RendererImpl"), Data_t{} };
   RenderInterface_t & IExample = Example;
 
-  EXPECT_CALL(RendererImplProxy, DisableScissorRegion(RendererId))
+  IExample.EnableScissorRegion(true);
+
+  EXPECT_CALL(RenderProxy, Render(
+    Values_t{ uT("State"), uT("Covellite.Api.State.Blend"), uT("Blend") }))
+    .Times(1);
+
+  EXPECT_CALL(RenderProxy, Render(
+    Values_t{ uT("State"), uT("Covellite.Api.State.Sampler"), uT("Sampler") }))
+    .Times(1);
+
+  EXPECT_CALL(RenderProxy, Render(_))
     .Times(0);
 
-  IExample.EnableScissorRegion(true);
+  EXPECT_CALL(RendererImplProxy, PresentFrame(_))
+    .Times(1);
+
+  Example.PresentFrame();
 }
 
 // ************************************************************************** //
 TEST_F(Renderer_test, /*DISABLED_*/Test_EnableScissorRegion_False)
 {
+  RenderProxy RenderProxy;
+
   using RendererImplProxy_t = ::mock::RendererImpl::Proxy;
   RendererImplProxy_t RendererImplProxy;
   RendererImplProxy_t::GetInstance() = &RendererImplProxy;
 
-  const ::mock::Id_t RendererId = 1808242032;
+  auto Creator = [&](const Component_t::ComponentPtr_t & _pComponent) -> Renders_t::Render_t
+  {
+    return [&, _pComponent]()
+    {
+      RenderProxy.Render(ComponentData{ _pComponent }
+        .AddValue(uT("type"), uT(""))
+        .AddValue(uT("id"), uT(""))
+        .AddValue(uT("kind"), uT(""))
+        .AddValue(uT("is_enabled"), uT(""))
+        .GetValues());
+    };
+  };
+
+  const Renders_t::Creators_t Creators =
+  {
+    { uT("State"), Creator },
+  };
 
   using namespace ::testing;
 
-  EXPECT_CALL(RendererImplProxy, Constructor(_))
+  InSequence Dummy;
+
+  EXPECT_CALL(RendererImplProxy, GetCreators(_))
     .Times(1)
-    .WillOnce(Return(RendererId));
+    .WillOnce(ReturnRef(Creators));
 
   Tested_t Example{ uT("RendererImpl"), Data_t{} };
   RenderInterface_t & IExample = Example;
 
-  EXPECT_CALL(RendererImplProxy, DisableScissorRegion(RendererId))
+  IExample.EnableScissorRegion(false);
+
+  EXPECT_CALL(RenderProxy, Render(
+    Values_t{ uT("State"), uT("Covellite.Api.State.Blend"), uT("Blend"), uT("") }))
     .Times(1);
 
-  IExample.EnableScissorRegion(false);
+  EXPECT_CALL(RenderProxy, Render(
+    Values_t{ uT("State"), uT("Covellite.Api.State.Sampler"), uT("Sampler"), uT("") }))
+    .Times(1);
+
+  const Values_t ExpectScissorInfo = 
+  { 
+    uT("State"), 
+    uT("Covellite.Api.State.Scissor.Disabled"), 
+    uT("Scissor"), 
+    uT("false"),
+  };
+
+  EXPECT_CALL(RenderProxy, Render(ExpectScissorInfo))
+    .Times(1);
+
+  EXPECT_CALL(RendererImplProxy, PresentFrame(_))
+    .Times(1);
+
+  Example.PresentFrame();
 }
 
 // ************************************************************************** //
 TEST_F(Renderer_test, /*DISABLED_*/Test_SetScissorRegion)
 {
+  RenderProxy RenderProxy;
+
   using RendererImplProxy_t = ::mock::RendererImpl::Proxy;
   RendererImplProxy_t RendererImplProxy;
   RendererImplProxy_t::GetInstance() = &RendererImplProxy;
 
-  const ::mock::Id_t RendererId = 1808242015;
-  const int X = 1808242017;
-  const int Y = 1808242018;
-  const int W = 1808242019;
-  const int H = 1808242020;
+  auto Creator = [&](const Component_t::ComponentPtr_t & _pComponent) -> Renders_t::Render_t
+  {
+    const auto Kind = _pComponent->GetValue(uT("kind"), uT(""));
+
+    if (Kind == uT("Scissor"))
+    {
+      return [&, _pComponent]()
+      {
+        RenderProxy.Render(ComponentData{ _pComponent }
+          .AddValue(uT("type"), uT(""))
+          .AddValue(uT("kind"), uT(""))
+          .AddValue(uT("id"), uT(""))
+          .AddValue(uT("is_enabled"), uT(""))
+          .AddValue(uT("left"), 0)
+          .AddValue(uT("right"), 0)
+          .AddValue(uT("top"), 0)
+          .AddValue(uT("bottom"), 0)
+          .GetValues());
+      };
+    }
+    
+    return [&, _pComponent]()
+    {
+      RenderProxy.Render(ComponentData{ _pComponent }
+        .AddValue(uT("type"), uT(""))
+        .AddValue(uT("id"), uT(""))
+        .GetValues());
+    };
+  };
+
+  const Renders_t::Creators_t Creators =
+  {
+    { uT("State"), Creator },
+  };
 
   using namespace ::testing;
 
-  EXPECT_CALL(RendererImplProxy, Constructor(_))
+  InSequence Dummy;
+
+  EXPECT_CALL(RendererImplProxy, GetCreators(_))
     .Times(1)
-    .WillOnce(Return(RendererId));
+    .WillOnce(ReturnRef(Creators));
 
   Tested_t Example{ uT("RendererImpl"), Data_t{} };
   RenderInterface_t & IExample = Example;
 
-  EXPECT_CALL(RendererImplProxy, EnableScissorRegion(RendererId, X, Y, W, H))
-    .Times(1);
+  // Первый вызов
+  {
+    const int X = 1811081503;
+    const int Y = 1811081504;
+    const int Width = 81505;
+    const int Height = 81506;
 
-  IExample.SetScissorRegion(X, Y, W, H);
+    IExample.SetScissorRegion(X, Y, Width, Height);
+
+    EXPECT_CALL(RenderProxy, Render(
+      Values_t{ uT("State"), uT("Covellite.Api.State.Blend") }))
+      .Times(1);
+
+    EXPECT_CALL(RenderProxy, Render(
+      Values_t{ uT("State"), uT("Covellite.Api.State.Sampler") }))
+      .Times(1);
+
+    const Values_t ExpectedScissorData =
+    {
+      uT("State"),
+      uT("Scissor"),
+      uT("Covellite.Api.State.Scissor.Enabled"),
+      uT("true"),
+      X,
+      X + Width,
+      Y,
+      Y + Height,
+    };
+
+    EXPECT_CALL(RenderProxy, Render(ExpectedScissorData))
+      .Times(1);
+
+    EXPECT_CALL(RendererImplProxy, PresentFrame(_))
+      .Times(1);
+
+    Example.PresentFrame();
+  }
+
+  // Второй вызов (с другими значениями координат)
+  {
+    const int X = 1811081519;
+    const int Y = 1811081520;
+    const int Width = 81505;
+    const int Height = 81506;
+
+    IExample.SetScissorRegion(X, Y, Width, Height);
+
+    EXPECT_CALL(RenderProxy, Render(
+      Values_t{ uT("State"), uT("Covellite.Api.State.Blend") }))
+      .Times(1);
+
+    EXPECT_CALL(RenderProxy, Render(
+      Values_t{ uT("State"), uT("Covellite.Api.State.Sampler") }))
+      .Times(1);
+
+    const Values_t ExpectedScissorData =
+    {
+      uT("State"),
+      uT("Scissor"),
+      uT("Covellite.Api.State.Scissor.Enabled"),
+      uT("true"),
+      X,
+      X + Width,
+      Y,
+      Y + Height,
+    };
+
+    EXPECT_CALL(RenderProxy, Render(ExpectedScissorData))
+      .Times(1);
+
+    EXPECT_CALL(RendererImplProxy, PresentFrame(_))
+      .Times(1);
+
+    Example.PresentFrame();
+  }
 }
 
 // ************************************************************************** //
@@ -467,168 +1310,409 @@ TEST_F(Renderer_test, /*DISABLED_*/Test_LoadTexture)
 }
 
 // ************************************************************************** //
-TEST_F(Renderer_test, /*DISABLED_*/Test_GenerateTexture_True)
+TEST_F(Renderer_test, /*DISABLED_*/Test_GenerateTexture)
 {
-  using TextureHandle_t = ::mock::Rocket::Core::TextureHandle;
-  using TextureData_t = ::std::vector<::mock::Rocket::Core::byte>;
-  using TextureDimensions_t = ::mock::Rocket::Core::Vector2i;
+  RenderProxy RenderProxy;
 
   using RendererImplProxy_t = ::mock::RendererImpl::Proxy;
   RendererImplProxy_t RendererImplProxy;
   RendererImplProxy_t::GetInstance() = &RendererImplProxy;
 
-  const ::mock::Id_t RendererId = 1808242042;
-  const TextureData_t TextureData = { 0x00, 0x01, 0x02 };
-  const TextureDimensions_t Size = { 1808242048, 1808242049 };
+  auto Creator = [&](const Component_t::ComponentPtr_t & _pComponent) -> Renders_t::Render_t
+  {
+    return [&, _pComponent]()
+    {
+      RenderProxy.Render(ComponentData{ _pComponent }
+        .AddValue(uT("type"), uT(""))
+        .AddValue(uT("id"), uT(""))
+        .AddValue<const uint8_t *>(uT("data"), nullptr)
+        .AddValue(uT("width"), 0)
+        .AddValue(uT("height"), 0)
+        .GetValues());
+    };
+  };
 
-  ITexture_t::Data Data;
-  Data.pData = TextureData.data();
-  Data.Width = Size.x;
-  Data.Height = Size.y;
-
-  Texture Texture;
-  ITexture_t * pTexture = &Texture;
+  const Renders_t::Creators_t Creators =
+  {
+    { uT("Texture"), Creator },
+  };
 
   using namespace ::testing;
 
-  EXPECT_CALL(RendererImplProxy, Constructor(_))
+  EXPECT_CALL(RendererImplProxy, GetCreators(_))
     .Times(1)
-    .WillOnce(Return(RendererId));
+    .WillOnce(ReturnRef(Creators));
 
   Tested_t Example{ uT("RendererImpl"), Data_t{} };
   RenderInterface_t & IExample = Example;
 
-  EXPECT_CALL(RendererImplProxy, CreateTexture(RendererId, Data))
-    .Times(1)
-    .WillOnce(Return(pTexture));
+  // Первый вызов функции
+  {
+    const uint8_t * const pData = (uint8_t *)1811071432;
+    const int Width = 1811071433;
+    const int Height = 1811071434;
 
-  TextureHandle_t Result = NULL;
-  const auto IsSuccess = 
-    IExample.GenerateTexture(Result, TextureData.data(), Size);
-  EXPECT_TRUE(IsSuccess);
-  EXPECT_EQ((ITexture_t *)Result, pTexture);
+    ::mock::Rocket::Core::TextureHandle hTexture = 0;
+    auto Result = IExample.GenerateTexture(hTexture, pData, { Width, Height });
+    EXPECT_TRUE(Result);
+    EXPECT_EQ(1, hTexture);
+
+    auto Renders = IExample.GetRenders()->Obtain(
+      {
+        Component_t::Make(
+          {
+            { uT("type"), uT("Texture") },
+            { uT("id"), uT("Covellite.Api.Texture.1") },
+          }),
+      });
+    ASSERT_EQ(1, Renders.size());
+
+    const Values_t ExpectedTextureData =
+    {
+      uT("Texture"),
+      uT("Covellite.Api.Texture.1"),
+      pData,
+      Width,
+      Height
+    };
+
+    EXPECT_CALL(RenderProxy, Render(ExpectedTextureData))
+      .Times(1);
+
+    Renders[0]();
+  }
+
+  // Второй вызов функции
+  {
+    const uint8_t * const pData = (uint8_t *)1811071454;
+    const int Width = 1811071455;
+    const int Height = 1811071456;
+
+    ::mock::Rocket::Core::TextureHandle hTexture = 0;
+    auto Result = IExample.GenerateTexture(hTexture, pData, { Width, Height });
+    EXPECT_TRUE(Result);
+    EXPECT_EQ(2, hTexture);
+
+    auto Renders = IExample.GetRenders()->Obtain(
+      {
+        Component_t::Make(
+          {
+            { uT("type"), uT("Texture") },
+            { uT("id"), uT("Covellite.Api.Texture.2") },
+          }),
+      });
+    ASSERT_EQ(1, Renders.size());
+
+    const Values_t ExpectedTextureData =
+    {
+      uT("Texture"),
+      uT("Covellite.Api.Texture.2"),
+      pData,
+      Width,
+      Height
+    };
+
+    EXPECT_CALL(RenderProxy, Render(ExpectedTextureData))
+      .Times(1);
+
+    Renders[0]();
+  }
 }
 
 // ************************************************************************** //
-TEST_F(Renderer_test, /*DISABLED_*/Test_GenerateTexture_False)
+TEST_F(Renderer_test, /*DISABLED_*/Test_GenerateTexture_Fail)
 {
-  using TextureHandle_t = ::mock::Rocket::Core::TextureHandle;
-  using TextureData_t = ::std::vector<::mock::Rocket::Core::byte>;
-  using TextureDimensions_t = ::mock::Rocket::Core::Vector2i;
-
   using RendererImplProxy_t = ::mock::RendererImpl::Proxy;
   RendererImplProxy_t RendererImplProxy;
   RendererImplProxy_t::GetInstance() = &RendererImplProxy;
 
-  const ::mock::Id_t RendererId = 1808242107;
-  const TextureData_t TextureData = { 0x00, 0x01, 0x02 };
-  const TextureDimensions_t Size = { 1808242108, 1808242109 };
+  auto Creator = [&](const Component_t::ComponentPtr_t &) -> Renders_t::Render_t
+  {
+    throw ::std::exception{};
+  };
 
-  ITexture_t::Data Data;
-  Data.pData = TextureData.data();
-  Data.Width = Size.x;
-  Data.Height = Size.y;
+  const Renders_t::Creators_t Creators =
+  {
+    { uT("Texture"), Creator },
+  };
 
   using namespace ::testing;
 
-  EXPECT_CALL(RendererImplProxy, Constructor(_))
+  EXPECT_CALL(RendererImplProxy, GetCreators(_))
     .Times(1)
-    .WillOnce(Return(RendererId));
+    .WillOnce(ReturnRef(Creators));
 
   Tested_t Example{ uT("RendererImpl"), Data_t{} };
   RenderInterface_t & IExample = Example;
 
-  EXPECT_CALL(RendererImplProxy, CreateTexture(RendererId, Data))
-    .Times(1)
-    .WillOnce(Throw(::std::exception{}));
-
-  TextureHandle_t Result = NULL;
-  const auto IsSuccess =
-    IExample.GenerateTexture(Result, TextureData.data(), Size);
-  EXPECT_FALSE(IsSuccess);
-  EXPECT_EQ(Result, NULL);
+  ::mock::Rocket::Core::TextureHandle hTexture = 0;
+  auto Result = IExample.GenerateTexture(hTexture, nullptr, { 0, 0 });
+  EXPECT_FALSE(Result);
+  EXPECT_EQ(0, hTexture);
 }
 
 // ************************************************************************** //
 TEST_F(Renderer_test, /*DISABLED_*/Test_ReleaseTexture)
 {
-  using TextureHandle_t = ::mock::Rocket::Core::TextureHandle;
+  RenderProxy RenderProxy;
 
   using RendererImplProxy_t = ::mock::RendererImpl::Proxy;
   RendererImplProxy_t RendererImplProxy;
   RendererImplProxy_t::GetInstance() = &RendererImplProxy;
 
-  const ::mock::Id_t RendererId = 1808242107;
+  auto Creator = [&](const Component_t::ComponentPtr_t & _pComponent) -> Renders_t::Render_t
+  {
+    return [&, _pComponent]()
+    {
+      RenderProxy.Render(ComponentData{ _pComponent }
+        .AddValue(uT("type"), uT(""))
+        .AddValue(uT("id"), uT(""))
+        .AddValue<const uint8_t *>(uT("data"), nullptr)
+        .GetValues());
+    };
+  };
 
-  Texture Texture;
-  ITexture_t * pTexture = &Texture;
-  TextureHandle_t hTexture = reinterpret_cast<TextureHandle_t>(pTexture);
+  const Renders_t::Creators_t Creators =
+  {
+    { uT("Texture"), Creator },
+  };
 
   using namespace ::testing;
 
-  EXPECT_CALL(RendererImplProxy, Constructor(_))
+  EXPECT_CALL(RendererImplProxy, GetCreators(_))
     .Times(1)
-    .WillOnce(Return(RendererId));
+    .WillOnce(ReturnRef(Creators));
 
   Tested_t Example{ uT("RendererImpl"), Data_t{} };
   RenderInterface_t & IExample = Example;
 
-  EXPECT_CALL(RendererImplProxy, DestroyTexture(RendererId, pTexture))
-    .Times(1);
+  auto pRenders = IExample.GetRenders();
 
-  IExample.ReleaseTexture(hTexture);
+  {
+    auto Renders = pRenders->Obtain(
+      {
+          Component_t::Make(
+          {
+            { uT("type"), uT("Texture") },
+            { uT("id"), uT("Covellite.Api.Texture.1811071543") },
+            { uT("data"), (const uint8_t *)1811071544 },
+           })
+      });
+
+    ASSERT_EQ(1, Renders.size());
+
+    const Values_t ExpectedTextureData =
+    {
+      uT("Texture"),
+      uT("Covellite.Api.Texture.1811071543"),
+      (const uint8_t *)1811071544,
+    };
+
+    EXPECT_CALL(RenderProxy, Render(ExpectedTextureData))
+      .Times(1);
+
+    Renders[0]();
+  }
+
+  IExample.ReleaseTexture(1811071543);
+
+  {
+    auto Renders = pRenders->Obtain(
+      {
+          Component_t::Make(
+          {
+            { uT("type"), uT("Texture") },
+            { uT("id"), uT("Covellite.Api.Texture.1811071543") },
+           })
+      });
+
+    ASSERT_EQ(1, Renders.size());
+
+    const Values_t ExpectedTextureData =
+    {
+      uT("Texture"),
+      uT("Covellite.Api.Texture.1811071543"),
+      (const uint8_t *)nullptr,
+    };
+
+    EXPECT_CALL(RenderProxy, Render(ExpectedTextureData))
+      .Times(1);
+
+    Renders[0]();
+  }
 }
 
 // ************************************************************************** //
-TEST_F(Renderer_test, /*DISABLED_*/Test_ClearWindow)
+TEST_F(Renderer_test, /*DISABLED_*/Test_GetRenders)
 {
   using RendererImplProxy_t = ::mock::RendererImpl::Proxy;
   RendererImplProxy_t RendererImplProxy;
   RendererImplProxy_t::GetInstance() = &RendererImplProxy;
 
-  const ::mock::Id_t RendererId = 1808232005;
+  const ::mock::Id_t RendererImplId = 1811051609;
+
+  auto Creator = [](const Component_t::ComponentPtr_t &) -> Renders_t::Render_t
+  {
+    return []() {};
+  };
+
+  const Renders_t::Creators_t Creators =
+  {
+    { uT("Type1811051618"), Creator },
+  };
 
   using namespace ::testing;
+
+  InSequence Dummy;
+
+  EXPECT_CALL(RendererImplProxy, Constructor(_))
+    .Times(1)
+    .WillOnce(Return(RendererImplId));
+
+  EXPECT_CALL(RendererImplProxy, GetCreators(RendererImplId))
+    .Times(1)
+    .WillOnce(ReturnRef(Creators));
+
+  const Tested_t Example{ uT("RendererImpl"), Data_t{} };
+  const RenderInterface_t & IExample = Example;
+
+  const auto pResult = IExample.GetRenders();
+
+  const auto Renders = pResult->Obtain(
+    {
+      Component_t::Make(
+        {
+          { uT("type"), uT("Type1811051618") },
+        }),
+    });
+
+  EXPECT_EQ(1, Renders.size());
+  EXPECT_EQ(pResult, IExample.GetRenders());
+}
+
+// ************************************************************************** //
+TEST_F(Renderer_test, /*DISABLED_*/Test_StartDrawingFrame)
+{
+  using RendererImplProxy_t = ::mock::RendererImpl::Proxy;
+  RendererImplProxy_t RendererImplProxy;
+  RendererImplProxy_t::GetInstance() = &RendererImplProxy;
+
+  const ::mock::Id_t RendererId = 1811061313;
+
+  using namespace ::testing;
+
+  InSequence Dummy;
 
   EXPECT_CALL(RendererImplProxy, Constructor(_))
     .Times(1)
     .WillOnce(Return(RendererId));
 
   Tested_t Example{ uT("RendererImpl"), Data_t{} };
-  ITested_t & IExample = Example;
 
-  EXPECT_CALL(RendererImplProxy, ClearWindow(RendererId))
+  EXPECT_CALL(RendererImplProxy, ClearFrame(RendererId))
     .Times(1);
 
-  IExample.ClearWindow();
+  Example.StartDrawingFrame();
 }
 
 // ************************************************************************** //
-TEST_F(Renderer_test, /*DISABLED_*/Test_Present)
+TEST_F(Renderer_test, /*DISABLED_*/Test_PresentFrame)
 {
+  RenderProxy RenderProxy;
+
   using RendererImplProxy_t = ::mock::RendererImpl::Proxy;
   RendererImplProxy_t RendererImplProxy;
   RendererImplProxy_t::GetInstance() = &RendererImplProxy;
 
-  const ::mock::Id_t RendererId = 1808232011;
+  const ::mock::Id_t RendererId = 1811061313;
+
+  const Values_t ExpectedShaderData =
+  {
+    uT("Shader"),
+    uT("Vertex"),
+    uT("vs_4_0"),
+    uT("VS"),
+    uT("Covellite.Api.Shader.Vertex"),
+    ::Vertex.data(),
+    ::Vertex.size(),
+  };
+
+  auto Creator = [&](const Component_t::ComponentPtr_t & _pComponent) -> Renders_t::Render_t
+  {
+    return [&, _pComponent]()
+    {
+      RenderProxy.Render(ComponentData{ _pComponent }
+        .AddValue(uT("type"), uT(""))
+        .AddValue(uT("id"), uT(""))
+        .AddValue(uT("kind"), uT(""))
+        .GetValues());
+    };
+  };
+
+  auto ShaderCreator = [&](const Component_t::ComponentPtr_t & _pComponent) -> Renders_t::Render_t
+  {
+    return [&, _pComponent]()
+    {
+      RenderProxy.Render(ComponentData{ _pComponent }
+        .AddValue(uT("type"), uT(""))
+        .AddValue(uT("kind"), uT(""))
+        .AddValue(uT("version"), uT(""))
+        .AddValue(uT("entry"), uT(""))
+        .AddValue(uT("id"), uT(""))
+        .AddValue<const uint8_t *>(uT("data"), nullptr)
+        .AddValue(uT("count"), (size_t)0)
+        .GetValues());
+    };
+  };
+
+  const Renders_t::Creators_t Creators =
+  {
+    { uT("Camera"), Creator },
+    { uT("State"), Creator },
+    { uT("Shader"), ShaderCreator },
+  };
 
   using namespace ::testing;
+
+  InSequence Dummy;
 
   EXPECT_CALL(RendererImplProxy, Constructor(_))
     .Times(1)
     .WillOnce(Return(RendererId));
 
-  Tested_t Example{ uT("RendererImpl"), Data_t{} };
-  ITested_t & IExample = Example;
+  EXPECT_CALL(RendererImplProxy, GetCreators(RendererId))
+    .Times(1)
+    .WillOnce(ReturnRef(Creators));
 
-  EXPECT_CALL(RendererImplProxy, Present(RendererId))
+  Tested_t Example{ uT("RendererImpl"), Data_t{} };
+
+  //************** Рендеры по умолчанию, общие для всех объектов *************//
+
+  EXPECT_CALL(RenderProxy, Render(
+    Values_t{ uT("Camera"), uT("Covellite.Api.Camera"), uT("") }))
     .Times(1);
 
-  IExample.Present();
+  EXPECT_CALL(RenderProxy, Render(
+    Values_t{ uT("State"), uT("Covellite.Api.State.Blend"), uT("Blend") }))
+    .Times(1);
+
+  EXPECT_CALL(RenderProxy, Render(
+    Values_t{ uT("State"), uT("Covellite.Api.State.Sampler"), uT("Sampler") }))
+    .Times(1);
+
+  EXPECT_CALL(RenderProxy, Render(Eq(ExpectedShaderData)))
+    .Times(1);
+
+  //^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^//
+
+  EXPECT_CALL(RendererImplProxy, PresentFrame(RendererId))
+    .Times(1);
+
+  Example.PresentFrame();
 }
 
 // ************************************************************************** //
-TEST_F(Renderer_test, /*DISABLED_*/Test_SetWindowSize)
+TEST_F(Renderer_test, /*DISABLED_*/Test_ResizeWindow)
 {
   using RendererImplProxy_t = ::mock::RendererImpl::Proxy;
   RendererImplProxy_t RendererImplProxy;
@@ -645,10 +1729,9 @@ TEST_F(Renderer_test, /*DISABLED_*/Test_SetWindowSize)
     .WillOnce(Return(RendererId));
 
   Tested_t Example{ uT("RendererImpl"), Data_t{} };
-  ITested_t & IExample = Example;
 
   EXPECT_CALL(RendererImplProxy, ResizeWindow(RendererId, X, Y))
     .Times(1);
 
-  IExample.ResizeWindow(X, Y);
+  Example.ResizeWindow(X, Y);
 }

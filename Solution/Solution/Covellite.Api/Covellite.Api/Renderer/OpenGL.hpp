@@ -13,7 +13,7 @@ namespace renderer
 {
 
 /**
-* \ingroup CovelliteApiRenderGroup
+* \ingroup CovelliteApiRendererGroup
 * \brief
 *  Класс входит в проект \ref CovelliteApiPage \n
 *  Реализация рендера графического API для Windows/OpenGL.
@@ -33,8 +33,8 @@ class OpenGL final :
   public OpenGLCommon
 {
 public:
-  // Интерфейс IRender:
-  void Present(void) override;
+  // Интерфейс IGraphicApi:
+  void PresentFrame(void) override;
 
 protected:
   void DoOrtho(int32_t, int32_t) override;
@@ -45,7 +45,7 @@ private:
   HGLRC       m_hRenderContex;
 
 public:
-  explicit OpenGL(const Data &);
+  explicit OpenGL(const Renderer::Data &);
   ~OpenGL(void);
 };
 

@@ -1,5 +1,6 @@
 
 #pragma once
+#include <Covellite/Api/RenderInterface.hpp>
 
 namespace mock
 {
@@ -61,11 +62,14 @@ namespace api
 {
 
 class RenderOpenGL :
-  public ::mock::Rocket::Core::RenderInterface
+  public ::covellite::api::RenderInterface
 {
   using Vertex_t = ::mock::Rocket::Core::Vertex;
   using TextureHandle_t = ::mock::Rocket::Core::TextureHandle;
   using Vector2f_t = ::mock::Rocket::Core::Vector2f;
+
+public:
+  const ::mock::Id_t m_RenderId;
 
 public:
   void RenderGeometry(Vertex_t *, int, int *, int, TextureHandle_t,
@@ -74,9 +78,13 @@ public:
   void SetScissorRegion(int, int, int, int) override { throw ::std::exception(); }
 
 public:
+  RendersPtr_t GetRenders(void) const override { throw ::std::exception(); }
+
+public:
   explicit RenderOpenGL(int _StatusBarHeight) :
-    RenderInterface(InterfacesProxy::GetInstance()->RenderConstructor(_StatusBarHeight))
+    m_RenderId(InterfacesProxy::GetInstance()->RenderConstructor(_StatusBarHeight))
   {
+    const_cast<::mock::Id_t &>(m_Id) = m_RenderId;
   }
 };
 

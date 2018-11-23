@@ -47,8 +47,8 @@ class OpenGLES final :
   using EglPtr_t = ::std::shared_ptr<TEgl>;
 
 public:
-  // Интерфейс IRender:
-  void Present(void) override;
+  // Интерфейс IGraphicApi:
+  void PresentFrame(void) override;
 
 protected:
   void DoOrtho(int32_t, int32_t) override;
@@ -60,7 +60,7 @@ private:
   EglPtr_t<covellite::egl::Context> m_pContext;
 
 public:
-  explicit OpenGLES(const Data &);
+  explicit OpenGLES(const Renderer::Data &);
   ~OpenGLES(void);
 };
 

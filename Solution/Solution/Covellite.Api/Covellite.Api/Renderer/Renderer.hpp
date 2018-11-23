@@ -1,8 +1,12 @@
 ﻿
 #pragma once
-#include <alicorn/std/memory/unique-ptr.hpp>
+#include <vector>
+#include <functional>
 #include <alicorn/std/string.forward.hpp>
-#include "IGraphicApi.hpp"
+#include <alicorn/std/memory/unique-ptr.hpp>
+#include <Covellite/Predefined.hpp>
+#include <Covellite/Os/Predefined.hpp>
+#include <Covellite/Api/RenderInterface.hpp>
 
 namespace covellite
 {
@@ -10,11 +14,15 @@ namespace covellite
 namespace api
 {
 
+class Component;
+
 namespace renderer
 {
 
+class IGraphicApi;
+
 /**
-* \ingroup CovelliteApiRendererererGroup
+* \ingroup CovelliteApiRendererGroup
 * \brief
 *  Класс входит в проект \ref CovelliteApiPage \n
 *  Класс обобщенной логики рендеринга GUI.
@@ -24,22 +32,46 @@ namespace renderer
 *  
 * \version
 *  1.0.0.0        \n
+*  2.0.0.0        \n
 * \date
 *  23 Август 2018    \n
+*  25 Октябрь 2018    \n
 * \author
 *  CTAPOBEP (unicornum.verum@gmail.com)
 * \copyright
 *  © CTAPOBEP 2018
 */
 class Renderer final :
-  public Rocket::Core::RenderInterface,
-  public IRenderer
+  public RenderInterface
 {
   using String_t = ::alicorn::extension::std::String;
-  using ImplPtr_t = ::alicorn::extension::std::unique_ptr<IGraphicApi>;
+  using IGraphicApiPtr_t = ::alicorn::extension::std::unique_ptr<IGraphicApi>;
+  using Render_t = ::std::function<void(void)>;
+  using Renders_t = ::std::vector<Render_t>;
+  using ComponentPtr_t = ::std::shared_ptr<Component>;
+  using Object_t = ::std::vector<ComponentPtr_t>;
 
 public:
-  // Интерфейс RenderererInterface
+  /// Класс для передачи значений настроек программы реализации рендера.
+  class Data final
+  {
+  public:
+    class Color final
+    {
+    public:
+      float R, G, B, A;
+    };
+
+  public:
+    Handle_t  Handle;       ///< Хэнд окна операционной системы.
+    int       Top;          ///< Смещение верхнего края клиентской части окна.
+    Color     BkColor;      ///< Цвет фона окна по умолчанию.
+    bool      IsFullScreen; ///< Признак работы программы в полноэкранном 
+                            ///< режиме.
+  };
+
+public:
+  // Интерфейс Rocket::Core::RenderererInterface
   void RenderGeometry(Rocket::Core::Vertex *, int, int *, int,
     Rocket::Core::TextureHandle, const Rocket::Core::Vector2f &) override;
   Rocket::Core::CompiledGeometryHandle CompileGeometry(Rocket::Core::Vertex *,
@@ -56,17 +88,36 @@ public:
   void ReleaseTexture(Rocket::Core::TextureHandle) override;
 
 public:
-  // Интерфейс IRendererer:
-  void ClearWindow(void) override;
-  void Present(void) override;
-  void ResizeWindow(int32_t, int32_t) override;
+  // Интерфейс covellite::api::RenderInterface
+  RendersPtr_t GetRenders(void) const override;
+
+public:
+  void StartDrawingFrame(void);
+  void PresentFrame(void);
+  void ResizeWindow(int32_t, int32_t);
 
 private:
-  static ImplPtr_t MakeImpl(const String_t &, const Data &);
+  static IGraphicApiPtr_t MakeImpl(const String_t &, const Data &);
   static ::std::vector<String_t> GetRenderers(void);
 
 private:
-  const ImplPtr_t m_pImpl;
+  const IGraphicApiPtr_t m_pImpl;
+  const RendersPtr_t m_pRenders;
+
+private:
+  const Renders_t m_DefaultRenders;
+  ComponentPtr_t m_pScissorEnabled;
+
+  class Object
+  {
+  public:
+    ComponentPtr_t pPosition;
+    Renders_t Renders;
+  };
+
+  ::std::map<size_t, Object> m_Objects;
+
+  Renders_t m_RenderQueue;
 
 public:
   Renderer(const String_t &, const Data &);

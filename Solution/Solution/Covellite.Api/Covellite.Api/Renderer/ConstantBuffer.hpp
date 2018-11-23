@@ -12,7 +12,7 @@ namespace renderer
 {
 
 /**
-* \ingroup CovelliteApiRenderGroup
+* \ingroup CovelliteApiRendererGroup
 * \brief
 *  Класс входит в проект \ref CovelliteApiPage \n
 *  Структура для передачи данных шейдеру, который используется DirectX.
@@ -31,7 +31,6 @@ class ConstantBuffer final
 public:
   ::DirectX::XMMATRIX World;
   ::DirectX::XMMATRIX Projection;
-  ::DirectX::XMFLOAT2 IsTextureDisabled;
 };
 
 } // namespace renderer

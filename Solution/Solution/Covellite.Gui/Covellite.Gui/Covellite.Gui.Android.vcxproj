@@ -72,6 +72,7 @@
     <ClInclude Include="Layers.hpp" />
     <ClInclude Include="Layers.mock.hpp" />
     <ClInclude Include="pch.h" />
+    <ClInclude Include="Renderer.hpp" />
     <ClInclude Include="Rocket.forward.hpp" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="StringTranslator.hpp" />
@@ -90,6 +91,7 @@
     <ClCompile Include="Layer.android.cpp" />
     <ClCompile Include="Layer.cpp" />
     <ClCompile Include="Layers.cpp" />
+    <ClCompile Include="Renderer.cpp" />
     <ClCompile Include="StringTranslator.cpp" />
     <ClCompile Include="System.android.cpp" />
     <ClCompile Include="System.cpp" />

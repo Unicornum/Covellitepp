@@ -22,6 +22,7 @@
 
 #include <Covellite/Os/Events.hpp>
 #include <Covellite/Api/Events.hpp>
+#include <Covellite/Covellite.Api.lib.hpp>
 
 // Общий тестовый класс класса Window
 class Window_test :
@@ -32,7 +33,7 @@ protected:
   using ITested_t = ::covellite::gui::IWindow;
   using WindowOs_t = ::mock::covellite::os::Window;
   using IWindowApi_t = ::covellite::api::IWindow;
-  using WindowApi_t = ::mock::covellite::api::Window<int>;
+  using WindowApi_t = ::mock::covellite::api::Window;
   using RenderInterfacePtr_t = 
     ::std::shared_ptr<::mock::Rocket::Core::RenderInterface>;
   using Vector_t = ::mock::Rocket::Core::Vector2i;
@@ -41,6 +42,8 @@ protected:
   using Events_t = ::covellite::events::Events;
   using Context_t = ::mock::Rocket::Core::Context;
   using Document_t = ::mock::Rocket::Core::ElementDocument;
+  using Renders_t = ::covellite::api::Component::Renders;
+  using RendersPtr_t = ::std::shared_ptr<Renders_t>;
 
   // Вызывается ПЕРЕД запуском каждого теста
   void SetUp(void) override
@@ -53,6 +56,7 @@ protected:
     ::testing::DefaultValue<String>::Set(string_cast<String>(m_PathToFontsDirectory));
     ::testing::DefaultValue<WindowOs_t::Rect>::Set({ 0, 0, 1, 1});
     ::testing::DefaultValue<Context_t *>::Set(&m_Context);
+    ::testing::DefaultValue<RendersPtr_t>::Set(m_pRenders);
   }
 
   // Вызывается ПОСЛЕ запуска каждого теста
@@ -66,6 +70,7 @@ protected:
     ::testing::DefaultValue<String>::Clear();
     ::testing::DefaultValue<WindowOs_t::Rect>::Clear();
     ::testing::DefaultValue<Context_t *>::Clear();
+    ::testing::DefaultValue<RendersPtr_t>::Clear();
   }
 
 protected:
@@ -78,6 +83,8 @@ private:
   RenderInterfacePtr_t m_pRenderInterface =
     ::std::make_shared<::mock::covellite::api::RenderOpenGL>(0);
   Context_t m_Context;
+  RendersPtr_t m_pRenders = 
+    ::std::make_shared<Renders_t>(Renders_t::Creators_t{});
 };
 
 // Образец макроса для подстановки в класс Window 
@@ -116,6 +123,10 @@ TEST_F(Window_test, /*DISABLED_*/Test_Constructor_CreateContext_Fail)
 // ************************************************************************** //
 TEST_F(Window_test, /*DISABLED_*/Test_Constructor)
 {
+  using RendererProxy_t = ::mock::covellite::gui::Renderer::Proxy;
+  RendererProxy_t RendererProxy;
+  RendererProxy_t::GetInstance() = &RendererProxy;
+
   using ClickEventListenerProxy_t = ::covellite::gui::mock::ClickEventListenerProxy;
   ClickEventListenerProxy_t ClickEventListenerProxy;
   ClickEventListenerProxy_t::GetInstance() = &ClickEventListenerProxy;
@@ -124,13 +135,9 @@ TEST_F(Window_test, /*DISABLED_*/Test_Constructor)
   StringTranslatorProxy_t StringTranslatorProxy;
   StringTranslatorProxy_t::GetInstance() = &StringTranslatorProxy;
 
-  using WindowApiProxy_t = ::mock::covellite::api::Window<int>::Proxy;
+  using WindowApiProxy_t = ::mock::covellite::api::Window::Proxy;
   WindowApiProxy_t WindowApiProxy;
   WindowApiProxy_t::GetInstance() = &WindowApiProxy;
-
-  using InterfacesProxy_t = ::mock::covellite::InterfacesProxy;
-  InterfacesProxy_t InterfacesProxy;
-  InterfacesProxy_t::GetInstance() = &InterfacesProxy;
 
   using InitializerProxy_t = ::mock::covellite::gui::Initializer::Proxy;
   InitializerProxy_t InitializerProxy;
@@ -152,6 +159,8 @@ TEST_F(Window_test, /*DISABLED_*/Test_Constructor)
   FontDatabaseProxy_t FontDatabaseProxy;
   FontDatabaseProxy_t::GetInstance() = &FontDatabaseProxy;
 
+  const ::mock::Id_t RendererId = 1811191437;
+  const auto pRenders = ::std::make_shared<Renders_t>(Renders_t::Creators_t{});
   const ::mock::Id_t StringTranslatorId = 1612212313;
   const ::mock::Id_t WindowApiId = 1612202302;
   const ::mock::Id_t IRenderId = 1709291347;
@@ -164,33 +173,18 @@ TEST_F(Window_test, /*DISABLED_*/Test_Constructor)
 
   using namespace ::testing;
 
-  EXPECT_CALL(StringTranslatorProxy, Constructor())
-    .Times(2)
-    .WillRepeatedly(Return(StringTranslatorId));
-
   InSequence Dummy;
 
-  EXPECT_CALL(WindowApiProxy, Constructor(_))
+  EXPECT_CALL(RendererProxy, Constructor(pRenders))
     .Times(1)
-    .WillOnce(Return(WindowApiId));
-
-  const WindowOs_t WindowOs;
-  const WindowApi_t WindowApi{ WindowOs };
-  const IWindowApi_t & IWindowApi = WindowApi;
-
-  EXPECT_CALL(InterfacesProxy, RenderConstructor(_))
-    .Times(1)
-    .WillOnce(Return(IRenderId));
+    .WillOnce(Return(RendererId));
 
   RenderInterfacePtr_t pRenderInterface =
-    ::std::make_shared<::mock::covellite::api::RenderOpenGL>(0);
+    ::std::make_shared<::mock::covellite::gui::Renderer>(pRenders);
 
-  auto pClickEventListener =
-    ::std::make_shared<Tested_t::ClickEventListener>(IWindowApi);
-
-  EXPECT_CALL(ClickEventListenerProxy, Make(_))
+  EXPECT_CALL(StringTranslatorProxy, Constructor())
     .Times(1)
-    .WillOnce(Return(pClickEventListener));
+    .WillRepeatedly(Return(StringTranslatorId));
 
   auto pStringTranslator =
     ::std::make_shared<::mock::covellite::gui::StringTranslator>();
@@ -201,9 +195,32 @@ TEST_F(Window_test, /*DISABLED_*/Test_Constructor)
     pStringTranslator
   };
 
-  EXPECT_CALL(WindowApiProxy, MakeRenderInterface(WindowApiId))
+  EXPECT_CALL(WindowApiProxy, Constructor(_))
     .Times(1)
-    .WillOnce(Return(pRenderInterface));
+    .WillOnce(Return(WindowApiId));
+
+  const WindowOs_t WindowOs;
+  const WindowApi_t WindowApi{ WindowOs };
+  const IWindowApi_t & IWindowApi = WindowApi;
+
+  EXPECT_CALL(WindowApiProxy, GetRenders(WindowApiId))
+    .Times(1)
+    .WillOnce(Return(pRenders));
+
+  EXPECT_CALL(RendererProxy, Constructor(pRenders))
+    .Times(1)
+    .WillOnce(Return(RendererId));
+
+  auto pClickEventListener =
+    ::std::make_shared<Tested_t::ClickEventListener>(IWindowApi);
+
+  EXPECT_CALL(ClickEventListenerProxy, Make(_))
+    .Times(1)
+    .WillOnce(Return(pClickEventListener));
+
+  EXPECT_CALL(StringTranslatorProxy, Constructor())
+    .Times(1)
+    .WillRepeatedly(Return(StringTranslatorId));
 
   EXPECT_CALL(InitializerProxy, Constructor(Data))
     .Times(1);
@@ -636,11 +653,16 @@ TEST_F(Window_test, /*DISABLED_*/Test_Back_NotExistsLayer)
 // ************************************************************************** //
 TEST_F(Window_test, /*DISABLED_*/Test_OnDrawWindow)
 {
+  using RendererProxy_t = ::mock::covellite::gui::Renderer::Proxy;
+  RendererProxy_t RendererProxy;
+  RendererProxy_t::GetInstance() = &RendererProxy;
+
   using RocketCoreProxy_t = ::mock::Rocket::Core::Proxy;
   RocketCoreProxy_t RocketCoreProxy;
   RocketCoreProxy_t::GetInstance() = &RocketCoreProxy;
 
   ::mock::Rocket::Core::Context Context;
+  const ::mock::Id_t RendererId = 1811191434;
 
   const WindowOs_t WindowOs;
   const WindowApi_t WindowApi{ WindowOs };
@@ -649,6 +671,10 @@ TEST_F(Window_test, /*DISABLED_*/Test_OnDrawWindow)
   using namespace ::testing;
 
   InSequence Dummy;
+
+  EXPECT_CALL(RendererProxy, Constructor(_))
+    .Times(1)
+    .WillOnce(Return(RendererId));
 
   EXPECT_CALL(RocketCoreProxy, CreateContext(_, _, _))
     .Times(1)
@@ -662,6 +688,9 @@ TEST_F(Window_test, /*DISABLED_*/Test_OnDrawWindow)
   EXPECT_CALL(Context, Render())
     .Times(1);
 
+  EXPECT_CALL(RendererProxy, RenderScene(RendererId))
+    .Times(1);
+
   using namespace ::covellite::events;
 
   Events Events = IWindowApi;
@@ -671,7 +700,7 @@ TEST_F(Window_test, /*DISABLED_*/Test_OnDrawWindow)
 // ************************************************************************** //
 TEST_F(Window_test, /*DISABLED_*/Test_OnResize)
 {
-  using WindowApiProxy_t = ::mock::covellite::api::Window<int>::Proxy;
+  using WindowApiProxy_t = WindowApi_t::Proxy;
   WindowApiProxy_t WindowApiProxy;
   WindowApiProxy_t::GetInstance() = &WindowApiProxy;
 
@@ -714,7 +743,7 @@ TEST_F(Window_test, /*DISABLED_*/Test_OnResize)
 // ************************************************************************** //
 TEST_F(Window_test, /*DISABLED_*/Test_OnMotion)
 {
-  using WindowApiProxy_t = ::mock::covellite::api::Window<int>::Proxy;
+  using WindowApiProxy_t = WindowApi_t::Proxy;
   WindowApiProxy_t WindowApiProxy;
   WindowApiProxy_t::GetInstance() = &WindowApiProxy;
 

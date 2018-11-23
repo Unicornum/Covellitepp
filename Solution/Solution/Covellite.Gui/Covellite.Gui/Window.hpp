@@ -22,6 +22,7 @@ namespace gui
 
 class Initializer;
 class StringTranslator;
+class Renderer;
 
 /**
 * \ingroup CovelliteGuiGroup
@@ -67,6 +68,7 @@ class Window final :
   using Context_t = Rocket::Core::Context;
   using ContextPtr_t = ::std::unique_ptr<Context_t, void(*)(Context_t *)>;
   using Vector_t = Rocket::Core::Vector2i;
+  using RendererPtr_t = ::std::shared_ptr<covellite::gui::Renderer>;
 
 public:
   class ClickEventListener;
@@ -103,6 +105,7 @@ private:
 private:
   const WindowApi_t     & m_WindowApi;
   Events_t                m_Events;
+  RendererPtr_t           m_pRenderer;
   ClickEventListenerPtr_t m_pClickEventListener;
   EventHandlerPtr_t       m_pEvents;
   StringTranslatorPtr_t   m_pStringTranslator;

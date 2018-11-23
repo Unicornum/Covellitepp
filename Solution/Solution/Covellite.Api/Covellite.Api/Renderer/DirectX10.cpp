@@ -4,6 +4,7 @@
 #include <alicorn/std/vector.hpp>
 #include <alicorn/boost/lexical-cast.hpp>
 #include "DxCheck.hpp"
+#include "Component.hpp"
 #include "fx/VertexInput.auto.hpp"
 #include "fx/PixelInput.auto.hpp"
 
@@ -14,12 +15,14 @@
 
 using namespace covellite::api::renderer;
 
-DirectX10::DirectX10(const Data & _Data)
+DirectX10::DirectX10(const Renderer::Data & _Data)
 {
   m_BkColor[0] = _Data.BkColor.R;
   m_BkColor[1] = _Data.BkColor.G;
   m_BkColor[2] = _Data.BkColor.B;
   m_BkColor[3] = _Data.BkColor.A;
+
+  memset(&m_Constants, sizeof(m_Constants), 0);
 
   using ::alicorn::extension::cpp::IS_RELEASE_CONFIGURATION;
 
@@ -49,53 +52,43 @@ DirectX10::DirectX10(const Data & _Data)
 
   m_Creators =
   {
-    { uT("Camera"),
-      [&](const Component & _Data) -> Render_t { return CreateCamera(_Data); } },
-    { uT("BlendState"),
-      [&](const Component & _Data) -> Render_t { return CreateBlendState(_Data); } },
-    { uT("SamplerState"),
-      [&](const Component & _Data) -> Render_t { return CreateSamplerState(_Data); } },
-    { uT("Shader"),
-      [&](const Component & _Data) -> Render_t { return CreateShader(_Data); } },
-    { uT("Scissor"),
-      [&](const Component & _Data) -> Render_t { return CreateScissor(_Data); } },
-    { uT("Texture"),
-      [&](const Component & _Data) -> Render_t { return CreateTexture(_Data); } },
-    { uT("VertexBuffer"),
-      [&](const Component & _Data) -> Render_t { return CreateVertexBuffer(_Data); } },
-    { uT("IndexBuffer"),
-      [&](const Component & _Data) -> Render_t { return CreateIndexBuffer(_Data); } },
-    { uT("DrawCall"),
-      [&](const Component & _Data) -> Render_t { return CreateDrawCall(_Data); } },
-    { uT("Position"),
-      [&](const Component & _Data) -> Render_t { return CreatePosition(_Data); } },
+    { uT("Camera"), [&](const ComponentPtr_t & _pData) -> Render_t 
+      { return CreateCamera(_pData); } },
+    { uT("State"), [&](const ComponentPtr_t & _pData) -> Render_t 
+      { return CreateState(_pData); } },
+    { uT("Shader"), [&](const ComponentPtr_t & _pData) -> Render_t 
+      { return CreateShader(_pData); } },
+    { uT("Texture"), [&](const ComponentPtr_t & _pData) -> Render_t 
+      { return CreateTexture(_pData); } },
+    { uT("Buffer"), [&](const ComponentPtr_t & _pData) -> Render_t 
+      { return CreateBuffer(_pData); } },
+    { uT("DrawCall"), [&](const ComponentPtr_t & _pData) -> Render_t 
+      { return CreateDrawCall(_pData); } },
+    { uT("Position"), [&](const ComponentPtr_t & _pData) -> Render_t 
+      { return CreatePosition(_pData); } },
   };
 }
 
 DirectX10::~DirectX10(void) = default;
 
-void DirectX10::ClearWindow(void) /*override*/
+DirectX10::String_t DirectX10::GetUsingApi(void) const /*override*/
 {
-  m_pDevice->ClearRenderTargetView(m_pRenderTargetView.Get(), m_BkColor);
-
-  BeginScene();
+  return uT("DirectX 10");
 }
 
-void DirectX10::Present(void) /*override*/
+void DirectX10::ClearFrame(void) /*override*/
 {
-  EndScene();
+  m_pDevice->ClearRenderTargetView(m_pRenderTargetView.Get(), m_BkColor);
+}
 
+void DirectX10::PresentFrame(void) /*override*/
+{
   m_pSwapChain->Present(0, 0);
 }
 
 void DirectX10::ResizeWindow(int32_t _Width, int32_t _Height) /*override*/
 {
   SetViewport(_Width, _Height);
-}
-
-DirectX10::String_t DirectX10::GetUsingApi(void) const /*override*/
-{
-  return uT("DirectX 10");
 }
 
 auto DirectX10::GetCreators(void) const -> const Creators_t & /*override*/
@@ -135,29 +128,7 @@ void DirectX10::SetViewport(int _Width, int _Height)
   m_pDevice->RSSetViewports(1, &vp);
 }
 
-::Microsoft::WRL::ComPtr<ID3DBlob> Compile(const ::std::vector<uint8_t> & _Data,
-  LPCSTR _pEntryPoint, LPCSTR _pTarget)
-{
-  using ::alicorn::extension::cpp::IS_RELEASE_CONFIGURATION;
-
-  const DWORD ShaderFlags = (IS_RELEASE_CONFIGURATION) ? 0 :
-    D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION;
-
-  ::Microsoft::WRL::ComPtr<ID3DBlob> pCompiledEffect;
-  ::Microsoft::WRL::ComPtr<ID3DBlob> pError;
-  auto Result = D3DCompile(_Data.data(), _Data.size(), "[Covellite::Api]",
-    NULL, NULL, _pEntryPoint, _pTarget, ShaderFlags, 0,
-    &pCompiledEffect, &pError);
-  if (FAILED(Result))
-  {
-    throw STD_EXCEPTION << "Failed: " << Result <<
-      " [" << (char *)pError->GetBufferPointer() << "].";
-  }
-
-  return pCompiledEffect;
-}
-
-auto DirectX10::CreateCamera(const Component &) -> Render_t
+auto DirectX10::CreateCamera(const ComponentPtr_t &) -> Render_t
 {
   return [&]()
   {
@@ -171,81 +142,106 @@ auto DirectX10::CreateCamera(const Component &) -> Render_t
   };
 }
 
-auto DirectX10::CreateBlendState(const Component &) const -> Render_t
+auto DirectX10::CreateState(const ComponentPtr_t & _pComponent) const -> Render_t
 {
-  D3D10_BLEND_DESC bd = { 0 };
-  bd.AlphaToCoverageEnable = FALSE;
-  bd.BlendEnable[0] = TRUE;
-  bd.SrcBlend = D3D10_BLEND_SRC_ALPHA;
-  bd.DestBlend = D3D10_BLEND_INV_SRC_ALPHA;
-  bd.BlendOp = D3D10_BLEND_OP_ADD;
-  bd.SrcBlendAlpha = D3D10_BLEND_ONE;
-  bd.DestBlendAlpha = D3D10_BLEND_ZERO;
-  bd.BlendOpAlpha = D3D10_BLEND_OP_ADD;
-  bd.RenderTargetWriteMask[0] = D3D10_COLOR_WRITE_ENABLE_ALL;
-
-  ComPtr_t<ID3D10BlendState> pBlendState;
-  DX_CHECK m_pDevice->CreateBlendState(&bd, &pBlendState);
-
-  return [=]()
+  auto CreateBlendState = [&](const ComponentPtr_t & /*_pComponent*/) -> Render_t
   {
-    const FLOAT BlendFactor[] = { 0.0f, 0.0f, 0.0f, 0.0f };
-    m_pDevice->OMSetBlendState(pBlendState.Get(),
-      BlendFactor, 0xFFFFFFFF);
+    D3D10_BLEND_DESC bd = { 0 };
+    bd.AlphaToCoverageEnable = FALSE;
+    bd.BlendEnable[0] = TRUE;
+    bd.SrcBlend = D3D10_BLEND_SRC_ALPHA;
+    bd.DestBlend = D3D10_BLEND_INV_SRC_ALPHA;
+    bd.BlendOp = D3D10_BLEND_OP_ADD;
+    bd.SrcBlendAlpha = D3D10_BLEND_ONE;
+    bd.DestBlendAlpha = D3D10_BLEND_ZERO;
+    bd.BlendOpAlpha = D3D10_BLEND_OP_ADD;
+    bd.RenderTargetWriteMask[0] = D3D10_COLOR_WRITE_ENABLE_ALL;
+
+    ComPtr_t<ID3D10BlendState> pBlendState;
+    DX_CHECK m_pDevice->CreateBlendState(&bd, &pBlendState);
+
+    return [=]()
+    {
+      const FLOAT BlendFactor[] = { 0.0f, 0.0f, 0.0f, 0.0f };
+      m_pDevice->OMSetBlendState(pBlendState.Get(),
+        BlendFactor, 0xFFFFFFFF);
+    };
   };
+
+  auto CreateSamplerState = [&](const ComponentPtr_t & /*_pComponent*/) -> Render_t
+  {
+    D3D10_SAMPLER_DESC sampDesc = { 0 };
+    sampDesc.Filter = D3D10_FILTER_MIN_MAG_MIP_LINEAR;
+    sampDesc.AddressU = D3D10_TEXTURE_ADDRESS_WRAP;
+    sampDesc.AddressV = D3D10_TEXTURE_ADDRESS_WRAP;
+    sampDesc.AddressW = D3D10_TEXTURE_ADDRESS_WRAP;
+    sampDesc.ComparisonFunc = D3D10_COMPARISON_NEVER;
+    sampDesc.MinLOD = 0;
+    sampDesc.MaxLOD = D3D10_FLOAT32_MAX;
+
+    ComPtr_t<ID3D10SamplerState> pSamplerState;
+    DX_CHECK m_pDevice->CreateSamplerState(&sampDesc, &pSamplerState);
+
+    return [=]()
+    {
+      m_pDevice->PSSetSamplers(0, 1, pSamplerState.GetAddressOf());
+    };
+  };
+
+  auto CreateScissorState = [&](const ComponentPtr_t & /*_pComponent*/) -> Render_t
+  {
+    const Component::Scissor Data{ _pComponent };
+
+    D3D10_RASTERIZER_DESC rasterDesc = { 0 };
+    rasterDesc.FillMode = D3D10_FILL_SOLID;
+    rasterDesc.CullMode = D3D10_CULL_NONE;
+    rasterDesc.FrontCounterClockwise = TRUE;
+    rasterDesc.ScissorEnable = (Data.IsEnabled) ? TRUE : FALSE;
+
+    ComPtr_t<ID3D10RasterizerState> pScissor;
+    DX_CHECK m_pDevice->CreateRasterizerState(&rasterDesc, &pScissor);
+
+    Render_t ScissorEnabled = [=]()
+    {
+      const Component::Scissor Data{ _pComponent };
+
+      D3D10_RECT rect;
+      rect.left = Data.Left;
+      rect.right = Data.Right;
+      rect.top = Data.Top;
+      rect.bottom = Data.Bottom;
+
+      m_pDevice->RSSetScissorRects(1, &rect);
+      m_pDevice->RSSetState(pScissor.Get());
+    };
+
+    Render_t ScissorDisabled = [=]()
+    {
+      m_pDevice->RSSetState(pScissor.Get());
+    };
+
+    return (Data.IsEnabled) ? ScissorEnabled : ScissorDisabled;
+  };
+
+  Creators_t Creators =
+  {
+    { uT("Blend"), CreateBlendState },
+    { uT("Sampler"), CreateSamplerState },
+    { uT("Scissor"), CreateScissorState },
+  };
+
+  return Creators[_pComponent->GetValue(uT("kind"), uT("Unknown"))](_pComponent);
 }
 
-auto DirectX10::CreateSamplerState(const Component &) const -> Render_t
+auto DirectX10::CreatePosition(const ComponentPtr_t & _pComponent) -> Render_t
 {
-  D3D10_SAMPLER_DESC sampDesc = { 0 };
-  sampDesc.Filter = D3D10_FILTER_MIN_MAG_MIP_LINEAR;
-  sampDesc.AddressU = D3D10_TEXTURE_ADDRESS_WRAP;
-  sampDesc.AddressV = D3D10_TEXTURE_ADDRESS_WRAP;
-  sampDesc.AddressW = D3D10_TEXTURE_ADDRESS_WRAP;
-  sampDesc.ComparisonFunc = D3D10_COMPARISON_NEVER;
-  sampDesc.MinLOD = 0;
-  sampDesc.MaxLOD = D3D10_FLOAT32_MAX;
-
-  ComPtr_t<ID3D10SamplerState> pSamplerState;
-  DX_CHECK m_pDevice->CreateSamplerState(&sampDesc, &pSamplerState);
-
-  return [=]()
+  return [&, _pComponent]()
   {
-    m_pDevice->PSSetSamplers(0, 1, pSamplerState.GetAddressOf());
+    const Component::Position Data{ _pComponent };
+
+    m_Constants.World = ::DirectX::XMMatrixTranspose(
+      ::DirectX::XMMatrixTranslation(Data.X, Data.Y, Data.Z));
   };
-}
-
-auto DirectX10::CreateScissor(const Component & _Component) const -> Render_t
-{
-  const Scissor Data{ _Component };
-
-  D3D10_RASTERIZER_DESC rasterDesc = { 0 };
-  rasterDesc.FillMode = D3D10_FILL_SOLID;
-  rasterDesc.CullMode = D3D10_CULL_NONE;
-  rasterDesc.FrontCounterClockwise = TRUE;
-  rasterDesc.ScissorEnable = (Data.IsEnabled) ? TRUE : FALSE;
-
-  ComPtr_t<ID3D10RasterizerState> pScissor;
-  DX_CHECK m_pDevice->CreateRasterizerState(&rasterDesc, &pScissor);
-
-  Render_t ScissorEnabled = [&, Data, pScissor]()
-  {
-    D3D10_RECT rect;
-    rect.left = Data.Left.Value;
-    rect.right = Data.Right.Value;
-    rect.top = Data.Top.Value;
-    rect.bottom = Data.Bottom.Value;
-
-    m_pDevice->RSSetScissorRects(1, &rect);
-    m_pDevice->RSSetState(pScissor.Get());
-  };
-
-  Render_t ScissorDisabled = [&, pScissor]()
-  {
-    m_pDevice->RSSetState(pScissor.Get());
-  };
-
-  return (Data.IsEnabled) ? ScissorEnabled : ScissorDisabled;
 }
 
 class DirectX10::Buffer
@@ -294,44 +290,44 @@ public:
   }
 };
 
-auto DirectX10::CreatePosition(const Component & _Component) -> Render_t
+auto DirectX10::CreateBuffer(const ComponentPtr_t & _pComponent) const->Render_t
 {
-  const Position Data{ _Component };
-
-  return [&, Data]()
+  auto CreateVertexBuffer = [&](const ComponentPtr_t & _pComponent) -> Render_t
   {
-    m_Constants.World = ::DirectX::XMMatrixTranspose(
-      ::DirectX::XMMatrixTranslation(Data.X.Value, Data.Y.Value, Data.Z.Value));
+    const Component::Buffer<Vertex> Data{ _pComponent };
+
+    auto pBuffer = Buffer::Create(m_pDevice, Data.pData, Data.Count);
+
+    return [=]()
+    {
+      const UINT stride = sizeof(IGraphicApi::Vertex);
+      const UINT offset = 0;
+      m_pDevice->IASetVertexBuffers(0, 1, pBuffer.GetAddressOf(), &stride, &offset);
+    };
   };
+
+  auto CreateIndexBuffer = [&](const ComponentPtr_t & _pComponent)->Render_t
+  {
+    const Component::Buffer<int> Data{ _pComponent };
+
+    auto pBuffer = Buffer::Create(m_pDevice, Data.pData, Data.Count);
+
+    return [=]()
+    {
+      m_pDevice->IASetIndexBuffer(pBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);
+    };
+  };
+
+  Creators_t Creators =
+  {
+    { uT("Vertex"), CreateVertexBuffer },
+    { uT("Index"), CreateIndexBuffer },
+  };
+
+  return Creators[_pComponent->GetValue(uT("kind"), uT("Unknown"))](_pComponent);
 }
 
-auto DirectX10::CreateVertexBuffer(const Component & _Component) const -> Render_t
-{
-  const CommonImpl::Buffer<Vertex> Data{ _Component };
-
-  auto pBuffer = Buffer::Create(m_pDevice, Data.pData, Data.Count);
-
-  return [=]()
-  {
-    const UINT stride = sizeof(IGraphicApi::Vertex);
-    const UINT offset = 0;
-    m_pDevice->IASetVertexBuffers(0, 1, pBuffer.GetAddressOf(), &stride, &offset);
-  };
-}
-
-auto DirectX10::CreateIndexBuffer(const Component & _Component) const -> Render_t
-{
-  const CommonImpl::Buffer<int> Data{ _Component };
-
-  auto pBuffer = Buffer::Create(m_pDevice, Data.pData, Data.Count);
-
-  return [=]()
-  {
-    m_pDevice->IASetIndexBuffer(pBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);
-  };
-}
-
-auto DirectX10::CreateDrawCall(const Component & _Component) const -> Render_t
+auto DirectX10::CreateDrawCall(const ComponentPtr_t &) const -> Render_t
 {
   ::ConstantBuffer oConstantBuffer;
 
@@ -355,9 +351,9 @@ auto DirectX10::CreateDrawCall(const Component & _Component) const -> Render_t
   };
 }
 
-auto DirectX10::CreateTexture(const Component & _Component) const -> Render_t
+auto DirectX10::CreateTexture(const ComponentPtr_t & _pComponent) const -> Render_t
 {
-  const Texture Data{ _Component };
+  const Component::Texture Data{ _pComponent };
 
   D3D10_TEXTURE2D_DESC textureDesc = { 0 };
   textureDesc.Width = Data.Width;
@@ -394,13 +390,42 @@ auto DirectX10::CreateTexture(const Component & _Component) const -> Render_t
   };
 }
 
-auto DirectX10::CreateShader(const Component & _Component) const -> Render_t
+auto DirectX10::CreateShader(const ComponentPtr_t & _pComponent) const -> Render_t
 {
+  class Shader
+  {
+  public:
+    static ComPtr_t<ID3DBlob> Compile(const ::std::vector<uint8_t> & _Data,
+      LPCSTR _pEntryPoint, LPCSTR _pTarget)
+    {
+      // 20 Ноябрь 2018 17:46 (unicornum.verum@gmail.com)
+      TODO("Повтор кода из реализации DirectX11");
+
+      using ::alicorn::extension::cpp::IS_RELEASE_CONFIGURATION;
+
+      const DWORD ShaderFlags = (IS_RELEASE_CONFIGURATION) ? 0 :
+        D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION;
+
+      ::Microsoft::WRL::ComPtr<ID3DBlob> pCompiledEffect;
+      ::Microsoft::WRL::ComPtr<ID3DBlob> pError;
+      auto Result = D3DCompile(_Data.data(), _Data.size(), "[Covellite::Api]",
+        NULL, NULL, _pEntryPoint, _pTarget, ShaderFlags, 0,
+        &pCompiledEffect, &pError);
+      if (FAILED(Result))
+      {
+        throw STD_EXCEPTION << "Failed: " << Result <<
+          " [" << (char *)pError->GetBufferPointer() << "].";
+      }
+
+      return pCompiledEffect;
+    }
+  };
+
   using namespace ::alicorn::extension::std;
 
-  const Shader Data{ _Component };
+  const Component::Shader Data{ _pComponent };
 
-  auto pCompiledEffect = Compile(VertexInput + PixelInput +
+  auto pCompiledEffect = Shader::Compile(VertexInput + PixelInput +
     ::std::vector<uint8_t>{ Data.pData, Data.pData + Data.Count },
     Data.Entry.c_str(), Data.Version.c_str());
 

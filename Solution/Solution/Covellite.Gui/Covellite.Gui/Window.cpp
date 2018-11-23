@@ -11,7 +11,9 @@
 #include <Covellite/App/Settings.hpp>
 #include <Covellite/Os/Events.hpp>
 #include <Covellite/Api/IWindow.hpp>
+#include <Covellite/Api/RenderInterface.hpp>
 #include <Covellite/Api/Events.hpp>
+#include <Covellite/Gui/Renderer.hpp>
 #include <Covellite/Gui/Initializer.hpp>
 #include <Covellite/Gui/StringTranslator.hpp>
 #include <Covellite/Gui/ClickEventListener.hpp>
@@ -21,12 +23,13 @@ using namespace covellite::gui;
 Window::Window(const WindowApi_t & _Window) :
   m_WindowApi(_Window),
   m_Events(_Window),
+  m_pRenderer(::std::make_shared<covellite::gui::Renderer>(_Window.GetRenders())),
   m_pClickEventListener(ClickEventListener::Make(_Window)),
   m_pEvents(::std::make_shared<EventHandler_t>(EventHandler_t::Dummy{})),
   m_pStringTranslator(::std::make_unique<covellite::gui::StringTranslator>()),
   m_pInitializer(::std::make_unique<Initializer_t>(Initializer_t::Data
     {
-      m_WindowApi.MakeRenderInterface(),
+      m_pRenderer,
       m_pStringTranslator
     })),
   m_pContext(Rocket::Core::CreateContext("main", GetContextSize()),
@@ -219,6 +222,7 @@ void Window::DoDrawWindow(void)
 {
   m_pContext->Update();
   m_pContext->Render();
+  m_pRenderer->RenderScene();
 }
 
 /**

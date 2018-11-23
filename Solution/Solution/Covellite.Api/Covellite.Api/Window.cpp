@@ -20,9 +20,9 @@ Window::Window(const WindowOs_t & _Window) :
 {
   m_Events[events::Application.Update].Connect([&]()
   {
-    m_pImpl->ClearWindow();
+    m_pImpl->StartDrawingFrame();
     m_Events[events::Drawing.Do]();
-    m_pImpl->Present();
+    m_pImpl->PresentFrame();
   });
 
   m_Events[events::Window.Resize].Connect([&]()
@@ -50,9 +50,30 @@ Window::operator Window::Events_t (void) const /*override*/
   return m_Events;
 }
 
-Window::Rect_t Window::GetClientRect(void) const /*override*/
+auto Window::GetClientRect(void) const /*override*/ -> Rect_t
 {
   return m_WindowOs.GetClientRect();
+}
+
+/**
+* \brief
+*  Функция получения объекта для созданий рендеров  компонентов объектов 3D сцены.
+* \details
+*  - При каждом вызове создается новый объект; допустимо использовать
+*  несколько объектов одновременно, но при этом следует следить, чтобы
+*  удаление рендеров для компонентов производилось в том же объекте, в котором
+*  они создавались.
+*  
+* \exception std::exception
+*  - Действие невозможно (подробнее см. описание исключения).
+*/
+auto Window::GetRenders(void) const /*override*/ -> RendersPtr_t
+{
+  // 19 Ноябрь 2018 12:51 (unicornum.verum@gmail.com)
+  TODO("При выпуске стабильной версии добавить создание нового объекта и тест функции.");
+  //return ::std::make_shared<Component::Renders>(m_pImpl->GetCreators());
+
+  return m_pImpl->GetRenders();
 }
 
 auto Window::GetRenderInterface(void) const -> RenderInterfacePtr_t /*override*/
@@ -80,6 +101,7 @@ void Window::Subscribe(const EventHandlerPtr_t & _pEvents) /*override*/
 #if BOOST_COMP_MSVC
 # pragma warning(push)
 # pragma warning(disable: 4996)
+# pragma warning(disable: 26444)
 #endif
 
   using namespace ::covellite::core;
@@ -90,12 +112,12 @@ void Window::Subscribe(const EventHandlerPtr_t & _pEvents) /*override*/
 
   (*_pEvents)[Event::StartDrawing].connect([&](const Params &) 
   { 
-    m_pImpl->ClearWindow();
+    m_pImpl->StartDrawingFrame();
   });
 
   (*_pEvents)[Event::FinishDrawing].connect([&](const Params &) 
   { 
-    m_pImpl->Present(); 
+    m_pImpl->PresentFrame(); 
   });
 
   (*_pEvents)[Event::Resize].connect([&](const Params &) 
@@ -107,7 +129,7 @@ void Window::Subscribe(const EventHandlerPtr_t & _pEvents) /*override*/
 
 /*static*/ Window::RendererPtr_t Window::MakeRender(const WindowOs_t & _Window)
 {
-  renderer::IRenderer::Data Data;
+  Renderer_t::Data Data;
   Data.Handle = _Window.GetHandle();
   Data.Top = _Window.GetClientRect().Top;
 
@@ -132,6 +154,5 @@ void Window::Subscribe(const EventHandlerPtr_t & _pEvents) /*override*/
 
   const auto NameOfApiClass = WindowSection.Get<String_t>(uT("GraphicsApi"));
 
-  return ::std::make_shared<covellite::api::renderer::Renderer>(
-    NameOfApiClass, Data);
+  return ::std::make_shared<Renderer_t>(NameOfApiClass, Data);
 }

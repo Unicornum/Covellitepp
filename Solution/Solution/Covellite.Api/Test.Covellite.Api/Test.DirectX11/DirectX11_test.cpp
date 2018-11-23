@@ -1,11 +1,12 @@
 
 #include "stdafx.h"
+#include <alicorn/std/vector.hpp>
 
 // Примеры макросов библиотеки Google Test
-#include <alicorn\google\test\example.hpp>
+#include <alicorn/google/test/example.hpp>
 
 // Примеры макросов библиотеки Google Mock
-#include <alicorn\google\mock\example.hpp>
+#include <alicorn/google/mock/example.hpp>
 
 /**
 * \file
@@ -13,9 +14,13 @@
 */
 
 // Расположение класса DirectX11
-#include "..\..\Covellite.Api\Renderer\DirectX11.hpp"
+#include "../../Covellite.Api/Renderer/DirectX11.hpp"
 
-#include "../../Covellite.Api/Renderer/fx/Render.auto.hpp"
+#include <Covellite/Api/Component.inl>
+#include "../../Covellite.Api/Renderer/fx/Vertex.auto.hpp"
+#include "../../Covellite.Api/Renderer/fx/Pixel.auto.hpp"
+#include "../../Covellite.Api/Renderer/fx/VertexInput.auto.hpp"
+#include "../../Covellite.Api/Renderer/fx/PixelInput.auto.hpp"
 
 // Общий тестовый класс класса DirectX11
 class DirectX11_test :
@@ -23,8 +28,9 @@ class DirectX11_test :
 {
 protected:
   using Tested_t = ::covellite::api::renderer::DirectX11;
-  using IRender_t = ::covellite::api::renderer::IRenderer;
-  using IGraphicApi_t = ::covellite::api::renderer::IGraphicApi;
+  using ITested_t = ::covellite::api::renderer::IGraphicApi;
+  using Data_t = ::covellite::api::renderer::Renderer::Data;
+  using Component_t = ::covellite::api::Component;
 
   // Вызывается ПЕРЕД запуском каждого теста
   void SetUp(void) override
@@ -32,12 +38,11 @@ protected:
     ::testing::DefaultValue<HRESULT>::Set(S_OK);
     ::testing::DefaultValue<ID3D11Device *>::Set(&m_DefaultDevice);
     ::testing::DefaultValue<ID3D11DeviceContext *>::Set(&m_DefaultDeviceContext);
-    ::testing::DefaultValue<ID3D11RasterizerState *>::Set(&m_DefaultRasterizerState);
-    ::testing::DefaultValue<ID3DBlob *>::Set(&m_DefaultBlob);
-    ::testing::DefaultValue<ID3D11InputLayout *>::Set(&m_DefaultInputLayout);
-    ::testing::DefaultValue<ID3D11SamplerState *>::Set(&m_DefaultSamplerState);
     ::testing::DefaultValue<IDXGISwapChain *>::Set(&m_DefaultSwapChain);
     ::testing::DefaultValue<DXGI_SWAP_CHAIN_DESC>::Set(m_DefaultDesc);
+    ::testing::DefaultValue<ID3D11Buffer *>::Set(&m_DefaultBuffer);
+    ::testing::DefaultValue<D3D11_BUFFER_DESC>::Set(m_DefaultBufferDesc);
+    ::testing::DefaultValue<ID3DBlob *>::Set(&m_DefaultBlob);
   }
 
   // Вызывается ПОСЛЕ запуска каждого теста
@@ -46,23 +51,21 @@ protected:
     ::testing::DefaultValue<HRESULT>::Clear();
     ::testing::DefaultValue<ID3D11Device *>::Clear();
     ::testing::DefaultValue<ID3D11DeviceContext *>::Clear();
-    ::testing::DefaultValue<ID3D11RasterizerState *>::Clear();
-    ::testing::DefaultValue<ID3DBlob *>::Clear();
-    ::testing::DefaultValue<ID3D11InputLayout *>::Clear();
-    ::testing::DefaultValue<ID3D11SamplerState *>::Clear();
     ::testing::DefaultValue<IDXGISwapChain *>::Clear();
     ::testing::DefaultValue<DXGI_SWAP_CHAIN_DESC>::Clear();
+    ::testing::DefaultValue<ID3D11Buffer *>::Clear();
+    ::testing::DefaultValue<D3D11_BUFFER_DESC>::Clear();
+    ::testing::DefaultValue<ID3DBlob *>::Clear();
   }
 
 private:
   ::mock::DirectX11::Device m_DefaultDevice;
   ::mock::DirectX11::DeviceContext m_DefaultDeviceContext;
-  ::mock::DirectX11::RasterizerState m_DefaultRasterizerState;
-  ::mock::DirectX11::Blob m_DefaultBlob;
-  ::mock::DirectX11::InputLayout m_DefaultInputLayout;
-  ::mock::DirectX11::SamplerState m_DefaultSamplerState;
   ::mock::DXGI::SwapChain m_DefaultSwapChain;
   DXGI_SWAP_CHAIN_DESC m_DefaultDesc = { 0 };
+  ::mock::DirectX11::Buffer m_DefaultBuffer;
+  D3D11_BUFFER_DESC m_DefaultBufferDesc;
+  ::mock::DirectX11::Blob m_DefaultBlob;
 };
 
 // Образец макроса для подстановки в класс DirectX11 
@@ -79,6 +82,17 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Destructor)
 }
 
 // ************************************************************************** //
+TEST_F(DirectX11_test, /*DISABLED_*/Test_RegisterIntoFactory)
+{
+  using namespace ::alicorn::modules::patterns;
+
+  const Data_t Data = { 0 };
+
+  auto pExample = factory::make_unique<ITested_t>(uT("DirectX11"), Data);
+  EXPECT_NO_THROW(dynamic_cast<Tested_t &>(*pExample));
+}
+
+// ************************************************************************** //
 TEST_F(DirectX11_test, /*DISABLED_*/Test_CreateDeviceAndSwapChain_Fail)
 {
   using DirectXProxy_t = ::mock::DirectX11::Proxy;
@@ -91,7 +105,7 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_CreateDeviceAndSwapChain_Fail)
     .Times(1)
     .WillOnce(Return(E_FAIL));
 
-  EXPECT_THROW(Tested_t{ Tested_t::Data{} }, ::std::exception);
+  EXPECT_THROW(Tested_t{ Data_t{} }, ::std::exception);
 }
 
 // ************************************************************************** //
@@ -101,7 +115,7 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_CreateDeviceAndSwapChain_Windowed)
   DirectXProxy_t DirectXProxy;
   DirectXProxy_t::GetInstance() = &DirectXProxy;
 
-  Tested_t::Data Data = { 0 };
+  Data_t Data = { 0 };
   Data.Handle = (HWND)1809051128;
   Data.IsFullScreen = false;
 
@@ -134,7 +148,7 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_CreateDeviceAndSwapChain_FullScreen)
   DirectXProxy_t DirectXProxy;
   DirectXProxy_t::GetInstance() = &DirectXProxy;
 
-  Tested_t::Data Data = { 0 };
+  Data_t Data = { 0 };
   Data.Handle = (HWND)1809051304;
   Data.IsFullScreen = true;
 
@@ -189,7 +203,7 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_CreateDeviceAndSwapChain_Release)
     .Times(1);
 
   {
-    Tested_t Example{ Tested_t::Data{} };
+    Tested_t Example{ Data_t{} };
 
     EXPECT_CALL(Device, Release())
       .Times(1);
@@ -275,7 +289,7 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Constructor_SetViewport)
     .Times(1);
 
   {
-    Tested_t Example{ Tested_t::Data{} };
+    Tested_t Example{ Data_t{} };
 
     EXPECT_CALL(RenderTargetView, Release())
       .Times(1);
@@ -320,7 +334,7 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_SwapChain_GetDesc_Faill)
   EXPECT_CALL(SwapChain, Release())
     .Times(1);
 
-  EXPECT_THROW(Tested_t{ Tested_t::Data{} }, ::std::exception);
+  EXPECT_THROW(Tested_t{ Data_t{} }, ::std::exception);
 }
 
 // ************************************************************************** //
@@ -362,7 +376,7 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_SwapChain_GetBuffer_Fail)
   EXPECT_CALL(SwapChain, Release())
     .Times(1);
 
-  EXPECT_THROW(Tested_t{ Tested_t::Data{} }, ::std::exception);
+  EXPECT_THROW(Tested_t{ Data_t{} }, ::std::exception);
 }
 
 // ************************************************************************** //
@@ -411,44 +425,21 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Device_CreateRenderTargetView_Fail)
   EXPECT_CALL(SwapChain, Release())
     .Times(1);
 
-  EXPECT_THROW(Tested_t{ Tested_t::Data{} }, ::std::exception);
+  EXPECT_THROW(Tested_t{ Data_t{} }, ::std::exception);
 }
 
 // ************************************************************************** //
-TEST_F(DirectX11_test, /*DISABLED_*/Test_CreateConstantBuffer_Fail)
+TEST_F(DirectX11_test, /*DISABLED_*/Test_GetUsingApi)
 {
-  using DirectXProxy_t = ::mock::DirectX11::Proxy;
-  DirectXProxy_t DirectXProxy;
-  DirectXProxy_t::GetInstance() = &DirectXProxy;
+  const Tested_t Example{ Data_t{} };
+  const ITested_t & IExample = Example;
 
-  ::mock::DirectX11::Device Device;
-
-  using namespace ::testing;
-
-  InSequence Dummy;
-
-  EXPECT_CALL(DirectXProxy, CreateDevice())
-    .Times(1)
-    .WillOnce(Return(&Device));
-
-  EXPECT_CALL(Device, GetResult())
-    .Times(AtLeast(1));
-
-  EXPECT_CALL(Device, CreateBuffer(_, _))
-    .Times(1);
-
-  EXPECT_CALL(Device, GetResult())
-    .Times(1)
-    .WillOnce(Return(E_FAIL));
-
-  EXPECT_CALL(Device, Release())
-    .Times(1);
-
-  EXPECT_THROW(Tested_t{ Tested_t::Data{} }, ::std::exception);
+  const auto Result = IExample.GetUsingApi();
+  EXPECT_EQ(uT("DirectX 11"), Result);
 }
 
 // ************************************************************************** //
-TEST_F(DirectX11_test, /*DISABLED_*/Test_ClearWindow)
+TEST_F(DirectX11_test, /*DISABLED_*/Test_ClearFrame)
 {
   using DirectXProxy_t = ::mock::DirectX11::Proxy;
   DirectXProxy_t DirectXProxy;
@@ -458,7 +449,7 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_ClearWindow)
   ::mock::DirectX11::DeviceContext DeviceContext;
   ::mock::DirectX11::RenderTargetView RenderTargetView;
 
-  Tested_t::Data Data = { 0 };
+  Data_t Data = { 0 };
   Data.BkColor.R = 1809061119.0f;
   Data.BkColor.G = 1809061120.0f;
   Data.BkColor.B = 1809061121.0f;
@@ -487,16 +478,16 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_ClearWindow)
     .WillOnce(Return(&RenderTargetView));
 
   Tested_t Example{ Data };
-  IRender_t & IExample = Example;
+  ITested_t & IExample = Example;
 
   EXPECT_CALL(DeviceContext, ClearRenderTargetView(&RenderTargetView, Color))
     .Times(1);
 
-  IExample.ClearWindow();
+  IExample.ClearFrame();
 }
 
 // ************************************************************************** //
-TEST_F(DirectX11_test, /*DISABLED_*/Test_Present)
+TEST_F(DirectX11_test, /*DISABLED_*/Test_PresentFrame)
 {
   using DirectXProxy_t = ::mock::DirectX11::Proxy;
   DirectXProxy_t DirectXProxy;
@@ -510,13 +501,13 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Present)
     .Times(1)
     .WillOnce(Return(&SwapChain));
 
-  Tested_t Example{ Tested_t::Data{} };
-  IRender_t & IExample = Example;
+  Tested_t Example{ Data_t{} };
+  ITested_t & IExample = Example;
 
   EXPECT_CALL(SwapChain, Present(0, 0))
     .Times(1);
 
-  IExample.Present();
+  IExample.PresentFrame();
 }
 
 // ************************************************************************** //
@@ -567,8 +558,8 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_ResizeWindow)
     .WillOnce(Return(&RenderTargetViewBegin));
 
   {
-    Tested_t Example{ Tested_t::Data{} };
-    IRender_t & IExample = Example;
+    Tested_t Example{ Data_t{} };
+    ITested_t & IExample = Example;
 
     {
       InSequence Dummy;
@@ -630,8 +621,8 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_ResizeWindow_SwapChain_ResizeBuffers_Fa
     .Times(1)
     .WillOnce(Return(&RenderTargetView));
 
-  Tested_t Example{ Tested_t::Data{} };
-  IRender_t & IExample = Example;
+  Tested_t Example{ Data_t{} };
+  ITested_t & IExample = Example;
 
   EXPECT_CALL(SwapChain, ResizeBuffers(_, _, _, _, _))
     .Times(1)
@@ -655,8 +646,8 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_ResizeWindow_SwapChain_GetBuffer_Fail)
     .Times(1)
     .WillOnce(Return(&SwapChain));
 
-  Tested_t Example{ Tested_t::Data{} };
-  IRender_t & IExample = Example;
+  Tested_t Example{ Data_t{} };
+  ITested_t & IExample = Example;
 
   EXPECT_CALL(SwapChain, GetResult())
     .Times(1)
@@ -686,8 +677,8 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_ResizeWindow_SwapChain_CreateRenderTarg
     .Times(1)
     .WillOnce(Return(&SwapChain));
 
-  Tested_t Example{ Tested_t::Data{} };
-  IRender_t & IExample = Example;
+  Tested_t Example{ Data_t{} };
+  ITested_t & IExample = Example;
 
   InSequence Dummy;
 
@@ -709,1486 +700,46 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_ResizeWindow_SwapChain_CreateRenderTarg
 }
 
 // ************************************************************************** //
-TEST_F(DirectX11_test, /*DISABLED_*/Test_GetUsingApi)
-{
-  const Tested_t Example{ Tested_t::Data{} };
-  const IGraphicApi_t & IExample = Example;
-
-  const auto Result = IExample.GetUsingApi();
-  EXPECT_EQ(uT("DirectX 11"), Result);
-}
-
-// ************************************************************************** //
-TEST_F(DirectX11_test, /*DISABLED_*/Test_CreateTexture)
+TEST_F(DirectX11_test, /*DISABLED_*/Test_BlendState_Fail)
 {
   using DirectXProxy_t = ::mock::DirectX11::Proxy;
   DirectXProxy_t DirectXProxy;
   DirectXProxy_t::GetInstance() = &DirectXProxy;
 
   ::mock::DirectX11::Device Device;
-  ::mock::DirectX11::DeviceContext DeviceContext;
-  ::mock::DirectX11::Texture2D Texture2D;
-  ::mock::DirectX11::ShaderResourceView ShaderResourceView;
 
-  const ::std::vector<uint8_t> BinaryData =
-  {
-    0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, 0x99,
-  };
-
-  Tested_t::ITexture::Data Data = { 0 };
-  Data.Width = 1809062028;
-  Data.Height = 1809062029;
-  Data.pData = BinaryData.data();
-
-  D3D11_TEXTURE2D_DESC TextureDesc = { 0 };
-  TextureDesc.Width = Data.Width;
-  TextureDesc.Height = Data.Height;
-  TextureDesc.MipLevels = 1;
-  TextureDesc.ArraySize = 1;
-  TextureDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-  TextureDesc.Usage = D3D11_USAGE_DEFAULT;
-  TextureDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
-  TextureDesc.MiscFlags = 0;
-  TextureDesc.SampleDesc.Count = 1;
-  TextureDesc.SampleDesc.Quality = 0;
-
-  D3D11_SUBRESOURCE_DATA Init = { 0 };
-  Init.pSysMem = BinaryData.data();
-  Init.SysMemPitch = Data.Width * 4;
-
-  D3D11_SHADER_RESOURCE_VIEW_DESC SrvDesc = { 0 };
-  SrvDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-  SrvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
-  SrvDesc.Texture2D.MipLevels = 1;
+  const auto Type = uT("State");
+  const auto pComponent = Component_t::Make(
+    { 
+      { uT("kind"), uT("Blend") }, 
+    });
 
   using namespace ::testing;
 
-  InSequence Dummy;
-
-  EXPECT_CALL(DirectXProxy, CreateDeviceContext())
-    .Times(1)
-    .WillOnce(Return(&DeviceContext));
-
-  Tested_t Example{ Tested_t::Data{} };
-  IGraphicApi_t & IExample = Example;
-
-  EXPECT_CALL(DeviceContext, GetDevice())
+  EXPECT_CALL(DirectXProxy, CreateDevice())
     .Times(1)
     .WillOnce(Return(&Device));
 
-  EXPECT_CALL(Device, CreateTexture2D(TextureDesc, Init))
-    .Times(1)
-    .WillOnce(Return(&Texture2D));
+  const Tested_t Example{ Data_t{} };
+  const ITested_t & IExample = Example;
 
-  EXPECT_CALL(Device, CreateShaderResourceView(&Texture2D, SrvDesc))
-    .Times(1)
-    .WillOnce(Return(&ShaderResourceView));
-
-  EXPECT_CALL(Texture2D, Release())
-    .Times(1);
-
-  EXPECT_CALL(Device, Release())
-    .Times(1);
-
-  auto * pResult = IExample.Create(Data);
-
-  EXPECT_CALL(DeviceContext, PSSetShaderResources(0, 1, &ShaderResourceView))
-    .Times(1);
-
-  pResult->Render();
-
-  EXPECT_CALL(ShaderResourceView, Release())
-    .Times(1);
-
-  delete pResult;
-}
-
-// ************************************************************************** //
-TEST_F(DirectX11_test, /*DISABLED_*/Test_CreateTexture_CreateTexture2D_Fail)
-{
-  using DirectXProxy_t = ::mock::DirectX11::Proxy;
-  DirectXProxy_t DirectXProxy;
-  DirectXProxy_t::GetInstance() = &DirectXProxy;
-
-  ::mock::DirectX11::Device Device;
-  ::mock::DirectX11::DeviceContext DeviceContext;
-  ::mock::DirectX11::Texture2D Texture2D;
-
-  using namespace ::testing;
+  auto itCreator = IExample.GetCreators().find(Type);
+  ASSERT_NE(IExample.GetCreators().end(), itCreator);
 
   InSequence Dummy;
 
-  EXPECT_CALL(DirectXProxy, CreateDeviceContext())
-    .Times(1)
-    .WillOnce(Return(&DeviceContext));
-
-  Tested_t Example{ Tested_t::Data{} };
-  IGraphicApi_t & IExample = Example;
-
-  EXPECT_CALL(DeviceContext, GetDevice())
-    .Times(1)
-    .WillOnce(Return(&Device));
-
-  EXPECT_CALL(Device, CreateTexture2D(_, _))
-    .Times(1)
-    .WillOnce(Return(&Texture2D));
-
-  EXPECT_CALL(Device, GetResult())
-    .Times(AtLeast(1))
-    .WillOnce(Return(E_FAIL));
-
-  EXPECT_CALL(Device, Release())
-    .Times(1);
-
-  EXPECT_THROW(IExample.Create(Tested_t::ITexture::Data{}), ::std::exception);
-}
-
-// ************************************************************************** //
-TEST_F(DirectX11_test, /*DISABLED_*/Test_CreateTexture_CreateShaderResourceView_Fail)
-{
-  using DirectXProxy_t = ::mock::DirectX11::Proxy;
-  DirectXProxy_t DirectXProxy;
-  DirectXProxy_t::GetInstance() = &DirectXProxy;
-
-  ::mock::DirectX11::Device Device;
-  ::mock::DirectX11::DeviceContext DeviceContext;
-  ::mock::DirectX11::Texture2D Texture2D;
-
-  using namespace ::testing;
-
-  InSequence Dummy;
-
-  EXPECT_CALL(DirectXProxy, CreateDeviceContext())
-    .Times(1)
-    .WillOnce(Return(&DeviceContext));
-
-  Tested_t Example{ Tested_t::Data{} };
-  IGraphicApi_t & IExample = Example;
-
-  EXPECT_CALL(DeviceContext, GetDevice())
-    .Times(1)
-    .WillOnce(Return(&Device));
-
-  EXPECT_CALL(Device, CreateTexture2D(_, _))
-    .Times(1)
-    .WillOnce(Return(&Texture2D));
-
-  EXPECT_CALL(Device, GetResult())
-    .Times(1);
-
-  EXPECT_CALL(Device, CreateShaderResourceView(_, _))
-    .Times(1)
-    .WillOnce(Return(nullptr));
-
-  EXPECT_CALL(Device, GetResult())
-    .Times(1)
-    .WillOnce(Return(E_FAIL));
-
-  EXPECT_CALL(Texture2D, Release())
-    .Times(1);
-
-  EXPECT_CALL(Device, Release())
-    .Times(1);
-
-  EXPECT_THROW(IExample.Create(Tested_t::ITexture::Data{}), ::std::exception);
-}
-
-// ************************************************************************** //
-TEST_F(DirectX11_test, /*DISABLED_*/Test_DestroyTexture)
-{
-  class Texture :
-    public ::covellite::api::renderer::DirectX11::ITexture
-  {
-  public:
-    class Proxy :
-      public ::alicorn::extension::testing::Proxy<Proxy>
-    {
-    public:
-      MOCK_METHOD0(Destructor, void(void));
-    };
-
-  public:
-    void Render(void) override {}
-
-  public:
-    ~Texture(void)
-    {
-      Proxy::GetInstance()->Destructor();
-    }
-  };
-
-  Texture::Proxy Proxy;
-  Texture::Proxy::GetInstance() = &Proxy;
-
-  Tested_t Example{ Tested_t::Data{} };
-  IGraphicApi_t & IExample = Example;
-
-  Texture * pTexture = new Texture;
-
-  using namespace ::testing;
-
-  EXPECT_CALL(Proxy, Destructor())
-    .Times(1);
-
-  IExample.Destroy(pTexture);
-}
-
-// ************************************************************************** //
-TEST_F(DirectX11_test, /*DISABLED_*/Test_CreateGeometry_CreateVertexBuffer)
-{
-  using DirectXProxy_t = ::mock::DirectX11::Proxy;
-  DirectXProxy_t DirectXProxy;
-  DirectXProxy_t::GetInstance() = &DirectXProxy;
-
-  ::mock::DirectX11::Device Device;
-  ::mock::DirectX11::DeviceContext DeviceContext;
-  ::mock::DirectX11::Buffer Buffer;
-
-  ::std::vector<Tested_t::Vertex> VertexData = 
-  {
-    { 1.0f, 2.0f, 1809081155, 3.0f, 4.0f },
-    { 5.0f, 6.0f, 1809081156, 7.0f, 8.0f },
-  };
-
-  Tested_t::IGeometry::Data Data = { 0 };
-  Data.pVertices = VertexData.data();
-  Data.VerticesCount = (int)VertexData.size();
-
-  D3D11_SUBRESOURCE_DATA InitData = { 0 };
-  InitData.pSysMem = VertexData.data();
-
-  D3D11_BUFFER_DESC Desc = { 0 };
-  Desc.Usage = D3D11_USAGE_DEFAULT;
-  Desc.ByteWidth = sizeof(Tested_t::Vertex) * (int)VertexData.size();
-  Desc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
-
-  using namespace ::testing;
-
-  EXPECT_CALL(DirectXProxy, CreateDeviceContext())
-    .Times(1)
-    .WillOnce(Return(&DeviceContext));
-
-  Tested_t Example{ Tested_t::Data{} };
-  IGraphicApi_t & IExample = Example;
-
-  InSequence Dummy;
-
-  EXPECT_CALL(DeviceContext, GetDevice())
-    .Times(1)
-    .WillOnce(Return(&Device));
-
-  EXPECT_CALL(Device, CreateBuffer(Desc, InitData))
-    .Times(1)
-    .WillOnce(Return(&Buffer));
-
-  EXPECT_CALL(Device, Release())
-    .Times(1);
-
-  EXPECT_CALL(DeviceContext, GetDevice())
-    .Times(1);
-
-  auto * pGeometry = IExample.Create(Data);
-
-  EXPECT_CALL(Buffer, Release())
-    .Times(1);
-
-  delete pGeometry;
-}
-
-// ************************************************************************** //
-TEST_F(DirectX11_test, /*DISABLED_*/Test_CreateGeometry_CreateVertexBuffer_Fail)
-{
-  using DirectXProxy_t = ::mock::DirectX11::Proxy;
-  DirectXProxy_t DirectXProxy;
-  DirectXProxy_t::GetInstance() = &DirectXProxy;
-
-  ::mock::DirectX11::Device Device;
-  ::mock::DirectX11::DeviceContext DeviceContext;
-
-  using namespace ::testing;
-
-  EXPECT_CALL(DirectXProxy, CreateDeviceContext())
-    .Times(1)
-    .WillOnce(Return(&DeviceContext));
-
-  Tested_t Example{ Tested_t::Data{} };
-  IGraphicApi_t & IExample = Example;
-
-  InSequence Dummy;
-
-  EXPECT_CALL(DeviceContext, GetDevice())
-    .Times(1)
-    .WillOnce(Return(&Device));
-
-  EXPECT_CALL(Device, CreateBuffer(_, _))
+  EXPECT_CALL(Device, CreateBlendState(_))
     .Times(1);
 
   EXPECT_CALL(Device, GetResult())
     .Times(1)
     .WillOnce(Return(E_FAIL));
 
-  EXPECT_CALL(Device, Release())
-    .Times(1);
-
-  EXPECT_THROW(IExample.Create(Tested_t::IGeometry::Data{}), ::std::exception);
+  EXPECT_THROW(itCreator->second(pComponent), ::std::exception);
 }
 
 // ************************************************************************** //
-TEST_F(DirectX11_test, /*DISABLED_*/Test_CreateGeometry_CreateIndexBuffer)
-{
-  using DirectXProxy_t = ::mock::DirectX11::Proxy;
-  DirectXProxy_t DirectXProxy;
-  DirectXProxy_t::GetInstance() = &DirectXProxy;
-
-  ::mock::DirectX11::Device Device;
-  ::mock::DirectX11::DeviceContext DeviceContext;
-  ::mock::DirectX11::Buffer Buffer;
-
-  ::std::vector<int> IndexData = { 1, 2, 3, 4, 5, 6 };
-
-  Tested_t::IGeometry::Data Data = { 0 };
-  Data.pIndices = IndexData.data();
-  Data.IndicesCount = (int)IndexData.size();
-
-  D3D11_SUBRESOURCE_DATA InitData = { 0 };
-  InitData.pSysMem = IndexData.data();
-
-  D3D11_BUFFER_DESC Desc = { 0 };
-  Desc.Usage = D3D11_USAGE_DEFAULT;
-  Desc.ByteWidth = sizeof(int) * (int)IndexData.size();
-  Desc.BindFlags = D3D11_BIND_INDEX_BUFFER;
-
-  using namespace ::testing;
-
-  EXPECT_CALL(DirectXProxy, CreateDeviceContext())
-    .Times(1)
-    .WillOnce(Return(&DeviceContext));
-
-  Tested_t Example{ Tested_t::Data{} };
-  IGraphicApi_t & IExample = Example;
-
-  InSequence Dummy;
-
-  EXPECT_CALL(DeviceContext, GetDevice())
-    .Times(1);
-
-  EXPECT_CALL(DeviceContext, GetDevice())
-    .Times(1)
-    .WillOnce(Return(&Device));
-
-  EXPECT_CALL(Device, CreateBuffer(Desc, InitData))
-    .Times(1)
-    .WillOnce(Return(&Buffer));
-
-  EXPECT_CALL(Device, Release())
-    .Times(1);
-
-  auto * pGeometry = IExample.Create(Data);
-
-  EXPECT_CALL(Buffer, Release())
-    .Times(1);
-
-  delete pGeometry;
-}
-
-// ************************************************************************** //
-TEST_F(DirectX11_test, /*DISABLED_*/Test_CreateGeometry_CreateIndexBuffer_Fail)
-{
-  using DirectXProxy_t = ::mock::DirectX11::Proxy;
-  DirectXProxy_t DirectXProxy;
-  DirectXProxy_t::GetInstance() = &DirectXProxy;
-
-  ::mock::DirectX11::Device Device;
-  ::mock::DirectX11::DeviceContext DeviceContext;
-
-  using namespace ::testing;
-
-  EXPECT_CALL(DirectXProxy, CreateDeviceContext())
-    .Times(1)
-    .WillOnce(Return(&DeviceContext));
-
-  Tested_t Example{ Tested_t::Data{} };
-  IGraphicApi_t & IExample = Example;
-
-  InSequence Dummy;
-
-  // Vertex buffer
-
-  EXPECT_CALL(DeviceContext, GetDevice())
-    .Times(1);
-
-  // Index buffer
-
-  EXPECT_CALL(DeviceContext, GetDevice())
-    .Times(1)
-    .WillOnce(Return(&Device));
-
-  EXPECT_CALL(Device, CreateBuffer(_, _))
-    .Times(1);
-
-  EXPECT_CALL(Device, GetResult())
-    .Times(1)
-    .WillOnce(Return(E_FAIL));
-
-  EXPECT_CALL(Device, Release())
-    .Times(1);
-
-  EXPECT_THROW(IExample.Create(Tested_t::IGeometry::Data{}), ::std::exception);
-}
-
-// ************************************************************************** //
-TEST_F(DirectX11_test, /*DISABLED_*/Test_CreateGeometry_Update_WithTexture)
-{
-  class Texture :
-    public Tested_t::ITexture
-  {
-  public:
-    MOCK_METHOD0(Render, void(void));
-  };
-
-  using DirectXProxy_t = ::mock::DirectX11::Proxy;
-  DirectXProxy_t DirectXProxy;
-  DirectXProxy_t::GetInstance() = &DirectXProxy;
-
-  ::mock::DirectX11::DeviceContext DeviceContext;
-  Texture Texture;
-
-  const FLOAT X = 1809081821.0f;
-  const FLOAT Y = 1809081822.0f;
-  const auto Width = 1809081920;
-  const auto Height = 1809081921;
-
-  D3D11_VIEWPORT Viewport = { 0 };
-  Viewport.Width = (FLOAT)Width;
-  Viewport.Height = (FLOAT)Height;
-
-  ::covellite::api::renderer::ConstantBuffer ConstantBuffer =
-  {
-    ::DirectX::XMMatrixTranspose(::DirectX::XMMatrixTranslation(X, Y, 0)),
-    ::DirectX::XMMatrixTranspose(
-      ::DirectX::XMMatrixOrthographicOffCenterLH(0, (float)Width, (float)Height,
-        0, -1, 1)),
-    ::DirectX::XMFLOAT2{ 1.0f, 1.0f },
-  };
-
-  Tested_t::IGeometry::Data Data = { 0 };
-  Data.pTexture = &Texture;
-
-  using namespace ::testing;
-
-  EXPECT_CALL(DirectXProxy, CreateDeviceContext())
-    .Times(1)
-    .WillOnce(Return(&DeviceContext));
-
-  Tested_t Example{ Tested_t::Data{} };
-  IGraphicApi_t & IExample = Example;
-
-  auto * pGeometry = IExample.Create(Data);
-
-  InSequence Dummy;
-
-  EXPECT_CALL(DeviceContext, RSGetViewports(1))
-    .Times(1)
-    .WillOnce(Return(Viewport));
-
-  pGeometry->Update(X, Y);
-
-  EXPECT_CALL(DeviceContext, UpdateSubresource(_, _, _, ConstantBuffer, 0, 0))
-    .Times(1);
-
-  pGeometry->Render();
-
-  delete pGeometry;
-}
-
-// ************************************************************************** //
-TEST_F(DirectX11_test, /*DISABLED_*/Test_CreateGeometry_Update_WithoutTexture)
-{
-  using DirectXProxy_t = ::mock::DirectX11::Proxy;
-  DirectXProxy_t DirectXProxy;
-  DirectXProxy_t::GetInstance() = &DirectXProxy;
-
-  ::mock::DirectX11::DeviceContext DeviceContext;
-
-  const FLOAT X = 1809081922.0f;
-  const FLOAT Y = 1809081923.0f;
-  const auto Width = 1809081924;
-  const auto Height = 1809081925;
-
-  D3D11_VIEWPORT Viewport = { 0 };
-  Viewport.Width = (FLOAT)Width;
-  Viewport.Height = (FLOAT)Height;
-
-  ::covellite::api::renderer::ConstantBuffer ConstantBuffer =
-  {
-    ::DirectX::XMMatrixTranspose(::DirectX::XMMatrixTranslation(X, Y, 0)),
-    ::DirectX::XMMatrixTranspose(
-      ::DirectX::XMMatrixOrthographicOffCenterLH(0, (float)Width, (float)Height,
-        0, -1, 1)),
-    ::DirectX::XMFLOAT2{ 0.0f, 0.0f },
-  };
-
-  Tested_t::IGeometry::Data Data = { 0 };
-
-  using namespace ::testing;
-
-  EXPECT_CALL(DirectXProxy, CreateDeviceContext())
-    .Times(1)
-    .WillOnce(Return(&DeviceContext));
-
-  Tested_t Example{ Tested_t::Data{} };
-  IGraphicApi_t & IExample = Example;
-
-  auto * pGeometry = IExample.Create(Data);
-
-  InSequence Dummy;
-
-  EXPECT_CALL(DeviceContext, RSGetViewports(1))
-    .Times(1)
-    .WillOnce(Return(Viewport));
-
-  pGeometry->Update(X, Y);
-
-  EXPECT_CALL(DeviceContext, UpdateSubresource(_, _, _, ConstantBuffer, 0, 0))
-    .Times(1);
-
-  pGeometry->Render();
-
-  delete pGeometry;
-}
-
-// ************************************************************************** //
-TEST_F(DirectX11_test, /*DISABLED_*/Test_CreateGeometry_Render_WithTexture)
-{
-  class Texture :
-    public Tested_t::ITexture
-  {
-  public:
-    MOCK_METHOD0(Render, void(void));
-  };
-
-  using DirectXProxy_t = ::mock::DirectX11::Proxy;
-  DirectXProxy_t DirectXProxy;
-  DirectXProxy_t::GetInstance() = &DirectXProxy;
-
-  ::mock::DirectX11::Device Device;
-  ::mock::DirectX11::DeviceContext DeviceContext;
-  ::mock::DirectX11::Buffer ConstantBuffer;
-  ::mock::DirectX11::Buffer VertexBuffer;
-  ::mock::DirectX11::Buffer IndexBuffer;
-  const auto IndexCount = 9081950 * 3;
-  Texture Texture;
-
-  Tested_t::IGeometry::Data Data = { 0 };
-  Data.IndicesCount = IndexCount;
-  Data.pTexture = &Texture;
-
-  D3D11_BUFFER_DESC ConstantBufferDesc = { 0 };
-  ConstantBufferDesc.Usage = D3D11_USAGE_DEFAULT;
-  ConstantBufferDesc.ByteWidth = sizeof(::covellite::api::renderer::ConstantBuffer);
-  ConstantBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-
-  D3D11_SUBRESOURCE_DATA InitData = { 0 };
-
-  using namespace ::testing;
-
-  EXPECT_CALL(DirectXProxy, CreateDevice())
-    .Times(1)
-    .WillOnce(Return(&Device));
-
-  EXPECT_CALL(DirectXProxy, CreateDeviceContext())
-    .Times(1)
-    .WillOnce(Return(&DeviceContext));
-
-  EXPECT_CALL(Device, CreateBuffer(ConstantBufferDesc, InitData))
-    .Times(1)
-    .WillOnce(Return(&ConstantBuffer));
-
-  Tested_t Example{ Tested_t::Data{} };
-  IGraphicApi_t & IExample = Example;
-
-  EXPECT_CALL(DeviceContext, GetDevice())
-    .Times(2)
-    .WillRepeatedly(Return(&Device));
-
-  EXPECT_CALL(Device, CreateBuffer(_, _))
-    .Times(2)
-    .WillOnce(Return(&VertexBuffer))
-    .WillOnce(Return(&IndexBuffer));
-
-  auto * pGeometry = IExample.Create(Data);
-
-  InSequence Dummy;
-
-  EXPECT_CALL(DeviceContext, IASetVertexBuffers(0, 1, &VertexBuffer,
-    sizeof(Tested_t::Vertex), 0))
-    .Times(1);
-
-  EXPECT_CALL(DeviceContext, IASetIndexBuffer(&IndexBuffer, 
-    DXGI_FORMAT_R32_UINT, 0))
-    .Times(1);
-
-  EXPECT_CALL(DeviceContext, UpdateSubresource(&ConstantBuffer, 0, nullptr, 
-    _, _, _))
-    .Times(1);
-
-  EXPECT_CALL(DeviceContext, VSSetConstantBuffers(0, 1, &ConstantBuffer))
-    .Times(1);
-
-  EXPECT_CALL(Texture, Render())
-    .Times(1);
-
-  EXPECT_CALL(DeviceContext, IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST))
-    .Times(1);
-
-  EXPECT_CALL(DeviceContext, DrawIndexed(IndexCount, 0, 0))
-    .Times(1);
-
-  pGeometry->Render();
-
-  delete pGeometry;
-}
-
-// ************************************************************************** //
-TEST_F(DirectX11_test, /*DISABLED_*/Test_CreateGeometry_Render_WithoutTexture)
-{
-  using DirectXProxy_t = ::mock::DirectX11::Proxy;
-  DirectXProxy_t DirectXProxy;
-  DirectXProxy_t::GetInstance() = &DirectXProxy;
-
-  ::mock::DirectX11::Device Device;
-  ::mock::DirectX11::DeviceContext DeviceContext;
-  ::mock::DirectX11::Buffer ConstantBuffer;
-  ::mock::DirectX11::Buffer VertexBuffer;
-  ::mock::DirectX11::Buffer IndexBuffer;
-  const auto IndexCount = 9081950 * 3;
-
-  Tested_t::IGeometry::Data Data = { 0 };
-  Data.IndicesCount = IndexCount;
-  Data.pTexture = nullptr;
-
-  D3D11_BUFFER_DESC ConstantBufferDesc = { 0 };
-  ConstantBufferDesc.Usage = D3D11_USAGE_DEFAULT;
-  ConstantBufferDesc.ByteWidth = sizeof(::covellite::api::renderer::ConstantBuffer);
-  ConstantBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-
-  D3D11_SUBRESOURCE_DATA InitData = { 0 };
-
-  using namespace ::testing;
-
-  EXPECT_CALL(DirectXProxy, CreateDevice())
-    .Times(1)
-    .WillOnce(Return(&Device));
-
-  EXPECT_CALL(DirectXProxy, CreateDeviceContext())
-    .Times(1)
-    .WillOnce(Return(&DeviceContext));
-
-  EXPECT_CALL(Device, CreateBuffer(ConstantBufferDesc, InitData))
-    .Times(1)
-    .WillOnce(Return(&ConstantBuffer));
-
-  Tested_t Example{ Tested_t::Data{} };
-  IGraphicApi_t & IExample = Example;
-
-  EXPECT_CALL(DeviceContext, GetDevice())
-    .Times(2)
-    .WillRepeatedly(Return(&Device));
-
-  EXPECT_CALL(Device, CreateBuffer(_, _))
-    .Times(2)
-    .WillOnce(Return(&VertexBuffer))
-    .WillOnce(Return(&IndexBuffer));
-
-  auto * pGeometry = IExample.Create(Data);
-
-  InSequence Dummy;
-
-  EXPECT_CALL(DeviceContext, IASetVertexBuffers(0, 1, &VertexBuffer,
-    sizeof(Tested_t::Vertex), 0))
-    .Times(1);
-
-  EXPECT_CALL(DeviceContext, IASetIndexBuffer(&IndexBuffer,
-    DXGI_FORMAT_R32_UINT, 0))
-    .Times(1);
-
-  EXPECT_CALL(DeviceContext, UpdateSubresource(&ConstantBuffer, 0, nullptr,
-    _, _, _))
-    .Times(1);
-
-  EXPECT_CALL(DeviceContext, VSSetConstantBuffers(0, 1, &ConstantBuffer))
-    .Times(1);
-
-  EXPECT_CALL(DeviceContext, IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST))
-    .Times(1);
-
-  EXPECT_CALL(DeviceContext, DrawIndexed(IndexCount, 0, 0))
-    .Times(1);
-
-  pGeometry->Render();
-
-  delete pGeometry;
-}
-
-// ************************************************************************** //
-TEST_F(DirectX11_test, /*DISABLED_*/Test_DestroyGeometry)
-{
-  class Geometry :
-    public ::covellite::api::renderer::DirectX11::IGeometry
-  {
-  public:
-    class Proxy :
-      public ::alicorn::extension::testing::Proxy<Proxy>
-    {
-    public:
-      MOCK_METHOD0(Destructor, void(void));
-    };
-
-  public:
-    void Update(float, float) override {}
-    void Render(void) override {}
-
-  public:
-    ~Geometry(void)
-    {
-      Proxy::GetInstance()->Destructor();
-    }
-  };
-
-  Geometry::Proxy Proxy;
-  Geometry::Proxy::GetInstance() = &Proxy;
-
-  Tested_t Example{ Tested_t::Data{} };
-  IGraphicApi_t & IExample = Example;
-
-  Geometry * pGeometry = new Geometry;
-
-  using namespace ::testing;
-
-  EXPECT_CALL(Proxy, Destructor())
-    .Times(1);
-
-  IExample.Destroy(pGeometry);
-}
-
-// ************************************************************************** //
-TEST_F(DirectX11_test, /*DISABLED_*/Test_EnableScissorRegion)
-{
-  using DirectXProxy_t = ::mock::DirectX11::Proxy;
-  DirectXProxy_t DirectXProxy;
-  DirectXProxy_t::GetInstance() = &DirectXProxy;
-
-  ::mock::DirectX11::Device Device;
-  ::mock::DirectX11::DeviceContext DeviceContext;
-  ::mock::DirectX11::RasterizerState Enable;
-
-  const auto X = 9061257;
-  const auto Y = 9061258;
-  const auto Width = 1809061259;
-  const auto Height = 1809061300;
-
-  D3D11_RASTERIZER_DESC Desc = { 0 };
-  Desc.FillMode = D3D11_FILL_SOLID;
-  Desc.CullMode = D3D11_CULL_NONE;
-  Desc.FrontCounterClockwise = TRUE;
-  Desc.ScissorEnable = TRUE;
-
-  const ::std::vector<D3D11_RECT> Rects =
-  {
-    { X, Y, X + Width, Y + Height },
-  };
-
-  using namespace ::testing;
-
-  InSequence Dummy;
-
-  EXPECT_CALL(DirectXProxy, CreateDevice())
-    .Times(1)
-    .WillOnce(Return(&Device));
-
-  EXPECT_CALL(DirectXProxy, CreateDeviceContext())
-    .Times(1)
-    .WillOnce(Return(&DeviceContext));
-
-  EXPECT_CALL(Device, CreateRasterizerState(Desc))
-    .Times(1)
-    .WillOnce(Return(&Enable));
-
-  EXPECT_CALL(Device, CreateRasterizerState(_))
-    .Times(1);
-
-  {
-    Tested_t Example{ Tested_t::Data{} };
-    IGraphicApi_t & IExample = Example;
-
-    EXPECT_CALL(DeviceContext, RSSetScissorRects(Rects))
-      .Times(1);
-
-    EXPECT_CALL(DeviceContext, RSSetState(&Enable))
-      .Times(1);
-
-    IExample.EnableScissorRegion(X, Y, Width, Height);
-
-    EXPECT_CALL(Enable, Release())
-      .Times(1);
-  }
-}
-
-// ************************************************************************** //
-TEST_F(DirectX11_test, /*DISABLED_*/Test_Device_CreateRasterizerState_Fail)
-{
-  using DirectXProxy_t = ::mock::DirectX11::Proxy;
-  DirectXProxy_t DirectXProxy;
-  DirectXProxy_t::GetInstance() = &DirectXProxy;
-
-  ::mock::DirectX11::Device Device;
-
-  using namespace ::testing;
-
-  {
-    InSequence Dummy;
-
-    EXPECT_CALL(DirectXProxy, CreateDevice())
-      .Times(1)
-      .WillOnce(Return(&Device));
-
-    EXPECT_CALL(Device, GetResult())
-      .Times(AtLeast(1));
-
-    EXPECT_CALL(Device, CreateRasterizerState(_))
-      .Times(1);
-
-    EXPECT_CALL(Device, GetResult())
-      .Times(1)
-      .WillOnce(Return(E_FAIL));
-
-    EXPECT_THROW(Tested_t{ Tested_t::Data{} }, ::std::exception);
-  }
-
-  {
-    InSequence Dummy;
-
-    EXPECT_CALL(DirectXProxy, CreateDevice())
-      .Times(1)
-      .WillOnce(Return(&Device));
-
-    EXPECT_CALL(Device, GetResult())
-      .Times(AtLeast(1));
-
-    EXPECT_CALL(Device, CreateRasterizerState(_))
-      .Times(1);
-
-    EXPECT_CALL(Device, GetResult())
-      .Times(1)
-      .WillOnce(Return(S_OK));
-
-    EXPECT_CALL(Device, CreateRasterizerState(_))
-      .Times(1);
-
-    EXPECT_CALL(Device, GetResult())
-      .Times(1)
-      .WillOnce(Return(E_FAIL));
-
-    EXPECT_THROW(Tested_t{ Tested_t::Data{} }, ::std::exception);
-  }
-}
-
-// ************************************************************************** //
-TEST_F(DirectX11_test, /*DISABLED_*/Test_DisableScissorRegion)
-{
-  using DirectXProxy_t = ::mock::DirectX11::Proxy;
-  DirectXProxy_t DirectXProxy;
-  DirectXProxy_t::GetInstance() = &DirectXProxy;
-
-  ::mock::DirectX11::Device Device;
-  ::mock::DirectX11::DeviceContext DeviceContext;
-  ::mock::DirectX11::RasterizerState Disabled;
-
-  D3D11_RASTERIZER_DESC Desc = { 0 };
-  Desc.FillMode = D3D11_FILL_SOLID;
-  Desc.CullMode = D3D11_CULL_NONE;
-  Desc.FrontCounterClockwise = TRUE;
-  Desc.ScissorEnable = FALSE;
-
-  using namespace ::testing;
-
-  InSequence Dummy;
-
-  EXPECT_CALL(DirectXProxy, CreateDevice())
-    .Times(1)
-    .WillOnce(Return(&Device));
-
-  EXPECT_CALL(DirectXProxy, CreateDeviceContext())
-    .Times(1)
-    .WillOnce(Return(&DeviceContext));
-
-  EXPECT_CALL(Device, CreateRasterizerState(_))
-    .Times(1);
-
-  EXPECT_CALL(Device, CreateRasterizerState(Desc))
-    .Times(1)
-    .WillOnce(Return(&Disabled));
-
-  {
-    Tested_t Example{ Tested_t::Data{} };
-    IGraphicApi_t & IExample = Example;
-
-    EXPECT_CALL(DeviceContext, RSSetState(&Disabled))
-      .Times(1);
-
-    IExample.DisableScissorRegion();
-
-    EXPECT_CALL(Disabled, Release())
-      .Times(1);
-  }
-}
-
-// ************************************************************************** //
-TEST_F(DirectX11_test, /*DISABLED_*/Test_CompileVS_Fail)
-{
-  using DirectXProxy_t = ::mock::DirectX11::Proxy;
-  DirectXProxy_t DirectXProxy;
-  DirectXProxy_t::GetInstance() = &DirectXProxy;
-
-  ::mock::DirectX11::Blob ErrorMessage;
-  char * Error = "Error1809081119";
-
-  using namespace ::testing;
-
-  InSequence Dummy;
-
-  EXPECT_CALL(DirectXProxy, CompileGetErrorMsg())
-    .Times(1)
-    .WillOnce(Return(&ErrorMessage));
-
-  EXPECT_CALL(DirectXProxy, Compile(_))
-    .Times(1)
-    .WillOnce(Return(E_FAIL));
-
-  EXPECT_CALL(ErrorMessage, GetBufferPointer())
-    .Times(1)
-    .WillOnce(Return(Error));
-
-  EXPECT_CALL(ErrorMessage, Release())
-    .Times(1)
-    .WillOnce(Return(0));
-
-  EXPECT_STDEXCEPTION(Tested_t{ Tested_t::Data{} },
-    (".+directx11\\.cpp\\([0-9]+\\): Failed: -2147467259 \\[" + 
-    ::std::string{ Error } + "\\]\\.").c_str());
-}
-
-// ************************************************************************** //
-TEST_F(DirectX11_test, /*DISABLED_*/Test_Render_VertexShader)
-{
-  using DirectXProxy_t = ::mock::DirectX11::Proxy;
-  DirectXProxy_t DirectXProxy;
-  DirectXProxy_t::GetInstance() = &DirectXProxy;
-
-  ::mock::DirectX11::Device Device;
-  ::mock::DirectX11::DeviceContext DeviceContext;
-  ::mock::DirectX11::Blob CompiledEffect;
-  ::mock::DirectX11::VertexShader VertexShader;
-
-  using ::alicorn::extension::cpp::IS_RELEASE_CONFIGURATION;
-
-  ::mock::DirectX11::CompileDesc Desc;
-  Desc.SrcData = ::Render;
-  Desc.SourceName = "";
-  Desc.pDefines = nullptr;
-  Desc.pInclude = nullptr;
-  Desc.Entrypoint = "VS";
-  Desc.Target = "vs_4_0";
-  Desc.Flags1 = (IS_RELEASE_CONFIGURATION) ? 0 :
-    D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION;
-  Desc.Flags2 = 0;
-
-  void * pData = (void *)1809071758;
-  const size_t DataSize = 1809071759;
-
-  using namespace ::testing;
-
-  EXPECT_CALL(DirectXProxy, CreateDevice())
-    .Times(1)
-    .WillOnce(Return(&Device));
-
-  EXPECT_CALL(DirectXProxy, CreateDeviceContext())
-    .Times(1)
-    .WillOnce(Return(&DeviceContext));
-
-  InSequence Dummy;
-
-  EXPECT_CALL(DirectXProxy, CompileGetCode())
-    .Times(1)
-    .WillOnce(Return(&CompiledEffect));
-
-  EXPECT_CALL(DirectXProxy, Compile(Desc))
-    .Times(1);
-
-  EXPECT_CALL(CompiledEffect, GetBufferPointer())
-    .Times(1)
-    .WillOnce(Return(pData));
-
-  EXPECT_CALL(CompiledEffect, GetBufferSize())
-    .Times(1)
-    .WillOnce(Return(DataSize));
-
-  EXPECT_CALL(Device, CreateVertexShader(pData, DataSize, nullptr))
-    .Times(1)
-    .WillOnce(Return(&VertexShader));
-
-  EXPECT_CALL(CompiledEffect, Release())
-    .Times(1);
-
-  EXPECT_CALL(DirectXProxy, CompileGetCode())
-    .Times(1);
-
-  EXPECT_CALL(DirectXProxy, Compile(_))
-    .Times(1);
-
-  {
-    Tested_t Example{ Tested_t::Data{} };
-    IGraphicApi_t & IExample = Example;
-
-    EXPECT_CALL(DeviceContext, IASetInputLayout(_))
-      .Times(1);
-
-    EXPECT_CALL(DeviceContext, VSSetShader(&VertexShader, nullptr, 0))
-      .Times(1);
-
-    IExample.Render();
-
-    EXPECT_CALL(VertexShader, Release())
-      .Times(1);
-  }
-}
-
-// ************************************************************************** //
-TEST_F(DirectX11_test, /*DISABLED_*/Test_CreateVertexShader_Fail)
-{
-  using DirectXProxy_t = ::mock::DirectX11::Proxy;
-  DirectXProxy_t DirectXProxy;
-  DirectXProxy_t::GetInstance() = &DirectXProxy;
-
-  ::mock::DirectX11::Device Device;
-  ::mock::DirectX11::Blob CompiledEffect;
-
-  using namespace ::testing;
-
-  EXPECT_CALL(DirectXProxy, CreateDevice())
-    .Times(1)
-    .WillOnce(Return(&Device));
-
-  InSequence Dummy;
-
-  EXPECT_CALL(Device, GetResult())
-    .Times(AtLeast(1));
-
-  EXPECT_CALL(DirectXProxy, CompileGetCode())
-    .Times(1)
-    .WillOnce(Return(&CompiledEffect));
-
-  EXPECT_CALL(Device, CreateVertexShader(_, _, _))
-    .Times(1);
-
-  EXPECT_CALL(Device, GetResult())
-    .Times(1)
-    .WillOnce(Return(E_FAIL));
-
-  EXPECT_CALL(CompiledEffect, Release())
-    .Times(1);
-
-  EXPECT_THROW(Tested_t{ Tested_t::Data{} }, ::std::exception);
-}
-
-// ************************************************************************** //
-TEST_F(DirectX11_test, /*DISABLED_*/Test_CompilePS_Fail)
-{
-  using DirectXProxy_t = ::mock::DirectX11::Proxy;
-  DirectXProxy_t DirectXProxy;
-  DirectXProxy_t::GetInstance() = &DirectXProxy;
-
-  ::mock::DirectX11::Blob ErrorMessage;
-  char * Error = "Error1809081140";
-
-  using namespace ::testing;
-
-  InSequence Dummy;
-
-  EXPECT_CALL(DirectXProxy, CompileGetErrorMsg())
-    .Times(1);
-
-  EXPECT_CALL(DirectXProxy, Compile(_))
-    .Times(1);
-
-  EXPECT_CALL(DirectXProxy, CompileGetErrorMsg())
-    .Times(1)
-    .WillOnce(Return(&ErrorMessage));
-
-  EXPECT_CALL(DirectXProxy, Compile(_))
-    .Times(1)
-    .WillOnce(Return(E_FAIL));
-
-  EXPECT_CALL(ErrorMessage, GetBufferPointer())
-    .Times(1)
-    .WillOnce(Return(Error));
-
-  EXPECT_CALL(ErrorMessage, Release())
-    .Times(1)
-    .WillOnce(Return(0));
-
-  EXPECT_STDEXCEPTION(Tested_t{ Tested_t::Data{} },
-    (".+directx11\\.cpp\\([0-9]+\\): Failed: -2147467259 \\[" +
-      ::std::string{ Error } +"\\]\\.").c_str());
-}
-
-// ************************************************************************** //
-TEST_F(DirectX11_test, /*DISABLED_*/Test_Render_VertexLayout)
-{
-  using DirectXProxy_t = ::mock::DirectX11::Proxy;
-  DirectXProxy_t DirectXProxy;
-  DirectXProxy_t::GetInstance() = &DirectXProxy;
-
-  ::mock::DirectX11::Device Device;
-  ::mock::DirectX11::DeviceContext DeviceContext;
-  ::mock::DirectX11::Blob CompiledEffect;
-  ::mock::DirectX11::InputLayout InputLayout;
-
-  using ::alicorn::extension::cpp::IS_RELEASE_CONFIGURATION;
-
-  ::mock::DirectX11::CompileDesc Desc;
-  Desc.SrcData = ::Render;
-  Desc.SourceName = "";
-  Desc.pDefines = nullptr;
-  Desc.pInclude = nullptr;
-  Desc.Entrypoint = "VS";
-  Desc.Target = "vs_4_0";
-  Desc.Flags1 = (IS_RELEASE_CONFIGURATION) ? 0 :
-    D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION;
-  Desc.Flags2 = 0;
-
-  const ::std::vector<D3D11_INPUT_ELEMENT_DESC> Layout =
-  {
-    { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-    { "COLOR", 0, DXGI_FORMAT_R32_UINT, 0, 8, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-    { "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-  };
-
-  void * pData = (void *)1809071329;
-  const size_t DataSize = 1809071330;
-
-  using namespace ::testing;
-
-  EXPECT_CALL(DirectXProxy, CreateDevice())
-    .Times(1)
-    .WillOnce(Return(&Device));
-
-  EXPECT_CALL(DirectXProxy, CreateDeviceContext())
-    .Times(1)
-    .WillOnce(Return(&DeviceContext));
-
-  InSequence Dummy;
-
-  EXPECT_CALL(DirectXProxy, CompileGetCode())
-    .Times(1)
-    .WillOnce(Return(&CompiledEffect));
-
-  EXPECT_CALL(DirectXProxy, Compile(Desc))
-    .Times(1);
-
-  EXPECT_CALL(CompiledEffect, GetBufferPointer())
-    .Times(1)
-    .WillOnce(Return(pData));
-
-  EXPECT_CALL(CompiledEffect, GetBufferSize())
-    .Times(1)
-    .WillOnce(Return(DataSize));
-
-  EXPECT_CALL(Device, CreateInputLayout(Layout, pData, DataSize))
-    .Times(1)
-    .WillOnce(Return(&InputLayout));
-
-  EXPECT_CALL(CompiledEffect, Release())
-    .Times(1);
-
-  EXPECT_CALL(DirectXProxy, CompileGetCode())
-    .Times(1);
-
-  EXPECT_CALL(DirectXProxy, Compile(_))
-    .Times(1);
-
-  {
-    Tested_t Example{ Tested_t::Data{} };
-    IGraphicApi_t & IExample = Example;
-
-    EXPECT_CALL(DeviceContext, IASetInputLayout(&InputLayout))
-      .Times(1);
-
-    IExample.Render();
-
-    EXPECT_CALL(InputLayout, Release())
-      .Times(1);
-  }
-}
-
-// ************************************************************************** //
-TEST_F(DirectX11_test, /*DISABLED_*/Test_CreateInputLayout_Fail)
-{
-  using DirectXProxy_t = ::mock::DirectX11::Proxy;
-  DirectXProxy_t DirectXProxy;
-  DirectXProxy_t::GetInstance() = &DirectXProxy;
-
-  ::mock::DirectX11::Device Device;
-  ::mock::DirectX11::Blob CompiledEffect;
-
-  using namespace ::testing;
-
-  EXPECT_CALL(DirectXProxy, CreateDevice())
-    .Times(1)
-    .WillOnce(Return(&Device));
-
-  InSequence Dummy;
-
-  EXPECT_CALL(Device, GetResult())
-    .Times(AtLeast(1));
-
-  EXPECT_CALL(DirectXProxy, CompileGetCode())
-    .Times(1)
-    .WillOnce(Return(&CompiledEffect));
-
-  EXPECT_CALL(Device, GetResult())
-    .Times(AtLeast(1));
-
-  EXPECT_CALL(Device, CreateInputLayout(_, _, _))
-    .Times(1);
-
-  EXPECT_CALL(Device, GetResult())
-    .Times(1)
-    .WillOnce(Return(E_FAIL));
-
-  EXPECT_CALL(CompiledEffect, Release())
-    .Times(1);
-
-  EXPECT_THROW(Tested_t{ Tested_t::Data{} }, ::std::exception);
-}
-
-// ************************************************************************** //
-TEST_F(DirectX11_test, /*DISABLED_*/Test_Render_PixelShader)
-{
-  using DirectXProxy_t = ::mock::DirectX11::Proxy;
-  DirectXProxy_t DirectXProxy;
-  DirectXProxy_t::GetInstance() = &DirectXProxy;
-
-  ::mock::DirectX11::Device Device;
-  ::mock::DirectX11::DeviceContext DeviceContext;
-  ::mock::DirectX11::Blob CompiledEffect;
-  ::mock::DirectX11::PixelShader PixelShader;
-
-  using ::alicorn::extension::cpp::IS_RELEASE_CONFIGURATION;
-
-  ::mock::DirectX11::CompileDesc Desc;
-  Desc.SrcData = ::Render;
-  Desc.SourceName = "";
-  Desc.pDefines = nullptr;
-  Desc.pInclude = nullptr;
-  Desc.Entrypoint = "PS";
-  Desc.Target = "ps_4_0";
-  Desc.Flags1 = (IS_RELEASE_CONFIGURATION) ? 0 :
-    D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION;
-  Desc.Flags2 = 0;
-
-  void * pData = (void *)1809071822;
-  const size_t DataSize = 1809071823;
-
-  using namespace ::testing;
-
-  EXPECT_CALL(DirectXProxy, CreateDevice())
-    .Times(1)
-    .WillOnce(Return(&Device));
-
-  EXPECT_CALL(DirectXProxy, CreateDeviceContext())
-    .Times(1)
-    .WillOnce(Return(&DeviceContext));
-
-  InSequence Dummy;
-
-  EXPECT_CALL(DirectXProxy, CompileGetCode())
-    .Times(1);
-
-  EXPECT_CALL(DirectXProxy, Compile(_))
-    .Times(1);
-
-  EXPECT_CALL(DirectXProxy, CompileGetCode())
-    .Times(1)
-    .WillOnce(Return(&CompiledEffect));
-
-  EXPECT_CALL(DirectXProxy, Compile(Desc))
-    .Times(1);
-
-  EXPECT_CALL(CompiledEffect, GetBufferSize())
-    .Times(1)
-    .WillOnce(Return(DataSize));
-
-  EXPECT_CALL(CompiledEffect, GetBufferPointer())
-    .Times(1)
-    .WillOnce(Return(pData));
-
-  EXPECT_CALL(Device, CreatePixelShader(pData, DataSize, nullptr))
-    .Times(1)
-    .WillOnce(Return(&PixelShader));
-
-  EXPECT_CALL(CompiledEffect, Release())
-    .Times(1);
-
-  {
-    Tested_t Example{ Tested_t::Data{} };
-    IGraphicApi_t & IExample = Example;
-
-    EXPECT_CALL(DeviceContext, VSSetShader(_, _, _))
-      .Times(1);
-
-    EXPECT_CALL(DeviceContext, PSSetShader(&PixelShader, nullptr, 0))
-      .Times(1);
-
-    IExample.Render();
-
-    EXPECT_CALL(PixelShader, Release())
-      .Times(1);
-  }
-}
-
-// ************************************************************************** //
-TEST_F(DirectX11_test, /*DISABLED_*/Test_CreatePixelShader_Fail)
-{
-  using DirectXProxy_t = ::mock::DirectX11::Proxy;
-  DirectXProxy_t DirectXProxy;
-  DirectXProxy_t::GetInstance() = &DirectXProxy;
-
-  ::mock::DirectX11::Device Device;
-  ::mock::DirectX11::Blob CompiledEffect;
-
-  using namespace ::testing;
-
-  EXPECT_CALL(DirectXProxy, CreateDevice())
-    .Times(1)
-    .WillOnce(Return(&Device));
-
-  InSequence Dummy;
-
-  EXPECT_CALL(Device, GetResult())
-    .Times(AtLeast(1));
-
-  EXPECT_CALL(DirectXProxy, CompileGetCode())
-    .Times(1);
-
-  EXPECT_CALL(Device, GetResult())
-    .Times(AtLeast(1));
-
-  EXPECT_CALL(DirectXProxy, CompileGetCode())
-    .Times(1)
-    .WillOnce(Return(&CompiledEffect));
-
-  EXPECT_CALL(Device, CreatePixelShader(_, _, _))
-    .Times(1);
-
-  EXPECT_CALL(Device, GetResult())
-    .Times(1)
-    .WillOnce(Return(E_FAIL));
-
-  EXPECT_CALL(CompiledEffect, Release())
-    .Times(1);
-
-  EXPECT_THROW(Tested_t{ Tested_t::Data{} }, ::std::exception);
-}
-
-// ************************************************************************** //
-TEST_F(DirectX11_test, /*DISABLED_*/Test_Render_SamplerState)
-{
-  using DirectXProxy_t = ::mock::DirectX11::Proxy;
-  DirectXProxy_t DirectXProxy;
-  DirectXProxy_t::GetInstance() = &DirectXProxy;
-
-  ::mock::DirectX11::Device Device;
-  ::mock::DirectX11::DeviceContext DeviceContext;
-  ::mock::DirectX11::SamplerState SamplerState;
-
-  D3D11_SAMPLER_DESC SamplerDesc = { 0 };
-  SamplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
-  SamplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
-  SamplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
-  SamplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
-  SamplerDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
-  SamplerDesc.MinLOD = 0;
-  SamplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
-
-  using namespace ::testing;
-
-  EXPECT_CALL(DirectXProxy, CreateDevice())
-    .Times(1)
-    .WillOnce(Return(&Device));
-
-  EXPECT_CALL(DirectXProxy, CreateDeviceContext())
-    .Times(1)
-    .WillOnce(Return(&DeviceContext));
-
-  InSequence Dummy;
-
-  EXPECT_CALL(Device, CreateSamplerState(SamplerDesc))
-    .Times(1)
-    .WillOnce(Return(&SamplerState));
-
-  {
-    Tested_t Example{ Tested_t::Data{} };
-    IGraphicApi_t & IExample = Example;
-
-    EXPECT_CALL(DeviceContext, PSSetShader(_, _, _))
-      .Times(1);
-
-    EXPECT_CALL(DeviceContext, PSSetSamplers(0, 1, &SamplerState))
-      .Times(1);
-
-    IExample.Render();
-
-    EXPECT_CALL(SamplerState, Release())
-      .Times(1);
-  }
-}
-
-// ************************************************************************** //
-TEST_F(DirectX11_test, /*DISABLED_*/Test_CreateSamplerState_Fail)
-{
-  using DirectXProxy_t = ::mock::DirectX11::Proxy;
-  DirectXProxy_t DirectXProxy;
-  DirectXProxy_t::GetInstance() = &DirectXProxy;
-
-  ::mock::DirectX11::Device Device;
-
-  using namespace ::testing;
-
-  EXPECT_CALL(DirectXProxy, CreateDevice())
-    .Times(1)
-    .WillOnce(Return(&Device));
-
-  InSequence Dummy;
-
-  EXPECT_CALL(Device, GetResult())
-    .Times(AtLeast(1));
-
-  EXPECT_CALL(Device, CreateSamplerState(_))
-    .Times(1);
-
-  EXPECT_CALL(Device, GetResult())
-    .Times(1)
-    .WillOnce(Return(E_FAIL));
-
-  EXPECT_CALL(Device, Release())
-    .Times(1);
-
-  EXPECT_THROW(Tested_t{ Tested_t::Data{} }, ::std::exception);
-}
-
-// ************************************************************************** //
-TEST_F(DirectX11_test, /*DISABLED_*/Test_Render_BlendState)
+TEST_F(DirectX11_test, /*DISABLED_*/Test_BlendState)
 {
   using DirectXProxy_t = ::mock::DirectX11::Proxy;
   DirectXProxy_t DirectXProxy;
@@ -2212,6 +763,12 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Render_BlendState)
 
   const ::std::vector<FLOAT> Factor = { 0.0f, 0.0f, 0.0f, 0.0f };
 
+  const auto Type = uT("State");
+  const auto pComponent = Component_t::Make(
+    { 
+      { uT("kind"), uT("Blend") }, 
+    });
+
   using namespace ::testing;
 
   EXPECT_CALL(DirectXProxy, CreateDevice())
@@ -2222,31 +779,31 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Render_BlendState)
     .Times(1)
     .WillOnce(Return(&DeviceContext));
 
+  const Tested_t Example{ Data_t{} };
+  const ITested_t & IExample = Example;
+
+  auto itCreator = IExample.GetCreators().find(Type);
+  ASSERT_NE(IExample.GetCreators().end(), itCreator);
+
   InSequence Dummy;
 
   EXPECT_CALL(Device, CreateBlendState(BlendDesc))
     .Times(1)
     .WillOnce(Return(&BlendState));
 
-  {
-    Tested_t Example{ Tested_t::Data{} };
-    IGraphicApi_t & IExample = Example;
+  auto Render = itCreator->second(pComponent);
 
-    EXPECT_CALL(DeviceContext, PSSetSamplers(_, _, _))
-      .Times(1);
+  EXPECT_CALL(DeviceContext, OMSetBlendState(&BlendState, Factor, 0xFFFFFFFF))
+    .Times(1);
 
-    EXPECT_CALL(DeviceContext, OMSetBlendState(&BlendState, Factor, 0xFFFFFFFF))
-      .Times(1);
+  Render();
 
-    IExample.Render();
-
-    EXPECT_CALL(BlendState, Release())
-      .Times(1);
-  }
+  EXPECT_CALL(BlendState, Release())
+    .Times(1);
 }
 
 // ************************************************************************** //
-TEST_F(DirectX11_test, /*DISABLED_*/Test_CreateBlendState_Fail)
+TEST_F(DirectX11_test, /*DISABLED_*/Test_SamplerState_Fail)
 {
   using DirectXProxy_t = ::mock::DirectX11::Proxy;
   DirectXProxy_t DirectXProxy;
@@ -2254,26 +811,1302 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_CreateBlendState_Fail)
 
   ::mock::DirectX11::Device Device;
 
+  const auto Type = uT("State");
+  const auto pComponent = Component_t::Make(
+    {
+      { uT("kind"), uT("Sampler") },
+    });
+
   using namespace ::testing;
 
   EXPECT_CALL(DirectXProxy, CreateDevice())
     .Times(1)
     .WillOnce(Return(&Device));
 
+  const Tested_t Example{ Data_t{} };
+  const ITested_t & IExample = Example;
+
+  auto itCreator = IExample.GetCreators().find(Type);
+  ASSERT_NE(IExample.GetCreators().end(), itCreator);
+
   InSequence Dummy;
 
-  EXPECT_CALL(Device, GetResult())
-    .Times(AtLeast(1));
-
-  EXPECT_CALL(Device, CreateBlendState(_))
+  EXPECT_CALL(Device, CreateSamplerState(_))
     .Times(1);
 
   EXPECT_CALL(Device, GetResult())
     .Times(1)
     .WillOnce(Return(E_FAIL));
 
-  EXPECT_CALL(Device, Release())
+  EXPECT_THROW(itCreator->second(pComponent), ::std::exception);
+}
+
+// ************************************************************************** //
+TEST_F(DirectX11_test, /*DISABLED_*/Test_SamplerState)
+{
+  using DirectXProxy_t = ::mock::DirectX11::Proxy;
+  DirectXProxy_t DirectXProxy;
+  DirectXProxy_t::GetInstance() = &DirectXProxy;
+
+  ::mock::DirectX11::Device Device;
+  ::mock::DirectX11::DeviceContext DeviceContext;
+  ::mock::DirectX11::SamplerState SamplerState;
+
+  D3D11_SAMPLER_DESC SamplerDesc = { 0 };
+  SamplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
+  SamplerDesc.AddressU = D3D11_TEXTURE_ADDRESS_WRAP;
+  SamplerDesc.AddressV = D3D11_TEXTURE_ADDRESS_WRAP;
+  SamplerDesc.AddressW = D3D11_TEXTURE_ADDRESS_WRAP;
+  SamplerDesc.ComparisonFunc = D3D11_COMPARISON_NEVER;
+  SamplerDesc.MinLOD = 0;
+  SamplerDesc.MaxLOD = D3D11_FLOAT32_MAX;
+
+  const auto Type = uT("State");
+  const auto pComponent = Component_t::Make(
+    {
+      { uT("kind"), uT("Sampler") },
+    });
+
+  using namespace ::testing;
+
+  EXPECT_CALL(DirectXProxy, CreateDevice())
+    .Times(1)
+    .WillOnce(Return(&Device));
+
+  EXPECT_CALL(DirectXProxy, CreateDeviceContext())
+    .Times(1)
+    .WillOnce(Return(&DeviceContext));
+
+  const Tested_t Example{ Data_t{} };
+  const ITested_t & IExample = Example;
+
+  auto itCreator = IExample.GetCreators().find(Type);
+  ASSERT_NE(IExample.GetCreators().end(), itCreator);
+
+  InSequence Dummy;
+
+  EXPECT_CALL(Device, CreateSamplerState(SamplerDesc))
+    .Times(1)
+    .WillOnce(Return(&SamplerState));
+
+  auto Render = itCreator->second(pComponent);
+
+  EXPECT_CALL(DeviceContext, PSSetSamplers(0, 1, &SamplerState))
     .Times(1);
 
-  EXPECT_THROW(Tested_t{ Tested_t::Data{} }, ::std::exception);
+  Render();
+
+  EXPECT_CALL(SamplerState, Release())
+    .Times(1);
+}
+
+// ************************************************************************** //
+TEST_F(DirectX11_test, /*DISABLED_*/Test_ScissorState_Fail)
+{
+  using DirectXProxy_t = ::mock::DirectX11::Proxy;
+  DirectXProxy_t DirectXProxy;
+  DirectXProxy_t::GetInstance() = &DirectXProxy;
+
+  ::mock::DirectX11::Device Device;
+
+  const auto Type = uT("State");
+  const auto pComponent = Component_t::Make(
+    {
+      { uT("kind"), uT("Scissor") },
+    });
+
+  using namespace ::testing;
+
+  EXPECT_CALL(DirectXProxy, CreateDevice())
+    .Times(1)
+    .WillOnce(Return(&Device));
+
+  const Tested_t Example{ Data_t{} };
+  const ITested_t & IExample = Example;
+
+  auto itCreator = IExample.GetCreators().find(Type);
+  ASSERT_NE(IExample.GetCreators().end(), itCreator);
+
+  InSequence Dummy;
+
+  EXPECT_CALL(Device, CreateRasterizerState(_))
+    .Times(1);
+
+  EXPECT_CALL(Device, GetResult())
+    .Times(1)
+    .WillOnce(Return(E_FAIL));
+
+  EXPECT_THROW(itCreator->second(pComponent), ::std::exception);
+}
+
+// ************************************************************************** //
+TEST_F(DirectX11_test, /*DISABLED_*/Test_ScissorState_Enabled)
+{
+  using DirectXProxy_t = ::mock::DirectX11::Proxy;
+  DirectXProxy_t DirectXProxy;
+  DirectXProxy_t::GetInstance() = &DirectXProxy;
+
+  ::mock::DirectX11::Device Device;
+  ::mock::DirectX11::DeviceContext DeviceContext;
+  ::mock::DirectX11::RasterizerState Enable;
+
+  D3D11_RASTERIZER_DESC Desc = { 0 };
+  Desc.FillMode = D3D11_FILL_SOLID;
+  Desc.CullMode = D3D11_CULL_NONE;
+  Desc.FrontCounterClockwise = TRUE;
+  Desc.ScissorEnable = TRUE;
+
+  const auto X = 9061257;
+  const auto Y = 9061258;
+  const auto Width = 1809061259;
+  const auto Height = 1809061300;
+
+  const ::std::vector<D3D11_RECT> Rects =
+  {
+    { X, Y, X + Width, Y + Height },
+  };
+
+  const auto Type = uT("State");
+  const auto pComponent = Component_t::Make(
+    {
+      { uT("kind"), uT("Scissor") },
+      { uT("is_enabled"), uT("true") },
+      { uT("left"), X },
+      { uT("top"), Y },
+      { uT("right"), X + Width },
+      { uT("bottom"), Y + Height },
+    });
+
+  using namespace ::testing;
+
+  EXPECT_CALL(DirectXProxy, CreateDevice())
+    .Times(1)
+    .WillOnce(Return(&Device));
+
+  EXPECT_CALL(DirectXProxy, CreateDeviceContext())
+    .Times(1)
+    .WillOnce(Return(&DeviceContext));
+
+  const Tested_t Example{ Data_t{} };
+  const ITested_t & IExample = Example;
+
+  auto itCreator = IExample.GetCreators().find(Type);
+  ASSERT_NE(IExample.GetCreators().end(), itCreator);
+
+  InSequence Dummy;
+
+  EXPECT_CALL(Device, CreateRasterizerState(Desc))
+    .Times(1)
+    .WillOnce(Return(&Enable));
+
+  auto Render = itCreator->second(pComponent);
+
+  EXPECT_CALL(DeviceContext, RSSetScissorRects(Rects))
+    .Times(1);
+
+  EXPECT_CALL(DeviceContext, RSSetState(&Enable))
+    .Times(1);
+
+  Render();
+
+  EXPECT_CALL(Enable, Release())
+    .Times(1);
+}
+
+// ************************************************************************** //
+TEST_F(DirectX11_test, /*DISABLED_*/Test_ScissorState_Disabled)
+{
+  using DirectXProxy_t = ::mock::DirectX11::Proxy;
+  DirectXProxy_t DirectXProxy;
+  DirectXProxy_t::GetInstance() = &DirectXProxy;
+
+  ::mock::DirectX11::Device Device;
+  ::mock::DirectX11::DeviceContext DeviceContext;
+  ::mock::DirectX11::RasterizerState Disable;
+
+  D3D11_RASTERIZER_DESC Desc = { 0 };
+  Desc.FillMode = D3D11_FILL_SOLID;
+  Desc.CullMode = D3D11_CULL_NONE;
+  Desc.FrontCounterClockwise = TRUE;
+  Desc.ScissorEnable = FALSE;
+
+  const auto Type = uT("State");
+  const auto pComponent = Component_t::Make(
+    {
+      { uT("kind"), uT("Scissor") },
+      { uT("is_enabled"), uT("false") },
+    });
+
+  using namespace ::testing;
+
+  EXPECT_CALL(DirectXProxy, CreateDevice())
+    .Times(1)
+    .WillOnce(Return(&Device));
+
+  EXPECT_CALL(DirectXProxy, CreateDeviceContext())
+    .Times(1)
+    .WillOnce(Return(&DeviceContext));
+
+  const Tested_t Example{ Data_t{} };
+  const ITested_t & IExample = Example;
+
+  auto itCreator = IExample.GetCreators().find(Type);
+  ASSERT_NE(IExample.GetCreators().end(), itCreator);
+
+  InSequence Dummy;
+
+  EXPECT_CALL(Device, CreateRasterizerState(Desc))
+    .Times(1)
+    .WillOnce(Return(&Disable));
+
+  auto Render = itCreator->second(pComponent);
+
+  EXPECT_CALL(DeviceContext, RSSetState(&Disable))
+    .Times(1);
+
+  Render();
+
+  EXPECT_CALL(Disable, Release())
+    .Times(1);
+}
+
+// ************************************************************************** //
+TEST_F(DirectX11_test, /*DISABLED_*/Test_Buffer_CreateVertex_Fail)
+{
+  using DirectXProxy_t = ::mock::DirectX11::Proxy;
+  DirectXProxy_t DirectXProxy;
+  DirectXProxy_t::GetInstance() = &DirectXProxy;
+
+  ::mock::DirectX11::Device Device;
+
+  const auto Type = uT("Buffer");
+  const auto pComponent = Component_t::Make(
+    {
+      { uT("kind"), uT("Vertex") },
+    });
+
+  using namespace ::testing;
+
+  EXPECT_CALL(DirectXProxy, CreateDevice())
+    .Times(1)
+    .WillOnce(Return(&Device));
+
+  const Tested_t Example{ Data_t{} };
+  const ITested_t & IExample = Example;
+
+  auto itCreator = IExample.GetCreators().find(Type);
+  ASSERT_NE(IExample.GetCreators().end(), itCreator);
+
+  InSequence Dummy;
+
+  EXPECT_CALL(Device, CreateBuffer(_, _))
+    .Times(1);
+
+  EXPECT_CALL(Device, GetResult())
+    .Times(1)
+    .WillOnce(Return(E_FAIL));
+
+  EXPECT_THROW(itCreator->second(pComponent), ::std::exception);
+}
+
+// ************************************************************************** //
+TEST_F(DirectX11_test, /*DISABLED_*/Test_Buffer_Vertex)
+{
+  using DirectXProxy_t = ::mock::DirectX11::Proxy;
+  DirectXProxy_t DirectXProxy;
+  DirectXProxy_t::GetInstance() = &DirectXProxy;
+
+  ::mock::DirectX11::Device Device;
+  ::mock::DirectX11::DeviceContext DeviceContext;
+  ::mock::DirectX11::Buffer Buffer;
+
+  const ::std::vector<Tested_t::Vertex> VertexData =
+  {
+    { 1.0f, 2.0f, 1809081155, 3.0f, 4.0f },
+    { 5.0f, 6.0f, 1809081156, 7.0f, 8.0f },
+  };
+
+  const auto Type = uT("Buffer");
+  const auto pComponent = Component_t::Make(
+    {
+      { uT("kind"), uT("Vertex") },
+      { uT("data"), VertexData.data() },
+      { uT("count"), VertexData.size() },
+    });
+
+  D3D11_SUBRESOURCE_DATA InitData = { 0 };
+  InitData.pSysMem = VertexData.data();
+
+  D3D11_BUFFER_DESC Desc = { 0 };
+  Desc.Usage = D3D11_USAGE_DEFAULT;
+  Desc.ByteWidth = sizeof(Tested_t::Vertex) * (int)VertexData.size();
+  Desc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+
+  using namespace ::testing;
+
+  EXPECT_CALL(DirectXProxy, CreateDevice())
+    .Times(1)
+    .WillOnce(Return(&Device));
+
+  EXPECT_CALL(DirectXProxy, CreateDeviceContext())
+    .Times(1)
+    .WillOnce(Return(&DeviceContext));
+
+  const Tested_t Example{ Data_t{} };
+  const ITested_t & IExample = Example;
+
+  auto itCreator = IExample.GetCreators().find(Type);
+  ASSERT_NE(IExample.GetCreators().end(), itCreator);
+
+  InSequence Dummy;
+
+  EXPECT_CALL(Device, CreateBuffer(Desc, InitData))
+    .Times(1)
+    .WillOnce(Return(&Buffer));
+
+  auto Render = itCreator->second(pComponent);
+
+  EXPECT_CALL(DeviceContext, IASetVertexBuffers(0, 1, &Buffer,
+    sizeof(Tested_t::Vertex), 0))
+    .Times(1);
+
+  Render();
+
+  EXPECT_CALL(Buffer, Release())
+    .Times(1);
+}
+
+// ************************************************************************** //
+TEST_F(DirectX11_test, /*DISABLED_*/Test_Buffer_CreateIndex_Fail)
+{
+  using DirectXProxy_t = ::mock::DirectX11::Proxy;
+  DirectXProxy_t DirectXProxy;
+  DirectXProxy_t::GetInstance() = &DirectXProxy;
+
+  ::mock::DirectX11::Device Device;
+
+  const auto Type = uT("Buffer");
+  const auto pComponent = Component_t::Make(
+    {
+      { uT("kind"), uT("Index") },
+    });
+
+  using namespace ::testing;
+
+  EXPECT_CALL(DirectXProxy, CreateDevice())
+    .Times(1)
+    .WillOnce(Return(&Device));
+
+  const Tested_t Example{ Data_t{} };
+  const ITested_t & IExample = Example;
+
+  auto itCreator = IExample.GetCreators().find(Type);
+  ASSERT_NE(IExample.GetCreators().end(), itCreator);
+
+  InSequence Dummy;
+
+  EXPECT_CALL(Device, CreateBuffer(_, _))
+    .Times(1);
+
+  EXPECT_CALL(Device, GetResult())
+    .Times(1)
+    .WillOnce(Return(E_FAIL));
+
+  EXPECT_THROW(itCreator->second(pComponent), ::std::exception);
+}
+
+// ************************************************************************** //
+TEST_F(DirectX11_test, /*DISABLED_*/Test_Buffer_Index)
+{
+  using DirectXProxy_t = ::mock::DirectX11::Proxy;
+  DirectXProxy_t DirectXProxy;
+  DirectXProxy_t::GetInstance() = &DirectXProxy;
+
+  ::mock::DirectX11::Device Device;
+  ::mock::DirectX11::DeviceContext DeviceContext;
+  ::mock::DirectX11::Buffer Buffer;
+
+  const ::std::vector<int> IndexData = { 1, 2, 3, 4, 5, 6 };
+
+  const auto Type = uT("Buffer");
+  const auto pComponent = Component_t::Make(
+    {
+      { uT("kind"), uT("Index") },
+      { uT("data"), IndexData.data() },
+      { uT("count"), IndexData.size() },
+    });
+
+  D3D11_SUBRESOURCE_DATA InitData = { 0 };
+  InitData.pSysMem = IndexData.data();
+
+  D3D11_BUFFER_DESC Desc = { 0 };
+  Desc.Usage = D3D11_USAGE_DEFAULT;
+  Desc.ByteWidth = sizeof(int) * (int)IndexData.size();
+  Desc.BindFlags = D3D11_BIND_INDEX_BUFFER;
+
+  using namespace ::testing;
+
+  EXPECT_CALL(DirectXProxy, CreateDevice())
+    .Times(1)
+    .WillOnce(Return(&Device));
+
+  EXPECT_CALL(DirectXProxy, CreateDeviceContext())
+    .Times(1)
+    .WillOnce(Return(&DeviceContext));
+
+  const Tested_t Example{ Data_t{} };
+  const ITested_t & IExample = Example;
+
+  auto itCreator = IExample.GetCreators().find(Type);
+  ASSERT_NE(IExample.GetCreators().end(), itCreator);
+
+  InSequence Dummy;
+
+  EXPECT_CALL(Device, CreateBuffer(Desc, InitData))
+    .Times(1)
+    .WillOnce(Return(&Buffer));
+
+  auto Render = itCreator->second(pComponent);
+
+  EXPECT_CALL(DeviceContext, IASetIndexBuffer(&Buffer, DXGI_FORMAT_R32_UINT, 0))
+    .Times(1);
+
+  Render();
+
+  EXPECT_CALL(Buffer, Release())
+    .Times(1);
+}
+
+// ************************************************************************** //
+TEST_F(DirectX11_test, /*DISABLED_*/Test_DrawCall_CreateBuffer_Fail)
+{
+  using DirectXProxy_t = ::mock::DirectX11::Proxy;
+  DirectXProxy_t DirectXProxy;
+  DirectXProxy_t::GetInstance() = &DirectXProxy;
+
+  ::mock::DirectX11::Device Device;
+
+  const auto pComponent = Component_t::Make({});
+
+  using namespace ::testing;
+
+  EXPECT_CALL(DirectXProxy, CreateDevice())
+    .Times(1)
+    .WillOnce(Return(&Device));
+
+  const Tested_t Example{ Data_t{} };
+  const ITested_t & IExample = Example;
+
+  auto itCreator = IExample.GetCreators().find(uT("DrawCall"));
+  ASSERT_NE(IExample.GetCreators().end(), itCreator);
+
+  InSequence Dummy;
+
+  EXPECT_CALL(Device, CreateBuffer(_, _))
+    .Times(1);
+
+  EXPECT_CALL(Device, GetResult())
+    .Times(1)
+    .WillOnce(Return(E_FAIL));
+
+  EXPECT_THROW(itCreator->second(pComponent), ::std::exception);
+}
+
+// ************************************************************************** //
+TEST_F(DirectX11_test, /*DISABLED_*/Test_DrawCall)
+{
+  using DirectXProxy_t = ::mock::DirectX11::Proxy;
+  DirectXProxy_t DirectXProxy;
+  DirectXProxy_t::GetInstance() = &DirectXProxy;
+
+  ::mock::DirectX11::Device Device;
+  ::mock::DirectX11::DeviceContext DeviceContext;
+  ::mock::DirectX11::Buffer ConstantBuffer;
+  ::mock::DirectX11::Buffer IndexBuffer;
+
+  using namespace ::testing;
+
+  EXPECT_CALL(DirectXProxy, CreateDevice())
+    .Times(1)
+    .WillOnce(Return(&Device));
+
+  EXPECT_CALL(DirectXProxy, CreateDeviceContext())
+    .Times(1)
+    .WillOnce(Return(&DeviceContext));
+
+  const Tested_t Example{ Data_t{} };
+  const ITested_t & IExample = Example;
+
+  D3D11_BUFFER_DESC ConstantBufferDesc = { 0 };
+  ConstantBufferDesc.Usage = D3D11_USAGE_DEFAULT;
+  ConstantBufferDesc.ByteWidth = sizeof(::covellite::api::renderer::ConstantBuffer);
+  ConstantBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+
+  D3D11_BUFFER_DESC IndexBufferDesc = { 0 };
+  IndexBufferDesc.ByteWidth = 1811221344;
+
+  auto itCreator = IExample.GetCreators().find(uT("DrawCall"));
+  ASSERT_NE(IExample.GetCreators().end(), itCreator);
+
+  InSequence Dummy;
+
+  EXPECT_CALL(Device, CreateBuffer(ConstantBufferDesc, _))
+    .Times(1)
+    .WillOnce(Return(&ConstantBuffer));
+
+  auto Render = itCreator->second(Component_t::Make({}));
+
+  EXPECT_CALL(DeviceContext, UpdateSubresource(&ConstantBuffer, 0, nullptr,
+    _, 0, 0))
+    .Times(1);
+
+  EXPECT_CALL(DeviceContext, VSSetConstantBuffers(0, 1, &ConstantBuffer))
+    .Times(1);
+
+  EXPECT_CALL(DeviceContext, IAGetIndexBuffer(DXGI_FORMAT_UNKNOWN, 0))
+    .Times(1)
+    .WillOnce(Return(&IndexBuffer));
+
+  EXPECT_CALL(IndexBuffer, GetDesc())
+    .Times(1)
+    .WillOnce(Return(IndexBufferDesc));
+
+  EXPECT_CALL(DeviceContext, IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST))
+    .Times(1);
+
+  EXPECT_CALL(DeviceContext,
+    DrawIndexed(IndexBufferDesc.ByteWidth / sizeof(int), 0, 0))
+    .Times(1);
+
+  EXPECT_CALL(IndexBuffer, Release())
+    .Times(1);
+
+  Render();
+
+  EXPECT_CALL(ConstantBuffer, Release())
+    .Times(1);
+}
+
+// ************************************************************************** //
+TEST_F(DirectX11_test, /*DISABLED_*/Test_Camera)
+{
+  using DirectXProxy_t = ::mock::DirectX11::Proxy;
+  DirectXProxy_t DirectXProxy;
+  DirectXProxy_t::GetInstance() = &DirectXProxy;
+
+  ::mock::DirectX11::DeviceContext DeviceContext;
+
+  const auto Width = 1811211754;
+  const auto Height = 1811211755;
+
+  ::covellite::api::renderer::ConstantBuffer Constants;
+  memset(&Constants, 0, sizeof(Constants));
+
+  Constants.Projection = ::DirectX::XMMatrixTranspose(
+    ::DirectX::XMMatrixOrthographicOffCenterLH(0,
+    (FLOAT)Width, (FLOAT)Height, 0, -1, 1));
+
+  using namespace ::testing;
+
+  EXPECT_CALL(DirectXProxy, CreateDeviceContext())
+    .Times(1)
+    .WillOnce(Return(&DeviceContext));
+
+  const Tested_t Example{ Data_t{} };
+  const ITested_t & IExample = Example;
+
+  // Camera
+  {
+    D3D11_VIEWPORT Viewport = { 0 };
+    Viewport.Width = (FLOAT)Width;
+    Viewport.Height = (FLOAT)Height;
+
+    auto itCreator = IExample.GetCreators().find(uT("Camera"));
+    ASSERT_NE(IExample.GetCreators().end(), itCreator);
+
+    auto Render = itCreator->second(Component_t::Make({}));
+
+    EXPECT_CALL(DeviceContext, RSGetViewports(1))
+      .Times(1)
+      .WillOnce(Return(Viewport));
+
+    Render();
+  }
+
+  // DrawCall
+  {
+    auto itCreator = IExample.GetCreators().find(uT("DrawCall"));
+    ASSERT_NE(IExample.GetCreators().end(), itCreator);
+
+    auto Render = itCreator->second(Component_t::Make({}));
+
+    EXPECT_CALL(DeviceContext, UpdateSubresource(_, _, _, Constants, _, _))
+      .Times(1);
+
+    Render();
+  }
+}
+
+// ************************************************************************** //
+TEST_F(DirectX11_test, /*DISABLED_*/Test_Position)
+{
+  using DirectXProxy_t = ::mock::DirectX11::Proxy;
+  DirectXProxy_t DirectXProxy;
+  DirectXProxy_t::GetInstance() = &DirectXProxy;
+
+  ::mock::DirectX11::DeviceContext DeviceContext;
+
+  ::covellite::api::renderer::ConstantBuffer Constants;
+  memset(&Constants, 0, sizeof(Constants));
+
+  using namespace ::testing;
+
+  EXPECT_CALL(DirectXProxy, CreateDeviceContext())
+    .Times(1)
+    .WillOnce(Return(&DeviceContext));
+
+  const Tested_t Example{ Data_t{} };
+  const ITested_t & IExample = Example;
+
+  // Position
+
+  auto itPositionCreator = IExample.GetCreators().find(uT("Position"));
+  ASSERT_NE(IExample.GetCreators().end(), itPositionCreator);
+
+  const auto pPosition = Component_t::Make({});
+
+  auto PositionRender = itPositionCreator->second(pPosition);
+
+  // DrawCall
+
+  auto itCreator = IExample.GetCreators().find(uT("DrawCall"));
+  ASSERT_NE(IExample.GetCreators().end(), itCreator);
+
+  auto Render = itCreator->second(Component_t::Make({}));
+
+  // Первый вызов
+  {
+    const auto X = 1811221354.0f;
+    const auto Y = 1811221355.0f;
+    const auto Z = 1811221356.0f;
+
+    Constants.World = ::DirectX::XMMatrixTranspose(
+      ::DirectX::XMMatrixTranslation(X, Y, Z));
+
+    pPosition->SetValue(uT("x"), X);
+    pPosition->SetValue(uT("y"), Y);
+    pPosition->SetValue(uT("z"), Z);
+
+    PositionRender();
+
+    EXPECT_CALL(DeviceContext, UpdateSubresource(_, _, _, Constants, _, _))
+      .Times(1);
+
+    Render();
+  }
+
+  // Второй вызов
+  {
+    const auto X = 1811221405.0f;
+    const auto Y = 1811221406.0f;
+    const auto Z = 1811221407.0f;
+
+    Constants.World = ::DirectX::XMMatrixTranspose(
+      ::DirectX::XMMatrixTranslation(X, Y, Z));
+
+    InSequence Dummy;
+
+    pPosition->SetValue(uT("x"), X);
+    pPosition->SetValue(uT("y"), Y);
+    pPosition->SetValue(uT("z"), Z);
+
+    PositionRender();
+
+    EXPECT_CALL(DeviceContext, UpdateSubresource(_, _, _, Constants, _, _))
+      .Times(1);
+
+    Render();
+  }
+}
+
+// ************************************************************************** //
+TEST_F(DirectX11_test, /*DISABLED_*/Test_Texture_CreateTexture2D_Fail)
+{
+  using DirectXProxy_t = ::mock::DirectX11::Proxy;
+  DirectXProxy_t DirectXProxy;
+  DirectXProxy_t::GetInstance() = &DirectXProxy;
+
+  ::mock::DirectX11::Device Device;
+
+  const auto Type = uT("Texture");
+  const auto pComponent = Component_t::Make(
+    {
+    });
+
+  using namespace ::testing;
+
+  EXPECT_CALL(DirectXProxy, CreateDevice())
+    .Times(1)
+    .WillOnce(Return(&Device));
+
+  const Tested_t Example{ Data_t{} };
+  const ITested_t & IExample = Example;
+
+  auto itCreator = IExample.GetCreators().find(Type);
+  ASSERT_NE(IExample.GetCreators().end(), itCreator);
+
+  InSequence Dummy;
+
+  EXPECT_CALL(Device, CreateTexture2D(_, _))
+    .Times(1);
+
+  EXPECT_CALL(Device, GetResult())
+    .Times(AtLeast(1))
+    .WillOnce(Return(E_FAIL));
+
+  EXPECT_THROW(itCreator->second(pComponent), ::std::exception);
+}
+
+// ************************************************************************** //
+TEST_F(DirectX11_test, /*DISABLED_*/Test_Texture_CreateShaderResourceView_Fail)
+{
+  using DirectXProxy_t = ::mock::DirectX11::Proxy;
+  DirectXProxy_t DirectXProxy;
+  DirectXProxy_t::GetInstance() = &DirectXProxy;
+
+  ::mock::DirectX11::Device Device;
+  ::mock::DirectX11::Texture2D Texture2D;
+
+  const auto Type = uT("Texture");
+  const auto pComponent = Component_t::Make(
+    {
+    });
+
+  using namespace ::testing;
+
+  EXPECT_CALL(DirectXProxy, CreateDevice())
+    .Times(1)
+    .WillOnce(Return(&Device));
+
+  const Tested_t Example{ Data_t{} };
+  const ITested_t & IExample = Example;
+
+  auto itCreator = IExample.GetCreators().find(Type);
+  ASSERT_NE(IExample.GetCreators().end(), itCreator);
+
+  InSequence Dummy;
+
+  EXPECT_CALL(Device, CreateTexture2D(_, _))
+    .Times(1)
+    .WillOnce(Return(&Texture2D));
+
+  EXPECT_CALL(Device, GetResult())
+    .Times(1);
+
+  EXPECT_CALL(Device, CreateShaderResourceView(_, _))
+    .Times(1)
+    .WillOnce(Return(nullptr));
+
+  EXPECT_CALL(Device, GetResult())
+    .Times(1)
+    .WillOnce(Return(E_FAIL));
+
+  EXPECT_CALL(Texture2D, Release())
+    .Times(1);
+
+  EXPECT_THROW(itCreator->second(pComponent), ::std::exception);
+}
+
+// ************************************************************************** //
+TEST_F(DirectX11_test, /*DISABLED_*/Test_Texture)
+{
+  using DirectXProxy_t = ::mock::DirectX11::Proxy;
+  DirectXProxy_t DirectXProxy;
+  DirectXProxy_t::GetInstance() = &DirectXProxy;
+
+  ::mock::DirectX11::Device Device;
+  ::mock::DirectX11::DeviceContext DeviceContext;
+  ::mock::DirectX11::Texture2D Texture2D;
+  ::mock::DirectX11::ShaderResourceView ShaderResourceView;
+
+  const ::std::vector<uint8_t> BinaryData =
+  {
+    0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, 0x99,
+  };
+
+  const int Width = 11212026;
+  const int Height = 1811212027;
+
+  const auto Type = uT("Texture");
+  const auto pComponent = Component_t::Make(
+    {
+      { uT("width"), Width },
+      { uT("height"), Height },
+      { uT("data"), BinaryData.data() },
+      { uT("count"), BinaryData.size() },
+    });
+
+  D3D11_TEXTURE2D_DESC TextureDesc = { 0 };
+  TextureDesc.Width = Width;
+  TextureDesc.Height = Height;
+  TextureDesc.MipLevels = 1;
+  TextureDesc.ArraySize = 1;
+  TextureDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+  TextureDesc.Usage = D3D11_USAGE_DEFAULT;
+  TextureDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+  TextureDesc.MiscFlags = 0;
+  TextureDesc.SampleDesc.Count = 1;
+  TextureDesc.SampleDesc.Quality = 0;
+
+  D3D11_SUBRESOURCE_DATA Init = { 0 };
+  Init.pSysMem = BinaryData.data();
+  Init.SysMemPitch = (UINT)Width * 4;
+
+  D3D11_SHADER_RESOURCE_VIEW_DESC SrvDesc = { 0 };
+  SrvDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+  SrvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+  SrvDesc.Texture2D.MipLevels = 1;
+
+  using namespace ::testing;
+
+  EXPECT_CALL(DirectXProxy, CreateDevice())
+    .Times(1)
+    .WillOnce(Return(&Device));
+
+  EXPECT_CALL(DirectXProxy, CreateDeviceContext())
+    .Times(1)
+    .WillOnce(Return(&DeviceContext));
+
+  const Tested_t Example{ Data_t{} };
+  const ITested_t & IExample = Example;
+
+  auto itCreator = IExample.GetCreators().find(Type);
+  ASSERT_NE(IExample.GetCreators().end(), itCreator);
+
+  InSequence Dummy;
+
+  EXPECT_CALL(Device, CreateTexture2D(TextureDesc, Init))
+    .Times(1)
+    .WillOnce(Return(&Texture2D));
+
+  EXPECT_CALL(Device, CreateShaderResourceView(&Texture2D, SrvDesc))
+    .Times(1)
+    .WillOnce(Return(&ShaderResourceView));
+
+  EXPECT_CALL(Texture2D, Release())
+    .Times(1);
+
+  auto Render = itCreator->second(pComponent);
+
+  EXPECT_CALL(DeviceContext, PSSetShaderResources(0, 1, &ShaderResourceView))
+    .Times(1);
+
+  Render();
+
+  EXPECT_CALL(ShaderResourceView, Release())
+    .Times(1);
+}
+
+// ************************************************************************** //
+TEST_F(DirectX11_test, /*DISABLED_*/Test_Shader_Compile_Fail)
+{
+  using DirectXProxy_t = ::mock::DirectX11::Proxy;
+  DirectXProxy_t DirectXProxy;
+  DirectXProxy_t::GetInstance() = &DirectXProxy;
+
+  ::mock::DirectX11::Blob ErrorMessage;
+  char * Error = "Error1809081119";
+
+  const auto Type = uT("Shader");
+  const auto pComponent = Component_t::Make(
+    {
+      { uT("data"), (const uint8_t *)nullptr },
+      { uT("count"), (size_t)0 }
+    });
+
+  const Tested_t Example{ Data_t{} };
+  const ITested_t & IExample = Example;
+
+  auto itCreator = IExample.GetCreators().find(Type);
+  ASSERT_NE(IExample.GetCreators().end(), itCreator);
+
+  using namespace ::testing;
+
+  InSequence Dummy;
+
+  EXPECT_CALL(DirectXProxy, CompileGetErrorMsg())
+    .Times(1)
+    .WillOnce(Return(&ErrorMessage));
+
+  EXPECT_CALL(DirectXProxy, Compile(_))
+    .Times(1)
+    .WillOnce(Return(E_FAIL));
+
+  EXPECT_CALL(ErrorMessage, GetBufferPointer())
+    .Times(1)
+    .WillOnce(Return(Error));
+
+  EXPECT_CALL(ErrorMessage, Release())
+    .Times(1)
+    .WillOnce(Return(0));
+
+  EXPECT_STDEXCEPTION(itCreator->second(pComponent),
+    (".+directx11\\.cpp\\([0-9]+\\): Failed: -2147467259 \\[" +
+      ::std::string{ Error } +"\\]\\.").c_str());
+}
+
+// ************************************************************************** //
+TEST_F(DirectX11_test, /*DISABLED_*/Test_Shader_CreateInputLayout_Fail)
+{
+  using DirectXProxy_t = ::mock::DirectX11::Proxy;
+  DirectXProxy_t DirectXProxy;
+  DirectXProxy_t::GetInstance() = &DirectXProxy;
+
+  ::mock::DirectX11::Device Device;
+  ::mock::DirectX11::Blob CompiledEffect;
+
+  const auto Type = uT("Shader");
+  const auto pComponent = Component_t::Make(
+    {
+      { uT("kind"), uT("Vertex") },
+      { uT("data"), (const uint8_t *)nullptr },
+      { uT("count"), (size_t)0 }
+    });
+
+  using namespace ::testing;
+
+  EXPECT_CALL(DirectXProxy, CreateDevice())
+    .Times(1)
+    .WillOnce(Return(&Device));
+
+  const Tested_t Example{ Data_t{} };
+  const ITested_t & IExample = Example;
+
+  auto itCreator = IExample.GetCreators().find(Type);
+  ASSERT_NE(IExample.GetCreators().end(), itCreator);
+
+  InSequence Dummy;
+
+  EXPECT_CALL(DirectXProxy, CompileGetCode())
+    .Times(1)
+    .WillOnce(Return(&CompiledEffect));
+
+  EXPECT_CALL(Device, CreateInputLayout(_, _, _))
+    .Times(1);
+
+  EXPECT_CALL(Device, GetResult())
+    .Times(1)
+    .WillOnce(Return(E_FAIL));
+
+  EXPECT_CALL(CompiledEffect, Release())
+    .Times(1);
+
+  EXPECT_THROW(itCreator->second(pComponent), ::std::exception);
+}
+
+// ************************************************************************** //
+TEST_F(DirectX11_test, /*DISABLED_*/Test_Shader_CreateVertexShader_Fail)
+{
+  using DirectXProxy_t = ::mock::DirectX11::Proxy;
+  DirectXProxy_t DirectXProxy;
+  DirectXProxy_t::GetInstance() = &DirectXProxy;
+
+  ::mock::DirectX11::Device Device;
+  ::mock::DirectX11::Blob CompiledEffect;
+
+  const auto Type = uT("Shader");
+  const auto pComponent = Component_t::Make(
+    {
+      { uT("kind"), uT("Vertex") },
+      { uT("data"), (const uint8_t *)nullptr },
+      { uT("count"), (size_t)0 }
+    });
+
+  using namespace ::testing;
+
+  EXPECT_CALL(DirectXProxy, CreateDevice())
+    .Times(1)
+    .WillOnce(Return(&Device));
+
+  const Tested_t Example{ Data_t{} };
+  const ITested_t & IExample = Example;
+
+  auto itCreator = IExample.GetCreators().find(Type);
+  ASSERT_NE(IExample.GetCreators().end(), itCreator);
+
+  InSequence Dummy;
+
+  EXPECT_CALL(DirectXProxy, CompileGetCode())
+    .Times(1)
+    .WillOnce(Return(&CompiledEffect));
+
+  EXPECT_CALL(Device, GetResult())
+    .Times(AtLeast(1));
+
+  EXPECT_CALL(Device, CreateVertexShader(_, _, _))
+    .Times(1);
+
+  EXPECT_CALL(Device, GetResult())
+    .Times(1)
+    .WillOnce(Return(E_FAIL));
+
+  EXPECT_CALL(CompiledEffect, Release())
+    .Times(1);
+
+  EXPECT_THROW(itCreator->second(pComponent), ::std::exception);
+}
+
+// ************************************************************************** //
+TEST_F(DirectX11_test, /*DISABLED_*/Test_Shader_CreatePixelShader_Fail)
+{
+  using DirectXProxy_t = ::mock::DirectX11::Proxy;
+  DirectXProxy_t DirectXProxy;
+  DirectXProxy_t::GetInstance() = &DirectXProxy;
+
+  ::mock::DirectX11::Device Device;
+  ::mock::DirectX11::Blob CompiledEffect;
+
+  const auto Type = uT("Shader");
+  const auto pComponent = Component_t::Make(
+    {
+      { uT("kind"), uT("Pixel") },
+      { uT("data"), (const uint8_t *)nullptr },
+      { uT("count"), (size_t)0 }
+    });
+
+  using namespace ::testing;
+
+  EXPECT_CALL(DirectXProxy, CreateDevice())
+    .Times(1)
+    .WillOnce(Return(&Device));
+
+  const Tested_t Example{ Data_t{} };
+  const ITested_t & IExample = Example;
+
+  auto itCreator = IExample.GetCreators().find(Type);
+  ASSERT_NE(IExample.GetCreators().end(), itCreator);
+
+  InSequence Dummy;
+
+  EXPECT_CALL(DirectXProxy, CompileGetCode())
+    .Times(1)
+    .WillOnce(Return(&CompiledEffect));
+
+  EXPECT_CALL(Device, CreatePixelShader(_, _, _))
+    .Times(1);
+
+  EXPECT_CALL(Device, GetResult())
+    .Times(1)
+    .WillOnce(Return(E_FAIL));
+
+  EXPECT_CALL(CompiledEffect, Release())
+    .Times(1);
+
+  EXPECT_THROW(itCreator->second(pComponent), ::std::exception);
+}
+
+// ************************************************************************** //
+TEST_F(DirectX11_test, /*DISABLED_*/Test_Shader_Vertex)
+{
+  using DirectXProxy_t = ::mock::DirectX11::Proxy;
+  DirectXProxy_t DirectXProxy;
+  DirectXProxy_t::GetInstance() = &DirectXProxy;
+
+  ::mock::DirectX11::Device Device;
+  ::mock::DirectX11::DeviceContext DeviceContext;
+  ::mock::DirectX11::Blob CompiledEffect;
+  ::mock::DirectX11::InputLayout InputLayout;
+  ::mock::DirectX11::VertexShader VertexShader;
+
+  const ::std::vector<D3D11_INPUT_ELEMENT_DESC> Layout =
+  {
+    { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+    { "COLOR", 0, DXGI_FORMAT_R32_UINT, 0, 8, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+    { "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+  };
+
+  const ::std::vector<uint8_t> Data = { 0x18, 0x11, 0x22, 0x12, 0x28 };
+
+  const auto Type = uT("Shader");
+  const auto pComponent = Component_t::Make(
+    {
+      { uT("kind"), uT("Vertex") },
+      { uT("data"), Data.data() },
+      { uT("count"), Data.size() },
+      { uT("version"), uT("Version1811221242") },
+      { uT("entry"), uT("Entry1811221243") },
+   });
+
+  using namespace ::alicorn::extension::std;
+  using ::alicorn::extension::cpp::IS_RELEASE_CONFIGURATION;
+
+  ::mock::DirectX11::CompileDesc Desc;
+  Desc.SrcData = VertexInput + PixelInput + Data;
+  Desc.SourceName = "[Covellite::Api]";
+  Desc.pDefines = nullptr;
+  Desc.pInclude = nullptr;
+  Desc.Entrypoint = "Entry1811221243";
+  Desc.Target = "Version1811221242";
+  Desc.Flags1 = (IS_RELEASE_CONFIGURATION) ? 0 :
+    D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION;
+  Desc.Flags2 = 0;
+
+  void * const pData = (void *)1811221233;
+  const size_t DataSize = 1811221234;
+
+  using namespace ::testing;
+
+  EXPECT_CALL(DirectXProxy, CreateDevice())
+    .Times(1)
+    .WillOnce(Return(&Device));
+
+  EXPECT_CALL(DirectXProxy, CreateDeviceContext())
+    .Times(1)
+    .WillOnce(Return(&DeviceContext));
+
+  const Tested_t Example{ Data_t{} };
+  const ITested_t & IExample = Example;
+
+  auto itCreator = IExample.GetCreators().find(Type);
+  ASSERT_NE(IExample.GetCreators().end(), itCreator);
+
+  {
+    InSequence Dummy;
+
+    EXPECT_CALL(DirectXProxy, CompileGetCode())
+      .Times(1)
+      .WillOnce(Return(&CompiledEffect));
+
+    EXPECT_CALL(DirectXProxy, Compile(Desc))
+      .Times(1);
+
+    EXPECT_CALL(CompiledEffect, GetBufferPointer())
+      .Times(1)
+      .WillOnce(Return(pData));
+
+    EXPECT_CALL(CompiledEffect, GetBufferSize())
+      .Times(1)
+      .WillOnce(Return(DataSize));
+
+    EXPECT_CALL(Device, CreateInputLayout(Layout, pData, DataSize))
+      .Times(1)
+      .WillOnce(Return(&InputLayout));
+
+    EXPECT_CALL(Device, CreateVertexShader(pData, DataSize, nullptr))
+      .Times(1)
+      .WillOnce(Return(&VertexShader));
+
+    EXPECT_CALL(CompiledEffect, Release())
+      .Times(1);
+  }
+
+  auto Render = itCreator->second(pComponent);
+
+  EXPECT_CALL(DeviceContext, IASetInputLayout(&InputLayout))
+    .Times(1);
+
+  EXPECT_CALL(DeviceContext, VSSetShader(&VertexShader, nullptr, 0))
+    .Times(1);
+
+  Render();
+
+  EXPECT_CALL(InputLayout, Release())
+    .Times(1);
+
+  EXPECT_CALL(VertexShader, Release())
+    .Times(1);
+}
+
+// ************************************************************************** //
+TEST_F(DirectX11_test, /*DISABLED_*/Test_Shader_Pixel)
+{
+  using DirectXProxy_t = ::mock::DirectX11::Proxy;
+  DirectXProxy_t DirectXProxy;
+  DirectXProxy_t::GetInstance() = &DirectXProxy;
+
+  ::mock::DirectX11::Device Device;
+  ::mock::DirectX11::DeviceContext DeviceContext;
+  ::mock::DirectX11::Blob CompiledEffect;
+  ::mock::DirectX11::PixelShader PixelShader;
+
+  const ::std::vector<uint8_t> Data = { 0x18, 0x11, 0x22, 0x12, 0x56 };
+
+  const auto Type = uT("Shader");
+  const auto pComponent = Component_t::Make(
+    {
+      { uT("kind"), uT("Pixel") },
+      { uT("data"), Data.data() },
+      { uT("count"), Data.size() },
+      { uT("version"), uT("Version1811221254") },
+      { uT("entry"), uT("Entry1811221255") },
+   });
+
+  using namespace ::alicorn::extension::std;
+  using ::alicorn::extension::cpp::IS_RELEASE_CONFIGURATION;
+
+  ::mock::DirectX11::CompileDesc Desc;
+  Desc.SrcData = VertexInput + PixelInput + Data;
+  Desc.SourceName = "[Covellite::Api]";
+  Desc.pDefines = nullptr;
+  Desc.pInclude = nullptr;
+  Desc.Entrypoint = "Entry1811221255";
+  Desc.Target = "Version1811221254";
+  Desc.Flags1 = (IS_RELEASE_CONFIGURATION) ? 0 :
+    D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION;
+  Desc.Flags2 = 0;
+
+  void * const pData = (void *)1809071822;
+  const size_t DataSize = 1809071823;
+
+  using namespace ::testing;
+
+  EXPECT_CALL(DirectXProxy, CreateDevice())
+    .Times(1)
+    .WillOnce(Return(&Device));
+
+  EXPECT_CALL(DirectXProxy, CreateDeviceContext())
+    .Times(1)
+    .WillOnce(Return(&DeviceContext));
+
+  const Tested_t Example{ Data_t{} };
+  const ITested_t & IExample = Example;
+
+  auto itCreator = IExample.GetCreators().find(Type);
+  ASSERT_NE(IExample.GetCreators().end(), itCreator);
+
+  {
+    InSequence Dummy;
+
+    EXPECT_CALL(DirectXProxy, CompileGetCode())
+      .Times(1)
+      .WillOnce(Return(&CompiledEffect));
+
+    EXPECT_CALL(DirectXProxy, Compile(Desc))
+      .Times(1);
+
+    EXPECT_CALL(CompiledEffect, GetBufferSize())
+      .Times(1)
+      .WillOnce(Return(DataSize));
+
+    EXPECT_CALL(CompiledEffect, GetBufferPointer())
+      .Times(1)
+      .WillOnce(Return(pData));
+
+    EXPECT_CALL(Device, CreatePixelShader(pData, DataSize, nullptr))
+      .Times(1)
+      .WillOnce(Return(&PixelShader));
+
+    EXPECT_CALL(CompiledEffect, Release())
+      .Times(1);
+  }
+
+  auto Render = itCreator->second(pComponent);
+
+  EXPECT_CALL(DeviceContext, PSSetShader(&PixelShader, nullptr, 0))
+    .Times(1);
+
+  Render();
+
+  EXPECT_CALL(PixelShader, Release())
+    .Times(1);
 }

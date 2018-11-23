@@ -1,8 +1,10 @@
 
 #pragma once
+#include <wrl.h>
 #include <alicorn/std/string.hpp>
 #include "IGraphicApi.hpp"
 #include "Api.forward.hpp"
+#include "Renderer.hpp"
 
 struct IDirect3D9;
 struct IDirect3DDevice9;
@@ -17,7 +19,7 @@ namespace renderer
 {
 
 /**
-* \ingroup CovelliteApiRenderGroup
+* \ingroup CovelliteApiRendererGroup
 * \brief
 *  Класс входит в проект \ref CovelliteApiPage \n
 *  Реализация рендера графического API для Windows/DirectX9.
@@ -27,8 +29,10 @@ namespace renderer
 *
 * \version
 *  1.0.0.0        \n
+*  1.1.0.0        \n
 * \date
 *  28 Август 2018    \n
+*  18 Ноябрь 2018    \n
 * \author
 *  CTAPOBEP (unicornum.verum@gmail.com)
 * \copyright
@@ -37,33 +41,36 @@ namespace renderer
 class DirectX9 final :
   public Registator_t<IGraphicApi>
 {
-public:
-  // Интерфейс IRender:
-  void ClearWindow(void) override;
-  void Present(void) override;
-  void ResizeWindow(int32_t, int32_t) override;
+  template<class T>
+  using ComPtr_t = ::Microsoft::WRL::ComPtr<T>;
 
-public:
   // Интерфейс IGraphicApi:
   String_t GetUsingApi(void) const override;
-
-public:
-  ITexture * Create(const ITexture::Data &) override;
-  void Destroy(ITexture *) override;
-  IGeometry * Create(const IGeometry::Data &) override;
-  void Destroy(IGeometry *) override;
-  void EnableScissorRegion(int, int, int, int) override;
-  void DisableScissorRegion(void) override;
-  void Render(void) override;
+  void ClearFrame(void) override;
+  void PresentFrame(void) override;
+  void ResizeWindow(int32_t, int32_t) override;
+  const Creators_t & GetCreators(void) const override;
 
 private:
-  HWND m_hWnd;
-  const Data::Color m_BackgroundColor;
-  IDirect3D9 * m_pDirect3D;
-  IDirect3DDevice9 * m_pDevice = nullptr;
+  Render_t CreateCamera(const ComponentPtr_t &);
+  Render_t CreateState(const ComponentPtr_t &) const;
+  Render_t CreatePosition(const ComponentPtr_t &);
+  Render_t CreateBuffer(const ComponentPtr_t &) const;
+  Render_t CreateDrawCall(const ComponentPtr_t &) const;
+  Render_t CreateTexture(const ComponentPtr_t &) const;
+
+private:
+  const DWORD m_BackgroundColor;
+  Creators_t m_Creators;
+  FLOAT m_FrameWidth = 0.0f;
+  FLOAT m_FrameHeight = 0.0f;
+
+private:
+  ComPtr_t<IDirect3D9>       m_pDirect3D;
+  ComPtr_t<IDirect3DDevice9> m_pDevice;
 
 public:
-  explicit DirectX9(const Data &);
+  explicit DirectX9(const Renderer::Data &);
   ~DirectX9(void);
 };
 

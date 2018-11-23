@@ -4,18 +4,12 @@
 #include <alicorn/std/string.hpp>
 #include "IGraphicApi.hpp"
 #include "Api.forward.hpp"
+#include "ConstantBuffer.hpp"
 
 struct ID3D11Device;
 struct ID3D11DeviceContext;
 struct IDXGISwapChain;
 struct ID3D11RenderTargetView;
-struct ID3D11InputLayout;
-struct ID3D11VertexShader;
-struct ID3D11PixelShader;
-struct ID3D11BlendState;
-struct ID3D11RasterizerState;
-struct ID3D11Buffer;
-struct ID3D11SamplerState;
 
 namespace covellite
 {
@@ -27,7 +21,7 @@ namespace renderer
 {
 
 /**
-* \ingroup CovelliteApiRenderGroup
+* \ingroup CovelliteApiRendererGroup
 * \brief
 *  Класс входит в проект \ref CovelliteApiPage \n
 *  Реализация рендера графического API для Windows/DirectX11.
@@ -36,8 +30,10 @@ namespace renderer
 *  
 * \version
 *  1.0.0.0        \n
+*  1.1.0.0        \n
 * \date
 *  29 Август 2018    \n
+*  20 Ноябрь 2018    \n
 * \author
 *  CTAPOBEP (unicornum.verum@gmail.com)
 * \copyright
@@ -50,54 +46,42 @@ class DirectX11 final :
   using ComPtr_t = ::Microsoft::WRL::ComPtr<T>;
 
 public:
-  // Интерфейс IRenderer:
-  void ClearWindow(void) override;
-  void Present(void) override;
-  void ResizeWindow(int32_t, int32_t) override;
-
-public:
   // Интерфейс IGraphicApi:
   String_t GetUsingApi(void) const override;
-
-public:
-  ITexture * Create(const ITexture::Data &) override;
-  void Destroy(ITexture *) override;
-  IGeometry * Create(const IGeometry::Data &) override;
-  void Destroy(IGeometry *) override;
-  void EnableScissorRegion(int, int, int, int) override;
-  void DisableScissorRegion(void) override;
-  void Render(void) override;
+  void ClearFrame(void) override;
+  void PresentFrame(void) override;
+  void ResizeWindow(int32_t, int32_t) override;
+  const Creators_t & GetCreators(void) const override;
 
 private:
-  void CreateDeviceAndSwapChain(const Data &);
+  void CreateDeviceAndSwapChain(const Renderer::Data &);
   void SetViewport(int, int);
-  void SetupEffect(void);
 
 private:
-  ComPtr_t<ID3D11Device>            m_pd3dDevice;
+  Render_t CreateCamera(const ComponentPtr_t &);
+  Render_t CreateState(const ComponentPtr_t &) const;
+  Render_t CreatePosition(const ComponentPtr_t &);
+  Render_t CreateBuffer(const ComponentPtr_t &) const;
+  Render_t CreateDrawCall(const ComponentPtr_t &) const;
+  Render_t CreateTexture(const ComponentPtr_t &) const;
+  Render_t CreateShader(const ComponentPtr_t &) const;
+
+private:
+  FLOAT m_BkColor[4];
+  ConstantBuffer m_Constants;
+  Creators_t m_Creators;
+
+private:
+  ComPtr_t<ID3D11Device>            m_pDevice;
   ComPtr_t<ID3D11DeviceContext>     m_pImmediateContext;
   ComPtr_t<IDXGISwapChain>          m_pSwapChain;
   ComPtr_t<ID3D11RenderTargetView>  m_pRenderTargetView;
 
-  ComPtr_t<ID3D11RasterizerState>   m_pScissorTestEnable;
-  ComPtr_t<ID3D11RasterizerState>   m_pScissorTestDisable;
-  ComPtr_t<ID3D11InputLayout>       m_pVertexLayout;
-  ComPtr_t<ID3D11VertexShader>      m_pVertexShader;
-  ComPtr_t<ID3D11PixelShader>       m_pPixelShader;
-  ComPtr_t<ID3D11SamplerState>      m_pSamplerState;
-  ComPtr_t<ID3D11BlendState>        m_pBlendEnable;
-
-  ComPtr_t<ID3D11Buffer>            m_pConstantBuffer;
-
-  FLOAT m_BkColor[4];
-
 private:
-  class Texture;
   class Buffer;
-  class Geometry;
 
 public:
-  explicit DirectX11(const Data &);
+  explicit DirectX11(const Renderer::Data &);
   ~DirectX11(void);
 };
 

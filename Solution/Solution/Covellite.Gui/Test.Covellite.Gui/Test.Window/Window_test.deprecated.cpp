@@ -31,7 +31,7 @@ protected:
   using WindowOs_t = ::mock::covellite::os::Window;
   using IWindowApi_t = ::covellite::api::IWindow;
   using IWindowApiPtr_t = ::std::shared_ptr<IWindowApi_t>;
-  using WindowApi_t = ::mock::covellite::api::Window<int>;
+  using WindowApi_t = ::mock::covellite::api::Window;
   using RenderInterfacePtr_t = 
     ::std::shared_ptr<::mock::Rocket::Core::RenderInterface>;
   using Vector_t = ::mock::Rocket::Core::Vector2i;
@@ -39,6 +39,8 @@ protected:
   using AppInfo_t = ::alicorn::system::platform::AppInfo;
   using Path_t = ::boost::filesystem::path;
   using Events_t = ::covellite::events::Events;
+  using Renders_t = ::covellite::api::Component::Renders;
+  using RendersPtr_t = ::std::shared_ptr<Renders_t>;
 
   // Вызывается ПЕРЕД запуском каждого теста
   void SetUp(void) override
@@ -50,6 +52,7 @@ protected:
     ::testing::DefaultValue<String_t>::Set("DefaultString");
     ::testing::DefaultValue<String>::Set(string_cast<String>(m_PathToFontsDirectory));
     ::testing::DefaultValue<WindowOs_t::Rect>::Set({ 0, 0, 1, 1 });
+    ::testing::DefaultValue<RendersPtr_t>::Set(m_pRenders);
   }
 
   // Вызывается ПОСЛЕ запуска каждого теста
@@ -62,6 +65,7 @@ protected:
     ::testing::DefaultValue<String_t>::Clear();
     ::testing::DefaultValue<String>::Clear();
     ::testing::DefaultValue<WindowOs_t::Rect>::Clear();
+    ::testing::DefaultValue<RendersPtr_t>::Clear();
   }
 
 protected:
@@ -73,6 +77,8 @@ private:
     ::std::make_shared<Tested_t::ClickEventListener>(m_Events);
   RenderInterfacePtr_t m_pRenderInterface =
     ::std::make_shared<::mock::covellite::api::RenderOpenGL>(0);
+  RendersPtr_t m_pRenders =
+    ::std::make_shared<Renders_t>(Renders_t::Creators_t{});
 };
 
 // Образец макроса для подстановки в класс Window 
@@ -112,13 +118,9 @@ TEST_F(Window_test, /*DISABLED_*/Test_Constructor)
   StringTranslatorProxy_t StringTranslatorProxy;
   StringTranslatorProxy_t::GetInstance() = &StringTranslatorProxy;
 
-  using WindowApiProxy_t = ::mock::covellite::api::Window<int>::Proxy;
+  using WindowApiProxy_t = WindowApi_t::Proxy;
   WindowApiProxy_t WindowApiProxy;
   WindowApiProxy_t::GetInstance() = &WindowApiProxy;
-
-  using InterfacesProxy_t = ::mock::covellite::InterfacesProxy;
-  InterfacesProxy_t InterfacesProxy;
-  InterfacesProxy_t::GetInstance() = &InterfacesProxy;
 
   using InitializerProxy_t = ::mock::covellite::gui::Initializer::Proxy;
   InitializerProxy_t InitializerProxy;
@@ -169,10 +171,6 @@ TEST_F(Window_test, /*DISABLED_*/Test_Constructor)
   auto pWindowOs = ::std::make_shared<WindowOs_t>();
   IWindowApiPtr_t pWindowApi = ::std::make_shared<WindowApi_t>(pWindowOs);
 
-  EXPECT_CALL(InterfacesProxy, RenderConstructor(_))
-    .Times(1)
-    .WillOnce(Return(IRenderId));
-
   RenderInterfacePtr_t pRenderInterface =
     ::std::make_shared<::mock::covellite::api::RenderOpenGL>(0);
 
@@ -185,11 +183,7 @@ TEST_F(Window_test, /*DISABLED_*/Test_Constructor)
     pStringTranslator
   };
 
-  EXPECT_CALL(WindowApiProxy, MakeRenderInterface(WindowApiId))
-    .Times(1)
-    .WillOnce(Return(pRenderInterface));
-
-  EXPECT_CALL(InitializerProxy, Constructor(Data))
+  EXPECT_CALL(InitializerProxy, Constructor(_))
     .Times(1);
 
   EXPECT_CALL(WindowApiProxy, GetClientRect(WindowApiId))
@@ -741,7 +735,7 @@ TEST_F(Window_test, /*DISABLED_*/Test_OnDrawWindow)
 // ************************************************************************** //
 TEST_F(Window_test, /*DISABLED_*/Test_OnResize)
 {
-  using WindowApiProxy_t = ::mock::covellite::api::Window<int>::Proxy;
+  using WindowApiProxy_t = WindowApi_t::Proxy;
   WindowApiProxy_t WindowApiProxy;
   WindowApiProxy_t::GetInstance() = &WindowApiProxy;
 
@@ -796,7 +790,7 @@ TEST_F(Window_test, /*DISABLED_*/Test_OnResize)
 // ************************************************************************** //
 TEST_F(Window_test, /*DISABLED_*/Test_OnMotion)
 {
-  using WindowApiProxy_t = ::mock::covellite::api::Window<int>::Proxy;
+  using WindowApiProxy_t = WindowApi_t::Proxy;
   WindowApiProxy_t WindowApiProxy;
   WindowApiProxy_t::GetInstance() = &WindowApiProxy;
 

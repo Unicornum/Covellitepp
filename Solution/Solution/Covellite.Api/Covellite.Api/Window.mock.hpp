@@ -1,7 +1,8 @@
 
 #pragma once
-#include <Covellite\Os\Window.mock.hpp>
-#include <Covellite\Api\IWindow.hpp>
+#include <Covellite/Os/Window.mock.hpp>
+#include <Covellite/App/IWindow.hpp>
+#include <Covellite/Api/IWindow.hpp>
 
 /*
 An example of use:
@@ -39,9 +40,9 @@ namespace covellite
 namespace api
 {
 
-template<class TApiImpl>
 class Window :
   public ::covellite::core::IWindow,
+  public ::covellite::app::IWindow,
   public ::covellite::api::IWindow
 {
   using WindowOs_t = ::covellite::os::IWindow;
@@ -56,8 +57,9 @@ public:
   public:
     MOCK_METHOD1(Constructor, Id_t(Id_t));
     MOCK_METHOD1(GetClientRect, Rect_t(Id_t));
-    MOCK_METHOD1(GetRenderInterface, RenderInterfacePtr_t(Id_t));
+    MOCK_METHOD1(GetRenders, RendersPtr_t(Id_t));
 
+    MOCK_METHOD1(GetRenderInterface, RenderInterfacePtr_t(Id_t));
     MOCK_METHOD1(GetWidth, int32_t(Id_t));
     MOCK_METHOD1(GetHeight, int32_t(Id_t));
     MOCK_METHOD1(MakeRenderInterface, RenderInterfacePtr_t(Id_t));
@@ -88,12 +90,17 @@ public:
     return Proxy::GetInstance()->GetClientRect(m_Id);
   }
 
+  RendersPtr_t GetRenders(void) const override
+  {
+    return Proxy::GetInstance()->GetRenders(m_Id);
+  }
+
+  // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!! DEPRECATED !!!!!!!!!!!!!!!!!!!!!!!!!!!!!! //
+
   RenderInterfacePtr_t GetRenderInterface(void) const override
   {
     return Proxy::GetInstance()->GetRenderInterface(m_Id);
   }
-
-  // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!! DEPRECATED !!!!!!!!!!!!!!!!!!!!!!!!!!!!!! //
 
   int32_t GetWidth(void) const override
   {
@@ -119,7 +126,7 @@ public:
       .connect(::std::bind(&Window::DoDrawWindow, this));
   }
 
-  // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!! DEPRECATED !!!!!!!!!!!!!!!!!!!!!!!!!!!!!! //
+  // ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ DEPRECATED ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ //
 
 private:
   Events_t m_Events;
