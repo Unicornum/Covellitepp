@@ -65,20 +65,18 @@ public:
 template<class T>
 class Component::Buffer
 {
+private:
+  ::std::vector<T> m_Data;
+
 public:
   const T * const pData;
   const size_t Count;
-
-private:
-  ::std::vector<T> m_Data;
 
 public:
   explicit Buffer(const ComponentPtr_t & _pComponent) :
     pData(_pComponent->GetValue<const T *>(uT("data"), m_Data.data())),
     Count(_pComponent->GetValue(uT("count"), m_Data.size()))
   {
-    // 17 Октябрь 2018 14:38 (unicornum.verum@gmail.com)
-    TODO("Заполнение m_Data из файла, если указано имя файла, а не данные.");
   }
 };
 
@@ -120,6 +118,25 @@ public:
 
 class Component::Position
 {
+private:
+  inline static size_t GetHashX(void)
+  {
+    static const size_t Hash = ::std::hash<String_t>{}(uT("x"));
+    return Hash;
+  }
+
+  inline static size_t GetHashY(void)
+  {
+    static const size_t Hash = ::std::hash<String_t>{}(uT("y"));
+    return Hash;
+  }
+
+  inline static size_t GetHashZ(void)
+  {
+    static const size_t Hash = ::std::hash<String_t>{}(uT("z"));
+    return Hash;
+  }
+
 public:
   const float X;
   const float Y;
@@ -127,9 +144,9 @@ public:
 
 public:
   explicit Position(const ComponentPtr_t & _pComponent) :
-    X(_pComponent->GetValue(uT("x"), 0.0f)),
-    Y(_pComponent->GetValue(uT("y"), 0.0f)),
-    Z(_pComponent->GetValue(uT("z"), 0.0f))
+    X(_pComponent->GetValue(GetHashX(), 0.0f)),
+    Y(_pComponent->GetValue(GetHashY(), 0.0f)),
+    Z(_pComponent->GetValue(GetHashZ(), 0.0f))
   {
 
   }

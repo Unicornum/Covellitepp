@@ -50,9 +50,6 @@ public:
   // Интерфейс IGraphicApi:
   void PresentFrame(void) override;
 
-protected:
-  void DoOrtho(int32_t, int32_t) override;
-
 private:
   EglPtr_t<covellite::egl::Display> m_pDisplay;
   EglPtr_t<covellite::egl::Config>  m_pConfig;

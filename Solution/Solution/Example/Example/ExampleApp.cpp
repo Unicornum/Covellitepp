@@ -8,7 +8,7 @@
 
 /// [Constructor main application class]
 ExampleApp::ExampleApp(void) noexcept :
-  Application(EventBased{})
+  Application(Continuous{})
 {
   using namespace ::covellite;
     

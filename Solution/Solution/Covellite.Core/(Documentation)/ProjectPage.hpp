@@ -5,7 +5,8 @@
 *  
 * \deprecated
 *  Код проекта устарел и будет удален в следующей стабильной версии, вместо
-*  него использовать код из проекта \ref CovelliteAppPage.
+*  него использовать код из проектов \ref CovelliteAppPage и 
+*  \ref CovelliteEventsPage.
 */
 
 /**

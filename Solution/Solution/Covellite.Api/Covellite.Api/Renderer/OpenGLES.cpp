@@ -29,12 +29,6 @@ void OpenGLES::PresentFrame(void) /*override*/
   m_pSurface->SwapBuffers();
 }
 
-void OpenGLES::DoOrtho(int32_t _Width, int32_t _Height) /*override*/
-{
-  glOrthof(0, static_cast<GLfloat>(_Width),
-    static_cast<GLfloat>(_Height), 0, -1, 1);
-}
-
 } // namespace renderer
 
 } // namespace api

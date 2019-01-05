@@ -73,7 +73,6 @@ TEST_F(Config_test, /*DISABLED_*/Test_ANativeWindow_Nullptr)
 }
 
 // ************************************************************************** //
-// cppcheck-suppress syntaxError
 TEST_F(Config_test, /*DISABLED_*/Test_Constructor)
 {
   using EglProxy_t = ::mock::EglProxy;
@@ -90,6 +89,7 @@ TEST_F(Config_test, /*DISABLED_*/Test_Constructor)
     ::covellite::egl::EGL_BLUE_SIZE,    8,
     ::covellite::egl::EGL_GREEN_SIZE,   8,
     ::covellite::egl::EGL_RED_SIZE,     8,
+    ::covellite::egl::EGL_DEPTH_SIZE,   24,
     ::covellite::egl::EGL_NONE
   };
 
@@ -144,6 +144,7 @@ TEST_F(Config_test, /*DISABLED_*/Test_eglChooseConfig_Fail)
     ::covellite::egl::EGL_BLUE_SIZE,    8,
     ::covellite::egl::EGL_GREEN_SIZE,   8,
     ::covellite::egl::EGL_RED_SIZE,     8,
+    ::covellite::egl::EGL_DEPTH_SIZE,   24,
     ::covellite::egl::EGL_NONE
   };
 
@@ -191,6 +192,7 @@ TEST_F(Config_test, /*DISABLED_*/Test_eglGetConfigAttrib_Fail)
     ::covellite::egl::EGL_BLUE_SIZE,    8,
     ::covellite::egl::EGL_GREEN_SIZE,   8,
     ::covellite::egl::EGL_RED_SIZE,     8,
+    ::covellite::egl::EGL_DEPTH_SIZE,   24,
     ::covellite::egl::EGL_NONE
   };
 

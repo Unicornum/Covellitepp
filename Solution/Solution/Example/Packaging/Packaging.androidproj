@@ -90,7 +90,9 @@
     </AntPackage>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <Content Include="assets\data\demo.rml" />
+    <Content Include="assets\data\demo.rml">
+      <SubType>Designer</SubType>
+    </Content>
     <Content Include="assets\data\demo2.rml" />
     <Content Include="assets\data\fonts\Times New Roman.ttf" />
     <Content Include="assets\data\fonts\Ubuntu.ttf" />
@@ -103,6 +105,7 @@
     <Content Include="assets\data\scroll.rml" />
     <Content Include="assets\data\table.rcss" />
     <Content Include="assets\data\table.rml" />
+    <Content Include="assets\data\title.png" />
     <Content Include="assets\data\window.rml" />
     <Content Include="res\drawable\icon.png" />
     <Content Include="res\values\strings.xml" />

@@ -2,6 +2,10 @@
 /**
 * \page CovelliteRocketBriefPage
 *  ѕроект реализации работы с GUI при помощи [libRocket].
+*
+* \deprecated
+*   од проекта устарел и будет удален в следующей стабильной версии, вместо
+*  него использовать код из проекта \ref CovelliteGuiPage.
 *  
 *  [libRocket]: https://github.com/libRocket/libRocket "libRocket"
 */

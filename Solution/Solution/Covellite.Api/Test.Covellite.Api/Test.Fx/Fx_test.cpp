@@ -35,17 +35,17 @@ protected:
 // FRIEND_TEST(Fx_test, Test_Function);
 
 // ************************************************************************** //
-TEST_F(Fx_test, /*DISABLED_*/Test_Pixel)
+TEST_F(Fx_test, /*DISABLED_*/Test_Data)
 {
-  EXPECT_FILES_STREQ(THIS_DIRECTORY / L"Pixel.expected.fx",
-    THIS_DIRECTORY / L"../../Covellite.Api/Renderer/fx/Pixel.fx");
+  EXPECT_FILES_STREQ(THIS_DIRECTORY / L"Data.expected.h",
+    THIS_DIRECTORY / L"../../Covellite.Api/Renderer/fx/Data.h");
 }
 
 // ************************************************************************** //
-TEST_F(Fx_test, /*DISABLED_*/Test_PixelInput)
+TEST_F(Fx_test, /*DISABLED_*/Test_Input)
 {
-  EXPECT_FILES_STREQ(THIS_DIRECTORY / L"PixelInput.expected.fx",
-    THIS_DIRECTORY / L"../../Covellite.Api/Renderer/fx/PixelInput.fx");
+  EXPECT_FILES_STREQ(THIS_DIRECTORY / L"Input.expected.fx",
+    THIS_DIRECTORY / L"../../Covellite.Api/Renderer/fx/Input.fx");
 }
 
 // ************************************************************************** //
@@ -56,8 +56,8 @@ TEST_F(Fx_test, /*DISABLED_*/Test_Vertex)
 }
 
 // ************************************************************************** //
-TEST_F(Fx_test, /*DISABLED_*/Test_VertexInput)
+TEST_F(Fx_test, /*DISABLED_*/Test_Pixel)
 {
-  EXPECT_FILES_STREQ(THIS_DIRECTORY / L"VertexInput.expected.fx",
-    THIS_DIRECTORY / L"../../Covellite.Api/Renderer/fx/VertexInput.fx");
+  EXPECT_FILES_STREQ(THIS_DIRECTORY / L"Pixel.expected.fx",
+    THIS_DIRECTORY / L"../../Covellite.Api/Renderer/fx/Pixel.fx");
 }

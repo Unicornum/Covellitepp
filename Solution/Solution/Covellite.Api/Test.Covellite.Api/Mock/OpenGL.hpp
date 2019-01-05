@@ -1,5 +1,26 @@
 
 #pragma once
+#include <DirectXMath.h>
+
+namespace DirectX
+{
+
+inline bool operator== (
+  const ::DirectX::XMFLOAT4X4 & _Left,
+  const ::DirectX::XMFLOAT4X4 & _Right)
+{
+  for (int i = 0; i < 4; i++)
+  {
+    for (int j = 0; j < 4; j++)
+    {
+      if (abs(_Left.m[i][j] - _Right.m[i][j]) > 1e-6f) return false;
+    }
+  }
+
+  return true;
+}
+
+} // namespace DirectX
 
 #define GL_BLEND                          0x0BE2
 #define GL_COLOR_BUFFER_BIT               0x00004000
@@ -20,6 +41,7 @@
 #define GL_UNSIGNED_BYTE                  0x1401
 #define GL_FLOAT                          0x1406
 #define GL_VERTEX_ARRAY                   0x8074
+#define GL_NORMAL_ARRAY                   0x8075
 #define GL_COLOR_ARRAY                    0x8076
 #define GL_TEXTURE_COORD_ARRAY            0x8078
 #define GL_TEXTURE_2D                     0x0DE1
@@ -35,6 +57,19 @@
 #define GL_VIEWPORT                       0x0BA2
 #define GL_NO_ERROR                       0
 #define GL_VERSION                        0x1F02
+#define GL_FRONT_AND_BACK                 0x0408
+#define GL_DEPTH_BUFFER_BIT               0x00000100
+
+#define GL_LIGHT0                         0x4000
+#define GL_AMBIENT                        0x1200
+#define GL_DIFFUSE                        0x1201
+#define GL_SPECULAR                       0x1202
+#define GL_POSITION                       0x1203
+#define GL_CONSTANT_ATTENUATION           0x1207
+#define GL_LINEAR_ATTENUATION             0x1208
+#define GL_QUADRATIC_ATTENUATION          0x1209
+#define GL_EMISSION                       0x1600
+#define GL_SHININESS                      0x1601
 
 namespace mock
 {
@@ -55,6 +90,11 @@ class GLProxy :
   public ::alicorn::extension::testing::Proxy<GLProxy>
 {
 public:
+  using Uints_t = ::std::vector<uint32_t>;
+  using Ints_t = ::std::vector<int>;
+  using Floats_t = ::std::vector<GLfloat>;
+
+public:
   MOCK_METHOD0(GetError, GLenum (void));
   MOCK_METHOD1(Enable, void(GLenum));
   MOCK_METHOD1(Disable, void(GLenum));
@@ -68,10 +108,13 @@ public:
   MOCK_METHOD1(DisableClientState, void (GLenum));
   MOCK_METHOD2(BindTexture, void (GLenum, GLuint));
   MOCK_METHOD3(Translatef, void (GLfloat, GLfloat, GLfloat));
-  MOCK_METHOD4(VertexPointer, void (GLint, GLenum, GLsizei, const GLvoid *));
-  MOCK_METHOD4(ColorPointer, void (GLint, GLenum, GLsizei, const GLvoid *));
-  MOCK_METHOD4(TexCoordPointer, void (GLint, GLenum, GLsizei, const GLvoid *));
-  MOCK_METHOD4(DrawElements, void (GLenum, GLsizei, GLenum, const GLvoid *));
+  MOCK_METHOD4(Rotatef, void(GLfloat, GLfloat, GLfloat, GLfloat));
+  MOCK_METHOD3(Scalef, void(GLfloat, GLfloat, GLfloat));
+  MOCK_METHOD4(VertexPointer, void (GLint, GLenum, GLsizei, Floats_t));
+  MOCK_METHOD3(NormalPointer, void(GLenum, GLsizei, Floats_t));
+  MOCK_METHOD4(ColorPointer, void (GLint, GLenum, GLsizei, Uints_t));
+  MOCK_METHOD4(TexCoordPointer, void (GLint, GLenum, GLsizei, Floats_t));
+  MOCK_METHOD4(DrawElements, void (GLenum, GLsizei, GLenum, Ints_t));
   MOCK_METHOD1(GenTextures, GLuint(GLsizei));
   MOCK_METHOD3(TexParameteri, void (GLenum, GLenum, GLfixed));
   MOCK_METHOD9(TexImage2D, void (GLenum, GLint, GLint, GLsizei, GLsizei, GLint, 
@@ -81,14 +124,42 @@ public:
   MOCK_METHOD4(Viewport, void (GLint, GLint, GLsizei, GLsizei));
   MOCK_METHOD1(MatrixMode, void (GLenum));
   MOCK_METHOD0(LoadIdentity, void (void));
-  MOCK_METHOD6(Orthof, void (GLfloat, GLfloat, GLfloat, GLfloat, GLfloat, GLfloat));
   MOCK_METHOD6(Ortho, void(GLdouble, GLdouble, GLdouble, GLdouble, GLdouble, GLdouble));
-  MOCK_METHOD1(GetIntegerv, void(GLenum));
-  MOCK_METHOD1(GetIntValue, GLint(::std::string));
   MOCK_METHOD4(Scissor, void (GLint, GLint, GLsizei, GLsizei));
   MOCK_METHOD4(ClearColor, void(GLclampf, GLclampf, GLclampf, GLclampf));
   MOCK_METHOD1(Clear, void(GLbitfield));
-  MOCK_METHOD1(GetString, const GLubyte * (GLenum _Name));
+  MOCK_METHOD1(GetString, const GLubyte * (GLenum));
+  MOCK_METHOD1(GetIntegerv, const GLint * (GLenum));
+  MOCK_METHOD1(GetFloatv, const GLfloat * (GLenum));
+  MOCK_METHOD3(Materialfv, void (GLenum, GLenum, Floats_t));
+  MOCK_METHOD3(Lightfv, void(GLenum, GLenum, Floats_t));
+  MOCK_METHOD3(Lightf, void(GLenum, GLenum, GLfloat));
+  MOCK_METHOD1(LoadMatrixf, void(::DirectX::XMFLOAT4X4));
+
+public:
+  template<class T>
+  static ::std::vector<T> GetData(GLint _Count, GLsizei _Stride,
+    const GLvoid * _pRawData)
+  {
+    ::std::vector<T> Result;
+
+    auto * pRawData = reinterpret_cast<const GLubyte *>(_pRawData);
+
+    while (true)
+    {
+      auto * pData = reinterpret_cast<const T *>(pRawData);
+      if (*pData == (T)0) break;
+
+      for (GLint i = 0; i < _Count; i++)
+      {
+        Result.push_back(pData[i]);
+      }
+
+      pRawData += _Stride;
+    }
+
+    return Result;
+  }
 };
 
 namespace
@@ -159,28 +230,91 @@ void glTranslatef(GLfloat _Param1, GLfloat _Param2, GLfloat _Param3)
   GLProxy::GetInstance()->Translatef(_Param1, _Param2, _Param3);
 }
 
-void glVertexPointer(GLint _Param1, GLenum _Param2, GLsizei _Param3, 
-  const GLvoid * _Param4)
+void glRotatef(GLfloat _Param1, GLfloat _Param2, GLfloat _Param3, GLfloat _Param4)
 {
-  GLProxy::GetInstance()->VertexPointer(_Param1, _Param2, _Param3, _Param4);
+  GLProxy::GetInstance()->Rotatef(_Param1, _Param2, _Param3, _Param4);
 }
 
-void glColorPointer(GLint _Param1, GLenum _Param2, GLsizei _Param3, 
-  const GLvoid * _Param4)
+void glScalef(GLfloat _Param1, GLfloat _Param2, GLfloat _Param3)
 {
-  GLProxy::GetInstance()->ColorPointer(_Param1, _Param2, _Param3, _Param4);
+  GLProxy::GetInstance()->Scalef(_Param1, _Param2, _Param3);
 }
 
-void glTexCoordPointer(GLint _Param1, GLenum _Param2, GLsizei _Param3, 
-  const GLvoid * _Param4)
+void glVertexPointer(GLint _Count, GLenum _Type, GLsizei _Stride, 
+  const GLvoid * _pRawData)
 {
-  GLProxy::GetInstance()->TexCoordPointer(_Param1, _Param2, _Param3, _Param4);
+  if (_Type == GL_FLOAT)
+  {
+    GLProxy::GetInstance()->VertexPointer(_Count, _Type, _Stride, 
+      GLProxy::GetData<GLfloat>(_Count, _Stride, _pRawData));
+  }
+  else
+  {
+    throw ::std::exception{ "Unexpected type." };
+  }
 }
 
-void glDrawElements(GLenum _Param1, GLsizei _Param2, GLenum _Param3, 
-  const GLvoid * _Param4)
+void glNormalPointer(GLenum _Type, GLsizei _Stride, const GLvoid * _pRawData)
 {
-  GLProxy::GetInstance()->DrawElements(_Param1, _Param2, _Param3, _Param4);
+  if (_Type == GL_FLOAT)
+  {
+    GLProxy::GetInstance()->NormalPointer(_Type, _Stride,
+      GLProxy::GetData<GLfloat>(3, _Stride, _pRawData));
+  }
+  else
+  {
+    throw ::std::exception{ "Unexpected type." };
+  }
+}
+
+void glColorPointer(GLint _Count, GLenum _Type, GLsizei _Stride,
+  const GLvoid * _pRawData)
+{
+  if (_Type == GL_UNSIGNED_BYTE && _Count == 4)
+  {
+    GLProxy::GetInstance()->ColorPointer(_Count, _Type, _Stride,
+      GLProxy::GetData<uint32_t>(1, _Stride, _pRawData));
+  }
+  else
+  {
+    throw ::std::exception{ "Unexpected type." };
+  }
+}
+
+void glTexCoordPointer(GLint _Count, GLenum _Type, GLsizei _Stride,
+  const GLvoid * _pRawData)
+{
+  if (_Type == GL_FLOAT)
+  {
+    GLProxy::GetInstance()->TexCoordPointer(_Count, _Type, _Stride,
+      GLProxy::GetData<GLfloat>(_Count, _Stride, _pRawData));
+  }
+  else
+  {
+    throw ::std::exception{ "Unexpected type." };
+  }
+}
+
+void glDrawElements(GLenum _Mode, GLsizei _Count, GLenum _Type, 
+  const GLvoid * _pRawData)
+{
+  if (_Type == GL_UNSIGNED_INT)
+  {
+    auto GetData = [&](void)
+    {
+      auto * const pData = reinterpret_cast<const int *>(_pRawData);
+
+      GLProxy::Ints_t Result;
+      for (GLsizei i = 0; i < _Count; i++) Result.push_back(pData[i]);
+      return Result;
+    };
+
+    GLProxy::GetInstance()->DrawElements(_Mode, _Count, _Type, GetData());
+  }
+  else
+  {
+    throw ::std::exception{ "Unexpected type." };
+  }
 }
 
 void glGenTextures(GLsizei _Param1, GLuint * _Param2)
@@ -226,31 +360,11 @@ void glLoadIdentity(void)
   GLProxy::GetInstance()->LoadIdentity();
 }
 
-void glOrthof(GLfloat _Param1, GLfloat _Param2, GLfloat _Param3, 
-  GLfloat _Param4, GLfloat _Param5, GLfloat _Param6)
-{
-  GLProxy::GetInstance()->Orthof(
-    _Param1, _Param2, _Param3, _Param4, _Param5, _Param6);
-}
-
 void glOrtho(GLdouble _Param1, GLdouble _Param2, GLdouble _Param3, 
   GLdouble _Param4, GLdouble _Param5, GLdouble _Param6)
 {
   GLProxy::GetInstance()->Ortho(
     _Param1, _Param2, _Param3, _Param4, _Param5, _Param6);
-}
-
-void glGetIntegerv(GLenum _Name, GLint * _pParams)
-{
-  GLProxy::GetInstance()->GetIntegerv(_Name);
-
-  if (_Name == GL_VIEWPORT)
-  {
-    _pParams[0] = GLProxy::GetInstance()->GetIntValue("x");
-    _pParams[1] = GLProxy::GetInstance()->GetIntValue("y");
-    _pParams[2] = GLProxy::GetInstance()->GetIntValue("width");
-    _pParams[3] = GLProxy::GetInstance()->GetIntValue("height");
-  }
 }
 
 void glScissor(GLint _X, GLint _Y, GLsizei _Width, GLsizei _Height)
@@ -271,6 +385,78 @@ void glClear(GLbitfield _Mask)
 const GLubyte * glGetString(GLenum _Name)
 {
   return GLProxy::GetInstance()->GetString(_Name);
+}
+
+void glGetIntegerv(GLenum _Name, GLint * _pParams)
+{
+  auto * pParams = GLProxy::GetInstance()->GetIntegerv(_Name);
+
+  if (_Name == GL_VIEWPORT)
+  {
+    _pParams[0] = pParams[0];
+    _pParams[1] = pParams[1];
+    _pParams[2] = pParams[2];
+    _pParams[3] = pParams[3];
+  }
+}
+
+void glGetFloatv(GLenum _Name, GLfloat * _pParams)
+{
+  auto * pParams = GLProxy::GetInstance()->GetFloatv(_Name);
+
+  if (_Name == GL_VIEWPORT)
+  {
+    _pParams[0] = pParams[0];
+    _pParams[1] = pParams[1];
+    _pParams[2] = pParams[2];
+    _pParams[3] = pParams[3];
+  }
+}
+
+void glMaterialfv(GLenum _Face, GLenum _Name, const GLfloat * _pParams)
+{
+  const auto Count = (_Name == GL_SHININESS) ? 1 : 4;
+
+  ::std::vector<float> Params;
+
+  for (int i = 0; i < Count; i++)
+  {
+    Params.push_back(*(_pParams + i));
+  }
+
+  GLProxy::GetInstance()->Materialfv(_Face, _Name, Params);
+}
+
+void glLightfv(GLenum _Index, GLenum _Name, const GLfloat * _pParams)
+{
+  ::std::vector<float> Params;
+
+  for (int i = 0; i < 4; i++)
+  {
+    Params.push_back(*(_pParams + i));
+  }
+
+  GLProxy::GetInstance()->Lightfv(_Index, _Name, Params);
+}
+
+void glLightf(GLenum _Index, GLenum _Name, GLfloat _Param)
+{
+  GLProxy::GetInstance()->Lightf(_Index, _Name, _Param);
+}
+
+void glLoadMatrixf(const GLfloat * _pMatrix)
+{
+  ::DirectX::XMFLOAT4X4 Matrix4x4;
+
+  for (int i = 0; i < 4; i++)
+  {
+    for (int j = 0; j < 4; j++)
+    {
+      Matrix4x4.m[i][j] = _pMatrix[i + 4 * j];
+    }
+  }
+
+  GLProxy::GetInstance()->LoadMatrixf(Matrix4x4);
 }
 
 } // unnamed namespace
@@ -308,7 +494,10 @@ using ::mock::glEnableClientState;
 using ::mock::glDisableClientState;
 using ::mock::glBindTexture;
 using ::mock::glTranslatef;
+using ::mock::glRotatef;
+using ::mock::glScalef;
 using ::mock::glVertexPointer;
+using ::mock::glNormalPointer;
 using ::mock::glColorPointer;
 using ::mock::glTexCoordPointer;
 using ::mock::glDrawElements;
@@ -320,13 +509,17 @@ using ::mock::glBlendFunc;
 using ::mock::glViewport;
 using ::mock::glMatrixMode;
 using ::mock::glLoadIdentity;
-using ::mock::glOrthof;
 using ::mock::glOrtho;
-using ::mock::glGetIntegerv;
 using ::mock::glScissor;
 using ::mock::glClearColor;
 using ::mock::glClear;
 using ::mock::glGetString;
+using ::mock::glGetIntegerv;
+using ::mock::glGetFloatv;
+using ::mock::glMaterialfv;
+using ::mock::glLightfv;
+using ::mock::glLoadMatrixf;
+using ::mock::glLightf;
 
 } // namespace api
 

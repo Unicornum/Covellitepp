@@ -32,6 +32,9 @@ class ExampleWindow::DemoLayer1 final :
 public:
   // Интерфейс IWindow:
   void Subscribe(const EventHandlerPtr_t &) override {}
+
+private:
+  int m_Fps = 0;
     
 public:
   explicit DemoLayer1(IWindowRocket_t & _Window) :
@@ -46,6 +49,24 @@ public:
         Info.GetValue(uT("FileVersionShort"))) + "</h1>");
       
     using namespace ::covellite;
+
+    m_Events[events::Drawing.Do].Connect([&](void)
+    {
+      static auto Begin = ::std::chrono::system_clock::now();
+
+      m_Fps++;
+
+      using namespace ::std::chrono;
+
+      if (duration_cast<seconds>(system_clock::now() - Begin) >= seconds{ 1 })
+      {
+        GetElement("main_text").SetText(string_cast<::std::string, Locale::UTF8>(
+          uT("FPS: {FPS}").Replace(uT("{FPS}"), m_Fps)));
+
+        m_Fps = 0;
+        Begin = system_clock::now();
+      }
+    });
       
     // При нажатии кнопок слоя генерируем события уровня проекта примера,
     // которые обрабатываются в классе окна.

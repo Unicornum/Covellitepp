@@ -7,6 +7,7 @@
 #include <alicorn/image.hpp>
 #include <Covellite/Api/Component.inl>
 #include <Covellite/Api/Renders.hpp>
+#include <Covellite/Api/Vertex.hpp>
 
 // 19 Ноябрь 2018 19:27 (unicornum.verum@gmail.com)
 TODO("Недопустимое обращение к файлам другого проекта.");
@@ -20,7 +21,7 @@ namespace covellite
 namespace gui
 {
 
-using IGraphicApi_t = ::covellite::api::renderer::IGraphicApi;
+using Vertex_t = ::covellite::api::Vertex::Gui;
 
 Renderer::Renderer(const RendersPtr_t & _pRenders) :
   m_pRenders(_pRenders),
@@ -28,32 +29,32 @@ Renderer::Renderer(const RendersPtr_t & _pRenders) :
     {
       Component_t::Make(
         {
-          { uT("type"), uT("Camera") },
-          { uT("id"), uT("Covellite.Api.Camera") }
+          { uT("id"), uT("Covellite.Api.Present.Camera") },
+          { uT("type"), uT("Present") },
+          { uT("kind"), uT("Camera") },
         }),
       Component_t::Make(
         {
+          { uT("id"), uT("Covellite.Api.State.Blend") },
           { uT("type"), uT("State") },
           { uT("kind"), uT("Blend") },
-          { uT("id"), uT("Covellite.Api.State.Blend") }
         }),
       Component_t::Make(
         {
+          { uT("id"), uT("Covellite.Api.Shader.Vertex") },
           { uT("type"), uT("Shader") },
-          { uT("kind"), uT("Vertex") },
+          { uT("kind"), Vertex_t::GetName() },
           { uT("version"), uT("vs_4_0") },
           { uT("entry"), uT("VS") },
-          { uT("id"), uT("Covellite.Api.Shader.Vertex") },
           { uT("data"), ::Vertex.data() },
           { uT("count"), ::Vertex.size() },
         }),
     })),
-    m_pScissorEnabled(Component_t::Make(
+    m_pScissorRect(Component_t::Make(
       {
-        { uT("type"), uT("State") },
-        { uT("kind"), uT("Scissor") },
-        { uT("id"), uT("Covellite.Api.State.Scissor.Enabled") },
-        { uT("is_enabled"), uT("true") },
+        { uT("id"), uT("Covellite.Api.Data.Rect") },
+        { uT("type"), uT("Data") },
+        { uT("kind"), uT("Rect") },
       }))
 {
 }
@@ -77,7 +78,7 @@ Rocket::Core::CompiledGeometryHandle Renderer::CompileGeometry(
   int * _pIndex, int _IndexCount,
   Rocket::Core::TextureHandle _hTexture) /*override*/
 {
-  static_assert(sizeof(IGraphicApi_t::Vertex) == sizeof(Rocket::Core::Vertex),
+  static_assert(sizeof(Vertex_t) == sizeof(Rocket::Core::Vertex),
     "Unexpected framework vertex data size.");
 
   Object_t Object;
@@ -86,11 +87,11 @@ Rocket::Core::CompiledGeometryHandle Renderer::CompileGeometry(
   {
     Object.push_back(Component_t::Make(
       {
+        { uT("id"), uT("Covellite.Api.Shader.Pixel.Colored") },
         { uT("type"), uT("Shader") },
         { uT("kind"), uT("Pixel") },
         { uT("version"), uT("ps_4_0") },
         { uT("entry"), uT("psColored") },
-        { uT("id"), uT("Covellite.Api.Shader.Pixel.Colored") },
         { uT("data"), ::Pixel.data() },
         { uT("count"), ::Pixel.size() }
       }));
@@ -99,11 +100,11 @@ Rocket::Core::CompiledGeometryHandle Renderer::CompileGeometry(
   {
     Object.push_back(Component_t::Make(
       {
+        { uT("id"), uT("Covellite.Api.Shader.Pixel.Textured") },
         { uT("type"), uT("Shader") },
         { uT("kind"), uT("Pixel") },
         { uT("version"), uT("ps_4_0") },
         { uT("entry"), uT("psTextured") },
-        { uT("id"), uT("Covellite.Api.Shader.Pixel.Textured") },
         { uT("data"), ::Pixel.data() },
         { uT("count"), ::Pixel.size() }
       }));
@@ -113,18 +114,18 @@ Rocket::Core::CompiledGeometryHandle Renderer::CompileGeometry(
 
     Object.push_back(Component_t::Make(
       {
-        { uT("type"), uT("Texture") },
         { uT("id"), strTextureId },
+        { uT("type"), uT("Texture") },
       }));
 
-    // Sampler нужно обязательно ставить после активации КАЖДОЙ текстуры,
+    // Sampler нужно обязательно ставить ПОСЛЕ активации КАЖДОЙ текстуры,
     // иначе OpenGL будет работать неправильно!
     // - Для DirectX 9/10/11 это не имеет значения.
     Object.push_back(Component_t::Make(
     {
+      { uT("id"), uT("Covellite.Api.State.Sampler") },
       { uT("type"), uT("State") },
       { uT("kind"), uT("Sampler") },
-      { uT("id"), uT("Covellite.Api.State.Sampler") }
     }));
   }
 
@@ -132,36 +133,38 @@ Rocket::Core::CompiledGeometryHandle Renderer::CompileGeometry(
 
   const auto strObjectId = uT("{ID}").Replace(uT("{ID}"), (size_t)++ObjectId);
 
+  Object.push_back(Component_t::Make(
+    {
+      { uT("id"), uT("Covellite.Api.Buffer.Vertex.") + strObjectId },
+      { uT("type"), uT("Buffer") },
+      { uT("kind"), Vertex_t::GetName() },
+      { uT("data"), reinterpret_cast<const Vertex_t *>(_pVertex) },
+      { uT("count"), (size_t)_VertexCount }
+    }));
+
+  Object.push_back(Component_t::Make(
+    {
+      { uT("id"), uT("Covellite.Api.Buffer.Index.") + strObjectId },
+      { uT("type"), uT("Buffer") },
+      { uT("kind"), uT("Index") },
+      { uT("data"), static_cast<const int *>(_pIndex) },
+      { uT("count"), (size_t)_IndexCount }
+    }));
+
   m_Objects[ObjectId].pPosition = Component_t::Make(
     {
-      { uT("type"), uT("Position") },
-      { uT("id"), uT("Covellite.Api.Position.") + strObjectId },
+      { uT("id"), uT("Covellite.Api.Data.Position.") + strObjectId },
+      { uT("type"), uT("Data") },
+      { uT("kind"), uT("Position") },
     });
 
   Object.push_back(m_Objects[ObjectId].pPosition);
 
   Object.push_back(Component_t::Make(
     {
-      { uT("type"), uT("Buffer") },
-      { uT("id"), uT("Covellite.Api.Buffer.Vertex.") + strObjectId },
-      { uT("kind"), uT("Vertex") },
-      { uT("data"), reinterpret_cast<const IGraphicApi_t::Vertex *>(_pVertex) },
-      { uT("count"), (size_t)_VertexCount }
-    }));
-
-  Object.push_back(Component_t::Make(
-    {
-      { uT("type"), uT("Buffer") },
-      { uT("id"), uT("Covellite.Api.Buffer.Index.") + strObjectId },
-      { uT("kind"), uT("Index") },
-      { uT("data"), static_cast<const int *>(_pIndex) },
-      { uT("count"), (size_t)_IndexCount }
-    }));
-
-  Object.push_back(Component_t::Make(
-    {
-      { uT("type"), uT("DrawCall") },
-      { uT("id"), uT("Covellite.Api.DrawCall") },
+      { uT("id"), uT("Covellite.Api.Present.Geometry.") + strObjectId },
+      { uT("type"), uT("Present") },
+      { uT("kind"), uT("Geometry") },
     }));
 
   m_Objects[ObjectId].Renders = m_pRenders->Obtain(Object);
@@ -192,15 +195,19 @@ void Renderer::ReleaseCompiledGeometry(
   m_pRenders->Remove({
     Component_t::Make(
       {
-        { uT("id"), uT("Covellite.Api.Position.") + strObjectId }
-      }),
-    Component_t::Make(
-      {
         { uT("id"), uT("Covellite.Api.Buffer.Vertex.") + strObjectId }
       }),
     Component_t::Make(
       {
         { uT("id"), uT("Covellite.Api.Buffer.Index.") + strObjectId }
+      }),
+    Component_t::Make(
+      {
+        { uT("id"), uT("Covellite.Api.Data.Position.") + strObjectId }
+      }),
+    Component_t::Make(
+      {
+        { uT("id"), uT("Covellite.Api.Present.Geometry.") + strObjectId }
       }),
     });
 
@@ -217,9 +224,9 @@ void Renderer::EnableScissorRegion(bool _IsEnable) /*override*/
     {
       Component_t::Make(
       {
+        { uT("id"), uT("Covellite.Api.State.Scissor.Disabled") },
         { uT("type"), uT("State") },
         { uT("kind"), uT("Scissor") },
-        { uT("id"), uT("Covellite.Api.State.Scissor.Disabled") },
         { uT("is_enabled"), uT("false") }
       })
     });
@@ -229,15 +236,25 @@ void Renderer::SetScissorRegion(int _X, int _Y, int _Width, int _Height) /*overr
 {
   m_RenderQueue.push_back([&, _X, _Y, _Width, _Height]()
   {
-    m_pScissorEnabled->SetValue(uT("left"), _X);
-    m_pScissorEnabled->SetValue(uT("right"), _X + _Width);
-    m_pScissorEnabled->SetValue(uT("top"), _Y);
-    m_pScissorEnabled->SetValue(uT("bottom"), _Y + _Height);
+    m_pScissorRect->SetValue(uT("left"), _X);
+    m_pScissorRect->SetValue(uT("right"), _X + _Width);
+    m_pScissorRect->SetValue(uT("top"), _Y);
+    m_pScissorRect->SetValue(uT("bottom"), _Y + _Height);
   });
 
   using namespace ::alicorn::extension::std;
 
-  m_RenderQueue += m_pRenders->Obtain({ m_pScissorEnabled });
+  m_RenderQueue += m_pRenders->Obtain(
+    { 
+      m_pScissorRect,
+      Component_t::Make(
+      {
+        { uT("id"), uT("Covellite.Api.State.Scissor.Enabled") },
+        { uT("type"), uT("State") },
+        { uT("kind"), uT("Scissor") },
+        { uT("is_enabled"), uT("true") }
+      }),
+    });
 }
 
 bool Renderer::LoadTexture(
@@ -259,8 +276,6 @@ bool Renderer::LoadTexture(
 
   return GenerateTexture(_hTexture,
     Image.GetData().Buffer.data(), _TextureDimensions);
-
-  return true;
 }
 
 bool Renderer::GenerateTexture(
@@ -270,31 +285,26 @@ bool Renderer::GenerateTexture(
 {
   static Rocket::Core::TextureHandle TextureId = 0;
 
-  try
-  {
-    TextureId++;
+  TextureId++;
 
-    const auto strTextureId = uT("Covellite.Api.Texture.{ID}")
-      .Replace(uT("{ID}"), TextureId);
+  const auto strTextureId = uT("Covellite.Api.Texture.{ID}")
+    .Replace(uT("{ID}"), TextureId);
 
-    m_pRenders->Obtain(
+  auto Render = m_pRenders->Obtain(
+    {
+      Component_t::Make(
       {
-        Component_t::Make(
-        {
-          { uT("type"), uT("Texture") },
-          { uT("id"), strTextureId },
-          { uT("data"), _pSource },
-          { uT("width"), _SourceDimensions.x },
-          { uT("height"), _SourceDimensions.y },
-        })
-      });
+        { uT("id"), strTextureId },
+        { uT("type"), uT("Texture") },
+        { uT("data"), _pSource },
+        { uT("width"), _SourceDimensions.x },
+        { uT("height"), _SourceDimensions.y },
+      })
+    });
 
-    _hTexture = TextureId;
-  }
-  catch (const ::std::exception &)
-  {
-    return false;
-  }
+  if (Render.empty() || Render[0] == nullptr) return false;
+
+  _hTexture = TextureId;
 
   return true;
 }
@@ -308,8 +318,8 @@ void Renderer::ReleaseTexture(Rocket::Core::TextureHandle _hTexture) /*override*
     {
       Component_t::Make(
         {
-          { uT("type"), uT("Texture") },
           { uT("id"), strTextureId },
+          { uT("type"), uT("Texture") },
         })
     });
 }

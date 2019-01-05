@@ -4,7 +4,7 @@
 #include <vector>
 #include <d3d11.h>
 #include <d3dcompiler.h>
-#include "..\..\Covellite.Api\Renderer\ConstantBuffer.hpp"
+#include "../../Covellite.Api/Renderer/fx/Data.h"
 
 #pragma warning(push)
 #pragma warning(disable: 4100)
@@ -70,6 +70,20 @@ inline bool operator== (
 }
 
 inline bool operator== (
+  const D3D11_DEPTH_STENCIL_DESC & _Left,
+  const D3D11_DEPTH_STENCIL_DESC & _Right)
+{
+  return DirectX::operator== (_Left, _Right);
+}
+
+inline bool operator== (
+  const D3D11_DEPTH_STENCIL_VIEW_DESC & _Left,
+  const D3D11_DEPTH_STENCIL_VIEW_DESC & _Right)
+{
+  return DirectX::operator== (_Left, _Right);
+}
+
+inline bool operator== (
   const D3D11_SUBRESOURCE_DATA & _Left,
   const D3D11_SUBRESOURCE_DATA & _Right)
 {
@@ -98,30 +112,68 @@ inline bool operator== (
   return true;
 }
 
-namespace covellite
+inline bool operator== (
+  const ::Material & _Left,
+  const ::Material & _Right)
 {
-
-namespace api
-{
-
-namespace renderer
-{
+  return DirectX::operator== (_Left, _Right);
+}
 
 inline bool operator== (
-  const ConstantBuffer & _Left,
-  const ConstantBuffer & _Right)
+  const ::Matrices & _Left,
+  const ::Matrices & _Right)
 {
-  if (!(_Left.World == _Right.World)) return false;
-  if (!(_Left.Projection == _Right.Projection)) return false;
+  return DirectX::operator== (_Left, _Right);
+}
 
+inline bool operator== (
+  const ::float3 & _Left,
+  const ::float3 & _Right)
+{
+  return DirectX::operator== (_Left, _Right);
+}
+
+inline bool operator== (
+  const ::Color & _Left,
+  const ::Color & _Right)
+{
+  return DirectX::operator== (_Left, _Right);
+}
+
+inline bool operator== (
+  const ::Light::Direction & _Left,
+  const ::Light::Direction & _Right)
+{
+  if (!(_Left.Color == _Right.Color)) return false;
+  if (!(_Left.Direction == _Right.Direction)) return false;
   return true;
 }
 
-} // namespace renderer
+inline bool operator== (
+  const ::Light::Point & _Left,
+  const ::Light::Point & _Right)
+{
+  if (!(_Left.Color == _Right.Color)) return false;
+  if (!(_Left.Position == _Right.Position)) return false;
+  if (!(_Left.Attenuation == _Right.Attenuation)) return false;
+  return true;
+}
 
-} // namespace api
+inline bool operator== (
+  const ::Lights & _Left,
+  const ::Lights & _Right)
+{
+  if (!(_Left.Ambient.Color == _Right.Ambient.Color)) return false;
+  if (!(_Left.Direction == _Right.Direction)) return false;
+  if (_Left.Points.UsedSlotCount != _Right.Points.UsedSlotCount) return false;
 
-} // namespace covellite
+  for (int i = 0; i < MAX_LIGHT_POINT_COUNT; i++)
+  {
+    if (!(_Left.Points.Lights[i] == _Right.Points.Lights[i])) return false;
+  }
+
+  return true;
+}
 
 namespace mock
 {
@@ -133,7 +185,7 @@ class Device :
   public ID3D11Device
 {
 public:
-  MOCK_METHOD0(GetResult, HRESULT(void));
+  MOCK_METHOD1(GetResult, HRESULT(::std::string));
 
 public:
   virtual HRESULT STDMETHODCALLTYPE QueryInterface(
@@ -148,6 +200,7 @@ public:
 public:
 
   MOCK_METHOD2(CreateBuffer, ID3D11Buffer *(D3D11_BUFFER_DESC, D3D11_SUBRESOURCE_DATA));
+  MOCK_METHOD1(CreateMaterialBuffer, void(::Material));
 
   virtual HRESULT STDMETHODCALLTYPE CreateBuffer(
     /* [annotation] */
@@ -162,8 +215,14 @@ public:
     const auto * pInitialData = (_pInitialData != nullptr) ?
       _pInitialData : &EmptyInitData;
 
+    if (_pInitialData->pSysMem != nullptr)
+    {
+      CreateMaterialBuffer(
+        *reinterpret_cast<const ::Material *>(_pInitialData->pSysMem));
+    }
+
     *ppBuffer = CreateBuffer(*pDesc, *pInitialData);
-    return GetResult();
+    return GetResult("CreateBuffer");
   }
 
   virtual HRESULT STDMETHODCALLTYPE CreateTexture1D(
@@ -186,8 +245,11 @@ public:
     /* [annotation] */
     _Out_opt_  ID3D11Texture2D **ppTexture2D) 
   {
-    *ppTexture2D = CreateTexture2D(*pDesc, *pInitialData);
-    return GetResult();
+    static const D3D11_SUBRESOURCE_DATA ZeroData = { 0 };
+
+    *ppTexture2D = CreateTexture2D(*pDesc, 
+      (pInitialData == nullptr) ? ZeroData : *pInitialData);
+    return GetResult("CreateTexture2D");
   }
 
   virtual HRESULT STDMETHODCALLTYPE CreateTexture3D(
@@ -212,7 +274,7 @@ public:
     _Out_opt_  ID3D11ShaderResourceView **ppSRView) 
   {
     *ppSRView = CreateShaderResourceView(pResource, *pDesc);
-    return GetResult();
+    return GetResult("CreateShaderResourceView");
   }
 
   virtual HRESULT STDMETHODCALLTYPE CreateUnorderedAccessView(
@@ -233,8 +295,10 @@ public:
     ID3D11RenderTargetView ** ppRTView) 
   {
     *ppRTView = CreateRenderTargetView(pResource, pDesc);
-    return GetResult();
+    return GetResult("CreateRenderTargetView");
   }
+
+  MOCK_METHOD2(CreateDepthStencilView, ID3D11DepthStencilView *(ID3D11Resource *, D3D11_DEPTH_STENCIL_VIEW_DESC));
 
   virtual HRESULT STDMETHODCALLTYPE CreateDepthStencilView(
     /* [annotation] */
@@ -242,8 +306,10 @@ public:
     /* [annotation] */
     _In_opt_  const D3D11_DEPTH_STENCIL_VIEW_DESC *pDesc,
     /* [annotation] */
-    _Out_opt_  ID3D11DepthStencilView **ppDepthStencilView) {
-    return E_FAIL;
+    _Out_opt_  ID3D11DepthStencilView **ppDepthStencilView) 
+  {
+    *ppDepthStencilView = CreateDepthStencilView(pResource, *pDesc);
+    return GetResult("CreateDepthStencilView");
   }
 
   using InputElements_t = ::std::vector<D3D11_INPUT_ELEMENT_DESC>;
@@ -269,7 +335,7 @@ public:
     *ppInputLayout = CreateInputLayout(InputElements, 
       pShaderBytecodeWithInputSignature, BytecodeLength);
 
-    return GetResult();
+    return GetResult("CreateInputLayout");
   }
 
   MOCK_METHOD3(CreateVertexShader, ID3D11VertexShader *(const void *, SIZE_T,
@@ -288,7 +354,7 @@ public:
     *ppVertexShader = CreateVertexShader(pShaderBytecode, 
       BytecodeLength, pClassLinkage);
 
-    return GetResult();
+    return GetResult("CreateVertexShader");
   }
 
   virtual HRESULT STDMETHODCALLTYPE CreateGeometryShader(
@@ -341,7 +407,7 @@ public:
     *ppPixelShader = CreatePixelShader(pShaderBytecode,
       BytecodeLength, pClassLinkage);
 
-    return GetResult();
+    return GetResult("CreatePixelShader");
   }
 
   virtual HRESULT STDMETHODCALLTYPE CreateHullShader(
@@ -395,15 +461,19 @@ public:
     _Out_opt_  ID3D11BlendState **ppBlendState) 
   {
     *ppBlendState = CreateBlendState(*pBlendStateDesc);
-    return GetResult();
+    return GetResult("CreateBlendState");
   }
+
+  MOCK_METHOD1(CreateDepthStencilState, ID3D11DepthStencilState *(D3D11_DEPTH_STENCIL_DESC));
 
   virtual HRESULT STDMETHODCALLTYPE CreateDepthStencilState(
     /* [annotation] */
     _In_  const D3D11_DEPTH_STENCIL_DESC *pDepthStencilDesc,
     /* [annotation] */
-    _Out_opt_  ID3D11DepthStencilState **ppDepthStencilState) {
-    return E_FAIL;
+    _Out_opt_  ID3D11DepthStencilState **ppDepthStencilState) 
+  {
+    *ppDepthStencilState = CreateDepthStencilState(*pDepthStencilDesc);
+    return GetResult("CreateDepthStencilState");
   }
 
   MOCK_METHOD1(CreateRasterizerState, ID3D11RasterizerState *(D3D11_RASTERIZER_DESC));
@@ -415,7 +485,7 @@ public:
     _Out_opt_  ID3D11RasterizerState ** ppRasterizerState) 
   {
     *ppRasterizerState = CreateRasterizerState(*pRasterizerDesc);
-    return GetResult();
+    return GetResult("CreateRasterizerState");
   }
 
   MOCK_METHOD1(CreateSamplerState, ID3D11SamplerState *(D3D11_SAMPLER_DESC));
@@ -427,7 +497,7 @@ public:
     _Out_opt_  ID3D11SamplerState **ppSamplerState) 
   {
     *ppSamplerState = CreateSamplerState(*pSamplerDesc);
-    return GetResult();
+    return GetResult("CreateSamplerState");
   }
 
   virtual HRESULT STDMETHODCALLTYPE CreateQuery(
@@ -699,13 +769,18 @@ public:
     /* [annotation] */
     _In_  UINT Subresource) {}
 
+  MOCK_METHOD3(PSSetConstantBuffers, void(UINT, UINT, ID3D11Buffer *));
+
   virtual void STDMETHODCALLTYPE PSSetConstantBuffers(
     /* [annotation] */
-    _In_range_(0, D3D11_COMMONSHADER_CONSTANT_BUFFER_API_SLOT_COUNT - 1)  UINT StartSlot,
+    UINT StartSlot,
     /* [annotation] */
-    _In_range_(0, D3D11_COMMONSHADER_CONSTANT_BUFFER_API_SLOT_COUNT - StartSlot)  UINT NumBuffers,
+    UINT NumBuffers,
     /* [annotation] */
-    _In_reads_opt_(NumBuffers)  ID3D11Buffer *const *ppConstantBuffers) {}
+    ID3D11Buffer *const *ppConstantBuffers) 
+  {
+    PSSetConstantBuffers(StartSlot, NumBuffers, *ppConstantBuffers);
+  }
 
   MOCK_METHOD1(IASetInputLayout, void(ID3D11InputLayout *));
   MOCK_METHOD5(IASetVertexBuffers, void(UINT, UINT, ID3D11Buffer *, UINT, UINT));
@@ -876,11 +951,7 @@ public:
     OMSetBlendState(pBlendState, Factor, SampleMask);
   }
 
-  virtual void STDMETHODCALLTYPE OMSetDepthStencilState(
-    /* [annotation] */
-    _In_opt_  ID3D11DepthStencilState *pDepthStencilState,
-    /* [annotation] */
-    _In_  UINT StencilRef) {}
+  MOCK_METHOD2(OMSetDepthStencilState, void(ID3D11DepthStencilState *, UINT));
 
   virtual void STDMETHODCALLTYPE SOSetTargets(
     /* [annotation] */
@@ -979,12 +1050,14 @@ public:
     /* [annotation] */
     _In_  ID3D11Resource *pSrcResource) {}
 
-  using ConstantBuffer_t = ::covellite::api::renderer::ConstantBuffer;
-
+  MOCK_METHOD6(UpdateSubresource, void(ID3D11Resource *, UINT,
+    const D3D11_BOX *, ::Material, UINT, UINT));
+  MOCK_METHOD6(UpdateSubresource, void(ID3D11Resource *, UINT,
+    const D3D11_BOX *, ::Lights, UINT, UINT));
   MOCK_METHOD6(UpdateSubresource, void(ID3D11Resource *, UINT, 
-    const D3D11_BOX *, ConstantBuffer_t, UINT, UINT));
+    const D3D11_BOX *, ::Matrices, UINT, UINT));
 
-  void UpdateSubresource(
+  virtual void UpdateSubresource(
     /* [annotation] */
     _In_  ID3D11Resource * pDstResource,
     /* [annotation] */
@@ -999,7 +1072,15 @@ public:
     _In_  UINT SrcDepthPitch)
   {
     UpdateSubresource(pDstResource, DstSubresource, pDstBox,
-      *reinterpret_cast<const ConstantBuffer_t *>(pSrcData), 
+      *reinterpret_cast<const ::Material *>(pSrcData),
+      SrcRowPitch, SrcDepthPitch);
+
+    UpdateSubresource(pDstResource, DstSubresource, pDstBox,
+      *reinterpret_cast<const ::Lights *>(pSrcData),
+      SrcRowPitch, SrcDepthPitch);
+
+    UpdateSubresource(pDstResource, DstSubresource, pDstBox,
+      *reinterpret_cast<const ::Matrices *>(pSrcData), 
       SrcRowPitch, SrcDepthPitch);
   }
 
@@ -1037,15 +1118,15 @@ public:
     /* [annotation] */
     _In_  const FLOAT Values[4]) {}
 
-  virtual void STDMETHODCALLTYPE ClearDepthStencilView(
+  MOCK_METHOD4(ClearDepthStencilView, void(
     /* [annotation] */
-    _In_  ID3D11DepthStencilView *pDepthStencilView,
+    _In_  ID3D11DepthStencilView *,
     /* [annotation] */
-    _In_  UINT ClearFlags,
+    _In_  UINT,
     /* [annotation] */
-    _In_  FLOAT Depth,
+    _In_  FLOAT,
     /* [annotation] */
-    _In_  UINT8 Stencil) {}
+    _In_  UINT8));
 
   virtual void STDMETHODCALLTYPE GenerateMips(
     /* [annotation] */
@@ -2150,6 +2231,113 @@ public:
     _Out_  D3D11_BLEND_DESC *pDesc) {}
 };
 
+class DepthStencilState :
+  public ID3D11DepthStencilState
+{
+public:
+    virtual void STDMETHODCALLTYPE GetDesc(
+      /* [annotation] */
+      _Out_  D3D11_DEPTH_STENCIL_DESC *pDesc) {}
+
+public:
+  virtual void STDMETHODCALLTYPE GetDevice(
+    /* [annotation] */
+    _Outptr_  ID3D11Device **ppDevice) {}
+
+  virtual HRESULT STDMETHODCALLTYPE GetPrivateData(
+    /* [annotation] */
+    _In_  REFGUID guid,
+    /* [annotation] */
+    _Inout_  UINT *pDataSize,
+    /* [annotation] */
+    _Out_writes_bytes_opt_(*pDataSize)  void *pData) { return E_FAIL; }
+
+  virtual HRESULT STDMETHODCALLTYPE SetPrivateData(
+    /* [annotation] */
+    _In_  REFGUID guid,
+    /* [annotation] */
+    _In_  UINT DataSize,
+    /* [annotation] */
+    _In_reads_bytes_opt_(DataSize)  const void *pData) { return E_FAIL; }
+
+  virtual HRESULT STDMETHODCALLTYPE SetPrivateDataInterface(
+    /* [annotation] */
+    _In_  REFGUID guid,
+    /* [annotation] */
+    _In_opt_  const IUnknown *pData) { return E_FAIL; }
+
+public:
+  BEGIN_INTERFACE
+    virtual HRESULT STDMETHODCALLTYPE QueryInterface(
+      /* [in] */ REFIID riid,
+      /* [iid_is][out] */ _COM_Outptr_ void __RPC_FAR *__RPC_FAR *ppvObject) {
+   return E_FAIL;
+  }
+
+  virtual ULONG STDMETHODCALLTYPE AddRef(void) { return 0; }
+
+  MOCK_METHOD0(Release, ULONG(void));
+};
+
+class DepthStencilView :
+  public ID3D11DepthStencilView
+{
+public:
+  virtual void STDMETHODCALLTYPE GetDesc(
+    /* [annotation] */
+    _Out_  D3D11_DEPTH_STENCIL_VIEW_DESC *pDesc) {}
+
+public:
+  virtual void STDMETHODCALLTYPE GetResource(
+    /* [annotation] */
+    _Outptr_  ID3D11Resource **ppResource) {}
+
+public:
+  virtual void STDMETHODCALLTYPE GetDevice(
+    /* [annotation] */
+    _Outptr_  ID3D11Device **ppDevice) {}
+
+  virtual HRESULT STDMETHODCALLTYPE GetPrivateData(
+    /* [annotation] */
+    _In_  REFGUID guid,
+    /* [annotation] */
+    _Inout_  UINT *pDataSize,
+    /* [annotation] */
+    _Out_writes_bytes_opt_(*pDataSize)  void *pData) {
+    return E_FAIL;
+  }
+
+  virtual HRESULT STDMETHODCALLTYPE SetPrivateData(
+    /* [annotation] */
+    _In_  REFGUID guid,
+    /* [annotation] */
+    _In_  UINT DataSize,
+    /* [annotation] */
+    _In_reads_bytes_opt_(DataSize)  const void *pData) {
+    return E_FAIL;
+  }
+
+  virtual HRESULT STDMETHODCALLTYPE SetPrivateDataInterface(
+    /* [annotation] */
+    _In_  REFGUID guid,
+    /* [annotation] */
+    _In_opt_  const IUnknown *pData) {
+    return E_FAIL;
+  }
+
+public:
+  BEGIN_INTERFACE
+    virtual HRESULT STDMETHODCALLTYPE QueryInterface(
+      /* [in] */ REFIID riid,
+      /* [iid_is][out] */ _COM_Outptr_ void __RPC_FAR *__RPC_FAR *ppvObject) {
+    return E_FAIL;
+  }
+
+  virtual ULONG STDMETHODCALLTYPE AddRef(void) { return 0; }
+
+  MOCK_METHOD0(Release, ULONG(void));
+};
+
 class DeviceDesc
 {
 public:
@@ -2279,14 +2467,15 @@ public:
 public:
   MOCK_METHOD2(Present, HRESULT(UINT, UINT));
 
-  MOCK_METHOD0(GetResult, HRESULT(void));
+  MOCK_METHOD1(GetResult, HRESULT(::std::string));
+
   MOCK_METHOD2(GetBuffer, void *(UINT, REFIID));
 
   virtual HRESULT STDMETHODCALLTYPE GetBuffer(
     UINT Buffer, REFIID riid, void ** ppSurface)
   {
     *ppSurface = GetBuffer(Buffer, riid);
-    return GetResult();
+    return GetResult("GetBuffer");
   }
 
   virtual HRESULT STDMETHODCALLTYPE SetFullscreenState(
@@ -2306,7 +2495,7 @@ public:
     DXGI_SWAP_CHAIN_DESC * pDesc)
   { 
     *pDesc = GetDesc();
-    return GetResult();
+    return GetResult("GetDesc");
   }
 
   MOCK_METHOD5(ResizeBuffers, HRESULT(UINT, UINT, UINT, DXGI_FORMAT, UINT));

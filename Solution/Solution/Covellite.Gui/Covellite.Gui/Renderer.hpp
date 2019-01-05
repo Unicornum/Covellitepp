@@ -11,6 +11,8 @@
 namespace covellite
 {
 
+namespace api { namespace renderer { class Renderer; } }
+
 namespace gui
 {
 
@@ -72,7 +74,7 @@ private:
 
 private:
   const Renders_t m_DefaultRenders;
-  ComponentPtr_t m_pScissorEnabled;
+  ComponentPtr_t m_pScissorRect;
 
   class Object
   {
@@ -87,6 +89,9 @@ private:
 
 public:
   explicit Renderer(const RendersPtr_t &);
+
+private:
+  friend ::covellite::api::renderer::Renderer;
 };
 
 } // namespace gui

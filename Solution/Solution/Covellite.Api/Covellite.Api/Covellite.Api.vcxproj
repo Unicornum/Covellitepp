@@ -79,12 +79,13 @@
     <ClInclude Include="IWindow.hpp" />
     <ClInclude Include="Renderer\Api.forward.hpp" />
     <ClInclude Include="Renderer\Component.hpp" />
-    <ClInclude Include="Renderer\ConstantBuffer.hpp" />
     <ClInclude Include="Renderer\DirectX10.hpp" />
     <ClInclude Include="Renderer\DirectX11.hpp" />
     <ClInclude Include="Renderer\DirectX9.hpp" />
     <ClInclude Include="Renderer\DxCheck.hpp" />
+    <ClInclude Include="Renderer\fx\Data.h" />
     <ClInclude Include="Renderer\GL.hpp" />
+    <ClInclude Include="Renderer\GLMath.hpp" />
     <ClInclude Include="Renderer\IGraphicApi.hpp" />
     <ClInclude Include="Renderer\OpenGL.hpp" />
     <ClInclude Include="Renderer\OpenGLCommon.hpp" />
@@ -94,6 +95,7 @@
     <ClInclude Include="Renders.hpp" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
+    <ClInclude Include="Vertex.hpp" />
     <ClInclude Include="Window.hpp" />
     <ClInclude Include="Window.mock.hpp" />
   </ItemGroup>
@@ -114,19 +116,15 @@
     <ClCompile Include="Window.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <FxCompile Include="Renderer\fx\Input.fx">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </FxCompile>
     <FxCompile Include="Renderer\fx\Pixel.fx">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </FxCompile>
-    <FxCompile Include="Renderer\fx\PixelInput.fx">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-    </FxCompile>
     <FxCompile Include="Renderer\fx\Vertex.fx">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-    </FxCompile>
-    <FxCompile Include="Renderer\fx\VertexInput.fx">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </FxCompile>

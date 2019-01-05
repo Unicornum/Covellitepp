@@ -36,9 +36,6 @@ public:
   // Èםעונפויס IGraphicApi:
   void PresentFrame(void) override;
 
-protected:
-  void DoOrtho(int32_t, int32_t) override;
-
 private:
   HWND        m_hWnd;
   HDC         m_hDeviceContex;

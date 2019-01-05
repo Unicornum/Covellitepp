@@ -25,9 +25,6 @@
     <ClInclude Include="Renderer\Api.forward.hpp">
       <Filter>Renderer</Filter>
     </ClInclude>
-    <ClInclude Include="Renderer\ConstantBuffer.hpp">
-      <Filter>Renderer</Filter>
-    </ClInclude>
     <ClInclude Include="Renderer\DxCheck.hpp">
       <Filter>Renderer</Filter>
     </ClInclude>
@@ -62,6 +59,13 @@
       <Filter>Renderer</Filter>
     </ClInclude>
     <ClInclude Include="Renderer\OpenGLCommon.hpp">
+      <Filter>Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="Vertex.hpp" />
+    <ClInclude Include="Renderer\fx\Data.h">
+      <Filter>Renderer\fx</Filter>
+    </ClInclude>
+    <ClInclude Include="Renderer\GLMath.hpp">
       <Filter>Renderer</Filter>
     </ClInclude>
   </ItemGroup>
@@ -103,10 +107,7 @@
     <FxCompile Include="Renderer\fx\Pixel.fx">
       <Filter>Renderer\fx</Filter>
     </FxCompile>
-    <FxCompile Include="Renderer\fx\PixelInput.fx">
-      <Filter>Renderer\fx</Filter>
-    </FxCompile>
-    <FxCompile Include="Renderer\fx\VertexInput.fx">
+    <FxCompile Include="Renderer\fx\Input.fx">
       <Filter>Renderer\fx</Filter>
     </FxCompile>
   </ItemGroup>

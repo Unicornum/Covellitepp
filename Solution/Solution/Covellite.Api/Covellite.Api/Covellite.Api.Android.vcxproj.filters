@@ -46,6 +46,10 @@
     <ClInclude Include="Renderer\OpenGLCommon.hpp">
       <Filter>Renderer</Filter>
     </ClInclude>
+    <ClInclude Include="Vertex.hpp" />
+    <ClInclude Include="Renderer\GLMath.hpp">
+      <Filter>Renderer</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Window.cpp" />

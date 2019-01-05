@@ -70,11 +70,6 @@ void OpenGL::PresentFrame(void) /*override*/
   WINAPI_CHECK USING_MOCK ::SwapBuffers(m_hDeviceContex);
 }
 
-void OpenGL::DoOrtho(int32_t _Width, int32_t _Height) /*override*/
-{
-  glOrtho(0, _Width, _Height, 0, -1, 1);
-}
-
 } // namespace renderer
 
 } // namespace api

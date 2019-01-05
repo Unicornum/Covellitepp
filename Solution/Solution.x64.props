@@ -3,6 +3,7 @@
   <ImportGroup Label="PropertySheets">
     <Import Project="Solution\Externals\Default.props" />
     <Import Project="Solution\Externals\Covellite\Covellite.props" />
+    <Import Project="Solution.props" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup />

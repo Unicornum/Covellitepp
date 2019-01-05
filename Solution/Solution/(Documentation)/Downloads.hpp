@@ -19,6 +19,7 @@
 *  
 * | Версия | Windows               | Android               | Комментарий             |
 * | :----: | :-------------------: | :-------------------: | :---------------------- |
+* | 2.1.7  | [Windows v2.1.7]      | [Android v2.1.7]      |                         |
 * | 2.1.6  | [Windows v2.1.6]      | [Android v2.1.6]      |                         |
 * | 2.1.5  | [Windows v2.1.5]      | [Android v2.1.5]      |                         |
 * | 2.1.4  | [Windows v2.1.4]      | [Android v2.1.4]      |                         |
@@ -28,6 +29,8 @@
 * | 2.1.0  | [Windows v2.1.0]      | [Android v2.1.0]      |                         |
 * | 1.0.0  | -                     | [Android v1.0.0]      |                         |
 *  
+*  [Windows v2.1.7]: https://github.com/Unicornum/Unicornum.github.io/releases/download/covellite/Covellitepp_v2.1.7.zip "Covellite++ Windows example"
+*  [Android v2.1.7]: https://github.com/Unicornum/Unicornum.github.io/releases/download/covellite/Covellitepp_v2.1.7.apk "Covellite++ Android example"
 *  [Windows v2.1.6]: https://github.com/Unicornum/Unicornum.github.io/releases/download/covellite/Covellitepp_v2.1.6.zip "Covellite++ Windows example"
 *  [Android v2.1.6]: https://github.com/Unicornum/Unicornum.github.io/releases/download/covellite/Covellitepp_v2.1.6.apk "Covellite++ Android example"
 *  [Windows v2.1.5]: https://github.com/Unicornum/Unicornum.github.io/releases/download/covellite/Covellitepp_v2.1.5.zip "Covellite++ Windows example"

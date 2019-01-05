@@ -74,7 +74,7 @@ public:
   ~DirectX9(void);
 };
 
-FACTORY_REGISTER_STRING_NAME(DirectX9);
+//FACTORY_REGISTER_STRING_NAME(DirectX9);
 
 } // namespace renderer
 

@@ -22,6 +22,8 @@
 #include "../../Covellite.Api/Renderer/Renderer.cpp"
 #include "../../Covellite.Api/Renderer/Renderer.android.cpp"
 
+#include <Covellite.Gui/Covellite.Gui/Renderer.cpp>
+
 #include "../Mock/Equal.hpp"
 #include "../Mock/RendererImpl.hpp"
 

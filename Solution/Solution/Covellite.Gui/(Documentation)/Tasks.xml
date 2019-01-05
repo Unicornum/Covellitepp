@@ -13,12 +13,17 @@
     </Task1>
   </Process>
   <Complete>
-    <Week6202>
-      <Task6 Text="Тесты класса Renderer." Type="Red" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="false"/>
-      <Task10 Text="Установка State.Sampler после установки текстуры." Type="Red" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="false"/>
-    </Week6202>
-    <Week6201/>
-    <Week6200/>
-    <Week6199/>
+    <Week6207>
+      <Task13 Text="Удаление отключения использования источников света." Type="Red" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="false"/>
+    </Week6207>
+    <Week6206>
+      <Task7 Text="Исправление логики рендеринга с учетом изменений компонентной системы." Type="Red" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="false">
+        <Task8 Text="Приведение в соответствие." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+        <Task9 Text="Отключение источника света." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+        <Task10 Text="Ограничивающий прямоугольник - через Data.Rect." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+      </Task7>
+    </Week6206>
+    <Week6205/>
+    <Week6204/>
   </Complete>
 </Tasks>

@@ -24,4 +24,9 @@
 *  платформы.
 *  
 * \image html ".\Solution\Covellite.Api\(Documentation)\Classes.png"
+*  
+*  Компонентная система
+*  --------------------
+*  
+* \subpage CovelliteApiComponentSystemPage
 */

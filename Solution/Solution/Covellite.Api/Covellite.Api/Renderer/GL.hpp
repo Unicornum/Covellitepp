@@ -17,5 +17,27 @@
 #include <gles\gl.h>
 #include <gles\glext.h>
 
-#endif
-#endif
+inline void glOrtho(GLfloat _Left, GLfloat _Right, GLfloat _Bottom,
+  GLfloat _Top, GLfloat _zNear, GLfloat _zFar)
+{
+  glOrthof(_Left, _Right, _Bottom, _Top, _zNear, _zFar);
+}
+
+inline void glFrustum(GLfloat _Left, GLfloat _Right, GLfloat _Bottom,
+  GLfloat _Top, GLfloat _zNear, GLfloat _zFar)
+{
+  glFrustumf(_Left, _Right, _Bottom, _Top, _zNear, _zFar);
+}
+
+inline void glClearDepth(GLfloat _Depth)
+{
+  glClearDepthf(_Depth);
+}
+
+inline void glDepthRange(GLclampf _zNear, GLclampf _zFar)
+{
+  glDepthRangef(_zNear, _zFar);
+}
+
+#endif // __USING_GTEST
+#endif // BOOST_OS_...

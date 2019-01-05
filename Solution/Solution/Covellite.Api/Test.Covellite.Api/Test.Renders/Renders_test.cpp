@@ -72,6 +72,96 @@ TEST_F(Renders_test, /*DISABLED_*/Test_Obtain_UnknownType)
 }
 
 // ************************************************************************** //
+TEST_F(Renders_test, /*DISABLED_*/Test_Obtain_CreateNullptr)
+{
+  TestCaller Caller;
+
+  auto Creator =
+    [&](const Component_t::ComponentPtr_t &) -> Tested_t::Render_t
+  {
+    Caller.Creator(uT("Texture"));
+
+    return nullptr;
+  };
+
+  Tested_t Example{
+  {
+    { uT("Texture"), Creator },
+  } };
+
+  using namespace ::testing;
+
+  InSequence Dummy;
+
+  EXPECT_CALL(Caller, Creator(uT("Texture")))
+    .Times(2);
+
+  const auto Result = Example.Obtain(
+    {
+      Component_t::Make({
+        { uT("type"), uT("Texture") },
+        { uT("id"), uT("TextureId") },
+        }),
+      Component_t::Make({
+        { uT("type"), uT("Texture") },
+        { uT("id"), uT("TextureId") },
+        }),
+    });
+  EXPECT_TRUE(Result.empty());
+}
+
+// ************************************************************************** //
+TEST_F(Renders_test, /*DISABLED_*/Test_Obtain_CreateException)
+{
+  using LoggerProxy_t = ::mock::alicorn::modules::logger::LoggerProxy;
+  LoggerProxy_t LoggerProxy;
+  LoggerProxy_t::GetInstance() = &LoggerProxy;
+
+  const auto LogMessage = uT("Error: ") +
+    uT("Create render fail: Exception1812151850 [id: TextureId, type: Texture].");
+
+  TestCaller Caller;
+
+  auto Creator = [&](const Component_t::ComponentPtr_t &) -> Tested_t::Render_t
+  {
+    Caller.Creator(uT("Texture"));
+
+    throw ::std::exception{ "Exception1812151850" };
+  };
+
+  Tested_t Example{
+  {
+    { uT("Texture"), Creator },
+  } };
+
+  using namespace ::testing;
+
+  InSequence Dummy;
+
+  for (size_t i = 0; i < 2; i++)
+  {
+    EXPECT_CALL(Caller, Creator(uT("Texture")))
+      .Times(1);
+
+    EXPECT_CALL(LoggerProxy, ToLog(LogMessage))
+      .Times(1);
+  }
+
+  const auto Result = Example.Obtain(
+    {
+      Component_t::Make({
+        { uT("type"), uT("Texture") },
+        { uT("id"), uT("TextureId") },
+        }),
+      Component_t::Make({
+        { uT("type"), uT("Texture") },
+        { uT("id"), uT("TextureId") },
+        }),
+    });
+  EXPECT_TRUE(Result.empty());
+}
+
+// ************************************************************************** //
 TEST_F(Renders_test, /*DISABLED_*/Test_Obtain_CreateNewRenders)
 {
   TestCaller Caller;
@@ -189,6 +279,119 @@ TEST_F(Renders_test, /*DISABLED_*/Test_Obtain_ExistsRenders)
     .Times(3);
 
   for (auto & Render : Result) Render();
+}
+
+// ************************************************************************** //
+TEST_F(Renders_test, /*DISABLED_*/Test_Obtain_EmptyRenders)
+{
+  TestCaller Caller;
+
+  auto TextureCreator =
+    [&](const Component_t::ComponentPtr_t & _pComponent) -> Tested_t::Render_t
+  {
+    Caller.Creator(_pComponent->Type);
+
+    return [&, _pComponent]() { Caller.Render(_pComponent->Id); };
+  };
+
+  auto MeshCreator =
+    [&](const Component_t::ComponentPtr_t &) -> Tested_t::Render_t
+  {
+    return nullptr;
+  };
+
+  Tested_t Example{
+    {
+      { uT("Texture"), TextureCreator },
+      { uT("Mesh"), MeshCreator },
+    } };
+
+  using namespace ::testing;
+
+  // Первый вызов - создание.
+  {
+    InSequence Dummy;
+
+    EXPECT_CALL(Caller, Creator(uT("Texture")))
+      .Times(1);
+
+    EXPECT_CALL(Caller, Creator(_))
+      .Times(0);
+
+    const auto Result = Example.Obtain(
+      {
+        Component_t::Make({
+          { uT("type"), uT("Texture") },
+          { uT("id"), uT("TextureId") },
+          }),
+        Component_t::Make({
+          { uT("type"), uT("Texture") },
+          { uT("id"), uT("TextureId") },
+          }),
+        Component_t::Make({
+          { uT("type"), uT("Mesh") },
+          { uT("id"), uT("MeshId") },
+          }),
+        Component_t::Make({
+          { uT("type"), uT("Mesh") },
+          { uT("id"), uT("MeshId") },
+          }),
+        Component_t::Make({
+          { uT("type"), uT("Mesh") },
+          { uT("id"), uT("MeshId") },
+          }),
+      });
+    EXPECT_EQ(2, Result.size());
+
+    EXPECT_CALL(Caller, Render(uT("TextureId")))
+      .Times(2);
+
+    EXPECT_CALL(Caller, Render(_))
+      .Times(0);
+
+    for (auto & Render : Result) Render();
+  }
+
+  // Второй вызов - получение существующих.
+  {
+    InSequence Dummy;
+
+    EXPECT_CALL(Caller, Creator(_))
+      .Times(0);
+
+    const auto Result = Example.Obtain(
+      {
+        Component_t::Make({
+          { uT("type"), uT("Texture") },
+          { uT("id"), uT("TextureId") },
+          }),
+        Component_t::Make({
+          { uT("type"), uT("Texture") },
+          { uT("id"), uT("TextureId") },
+          }),
+        Component_t::Make({
+          { uT("type"), uT("Mesh") },
+          { uT("id"), uT("MeshId") },
+          }),
+        Component_t::Make({
+          { uT("type"), uT("Mesh") },
+          { uT("id"), uT("MeshId") },
+          }),
+        Component_t::Make({
+          { uT("type"), uT("Mesh") },
+          { uT("id"), uT("MeshId") },
+          }),
+      });
+    EXPECT_EQ(2, Result.size());
+
+    EXPECT_CALL(Caller, Render(uT("TextureId")))
+      .Times(2);
+
+    EXPECT_CALL(Caller, Render(_))
+      .Times(0);
+
+    for (auto & Render : Result) Render();
+  }
 }
 
 // ************************************************************************** //

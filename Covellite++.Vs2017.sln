@@ -224,6 +224,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "(Documentation)", "(Documen
 	ProjectSection(SolutionItems) = preProject
 		Solution\Solution\Covellite.Api\(Documentation)\Classes.png = Solution\Solution\Covellite.Api\(Documentation)\Classes.png
 		Solution\Solution\Covellite.Api\(Documentation)\Classes.txt = Solution\Solution\Covellite.Api\(Documentation)\Classes.txt
+		Solution\Solution\Covellite.Api\(Documentation)\ComponentSystem.hpp = Solution\Solution\Covellite.Api\(Documentation)\ComponentSystem.hpp
 		Solution\Solution\Covellite.Api\(Documentation)\ProjectPage.hpp = Solution\Solution\Covellite.Api\(Documentation)\ProjectPage.hpp
 	EndProjectSection
 EndProject

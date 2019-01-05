@@ -8,6 +8,9 @@
 * \defgroup CovelliteApiGroup Api
 * \ingroup CovelliteGroup
 *  Группа классов проекта \ref CovelliteApiPage.
+*  
+* \ref CovelliteApiComponentSystemPage
+*  
 */
 
 #include "Api\Events.hpp"

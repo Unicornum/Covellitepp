@@ -30,6 +30,7 @@ static const EGLint EGL_ALPHA_SIZE = 1611182257;
 static const EGLint EGL_BLUE_SIZE = 1611182258;
 static const EGLint EGL_GREEN_SIZE = 1611182259;
 static const EGLint EGL_RED_SIZE = 1611182300;
+static const EGLint EGL_DEPTH_SIZE = 1812271130;
 static const EGLint EGL_WIDTH = 1611191345;
 static const EGLint EGL_HEIGHT = 1611191346;
 

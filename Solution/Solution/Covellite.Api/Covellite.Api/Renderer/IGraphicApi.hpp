@@ -47,19 +47,6 @@ protected:
   using Creators_t = ::std::map<String_t, Creator_t>;
 
 public:
-  /// \brief
-  ///  Описание одной вершины меша.
-  /// \details
-  ///  - Структура должна соответствовать Rocket::Core::Vertex
-  class Vertex final
-  {
-  public:
-    float x, y;
-    uint32_t Color;
-    float u, v;
-  };
-
-public:
   virtual String_t GetUsingApi(void) const = 0;
   virtual void ClearFrame(void) = 0;
   virtual void PresentFrame(void) = 0;

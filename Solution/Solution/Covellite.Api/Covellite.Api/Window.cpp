@@ -106,10 +106,6 @@ void Window::Subscribe(const EventHandlerPtr_t & _pEvents) /*override*/
 
   using namespace ::covellite::core;
 
-#if BOOST_COMP_MSVC
-# pragma warning(pop)
-#endif
-
   (*_pEvents)[Event::StartDrawing].connect([&](const Params &) 
   { 
     m_pImpl->StartDrawingFrame();
@@ -125,6 +121,10 @@ void Window::Subscribe(const EventHandlerPtr_t & _pEvents) /*override*/
     const auto Rect = GetClientRect();
     m_pImpl->ResizeWindow(Rect.Width, Rect.Height);
   });
+
+#if BOOST_COMP_MSVC
+# pragma warning(pop)
+#endif
 }
 
 /*static*/ Window::RendererPtr_t Window::MakeRender(const WindowOs_t & _Window)

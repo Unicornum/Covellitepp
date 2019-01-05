@@ -7,6 +7,7 @@
 #include <Covellite/Predefined.hpp>
 #include <Covellite/Os/Predefined.hpp>
 #include <Covellite/Api/RenderInterface.hpp>
+#include <Covellite/Gui/Renderer.hpp>
 
 namespace covellite
 {
@@ -29,6 +30,9 @@ class IGraphicApi;
 * \details
 *  - Задача класса - скрыть от клиентского кода ссылку на libRocket 
 *  (в разделе используется Rocket::Core::RenderererInterface).
+* \deprecated
+* \todo
+*  Удалить в следующей стабильной версии.
 *  
 * \version
 *  1.0.0.0        \n
@@ -102,22 +106,7 @@ private:
 
 private:
   const IGraphicApiPtr_t m_pImpl;
-  const RendersPtr_t m_pRenders;
-
-private:
-  const Renders_t m_DefaultRenders;
-  ComponentPtr_t m_pScissorEnabled;
-
-  class Object
-  {
-  public:
-    ComponentPtr_t pPosition;
-    Renders_t Renders;
-  };
-
-  ::std::map<size_t, Object> m_Objects;
-
-  Renders_t m_RenderQueue;
+  ::covellite::gui::Renderer m_Renderer;
 
 public:
   Renderer(const String_t &, const Data &);

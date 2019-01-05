@@ -2,6 +2,7 @@
 #include "stdafx.h"
 #include "DirectX9.hpp"
 #include <alicorn/platform/winapi-check.hpp>
+#include <Covellite/Api/Vertex.hpp>
 #include "DxCheck.hpp"
 #include "Component.hpp"
 
@@ -179,7 +180,7 @@ auto DirectX9::CreateBuffer(const ComponentPtr_t & _pComponent) const->Render_t
 {
   auto CreateVertexBuffer = [&](const ComponentPtr_t & _pComponent) -> Render_t
   {
-    const Component::Buffer<Vertex> Data{ _pComponent };
+    const Component::Buffer<Vertex::Gui> Data{ _pComponent };
 
     class D3D9Vertex final
     {
@@ -197,7 +198,7 @@ auto DirectX9::CreateBuffer(const ComponentPtr_t & _pComponent) const->Render_t
 
     ComPtr_t<IDirect3DVertexBuffer9> pBuffer;
     DX_CHECK m_pDevice->CreateVertexBuffer(
-      Data.Count * sizeof(D3D9Vertex),
+      (UINT)(Data.Count * sizeof(D3D9Vertex)),
       D3DUSAGE_WRITEONLY,
       D3D9Vertex::GetFVF(),
       D3DPOOL_DEFAULT,
@@ -214,10 +215,10 @@ auto DirectX9::CreateBuffer(const ComponentPtr_t & _pComponent) const->Render_t
       pVertices[i].z = 0;
 
       pVertices[i].colour = D3DCOLOR_RGBA(
-        (Data.pData[i].Color & 0x000000FF) >> 0,
-        (Data.pData[i].Color & 0x0000FF00) >> 8,
-        (Data.pData[i].Color & 0x00FF0000) >> 16,
-        (Data.pData[i].Color & 0xFF000000) >> 24);
+        (Data.pData[i].ABGRColor & 0x000000FF) >> 0,
+        (Data.pData[i].ABGRColor & 0x0000FF00) >> 8,
+        (Data.pData[i].ABGRColor & 0x00FF0000) >> 16,
+        (Data.pData[i].ABGRColor & 0xFF000000) >> 24);
 
       pVertices[i].u = Data.pData[i].u;
       pVertices[i].v = Data.pData[i].v;
@@ -238,7 +239,7 @@ auto DirectX9::CreateBuffer(const ComponentPtr_t & _pComponent) const->Render_t
 
     ComPtr_t<IDirect3DIndexBuffer9> pBuffer;
     DX_CHECK m_pDevice->CreateIndexBuffer(
-      Data.Count * sizeof(unsigned int),
+      (UINT)(Data.Count * sizeof(unsigned int)),
       D3DUSAGE_WRITEONLY,
       D3DFMT_INDEX32,
       D3DPOOL_DEFAULT,

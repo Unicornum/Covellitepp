@@ -37,6 +37,9 @@ public:
   void Remove(const Object_t &);
 
 private:
+  Render_t Create(const ComponentPtr_t &);
+
+private:
   const Creators_t m_Creators;
   ::std::map<Id_t, Render_t> m_AllExistingRenders;
 

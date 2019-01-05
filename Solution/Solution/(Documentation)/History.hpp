@@ -6,6 +6,51 @@
 *  =================
 *  <table frame=void><tr><td></td></tr></table>
 *  
+*  Version: 2.1.8.??? Unknown
+*  -----
+*  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект \ref CovelliteApiPage : </td></tr></table>
+*  <table frame=void border=1 bordercolor=#FFFFFF cellpadding=5 cellspacing=0 width=98%><tr>
+*    <td width=10px></td>
+*    <td bgcolor=#B8CCE4 width=125px align=center> 04.01.2019 11:07 </td>
+*    <td bgcolor=#C0FFC0> Исправление кода с учетом изменения компонентной системы: реализация DirectX11. </td>
+*  </tr></table>
+*  <table frame=void border=1 bordercolor=#FFFFFF cellpadding=5 cellspacing=0 width=98%><tr>
+*    <td width=10px></td>
+*    <td bgcolor=#B8CCE4 width=125px align=center> 27.12.2018 21:07 </td>
+*    <td bgcolor=#C0FFC0> Исправление кода с учетом изменения компонентной системы: реализация DirectX10. </td>
+*  </tr></table>
+*  <table frame=void border=1 bordercolor=#FFFFFF cellpadding=5 cellspacing=0 width=98%><tr>
+*    <td width=10px></td>
+*    <td bgcolor=#B8CCE4 width=125px align=center> 27.12.2018 12:56 </td>
+*    <td bgcolor=#C0FFC0> Исправление кода с учетом изменения компонентной системы: реализация OpenGLES. </td>
+*  </tr></table>
+*  <table frame=void border=1 bordercolor=#FFFFFF cellpadding=5 cellspacing=0 width=98%><tr>
+*    <td width=10px></td>
+*    <td bgcolor=#B8CCE4 width=125px align=center> 27.12.2018 11:53 </td>
+*    <td bgcolor=#C0FFC0> Исправление кода с учетом изменения компонентной системы: реализация OpenGL. </td>
+*  </tr></table>
+*  <table frame=void border=1 bordercolor=#FFFFFF cellpadding=5 cellspacing=0 width=98%><tr>
+*    <td width=10px></td>
+*    <td bgcolor=#B8CCE4 width=125px align=center> 15.12.2018 19:31 </td>
+*    <td bgcolor=#C0FFC0> Получение параметра компонента по хешу его имени. </td>
+*  </tr></table>
+*  <table frame=void border=1 bordercolor=#FFFFFF cellpadding=5 cellspacing=0 width=98%><tr>
+*    <td width=10px></td>
+*    <td bgcolor=#B8CCE4 width=125px align=center> 15.12.2018 19:04 </td>
+*    <td bgcolor=#C0FFC0> Обработка ошибок при создании компонентов. </td>
+*  </tr></table>
+*  <table frame=void border=1 bordercolor=#FFFFFF cellpadding=5 cellspacing=0 width=98%><tr>
+*    <td width=10px></td>
+*    <td bgcolor=#B8CCE4 width=125px align=center> 25.11.2018 12:18 </td>
+*    <td bgcolor=#C0FFC0> Обработка пустых рендеров. </td>
+*  </tr></table>
+*  <table frame=void border=1 bordercolor=#FFFFFF cellpadding=5 cellspacing=0 width=98%><tr>
+*    <td width=10px></td>
+*    <td bgcolor=#B8CCE4 width=125px align=center> 24.11.2018 13:22 </td>
+*    <td bgcolor=#FFC0C0> fix: Инициализация ссылкой на еще не существующий объект. </td>
+*  </tr></table>
+*  <table frame=void><tr><td></td></tr></table>
+*  
 *  Version: 2.1.7.1063 Unknown
 *  -----
 *  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект \ref CovelliteApiPage : </td></tr></table>

@@ -26,11 +26,18 @@ namespace api
 * \exception std::exception
 *  - Действие невозможно (подробнее см. описание исключения).
 */
-inline /*static*/ auto Component::Make(const Params_t & _Params) -> ComponentPtr_t
+inline /*static*/ auto Component::Make(const SourceParams_t & _Params) -> ComponentPtr_t
 {
   using Pool_t = ::alicorn::extension::std::pool<>;
 
-  return Pool_t::make_unique<Component>(_Params, ConstructorTag{});
+  Params_t Params;
+
+  for (const auto & Value : _Params)
+  {
+    Params[::std::hash<Name_t>{}(Value.first)] = Value.second;
+  }
+
+  return Pool_t::make_unique<Component>(Params, ConstructorTag{});
 }
 
 /**
@@ -86,11 +93,11 @@ public:
 *  с указанным именем.
 *  - Если параметра с указанным именем не существует, функция вернет указанное 
 *  значение по умолчанию.
-*  - Если параметр с указанным именем хратит строковое значение, оно будет 
+*  - Если параметр с указанным именем хранит строковое значение, оно будет 
 *  преобразовано в значение указанного типа.
 *  
 * \param [in] _Name
-*  Имя параметра.
+*  Строковое имя параметра.
 * \param [in] _DefaultValue
 *  Значение по умолчанию.
 *  
@@ -106,7 +113,39 @@ public:
 template<class T>
 T Component::GetValue(const Name_t & _Name, const T & _DefaultValue) const
 {
-  auto itValue = m_Params.find(_Name);
+  return GetValue(m_Hasher(_Name), _DefaultValue);
+}
+
+/**
+* \brief
+*  Функция получения значения параметра.
+* \details
+*  - Функция предназначена для быстрого получения значения параметра указанного 
+*  типа с указанным хэшем имени (для параметра имя которого заранее известно,
+*  хеш можно вычислить заранее - один раз - и использовать в дальнейшем).
+*  - Если параметра с указанным хэшем не существует, функция вернет указанное
+*  значение по умолчанию.
+*  - Если параметр с указанным хэшем хранит строковое значение, оно будет
+*  преобразовано в значение указанного типа.
+*
+* \param [in] _Hash
+*  Хэш имени параметра.
+* \param [in] _DefaultValue
+*  Значение по умолчанию.
+*
+* \return \b Value
+*  Значение параметра указанного типа.
+*
+* \exception std::exception
+*  - Параметр с указанным именем содержит значение, тип которого не совпадает
+*  с указанным.
+*  - Параметр с указанным именем содержит строковое значение, которое не
+*  может быть преобразовано в указанный тип.
+*/
+template<class T>
+T Component::GetValue(size_t _Hash, const T & _DefaultValue) const
+{
+  auto itValue = m_Params.find(_Hash);
   if (itValue == m_Params.end()) return _DefaultValue;
 
   if (itValue->second.type() == typeid(String_t))
@@ -135,7 +174,7 @@ T Component::GetValue(const Name_t & _Name, const T & _DefaultValue) const
 template<class T>
 inline void Component::SetValue(const Name_t & _Name, const T & _Value)
 {
-  m_Params[_Name] = _Value;
+  m_Params[m_Hasher(_Name)] = _Value;
 }
 
 } // namespace api

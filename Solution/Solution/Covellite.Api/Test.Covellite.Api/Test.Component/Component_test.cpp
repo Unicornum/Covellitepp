@@ -21,6 +21,7 @@ class Component_test :
 {
 protected:
   using Tested_t = ::covellite::api::Component;
+  using String_t = ::alicorn::extension::std::String;
 
   // Вызывается ПЕРЕД запуском каждого теста
   void SetUp(void) override
@@ -31,6 +32,9 @@ protected:
   void TearDown(void) override
   {
   }
+
+protected:
+  ::std::hash<String_t> m_Hasher;
 };
 
 // Образец макроса для подстановки в класс Component 
@@ -95,7 +99,7 @@ TEST_F(Component_test, /*DISABLED_*/Test_Id)
 }
 
 // ************************************************************************** //
-TEST_F(Component_test, /*DISABLED_*/Test_GetValue)
+TEST_F(Component_test, /*DISABLED_*/Test_GetValue_StringName)
 {
   const auto pExample = Tested_t::Make({
     {
@@ -126,7 +130,7 @@ TEST_F(Component_test, /*DISABLED_*/Test_GetValue)
 }
 
 // ************************************************************************** //
-TEST_F(Component_test, /*DISABLED_*/Test_GetValue_Pointer)
+TEST_F(Component_test, /*DISABLED_*/Test_GetValue_StringName_Pointer)
 {
   const uint8_t * pData = (const uint8_t *)1811061740;
 
@@ -139,7 +143,7 @@ TEST_F(Component_test, /*DISABLED_*/Test_GetValue_Pointer)
 }
 
 // ************************************************************************** //
-TEST_F(Component_test, /*DISABLED_*/Test_GetValue_InvalidType)
+TEST_F(Component_test, /*DISABLED_*/Test_GetValue_StringName_InvalidType)
 {
   const auto pExample = Tested_t::Make({
     {
@@ -153,6 +157,78 @@ TEST_F(Component_test, /*DISABLED_*/Test_GetValue_InvalidType)
   EXPECT_THROW(pExample->GetValue(uT("Param2"), uT("Unknown")), ::std::exception);
   EXPECT_THROW(pExample->GetValue(uT("Param3"), uT("Unknown")), ::std::exception);
   EXPECT_THROW(pExample->GetValue(uT("Param4"), 0), ::std::exception);
+}
+
+// ************************************************************************** //
+TEST_F(Component_test, /*DISABLED_*/Test_GetValue_Hash)
+{
+  const auto pExample = Tested_t::Make({
+    {
+      { uT("Param1"), uT("Value1") },
+      { uT("Param2"), uT("Value2") },
+      { uT("Param3"), uT("true") },
+      { uT("Param4"), uT("false") },
+      { uT("Param5"), true },
+      { uT("Param6"), false },
+      { uT("Param7"), uT("12345") },
+      { uT("Param8"), 12345 },
+      { uT("Param9"), 123.45f },
+    } });
+
+  auto GetValue = [&](const String_t & _Name, const auto & _DefaultValue) -> auto
+  {
+    return pExample->GetValue(m_Hasher(_Name), _DefaultValue);
+  };
+
+  EXPECT_EQ(0, GetValue(uT("Param0"), 0));
+  EXPECT_EQ(uT("Unknown"), GetValue(uT("Param0"), uT("Unknown")));
+  EXPECT_EQ(uT("Value1"), GetValue(uT("Param1"), uT("Unknown")));
+  EXPECT_EQ(uT("Value2"), GetValue(uT("Param2"), uT("Unknown")));
+  EXPECT_EQ(true, GetValue(uT("Param3"), false));
+  EXPECT_EQ(false, GetValue(uT("Param4"), false));
+  EXPECT_EQ(true, GetValue(uT("Param5"), true));
+  EXPECT_EQ(false, GetValue(uT("Param6"), true));
+  EXPECT_EQ(uT("12345"), GetValue(uT("Param7"), uT("0")));
+  EXPECT_EQ(12345, GetValue(uT("Param7"), 0));
+  EXPECT_EQ(12345.0f, GetValue(uT("Param7"), 0.0f));
+  EXPECT_EQ(12345, GetValue(uT("Param8"), 0));
+  EXPECT_EQ(123.45f, GetValue(uT("Param9"), 0.0f));
+}
+
+// ************************************************************************** //
+TEST_F(Component_test, /*DISABLED_*/Test_GetValue_Hash_Pointer)
+{
+  const uint8_t * pData = (const uint8_t *)1811061740;
+
+  const auto pExample = Tested_t::Make({
+    {
+      { uT("pData"), pData },
+    } });
+
+  EXPECT_EQ(pData, 
+    pExample->GetValue<const uint8_t *>(m_Hasher(uT("pData")), nullptr));
+}
+
+// ************************************************************************** //
+TEST_F(Component_test, /*DISABLED_*/Test_GetValue_Hash_InvalidType)
+{
+  const auto pExample = Tested_t::Make({
+    {
+      { uT("Param1"), uT("Value1") },
+      { uT("Param2"), true },
+      { uT("Param3"), 12345 },
+      { uT("Param4"), 123.45f },
+    } });
+
+  auto GetValue = [&](const String_t & _Name, const auto & _DefaultValue) -> auto
+  {
+    return pExample->GetValue(m_Hasher(_Name), _DefaultValue);
+  };
+
+  EXPECT_THROW(GetValue(uT("Param1"), 0), ::std::exception);
+  EXPECT_THROW(GetValue(uT("Param2"), uT("Unknown")), ::std::exception);
+  EXPECT_THROW(GetValue(uT("Param3"), uT("Unknown")), ::std::exception);
+  EXPECT_THROW(GetValue(uT("Param4"), 0), ::std::exception);
 }
 
 // ************************************************************************** //

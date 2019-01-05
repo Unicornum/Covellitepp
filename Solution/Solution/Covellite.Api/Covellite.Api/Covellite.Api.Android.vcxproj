@@ -65,6 +65,7 @@
     <ClInclude Include="Renderer\Api.forward.hpp" />
     <ClInclude Include="Renderer\Component.hpp" />
     <ClInclude Include="Renderer\GL.hpp" />
+    <ClInclude Include="Renderer\GLMath.hpp" />
     <ClInclude Include="Renderer\IGraphicApi.hpp" />
     <ClInclude Include="Renderer\OpenGLCommon.hpp" />
     <ClInclude Include="Renderer\OpenGLES.hpp" />
@@ -73,6 +74,7 @@
     <ClInclude Include="RenderInterface.hpp" />
     <ClInclude Include="Renders.hpp" />
     <ClInclude Include="stdafx.h" />
+    <ClInclude Include="Vertex.hpp" />
     <ClInclude Include="Window.hpp" />
     <ClInclude Include="Window.mock.hpp" />
   </ItemGroup>
