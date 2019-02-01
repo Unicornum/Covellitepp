@@ -90,23 +90,61 @@
     </AntPackage>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <Content Include="assets\data\body.rcss" />
+    <Content Include="assets\data\bricks.jpg" />
+    <Content Include="assets\data\controls.rcss" />
+    <Content Include="assets\data\controls.rml">
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="assets\data\demo.rcss" />
     <Content Include="assets\data\demo.rml">
       <SubType>Designer</SubType>
     </Content>
-    <Content Include="assets\data\demo2.rml" />
-    <Content Include="assets\data\fonts\Times New Roman.ttf" />
+    <Content Include="assets\data\description.rcss" />
+    <Content Include="assets\data\description.rml">
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="assets\data\draw3dobject.rcss" />
+    <Content Include="assets\data\draw3dobject.rml">
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="assets\data\experimental.rcss" />
+    <Content Include="assets\data\experimental.rml" />
+    <Content Include="assets\data\fonts.rcss" />
+    <Content Include="assets\data\fonts\CountryWestern.ttf" />
+    <Content Include="assets\data\fonts\fa-brands-400.ttf" />
+    <Content Include="assets\data\fonts\fa-regular-400.ttf" />
+    <Content Include="assets\data\fonts\fa-solid-900.ttf" />
+    <Content Include="assets\data\fonts\TimesNewRomanBold.ttf" />
+    <Content Include="assets\data\fonts\TimesNewRomanRegular.ttf" />
     <Content Include="assets\data\fonts\Ubuntu.ttf" />
+    <Content Include="assets\data\fonts\Vollkorn-Black.ttf" />
+    <Content Include="assets\data\fonts\Vollkorn-Bold.ttf" />
+    <Content Include="assets\data\fonts\Vollkorn-BoldItalic.ttf" />
+    <Content Include="assets\data\fonts\Vollkorn-Italic.ttf" />
+    <Content Include="assets\data\fonts\Vollkorn-Regular.ttf" />
+    <Content Include="assets\data\fonts\Vollkorn-SemiBold.ttf" />
     <Content Include="assets\data\gradient.png" />
-    <Content Include="assets\data\invader.png" />
-    <Content Include="assets\data\invader.rcss" />
-    <Content Include="assets\data\present.png" />
-    <Content Include="assets\data\rkt.rcss" />
-    <Content Include="assets\data\scroll.rcss" />
-    <Content Include="assets\data\scroll.rml" />
-    <Content Include="assets\data\table.rcss" />
-    <Content Include="assets\data\table.rml" />
+    <Content Include="assets\data\layer.template.rcss" />
+    <Content Include="assets\data\layer.template.rml">
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="assets\data\main.rcss" />
+    <Content Include="assets\data\main.rml">
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="assets\data\npc.jpg" />
+    <Content Include="assets\data\paper.png" />
+    <Content Include="assets\data\scrollbar.rcss" />
+    <Content Include="assets\data\simple2dgame.rcss" />
+    <Content Include="assets\data\simple2dgame.rml">
+      <SubType>Designer</SubType>
+    </Content>
+    <Content Include="assets\data\text.rcss" />
+    <Content Include="assets\data\text.rml">
+      <SubType>Designer</SubType>
+    </Content>
     <Content Include="assets\data\title.png" />
-    <Content Include="assets\data\window.rml" />
     <Content Include="res\drawable\icon.png" />
     <Content Include="res\values\strings.xml" />
     <AntBuildXml Include="build.xml" />

@@ -25,6 +25,7 @@ TEST_F(OpenGLCommon_test, /*DISABLED_*/Test_Destructor)
 }
 
 // ************************************************************************** //
+// cppcheck-suppress syntaxError
 TEST_F(OpenGLCommon_test, /*DISABLED_*/Test_RegisterIntoFactory)
 {
   using namespace ::alicorn::modules::patterns;
@@ -148,12 +149,10 @@ TEST_F(OpenGLCommon_test, /*DISABLED_*/Test_SamplerState)
     GL_LINEAR))
     .Times(1);
 
-  EXPECT_CALL(GLProxy, TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S,
-    GL_CLAMP_TO_EDGE))
+  EXPECT_CALL(GLProxy, TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT))
     .Times(1);
 
-  EXPECT_CALL(GLProxy, TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T,
-    GL_CLAMP_TO_EDGE))
+  EXPECT_CALL(GLProxy, TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT))
     .Times(1);
 
   Render();

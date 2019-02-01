@@ -51,7 +51,7 @@ inline bool operator== (
 #define GL_LINEAR                         0x2601
 #define GL_TEXTURE_WRAP_S                 0x2802
 #define GL_TEXTURE_WRAP_T                 0x2803
-#define GL_CLAMP_TO_EDGE                  0x812F
+#define GL_REPEAT                         0x2901
 #define GL_RGBA                           0x1908
 #define GL_SCISSOR_TEST                   0x0C11
 #define GL_VIEWPORT                       0x0BA2
@@ -124,7 +124,7 @@ public:
   MOCK_METHOD4(Viewport, void (GLint, GLint, GLsizei, GLsizei));
   MOCK_METHOD1(MatrixMode, void (GLenum));
   MOCK_METHOD0(LoadIdentity, void (void));
-  MOCK_METHOD6(Ortho, void(GLdouble, GLdouble, GLdouble, GLdouble, GLdouble, GLdouble));
+  MOCK_METHOD6(Ortho, void(GLfloat, GLfloat, GLfloat, GLfloat, GLfloat, GLfloat));
   MOCK_METHOD4(Scissor, void (GLint, GLint, GLsizei, GLsizei));
   MOCK_METHOD4(ClearColor, void(GLclampf, GLclampf, GLclampf, GLclampf));
   MOCK_METHOD1(Clear, void(GLbitfield));
@@ -138,7 +138,7 @@ public:
 
 public:
   template<class T>
-  static ::std::vector<T> GetData(GLint _Count, GLsizei _Stride,
+  static ::std::vector<T> GetData(const GLint & _Count, const GLsizei & _Stride,
     const GLvoid * _pRawData)
   {
     ::std::vector<T> Result;
@@ -150,7 +150,7 @@ public:
       auto * pData = reinterpret_cast<const T *>(pRawData);
       if (*pData == (T)0) break;
 
-      for (GLint i = 0; i < _Count; i++)
+      for (GLint i = 0; i < _Count; ++i)
       {
         Result.push_back(pData[i]);
       }
@@ -305,7 +305,7 @@ void glDrawElements(GLenum _Mode, GLsizei _Count, GLenum _Type,
       auto * const pData = reinterpret_cast<const int *>(_pRawData);
 
       GLProxy::Ints_t Result;
-      for (GLsizei i = 0; i < _Count; i++) Result.push_back(pData[i]);
+      for (GLsizei i = 0; i < _Count; ++i) Result.push_back(pData[i]);
       return Result;
     };
 
@@ -360,8 +360,8 @@ void glLoadIdentity(void)
   GLProxy::GetInstance()->LoadIdentity();
 }
 
-void glOrtho(GLdouble _Param1, GLdouble _Param2, GLdouble _Param3, 
-  GLdouble _Param4, GLdouble _Param5, GLdouble _Param6)
+void glOrthof(GLfloat _Param1, GLfloat _Param2, GLfloat _Param3,
+  GLfloat _Param4, GLfloat _Param5, GLfloat _Param6)
 {
   GLProxy::GetInstance()->Ortho(
     _Param1, _Param2, _Param3, _Param4, _Param5, _Param6);
@@ -509,7 +509,7 @@ using ::mock::glBlendFunc;
 using ::mock::glViewport;
 using ::mock::glMatrixMode;
 using ::mock::glLoadIdentity;
-using ::mock::glOrtho;
+using ::mock::glOrthof;
 using ::mock::glScissor;
 using ::mock::glClearColor;
 using ::mock::glClear;

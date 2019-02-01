@@ -1,6 +1,6 @@
 ﻿
 #pragma once
-#include <Covellite\Covellite.hpp>
+#include <Covellite/Covellite.hpp>
 
 /**
 * \ingroup ExampleGroup

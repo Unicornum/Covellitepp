@@ -1,8 +1,8 @@
 ﻿
 #include "stdafx.h"
 #include "ExampleApp.hpp"
-#include <alicorn\logger.hpp>
-#include <alicorn\version.hpp>
+#include <alicorn/logger.hpp>
+#include <alicorn/version.hpp>
 #include "ExampleWindow.hpp"
 #include "ExtraWindow.hpp"
 
@@ -53,13 +53,13 @@ void ExampleApp::DoInitWindow(void)
     
   // Создание обязательного набора объектов окон приложения.
     
-  MakeWindow<ExampleWindow>(                          // Клиенсткий код программы.
-    MakeWindow<::covellite::gui::Window>(          // Класс, обеспечивающий отрисовку GUI
-      MakeWindow<ExtraWindow>(                        // Дополнительный код (для примера), производящий 
-                                                      // заливку окна цветом перед отрисовкой GUI.
-        MakeWindow<::covellite::api::Window>(         // Класс окна графического Api
+  MakeWindow<ExampleWindow>(                          // Клиенсткий код программы, управляющий
+                                                      // переходами между разными слоями GUI.
+    MakeWindow<::covellite::gui::Window>(             // Класс фреймворка, обеспечивающий отрисовку GUI.
+      MakeWindow<ExtraWindow>(                        // Клиентский код, отрисовывающий 3D сцену.
+        MakeWindow<::covellite::api::Window>(         // Класс фреймворка окна графического Api
                                                       // (OpenGL или DirectX, задается в настройках).
-          MakeWindow<::covellite::os::Window>(*this)  // Класс окна операционной системы.
+          MakeWindow<::covellite::os::Window>(*this)  // Класс фреймворка окна операционной системы.
             ))));
 }
 /// [Create main window]

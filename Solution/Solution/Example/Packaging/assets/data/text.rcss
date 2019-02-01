@@ -1,0 +1,140 @@
+
+body#id_body {
+  min-width: 480px;
+  min-height: 480px;
+}
+
+form#id_bkimage {
+  display: block;
+  position: absolute;
+  top: 5 em;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background-decorator: image;
+  background-image: paper.png 0px 0px 479px 612px;
+  padding-left: 3 em;
+  padding-top: 4 em;
+  padding-right: 2 em;
+  padding-bottom: 4 em;
+}
+
+form#id_content {
+  display: block;
+  max-height: 100%;
+  overflow: hidden auto;
+  margin-top: 1 em;
+}
+
+scrollbarvertical sliderbar {
+  margin: 0;
+  padding: 0;
+  width: 12px;
+  min-height: 20px;
+  border-width: 2px;
+  border-left-color: #A0A0A0;
+  border-top-color: #A0A0A0;
+  border-right-color: grey;
+  border-bottom-color: grey;
+  background-color: rgba(255, 255, 255, 40);
+}
+
+form#id_title {
+  display: block;
+}
+
+form#id_icon {
+  display: inline-block;
+  float: left;
+  width: 5 em;
+  height: 5 em;
+  background-decorator: image;
+  background-image: npc.jpg 140px 50px 360px 270px;
+}
+
+form#id_char {
+  display: block;
+}
+
+p#id_name,
+p#id_status {
+  display: block;
+  text-align: center;
+}
+
+p#id_name {
+  font-size: 1.5 em;
+  color: #0c00b3;
+  margin-top: 0.15 em;
+  header-font-effect: shadow;
+  header-offset: 2px 2px;
+  header-color: #E9E9E9;
+}
+
+dialog {
+  display: inline-block;
+  font-size: 0.9 em;
+  color: black;
+  padding-left: 0.5 em;
+  padding-top: 1.5 em;
+  padding-right: 0.5 em;
+  padding-bottom: 0.5 em;
+  /*border-width: 1px;
+  border-color: red;*/
+}
+
+  dialog i {
+    font-style: italic;
+    font-weight: bold;
+  }
+
+  dialog u {
+    text-decoration: underline;
+  }
+
+  dialog big {
+    font-family: Country Western;
+    font-charset: U+0020-007F, U+0410-044F;
+    font-size: 3 em;
+    font-weight: bold;
+    max-width: 0.7 em;
+    padding: 0;
+    line-height: 0.85 em;
+    float: left;
+    color: #6c4500;
+    /*border-width: 1px;
+    border-color: red;*/
+  }
+
+form#id_speech {
+  display: block;
+  font-size: 1.2 em;
+}
+
+.speech {
+  display: block;
+  margin-left: 1 em;
+  margin-right: 1 em;
+  padding-left: 1 em;
+  padding-right: 1 em;
+  padding-top: 0.25 em;
+  padding-bottom: 0.25 em;
+  /*border-width: 1px;
+  border-color: red;*/
+}
+
+  .speech:hover {
+    background-color: rgba(128, 128, 128, 64);
+  }
+
+  .speech#id_evil {
+    color: #a50606;
+  }
+
+  .speech#id_neutral {
+    color: #808080;
+  }
+
+  .speech#id_good {
+    color: #018f10;
+  }

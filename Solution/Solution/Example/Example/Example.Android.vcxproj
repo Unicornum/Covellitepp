@@ -65,9 +65,23 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="Basements\Common.hpp" />
+    <ClInclude Include="Basements\Dummy.hpp" />
+    <ClInclude Include="Basements\IBasement.hpp" />
+    <ClInclude Include="Basements\Simple2DGame.hpp" />
+    <ClInclude Include="Basements\Simple3DObject.hpp" />
     <ClInclude Include="ExampleApp.hpp" />
     <ClInclude Include="ExampleWindow.hpp" />
     <ClInclude Include="ExtraWindow.hpp" />
+    <ClInclude Include="Layers\Controls.hpp" />
+    <ClInclude Include="Layers\Demo.hpp" />
+    <ClInclude Include="Layers\Description.hpp" />
+    <ClInclude Include="Layers\Draw3DObject.hpp" />
+    <ClInclude Include="Layers\Example2DGame.hpp" />
+    <ClInclude Include="Layers\Layer.hpp" />
+    <ClInclude Include="Layers\MainScreen.hpp" />
+    <ClInclude Include="Layers\stdafx.h" />
+    <ClInclude Include="Layers\Text.hpp" />
     <ClInclude Include="pch.h" />
   </ItemGroup>
   <ItemGroup>
@@ -77,10 +91,21 @@
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Basements\Common.cpp" />
+    <ClCompile Include="Basements\Simple2DGame.cpp" />
+    <ClCompile Include="Basements\Simple3DObject.cpp" />
     <ClCompile Include="DefaultSettings.cpp" />
     <ClCompile Include="ExampleApp.cpp" />
     <ClCompile Include="ExampleWindow.cpp" />
     <ClCompile Include="ExtraWindow.cpp" />
+    <ClCompile Include="Layers\Controls.cpp" />
+    <ClCompile Include="Layers\Demo.cpp" />
+    <ClCompile Include="Layers\Description.cpp" />
+    <ClCompile Include="Layers\Draw3DObject.cpp" />
+    <ClCompile Include="Layers\Example2DGame.cpp" />
+    <ClCompile Include="Layers\Layer.cpp" />
+    <ClCompile Include="Layers\MainScreen.cpp" />
+    <ClCompile Include="Layers\Text.cpp" />
     <ClCompile Include="ReadFileData.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

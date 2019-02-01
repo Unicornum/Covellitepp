@@ -12,9 +12,51 @@
     </Task1>
   </Process>
   <Complete>
-    <Week6208/>
-    <Week6207/>
-    <Week6206/>
-    <Week6205/>
+    <Week6212>
+      <Task5 Text="Исправление примера использования фреймворка." Type="Red" Version="None" ExternalProgram="None" Expanded="false" Completed="true" History="false" ParentTaskText="false">
+        <Task6 Text="Образец окна настроек." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+        <Task7 Text="Единый шаблон для всех слоев окна программы." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+        <Task8 Text="Заготовка окна описания слоя программы." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+        <Task9 Text="Переходы между окнами." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+        <Task10 Text="Стилистические исправления." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+        <Task11 Text="Заготовки экранов программы." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+        <Task12 Text="Описания шрифтов в отдельном .rcss файле." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+        <Task13 Text="Исправление стилей шаблона всех слоев программы." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+        <Task14 Text="Окно отображения 3D объекта." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="true" ParentTaskText="true">
+          <Task15 Text="Отображение FPS." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+          <Task16 Text="Описание окна." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+          <Task17 Text="Элементы управления для изменения параметров сцены." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+          <Task18 Text="Передача информации классу отрисовки 3D сцены." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+          <Task19 Text="Изменение количества полигонов на куб." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+          <Task20 Text="Изменение количества куюов в сцене." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+          <Task21 Text="Источники света." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+          <Task22 Text="Отдельный класс отрисовки кубов." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+        </Task14>
+        <Task23 Text="Пример простой 2D игры." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="true" ParentTaskText="true">
+          <Task24 Text="Заготовки классов." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+          <Task25 Text="Описание слоя." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+          <Task26 Text="Обобщение кода." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+          <Task27 Text="Отрисовка ограничивающих 'стен'." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+          <Task28 Text="Реорганизация кода." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+          <Task29 Text="Работа с относительными координатами." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+          <Task30 Text="Движущиеся блоки." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+          <Task31 Text="Игровой объект игрока." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+          <Task32 Text="Запуск процесса игры." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+          <Task33 Text="Перемещение центрального объекта." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+          <Task34 Text="Увеличение скорости со временем." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+          <Task35 Text="Синхронизация со временем." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+          <Task36 Text="Подсчет и вывод игрового времени." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+          <Task37 Text="Корректная работа в горизонтальном окне." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+        </Task23>
+        <Task38 Text="Удаление ненужных файлов." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+        <Task39 Text="Обобщение передачи описаний слоев." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+        <Task40 Text="Замена скриншотов в документации." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+      </Task5>
+    </Week6212>
+    <Week6211/>
+    <Week6210/>
+    <Week6209>
+      <Task44 Text="Заготовка окна описания программы." Type="Red" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="false"/>
+    </Week6209>
   </Complete>
 </Tasks>

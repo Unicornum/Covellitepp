@@ -6,7 +6,40 @@
 *  =================
 *  <table frame=void><tr><td></td></tr></table>
 *  
-*  Version: 2.1.8.??? Unknown
+*  Version: 2.1.9.1281 Unknown
+*  -----
+*  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект \ref ExamplePage : </td></tr></table>
+*  <table frame=void border=1 bordercolor=#FFFFFF cellpadding=5 cellspacing=0 width=98%><tr>
+*    <td width=10px></td>
+*    <td bgcolor=#B8CCE4 width=125px align=center> 31.01.2019 20:29 </td>
+*    <td bgcolor=#C0FFC0> Исправление примера использования фреймворка: пример простой 2D игры. </td>
+*  </tr></table>
+*  <table frame=void border=1 bordercolor=#FFFFFF cellpadding=5 cellspacing=0 width=98%><tr>
+*    <td width=10px></td>
+*    <td bgcolor=#B8CCE4 width=125px align=center> 28.01.2019 20:22 </td>
+*    <td bgcolor=#C0FFC0> Исправление примера использования фреймворка: окно отображения 3D объекта. </td>
+*  </tr></table>
+*  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект \ref ExamplePage : </td></tr></table>
+*  <table frame=void border=1 bordercolor=#FFFFFF cellpadding=5 cellspacing=0 width=98%><tr>
+*    <td width=10px></td>
+*    <td bgcolor=#B8CCE4 width=125px align=center> 25.01.2019 20:44 </td>
+*    <td bgcolor=#C0FFC0> Исправление примера использования фреймворка: окно настроек. </td>
+*  </tr></table>
+*  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект \ref ExamplePage : </td></tr></table>
+*  <table frame=void border=1 bordercolor=#FFFFFF cellpadding=5 cellspacing=0 width=98%><tr>
+*    <td width=10px></td>
+*    <td bgcolor=#B8CCE4 width=125px align=center> 20.01.2019 21:14 </td>
+*    <td bgcolor=#C0FFC0> Исправление примера использования фреймворка: окно вывода текста в разных форматах. </td>
+*  </tr></table>
+*  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект \ref ExamplePage : </td></tr></table>
+*  <table frame=void border=1 bordercolor=#FFFFFF cellpadding=5 cellspacing=0 width=98%><tr>
+*    <td width=10px></td>
+*    <td bgcolor=#B8CCE4 width=125px align=center> 18.01.2019 13:55 </td>
+*    <td bgcolor=#C0FFC0> Пример использования фреймворка: окно описания программы. </td>
+*  </tr></table>
+*  <table frame=void><tr><td></td></tr></table>
+*  
+*  Version: 2.1.8.???
 *  -----
 *  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект \ref CovelliteApiPage : </td></tr></table>
 *  <table frame=void border=1 bordercolor=#FFFFFF cellpadding=5 cellspacing=0 width=98%><tr>
@@ -51,7 +84,7 @@
 *  </tr></table>
 *  <table frame=void><tr><td></td></tr></table>
 *  
-*  Version: 2.1.7.1063 Unknown
+*  Version: 2.1.7.1063
 *  -----
 *  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект \ref CovelliteApiPage : </td></tr></table>
 *  <table frame=void border=1 bordercolor=#FFFFFF cellpadding=5 cellspacing=0 width=98%><tr>
@@ -61,7 +94,7 @@
 *  </tr></table>
 *  <table frame=void><tr><td></td></tr></table>
 *  
-*  Version: 2.1.6.986 Unknown
+*  Version: 2.1.6.986
 *  -----
 *  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект \ref CovelliteAppPage : </td></tr></table>
 *  <table frame=void border=1 bordercolor=#FFFFFF cellpadding=5 cellspacing=0 width=98%><tr>
@@ -71,7 +104,7 @@
 *  </tr></table>
 *  <table frame=void><tr><td></td></tr></table>
 *  
-*  Version: 2.1.5.933 Unknown
+*  Version: 2.1.5.933
 *  -----
 *  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект \ref CovelliteApiPage : </td></tr></table>
 *  <table frame=void border=1 bordercolor=#FFFFFF cellpadding=5 cellspacing=0 width=98%><tr>
@@ -87,7 +120,7 @@
 *  </tr></table>
 *  <table frame=void><tr><td></td></tr></table>
 *  
-*  Version: 2.1.4.895 Unknown
+*  Version: 2.1.4.895
 *  -----
 *  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект \ref CovelliteApiPage : </td></tr></table>
 *  <table frame=void border=1 bordercolor=#FFFFFF cellpadding=5 cellspacing=0 width=98%><tr>
@@ -114,7 +147,7 @@
 *  </tr></table>
 *  <table frame=void><tr><td></td></tr></table>
 *  
-*  Version: 2.1.3.771 Unknown
+*  Version: 2.1.3.771
 *  -----
 *  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект \ref CovelliteEventsPage : </td></tr></table>
 *  <table frame=void border=1 bordercolor=#FFFFFF cellpadding=5 cellspacing=0 width=98%><tr>

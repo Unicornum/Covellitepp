@@ -29,15 +29,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "(Documentation)", "(Documen
 		Solution\Solution\(Documentation)\CovelliteWindows.txt = Solution\Solution\(Documentation)\CovelliteWindows.txt
 		Solution\Solution\(Documentation)\Downloads.hpp = Solution\Solution\(Documentation)\Downloads.hpp
 		Solution\Solution\(Documentation)\History.hpp = Solution\Solution\(Documentation)\History.hpp
-		Solution\Solution\(Documentation)\InputRussianLetters.hpp = Solution\Solution\(Documentation)\InputRussianLetters.hpp
 		Solution\Solution\(Documentation)\MainPage.hpp = Solution\Solution\(Documentation)\MainPage.hpp
 		Solution\Solution\(Documentation)\Requirements.hpp = Solution\Solution\(Documentation)\Requirements.hpp
 		Solution\Solution\(Documentation)\SolutionPage.hpp = Solution\Solution\(Documentation)\SolutionPage.hpp
 		Solution\Solution\(Documentation)\Title.png = Solution\Solution\(Documentation)\Title.png
-		Solution\Solution\(Documentation)\UsingFramework.hpp = Solution\Solution\(Documentation)\UsingFramework.hpp
-		Solution\Solution\(Documentation)\Vs2015.Android.png = Solution\Solution\(Documentation)\Vs2015.Android.png
-		Solution\Solution\(Documentation)\Vs2015.So.png = Solution\Solution\(Documentation)\Vs2015.So.png
-		Solution\Solution\(Documentation)\Vs2015.Windows.png = Solution\Solution\(Documentation)\Vs2015.Windows.png
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution", "Solution", "{B8769225-58BD-4972-B1D2-C406404FC3FD}"
@@ -88,6 +83,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "(Documentation)", "(Documen
 		Solution\Solution\Example\(Documentation)\ExampleH.png = Solution\Solution\Example\(Documentation)\ExampleH.png
 		Solution\Solution\Example\(Documentation)\ExampleW.png = Solution\Solution\Example\(Documentation)\ExampleW.png
 		Solution\Solution\Example\(Documentation)\ProjectPage.hpp = Solution\Solution\Example\(Documentation)\ProjectPage.hpp
+		Solution\Solution\Example\(Documentation)\Screenshots.hpp = Solution\Solution\Example\(Documentation)\Screenshots.hpp
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Test.Classes", "Test.Classes", "{6B492867-449E-43CE-B0C0-45E6BEE0405A}"
@@ -593,6 +589,21 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Test.Renderer", "Solution\S
 	ProjectSection(ProjectDependencies) = postProject
 		{750448C3-1872-4755-B0FE-DCAD5656D7E4} = {750448C3-1872-4755-B0FE-DCAD5656D7E4}
 		{5F10F7EC-C470-499A-AB96-C19485CCD7AC} = {5F10F7EC-C470-499A-AB96-C19485CCD7AC}
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Manual", "Manual", "{22D2BC7E-7500-4CA2-BFF9-EB4C5ECE667A}"
+	ProjectSection(SolutionItems) = preProject
+		Solution\Solution\(Documentation)\Manual\BackgroundService.hpp = Solution\Solution\(Documentation)\Manual\BackgroundService.hpp
+		Solution\Solution\(Documentation)\Manual\BackgroundService.java = Solution\Solution\(Documentation)\Manual\BackgroundService.java
+		Solution\Solution\(Documentation)\Manual\BaseProject.hpp = Solution\Solution\(Documentation)\Manual\BaseProject.hpp
+		Solution\Solution\(Documentation)\Manual\Draw2DScene.hpp = Solution\Solution\(Documentation)\Manual\Draw2DScene.hpp
+		Solution\Solution\(Documentation)\Manual\Draw3DScene.hpp = Solution\Solution\(Documentation)\Manual\Draw3DScene.hpp
+		Solution\Solution\(Documentation)\Manual\GuiCode.hpp = Solution\Solution\(Documentation)\Manual\GuiCode.hpp
+		Solution\Solution\(Documentation)\Manual\InputRussianLetters.hpp = Solution\Solution\(Documentation)\Manual\InputRussianLetters.hpp
+		Solution\Solution\(Documentation)\Manual\Manual.hpp = Solution\Solution\(Documentation)\Manual\Manual.hpp
+		Solution\Solution\(Documentation)\Manual\Vs2015.Android.png = Solution\Solution\(Documentation)\Manual\Vs2015.Android.png
+		Solution\Solution\(Documentation)\Manual\Vs2015.So.png = Solution\Solution\(Documentation)\Manual\Vs2015.So.png
+		Solution\Solution\(Documentation)\Manual\Vs2015.Windows.png = Solution\Solution\(Documentation)\Manual\Vs2015.Windows.png
 	EndProjectSection
 EndProject
 Global
@@ -2391,6 +2402,7 @@ Global
 		{88FE23D4-4503-4748-AE23-98852B13CCA2} = {A1625B89-EE05-4E0A-8A19-62CD2C243E8A}
 		{09545F15-FF2C-4DED-A11F-73A1BD7F49EE} = {A1625B89-EE05-4E0A-8A19-62CD2C243E8A}
 		{745D5D7F-1DE3-4AF0-8FC2-08364A0DDF92} = {A0DCE822-E808-4D68-823E-3A186DB4D134}
+		{22D2BC7E-7500-4CA2-BFF9-EB4C5ECE667A} = {99A8DB18-AF88-4112-AAF4-D2AEEE09D803}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {C1363F25-17E1-4DB1-AE71-7921BFCA0645}

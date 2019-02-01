@@ -7,10 +7,58 @@
     <ClInclude Include="ExampleApp.hpp" />
     <ClInclude Include="ExampleWindow.hpp" />
     <ClInclude Include="ExtraWindow.hpp" />
+    <ClInclude Include="Layers\MainScreen.hpp">
+      <Filter>Layers</Filter>
+    </ClInclude>
+    <ClInclude Include="Layers\stdafx.h">
+      <Filter>Layers</Filter>
+    </ClInclude>
+    <ClInclude Include="Layers\Controls.hpp">
+      <Filter>Layers</Filter>
+    </ClInclude>
+    <ClInclude Include="Layers\Layer.hpp">
+      <Filter>Layers</Filter>
+    </ClInclude>
+    <ClInclude Include="Layers\Description.hpp">
+      <Filter>Layers</Filter>
+    </ClInclude>
+    <ClInclude Include="Layers\Demo.hpp">
+      <Filter>Layers</Filter>
+    </ClInclude>
+    <ClInclude Include="Layers\Draw3DObject.hpp">
+      <Filter>Layers</Filter>
+    </ClInclude>
+    <ClInclude Include="Layers\Text.hpp">
+      <Filter>Layers</Filter>
+    </ClInclude>
+    <ClInclude Include="Basements\Dummy.hpp">
+      <Filter>Basements</Filter>
+    </ClInclude>
+    <ClInclude Include="Basements\IBasement.hpp">
+      <Filter>Basements</Filter>
+    </ClInclude>
+    <ClInclude Include="Basements\Simple3DObject.hpp">
+      <Filter>Basements</Filter>
+    </ClInclude>
+    <ClInclude Include="Basements\Simple2DGame.hpp">
+      <Filter>Basements</Filter>
+    </ClInclude>
+    <ClInclude Include="Layers\Example2DGame.hpp">
+      <Filter>Layers</Filter>
+    </ClInclude>
+    <ClInclude Include="Basements\Common.hpp">
+      <Filter>Basements</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Common">
       <UniqueIdentifier>{40fc0b4b-f13a-40ee-8967-bbcb89d7746f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Layers">
+      <UniqueIdentifier>{ed429f45-c8ff-4549-85e8-58670e6f26fc}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Basements">
+      <UniqueIdentifier>{6a2edf3a-5505-4c33-9cb5-bd19c143010c}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -24,5 +72,38 @@
     <ClCompile Include="ExtraWindow.cpp" />
     <ClCompile Include="DefaultSettings.cpp" />
     <ClCompile Include="ReadFileData.cpp" />
+    <ClCompile Include="Layers\MainScreen.cpp">
+      <Filter>Layers</Filter>
+    </ClCompile>
+    <ClCompile Include="Layers\Controls.cpp">
+      <Filter>Layers</Filter>
+    </ClCompile>
+    <ClCompile Include="Layers\Layer.cpp">
+      <Filter>Layers</Filter>
+    </ClCompile>
+    <ClCompile Include="Layers\Description.cpp">
+      <Filter>Layers</Filter>
+    </ClCompile>
+    <ClCompile Include="Layers\Demo.cpp">
+      <Filter>Layers</Filter>
+    </ClCompile>
+    <ClCompile Include="Layers\Draw3DObject.cpp">
+      <Filter>Layers</Filter>
+    </ClCompile>
+    <ClCompile Include="Layers\Text.cpp">
+      <Filter>Layers</Filter>
+    </ClCompile>
+    <ClCompile Include="Basements\Simple3DObject.cpp">
+      <Filter>Basements</Filter>
+    </ClCompile>
+    <ClCompile Include="Basements\Simple2DGame.cpp">
+      <Filter>Basements</Filter>
+    </ClCompile>
+    <ClCompile Include="Layers\Example2DGame.cpp">
+      <Filter>Layers</Filter>
+    </ClCompile>
+    <ClCompile Include="Basements\Common.cpp">
+      <Filter>Basements</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

@@ -1,6 +1,6 @@
 ﻿
 #pragma once
-#include <Covellite\Covellite.hpp>
+#include <Covellite/Covellite.hpp>
 
 /**
 * \ingroup ExampleGroup
@@ -23,9 +23,8 @@ class ExampleWindow final :
   public ::covellite::app::IWindow
 {
   using Events_t = ::covellite::events::Events;
-  using WindowRocket_t = ::covellite::gui::Window;
+  using WindowGui_t = ::covellite::gui::Window;
   using Path_t = ::boost::filesystem::path;
-  using IWindowRocket_t = ::covellite::gui::IWindow;
   using Layer_t = ::covellite::gui::Layer;
   class DemoLayer1;
   class DemoLayer2;
@@ -33,9 +32,9 @@ class ExampleWindow final :
   class ScrollLayer;
 
 private:
-  WindowRocket_t & m_WindowRocket;
+  WindowGui_t & m_WindowGui;
   Events_t m_Events;
 
 public:
-  explicit ExampleWindow(WindowRocket_t &);
+  explicit ExampleWindow(WindowGui_t &);
 };

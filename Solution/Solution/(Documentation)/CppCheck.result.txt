@@ -1,7 +1,3 @@
-P:\projects\Covellitepp\Solution\Solution\Covellite.Api\Test.Covellite.Api\Mock\OpenGL.hpp(153): performance (suppress_id = postfixOperator): Prefer prefix ++/-- operators for non-primitive types.
-P:\projects\Covellitepp\Solution\Solution\Covellite.Api\Test.Covellite.Api\Mock\OpenGL.hpp(308): performance (suppress_id = postfixOperator): Prefer prefix ++/-- operators for non-primitive types.
-P:\projects\Covellitepp\Solution\Solution\Covellite.Api\Test.Covellite.Api\Mock\OpenGL.hpp(141): performance (suppress_id = passedByValue): Function parameter '_Count' should be passed by reference.
-P:\projects\Covellitepp\Solution\Solution\Covellite.Api\Test.Covellite.Api\Mock\OpenGL.hpp(141): performance (suppress_id = passedByValue): Function parameter '_Stride' should be passed by reference.
-P:\projects\Covellitepp\Solution\Solution\Covellite.Api\Test.Covellite.Api\OpenGLCommon_test.hpp(28): error (suppress_id = syntaxError): syntax error
-P:\projects\Covellitepp\Solution\Solution\Covellite.Api\Covellite.Api\Renderer\DirectX10.cpp(90): style (suppress_id = unusedFunction): The function 'GetRender < int >' is never used.
+P:\projects\Covellitepp\Solution\Solution\Example\Example\Layers\Controls.cpp(97): style (suppress_id = duplicateExpressionTernary): Same expression in both branches of ternary operator.
+P:\projects\Covellitepp\Solution\Solution\Example\Example\Layers\Controls.cpp(99): style (suppress_id = duplicateExpressionTernary): Same expression in both branches of ternary operator.
 (): information (suppress_id = missingInclude): Cppcheck cannot find all the include files (use --check-config for details)

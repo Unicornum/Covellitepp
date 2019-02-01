@@ -1,0 +1,24 @@
+﻿<template name="layer" content="id_content">
+  <head>
+    <link type="text/rcss" href="fonts.rcss"/>
+    <link type="text/rcss" href="body.rcss"/>
+    <link type="text/rcss" href="scrollbar.rcss"/>
+    <link type="text/rcss" href="layer.template.rcss"/>
+  </head>
+  <body class="fdefault" id="id_body">
+    <header class="fheader">
+      <button class="fbutton help" id="id_help"/>
+      <button class="fbutton back" id="id_back" />
+      <text>Covellite++</text>
+    </header>
+    <title class="fheader" id="id_title" />
+    <div id="id_content">
+      <!-- 
+      Сюда будет добавлено содержимое body из .rml файла, использующего этот 
+      шаблон; для этого в .rml файле нужно добавить:
+      - В <head> ссылку <link type="text/template" href="layer.template.rml"/>.
+      - В <body> атрибут template="layer".
+      -->
+    </div>
+  </body>
+</template>

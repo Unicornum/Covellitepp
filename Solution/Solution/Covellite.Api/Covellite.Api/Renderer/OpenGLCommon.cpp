@@ -92,8 +92,8 @@ auto OpenGLCommon::CreateState(const ComponentPtr_t & _pComponent) -> Render_t
       glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
       glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
     };
   };
 
@@ -478,7 +478,7 @@ auto OpenGLCommon::GetCameraGui(const ComponentPtr_t & _pComponent) -> Render_t
     GLfloat Viewport[4] = { 0 };
     glGetFloatv(GL_VIEWPORT, Viewport);
 
-    glOrtho(Viewport[0], Viewport[0] + Viewport[2],
+    glOrthof(Viewport[0], Viewport[0] + Viewport[2],
       Viewport[1] + Viewport[3], Viewport[1], -1, 1);
   };
 }

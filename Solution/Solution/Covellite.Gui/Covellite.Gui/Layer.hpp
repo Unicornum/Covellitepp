@@ -47,6 +47,7 @@ class Layer :
   using ElementId_t = ::std::string;
 
 protected:
+  using IWindowGui_t = gui::IWindow;
   using Context_t = Rocket::Core::Context;
   using Document_t = Rocket::Core::ElementDocument;
   using Element_t = Rocket::Core::Element;
@@ -54,6 +55,12 @@ protected:
   using String_t = Rocket::Core::String;
 
 public:
+  /**
+  * \ingroup CovelliteGuiGroup
+  * \brief
+  *  Класс входит в проект \ref CovelliteGuiPage \n
+  *  Класс одного элемента .rml файла.
+  */
   class Element
   {
   public:

@@ -3283,7 +3283,12 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Present_Camera_Gui)
   const auto Width = 1811211754.0f;
   const auto Height = 1811211755.0f;
 
+# pragma warning(push)
+# pragma warning(disable: 6001)
+
   ::Matrices Matrices;
+
+# pragma warning(pop)
 
   Matrices.World = ::DirectX::XMMatrixTranspose(
     ::DirectX::XMMatrixIdentity());

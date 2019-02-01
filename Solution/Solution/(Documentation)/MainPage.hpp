@@ -30,7 +30,7 @@
 *  
 *  - Кросс-платформенный:
 *   + Windows (тестируется на Windows 7 x64).
-*   + Android (тестируется на ARM API15).
+*   + Android (тестируется на ARM API15 и ARM64 API24).
 *  - Позволяет встраивать код дополнительной отрисовки кадра, поверх которого
 *  будет отображаться GUI.
 *  - Быстрый (Windows версия выдает ~1500 fps в режиме непрерывной отрисовки
@@ -56,10 +56,12 @@
 *  
 *  Скриншоты
 *  ---------
-*  
+* \htmlonly <style>div.image img[src="Covellitepp.png"]{width:90%;}</style> \endhtmlonly 
 * \image html ".\Solution\(Documentation)\Covellitepp.png"
+*  
+* [Еще скриншоты](\ref ScreenshotsPage)
 *
-*  \n
+*  -
 *  -------------
 *  
 * \subpage UsingFrameworkPage

@@ -87,6 +87,7 @@ public:
   }
 
   template<>
+  // cppcheck-suppress unusedFunction
   static Render_t GetRender<int>(const ComPtr_t<ID3D10Device> & _pDevice,
     const ComPtr_t<ID3D10Buffer> & _pBuffer)
   {
@@ -903,7 +904,8 @@ auto DirectX10::CreateBlendState(bool _IsEnabled) -> Render_t
 
   return [=](void)
   {
-    m_pDevice->OMSetBlendState(pBlendState.Get(), nullptr, 0xFFFFFFFF);
+    const FLOAT BlendFactor[] = { 0.0f, 0.0f, 0.0f, 0.0f };
+    m_pDevice->OMSetBlendState(pBlendState.Get(), BlendFactor, 0xFFFFFFFF);
   };
 }
 

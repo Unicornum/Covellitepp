@@ -1,185 +1,52 @@
 ﻿
 #include "stdafx.h"
 #include "ExampleWindow.hpp"
-#include <boost\format.hpp>
-#include <alicorn\logger.hpp>
-#include <alicorn\version.hpp>
-#include <alicorn\application\current-module.hpp>
-
-static const auto PathToDataDirectory =
-  ::alicorn::system::application::CurrentModule::GetAppRootPath() / "data";
-
-/// [Example events ids]
-class Example_t
-{
-public:
-  // Идентификаторы событий уровня проекта примера.
-  enum Id
-  {
-    Button1 = 0,
-    Button2,
-    Button3,
-  };
-};
-  
-namespace { Example_t Example; }
-/// [Example events ids]
-
-/// [Title layer]
-class ExampleWindow::DemoLayer1 final :
-  public Layer_t
-{
-public:
-  // Интерфейс IWindow:
-  void Subscribe(const EventHandlerPtr_t &) override {}
-
-private:
-  int m_Fps = 0;
-    
-public:
-  explicit DemoLayer1(IWindowRocket_t & _Window) :
-    Layer_t(_Window, PathToDataDirectory / "demo.rml", "title")
-  {
-    using namespace ::alicorn::extension::std;
-      
-    ::alicorn::system::version::Info Info;
-      
-    GetElement("id_header").SetText(
-      "<h1>Covellite++ v" + string_cast<::std::string, Locale::UTF8>(
-        Info.GetValue(uT("FileVersionShort"))) + "</h1>");
-      
-    using namespace ::covellite;
-
-    m_Events[events::Drawing.Do].Connect([&](void)
-    {
-      static auto Begin = ::std::chrono::system_clock::now();
-
-      m_Fps++;
-
-      using namespace ::std::chrono;
-
-      if (duration_cast<seconds>(system_clock::now() - Begin) >= seconds{ 1 })
-      {
-        GetElement("main_text").SetText(string_cast<::std::string, Locale::UTF8>(
-          uT("FPS: {FPS}").Replace(uT("{FPS}"), m_Fps)));
-
-        m_Fps = 0;
-        Begin = system_clock::now();
-      }
-    });
-      
-    // При нажатии кнопок слоя генерируем события уровня проекта примера,
-    // которые обрабатываются в классе окна.
-    m_Events[events::Click.DocumentId(GetId()).ElementId("button1")]
-      .Connect([&]() { m_Events[Example.Button1](); });
-    m_Events[events::Click.DocumentId(GetId()).ElementId("button2")]
-      .Connect([&]() { m_Events[Example.Button2](); });
-    m_Events[events::Click.DocumentId(GetId()).ElementId("button3")]
-      .Connect([&]() { m_Events[Example.Button3](); });
-    m_Events[events::Click.DocumentId(GetId()).ElementId("exit")]
-      .Connect([&]() { m_Events[events::Application.Exit](); });
-  }
-};
-/// [Title layer]
-
-/// [Layer example]
-class ExampleWindow::DemoLayer2 final :
-  public Layer_t
-{
-public:
-  // Интерфейс IWindow:
-  void Subscribe(const EventHandlerPtr_t &) override {}
-    
-public:
-  explicit DemoLayer2(IWindowRocket_t & _Window) :
-    Layer_t(_Window, PathToDataDirectory / "demo2.rml")
-  {
-    using namespace ::covellite::events;
-      
-    // Подписываемся на событие нажатия кнопки с идентификатором "id_hello".
-    m_Events[Click.DocumentId(GetId()).ElementId("id_hello")]
-      .Connect([&](const Click_t::Info &) 
-    {
-      // Действие, выполняемое при нажатии на кнопку id_hello.
-      GetElement("multiline_text").SetText(u8"Привет!");
-    });
-  }
-};
-/// [Layer example]
-
-class ExampleWindow::TableLayer final :
-  public Layer_t
-{
-public:
-  // Интерфейс IWindow:
-  void Subscribe(const EventHandlerPtr_t &) override {}
-    
-public:
-  explicit TableLayer(IWindowRocket_t & _Window) :
-    Layer_t(_Window, PathToDataDirectory / "table.rml")
-  {
-    GetElement("id_board_name").SetText(
-      u8"<h2><font30>Название доски</font30></h2>");
-      
-    GetElement("id_list").SetText(
-      u8"<button class=\"left\"><font42>\u00D7</font42></button>"
-      u8"<p class=\"textleft\"><font36>CSS example</font36></p>"
-      u8"<button class=\"right\"><font42>\u00D7</font42></button>"
-      u8"<button class=\"right\"><font42>\u00D7</font42></button>");
-      
-    GetElement("multiline_text").SetText(
-      u8"Строки:\r\n"
-      u8"- Первая.\r\n"
-      u8"- Вторая.\r\n"
-      u8"- Третья.\r\n"
-      u8"- Четвертая.\r\n"
-      u8"- Пятая.\r\n"
-      u8"- Шестая.");
-  }
-};
-
-class ExampleWindow::ScrollLayer final :
-  public Layer_t
-{
-public:
-  // Интерфейс IWindow:
-  void Subscribe(const EventHandlerPtr_t &) override {}
-    
-public:
-  explicit ScrollLayer(IWindowRocket_t & _Window) :
-    Layer_t(_Window, PathToDataDirectory / "scroll.rml")
-  {
-    const auto Height = ::std::max(GetWidth(), GetHeight());
-      
-    GetElement("id_body").SetStyle(
-      (::boost::format("font-size: %1%px;") % (Height / 30)).str());
-  }
-};
-
-// ************************************************************************** //
+#include <boost/format.hpp>
+#include <alicorn/logger.hpp>
+#include <alicorn/version.hpp>
+#include <alicorn/application/current-module.hpp>
+#include "Layers/MainScreen.hpp"
+#include "Layers/Description.hpp"
+#include "Layers/Controls.hpp"
+#include "Layers/Text.hpp"
+#include "Layers/Draw3DObject.hpp"
+#include "Layers/Example2DGame.hpp"
+#include "Layers/Demo.hpp"
 
 /// [Constructor main window]
-ExampleWindow::ExampleWindow(WindowRocket_t & _WindowRocket) :
-  m_WindowRocket(_WindowRocket),
-  m_Events(_WindowRocket)
+ExampleWindow::ExampleWindow(WindowGui_t & _WindowGui) :
+  m_WindowGui(_WindowGui),
+  m_Events(_WindowGui)
 {
   // Набор строк локализации приложения.
-  m_WindowRocket.Set(
+  m_WindowGui.Set(
   {
-    { u8"[HELLO]", u8"Привет" },
+# if BOOST_OS_WINDOWS
+    { u8"[BACK]", u8"ALT + LEFT" },
+    { u8"[EXIT]", u8"кнопку закрытия окна программы" },
+# elif BOOST_OS_ANDROID
+    { u8"[BACK]", u8"кнопку BACK устройства" },
+    { u8"[EXIT]", u8"кнопку HOME устройства" },
+# endif
   });
     
   // Экран, который будет отображаться при старте программы.
-  m_WindowRocket.PushLayer<DemoLayer1>();
+  m_WindowGui.PushLayer<::layers::MainScreen>();
     
-  using namespace ::covellite::events;
-    
-  // Подписка на события перехода к другому экрану.
-  m_Events[Example.Button1]
-    .Connect([&]() { m_WindowRocket.PushLayer<DemoLayer2>(); });
-  m_Events[Example.Button2]
-    .Connect([&]() { m_WindowRocket.PushLayer<TableLayer>(); });
-  m_Events[Example.Button3]
-    .Connect([&]() { m_WindowRocket.PushLayer<ScrollLayer>(); });
+  // Подписка на события перехода к другим слоям.
+  m_Events[::layers::Button.Back]
+    .Connect([&](void) { m_WindowGui.Back(); });
+  m_Events[::layers::Button.Help]
+    .Connect([&](void) { m_WindowGui.PushLayer<::layers::Description>(); });
+  m_Events[::layers::Button.Controls]
+    .Connect([&](void) { m_WindowGui.PushLayer<::layers::Controls>(); });
+  m_Events[::layers::Button.Text]
+    .Connect([&](void) { m_WindowGui.PushLayer<::layers::Text>(); });
+  m_Events[::layers::Button.Draw3DObject]
+    .Connect([&](void) { m_WindowGui.PushLayer<::layers::Draw3DObject>(); });
+  m_Events[::layers::Button.Simple2DGame]
+    .Connect([&](void) { m_WindowGui.PushLayer<::layers::Simple2DGame>(); });
+  m_Events[::layers::Button.Demo]
+    .Connect([&](void) { m_WindowGui.PushLayer<::layers::Demo>(); });
 }
 /// [Constructor main window]
