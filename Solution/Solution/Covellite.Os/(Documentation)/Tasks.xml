@@ -8,16 +8,14 @@
   </Options>
   <Process/>
   <Complete>
-    <Week6189>
-      <Task9 Text="Функция получения размеров окна программы." Type="Red" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="true" ParentTaskText="false"/>
-    </Week6189>
-    <Week6188/>
-    <Week6187/>
-    <Week6186>
-      <Task6 Text="Событие нажатия кнопки Menu программы." Type="Red" Version="None" ExternalProgram="None" Expanded="false" Completed="true" History="true" ParentTaskText="false">
-        <Task7 Text="Для Android." Type="None" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
-        <Task8 Text="Для Windows." Type="None" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
-      </Task6>
-    </Week6186>
+    <Week6213>
+      <Task3 Text="Исключение при сворачивании окна." Type="Bug" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="true" ParentTaskText="false"/>
+      <Task4 Text="Изменение логики вызова события изменения размеров окна программы в Windows." Type="Red" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="true" ParentTaskText="false"/>
+      <Task5 Text="События активации/деактивации окна Windows." Type="Red" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="true" ParentTaskText="false"/>
+      <Task9 Text="Параметры минимального размера окна Windows." Type="Red" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="true" ParentTaskText="false"/>
+    </Week6213>
+    <Week6212/>
+    <Week6211/>
+    <Week6210/>
   </Complete>
 </Tasks>

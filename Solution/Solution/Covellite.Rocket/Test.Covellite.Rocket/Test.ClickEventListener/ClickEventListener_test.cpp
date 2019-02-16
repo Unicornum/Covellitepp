@@ -43,7 +43,7 @@ protected:
   class Handler
   {
   public:
-    MOCK_METHOD2(DoClick, void(::std::string, ::std::string));
+    MOCK_METHOD0(DoClick, void(void));
     MOCK_METHOD1(DoError, void(::std::string));
   };
 };
@@ -92,8 +92,8 @@ TEST_F(ClickEventListener_test, /*DISABLED_*/Test_ProcessEvent_TargetElementNull
     .Connect([&](const Error_t::Description & _Desc) 
     { Handler.DoError(_Desc); });
   Events[Click.DocumentId("Unknown").ElementId("Unknown")]
-    .Connect([&](const Click_t::Info & _Info)
-    { Handler.DoClick(_Info.Tag, _Info.Type); });
+    .Connect([&](void)
+    { Handler.DoClick(); });
 
   auto pExample = Tested_t::Make(Events);
   ITested_t & IExample = *pExample;
@@ -108,7 +108,7 @@ TEST_F(ClickEventListener_test, /*DISABLED_*/Test_ProcessEvent_TargetElementNull
     .Times(1)
     .WillOnce(Return(nullptr));
 
-  EXPECT_CALL(Handler, DoClick(_, _))
+  EXPECT_CALL(Handler, DoClick())
     .Times(0);
 
   EXPECT_CALL(Handler, DoError(_))
@@ -128,8 +128,8 @@ TEST_F(ClickEventListener_test, /*DISABLED_*/Test_ProcessEvent_OwnerDocument_Nul
     .Connect([&](const Error_t::Description & _Desc)
   { Handler.DoError(_Desc); });
   Events[Click.DocumentId("Unknown").ElementId("Unknown")]
-    .Connect([&](const Click_t::Info & _Info)
-  { Handler.DoClick(_Info.Tag, _Info.Type); });
+    .Connect([&](void)
+  { Handler.DoClick(); });
 
   auto pExample = Tested_t::Make(Events);
   ITested_t & IExample = *pExample;
@@ -149,7 +149,7 @@ TEST_F(ClickEventListener_test, /*DISABLED_*/Test_ProcessEvent_OwnerDocument_Nul
     .Times(1)
     .WillOnce(Return(nullptr));
 
-  EXPECT_CALL(Handler, DoClick(_, _))
+  EXPECT_CALL(Handler, DoClick())
     .Times(0);
 
   EXPECT_CALL(Handler, DoError(_))
@@ -175,8 +175,8 @@ TEST_F(ClickEventListener_test, /*DISABLED_*/Test_ProcessEvent_OnClick_Exception
     .Connect([&](const Error_t::Description & _Desc)
   { Handler.DoError(_Desc); });
   Events[Click.DocumentId(DocumentId).ElementId(TargetElementId)]
-    .Connect([&](const Click_t::Info & _Info)
-  { Handler.DoClick(_Info.Tag, _Info.Type); });
+    .Connect([&](void)
+  { Handler.DoClick(); });
 
   auto pExample = Tested_t::Make(Events);
   ITested_t & IExample = *pExample;
@@ -203,15 +203,7 @@ TEST_F(ClickEventListener_test, /*DISABLED_*/Test_ProcessEvent_OnClick_Exception
     .Times(1)
     .WillOnce(Return(TargetElementId));
 
-  EXPECT_CALL(TargetElement, GetTagName())
-    .Times(1)
-    .WillOnce(Return(""));
-
-  EXPECT_CALL(TargetElement, GetAttribute(_, _))
-    .Times(1)
-    .WillOnce(Return(""));
-
-  EXPECT_CALL(Handler, DoClick(_, _))
+  EXPECT_CALL(Handler, DoClick())
     .Times(1)
     .WillOnce(Throw(::std::exception{ ErrorDescription }));
 
@@ -228,8 +220,6 @@ TEST_F(ClickEventListener_test, /*DISABLED_*/Test_ProcessEvent_OnClick)
   ::mock::Rocket::Core::ElementDocument OwnerDocument;
   const char * TargetElementId = "Id1710112311";
   const char * OwnerDocumentId = "Id1710112312";
-  const char * TagName = "Name1710112316";
-  const char * Attribute = "Attribute1710112319";
 
   using namespace ::covellite::events;
 
@@ -239,8 +229,8 @@ TEST_F(ClickEventListener_test, /*DISABLED_*/Test_ProcessEvent_OnClick)
     .Connect([&](const Error_t::Description & _Desc)
   { Handler.DoError(_Desc); });
   Events[Click.DocumentId(OwnerDocumentId).ElementId(TargetElementId)]
-    .Connect([&](const Click_t::Info & _Info)
-  { Handler.DoClick(_Info.Tag, _Info.Type); });
+    .Connect([&](void)
+  { Handler.DoClick(); });
 
   auto pExample = Tested_t::Make(Events);
   ITested_t & IExample = *pExample;
@@ -267,15 +257,7 @@ TEST_F(ClickEventListener_test, /*DISABLED_*/Test_ProcessEvent_OnClick)
     .Times(1)
     .WillOnce(Return(TargetElementId));
   
-  EXPECT_CALL(TargetElement, GetTagName())
-    .Times(1)
-    .WillOnce(Return(TagName));
-
-  EXPECT_CALL(TargetElement, GetAttribute(Eq("type"), Eq("unknown")))
-    .Times(1)
-    .WillOnce(Return(Attribute));
-
-  EXPECT_CALL(Handler, DoClick(Eq(TagName), Eq(Attribute)))
+  EXPECT_CALL(Handler, DoClick())
     .Times(1);
 
   EXPECT_CALL(Handler, DoError(_))

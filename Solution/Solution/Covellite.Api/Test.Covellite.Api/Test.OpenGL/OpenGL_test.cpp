@@ -324,7 +324,7 @@ TEST_F(OpenGL_test, /*DISABLED_*/Test_Constructor_UpdateScreen)
 
   using namespace ::testing;
 
-  EXPECT_CALL(WindowsProxy, BuildClientRect())
+  EXPECT_CALL(WindowsProxy, BuildRect())
     .WillRepeatedly(Return(ClientRect));
 
   EXPECT_CALL(WindowsProxy, GetClientRect(Data.Handle))

@@ -1,4 +1,12 @@
 
+/*dialog,*/
+/*dialog big,*/
+/*.speech,*/
+dummy {
+  border-width: 1px;
+  border-color: red;
+}
+
 body#id_body {
   min-width: 480px;
   min-height: 480px;
@@ -79,8 +87,6 @@ dialog {
   padding-top: 1.5 em;
   padding-right: 0.5 em;
   padding-bottom: 0.5 em;
-  /*border-width: 1px;
-  border-color: red;*/
 }
 
   dialog i {
@@ -102,8 +108,6 @@ dialog {
     line-height: 0.85 em;
     float: left;
     color: #6c4500;
-    /*border-width: 1px;
-    border-color: red;*/
   }
 
 form#id_speech {
@@ -119,22 +123,23 @@ form#id_speech {
   padding-right: 1 em;
   padding-top: 0.25 em;
   padding-bottom: 0.25 em;
-  /*border-width: 1px;
-  border-color: red;*/
 }
 
   .speech:hover {
     background-color: rgba(128, 128, 128, 64);
   }
 
-  .speech#id_evil {
+  .speech#id_evil,
+  p.evil {
     color: #a50606;
   }
 
-  .speech#id_neutral {
+  .speech#id_neutral,
+  p.neutral {
     color: #808080;
   }
 
-  .speech#id_good {
+  .speech#id_good,
+  p.good {
     color: #018f10;
   }

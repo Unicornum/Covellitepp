@@ -18,13 +18,12 @@ ExtraWindow::ExtraWindow(const WindowApi_t & _WindowApi) :
   });
 
   m_Events[::events::Simple2DGame.Start].Connect(
-    [&](const int & _HeadlineHeight)
+    [&](const ::std::vector<float> & _Rect)
   {
-    auto Rect = _WindowApi.GetClientRect();
-
-    // Формирование корректных размеров игровой области для Android.
-    Rect.Height -= Rect.Top;
-    Rect.Top = _HeadlineHeight;
+    const ::basement::Simple2DGame::Rect Rect =
+    { 
+      _Rect[0], _Rect[1], _Rect[2], _Rect[3]
+    };
 
     m_pBasement = ::std::make_shared<::basement::Simple2DGame>(
       m_Events, m_WindowApi.GetRenders(), Rect);

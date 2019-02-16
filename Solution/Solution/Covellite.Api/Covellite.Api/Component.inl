@@ -34,7 +34,7 @@ inline /*static*/ auto Component::Make(const SourceParams_t & _Params) -> Compon
 
   for (const auto & Value : _Params)
   {
-    Params[::std::hash<Name_t>{}(Value.first)] = Value.second;
+    Params[Hasher_t{}(Value.first)] = Value.second;
   }
 
   return Pool_t::make_unique<Component>(Params, ConstructorTag{});
@@ -55,8 +55,9 @@ inline /*static*/ auto Component::Make(const SourceParams_t & _Params) -> Compon
 */
 inline Component::Component(const Params_t & _Params, ConstructorTag _Tag) :
   m_Params(_Params),
-  Type(GetValue<Type_t>(uT("type"), uT("Unknown"))),
-  Id(GetValue<Id_t>(uT("id"), uT("Unknown")))
+  Id(GetValue(GetHashId(), uT("Unknown"))),
+  Type(GetValue(GetHashType(), uT("Unknown"))),
+  Kind(GetValue(GetHashKind(), uT("Unknown")))
 {
   ::boost::ignore_unused(_Tag);
 }
@@ -175,6 +176,24 @@ template<class T>
 inline void Component::SetValue(const Name_t & _Name, const T & _Value)
 {
   m_Params[m_Hasher(_Name)] = _Value;
+}
+
+inline /*static*/ size_t Component::GetHashId(void)
+{
+  static const size_t Hash = Hasher_t{}(uT("id"));
+  return Hash;
+}
+
+inline /*static*/ size_t Component::GetHashType(void)
+{
+  static const size_t Hash = Hasher_t{}(uT("type"));
+  return Hash;
+}
+
+inline /*static*/ size_t Component::GetHashKind(void)
+{
+  static const size_t Hash = Hasher_t{}(uT("kind"));
+  return Hash;
 }
 
 } // namespace api

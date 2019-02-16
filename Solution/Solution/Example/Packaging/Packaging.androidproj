@@ -92,6 +92,7 @@
   <ItemGroup>
     <Content Include="assets\data\body.rcss" />
     <Content Include="assets\data\bricks.jpg" />
+    <Content Include="assets\data\clock.png" />
     <Content Include="assets\data\controls.rcss" />
     <Content Include="assets\data\controls.rml">
       <SubType>Designer</SubType>

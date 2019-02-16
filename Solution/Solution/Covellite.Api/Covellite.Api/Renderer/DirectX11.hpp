@@ -1,10 +1,9 @@
 
 #pragma once
-#include <deque>
 #include <wrl.h>
-#include <alicorn/std/string.hpp>
 #include "IGraphicApi.hpp"
 #include "Api.forward.hpp"
+#include "CapturingServiceComponent.hpp"
 #include "fx/Data.h"
 
 struct ID3D11Device;
@@ -50,8 +49,6 @@ class DirectX11 final :
   template<class T>
   using ComPtr_t = ::Microsoft::WRL::ComPtr<T>;
   using Renders_t = ::std::vector<Render_t>;
-  using PreRender_t = ::std::function<void(const ComponentPtr_t &)>;
-  using PreRenders_t = ::std::map<String_t, PreRender_t>;
 
 public:
   // Èםעונפויס IGraphicApi:
@@ -83,13 +80,11 @@ private:
   Render_t GetLightsRender(void);
   Render_t GetDeptRender(const ComponentPtr_t &);
   Renders_t GetPreRendersGeometry(void);
-  ComponentPtr_t GetPreRenderComponent(const ComponentPtr_t &, const String_t &);
-  void PreRenderComponentsProcess(const PreRenders_t &);
 
 private:
+  CapturingServiceComponent       m_ServiceComponents;
   FLOAT                           m_BkColor[4];
   Creators_t                      m_Creators;
-  ::std::deque<ComponentPtr_t>    m_PreRenderComponent;
   ::Matrices                      m_Constants;
   ::std::map<String_t, ::Lights>  m_Lights;
   String_t                        m_CurrentCameraId;

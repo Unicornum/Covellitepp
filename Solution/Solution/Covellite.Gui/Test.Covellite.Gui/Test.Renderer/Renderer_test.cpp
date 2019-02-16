@@ -241,7 +241,6 @@ TEST_F(Renderer_test, /*DISABLED_*/Test_RenderCompiledGeometry_Textured)
     return [&, _pComponent]()
     {
       RenderProxy.Render(ComponentData{ _pComponent }
-        .AddValue(uT("id"), uT(""))
         .AddValue(uT("type"), uT(""))
         .AddValue(uT("kind"), uT(""))
         .AddValue(uT("x"), 0.0f)
@@ -253,7 +252,7 @@ TEST_F(Renderer_test, /*DISABLED_*/Test_RenderCompiledGeometry_Textured)
   auto ShaderCreator =
     [&](const Component_t::ComponentPtr_t & _pComponent) -> Renders_t::Render_t
   {
-    const auto Kind = _pComponent->GetValue(uT("kind"), uT(""));
+    const auto Kind = _pComponent->Kind;
 
     if (Kind == uT("Pixel"))
     {
@@ -277,7 +276,7 @@ TEST_F(Renderer_test, /*DISABLED_*/Test_RenderCompiledGeometry_Textured)
   auto BufferCreator =
     [&](const Component_t::ComponentPtr_t & _pComponent) -> Renders_t::Render_t
   {
-    const auto Kind = _pComponent->GetValue(uT("kind"), uT(""));
+    const auto Kind = _pComponent->Kind;
 
     if (Kind == Vertex_t::GetName())
     {
@@ -312,7 +311,7 @@ TEST_F(Renderer_test, /*DISABLED_*/Test_RenderCompiledGeometry_Textured)
   auto SimpleCreator =
     [&](const Component_t::ComponentPtr_t & _pComponent) -> Renders_t::Render_t
   {
-    const auto Kind = _pComponent->GetValue(uT("kind"), uT(""));
+    const auto Kind = _pComponent->Kind;
 
     if (Kind == uT("Blend") || Kind == uT("Camera")) return nullptr;
 
@@ -411,7 +410,6 @@ TEST_F(Renderer_test, /*DISABLED_*/Test_RenderCompiledGeometry_Textured)
 
     const Values_t PositionValues =
     {
-      uT("Covellite.Api.Data.Position.") + strObjectId,
       uT("Data"),
       uT("Position"),
       X,
@@ -451,7 +449,6 @@ TEST_F(Renderer_test, /*DISABLED_*/Test_RenderCompiledGeometry_Textured)
 
     const Values_t PositionValues =
     {
-      uT("Covellite.Api.Data.Position.") + strObjectId,
       uT("Data"),
       uT("Position"),
       X,
@@ -508,7 +505,6 @@ TEST_F(Renderer_test, /*DISABLED_*/Test_RenderCompiledGeometry_NonTextured)
     return [&, _pComponent]()
     {
       RenderProxy.Render(ComponentData{ _pComponent }
-        .AddValue(uT("id"), uT(""))
         .AddValue(uT("type"), uT(""))
         .AddValue(uT("kind"), uT(""))
         .AddValue(uT("x"), 0.0f)
@@ -520,7 +516,7 @@ TEST_F(Renderer_test, /*DISABLED_*/Test_RenderCompiledGeometry_NonTextured)
   auto ShaderCreator =
     [&](const Component_t::ComponentPtr_t & _pComponent) -> Renders_t::Render_t
   {
-    const auto Kind = _pComponent->GetValue(uT("kind"), uT(""));
+    const auto Kind = _pComponent->Kind;
 
     if (Kind == uT("Pixel"))
     {
@@ -544,7 +540,7 @@ TEST_F(Renderer_test, /*DISABLED_*/Test_RenderCompiledGeometry_NonTextured)
   auto BufferCreator =
     [&](const Component_t::ComponentPtr_t & _pComponent) -> Renders_t::Render_t
   {
-    const auto Kind = _pComponent->GetValue(uT("kind"), uT(""));
+    const auto Kind = _pComponent->Kind;
 
     if (Kind == Vertex_t::GetName())
     {
@@ -579,7 +575,7 @@ TEST_F(Renderer_test, /*DISABLED_*/Test_RenderCompiledGeometry_NonTextured)
   auto PresentCreator =
     [&](const Component_t::ComponentPtr_t & _pComponent) -> Renders_t::Render_t
   {
-    const auto Kind = _pComponent->GetValue(uT("kind"), uT(""));
+    const auto Kind = _pComponent->Kind;
 
     if (Kind == uT("Camera")) return nullptr;
 
@@ -661,7 +657,6 @@ TEST_F(Renderer_test, /*DISABLED_*/Test_RenderCompiledGeometry_NonTextured)
 
     const Values_t PositionValues =
     {
-      uT("Covellite.Api.Data.Position.") + strObjectId,
       uT("Data"),
       uT("Position"),
       X,
@@ -695,7 +690,6 @@ TEST_F(Renderer_test, /*DISABLED_*/Test_RenderCompiledGeometry_NonTextured)
 
     const Values_t PositionValues =
     {
-      uT("Covellite.Api.Data.Position.") + strObjectId,
       uT("Data"),
       uT("Position"),
       X,
@@ -786,12 +780,6 @@ TEST_F(Renderer_test, /*DISABLED_*/Test_ReleaseCompiledGeometry_RemoveUniqueComp
          }),
         Component_t::Make(
         {
-          { uT("id"), uT("Covellite.Api.Data.Position.") + strObjectId },
-          { uT("type"), uT("Data") },
-          { uT("data"), uT("Data.1811161820") },
-         }),
-        Component_t::Make(
-        {
           { uT("id"), uT("Covellite.Api.Present.Geometry.") + strObjectId },
           { uT("type"), uT("Present") },
           { uT("data"), uT("Present.1811261258") },
@@ -812,13 +800,6 @@ TEST_F(Renderer_test, /*DISABLED_*/Test_ReleaseCompiledGeometry_RemoveUniqueComp
       uT("Index.1811161840")
     };
 
-    const Values_t ExpectedPositionData =
-    {
-      uT("Covellite.Api.Data.Position.") + strObjectId,
-      uT("Data"),
-      uT("Data.1811161820")
-    };
-
     const Values_t ExpectedPresentData =
     {
       uT("Covellite.Api.Present.Geometry.") + strObjectId,
@@ -832,13 +813,10 @@ TEST_F(Renderer_test, /*DISABLED_*/Test_ReleaseCompiledGeometry_RemoveUniqueComp
     EXPECT_CALL(RenderProxy, Render(ExpectedIndexBufferData))
       .Times(1);
 
-    EXPECT_CALL(RenderProxy, Render(ExpectedPositionData))
-      .Times(1);
-
     EXPECT_CALL(RenderProxy, Render(ExpectedPresentData))
       .Times(1);
 
-    EXPECT_EQ(4, Renders.size());
+    EXPECT_EQ(3, Renders.size());
     for (auto & Render : Renders) Render();
   }
 
@@ -860,11 +838,6 @@ TEST_F(Renderer_test, /*DISABLED_*/Test_ReleaseCompiledGeometry_RemoveUniqueComp
          }),
         Component_t::Make(
         {
-          { uT("id"), uT("Covellite.Api.Data.Position.") + strObjectId },
-          { uT("type"), uT("Data") },
-        }),
-        Component_t::Make(
-        {
           { uT("id"), uT("Covellite.Api.Present.Geometry.") + strObjectId },
           { uT("type"), uT("Present") },
          }),
@@ -884,13 +857,6 @@ TEST_F(Renderer_test, /*DISABLED_*/Test_ReleaseCompiledGeometry_RemoveUniqueComp
       uT("")
     };
 
-    const Values_t ExpectedPositionData =
-    {
-      uT("Covellite.Api.Data.Position.") + strObjectId,
-      uT("Data"),
-      uT("")
-    };
-
     const Values_t ExpectedPresentData =
     {
       uT("Covellite.Api.Present.Geometry.") + strObjectId,
@@ -904,13 +870,10 @@ TEST_F(Renderer_test, /*DISABLED_*/Test_ReleaseCompiledGeometry_RemoveUniqueComp
     EXPECT_CALL(RenderProxy, Render(ExpectedIndexBufferData))
       .Times(1);
 
-    EXPECT_CALL(RenderProxy, Render(ExpectedPositionData))
-      .Times(1);
-
     EXPECT_CALL(RenderProxy, Render(ExpectedPresentData))
       .Times(1);
 
-    EXPECT_EQ(4, Renders.size());
+    EXPECT_EQ(3, Renders.size());
     for (auto & Render : Renders) Render();
   }
 }
@@ -922,7 +885,7 @@ TEST_F(Renderer_test, /*DISABLED_*/Test_EnableScissorRegion_True)
 
   auto Creator = [&](const Component_t::ComponentPtr_t & _pComponent) -> Renders_t::Render_t
   {
-    const auto Kind = _pComponent->GetValue(uT("kind"), uT(""));
+    const auto Kind = _pComponent->Kind;
     if (Kind != uT("Scissor")) return nullptr;
 
     return [&, _pComponent]()
@@ -962,7 +925,7 @@ TEST_F(Renderer_test, /*DISABLED_*/Test_EnableScissorRegion_False)
 
   auto Creator = [&](const Component_t::ComponentPtr_t & _pComponent) -> Renders_t::Render_t
   {
-    const auto Kind = _pComponent->GetValue(uT("kind"), uT(""));
+    const auto Kind = _pComponent->Kind;
     if (Kind != uT("Scissor")) return nullptr;
 
     return [&, _pComponent]()
@@ -1015,7 +978,6 @@ TEST_F(Renderer_test, /*DISABLED_*/Test_SetScissorRegion)
     return [&, _pComponent]()
     {
       RenderProxy.Render(ComponentData{ _pComponent }
-        .AddValue(uT("id"), uT(""))
         .AddValue(uT("type"), uT(""))
         .AddValue(uT("kind"), uT(""))
         .AddValue(uT("left"), 0)
@@ -1029,7 +991,7 @@ TEST_F(Renderer_test, /*DISABLED_*/Test_SetScissorRegion)
   auto ScissorCreator = 
     [&](const Component_t::ComponentPtr_t & _pComponent) -> Renders_t::Render_t
   {
-    const auto Kind = _pComponent->GetValue(uT("kind"), uT(""));
+    const auto Kind = _pComponent->Kind;
     if (Kind != uT("Scissor")) return nullptr;
 
     return [&, _pComponent]()
@@ -1075,7 +1037,6 @@ TEST_F(Renderer_test, /*DISABLED_*/Test_SetScissorRegion)
 
     const Values_t ExpectedRectData =
     {
-      uT("Covellite.Api.Data.Rect"),
       uT("Data"),
       uT("Rect"),
       X,
@@ -1104,7 +1065,6 @@ TEST_F(Renderer_test, /*DISABLED_*/Test_SetScissorRegion)
 
     const Values_t ExpectedRectData =
     {
-      uT("Covellite.Api.Data.Rect"),
       uT("Data"),
       uT("Rect"),
       X,

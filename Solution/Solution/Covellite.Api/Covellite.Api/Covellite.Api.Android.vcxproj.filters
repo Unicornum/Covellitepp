@@ -50,6 +50,9 @@
     <ClInclude Include="Renderer\GLMath.hpp">
       <Filter>Renderer</Filter>
     </ClInclude>
+    <ClInclude Include="Renderer\CapturingServiceComponent.hpp">
+      <Filter>Renderer</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Window.cpp" />
@@ -64,6 +67,9 @@
       <Filter>Renderer</Filter>
     </ClCompile>
     <ClCompile Include="Renderer\OpenGLCommon.cpp">
+      <Filter>Renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="Renderer\CapturingServiceComponent.cpp">
       <Filter>Renderer</Filter>
     </ClCompile>
   </ItemGroup>

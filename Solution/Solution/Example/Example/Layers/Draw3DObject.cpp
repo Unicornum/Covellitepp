@@ -25,14 +25,14 @@ Draw3DObject::Draw3DObject(IWindowGui_t & _Window) :
 {
   using namespace ::alicorn::extension::std;
 
-  GetElement("id_polygons_minus").SetText(u8"\uF056");
-  GetElement("id_polygons").SetText(string_cast<::std::string, Locale::UTF8>(
-    uT("{POLYGONS}").Replace(uT("{POLYGONS}"), m_Polygons)));
-  GetElement("id_polygons_plus").SetText(u8"\uF055");
-  GetElement("id_cubes_minus").SetText(u8"\uF056");
-  GetElement("id_cubes").SetText(string_cast<::std::string, Locale::UTF8>(
-    uT("{CUBES}").Replace(uT("{CUBES}"), m_CubesCount)));
-  GetElement("id_cubes_plus").SetText(u8"\uF055");
+  GetElement("id_polygons_minus").SetMeaning(uT("\uF056"));
+  GetElement("id_polygons").SetMeaning(uT("{POLYGONS}")
+    .Replace(uT("{POLYGONS}"), m_Polygons));
+  GetElement("id_polygons_plus").SetMeaning(uT("\uF055"));
+  GetElement("id_cubes_minus").SetMeaning(uT("\uF056"));
+  GetElement("id_cubes").SetMeaning(uT("{CUBES}")
+    .Replace(uT("{CUBES}"), m_CubesCount));
+  GetElement("id_cubes_plus").SetMeaning(uT("\uF055"));
 
   using namespace ::covellite::events;
 
@@ -45,8 +45,8 @@ Draw3DObject::Draw3DObject(IWindowGui_t & _Window) :
     m_Events[::events::Simple3DObject.Start](
       ::std::pair<int, int>{ m_Polygons, m_CubesCount });
 
-    GetElement("id_polygons").SetText(string_cast<::std::string, Locale::UTF8>(
-      uT("{POLYGONS}").Replace(uT("{POLYGONS}"), m_Polygons)));
+    GetElement("id_polygons").SetMeaning(uT("{POLYGONS}")
+      .Replace(uT("{POLYGONS}"), m_Polygons));
   });
 
   m_Events[Click.DocumentId(GetId()).ElementId("id_polygons_minus")]
@@ -58,8 +58,8 @@ Draw3DObject::Draw3DObject(IWindowGui_t & _Window) :
     m_Events[::events::Simple3DObject.Start](
       ::std::pair<int, int>{ m_Polygons, m_CubesCount });
 
-    GetElement("id_polygons").SetText(string_cast<::std::string, Locale::UTF8>(
-      uT("{POLYGONS}").Replace(uT("{POLYGONS}"), m_Polygons)));
+    GetElement("id_polygons").SetMeaning(uT("{POLYGONS}")
+      .Replace(uT("{POLYGONS}"), m_Polygons));
   });
 
   m_Events[Click.DocumentId(GetId()).ElementId("id_cubes_plus")]
@@ -71,8 +71,8 @@ Draw3DObject::Draw3DObject(IWindowGui_t & _Window) :
     m_Events[::events::Simple3DObject.Start](
       ::std::pair<int, int>{ m_Polygons, m_CubesCount });
 
-    GetElement("id_cubes").SetText(string_cast<::std::string, Locale::UTF8>(
-      uT("{CUBES}").Replace(uT("{CUBES}"), m_CubesCount)));
+    GetElement("id_cubes").SetMeaning(uT("{CUBES}")
+      .Replace(uT("{CUBES}"), m_CubesCount));
   });
 
   m_Events[Click.DocumentId(GetId()).ElementId("id_cubes_minus")]
@@ -84,8 +84,8 @@ Draw3DObject::Draw3DObject(IWindowGui_t & _Window) :
     m_Events[::events::Simple3DObject.Start](
       ::std::pair<int, int>{ m_Polygons, m_CubesCount });
 
-    GetElement("id_cubes").SetText(string_cast<::std::string, Locale::UTF8>(
-      uT("{CUBES}").Replace(uT("{CUBES}"), m_CubesCount)));
+    GetElement("id_cubes").SetMeaning(uT("{CUBES}")
+      .Replace(uT("{CUBES}"), m_CubesCount));
   });
 
   m_Events[Drawing.Do].Connect([&](void)
@@ -100,8 +100,8 @@ Draw3DObject::Draw3DObject(IWindowGui_t & _Window) :
     {
       using namespace ::alicorn::extension::std;
 
-      GetElement("id_fps").SetText(string_cast<::std::string, Locale::UTF8>(
-        uT("FPS: {FPS}").Replace(uT("{FPS}"), m_Fps)));
+      GetElement("id_fps").SetMeaning(uT("FPS: {FPS}")
+        .Replace(uT("{FPS}"), m_Fps));
 
       m_LastFps = m_Fps;
       m_Fps = 0;

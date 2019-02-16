@@ -46,19 +46,19 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">
+    <ClCompile />
     <ClCompile>
-      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <PrecompiledHeader>Use</PrecompiledHeader>
+      <AdditionalOptions>-Wno-unused-variable %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">
+    <ClCompile />
     <ClCompile>
-      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <PrecompiledHeader>Use</PrecompiledHeader>
+      <AdditionalOptions>-Wno-unused-variable %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="ClickEventListener.hpp" />
+    <ClInclude Include="EventListener.hpp" />
     <ClInclude Include="Events.hpp" />
     <ClInclude Include="File.hpp" />
     <ClInclude Include="ILayer.hpp" />
@@ -85,7 +85,7 @@
     <None Include="Window.inl" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="ClickEventListener.cpp" />
+    <ClCompile Include="EventListener.cpp" />
     <ClCompile Include="File.cpp" />
     <ClCompile Include="Initializer.cpp" />
     <ClCompile Include="Layer.android.cpp" />

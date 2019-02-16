@@ -16,10 +16,10 @@
 #define Window_test Window_deprecated_test
 
 // Расположение класса Window
-#include <Covellite\Gui\Window.hpp>
+#include <Covellite/Gui/Window.hpp>
 
-#include <Covellite/Gui/ClickEventListener.hpp>
-#include "../Mock/ClickEventListener.inl"
+#include <Covellite/Gui/EventListener.hpp>
+#include "../Mock/EventListener.inl"
 
 // Общий тестовый класс класса Window
 class Window_test :
@@ -47,7 +47,7 @@ protected:
   {
     using namespace ::alicorn::extension::std;
 
-    ::testing::DefaultValue<Tested_t::ClickEventListenerPtr_t>::Set(m_pClickEventListener);
+    ::testing::DefaultValue<Tested_t::EventListenerPtr_t>::Set(m_pEventListener);
     ::testing::DefaultValue<RenderInterfacePtr_t>::Set(m_pRenderInterface);
     ::testing::DefaultValue<String_t>::Set("DefaultString");
     ::testing::DefaultValue<String>::Set(string_cast<String>(m_PathToFontsDirectory));
@@ -60,7 +60,7 @@ protected:
   {
     using namespace ::alicorn::extension::std;
 
-    ::testing::DefaultValue<Tested_t::ClickEventListenerPtr_t>::Clear();
+    ::testing::DefaultValue<Tested_t::EventListenerPtr_t>::Clear();
     ::testing::DefaultValue<RenderInterfacePtr_t>::Clear();
     ::testing::DefaultValue<String_t>::Clear();
     ::testing::DefaultValue<String>::Clear();
@@ -73,8 +73,8 @@ protected:
 
 private:
   const Events_t m_Events;
-  Tested_t::ClickEventListenerPtr_t m_pClickEventListener =
-    ::std::make_shared<Tested_t::ClickEventListener>(m_Events);
+  Tested_t::EventListenerPtr_t m_pEventListener =
+    ::std::make_shared<Tested_t::EventListener>(m_Events);
   RenderInterfacePtr_t m_pRenderInterface =
     ::std::make_shared<::mock::covellite::api::RenderOpenGL>(0);
   RendersPtr_t m_pRenders =

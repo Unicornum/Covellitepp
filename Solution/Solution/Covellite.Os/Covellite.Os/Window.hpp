@@ -59,8 +59,11 @@ public:
 
 private:
   Events_t        m_Events;
+  long            m_MinWindowWidth = 0;
+  long            m_MinWindowHeight = 0;
   Handle_t        m_Handle;
   Configuration_t m_Configuration;
+  size_t          m_LastTypeSizeMessage;
 
 public:
   Window(void);

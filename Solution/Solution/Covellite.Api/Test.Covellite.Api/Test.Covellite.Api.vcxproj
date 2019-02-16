@@ -78,6 +78,7 @@
     <ResourceCompile Include="Resources.rc" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\Covellite.Api\Renderer\CapturingServiceComponent.cpp" />
     <ClCompile Include="..\Covellite.Api\Renderer\DirectX11.cpp" />
     <ClCompile Include="..\Covellite.Api\Renderer\DxCheck.cpp" />
     <ClCompile Include="..\Covellite.Api\Renders.cpp" />

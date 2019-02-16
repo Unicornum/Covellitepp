@@ -42,11 +42,24 @@ namespace basement
 class Simple2DGame final :
   public Common
 {
-  using Rect_t = ::covellite::os::IWindow::Rect;
+  /// [Vertex format]
   using Vertex_t = ::covellite::api::Vertex::Gui;
+  /// [Vertex format]
   using VertexData_t = ::std::vector<Vertex_t>;
   using Object_t = ::std::vector<Component_t::ComponentPtr_t>;
   using Events_t = ::covellite::events::Events;
+  using Updater_t = ::std::function<void(void)>;
+  using TimePoint_t = ::std::chrono::system_clock::time_point;
+
+public:
+  class Rect final
+  {
+  public:
+    float Left;
+    float Top;
+    float Right;
+    float Bottom;
+  };
 
 public:
   void Render(void) override;
@@ -65,10 +78,13 @@ private:
     public:
       inline float GetMin(void) const { return Position - Size / 2.0f; }
       inline float GetMax(void) const { return Position + Size / 2.0f; }
+      void Update(float);
     };
 
   public:
     bool IsIntersect(const GameUnit &) const;
+    void Update(float, float);
+    void Update(float);
 
   public:
     Info X, Y;
@@ -79,38 +95,44 @@ private:
   };
 
 private:
-  float GetScreenX(float) const;
-  float GetScreenY(float) const;
-  float GetCenterGameFieldUnitX(float) const;
-  float GetCenterGameFieldUnitY(float) const;
-  Id BuildCamera(void);
-  Id BuildRectangle(const Component_t::ComponentPtr_t &, 
-    float, float, const String_t &);
-  Id BuildRectangle(const Component_t::ComponentPtr_t &, 
-    float, float, uint32_t);
-  Id BuildRectangle(const Component_t::ComponentPtr_t &, 
-    const Object_t &, const VertexData_t &);
+  void AddCommonComponents(void);
+  void AddCamera(void);
+  void AddBackground(void);
+  void AddClock(void);
+  void AddActors(void);
+  Id BuildRectangle(const Object_t &, float, float, const String_t &);
+  Id BuildRectangle(const Object_t &, float, float, uint32_t);
+  Id BuildRectangle(const Rect &, uint32_t, const Rect &,
+    const String_t &, const Object_t &);
+  Id BuildRectangle(const Rect &, uint32_t, const Rect &, 
+    const Object_t &, const Object_t &);
 
 private:
   Events_t m_Events;
   bool m_IsTouch = false;
   float m_MouseX = 0.0f;
   float m_MouseY = 0.0f;
+
+private:
   const float m_Xo;
   const float m_Yo;
   const float m_Width;
   const float m_Height;
   const float m_GameFieldSize;
-  GameUnit m_UserUnit;
-  ::std::vector<GameUnit> m_Enemies;
-  float m_Speed = 0.1f;
-  ::std::function<void(void)> m_Updater;
-  ::std::chrono::system_clock::time_point m_LastTime;
-  ::std::chrono::system_clock::time_point m_BeginRenderFrameTime;
-  ::std::chrono::system_clock::time_point m_BeginGameTime;
+
+private:
+  GameUnit                  m_UserUnit;
+  ::std::vector<GameUnit>   m_Enemies;
+  float                     m_EnemiesSpeed = 0.1f;
+  Updater_t                 m_ClockUpdater;
+  ::std::vector<Updater_t>  m_Updaters;
+  TimePoint_t               m_LastTime;
+  TimePoint_t               m_BeginRenderFrameTime;
+  TimePoint_t               m_BeginGameTime;
 
 public:
-  Simple2DGame(const Events_t &, const RendersPtr_t &, const Rect_t &);
+  Simple2DGame(const Events_t &, const RendersPtr_t &, const Rect &);
+  ~Simple2DGame(void);
 };
 
 } // namespace basement

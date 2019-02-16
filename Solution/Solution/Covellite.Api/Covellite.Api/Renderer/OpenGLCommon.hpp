@@ -1,9 +1,8 @@
 
 #pragma once
-#include <deque>
-#include <alicorn/std/string.hpp>
 #include "IGraphicApi.hpp"
 #include "Api.forward.hpp"
+#include "CapturingServiceComponent.hpp"
 
 namespace covellite
 {
@@ -64,12 +63,12 @@ private:
   static Color_t ARGBtoFloat4(uint32_t);
 
 private:
-  const Renderer::Data::Color   m_BackgroundColor;
-  const int                     m_Top;
-  const String_t                m_PreVersion;
-  Creators_t                    m_Creators;
-  ::std::deque<ComponentPtr_t>  m_PreRenderComponent;
-  Render_t                      m_DrawElements;
+  CapturingServiceComponent   m_ServiceComponents;
+  const Renderer::Data::Color m_BackgroundColor;
+  const int                   m_Top;
+  const String_t              m_PreVersion;
+  Creators_t                  m_Creators;
+  Render_t                    m_DrawElements;
 
 private:
   class Texture;

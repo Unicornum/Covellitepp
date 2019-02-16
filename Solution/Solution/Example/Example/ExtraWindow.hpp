@@ -5,6 +5,8 @@
 
 namespace basement { class IBasement; }
 
+// 10 Февраль 2019 19:06 (unicornum.verum@gmail.com)
+TODO("Требуется более подходящее название класса.");
 /**
 * \ingroup ExampleGroup
 * \brief

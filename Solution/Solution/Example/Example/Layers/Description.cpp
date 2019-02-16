@@ -12,17 +12,14 @@ Description::Description(IWindowGui_t & _Window) :
 
   m_Events[Help.Title].Connect([&](const String & _Text)
   {
-    GetElement("id_title").SetText(
-      string_cast<::std::string, Locale::UTF8>(_Text/* + uT("<br/><br/>")*/));
+    GetElement("id_title").SetMeaning(_Text);
   });
 
   m_Events[Help.Text].Connect([&](const String & _Text)
   {
-    GetElement("id_description").SetText(
-      string_cast<::std::string, Locale::UTF8>(_Text + uT("<br/>") +
+    GetElement("id_description").SetMeaning(_Text + uT("<br/>") +
         uT("- Для возврата на предыдущий экран нажмите иконку в левой части ") +
         uT("заголовка или <p>[BACK]</p>.<br/>") +
-        uT("- Для выхода из программы нажмите <p>[EXIT]</p>.")
-    ));
+        uT("- Для выхода из программы нажмите <p>[EXIT]</p>."));
   });
 }

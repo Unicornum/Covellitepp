@@ -1,19 +1,19 @@
 ﻿
 #include "stdafx.h"
-#include <Covellite/Rocket/ClickEventListener.hpp>
+#include <Covellite/Gui/EventListener.hpp>
 #include <alicorn/std/exception.hpp>
 #include <Covellite/Events/Events.hpp>
 #include <Covellite/Events.hpp>
 #include <Covellite/Gui/Events.hpp>
 
-using namespace covellite::rocket;
+using namespace covellite::gui;
 
-  Window::ClickEventListener::ClickEventListener(const Events_t & _Events) :
+  Window::EventListener::EventListener(const Events_t & _Events) :
   m_Events(_Events)
 {
 }
 
-void Window::ClickEventListener::ProcessEvent(Event_t & _Event) /*override*/
+void Window::EventListener::ProcessEvent(Event_t & _Event) /*override*/
 {
   try
   {
@@ -29,10 +29,10 @@ void Window::ClickEventListener::ProcessEvent(Event_t & _Event) /*override*/
       throw STD_EXCEPTION << "Owner document null pointer.";
     }
 
-    const ::std::string DocumentId = pDocument->GetId().CString();
-    const ::std::string ElementId = pTargetElement->GetId().CString();
-
-    auto Id = events::Click.DocumentId(DocumentId).ElementId(ElementId);
+    const auto Id = 
+      events::Gui{ _Event.GetType().CString() }
+      .DocumentId(pDocument->GetId().CString())
+      .ElementId(pTargetElement->GetId().CString());
 
     m_Events[Id]();
   }
@@ -42,7 +42,7 @@ void Window::ClickEventListener::ProcessEvent(Event_t & _Event) /*override*/
   }
 }
 
-/*static*/ auto Window::ClickEventListener::Make(const Events_t & _Events) -> ClickEventListenerPtr_t
+/*static*/ auto Window::EventListener::Make(const Events_t & _Events) -> EventListenerPtr_t
 {
-  return ::std::make_shared<ClickEventListener>(_Events);
+  return ::std::make_shared<EventListener>(_Events);
 }

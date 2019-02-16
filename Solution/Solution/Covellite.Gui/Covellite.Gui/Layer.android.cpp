@@ -20,10 +20,10 @@ using namespace covellite::gui;
 * \return
 *  Преобразованный путь.
 */
-/*static*/ auto Layer::Convert(const Path_t & _Path) -> String_t
+/*static*/ ::std::string Layer::Convert(const Path_t & _Path)
 {
   using namespace ::alicorn::extension::std;
 
   return string_cast<::std::string, Locale::System>(
-    string_cast<String>(_Path).Replace(uT("\\"), uT("/"))).c_str();
+    string_cast<String>(_Path).Replace(uT("\\"), uT("/")));
 }

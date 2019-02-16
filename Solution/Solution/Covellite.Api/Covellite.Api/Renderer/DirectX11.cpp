@@ -64,6 +64,12 @@ public:
     Desc.ByteWidth = static_cast<decltype(Desc.ByteWidth)>(sizeof(T) * _Count);
     Desc.BindFlags = Support<T>::GetFlag();
 
+    //Desc.BindFlags = ::std::is_same<int, T>::value ?
+    //  D3D11_BIND_INDEX_BUFFER :
+    //  (::std::is_base_of<::covellite::api::Vertex::Common<T>, T>::value ?
+    //    D3D11_BIND_VERTEX_BUFFER :
+    //    D3D11_BIND_CONSTANT_BUFFER);
+
     D3D11_SUBRESOURCE_DATA InitData = { 0 };
     InitData.pSysMem = _pData;
 
@@ -89,7 +95,7 @@ DirectX11::DirectX11(const Renderer::Data & _Data)
     { 
       uT("Data"), [&](const ComponentPtr_t & _pComponent)
       {     
-        m_PreRenderComponent.push_back(_pComponent);
+        m_ServiceComponents.Add(_pComponent);
         return Render_t{};
       } 
     },
@@ -286,7 +292,8 @@ auto DirectX11::CreateState(const ComponentPtr_t & _pComponent) -> Render_t
     ComPtr_t<ID3D11RasterizerState> pScissor;
     DX_CHECK m_pDevice->CreateRasterizerState(&rasterDesc, &pScissor);
 
-    const auto pScissorRect = GetPreRenderComponent(_pComponent, uT("Rect"));
+    const auto pScissorRect = 
+      m_ServiceComponents.Get({ {uT("Rect"), _pComponent} })[0];
 
     Render_t ScissorEnabled = [=](void)
     {
@@ -317,13 +324,20 @@ auto DirectX11::CreateState(const ComponentPtr_t & _pComponent) -> Render_t
     { uT("Scissor"), CreateScissorState },
   };
 
-  return Creators[_pComponent->GetValue(uT("kind"), uT("Unknown"))]();
+  return Creators[_pComponent->Kind]();
 }
 
 auto DirectX11::CreateLight(const ComponentPtr_t & _pComponent) -> Render_t
 {
   auto * const pLights = &m_Lights;
   auto * const pCurrentCameraId = &m_CurrentCameraId;
+
+  const auto ServiceComponents = m_ServiceComponents.Get(
+    {
+      { uT("Position"), api::Component::Make({ }) },
+      { uT("Direction"), api::Component::Make({ { uT("x"), 1.0f } }) },
+      { uT("Attenuation"), api::Component::Make({ }) },
+    });
 
   auto CreateAmbient = [&](void)
   {
@@ -339,8 +353,7 @@ auto DirectX11::CreateLight(const ComponentPtr_t & _pComponent) -> Render_t
 
   auto CreateDirection = [&](void)
   {
-    const auto pDirection = GetPreRenderComponent(
-      ::covellite::api::Component::Make({ { uT("x"), 1.0f } }), uT("Direction"));
+    const auto pDirection = ServiceComponents[1];
 
     return [=](void)
     {
@@ -357,16 +370,8 @@ auto DirectX11::CreateLight(const ComponentPtr_t & _pComponent) -> Render_t
 
   auto CreatePoint = [&](void)
   {
-    auto pPosition = ::covellite::api::Component::Make({ });
-    auto pAttenuation = ::covellite::api::Component::Make({ });
-
-    PreRenderComponentsProcess(
-      {
-        { uT("Position"),
-          [&](const ComponentPtr_t & _pComponent) { pPosition = _pComponent; } },
-        { uT("Attenuation"),
-          [&](const ComponentPtr_t & _pComponent) { pAttenuation = _pComponent; } },
-      });
+    auto pPosition = ServiceComponents[0];
+    auto pAttenuation = ServiceComponents[2];
 
     return [=](void)
     {
@@ -404,7 +409,7 @@ auto DirectX11::CreateLight(const ComponentPtr_t & _pComponent) -> Render_t
     { uT("Point"), CreatePoint },
   };
 
-  return Creators[_pComponent->GetValue(uT("kind"), uT("Unknown"))]();
+  return Creators[_pComponent->Kind]();
 }
 
 auto DirectX11::CreateMaterial(const ComponentPtr_t & _pComponent) -> Render_t
@@ -436,7 +441,7 @@ auto DirectX11::CreateMaterial(const ComponentPtr_t & _pComponent) -> Render_t
 auto DirectX11::CreateTexture(const ComponentPtr_t & _pComponent) -> Render_t
 {
   const Component::Texture TextureData{
-    GetPreRenderComponent(_pComponent, uT("Texture")) };
+    m_ServiceComponents.Get({ { uT("Texture"), _pComponent } })[0] };
 
   D3D11_TEXTURE2D_DESC TextureDesc = { 0 };
   TextureDesc.Width = TextureData.Width;
@@ -576,7 +581,7 @@ public:
 auto DirectX11::CreateShader(const ComponentPtr_t & _pComponent) -> Render_t
 {
   const Component::Shader ShaderData{
-    GetPreRenderComponent(_pComponent, uT("Shader.HLSL")) };
+    m_ServiceComponents.Get({ { uT("Shader.HLSL"), _pComponent } })[0] };
 
   using namespace ::alicorn::extension::std;
 
@@ -621,17 +626,19 @@ auto DirectX11::CreateShader(const ComponentPtr_t & _pComponent) -> Render_t
     },
   };
 
-  return Creators[_pComponent->GetValue(uT("kind"), uT("Unknown"))]();
+  return Creators[_pComponent->Kind]();
 }
 
 auto DirectX11::CreateBuffer(const ComponentPtr_t & _pComponent) -> Render_t
 {
   using Vertex_t = ::covellite::api::Vertex;
 
+  const auto pBufferData =
+    m_ServiceComponents.Get({ { uT("Buffer"), _pComponent } })[0];
+
   auto CreateVertexGuiBuffer = [&](void)
   {
-    const Component::Buffer<Vertex_t::Gui> VertexData{ 
-      GetPreRenderComponent(_pComponent, Vertex_t::Gui::GetName()) };
+    const Component::Buffer<Vertex_t::Gui> VertexData{ pBufferData };
 
     auto pBuffer = Buffer::Create(m_pDevice, VertexData.pData, VertexData.Count);
 
@@ -646,8 +653,7 @@ auto DirectX11::CreateBuffer(const ComponentPtr_t & _pComponent) -> Render_t
 
   auto CreateVertexTexturedBuffer = [&](void)
   {
-    const Component::Buffer<Vertex_t::Textured> VertexData{ 
-      GetPreRenderComponent(_pComponent, Vertex_t::Textured::GetName()) };
+    const Component::Buffer<Vertex_t::Textured> VertexData{ pBufferData };
 
     auto pBuffer = Buffer::Create(m_pDevice, VertexData.pData, VertexData.Count);
 
@@ -662,8 +668,7 @@ auto DirectX11::CreateBuffer(const ComponentPtr_t & _pComponent) -> Render_t
 
   auto CreateIndexBuffer = [&](void)
   {
-    const Component::Buffer<int> IndexData{
-      GetPreRenderComponent(_pComponent, uT("Index")) };
+    const Component::Buffer<int> IndexData{ pBufferData };
 
     auto pBuffer = Buffer::Create(m_pDevice, IndexData.pData, IndexData.Count);
 
@@ -690,7 +695,7 @@ auto DirectX11::CreateBuffer(const ComponentPtr_t & _pComponent) -> Render_t
     },
   };
 
-  return Creators[_pComponent->GetValue(uT("kind"), uT("Unknown"))]();
+  return Creators[_pComponent->Kind]();
 }
 
 auto DirectX11::CreatePresent(const ComponentPtr_t & _pComponent) -> Render_t
@@ -707,7 +712,7 @@ auto DirectX11::CreatePresent(const ComponentPtr_t & _pComponent) -> Render_t
     },
   };
 
-  return Creators[_pComponent->GetValue(uT("kind"), uT("Unknown"))]();
+  return Creators[_pComponent->Kind]();
 }
 
 auto DirectX11::CreateCamera(const ComponentPtr_t & _pComponent) -> Render_t
@@ -746,22 +751,17 @@ auto DirectX11::CreateCamera(const ComponentPtr_t & _pComponent) -> Render_t
     m_pImmediateContext->RSGetViewports(&ViewportCount, &Viewport);
 
     pMatrices->Projection = ::DirectX::XMMatrixTranspose(
-      ::DirectX::XMMatrixOrthographicOffCenterLH(0,
-      Viewport.Width, Viewport.Height, 0, -1, 1));
+      ::DirectX::XMMatrixOrthographicOffCenterLH(0.0f,
+      Viewport.Width, Viewport.Height, 0.0f, 1.0f, -1.0f));
 
     pMatrices->View = ::DirectX::XMMatrixTranspose(
       ::DirectX::XMMatrixIdentity());
   };
 
-  auto pPosition = ::covellite::api::Component::Make({});
-  auto pRotation = ::covellite::api::Component::Make({});
-
-  PreRenderComponentsProcess(
+  const auto ServiceComponents = m_ServiceComponents.Get(
     {
-      { uT("Position"),
-        [&](const ComponentPtr_t & _pComponent) { pPosition = _pComponent; } },
-      { uT("Rotation"),
-        [&](const ComponentPtr_t & _pComponent) { pRotation = _pComponent; } },
+      { uT("Position"), api::Component::Make({}) },
+      { uT("Rotation"), api::Component::Make({}) },
     });
 
   const Render_t CameraFocal = [=](void)
@@ -784,7 +784,7 @@ auto DirectX11::CreateCamera(const ComponentPtr_t & _pComponent) -> Render_t
 
     // Точка, куда смотрит камера - задается как компонент 
     // Transform.Position.
-    const Component::Position Pos{ pPosition };
+    const Component::Position Pos{ ServiceComponents[0] };
     const auto Look = ::DirectX::XMVectorSet(Pos.X, Pos.Y, Pos.Z, 1.0f);
 
     // Расстояние от камеры до Look.
@@ -793,7 +793,7 @@ auto DirectX11::CreateCamera(const ComponentPtr_t & _pComponent) -> Render_t
 
     // Точка, где расположена камера - вычисляется на основе Look, Distance и
     // компонента Transform.Rotation.
-    const Component::Position Rot{ pRotation };
+    const Component::Position Rot{ ServiceComponents[1] };
 
     auto Transform =
       ::DirectX::XMMatrixRotationX(Rot.X) *
@@ -946,7 +946,7 @@ auto DirectX11::GetPreRendersGeometry(void) -> Renders_t
     pWorldViewProjection->World = ::DirectX::XMMatrixIdentity();
   });
 
-  PreRenderComponentsProcess(
+  m_ServiceComponents.Process(
     {
       { uT("Position"), CreatePosition },
       { uT("Rotation"), CreateRotation },
@@ -969,40 +969,4 @@ auto DirectX11::GetPreRendersGeometry(void) -> Renders_t
   });
 
   return Result;
-}
-
-auto DirectX11::GetPreRenderComponent(const ComponentPtr_t & _pDefault, 
-  const String_t & _Kind) -> ComponentPtr_t
-{
-  auto pResult = _pDefault;
-
-  PreRenderComponentsProcess(
-    {
-      { 
-        _Kind,
-        [&](const ComponentPtr_t & _pComponent) { pResult = _pComponent; }
-      },
-    });
-
-  return pResult;
-}
-
-void DirectX11::PreRenderComponentsProcess(const PreRenders_t & _PreRenders)
-{
-  for (; !m_PreRenderComponent.empty(); m_PreRenderComponent.pop_front())
-  {
-    const auto pComponent = m_PreRenderComponent.front();
-    const auto Kind = pComponent->GetValue(uT("kind"), uT("Unknown"));
-
-    auto itComponent = _PreRenders.find(Kind);
-    if (itComponent != _PreRenders.end())
-    {
-      itComponent->second(pComponent);
-    }
-    else
-    {
-      // 13 Декабрь 2018 14:22 (unicornum.verum@gmail.com)
-      TODO("Писать в лог warning о лишнем компоненте.");
-    }
-  }
 }

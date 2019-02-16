@@ -49,20 +49,14 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM'" />
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">
-    <ClCompile>
-      <PrecompiledHeader>Use</PrecompiledHeader>
-      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-    </ClCompile>
+    <ClCompile />
     <Link>
       <LibraryDependencies>%(LibraryDependencies);GLESv1_CM;EGL;Covellite.Jni.$(Configuration)</LibraryDependencies>
       <AdditionalLibraryDirectories>$(SolutionDir)$(Configuration)\Lib\$(PlatformTarget);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">
-    <ClCompile>
-      <PrecompiledHeader>Use</PrecompiledHeader>
-      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-    </ClCompile>
+    <ClCompile />
     <Link>
       <LibraryDependencies>%(LibraryDependencies);GLESv1_CM;EGL;Covellite.Jni.$(Configuration)</LibraryDependencies>
       <AdditionalLibraryDirectories>$(SolutionDir)$(Configuration)\Lib\$(PlatformTarget);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>

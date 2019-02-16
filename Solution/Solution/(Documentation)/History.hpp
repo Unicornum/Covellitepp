@@ -6,6 +6,69 @@
 *  =================
 *  <table frame=void><tr><td></td></tr></table>
 *  
+*  Version: 2.1.10.1330 Unknown
+*  -----
+*  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект \ref CovelliteApiPage : </td></tr></table>
+*  <table frame=void border=1 bordercolor=#FFFFFF cellpadding=5 cellspacing=0 width=98%><tr>
+*    <td width=10px></td>
+*    <td bgcolor=#B8CCE4 width=125px align=center> 15.02.2019 17:54 </td>
+*    <td bgcolor=#FFC0C0> fix: Ошибка при повторном создании объекта с одни и тем же id и передачей информации через компонент Data.Buffer. </td>
+*  </tr></table>
+*  <table frame=void border=1 bordercolor=#FFFFFF cellpadding=5 cellspacing=0 width=98%><tr>
+*    <td width=10px></td>
+*    <td bgcolor=#B8CCE4 width=125px align=center> 14.02.2019 21:04 </td>
+*    <td bgcolor=#C0FFC0> Передача данных вертексных и индексных буферов при помощи компонента Data.Buffer. </td>
+*  </tr></table>
+*  <table frame=void border=1 bordercolor=#FFFFFF cellpadding=5 cellspacing=0 width=98%><tr>
+*    <td width=10px></td>
+*    <td bgcolor=#B8CCE4 width=125px align=center> 13.02.2019 20:44 </td>
+*    <td bgcolor=#C0FFC0> Объект прямого доступа к параметру kind компонента. </td>
+*  </tr></table>
+*  <table frame=void border=1 bordercolor=#FFFFFF cellpadding=5 cellspacing=0 width=98%><tr>
+*    <td width=10px></td>
+*    <td bgcolor=#B8CCE4 width=125px align=center> 11.02.2019 18:52 </td>
+*    <td bgcolor=#FFC0C0> fix: DirectX: неверное направление оси Z при использовании буфера глубины для камеры отрисовки плоских объектов. </td>
+*  </tr></table>
+*  <table frame=void border=1 bordercolor=#FFFFFF cellpadding=5 cellspacing=0 width=98%><tr>
+*    <td width=10px></td>
+*    <td bgcolor=#B8CCE4 width=125px align=center> 11.02.2019 14:19 </td>
+*    <td bgcolor=#FFC0C0> fix: OpenGL: некорректная отрисовка с единым для всей сцены индексным буфером. </td>
+*  </tr></table>
+*  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект \ref ExamplePage : </td></tr></table>
+*  <table frame=void border=1 bordercolor=#FFFFFF cellpadding=5 cellspacing=0 width=98%><tr>
+*    <td width=10px></td>
+*    <td bgcolor=#B8CCE4 width=125px align=center> 09.02.2019 20:05 </td>
+*    <td bgcolor=#C0FFC0> Образец 2D игры: аналоговые часы в фоне. </td>
+*  </tr></table>
+*  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект \ref CovelliteOsPage : </td></tr></table>
+*  <table frame=void border=1 bordercolor=#FFFFFF cellpadding=5 cellspacing=0 width=98%><tr>
+*    <td width=10px></td>
+*    <td bgcolor=#B8CCE4 width=125px align=center> 08.02.2019 12:45 </td>
+*    <td bgcolor=#C0FFC0> Параметры минимального размера окна Windows. </td>
+*  </tr></table>
+*  <table frame=void border=1 bordercolor=#FFFFFF cellpadding=5 cellspacing=0 width=98%><tr>
+*    <td width=10px></td>
+*    <td bgcolor=#B8CCE4 width=125px align=center> 07.02.2019 19:51 </td>
+*    <td bgcolor=#C0FFC0> События активации/деактивации окна Windows. </td>
+*  </tr></table>
+*  <table frame=void border=1 bordercolor=#FFFFFF cellpadding=5 cellspacing=0 width=98%><tr>
+*    <td width=10px></td>
+*    <td bgcolor=#B8CCE4 width=125px align=center> 07.02.2019 19:42 </td>
+*    <td bgcolor=#C0FFC0> Изменение логики вызова события изменения размеров окна программы в Windows. </td>
+*  </tr></table>
+*  <table frame=void border=1 bordercolor=#FFFFFF cellpadding=5 cellspacing=0 width=98%><tr>
+*    <td width=10px></td>
+*    <td bgcolor=#B8CCE4 width=125px align=center> 07.02.2019 13:22 </td>
+*    <td bgcolor=#FFC0C0> fix: Исключение при сворачивании окна. </td>
+*  </tr></table>
+*  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект \ref CovelliteGuiPage : </td></tr></table>
+*  <table frame=void border=1 bordercolor=#FFFFFF cellpadding=5 cellspacing=0 width=98%><tr>
+*    <td width=10px></td>
+*    <td bgcolor=#B8CCE4 width=125px align=center> 06.02.2019 20:21 </td>
+*    <td bgcolor=#C0FFC0> Подписка на событие изменения элемента Gui. </td>
+*  </tr></table>
+*  <table frame=void><tr><td></td></tr></table>
+*  
 *  Version: 2.1.9.1281 Unknown
 *  -----
 *  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект \ref ExamplePage : </td></tr></table>
@@ -19,19 +82,16 @@
 *    <td bgcolor=#B8CCE4 width=125px align=center> 28.01.2019 20:22 </td>
 *    <td bgcolor=#C0FFC0> Исправление примера использования фреймворка: окно отображения 3D объекта. </td>
 *  </tr></table>
-*  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект \ref ExamplePage : </td></tr></table>
 *  <table frame=void border=1 bordercolor=#FFFFFF cellpadding=5 cellspacing=0 width=98%><tr>
 *    <td width=10px></td>
 *    <td bgcolor=#B8CCE4 width=125px align=center> 25.01.2019 20:44 </td>
 *    <td bgcolor=#C0FFC0> Исправление примера использования фреймворка: окно настроек. </td>
 *  </tr></table>
-*  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект \ref ExamplePage : </td></tr></table>
 *  <table frame=void border=1 bordercolor=#FFFFFF cellpadding=5 cellspacing=0 width=98%><tr>
 *    <td width=10px></td>
 *    <td bgcolor=#B8CCE4 width=125px align=center> 20.01.2019 21:14 </td>
 *    <td bgcolor=#C0FFC0> Исправление примера использования фреймворка: окно вывода текста в разных форматах. </td>
 *  </tr></table>
-*  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект \ref ExamplePage : </td></tr></table>
 *  <table frame=void border=1 bordercolor=#FFFFFF cellpadding=5 cellspacing=0 width=98%><tr>
 *    <td width=10px></td>
 *    <td bgcolor=#B8CCE4 width=125px align=center> 18.01.2019 13:55 </td>

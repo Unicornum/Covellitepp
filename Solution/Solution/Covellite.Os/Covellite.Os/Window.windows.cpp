@@ -23,7 +23,8 @@ namespace os
 {
 
 static Handle_t CreateWindow(const wchar_t * _ClassName,
-  const alicorn::modules::settings::Section & _WindowSettings)
+  const alicorn::modules::settings::Section & _WindowSettings,
+  long & _MinWindowWidth, long & _MinWindowHeight)
 {
   using Info_t = alicorn::system::version::Info;
   using namespace ::alicorn::extension::std;
@@ -48,13 +49,25 @@ static Handle_t CreateWindow(const wchar_t * _ClassName,
     WindowFlags = WS_CLIPSIBLINGS | WS_CLIPCHILDREN | WS_OVERLAPPEDWINDOW;
     WindowFlagsEx = WS_EX_APPWINDOW | WS_EX_WINDOWEDGE;
 
+    const auto & SizeSection = _WindowSettings[uT("Size")];
+
     const auto IsResized = _WindowSettings.Get<String>(uT("IsResized"));
     if (IsResized == uT("false"))
     {
       WindowFlags ^= WS_THICKFRAME | WS_MAXIMIZEBOX;
     }
+    else
+    {
+      const auto MinClientWidth = SizeSection.Get<int>(uT("MinClientWidth"));
+      const auto MinClientHeight = SizeSection.Get<int>(uT("MinClientHeight"));
 
-    const auto & SizeSection = _WindowSettings[uT("Size")];
+      RECT WindowRect = { 0, 0, MinClientWidth, MinClientHeight };
+      WINAPI_CHECK USING_MOCK ::AdjustWindowRectEx(&WindowRect,
+        WindowFlags, FALSE, WindowFlagsEx);
+
+      _MinWindowWidth = WindowRect.right - WindowRect.left;
+      _MinWindowHeight = WindowRect.bottom - WindowRect.top;
+    }
 
     const auto ClientWidth = SizeSection.Get<int>(uT("Width"));
     const auto ClientHeight = SizeSection.Get<int>(uT("Height"));
@@ -99,14 +112,18 @@ static Handle_t CreateWindow(const wchar_t * _ClassName,
 */
 Window::Window(void) :
   m_Handle(::covellite::os::CreateWindow(::covellite::core::ClassName,
-    ::covellite::app::Settings_t::GetInstance()[uT("Window")]))
+    ::covellite::app::Settings_t::GetInstance()[uT("Window")],
+    m_MinWindowWidth, m_MinWindowHeight)),
+  m_LastTypeSizeMessage(SIZE_RESTORED)
 {
 }
 
 Window::Window(const ::covellite::app::IApplication & _Application) :
   m_Events(_Application),
   m_Handle(::covellite::os::CreateWindow(::covellite::app::ClassName,
-    ::covellite::app::Settings_t::GetInstance()[uT("Window")]))
+    ::covellite::app::Settings_t::GetInstance()[uT("Window")],
+    m_MinWindowWidth, m_MinWindowHeight)),
+  m_LastTypeSizeMessage(SIZE_RESTORED)
 {
   USING_MOCK ::SetWindowLongPtrW(m_Handle, GWLP_USERDATA,
     reinterpret_cast<LONG_PTR>(&m_Events));
@@ -118,9 +135,50 @@ Window::Window(const ::covellite::app::IApplication & _Application) :
   { 
     m_Events[events::Application.Exit]();
   });
-  m_Events[(UINT)WM_SIZE].Connect([&]()
-  { 
+  m_Events[(UINT)WM_ACTIVATEAPP].Connect([&](const RawParams_t & _Params)
+  {
+    if (_Params.first == TRUE)
+    {
+      m_Events[events::Window.Activate]();
+    }
+    else if (_Params.first == FALSE)
+    {
+      m_Events[events::Window.Deactivate]();
+    }
+  });
+  m_Events[(UINT)WM_EXITSIZEMOVE].Connect([&]()
+  {
+    // Это событин вызывается в конце перетаскивания окна, но задержки
+    // перерисовки окна это не вызывает.
     m_Events[events::Window.Resize]();
+  });
+  m_Events[(UINT)WM_SIZE].Connect([&](const RawParams_t & _Params)
+  {
+    // SIZE_MAXIMIZED - развернуто на весь экран.
+    // SIZE_MINIMIZED - свернуто в панель задач (при этом размеры окна 
+    //                  устанавливаются в 0 и это вызывает проблемы рисования).
+    // SIZE_RESTORED  - вернулось в обычный размер из панели задач или 
+    //                  всего экрана и при изменении размеров окна мышью.
+    const auto Type = _Params.first;
+
+    if (Type == SIZE_MAXIMIZED || 
+      (Type == SIZE_RESTORED && m_LastTypeSizeMessage != SIZE_RESTORED))
+    {
+      m_Events[events::Window.Resize]();
+    }
+
+    if (Type == SIZE_MAXIMIZED || 
+      Type == SIZE_MINIMIZED || 
+      Type == SIZE_RESTORED)
+    {
+      m_LastTypeSizeMessage = Type;
+    }
+  });
+  m_Events[(UINT)WM_GETMINMAXINFO].Connect([&](const RawParams_t & _Params)
+  {
+    auto * const pInfo = reinterpret_cast<MINMAXINFO *>(_Params.second);
+    pInfo->ptMinTrackSize.x = m_MinWindowWidth;
+    pInfo->ptMinTrackSize.y = m_MinWindowHeight;
   });
   m_Events[(UINT)WM_MOUSEMOVE].Connect([&](const RawParams_t & _Params)
   {

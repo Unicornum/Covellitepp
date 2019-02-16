@@ -1,7 +1,6 @@
 
 #include "stdafx.h"
 #include "OpenGLCommon.hpp"
-#include <deque>
 #include <alicorn/cpp/math.hpp>
 #include <Covellite/Api/Vertex.hpp>
 #include "Component.hpp"
@@ -24,8 +23,8 @@ OpenGLCommon::OpenGLCommon(const Renderer::Data & _Data, const String_t & _PreVe
   m_Creators =
   {
     { uT("Data"), [&](const ComponentPtr_t & _pComponent)
-      { 
-        m_PreRenderComponent.push_back(_pComponent);
+      {
+        m_ServiceComponents.Add(_pComponent);
         return Render_t{};
       } },
     { uT("State"), [&](const ComponentPtr_t & _pComponent)
@@ -99,15 +98,8 @@ auto OpenGLCommon::CreateState(const ComponentPtr_t & _pComponent) -> Render_t
 
   auto CreateScissorState = [&](void) -> Render_t
   {
-    auto pScissorRect = api::Component::Make({});
-
-    for (; !m_PreRenderComponent.empty(); m_PreRenderComponent.pop_front())
-    {
-      const auto pComponent = m_PreRenderComponent.front();
-      const auto Kind = pComponent->GetValue(uT("kind"), uT("Unknown"));
-
-      if (Kind == uT("Rect")) pScissorRect = pComponent;
-    }
+    const auto pScissorRect = 
+      m_ServiceComponents.Get({ { uT("Rect"), api::Component::Make({}) } })[0];
 
     Render_t ScissorEnabled = [=](void)
     {
@@ -139,7 +131,7 @@ auto OpenGLCommon::CreateState(const ComponentPtr_t & _pComponent) -> Render_t
     { uT("Scissor"), CreateScissorState },
   };
 
-  return Creators[_pComponent->GetValue(uT("kind"), uT("Unknown"))]();
+  return Creators[_pComponent->Kind]();
 }
 
 auto OpenGLCommon::CreateLight(const ComponentPtr_t & _pComponent) -> Render_t
@@ -149,28 +141,12 @@ auto OpenGLCommon::CreateLight(const ComponentPtr_t & _pComponent) -> Render_t
 
   const auto DefaultColor = 0xFF000000;
 
-  auto pDirection = ::covellite::api::Component::Make(
+  const auto ServiceComponents = m_ServiceComponents.Get(
     {
-      { uT("z"), 1.0f },
+      { uT("Position"), api::Component::Make({ { uT("z"), 1.0f }, { uT("w"), 0.0f } }) },
+      { uT("Direction"), api::Component::Make({ { uT("z"), 1.0f } }) },
+      { uT("Attenuation"), api::Component::Make({ }) },
     });
-
-  auto pPosition = ::covellite::api::Component::Make(
-    {
-      { uT("z"), 1.0f },
-      { uT("w"), 0.0f },
-    });
-
-  auto pAttenuation = ::covellite::api::Component::Make({});
-
-  for (; !m_PreRenderComponent.empty(); m_PreRenderComponent.pop_front())
-  {
-    const auto pComponent = m_PreRenderComponent.front();
-    const auto Kind = pComponent->GetValue(uT("kind"), uT("Unknown"));
-
-    if (Kind == uT("Direction")) pDirection = pComponent;
-    if (Kind == uT("Position")) pPosition = pComponent;
-    if (Kind == uT("Attenuation")) pAttenuation = pComponent;
-  }
 
   auto CreateAmbient = [&](void)
   {
@@ -190,6 +166,8 @@ auto OpenGLCommon::CreateLight(const ComponentPtr_t & _pComponent) -> Render_t
 
   auto CreateDirection = [&](void)
   {
+    auto pDirection = ServiceComponents[1];
+
     return [=](void)
     {
       Light Value;
@@ -213,6 +191,9 @@ auto OpenGLCommon::CreateLight(const ComponentPtr_t & _pComponent) -> Render_t
 
   auto CreatePoint = [&](void)
   {
+    auto pPosition = ServiceComponents[0];
+    auto pAttenuation = ServiceComponents[2];
+
     return [=](void)
     {
       Light Value;
@@ -248,7 +229,7 @@ auto OpenGLCommon::CreateLight(const ComponentPtr_t & _pComponent) -> Render_t
     { uT("Point"), CreatePoint },
   };
 
-  return Creators[_pComponent->GetValue(uT("kind"), uT("Unknown"))]();
+  return Creators[_pComponent->Kind]();
 }
 
 auto OpenGLCommon::CreateMaterial(const ComponentPtr_t & _pComponent) -> Render_t
@@ -315,17 +296,8 @@ public:
 
 auto OpenGLCommon::CreateTexture(const ComponentPtr_t & _pComponent) -> Render_t
 {
-  auto pData = _pComponent;
-
-  for (; !m_PreRenderComponent.empty(); m_PreRenderComponent.pop_front())
-  {
-    const auto pComponent = m_PreRenderComponent.front();
-    const auto Kind = pComponent->GetValue(uT("kind"), uT("Unknown"));
-
-    if (Kind == uT("Texture")) pData = pComponent;
-  }
-
-  auto pTexture = ::std::make_shared<Texture>(pData);
+  const auto pTexture = ::std::make_shared<Texture>(
+    m_ServiceComponents.Get({ { uT("Texture"), _pComponent } })[0]);
 
   return [=](void)
   {
@@ -333,26 +305,16 @@ auto OpenGLCommon::CreateTexture(const ComponentPtr_t & _pComponent) -> Render_t
   };
 }
 
-auto OpenGLCommon::CreateBuffer(const ComponentPtr_t & _pComponent) -> Render_t
+auto OpenGLCommon::CreateBuffer(const ComponentPtr_t & _pBuffer) -> Render_t
 {
-  auto pData = _pComponent;
-
-  for (; !m_PreRenderComponent.empty(); m_PreRenderComponent.pop_front())
-  {
-    const auto pComponent = m_PreRenderComponent.front();
-    const auto Kind = pComponent->GetValue(uT("kind"), uT("Unknown"));
-
-    if (Kind.Find(uT("Vertex.")) == 0 || Kind == uT("Index"))
-    {
-      pData = pComponent;
-    }
-  }
+  const auto pBufferData = 
+    m_ServiceComponents.Get({ { uT("Buffer"), _pBuffer } })[0];
 
   auto CreateVertexGuiBuffer = [&](void) -> Render_t
   {
     using Vertex_t = ::covellite::api::Vertex::Gui;
 
-    const Component::Buffer<Vertex_t> Info{ pData };
+    const Component::Buffer<Vertex_t> Info{ pBufferData };
 
     ::std::vector<Vertex_t> Data{ Info.pData, Info.pData + Info.Count };
 
@@ -373,7 +335,7 @@ auto OpenGLCommon::CreateBuffer(const ComponentPtr_t & _pComponent) -> Render_t
   {
     using Vertex_t = ::covellite::api::Vertex::Textured;
 
-    const Component::Buffer<Vertex_t> Info{ pData };
+    const Component::Buffer<Vertex_t> Info{ pBufferData };
 
     ::std::vector<Vertex_t> Data{ Info.pData, Info.pData + Info.Count };
 
@@ -392,18 +354,21 @@ auto OpenGLCommon::CreateBuffer(const ComponentPtr_t & _pComponent) -> Render_t
 
   auto CreateIndexBuffer = [&](void) -> Render_t
   {
-    const Component::Buffer<int> IndexBufferInfo{ pData };
+    auto * pDrawElements = &m_DrawElements;
+
+    const Component::Buffer<int> IndexBufferInfo{ pBufferData };
 
     ::std::vector<int> IndexBufferData{
       IndexBufferInfo.pData, IndexBufferInfo.pData + IndexBufferInfo.Count };
 
-    m_DrawElements = [=](void)
+    return [=](void)
     {
-      glDrawElements(GL_TRIANGLES, (GLsizei)IndexBufferData.size(),
-        GL_UNSIGNED_INT, IndexBufferData.data());
+      *pDrawElements = [=](void)
+      {
+        glDrawElements(GL_TRIANGLES, (GLsizei)IndexBufferData.size(),
+          GL_UNSIGNED_INT, IndexBufferData.data());
+      };
     };
-
-    return nullptr;
   };
 
   using Vertex_t = ::covellite::api::Vertex;
@@ -415,7 +380,7 @@ auto OpenGLCommon::CreateBuffer(const ComponentPtr_t & _pComponent) -> Render_t
     { uT("Index"), CreateIndexBuffer },
   };
 
-  return Creators[_pComponent->GetValue(uT("kind"), uT("Unknown"))]();
+  return Creators[_pBuffer->Kind]();
 }
 
 auto OpenGLCommon::CreatePresent(const ComponentPtr_t & _pComponent) -> Render_t
@@ -426,7 +391,7 @@ auto OpenGLCommon::CreatePresent(const ComponentPtr_t & _pComponent) -> Render_t
     { uT("Geometry"), [&](void) { return CreateGeometry(_pComponent); } },
   };
 
-  return Creators[_pComponent->GetValue(uT("kind"), uT("Unknown"))]();
+  return Creators[_pComponent->Kind]();
 }
 
 auto OpenGLCommon::CreateCamera(const ComponentPtr_t & _pComponent) -> Render_t
@@ -479,7 +444,7 @@ auto OpenGLCommon::GetCameraGui(const ComponentPtr_t & _pComponent) -> Render_t
     glGetFloatv(GL_VIEWPORT, Viewport);
 
     glOrthof(Viewport[0], Viewport[0] + Viewport[2],
-      Viewport[1] + Viewport[3], Viewport[1], -1, 1);
+      Viewport[1] + Viewport[3], Viewport[1], -1.0f, 1.0f);
   };
 }
 
@@ -487,17 +452,11 @@ auto OpenGLCommon::GetCameraFocal(const ComponentPtr_t & _pComponent) -> Render_
 {
   const auto CommonRender = GetCameraCommon(_pComponent);
 
-  auto pPosition = ::covellite::api::Component::Make({});
-  auto pRotation = ::covellite::api::Component::Make({});
-
-  for (; !m_PreRenderComponent.empty(); m_PreRenderComponent.pop_front())
-  {
-    const auto pComponent = m_PreRenderComponent.front();
-    const auto Kind = pComponent->GetValue(uT("kind"), uT("Unknown"));
-
-    if (Kind == uT("Position")) pPosition = pComponent;
-    if (Kind == uT("Rotation")) pRotation = pComponent;
-  }
+  const auto ServiceComponents = m_ServiceComponents.Get(
+    {
+      { uT("Position"), api::Component::Make({}) },
+      { uT("Rotation"), api::Component::Make({}) },
+    });
 
   return [=](void)
   {
@@ -521,7 +480,7 @@ auto OpenGLCommon::GetCameraFocal(const ComponentPtr_t & _pComponent) -> Render_
     // **************************** ћатрица вида **************************** //
 
     // “очка, куда смотрит камера - задаетс€ как компонент Data.Position.
-    const Component::Position Look{ pPosition };
+    const Component::Position Look{ ServiceComponents[0] };
 
     auto GetEye = [&](void) -> ::glm::vec3
     {
@@ -531,7 +490,7 @@ auto OpenGLCommon::GetCameraFocal(const ComponentPtr_t & _pComponent) -> Render_
       // “очка, где расположена камера - вычисл€етс€ на основе Look, Distance и
       // компонента Data.Rotation.
 
-      const Component::Position Rot{ pRotation };
+      const Component::Position Rot{ ServiceComponents[1] };
 
       ::glm::mat4 Transform = ::glm::mat4{ 1.0f };
 
@@ -615,47 +574,47 @@ auto OpenGLCommon::CreateGeometry(const ComponentPtr_t &) -> Render_t
 {
   ::std::deque<Render_t> PreRenders;
 
-  for (; !m_PreRenderComponent.empty(); m_PreRenderComponent.pop_front())
+  auto CreatePosition = [&](const ComponentPtr_t & _pPosition)
   {
-    const auto pComponent = m_PreRenderComponent.front();
-    const auto Kind = pComponent->GetValue(uT("kind"), uT("Unknown"));
-
-    auto PositionRender = [=](void)
+    // OpenGL требует фомировани€ мартиц тансформации в обратном пор€дке!
+    PreRenders.push_front([=](void)
     {
-      const Component::Position Data{ pComponent };
+      const Component::Position Data{ _pPosition };
       glTranslatef(Data.X, Data.Y, Data.Z);
-    };
+    });
+  };
 
-    const auto RadianToGreed = static_cast<float>(
-      ::alicorn::extension::cpp::math::RadianToGreed);
+  const auto RadianToGreed = static_cast<float>(
+    ::alicorn::extension::cpp::math::RadianToGreed);
 
-    auto RotationRender = [=](void)
+  auto CreateRotation = [&](const ComponentPtr_t & _pRotation)
+  {
+    // OpenGL требует фомировани€ мартиц тансформации в обратном пор€дке!
+    PreRenders.push_front([=](void)
     {
-      const Component::Position Data{ pComponent };
+      const Component::Position Data{ _pRotation };
       glRotatef(Data.X * RadianToGreed, 1.0f, 0.0f, 0.0f);
       glRotatef(Data.Y * RadianToGreed, 0.0f, 1.0f, 0.0f);
       glRotatef(Data.Z * RadianToGreed, 0.0f, 0.0f, 1.0f);
-    };
+    });
+  };
 
-    auto ScaleRender = [=](void)
-    {
-      const Component::Position Data{ pComponent };
-      glScalef(Data.X, Data.Y, Data.Z);
-    };
-
-    ::std::map<String_t, Render_t> Renders =
-    {
-      { uT("Position"), PositionRender },
-      { uT("Rotation"), RotationRender },
-      { uT("Scale"), ScaleRender },
-    };
-
-    auto itRender = Renders.find(Kind);
-    if (itRender == Renders.end()) continue;
-
+  auto CreateScale = [&](const ComponentPtr_t & _pScale)
+  {
     // OpenGL требует фомировани€ мартиц тансформации в обратном пор€дке!
-    PreRenders.push_front(itRender->second);
-  }
+    PreRenders.push_front([=](void)
+    {
+      const Component::Position Data{ _pScale };
+      glScalef(Data.X, Data.Y, Data.Z);
+    });
+  };
+
+  m_ServiceComponents.Process(
+    {
+      { uT("Position"), CreatePosition },
+      { uT("Rotation"), CreateRotation },
+      { uT("Scale"), CreateScale },
+    });
 
   PreRenders.push_front([](void)
   {
@@ -665,17 +624,13 @@ auto OpenGLCommon::CreateGeometry(const ComponentPtr_t &) -> Render_t
     glPushMatrix();
   });
 
-  // «десь нужен захват локальной копии рендера (захват по значению
-  // m_DrawElements приводит к отрисовке мусора), причем в тестах повторный 
-  // вызов с другими данными индексного буфера проблем не вызывает.
-  // ???  ак это протестировать ???
-  const auto DrawElements = m_DrawElements;
+  const auto * pDrawElements = &m_DrawElements;
 
   return [=](void)
   {
     for (auto & Render : PreRenders) Render();
 
-    DrawElements();
+    (*pDrawElements)();
 
     glDisableClientState(GL_VERTEX_ARRAY);
     glDisableClientState(GL_COLOR_ARRAY);

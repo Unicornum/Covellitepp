@@ -629,7 +629,7 @@ TEST_F(OpenGLCommon_test, /*DISABLED_*/Test_Buffer_VertexGui)
 
     const auto pData = Component_t::Make(
       {
-        { uT("kind"), uT("Vertex.Gui") },
+        { uT("kind"), uT("Buffer") },
         { uT("data"), Data.data() },
         { uT("count"), Data.size() },
       });
@@ -760,7 +760,7 @@ TEST_F(OpenGLCommon_test, /*DISABLED_*/Test_Buffer_VertexTextured)
 
     const auto pData = Component_t::Make(
       {
-        { uT("kind"), uT("Vertex.Textured") },
+        { uT("kind"), uT("Buffer") },
         { uT("data"), Data.data() },
         { uT("count"), Data.size() },
       });
@@ -1145,11 +1145,12 @@ TEST_F(OpenGLCommon_test, /*DISABLED_*/Test_Present_Geometry)
   auto pRotation = Component_t::Make({ { uT("kind"), uT("Rotation") } });
   auto pScale = Component_t::Make({ { uT("kind"), uT("Scale") } });
 
-  auto TestCallRender = [&](Render_t & _Render,
+  auto TestCallRender = [&](Render_t & _IndexBufferRender, Render_t & _Render,
     float _X, float _Y, float _Z,
     float _A, float _B, float _C,
     float _Sx, float _Sy, float _Sz)
   {
+    ASSERT_NE(nullptr, _IndexBufferRender);
     ASSERT_NE(nullptr, _Render);
 
     pPosition->SetValue(uT("x"), _X);
@@ -1210,6 +1211,8 @@ TEST_F(OpenGLCommon_test, /*DISABLED_*/Test_Present_Geometry)
     EXPECT_CALL(GLProxy, PopMatrix())
       .Times(1);
 
+    _IndexBufferRender();
+
     _Render();
   };
 
@@ -1222,20 +1225,19 @@ TEST_F(OpenGLCommon_test, /*DISABLED_*/Test_Present_Geometry)
   {
     // Индексный буфер в компоненте буфера
 
+    Render_t IndexBufferRender;
+
     {
       // Передача локальной копии, чтобы убедиться, что рендер копирует
       // переданные ему данные.
       const auto IndicesCopy = Indices;
 
-      const auto pIndexBuffer = Component_t::Make(
+      IndexBufferRender = itBufferCreator->second(Component_t::Make(
         {
           { uT("kind"), uT("Index") },
           { uT("data"), IndicesCopy.data() },
           { uT("count"), IndicesCopy.size() },
-        });
-
-      auto IndexBufferRender = itBufferCreator->second(pIndexBuffer);
-      EXPECT_EQ(nullptr, IndexBufferRender);
+        }));
     }
 
     auto PositionRender = itDataCreator->second(pPosition);
@@ -1255,12 +1257,12 @@ TEST_F(OpenGLCommon_test, /*DISABLED_*/Test_Present_Geometry)
     // Два вызова, чтобы убедиться, что изменение исходных данных приводит 
     // к изменению результата рендеринга.
 
-    TestCallRender(Render,
+    TestCallRender(IndexBufferRender, Render,
       1811221956.0f, 1811221957.0f, 1811221958.0f,
       1812171204.0f, 1812171205.0f, 1812171206.0f,
       1812181152.0f, 1812181153.0f, 1812181154.0f);
 
-    TestCallRender(Render,
+    TestCallRender(IndexBufferRender, Render,
       1811221959.0f, 1811221960.0f, 1811221961.0f,
       1812181145.0f, 1812181146.0f, 1812181147.0f,
       1812181155.0f, 1812181157.0f, 1812181158.0f);
@@ -1269,28 +1271,25 @@ TEST_F(OpenGLCommon_test, /*DISABLED_*/Test_Present_Geometry)
   {
     // Индексный буфер через компонент Data
 
+    Render_t IndexBufferRender;
+
     {
       // Передача локальной копии, чтобы убедиться, что рендер копирует
       // переданные ему данные.
       const auto IndicesCopy = Indices;
 
-      const auto pIndexBufferData = Component_t::Make(
+      auto IndexBufferDataRender = itDataCreator->second(Component_t::Make(
         {
-          { uT("kind"), uT("Index") },
+          { uT("kind"), uT("Buffer") },
           { uT("data"), IndicesCopy.data() },
           { uT("count"), IndicesCopy.size() },
-        });
-
-      auto IndexBufferDataRender = itDataCreator->second(pIndexBufferData);
+        }));
       EXPECT_EQ(nullptr, IndexBufferDataRender);
 
-      const auto pIndexBuffer = Component_t::Make(
+      IndexBufferRender = itBufferCreator->second(Component_t::Make(
         {
           { uT("kind"), uT("Index") },
-        });
-
-      auto IndexBufferRender = itBufferCreator->second(pIndexBuffer);
-      EXPECT_EQ(nullptr, IndexBufferRender);
+        }));
     }
 
     auto PositionRender = itDataCreator->second(pPosition);
@@ -1310,12 +1309,12 @@ TEST_F(OpenGLCommon_test, /*DISABLED_*/Test_Present_Geometry)
     // Два вызова, чтобы убедиться, что изменение исходных данных приводит 
     // к изменению результата рендеринга.
 
-    TestCallRender(Render,
+    TestCallRender(IndexBufferRender, Render,
       1811221956.0f, 1811221957.0f, 1811221958.0f,
       1812171204.0f, 1812171205.0f, 1812171206.0f,
       1812181152.0f, 1812181153.0f, 1812181154.0f);
 
-    TestCallRender(Render,
+    TestCallRender(IndexBufferRender, Render,
       1811221959.0f, 1811221960.0f, 1811221961.0f,
       1812181145.0f, 1812181146.0f, 1812181147.0f,
       1812181155.0f, 1812181157.0f, 1812181158.0f);

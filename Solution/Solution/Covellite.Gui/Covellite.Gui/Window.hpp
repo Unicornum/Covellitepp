@@ -71,8 +71,8 @@ class Window final :
   using RendererPtr_t = ::std::shared_ptr<covellite::gui::Renderer>;
 
 public:
-  class ClickEventListener;
-  using ClickEventListenerPtr_t = ::std::shared_ptr<ClickEventListener>;
+  class EventListener;
+  using EventListenerPtr_t = ::std::shared_ptr<EventListener>;
 
 public:
   // Интерфейс core::IWindow:
@@ -103,15 +103,15 @@ private:
   static void LoadFonts(void);
 
 private:
-  const WindowApi_t     & m_WindowApi;
-  Events_t                m_Events;
-  RendererPtr_t           m_pRenderer;
-  ClickEventListenerPtr_t m_pClickEventListener;
-  EventHandlerPtr_t       m_pEvents;
-  StringTranslatorPtr_t   m_pStringTranslator;
-  InitializerPtr_t        m_pInitializer;
-  ContextPtr_t            m_pContext;
-  Layers_t                m_Layers;
+  const WindowApi_t   & m_WindowApi;
+  Events_t              m_Events;
+  RendererPtr_t         m_pRenderer;
+  EventListenerPtr_t    m_pEventListener;
+  EventHandlerPtr_t     m_pEvents;
+  StringTranslatorPtr_t m_pStringTranslator;
+  InitializerPtr_t      m_pInitializer;
+  ContextPtr_t          m_pContext;
+  Layers_t              m_Layers;
 
 public:
   explicit Window(const WindowApi_t &);

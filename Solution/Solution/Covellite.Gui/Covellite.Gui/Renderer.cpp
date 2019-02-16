@@ -52,7 +52,6 @@ Renderer::Renderer(const RendersPtr_t & _pRenders) :
     })),
     m_pScissorRect(Component_t::Make(
       {
-        { uT("id"), uT("Covellite.Api.Data.Rect") },
         { uT("type"), uT("Data") },
         { uT("kind"), uT("Rect") },
       }))
@@ -153,7 +152,6 @@ Rocket::Core::CompiledGeometryHandle Renderer::CompileGeometry(
 
   m_Objects[ObjectId].pPosition = Component_t::Make(
     {
-      { uT("id"), uT("Covellite.Api.Data.Position.") + strObjectId },
       { uT("type"), uT("Data") },
       { uT("kind"), uT("Position") },
     });
@@ -200,10 +198,6 @@ void Renderer::ReleaseCompiledGeometry(
     Component_t::Make(
       {
         { uT("id"), uT("Covellite.Api.Buffer.Index.") + strObjectId }
-      }),
-    Component_t::Make(
-      {
-        { uT("id"), uT("Covellite.Api.Data.Position.") + strObjectId }
       }),
     Component_t::Make(
       {

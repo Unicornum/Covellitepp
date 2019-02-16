@@ -1,11 +1,9 @@
 
 #pragma once
-#include <deque>
 #include <wrl.h>
-#include <alicorn/std/string.hpp>
 #include "IGraphicApi.hpp"
 #include "Api.forward.hpp"
-#include "fx/Data.h"
+#include "CapturingServiceComponent.hpp"
 
 struct ID3D10Device;
 struct IDXGISwapChain;
@@ -36,14 +34,16 @@ namespace renderer
 *  1.0.0.0        \n
 *  1.1.0.0        \n
 *  1.2.0.0        \n
+*  1.3.0.0        \n
 * \date
 *  25 Август 2018    \n
 *  17 Ноябрь 2018    \n
 *  27 Декабрь 2018    \n
+*  15 Февраль 2019    \n
 * \author
 *  CTAPOBEP (unicornum.verum@gmail.com)
 * \copyright
-*  © CTAPOBEP 2018
+*  © CTAPOBEP 2018 - 2019
 */
 class DirectX10 final :
   public Registator_t<IGraphicApi>
@@ -51,8 +51,6 @@ class DirectX10 final :
   template<class T>
   using ComPtr_t = ::Microsoft::WRL::ComPtr<T>;
   using Renders_t = ::std::vector<Render_t>;
-  using PreRender_t = ::std::function<void(const ComponentPtr_t &)>;
-  using PreRenders_t = ::std::map<String_t, PreRender_t>;
 
 public:
   // Интерфейс IGraphicApi:
@@ -63,6 +61,7 @@ public:
   const Creators_t & GetCreators(void) const override;
 
 private:
+  static Creators_t GetCreators(DirectX10 *);
   void SetViewport(int, int);
 
 private:
@@ -73,49 +72,32 @@ private:
   Render_t CreateShader(const ComponentPtr_t &);
   Render_t CreateBuffer(const ComponentPtr_t &);
   Render_t CreatePresent(const ComponentPtr_t &);
-  Render_t GetDeptRender(const ComponentPtr_t &);
-  Render_t CreateCamera(const ComponentPtr_t &);
-  Render_t CreateGeometry(const ComponentPtr_t &);
 
 private:
   Render_t CreateBlendState(bool);
-  void PreRenderComponentsProcess(const PreRenders_t &);
-  Renders_t GetPreRendersGeometry(void);
+  Render_t CreateDeptRender(const ComponentPtr_t &);
+  Render_t CreateCamera(const ComponentPtr_t &);
+  Render_t CreateGeometry(const ComponentPtr_t &);
+  Renders_t CreatePreRendersGeometry(void);
 
 private:
-  class Shader;
   class Buffer;
-
-  template<class T>
-  class ConstantBuffer final
-  {
-  public:
-    T Data;
-
-  public:
-    void Update(const ComPtr_t<ID3D10Device> &);
-
-  private:
-    ComPtr_t<ID3D10Buffer> m_pBuffer;
-
-  public:
-    ConstantBuffer(void);
-  };
+  class Data;
+  class Shader;
 
 private:
-  FLOAT                         m_BkColor[4];
-  Creators_t                    m_Creators;
-  ::std::deque<ComponentPtr_t>  m_PreRenderComponent;
-  String_t                      m_CurrentCameraId;
+  const ::std::vector<FLOAT>  m_BkColor;
+  const Creators_t            m_Creators;
 
 private:
-  ComPtr_t<ID3D10Device>                          m_pDevice;
-  ComPtr_t<IDXGISwapChain>                        m_pSwapChain;
-  ComPtr_t<ID3D10RenderTargetView>                m_pRenderTargetView;
-  ComPtr_t<ID3D10DepthStencilView>                m_pDepthStencilView;
-  ConstantBuffer<::Matrices>                      m_WorldViewProjection;
-  ::std::map<String_t, ConstantBuffer<::Lights>>  m_Lights;
-  ConstantBuffer<::Lights>                        m_CurrentLights;
+  ComPtr_t<ID3D10Device>            m_pDevice;
+  ComPtr_t<IDXGISwapChain>          m_pSwapChain;
+  ComPtr_t<ID3D10RenderTargetView>  m_pRenderTargetView;
+  ComPtr_t<ID3D10DepthStencilView>  m_pDepthStencilView;
+
+private:
+  ::std::shared_ptr<Data>       m_pData;
+  CapturingServiceComponent     m_ServiceComponents;
 
 public:
   explicit DirectX10(const Renderer::Data &);

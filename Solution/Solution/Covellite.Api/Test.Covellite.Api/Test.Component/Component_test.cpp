@@ -51,6 +51,30 @@ TEST_F(Component_test, /*DISABLED_*/Test_Destructor)
 }
 
 // ************************************************************************** //
+TEST_F(Component_test, /*DISABLED_*/Test_Id_Unknown)
+{
+  const auto pExample = Tested_t::Make({
+    {
+      { uT("noid"), uT("1810251203") },
+    } });
+
+  EXPECT_EQ(uT("Unknown"), pExample->Type);
+}
+
+// ************************************************************************** //
+TEST_F(Component_test, /*DISABLED_*/Test_Id)
+{
+  const auto Id = uT("Id1810251204");
+
+  const auto pExample = Tested_t::Make({
+    {
+      { uT("id"), Id },
+    } });
+
+  EXPECT_EQ(Id, pExample->Id);
+}
+
+// ************************************************************************** //
 TEST_F(Component_test, /*DISABLED_*/Test_Type_Unknown)
 {
   const auto pExample = Tested_t::Make({
@@ -75,27 +99,27 @@ TEST_F(Component_test, /*DISABLED_*/Test_Type)
 }
 
 // ************************************************************************** //
-TEST_F(Component_test, /*DISABLED_*/Test_Id_Unknown)
+TEST_F(Component_test, /*DISABLED_*/Test_Kind_Unknown)
 {
   const auto pExample = Tested_t::Make({
     {
-      { uT("noid"), uT("1810251203") },
+      { uT("nokind"), uT("1902131956") },
     } });
 
-  EXPECT_EQ(uT("Unknown"), pExample->Type);
+  EXPECT_EQ(uT("Unknown"), pExample->Kind);
 }
 
 // ************************************************************************** //
-TEST_F(Component_test, /*DISABLED_*/Test_Id)
+TEST_F(Component_test, /*DISABLED_*/Test_Kind)
 {
-  const auto Id = uT("Id1810251204");
+  const auto Kind = uT("Type1902131957");
 
   const auto pExample = Tested_t::Make({
     {
-      { uT("id"), Id },
+      { uT("kind"), Kind },
     } });
 
-  EXPECT_EQ(Id, pExample->Id);
+  EXPECT_EQ(Kind, pExample->Kind);
 }
 
 // ************************************************************************** //

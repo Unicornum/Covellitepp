@@ -248,6 +248,33 @@ TEST_F(Layer_test, /*DISABLED_*/Test_Hide)
 }
 
 // ************************************************************************** //
+TEST_F(Layer_test, /*DISABLED_*/Test_GetId)
+{
+  Context_t Context;
+  Window Window;
+  ::covellite::gui::IWindow & IWindow = Window;
+  Document_t Document;
+  const char * DocumentId = "Id1710102335";
+
+  using namespace ::testing;
+
+  InSequence Dummy;
+
+  EXPECT_CALL(Window, LoadDocument(_))
+    .Times(1)
+    .WillOnce(Return(&Document));
+
+  const Tested Example{ IWindow, Path_t{} };
+
+  EXPECT_CALL(Document, GetId())
+    .Times(1)
+    .WillOnce(Return(DocumentId));
+
+  const auto Result = Example.GetId();
+  EXPECT_EQ(DocumentId, Result);
+}
+
+// ************************************************************************** //
 TEST_F(Layer_test, /*DISABLED_*/Test_GetElement)
 {
   Window Window;
@@ -344,9 +371,8 @@ TEST_F(Layer_test, /*DISABLED_*/Test_GetHeight)
 }
 
 // ************************************************************************** //
-TEST_F(Layer_test, /*DISABLED_*/Test_SetFontSize_InvalidDocumentTagName)
+TEST_F(Layer_test, /*DISABLED_*/Test_EmployFontSize_UnexpectedDocumentTag)
 {
-  Context_t Context;
   Window Window;
   ::covellite::gui::IWindow & IWindow = Window;
   Document_t Document;
@@ -368,11 +394,11 @@ TEST_F(Layer_test, /*DISABLED_*/Test_SetFontSize_InvalidDocumentTagName)
     .Times(AtLeast(1))
     .WillOnce(Return(TagName));
 
-  EXPECT_THROW(Example.SetFontSize(), ::std::exception);
+  EXPECT_THROW(Example.EmployFontSize(0.0f), ::std::exception);
 }
 
 // ************************************************************************** //
-TEST_F(Layer_test, /*DISABLED_*/Test_SetFontSize)
+TEST_F(Layer_test, /*DISABLED_*/Test_EmployFontSize)
 {
   Context_t Context;
   Window Window;
@@ -406,7 +432,8 @@ TEST_F(Layer_test, /*DISABLED_*/Test_SetFontSize)
     EXPECT_CALL(Document, SetAttribute(Eq("style"), Eq("font-size: 16px;")))
       .Times(1);
 
-    Example.SetFontSize(Percent);
+    const auto Result = Example.EmployFontSize(Percent);
+    EXPECT_EQ(16.0, Result);
   }
 
   {
@@ -422,279 +449,14 @@ TEST_F(Layer_test, /*DISABLED_*/Test_SetFontSize)
     EXPECT_CALL(Document, SetAttribute(Eq("style"), Eq("font-size: 7.65px;")))
       .Times(1);
 
-    Example.SetFontSize(Percent);
+    const auto Result = Example.EmployFontSize(Percent);
+    EXPECT_EQ(7.65f, Result);
   }
 }
 
 // ************************************************************************** //
-TEST_F(Layer_test, /*DISABLED_*/Test_GetId)
+TEST_F(Layer_test, /*DISABLED_*/Test_Element_Focus)
 {
-  Context_t Context;
-  Window Window;
-  ::covellite::gui::IWindow & IWindow = Window;
-  Document_t Document;
-  const char * DocumentId = "Id1710102335";
-
-  using namespace ::testing;
-
-  InSequence Dummy;
-
-  EXPECT_CALL(Window, LoadDocument(_))
-    .Times(1)
-    .WillOnce(Return(&Document));
-
-  const Tested Example{ IWindow, Path_t{} };
-
-  EXPECT_CALL(Document, GetId())
-    .Times(1)
-    .WillOnce(Return(DocumentId));
-
-  const auto Result = Example.GetId();
-  EXPECT_EQ(DocumentId, Result);
-}
-
-// ************************************************************************** //
-TEST_F(Layer_test, /*DISABLED_*/Test_SetText_TextElement)
-{
-  Context_t Context;
-  Window Window;
-  ::covellite::gui::IWindow & IWindow = Window;
-  Document_t Document;
-  ::mock::Rocket::Core::Element Element;
-  const char * Text = "Text1701031215";
-
-  using namespace ::testing;
-
-  EXPECT_CALL(Window, LoadDocument(_))
-    .Times(1)
-    .WillOnce(Return(&Document));
-
-  Tested Example{ IWindow, Path_t{} };
-
-  using namespace ::testing;
-
-  {
-    InSequence Dummy;
-
-    EXPECT_CALL(Document, GetElementById(_))
-      .Times(1)
-      .WillOnce(Return(&Element));
-
-    EXPECT_CALL(Element, GetTagName())
-      .Times(1)
-      .WillOnce(Return("textarea"));
-
-    EXPECT_CALL(Element, GetAttribute(Eq("type"), Eq("unknown")))
-      .Times(1)
-      .WillOnce(Return("Type1701121404"));
-
-    EXPECT_CALL(Element, SetAttribute(Eq("value"), Eq(Text)))
-      .Times(1);
-
-    Example.GetElement("").SetText(Text);
-  }
-
-  {
-    InSequence Dummy;
-
-    EXPECT_CALL(Document, GetElementById(_))
-      .Times(1)
-      .WillOnce(Return(&Element));
-
-    EXPECT_CALL(Element, GetTagName())
-      .Times(1)
-      .WillOnce(Return("input"));
-
-    EXPECT_CALL(Element, GetAttribute(Eq("type"), Eq("unknown")))
-      .Times(1)
-      .WillOnce(Return("text"));
-
-    EXPECT_CALL(Element, SetAttribute(Eq("value"), Eq(Text)))
-      .Times(1);
-
-    Example.GetElement("").SetText(Text);
-  }
-}
-
-// ************************************************************************** //
-TEST_F(Layer_test, /*DISABLED_*/Test_SetText_AnotherElement)
-{
-  Context_t Context;
-  Window Window;
-  ::covellite::gui::IWindow & IWindow = Window;
-  Document_t Document;
-  ::mock::Rocket::Core::Element Element;
-  const char * Text = "Text1701121406";
-
-  using namespace ::testing;
-
-  InSequence Dummy;
-
-  EXPECT_CALL(Window, LoadDocument(_))
-    .Times(1)
-    .WillOnce(Return(&Document));
-
-  Tested Example{ IWindow, Path_t{} };
-
-  EXPECT_CALL(Document, GetElementById(_))
-    .Times(1)
-    .WillOnce(Return(&Element));
-
-  EXPECT_CALL(Element, GetTagName())
-    .Times(1)
-    .WillOnce(Return("Tag1701121407"));
-
-  EXPECT_CALL(Element, GetAttribute(Eq("type"), Eq("unknown")))
-    .Times(1)
-    .WillOnce(Return("Type1701121408"));
-
-  EXPECT_CALL(Element, SetInnerRML(Eq(Text)))
-    .Times(1);
-
-  Example.GetElement("").SetText(Text);
-}
-
-// ************************************************************************** //
-TEST_F(Layer_test, /*DISABLED_*/Test_GetText_TextElement)
-{
-  Context_t Context;
-  Window Window;
-  ::covellite::gui::IWindow & IWindow = Window;
-  Document_t Document;
-  ::mock::Rocket::Core::Element Element;
-  const char * Text = "Text1701121412";
-
-  using namespace ::testing;
-
-  EXPECT_CALL(Window, LoadDocument(_))
-    .Times(1)
-    .WillOnce(Return(&Document));
-
-  Tested Example{ IWindow, Path_t{} };
-
-  using namespace ::testing;
-
-  {
-    InSequence Dummy;
-
-    EXPECT_CALL(Document, GetElementById(_))
-      .Times(1)
-      .WillOnce(Return(&Element));
-
-    EXPECT_CALL(Element, GetTagName())
-      .Times(1)
-      .WillOnce(Return("textarea"));
-
-    EXPECT_CALL(Element, GetAttribute(Eq("type"), Eq("unknown")))
-      .Times(1)
-      .WillOnce(Return("Type1701121411"));
-
-    EXPECT_CALL(Element, GetAttribute(Eq("value"), Eq("unknown")))
-      .Times(1)
-      .WillOnce(Return(Text));
-
-    const auto Result = Example.GetElement("").GetText();
-    EXPECT_EQ(Text, Result);
-  }
-
-  {
-    InSequence Dummy;
-
-    EXPECT_CALL(Document, GetElementById(_))
-      .Times(1)
-      .WillOnce(Return(&Element));
-
-    EXPECT_CALL(Element, GetTagName())
-      .Times(1)
-      .WillOnce(Return("input"));
-
-    EXPECT_CALL(Element, GetAttribute(Eq("type"), Eq("unknown")))
-      .Times(1)
-      .WillOnce(Return("text"));
-
-    EXPECT_CALL(Element, GetAttribute(Eq("value"), Eq("unknown")))
-      .Times(1)
-      .WillOnce(Return(Text));
-
-    const auto Result = Example.GetElement("").GetText();
-    EXPECT_EQ(Text, Result);
-  }
-}
-
-// ************************************************************************** //
-TEST_F(Layer_test, /*DISABLED_*/Test_GetText_AnotherElement)
-{
-  Context_t Context;
-  Window Window;
-  ::covellite::gui::IWindow & IWindow = Window;
-  Document_t Document;
-  ::mock::Rocket::Core::Element Element;
-  const char * Text = "Text1701121413";
-
-  using namespace ::testing;
-
-  InSequence Dummy;
-
-  EXPECT_CALL(Window, LoadDocument(_))
-    .Times(1)
-    .WillOnce(Return(&Document));
-
-  Tested Example{ IWindow, Path_t{} };
-
-  EXPECT_CALL(Document, GetElementById(_))
-    .Times(1)
-    .WillOnce(Return(&Element));
-
-  EXPECT_CALL(Element, GetTagName())
-    .Times(1)
-    .WillOnce(Return("Tag1701121415"));
-
-  EXPECT_CALL(Element, GetAttribute(Eq("type"), Eq("unknown")))
-    .Times(1)
-    .WillOnce(Return("Type1701121414"));
-
-  EXPECT_CALL(Element, GetInnerRML())
-    .Times(1)
-    .WillOnce(Return(Text));
-
-  const auto Result = Example.GetElement("").GetText();
-  EXPECT_EQ(Text, Result);
-}
-
-// ************************************************************************** //
-TEST_F(Layer_test, /*DISABLED_*/Test_SetStyle)
-{
-  Context_t Context;
-  Window Window;
-  ::covellite::gui::IWindow & IWindow = Window;
-  Document_t Document;
-  ::mock::Rocket::Core::Element Element;
-  const char * Text = "Text1701131203";
-
-  using namespace ::testing;
-
-  InSequence Dummy;
-
-  EXPECT_CALL(Window, LoadDocument(_))
-    .Times(1)
-    .WillOnce(Return(&Document));
-
-  Tested Example{ IWindow, Path_t{} };
-
-  EXPECT_CALL(Document, GetElementById(_))
-    .Times(1)
-    .WillOnce(Return(&Element));
-
-  EXPECT_CALL(Element, SetAttribute(Eq("style"), Eq(Text)))
-    .Times(1);
-
-  Example.GetElement("").SetStyle(Text);
-}
-
-// ************************************************************************** //
-TEST_F(Layer_test, /*DISABLED_*/Test_Focus)
-{
-  Context_t Context;
   Window Window;
   ::covellite::gui::IWindow & IWindow = Window;
   Document_t Document;
@@ -718,4 +480,424 @@ TEST_F(Layer_test, /*DISABLED_*/Test_Focus)
     .Times(1);
 
   Example.GetElement("").SetFocus();
+}
+
+// ************************************************************************** //
+TEST_F(Layer_test, /*DISABLED_*/Test_Element_SetMeaning_Textarea)
+{
+  Window Window;
+  ::covellite::gui::IWindow & IWindow = Window;
+
+  Document_t Document;
+  ::mock::Rocket::Controls::ElementFormControl Element;
+  const char * Tag = "textarea";
+  const char * Type = "Type1902041652";
+  const char * Value = u8"ValueÇíà÷åíèå1902041653";
+
+  using namespace ::testing;
+
+  InSequence Dummy;
+
+  EXPECT_CALL(Window, LoadDocument(_))
+    .Times(1)
+    .WillOnce(Return(&Document));
+
+  Tested Example{ IWindow, Path_t{} };
+
+  EXPECT_CALL(Document, GetElementById(_))
+    .Times(1)
+    .WillOnce(Return(&Element));
+
+  EXPECT_CALL(Element, GetTagName())
+    .Times(1)
+    .WillOnce(Return(Tag));
+
+  EXPECT_CALL(Element, GetAttribute(Eq("type"), _))
+    .Times(1)
+    .WillOnce(Return(Type));
+
+  EXPECT_CALL(Element, SetValue(Eq(Value)))
+    .Times(1);
+
+  using namespace ::alicorn::extension::std;
+
+  Example.GetElement("").SetMeaning(string_cast<String, Locale::UTF8>(Value));
+}
+
+// ************************************************************************** //
+TEST_F(Layer_test, /*DISABLED_*/Test_Element_SetMeaning_Input_Text)
+{
+  Window Window;
+  ::covellite::gui::IWindow & IWindow = Window;
+
+  Document_t Document;
+  ::mock::Rocket::Controls::ElementFormControl Element;
+  const char * Tag = "input";
+  const char * Type = "text";
+  const char * Value = u8"ValueÇíà÷åíèå1902041658";
+
+  using namespace ::testing;
+
+  InSequence Dummy;
+
+  EXPECT_CALL(Window, LoadDocument(_))
+    .Times(1)
+    .WillOnce(Return(&Document));
+
+  Tested Example{ IWindow, Path_t{} };
+
+  EXPECT_CALL(Document, GetElementById(_))
+    .Times(1)
+    .WillOnce(Return(&Element));
+
+  EXPECT_CALL(Element, GetTagName())
+    .Times(1)
+    .WillOnce(Return(Tag));
+
+  EXPECT_CALL(Element, GetAttribute(Eq("type"), _))
+    .Times(1)
+    .WillOnce(Return(Type));
+
+  EXPECT_CALL(Element, SetValue(Eq(Value)))
+    .Times(1);
+
+  using namespace ::alicorn::extension::std;
+
+  Example.GetElement("").SetMeaning(string_cast<String, Locale::UTF8>(Value));
+}
+
+// ************************************************************************** //
+TEST_F(Layer_test, /*DISABLED_*/Test_Element_SetMeaning_Input_Range)
+{
+  Window Window;
+  ::covellite::gui::IWindow & IWindow = Window;
+
+  Document_t Document;
+  ::mock::Rocket::Controls::ElementFormControl Element;
+  const char * Tag = "input";
+  const char * Type = "range";
+  const char * Value = u8"ValueÇíà÷åíèå1902041659";
+
+  using namespace ::testing;
+
+  InSequence Dummy;
+
+  EXPECT_CALL(Window, LoadDocument(_))
+    .Times(1)
+    .WillOnce(Return(&Document));
+
+  Tested Example{ IWindow, Path_t{} };
+
+  EXPECT_CALL(Document, GetElementById(_))
+    .Times(1)
+    .WillOnce(Return(&Element));
+
+  EXPECT_CALL(Element, GetTagName())
+    .Times(1)
+    .WillOnce(Return(Tag));
+
+  EXPECT_CALL(Element, GetAttribute(Eq("type"), _))
+    .Times(1)
+    .WillOnce(Return(Type));
+
+  EXPECT_CALL(Element, SetValue(Eq(Value)))
+    .Times(1);
+
+  using namespace ::alicorn::extension::std;
+
+  Example.GetElement("").SetMeaning(string_cast<String, Locale::UTF8>(Value));
+}
+
+// ************************************************************************** //
+TEST_F(Layer_test, /*DISABLED_*/Test_Element_SetMeaning_InnerRml)
+{
+  Window Window;
+  ::covellite::gui::IWindow & IWindow = Window;
+
+  Document_t Document;
+  ::mock::Rocket::Core::Element Element;
+  const char * Tag = "Tag1902041640";
+  const char * Type = "Type1902041641";
+  const char * Value = u8"Value1902041642Òåêñò";
+
+  using namespace ::testing;
+
+  InSequence Dummy;
+
+  EXPECT_CALL(Window, LoadDocument(_))
+    .Times(1)
+    .WillOnce(Return(&Document));
+
+  Tested Example{ IWindow, Path_t{} };
+
+  EXPECT_CALL(Document, GetElementById(_))
+    .Times(1)
+    .WillOnce(Return(&Element));
+
+  EXPECT_CALL(Element, GetTagName())
+    .Times(1)
+    .WillOnce(Return(Tag));
+
+  EXPECT_CALL(Element, GetAttribute(Eq("type"), _))
+    .Times(1)
+    .WillOnce(Return(Type));
+
+  EXPECT_CALL(Element, SetInnerRML(Eq(Value)))
+    .Times(1);
+
+  using namespace ::alicorn::extension::std;
+
+  Example.GetElement("").SetMeaning(string_cast<String, Locale::UTF8>(Value));
+}
+
+// ************************************************************************** //
+TEST_F(Layer_test, /*DISABLED_*/Test_Element_GetMeaning_Textarea)
+{
+  Window Window;
+  ::covellite::gui::IWindow & IWindow = Window;
+
+  Document_t Document;
+  ::mock::Rocket::Controls::ElementFormControl Element;
+  const char * Tag = "textarea";
+  const char * Type = "Type1902041715";
+  const char * Value = u8"ValueÒåêñò1902041716";
+
+  using namespace ::testing;
+
+  InSequence Dummy;
+
+  EXPECT_CALL(Window, LoadDocument(_))
+    .Times(1)
+    .WillOnce(Return(&Document));
+
+  Tested Example{ IWindow, Path_t{} };
+
+  EXPECT_CALL(Document, GetElementById(_))
+    .Times(1)
+    .WillOnce(Return(&Element));
+
+  EXPECT_CALL(Element, GetTagName())
+    .Times(1)
+    .WillOnce(Return(Tag));
+
+  EXPECT_CALL(Element, GetAttribute(Eq("type"), _))
+    .Times(1)
+    .WillOnce(Return(Type));
+
+  EXPECT_CALL(Element, GetValue())
+    .Times(1)
+    .WillOnce(Return(Value));
+
+  using namespace ::alicorn::extension::std;
+
+  const auto Result = Example.GetElement("").GetMeaning();
+  EXPECT_EQ((string_cast<String, Locale::UTF8>(Value)), Result);
+}
+
+// ************************************************************************** //
+TEST_F(Layer_test, /*DISABLED_*/Test_Element_GetMeaning_Input_Text)
+{
+  Window Window;
+  ::covellite::gui::IWindow & IWindow = Window;
+
+  Document_t Document;
+  ::mock::Rocket::Controls::ElementFormControl Element;
+  const char * Tag = "input";
+  const char * Type = "text";
+  const char * Value = u8"ValueÒåêñò1902041717";
+
+  using namespace ::testing;
+
+  InSequence Dummy;
+
+  EXPECT_CALL(Window, LoadDocument(_))
+    .Times(1)
+    .WillOnce(Return(&Document));
+
+  Tested Example{ IWindow, Path_t{} };
+
+  EXPECT_CALL(Document, GetElementById(_))
+    .Times(1)
+    .WillOnce(Return(&Element));
+
+  EXPECT_CALL(Element, GetTagName())
+    .Times(1)
+    .WillOnce(Return(Tag));
+
+  EXPECT_CALL(Element, GetAttribute(Eq("type"), _))
+    .Times(1)
+    .WillOnce(Return(Type));
+
+  EXPECT_CALL(Element, GetValue())
+    .Times(1)
+    .WillOnce(Return(Value));
+
+  using namespace ::alicorn::extension::std;
+
+  const auto Result = Example.GetElement("").GetMeaning();
+  EXPECT_EQ((string_cast<String, Locale::UTF8>(Value)), Result);
+}
+
+// ************************************************************************** //
+TEST_F(Layer_test, /*DISABLED_*/Test_Element_GetMeaning_Input_Range)
+{
+  Window Window;
+  ::covellite::gui::IWindow & IWindow = Window;
+
+  Document_t Document;
+  ::mock::Rocket::Controls::ElementFormControl Element;
+  const char * Tag = "input";
+  const char * Type = "range";
+  const char * Value = u8"ValueÒåêñò1902041718";
+
+  using namespace ::testing;
+
+  InSequence Dummy;
+
+  EXPECT_CALL(Window, LoadDocument(_))
+    .Times(1)
+    .WillOnce(Return(&Document));
+
+  Tested Example{ IWindow, Path_t{} };
+
+  EXPECT_CALL(Document, GetElementById(_))
+    .Times(1)
+    .WillOnce(Return(&Element));
+
+  EXPECT_CALL(Element, GetTagName())
+    .Times(1)
+    .WillOnce(Return(Tag));
+
+  EXPECT_CALL(Element, GetAttribute(Eq("type"), _))
+    .Times(1)
+    .WillOnce(Return(Type));
+
+  EXPECT_CALL(Element, GetValue())
+    .Times(1)
+    .WillOnce(Return(Value));
+
+  using namespace ::alicorn::extension::std;
+
+  const auto Result = Example.GetElement("").GetMeaning();
+  EXPECT_EQ((string_cast<String, Locale::UTF8>(Value)), Result);
+}
+
+// ************************************************************************** //
+TEST_F(Layer_test, /*DISABLED_*/Test_Element_GetMeaning_Select)
+{
+  Window Window;
+  ::covellite::gui::IWindow & IWindow = Window;
+
+  Document_t Document;
+  ::mock::Rocket::Controls::ElementFormControl Element;
+  const char * Tag = "select";
+  const char * Type = "Type1902041719";
+  const char * Value = u8"ValueÒåêñò1902041720";
+
+  using namespace ::testing;
+
+  InSequence Dummy;
+
+  EXPECT_CALL(Window, LoadDocument(_))
+    .Times(1)
+    .WillOnce(Return(&Document));
+
+  Tested Example{ IWindow, Path_t{} };
+
+  EXPECT_CALL(Document, GetElementById(_))
+    .Times(1)
+    .WillOnce(Return(&Element));
+
+  EXPECT_CALL(Element, GetTagName())
+    .Times(1)
+    .WillOnce(Return(Tag));
+
+  EXPECT_CALL(Element, GetAttribute(Eq("type"), _))
+    .Times(1)
+    .WillOnce(Return(Type));
+
+  EXPECT_CALL(Element, GetValue())
+    .Times(1)
+    .WillOnce(Return(Value));
+
+  using namespace ::alicorn::extension::std;
+
+  const auto Result = Example.GetElement("").GetMeaning();
+  EXPECT_EQ((string_cast<String, Locale::UTF8>(Value)), Result);
+}
+
+// ************************************************************************** //
+TEST_F(Layer_test, /*DISABLED_*/Test_Element_GetMeaning_InnerRml)
+{
+  Window Window;
+  ::covellite::gui::IWindow & IWindow = Window;
+
+  Document_t Document;
+  ::mock::Rocket::Core::Element Element;
+  const char * Tag = "Tag1902041709";
+  const char * Type = "Type1902041710";
+  const char * Value = u8"ValueÒåêñò1902041711";
+
+  using namespace ::testing;
+
+  InSequence Dummy;
+
+  EXPECT_CALL(Window, LoadDocument(_))
+    .Times(1)
+    .WillOnce(Return(&Document));
+
+  Tested Example{ IWindow, Path_t{} };
+
+  EXPECT_CALL(Document, GetElementById(_))
+    .Times(1)
+    .WillOnce(Return(&Element));
+
+  EXPECT_CALL(Element, GetTagName())
+    .Times(1)
+    .WillOnce(Return(Tag));
+
+  EXPECT_CALL(Element, GetAttribute(Eq("type"), _))
+    .Times(1)
+    .WillOnce(Return(Type));
+
+  EXPECT_CALL(Element, GetInnerRML())
+    .Times(1)
+    .WillOnce(Return(Value));
+
+  using namespace ::alicorn::extension::std;
+
+  const auto Result = Example.GetElement("").GetMeaning();
+  EXPECT_EQ((string_cast<String, Locale::UTF8>(Value)), Result);
+}
+
+// ************************************************************************** //
+TEST_F(Layer_test, /*DISABLED_*/Test_Element_SetClassStyle)
+{
+  Window Window;
+  ::covellite::gui::IWindow & IWindow = Window;
+
+  Document_t Document;
+  ::mock::Rocket::Core::Element Element;
+  const char * Value = u8"ValueÒåêñò1902041733";
+
+  using namespace ::testing;
+
+  InSequence Dummy;
+
+  EXPECT_CALL(Window, LoadDocument(_))
+    .Times(1)
+    .WillOnce(Return(&Document));
+
+  Tested Example{ IWindow, Path_t{} };
+
+  EXPECT_CALL(Document, GetElementById(_))
+    .Times(1)
+    .WillOnce(Return(&Element));
+
+  EXPECT_CALL(Element, SetAttribute(Eq("class"), Eq(Value)))
+    .Times(1);
+
+  using namespace ::alicorn::extension::std;
+
+  Example.GetElement("").SetClassStyle(string_cast<String, Locale::UTF8>(Value));
 }

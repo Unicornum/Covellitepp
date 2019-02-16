@@ -72,7 +72,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="ClickEventListener.hpp" />
+    <ClInclude Include="EventListener.hpp" />
     <ClInclude Include="Events.hpp" />
     <ClInclude Include="File.hpp" />
     <ClInclude Include="ILayer.hpp" />
@@ -96,7 +96,7 @@
     <ClInclude Include="Window.mock.hpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="ClickEventListener.cpp" />
+    <ClCompile Include="EventListener.cpp" />
     <ClCompile Include="File.cpp" />
     <ClCompile Include="Initializer.cpp" />
     <ClCompile Include="Layer.cpp" />

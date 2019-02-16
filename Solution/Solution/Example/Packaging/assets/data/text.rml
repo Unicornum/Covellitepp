@@ -10,7 +10,7 @@
           <form id="id_icon" />
           <form id="id_char">
             <p id="id_name">Абетас Салренис</p>
-            <p id="id_status" style="color: #808080;">нейтрален</p>
+            <p id="id_status" class="neutral">нейтрален</p>
           </form>
         </form>
         <dialog id="id_text" />

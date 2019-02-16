@@ -3,6 +3,7 @@
 #include "ExampleApp.hpp"
 #include <alicorn/logger.hpp>
 #include <alicorn/version.hpp>
+#include <alicorn/application/current-module.hpp>
 #include "ExampleWindow.hpp"
 #include "ExtraWindow.hpp"
 
@@ -19,6 +20,11 @@ ExampleApp::ExampleApp(void) noexcept :
       { LOGGER(Error) << _Description.c_str(); });
   // ...
   /// [Constructor main application class]
+
+  // В Android будет ошибка, игнорирунм ее.
+  ::boost::system::error_code ErrorCode;
+  ::boost::filesystem::current_path(
+    ::alicorn::system::application::CurrentModule::GetAppRootPath(), ErrorCode);
 
   DoInitLogger();
 
@@ -58,7 +64,7 @@ void ExampleApp::DoInitWindow(void)
     MakeWindow<::covellite::gui::Window>(             // Класс фреймворка, обеспечивающий отрисовку GUI.
       MakeWindow<ExtraWindow>(                        // Клиентский код, отрисовывающий 3D сцену.
         MakeWindow<::covellite::api::Window>(         // Класс фреймворка окна графического Api
-                                                      // (OpenGL или DirectX, задается в настройках).
+                                                      // (реализация (OpenGL или DirectX) задается в настройках).
           MakeWindow<::covellite::os::Window>(*this)  // Класс фреймворка окна операционной системы.
             ))));
 }

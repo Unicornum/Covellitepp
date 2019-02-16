@@ -8,22 +8,27 @@
   </Options>
   <Process>
     <Task1 Text="Класс Window." Type="Orange" Version="None" ExternalProgram="Project" Expanded="true" Completed="false" History="true" ParentTaskText="false">
-      <Task2 Text="Использование api::IWindow::GetClientRect()." Type="None" Version="None" ExternalProgram="Project" Expanded="true" Completed="false" History="false" ParentTaskText="true"/>
-      <Task3 Text="Завершение работы при выходе из последнего слоя - через событие (+ удалить наследование от core::Window)." Type="None" Version="None" ExternalProgram="Project" Expanded="false" Completed="false" History="false" ParentTaskText="true"/>
+      <Task2 Text="Завершение работы при выходе из последнего слоя - через событие (+ удалить наследование от core::Window)." Type="None" Version="None" ExternalProgram="Project" Expanded="false" Completed="false" History="false" ParentTaskText="true"/>
+      <Task3 Text="Использование api::IWindow::GetClientRect()." Type="None" Version="None" ExternalProgram="None" Expanded="false" Completed="true" History="false" ParentTaskText="false"/>
     </Task1>
   </Process>
   <Complete>
-    <Week6207>
-      <Task13 Text="Удаление отключения использования источников света." Type="Red" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="false"/>
-    </Week6207>
-    <Week6206>
-      <Task7 Text="Исправление логики рендеринга с учетом изменений компонентной системы." Type="Red" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="false">
-        <Task8 Text="Приведение в соответствие." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
-        <Task9 Text="Отключение источника света." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
-        <Task10 Text="Ограничивающий прямоугольник - через Data.Rect." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
-      </Task7>
-    </Week6206>
-    <Week6205/>
-    <Week6204/>
+    <Week6213>
+      <Task6 Text="Класс Layer." Type="Red" Version="None" ExternalProgram="None" Expanded="false" Completed="true" History="false" ParentTaskText="false">
+        <Task7 Text="Устаревшие функции помечены как deprecated." Type="None" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+        <Task8 Text="Функция EmployFontSize()." Type="None" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+        <Task9 Text="Функция SetMeaning()." Type="None" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+        <Task10 Text="Функция GetMeaning()." Type="None" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+        <Task11 Text="Функция SetClassStyle()." Type="None" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+        <Task12 Text="Изменение логики работы функции GetMeaning()." Type="None" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+        <Task13 Text="Изменение логики работы функции SetMeaning()." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+      </Task6>
+      <Task14 Text="Изменение логики работы класса ClickEventListener + обработка события change." Type="Red" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="false"/>
+      <Task15 Text="Переименование класса-обработчика событий." Type="Red" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="false"/>
+      <Task19 Text="Подписка на событие изменения элемента Gui." Type="Red" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="true" ParentTaskText="false"/>
+    </Week6213>
+    <Week6212/>
+    <Week6211/>
+    <Week6210/>
   </Complete>
 </Tasks>

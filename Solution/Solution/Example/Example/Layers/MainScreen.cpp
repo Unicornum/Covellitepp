@@ -3,16 +3,12 @@
 #include "MainScreen.hpp"
 #include <alicorn/std/string.hpp>
 #include <alicorn/version.hpp>
-#include <alicorn/application/current-module.hpp>
 
 using namespace layers;
 
 /// [Layer example]
-static const auto PathToDataDirectory =
-  ::alicorn::system::application::CurrentModule::GetAppRootPath() / "data";
-  
 MainScreen::MainScreen(IWindowGui_t & _Window) :
-  Layer(_Window, PathToDataDirectory / "main.rml")
+  Layer(_Window, "data/main.rml")
 {
   /// [Layer example]
 
@@ -20,14 +16,12 @@ MainScreen::MainScreen(IWindowGui_t & _Window) :
 
   using namespace ::alicorn::extension::std;
 
-  GetElement("id_body").SetStyle(string_cast<::std::string, Locale::UTF8>(
-    uT("font-size: %SIZE%px;").Replace(uT("%SIZE%"), GetHeight() / 40)));
+  EmployFontSize(2.5);
 
-  GetElement("id_version").SetText(string_cast<::std::string, Locale::UTF8>(
-    uT("<h2>Версия: %VERSION%</h2>").Replace(uT("%VERSION%"), 
-      VersionInfo.GetValue(uT("FileVersionShort")))));
+  GetElement("id_version").SetMeaning(uT("<h2>Версия: %VERSION%</h2>")
+    .Replace(uT("%VERSION%"), VersionInfo.GetValue(uT("FileVersionShort"))));
 
-  GetElement("id_description").SetText(string_cast<::std::string, Locale::UTF8>(
+  GetElement("id_description").SetMeaning(
     uT("Это тестовое демо фреймворка Covellite++, которое реализовано ") +
     uT("в виде набора отдельных окон, каждое из которых демонстрирует ") +
     uT("использование различных возможностей фреймворка (в скобках указано ") +
@@ -44,16 +38,16 @@ MainScreen::MainScreen(IWindowGui_t & _Window) :
     uT("<br/>") +
     uT("Для продолжения нажмите одну из иконок внизу.<br/>") +
     uT("<br/>") +
-    uT("<br/>")));
+    uT("<br/>"));
 
-  GetElement("id_copyright").SetText(string_cast<::std::string, Locale::UTF8>(
-    VersionInfo.GetValue(uT("LegalCopyright"))));
+  GetElement("id_copyright").SetMeaning(
+    VersionInfo.GetValue(uT("LegalCopyright")));
 
-  GetElement("id_controls").SetText(u8"\uF013");
-  GetElement("id_text").SetText(u8"\uF2BD");
-  GetElement("id_draw3dobject").SetText(u8"\uF6D1");
-  GetElement("id_simple2dgame").SetText(u8"\uF443");
-  GetElement("id_demo").SetText(u8"\uF1BB");
+  GetElement("id_controls").SetMeaning(uT("\uF013"));
+  GetElement("id_text").SetMeaning(uT("\uF2BD"));
+  GetElement("id_draw3dobject").SetMeaning(uT("\uF6D1"));
+  GetElement("id_simple2dgame").SetMeaning(uT("\uF443"));
+  GetElement("id_demo").SetMeaning(uT("\uF1BB"));
 
   using namespace ::covellite;
 

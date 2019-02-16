@@ -108,7 +108,7 @@ public:
 public:
   explicit Shader(const ComponentPtr_t & _pComponent) :
     Buffer(_pComponent),
-    Kind(_pComponent->GetValue(uT("kind"), uT("Unknown"))),
+    Kind(_pComponent->Kind),
     Version(_pComponent->GetValue<::std::string>(uT("version"), "fx_unknown")),
     Entry(_pComponent->GetValue<::std::string>(uT("entry"), "Unknown"))
   {

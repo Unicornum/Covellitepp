@@ -18,7 +18,8 @@ ExampleWindow::ExampleWindow(WindowGui_t & _WindowGui) :
   m_WindowGui(_WindowGui),
   m_Events(_WindowGui)
 {
-  // Набор строк локализации приложения.
+  // Набор строк локализации приложения в данном случае используется для 
+  // вывода различного текста на различных платформах).
   m_WindowGui.Set(
   {
 # if BOOST_OS_WINDOWS
@@ -33,7 +34,9 @@ ExampleWindow::ExampleWindow(WindowGui_t & _WindowGui) :
   // Экран, который будет отображаться при старте программы.
   m_WindowGui.PushLayer<::layers::MainScreen>();
     
-  // Подписка на события перехода к другим слоям.
+  // Подписка на события перехода к другим слоям (события объекта Button
+  // активируются в классе layers::MainScreen при нажатии на соответствующую
+  // кнопку).
   m_Events[::layers::Button.Back]
     .Connect([&](void) { m_WindowGui.Back(); });
   m_Events[::layers::Button.Help]

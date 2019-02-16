@@ -2865,7 +2865,7 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Buffer_Vertex)
     {
       const auto pData = Component_t::Make(
         {
-          { uT("kind"), Vertex_t::Gui::GetName() },
+          { uT("kind"), uT("Buffer") },
           { uT("data"), VertexData.data() },
           { uT("count"), VertexData.size() },
         });
@@ -2910,7 +2910,7 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Buffer_Vertex)
     {
       const auto pData = Component_t::Make(
         {
-          { uT("kind"), Vertex_t::Textured::GetName() },
+          { uT("kind"), uT("Buffer") },
           { uT("data"), VertexData.data() },
           { uT("count"), VertexData.size() },
         });
@@ -3047,7 +3047,7 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Buffer_Index)
   {
     const auto pData = Component_t::Make(
       {
-        { uT("kind"), uT("Index") },
+        { uT("kind"), uT("Buffer") },
         { uT("data"), IndexData.data() },
         { uT("count"), IndexData.size() },
       });
@@ -3288,14 +3288,14 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Present_Camera_Gui)
 
   ::Matrices Matrices;
 
-# pragma warning(pop)
-
   Matrices.World = ::DirectX::XMMatrixTranspose(
     ::DirectX::XMMatrixIdentity());
   Matrices.Projection = ::DirectX::XMMatrixTranspose(
-    ::DirectX::XMMatrixOrthographicOffCenterLH(0, Width, Height, 0, -1, 1));
+    ::DirectX::XMMatrixOrthographicOffCenterLH(0.0f, Width, Height, 0.0f, 1.0f, -1.0f));
   Matrices.View = ::DirectX::XMMatrixTranspose(
     ::DirectX::XMMatrixIdentity());
+
+# pragma warning(pop)
 
   using namespace ::testing;
 

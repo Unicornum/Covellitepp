@@ -63,8 +63,13 @@ TEST_F(ApplicationEntryPoint_test, /*DISABLED_*/Test_WinMain)
   EXPECT_CALL(ApplicationProxy, Main(Eq(typeid(Application).name()), Params))
     .Times(1);
 
+#pragma warning(push)
+#pragma warning(disable: 6387)
+
   const auto Result = WinMain(0, 0, Params, 0);
   EXPECT_EQ(0, Result);
+
+#pragma warning(pop)
 }
 
 } // namespace covellite

@@ -9,6 +9,7 @@
 /*control-panel,
 control,
 .control,*/
+/*select,*/
 dummy {
   border-width: 1px;
   border-color: red;

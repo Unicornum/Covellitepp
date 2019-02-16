@@ -16,13 +16,15 @@ using namespace covellite::os;
 *  Covellite.Core, вместо них использовать классы из Covellite.App.
 */
 Window::Window(void) :
-  m_Handle(AppInfo_t::Get<ANativeWindow *>())
+  m_Handle(AppInfo_t::Get<ANativeWindow *>()),
+  m_LastTypeSizeMessage(0)
 {
 }
 
 Window::Window(const ::covellite::app::IApplication & _Application) :
   m_Events(_Application),
-  m_Handle(AppInfo_t::Get<ANativeWindow *>())
+  m_Handle(AppInfo_t::Get<ANativeWindow *>()),
+  m_LastTypeSizeMessage(0)
 {
   m_Events[(int32_t)APP_CMD_WINDOW_REDRAW_NEEDED].Connect([&]()
   {

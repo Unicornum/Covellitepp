@@ -18,6 +18,9 @@
       <Filter>Common</Filter>
     </ClCompile>
     <ClCompile Include="OpenGL_test.cpp" />
+    <ClCompile Include="..\..\Covellite.Api\Renderer\CapturingServiceComponent.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">

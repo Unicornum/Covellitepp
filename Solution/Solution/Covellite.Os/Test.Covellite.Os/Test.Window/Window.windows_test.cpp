@@ -33,6 +33,7 @@ protected:
   using ITested_t = ::covellite::os::IWindow;
   using String_t = ::alicorn::extension::std::String;
   using Application_t = ::mock::covellite::app::Application;
+  using RawParams_t = ::std::pair<WPARAM, LPARAM>;
 
   // Вызывается ПЕРЕД запуском каждого теста
   void SetUp(void) override
@@ -60,6 +61,8 @@ protected:
   {
   public:
     MOCK_METHOD0(OnExit, void(void));
+    MOCK_METHOD0(OnActivate, void(void));
+    MOCK_METHOD0(OnDeactivate, void(void));
     MOCK_METHOD0(OnResize, void(void));
     MOCK_METHOD2(OnMotion, void(int, int));
     MOCK_METHOD0(OnTouch, void(void));
@@ -79,6 +82,10 @@ protected:
       m_Events[events::Application.Exit]
         .Connect([&]() { OnExit(); });
 
+      m_Events[events::Window.Activate]
+        .Connect([&]() { OnActivate(); });
+      m_Events[events::Window.Deactivate]
+        .Connect([&]() { OnDeactivate(); });
       m_Events[events::Window.Resize]
         .Connect([&]() { OnResize(); });
 
@@ -130,8 +137,8 @@ TEST_F(Window_test, /*DISABLED_*/Test_WindowMode_Resized)
 
   const ::mock::Id_t InfoId = 1711032335;
   const auto Title = uT("Title1711032336");
-  const ::mock::Id_t RootSectionId = 1711091118;
-  const ::mock::Id_t MainSectionId = 1711091120;
+  //const ::mock::Id_t RootSectionId = 1711091118;
+  //const ::mock::Id_t MainSectionId = 1711091120;
   const ::mock::Id_t WindowSectionId = 1711091058;
   const ::mock::Id_t SizeSectionId = 1711091059;
   const auto ClientWidth = 1711091107;
@@ -152,6 +159,25 @@ TEST_F(Window_test, /*DISABLED_*/Test_WindowMode_Resized)
 
   using namespace ::testing;
 
+  InSequence Dummy;
+
+  // Восстановить, когда будут удалены deprecated тесты 
+
+  //EXPECT_CALL(SettingsProxy, Constructor())
+  //  .WillOnce(Return(RootSectionId));
+
+  //EXPECT_CALL(SettingsProxy, GetChildSectionImpl(RootSectionId, _))
+  //  .Times(1);
+
+  //EXPECT_CALL(SettingsProxy, Constructor())
+  //  .WillOnce(Return(MainSectionId));
+
+  EXPECT_CALL(SettingsProxy, GetChildSectionImpl(_, uT("Window")))
+    .Times(1);
+
+  EXPECT_CALL(SettingsProxy, Constructor())
+    .WillOnce(Return(WindowSectionId));
+
   EXPECT_CALL(InfoProxy, Constructor())
     .Times(1)
     .WillOnce(Return(InfoId));
@@ -159,43 +185,6 @@ TEST_F(Window_test, /*DISABLED_*/Test_WindowMode_Resized)
   EXPECT_CALL(InfoProxy, GetValue(InfoId, uT("ApplicationName")))
     .Times(1)
     .WillOnce(Return(Title));
-
-  EXPECT_CALL(SettingsProxy, Constructor())
-    //.WillOnce(Return(RootSectionId))
-    //.WillOnce(Return(MainSectionId))
-    .WillOnce(Return(WindowSectionId))
-    .WillOnce(Return(SizeSectionId));
-
-  //EXPECT_CALL(SettingsProxy, GetChildSectionImpl(RootSectionId, _))
-  //  .Times(1);
-
-  EXPECT_CALL(SettingsProxy, GetChildSectionImpl(/*MainSectionId*/_, uT("Window")))
-    .Times(1);
-
-  EXPECT_CALL(SettingsProxy, GetChildSectionImpl(WindowSectionId, uT("Size")))
-    .Times(1);
-
-  using ::boost::lexical_cast;
-
-  EXPECT_CALL(SettingsProxy, GetValue(WindowSectionId, uT("IsFullScreen")))
-    .Times(1)
-    .WillOnce(Return(uT("false")));
-
-  EXPECT_CALL(SettingsProxy, GetValue(WindowSectionId, uT("IsResized")))
-    .Times(1)
-    .WillOnce(Return(uT("true")));
-
-  EXPECT_CALL(SettingsProxy, GetValue(SizeSectionId, uT("Width")))
-    .Times(1)
-    .WillOnce(Return(lexical_cast<String_t>(ClientWidth)));
-
-  EXPECT_CALL(SettingsProxy, GetValue(SizeSectionId, uT("Height")))
-    .Times(1)
-    .WillOnce(Return(lexical_cast<String_t>(ClientHeight)));
-
-  EXPECT_CALL(WindowsProxy, GetModuleHandleW(nullptr))
-    .Times(1)
-    .WillOnce(Return(hModule));
 
   EXPECT_CALL(WindowsProxy, GetSystemMetrics(SM_CXSCREEN))
     .Times(1)
@@ -205,36 +194,75 @@ TEST_F(Window_test, /*DISABLED_*/Test_WindowMode_Resized)
     .Times(1)
     .WillOnce(Return(ScreenHeight));
 
+  EXPECT_CALL(SettingsProxy, GetValue(WindowSectionId, uT("IsFullScreen")))
+    .Times(1)
+    .WillOnce(Return(uT("false")));
+
+  EXPECT_CALL(SettingsProxy, GetChildSectionImpl(WindowSectionId, uT("Size")))
+    .Times(1);
+
+  EXPECT_CALL(SettingsProxy, Constructor())
+    .WillOnce(Return(SizeSectionId));
+
+  EXPECT_CALL(SettingsProxy, GetValue(WindowSectionId, uT("IsResized")))
+    .Times(1)
+    .WillOnce(Return(uT("true")));
+
+  EXPECT_CALL(SettingsProxy, GetValue(_, _))
+    .WillRepeatedly(Return(uT("0")));
+
+  EXPECT_CALL(WindowsProxy, SetClientRect(_, _, _, _))
+    .Times(1);
+
+  EXPECT_CALL(WindowsProxy, BuildRect())
+    .Times(1);
+
+  EXPECT_CALL(WindowsProxy, AdjustWindowRectEx(_, _, _))
+    .Times(1)
+    .WillOnce(Return(TRUE));
+
+  using ::boost::lexical_cast;
+
+  EXPECT_CALL(SettingsProxy, GetValue(SizeSectionId, uT("Width")))
+    .Times(1)
+    .WillOnce(Return(lexical_cast<String_t>(ClientWidth)));
+
+  EXPECT_CALL(SettingsProxy, GetValue(SizeSectionId, uT("Height")))
+    .Times(1)
+    .WillOnce(Return(lexical_cast<String_t>(ClientHeight)));
+
+  EXPECT_CALL(WindowsProxy, SetClientRect(0, 0, ClientWidth, ClientHeight))
+    .Times(1);
+
+  EXPECT_CALL(WindowsProxy, BuildRect())
+    .Times(1)
+    .WillOnce(Return(WindowRect));
+
+  EXPECT_CALL(WindowsProxy, 
+    AdjustWindowRectEx(WindowFlags, FALSE, WindowFlagsEx))
+    .Times(1)
+    .WillOnce(Return(TRUE));
+
+  EXPECT_CALL(WindowsProxy, GetModuleHandleW(nullptr))
+    .Times(1)
+    .WillOnce(Return(hModule));
+
+  using namespace ::alicorn::extension::std;
+
+  EXPECT_CALL(WindowsProxy, CreateWindowExW1(WindowFlagsEx,
+    Eq(::covellite::app::ClassName), Eq(string_cast<::std::wstring>(Title)),
+    WindowFlags, X, Y, WindowWidth, WindowHeight, nullptr, nullptr))
+    .Times(1);
+
+  EXPECT_CALL(WindowsProxy, CreateWindowExW2(hModule, nullptr))
+    .Times(1)
+    .WillOnce(Return(hWnd));
+
+  EXPECT_CALL(WindowsProxy, ShowWindow(hWnd, SW_SHOW))
+    .Times(1)
+    .WillOnce(Return(TRUE));
+
   {
-    using namespace ::alicorn::extension::std;
-
-    InSequence Dummy;
-
-    EXPECT_CALL(WindowsProxy, SetClientRect(0, 0, ClientWidth, ClientHeight))
-      .Times(1);
-
-    EXPECT_CALL(WindowsProxy, GetWindowRect())
-      .Times(1)
-      .WillOnce(Return(WindowRect));
-
-    EXPECT_CALL(WindowsProxy, 
-      AdjustWindowRectEx(WindowFlags, FALSE, WindowFlagsEx))
-      .Times(1)
-      .WillOnce(Return(TRUE));
-
-    EXPECT_CALL(WindowsProxy, CreateWindowExW1(WindowFlagsEx, 
-      Eq(::covellite::app::ClassName), Eq(string_cast<::std::wstring>(Title)),
-      WindowFlags, X, Y, WindowWidth, WindowHeight, nullptr, nullptr))
-      .Times(1);
-
-    EXPECT_CALL(WindowsProxy, CreateWindowExW2(hModule, nullptr))
-      .Times(1)
-      .WillOnce(Return(hWnd));
-
-    EXPECT_CALL(WindowsProxy, ShowWindow(hWnd, SW_SHOW))
-      .Times(1)
-      .WillOnce(Return(TRUE));
-
     const Application_t Application{ Application_t::EventBased{} };
     const Tested_t Example{ Application };
     const ITested_t & IExample = Example;
@@ -340,7 +368,7 @@ TEST_F(Window_test, /*DISABLED_*/Test_WindowMode_NoResized)
     EXPECT_CALL(WindowsProxy, SetClientRect(0, 0, ClientWidth, ClientHeight))
       .Times(1);
 
-    EXPECT_CALL(WindowsProxy, GetWindowRect())
+    EXPECT_CALL(WindowsProxy, BuildRect())
       .Times(1)
       .WillOnce(Return(WindowRect));
 
@@ -406,7 +434,13 @@ TEST_F(Window_test, /*DISABLED_*/Test_BoundWindowSize)
   EXPECT_CALL(SettingsProxy, GetValue(_, _))
     .WillRepeatedly(Return(uT("0")));
 
-  EXPECT_CALL(WindowsProxy, GetWindowRect())
+  EXPECT_CALL(WindowsProxy, BuildRect())
+    .Times(1);
+
+  EXPECT_CALL(SettingsProxy, GetValue(_, _))
+    .WillRepeatedly(Return(uT("0")));
+
+  EXPECT_CALL(WindowsProxy, BuildRect())
     .Times(1)
     .WillOnce(Return(WindowRect));
 
@@ -438,6 +472,10 @@ TEST_F(Window_test, /*DISABLED_*/Test_AdjustWindowRectEx_Failed)
   InSequence Dummy;
 
   EXPECT_CALL(SettingsProxy, GetValue(_, uT("IsFullScreen")))
+    .Times(1)
+    .WillOnce(Return(uT("false")));
+
+  EXPECT_CALL(SettingsProxy, GetValue(_, uT("IsResized")))
     .Times(1)
     .WillOnce(Return(uT("false")));
 
@@ -624,20 +662,240 @@ TEST_F(Window_test, /*DISABLED_*/Test_CloseWindow)
 }
 
 // ************************************************************************** //
-TEST_F(Window_test, /*DISABLED_*/Test_Resize)
+TEST_F(Window_test, /*DISABLED_*/Test_Activate)
 {
-  const UINT Message = WM_SIZE;
-
   Application Application;
   const Tested_t Example{ Application };
 
+  ::covellite::events::Events Events = Application;
+
   using namespace ::testing;
+
+  InSequence Dummy;
+
+  EXPECT_CALL(Application, OnActivate())
+    .Times(1);
+
+  Events[(UINT)WM_ACTIVATEAPP](RawParams_t{ TRUE, 0 });
+
+  EXPECT_CALL(Application, OnActivate())
+    .Times(0);
+
+  Events[(UINT)WM_ACTIVATEAPP](RawParams_t{ 1902071949, 0 });
+}
+
+// ************************************************************************** //
+TEST_F(Window_test, /*DISABLED_*/Test_Deactivate)
+{
+  Application Application;
+  const Tested_t Example{ Application };
+
+  ::covellite::events::Events Events = Application;
+
+  using namespace ::testing;
+
+  InSequence Dummy;
+
+  EXPECT_CALL(Application, OnDeactivate())
+    .Times(1);
+
+  Events[(UINT)WM_ACTIVATEAPP](RawParams_t{ FALSE, 0 });
+
+  EXPECT_CALL(Application, OnActivate())
+    .Times(0);
+
+  Events[(UINT)WM_ACTIVATEAPP](RawParams_t{ 1902071950, 0 });
+}
+
+// ************************************************************************** //
+TEST_F(Window_test, /*DISABLED_*/Test_Resize)
+{
+  Application Application;
+  const Tested_t Example{ Application };
+
+  ::covellite::events::Events Events = Application;
+
+  using namespace ::testing;
+
+  InSequence Dummy;
 
   EXPECT_CALL(Application, OnResize())
     .Times(1);
 
+  Events[(UINT)WM_EXITSIZEMOVE]();
+
+  EXPECT_CALL(Application, OnResize())
+    .Times(0);
+
+  Events[(UINT)WM_SIZE](RawParams_t{ 1902071316, 0 });
+
+  EXPECT_CALL(Application, OnResize())
+    .Times(0);
+
+  Events[(UINT)WM_SIZE](RawParams_t{ SIZE_RESTORED, 0 });
+
+  EXPECT_CALL(Application, OnResize())
+    .Times(1);
+
+  Events[(UINT)WM_SIZE](RawParams_t{ SIZE_MAXIMIZED, 0 });
+
+  EXPECT_CALL(Application, OnResize())
+    .Times(1);
+
+  Events[(UINT)WM_SIZE](RawParams_t{ SIZE_RESTORED, 0 });
+
+  EXPECT_CALL(Application, OnResize())
+    .Times(0);
+
+  Events[(UINT)WM_SIZE](RawParams_t{ SIZE_RESTORED, 0 });
+
+  EXPECT_CALL(Application, OnResize())
+    .Times(0);
+
+  Events[(UINT)WM_SIZE](RawParams_t{ SIZE_MINIMIZED, 0 });
+
+  EXPECT_CALL(Application, OnResize())
+    .Times(1);
+
+  Events[(UINT)WM_SIZE](RawParams_t{ SIZE_RESTORED, 0 });
+
+  EXPECT_CALL(Application, OnResize())
+    .Times(0);
+
+  Events[(UINT)WM_SIZE](RawParams_t{ SIZE_RESTORED, 0 });
+}
+
+// ************************************************************************** //
+TEST_F(Window_test, /*DISABLED_*/Test_LimitSizeWindow_IsResized)
+{
+  using SettingsProxy_t = ::mock::alicorn::modules::settings::SectionImplProxy;
+  SettingsProxy_t SettingsProxy;
+  SettingsProxy_t::GetInstance() = &SettingsProxy;
+
+  using WindowsProxy_t = ::mock::WindowsProxy;
+  WindowsProxy_t WindowsProxy;
+  WindowsProxy_t::GetInstance() = &WindowsProxy;
+
+  const ::mock::Id_t WindowSectionId = 1902072004;
+  const ::mock::Id_t SizeSectionId = 1902072005;
+  const auto MinClientWidth = 1902072006;
+  const auto MinClientHeight = 1902072007;
+  const auto LeftWindow = 1902081117;
+  const auto TopWindow = 1902081118;
+  const auto RightWindow = 1902081125;
+  const auto BottomWindow = 1902081130;
+  const auto WindowFlags = WS_CLIPSIBLINGS | WS_CLIPCHILDREN | WS_OVERLAPPED |
+    WS_CAPTION | WS_SYSMENU | WS_THICKFRAME | WS_MINIMIZEBOX | WS_MAXIMIZEBOX;
+  const auto WindowFlagsEx =
+    WS_EX_APPWINDOW | WS_EX_WINDOWEDGE;
+
+  using namespace ::testing;
+
+  InSequence Dummy;
+
+  EXPECT_CALL(SettingsProxy, GetChildSectionImpl(_, uT("Window")))
+    .Times(1);
+
+  EXPECT_CALL(SettingsProxy, Constructor())
+    .WillOnce(Return(WindowSectionId));
+
+  EXPECT_CALL(SettingsProxy, GetValue(WindowSectionId, uT("IsFullScreen")))
+    .Times(1)
+    .WillOnce(Return(uT("false")));
+
+  EXPECT_CALL(SettingsProxy, GetChildSectionImpl(WindowSectionId, uT("Size")))
+    .Times(1);
+
+  EXPECT_CALL(SettingsProxy, Constructor())
+    .WillOnce(Return(SizeSectionId));
+
+  EXPECT_CALL(SettingsProxy, GetValue(WindowSectionId, uT("IsResized")))
+    .Times(1)
+    .WillOnce(Return(uT("true")));
+
+  using ::boost::lexical_cast;
+
+  EXPECT_CALL(SettingsProxy, GetValue(SizeSectionId, uT("MinClientWidth")))
+    .Times(1)
+    .WillOnce(Return(lexical_cast<String_t>(MinClientWidth)));
+
+  EXPECT_CALL(SettingsProxy, GetValue(SizeSectionId, uT("MinClientHeight")))
+    .Times(1)
+    .WillOnce(Return(lexical_cast<String_t>(MinClientHeight)));
+
+  EXPECT_CALL(WindowsProxy, SetClientRect(0, 0, MinClientWidth, MinClientHeight))
+    .Times(1);
+
+  EXPECT_CALL(WindowsProxy, BuildRect())
+    .Times(1)
+    .WillOnce(Return(RECT{ LeftWindow, TopWindow, RightWindow, BottomWindow }));
+
+  EXPECT_CALL(WindowsProxy, AdjustWindowRectEx(WindowFlags, FALSE, WindowFlagsEx))
+    .Times(1)
+    .WillOnce(Return(TRUE));
+
+  EXPECT_CALL(SettingsProxy, GetValue(_, _))
+    .WillRepeatedly(Return(uT("0")));
+
+  EXPECT_CALL(WindowsProxy, SetClientRect(_, _, _, _))
+    .Times(1);
+
+  EXPECT_CALL(WindowsProxy, BuildRect())
+    .Times(1);
+
+  EXPECT_CALL(WindowsProxy, AdjustWindowRectEx(_, _, _))
+    .Times(1);
+
+  Application Application;
+  const Tested_t Example{ Application };
+
   ::covellite::events::Events Events = Application;
-  Events[Message]();
+
+  MINMAXINFO Info = { 0 };
+
+  Events[(UINT)WM_GETMINMAXINFO](RawParams_t{ 0, reinterpret_cast<LPARAM>(&Info) });
+  EXPECT_EQ(RightWindow - LeftWindow, Info.ptMinTrackSize.x);
+  EXPECT_EQ(BottomWindow - TopWindow, Info.ptMinTrackSize.y);
+}
+
+// ************************************************************************** //
+TEST_F(Window_test, /*DISABLED_*/Test_LimitSizeWindow_AdjustWindowRectEx_Failed)
+{
+  using SettingsProxy_t = ::mock::alicorn::modules::settings::SectionImplProxy;
+  SettingsProxy_t SettingsProxy;
+  SettingsProxy_t::GetInstance() = &SettingsProxy;
+
+  using WindowsProxy_t = ::mock::WindowsProxy;
+  WindowsProxy_t WindowsProxy;
+  WindowsProxy_t::GetInstance() = &WindowsProxy;
+
+  using namespace ::testing;
+
+  InSequence Dummy;
+
+  EXPECT_CALL(SettingsProxy, GetValue(_, uT("IsFullScreen")))
+    .Times(1)
+    .WillOnce(Return(uT("false")));
+
+  EXPECT_CALL(SettingsProxy, GetValue(_, uT("IsResized")))
+    .Times(1)
+    .WillOnce(Return(uT("true")));
+
+  EXPECT_CALL(SettingsProxy, GetValue(_, _))
+    .WillRepeatedly(Return(uT("0")));
+
+  EXPECT_CALL(WindowsProxy, AdjustWindowRectEx(_, _, _))
+    .Times(1)
+    .WillOnce(Return(FALSE));
+
+  EXPECT_CALL(WindowsProxy, AdjustWindowRectEx(_, _, _))
+    .Times(0);
+
+  EXPECT_CALL(WindowsProxy, CreateWindowExW2(_, _))
+    .Times(0);
+
+  Application Application;
+  EXPECT_THROW(Tested_t{ Application }, ::std::exception);
 }
 
 // ************************************************************************** //
@@ -861,7 +1119,7 @@ TEST_F(Window_test, /*DISABLED_*/Test_GetClientRect)
   const Tested_t Example{ Application };
   const ITested_t & IExample = Example;
 
-  EXPECT_CALL(WindowsProxy, BuildClientRect())
+  EXPECT_CALL(WindowsProxy, BuildRect())
     .WillRepeatedly(Return(ClientRect));
 
   EXPECT_CALL(WindowsProxy, GetClientRect(hWnd))

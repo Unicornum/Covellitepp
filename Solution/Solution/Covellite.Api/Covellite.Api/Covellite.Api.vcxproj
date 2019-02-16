@@ -51,7 +51,7 @@
     <ClCompile>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_ENABLE_EXTENDED_ALIGNED_STORAGE;_LIB;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>false</SDLCheck>
       <DisableSpecificWarnings>26495;%(DisableSpecificWarnings)</DisableSpecificWarnings>
     </ClCompile>
@@ -65,7 +65,7 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_ENABLE_EXTENDED_ALIGNED_STORAGE;_LIB;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>false</SDLCheck>
       <DisableSpecificWarnings>26495;%(DisableSpecificWarnings)</DisableSpecificWarnings>
     </ClCompile>
@@ -80,6 +80,7 @@
     <ClInclude Include="Events.hpp" />
     <ClInclude Include="IWindow.hpp" />
     <ClInclude Include="Renderer\Api.forward.hpp" />
+    <ClInclude Include="Renderer\CapturingServiceComponent.hpp" />
     <ClInclude Include="Renderer\Component.hpp" />
     <ClInclude Include="Renderer\DirectX10.hpp" />
     <ClInclude Include="Renderer\DirectX11.hpp" />
@@ -102,6 +103,7 @@
     <ClInclude Include="Window.mock.hpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Renderer\CapturingServiceComponent.cpp" />
     <ClCompile Include="Renderer\DirectX10.cpp" />
     <ClCompile Include="Renderer\DirectX11.cpp" />
     <ClCompile Include="Renderer\DirectX9.cpp" />

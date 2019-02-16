@@ -7,6 +7,7 @@
 #include <Covellite/Api/Vertex.hpp>
 #include "DxCheck.hpp"
 #include "Component.hpp"
+#include "fx/Data.h"
 #include "fx/Data.auto.hpp"
 #include "fx/Input.auto.hpp"
 
@@ -127,7 +128,7 @@ public:
   template<class T>
   static Creator_t GetCreator(const ComPtr_t<ID3D10Device> & _pDevice)
   {
-    return [&](const ComponentPtr_t & _pComponent) -> Render_t
+    return [=](const ComponentPtr_t & _pComponent)
     {
       const Component::Buffer<T> BufferData{ _pComponent };
 
@@ -137,39 +138,112 @@ public:
   }
 };
 
-template<class T>
-DirectX10::ConstantBuffer<T>::ConstantBuffer(void)
+class DirectX10::Data
 {
-  memset(&Data, 0x00, sizeof(Data));
-}
+  using CameraId_t = String_t;
 
-template<class T>
-void DirectX10::ConstantBuffer<T>::Update(
-  const ComPtr_t<ID3D10Device> & _pDevice)
-{
-  if (m_pBuffer == nullptr)
+private:
+  template<class T>
+  class ConstantBuffer final
   {
-    m_pBuffer = Buffer::Create<T>(_pDevice, &Data);
+  public:
+    T Data;
+
+    void Update(void) const
+    {
+      m_pDevice->UpdateSubresource(m_pBuffer.Get(), 0, NULL, &Data, 0, 0);
+
+      // Здесь очищать Data нельзя, т.к. для буфера матриц эта функция вызывается
+      // для каждого объекта, а матрицы вида/проекции устанавливаются при
+      // рендеринге сцены один раз.
+    }
+
+  private:
+    const ComPtr_t<ID3D10Device> m_pDevice;
+    const ComPtr_t<ID3D10Buffer> m_pBuffer;
+
+  public:
+    explicit ConstantBuffer(const ComPtr_t<ID3D10Device> & _pDevice) :
+      m_pDevice(_pDevice),
+      m_pBuffer(Buffer::Create<T>(m_pDevice, &Data))
+    {
+      memset(&Data, 0x00, sizeof(Data));
+    }
+  };
+
+public:
+  template<class T>
+  T & Get(void) = delete; // not implement
+
+  template<class T>
+  void Update(void) = delete; // not implement
+
+  template<>
+  ::Matrices & Get<::Matrices>(void)
+  {
+    return m_WorldViewProjection.Data;
   }
 
-  _pDevice->UpdateSubresource(m_pBuffer.Get(), 0, NULL, &Data, 0, 0);
+  template<>
+  void Update<::Matrices>(void)
+  {
+    // View и Projection здесь транспонировать нельзя, т.к. они должны быть
+    // транспонированы один раз для каждой камеры, а эта функция вызывается для
+    // каждого объекта.
+    // 
+    Get<::Matrices>().World =
+      ::DirectX::XMMatrixTranspose(Get<::Matrices>().World);
+    m_WorldViewProjection.Update();
+  }
 
-  // Здесь очищать Data нельзя, т.к. для буфера матриц эта функция вызывается
-  // для каждого объекта, а матрицы вида/проекции устанавливаются при
-  // рендеринге сцены один раз.
-}
+  void SetCameraId(const CameraId_t & _CameraId)
+  {
+    m_CurrentCameraId = _CameraId;
+    m_CurrentLights.Data = Get<::Lights>();
+    Get<::Lights>().Points.UsedSlotCount = 0;
+  }
 
-DirectX10::DirectX10(const Renderer::Data & _Data)
+  template<>
+  ::Lights & Get<::Lights>(void)
+  {
+    auto itLight = m_Lights.find(m_CurrentCameraId);
+    if (itLight == m_Lights.end())
+    {
+      m_Lights[m_CurrentCameraId] = { 0 };
+    }
+
+    return m_Lights[m_CurrentCameraId];
+  }
+
+  template<>
+  void Update<::Lights>(void)
+  {
+    m_CurrentLights.Update();
+  }
+
+private:
+  ConstantBuffer<::Matrices>        m_WorldViewProjection;
+  ConstantBuffer<::Lights>          m_CurrentLights;
+  ::std::map<CameraId_t, ::Lights>  m_Lights;
+  CameraId_t                        m_CurrentCameraId;
+
+public:
+  explicit Data(const ComPtr_t<ID3D10Device> & _pDevice) :
+    m_WorldViewProjection(_pDevice),
+    m_CurrentLights(_pDevice)
+  {
+
+  }
+};
+
+DirectX10::DirectX10(const Renderer::Data & _Data) :
+  m_BkColor{ _Data.BkColor.R, _Data.BkColor.G, _Data.BkColor.B, _Data.BkColor.A },
+  m_Creators{ GetCreators(this) }
 {
-  m_BkColor[0] = _Data.BkColor.R;
-  m_BkColor[1] = _Data.BkColor.G;
-  m_BkColor[2] = _Data.BkColor.B;
-  m_BkColor[3] = _Data.BkColor.A;
-
   using ::alicorn::extension::cpp::IS_RELEASE_CONFIGURATION;
 
-  const UINT createDeviceFlags = (IS_RELEASE_CONFIGURATION) ? 0 :
-    D3D10_CREATE_DEVICE_DEBUG;
+  const UINT DeviceFlags = 
+    (IS_RELEASE_CONFIGURATION) ? 0 : D3D10_CREATE_DEVICE_DEBUG;
 
   DXGI_SWAP_CHAIN_DESC sd = { 0 };
   sd.BufferCount = 2;
@@ -185,37 +259,14 @@ DirectX10::DirectX10(const Renderer::Data & _Data)
   sd.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
 
   DX_CHECK D3D10CreateDeviceAndSwapChain(NULL, D3D10_DRIVER_TYPE_HARDWARE, 
-    NULL, createDeviceFlags, D3D10_SDK_VERSION, &sd, &m_pSwapChain, &m_pDevice);
+    NULL, DeviceFlags, D3D10_SDK_VERSION, &sd, &m_pSwapChain, &m_pDevice);
 
   DXGI_SWAP_CHAIN_DESC Desc = { 0 };
   DX_CHECK m_pSwapChain->GetDesc(&Desc);
 
   SetViewport(Desc.BufferDesc.Width, Desc.BufferDesc.Height);
 
-  auto ToPreRenderComponents = [&](const ComponentPtr_t & _pComponent) -> Render_t
-  {
-    m_PreRenderComponent.push_back(_pComponent);
-    return nullptr;
-  };
-
-  m_Creators =
-  {
-    { uT("Data"), ToPreRenderComponents },
-    { uT("State"), [&](const ComponentPtr_t & _pData) -> Render_t 
-      { return CreateState(_pData); } },
-    { uT("Light"), [&](const ComponentPtr_t & _pData) -> Render_t
-      { return CreateLight(_pData); } },
-    { uT("Material"), [&](const ComponentPtr_t & _pData) -> Render_t
-      { return CreateMaterial(_pData); } },
-    { uT("Texture"), [&](const ComponentPtr_t & _pData) -> Render_t
-      { return CreateTexture(_pData); } },
-    { uT("Shader"), [&](const ComponentPtr_t & _pData) -> Render_t
-      { return CreateShader(_pData); } },
-    { uT("Buffer"), [&](const ComponentPtr_t & _pData) -> Render_t 
-      { return CreateBuffer(_pData); } },
-    { uT("Present"), [&](const ComponentPtr_t & _pData) -> Render_t
-      { return CreatePresent(_pData); } },
-  };
+  m_pData = ::std::make_shared<Data>(m_pDevice);
 }
 
 DirectX10::~DirectX10(void) = default;
@@ -227,7 +278,7 @@ DirectX10::String_t DirectX10::GetUsingApi(void) const /*override*/
 
 void DirectX10::ClearFrame(void) /*override*/
 {
-  m_pDevice->ClearRenderTargetView(m_pRenderTargetView.Get(), m_BkColor);
+  m_pDevice->ClearRenderTargetView(m_pRenderTargetView.Get(), m_BkColor.data());
 }
 
 void DirectX10::PresentFrame(void) /*override*/
@@ -243,6 +294,34 @@ void DirectX10::ResizeWindow(int32_t _Width, int32_t _Height) /*override*/
 auto DirectX10::GetCreators(void) const -> const Creators_t & /*override*/
 {
   return m_Creators;
+}
+
+/*static*/ auto DirectX10::GetCreators(DirectX10 * _pImpl) -> Creators_t
+{
+  return
+  {
+    { 
+      uT("Data"), [=](const ComponentPtr_t & _pComponent)
+      {
+        _pImpl->m_ServiceComponents.Add(_pComponent);
+        return nullptr;
+      } 
+    },
+    { uT("State"), [=](const ComponentPtr_t & _pComponent)
+      { return _pImpl->CreateState(_pComponent); } },
+    { uT("Light"), [=](const ComponentPtr_t & _pComponent)
+      { return _pImpl->CreateLight(_pComponent); } },
+    { uT("Material"), [=](const ComponentPtr_t & _pComponent)
+      { return _pImpl->CreateMaterial(_pComponent); } },
+    { uT("Texture"), [=](const ComponentPtr_t & _pComponent)
+      { return _pImpl->CreateTexture(_pComponent); } },
+    { uT("Shader"), [=](const ComponentPtr_t & _pComponent)
+      { return _pImpl->CreateShader(_pComponent); } },
+    { uT("Buffer"), [=](const ComponentPtr_t & _pComponent)
+      { return _pImpl->CreateBuffer(_pComponent); } },
+    { uT("Present"), [=](const ComponentPtr_t & _pComponent)
+      { return _pImpl->CreatePresent(_pComponent); } },
+  };
 }
 
 void DirectX10::SetViewport(int _Width, int _Height)
@@ -316,7 +395,7 @@ void DirectX10::SetViewport(int _Width, int _Height)
 
 auto DirectX10::CreateState(const ComponentPtr_t & _pComponent) -> Render_t
 {
-  auto CreateSamplerState = [&](void) -> Render_t
+  auto CreateSamplerState = [&](void)
   {
     D3D10_SAMPLER_DESC sampDesc = { 0 };
     sampDesc.Filter = D3D10_FILTER_MIN_MAG_MIP_LINEAR;
@@ -336,7 +415,7 @@ auto DirectX10::CreateState(const ComponentPtr_t & _pComponent) -> Render_t
     };
   };
 
-  auto CreateScissorState = [&](void) -> Render_t
+  auto CreateScissorState = [&](void)
   {
     const Component::Scissor ScissorData{ _pComponent };
 
@@ -349,13 +428,8 @@ auto DirectX10::CreateState(const ComponentPtr_t & _pComponent) -> Render_t
     ComPtr_t<ID3D10RasterizerState> pScissor;
     DX_CHECK m_pDevice->CreateRasterizerState(&rasterDesc, &pScissor);
 
-    ComponentPtr_t pScissorRect = _pComponent;
-
-    PreRenderComponentsProcess(
-      {
-        { uT("Rect"),
-          [&](const ComponentPtr_t & _pComponent) { pScissorRect = _pComponent; } },
-      });
+    const auto pScissorRect = 
+      m_ServiceComponents.Get({ { uT("Rect"), _pComponent } })[0];
 
     Render_t ScissorEnabled = [=](void)
     {
@@ -386,47 +460,39 @@ auto DirectX10::CreateState(const ComponentPtr_t & _pComponent) -> Render_t
     { uT("Scissor"), CreateScissorState },
   };
 
-  return Creators[_pComponent->GetValue(uT("kind"), uT("Unknown"))]();
+  return Creators[_pComponent->Kind]();
 }
 
 auto DirectX10::CreateLight(const ComponentPtr_t & _pComponent) -> Render_t
 {
-  auto * const pLights = &m_Lights;
-  auto * const pCurrentCameraId = &m_CurrentCameraId;
-
-  auto pPosition = ::covellite::api::Component::Make({ });
-  auto pDirection = ::covellite::api::Component::Make({ { uT("x"), 1.0f } });
-  auto pAttenuation = ::covellite::api::Component::Make({ });
-
-  PreRenderComponentsProcess(
+  const auto ServiceComponents = m_ServiceComponents.Get(
     {
-      { uT("Position"),
-        [&](const ComponentPtr_t & _pComponent) { pPosition = _pComponent; } },
-      { uT("Direction"),
-        [&](const ComponentPtr_t & _pComponent) { pDirection = _pComponent; } },
-      { uT("Attenuation"),
-        [&](const ComponentPtr_t & _pComponent) { pAttenuation = _pComponent; } },
+      { uT("Position"), api::Component::Make({ }) },
+      { uT("Direction"), api::Component::Make({ { uT("x"), 1.0f } }) },
+      { uT("Attenuation"), api::Component::Make({ }) },
     });
 
-  auto CreateAmbient = [&](void) -> Render_t
+  auto CreateAmbient = [&](void)
   {
     return [=](void)
     {
-      auto & Color = (*pLights)[*pCurrentCameraId].Data.Ambient.Color;
+      auto & Light = m_pData->Get<::Lights>().Ambient;
 
-      Color.ARGBAmbient = _pComponent->GetValue(uT("ambient"), 0xFF000000);
-      Color.ARGBDiffuse = _pComponent->GetValue(uT("diffuse"), 0xFF000000);
-      Color.ARGBSpecular = _pComponent->GetValue(uT("specular"), 0xFF000000);
+      Light.Color.ARGBAmbient = _pComponent->GetValue(uT("ambient"), 0xFF000000);
+      Light.Color.ARGBDiffuse = _pComponent->GetValue(uT("diffuse"), 0xFF000000);
+      Light.Color.ARGBSpecular = _pComponent->GetValue(uT("specular"), 0xFF000000);
     };
   };
 
-  auto CreateDirection = [&](void) -> Render_t
+  auto CreateDirection = [&](void)
   {
+    auto pDirection = ServiceComponents[1];
+
     return [=](void)
     {
       const Component::Position Direction{ pDirection };
 
-      auto & Light = (*pLights)[*pCurrentCameraId].Data.Direction;
+      auto & Light = m_pData->Get<::Lights>().Direction;
 
       Light.Color.ARGBAmbient = _pComponent->GetValue(uT("ambient"), 0xFF000000);
       Light.Color.ARGBDiffuse = _pComponent->GetValue(uT("diffuse"), 0xFF000000);
@@ -435,13 +501,16 @@ auto DirectX10::CreateLight(const ComponentPtr_t & _pComponent) -> Render_t
     };
   };
 
-  auto CreatePoint = [&](void) -> Render_t
+  auto CreatePoint = [&](void)
   {
+    auto pPosition = ServiceComponents[0];
+    auto pAttenuation = ServiceComponents[2];
+
     return [=](void)
     {
       const Component::Position Position{ pPosition };
 
-      auto & Lights = (*pLights)[*pCurrentCameraId].Data.Points;
+      auto & Lights = m_pData->Get<::Lights>().Points;
       auto & Light = Lights.Lights[Lights.UsedSlotCount++];
 
       Light.Color.ARGBAmbient = _pComponent->GetValue(uT("ambient"), 0xFF000000);
@@ -464,7 +533,7 @@ auto DirectX10::CreateLight(const ComponentPtr_t & _pComponent) -> Render_t
     { uT("Point"), CreatePoint },
   };
 
-  return Creators[_pComponent->GetValue(uT("kind"), uT("Unknown"))]();
+  return Creators[_pComponent->Kind]();
 }
 
 auto DirectX10::CreateMaterial(const ComponentPtr_t & _pComponent) -> Render_t
@@ -495,15 +564,8 @@ auto DirectX10::CreateMaterial(const ComponentPtr_t & _pComponent) -> Render_t
 
 auto DirectX10::CreateTexture(const ComponentPtr_t & _pComponent) -> Render_t
 {
-  ComponentPtr_t pData = _pComponent;
-
-  PreRenderComponentsProcess(
-  {
-    { uT("Texture"),
-      [&](const ComponentPtr_t & _pComponent) { pData = _pComponent; } },
-  });
-
-  const Component::Texture TextureData{ pData };
+  const Component::Texture TextureData{ 
+    m_ServiceComponents.Get({ { uT("Texture"), _pComponent } })[0] };
 
   D3D10_TEXTURE2D_DESC textureDesc = { 0 };
   textureDesc.Width = TextureData.Width;
@@ -608,7 +670,7 @@ public:
   static Creator_t GetCreator(const ComPtr_t<ID3D10Device> & _pDevice,
     const ComPtr_t<ID3DBlob> & _pCompiledShader)
   {
-    return [&](void)
+    return [=](void)
     {
       const auto LayoutDesc = Layout<T>::GetDesc();
 
@@ -634,15 +696,8 @@ public:
 
 auto DirectX10::CreateShader(const ComponentPtr_t & _pComponent) -> Render_t
 {
-  ComponentPtr_t pData = _pComponent;
-
-  PreRenderComponentsProcess(
-    {
-      { uT("Shader.HLSL"), 
-        [&](const ComponentPtr_t & _pComponent) { pData = _pComponent; } },
-    });
-
-  const Component::Shader ShaderData{ pData };
+  const Component::Shader ShaderData{ 
+    m_ServiceComponents.Get({ { uT("Shader.HLSL"), _pComponent } })[0] };
 
   using namespace ::alicorn::extension::std;
 
@@ -659,13 +714,10 @@ auto DirectX10::CreateShader(const ComponentPtr_t & _pComponent) -> Render_t
       pCompiledShader->GetBufferPointer(), pCompiledShader->GetBufferSize(),
       &pPixelShader);
 
-    auto * const pCurrentLights = &m_CurrentLights;
-
     return [=](void)
     {
       m_pDevice->PSSetShader(pPixelShader.Get());
-
-      pCurrentLights->Update(m_pDevice);
+      m_pData->Update<::Lights>();
     };
   };
 
@@ -687,24 +739,12 @@ auto DirectX10::CreateShader(const ComponentPtr_t & _pComponent) -> Render_t
     },
   };
 
-  return Creators[_pComponent->GetValue(uT("kind"), uT("Unknown"))]();
+  return Creators[_pComponent->Kind]();
 }
 
-auto DirectX10::CreateBuffer(const ComponentPtr_t & _pComponent) -> Render_t
+auto DirectX10::CreateBuffer(const ComponentPtr_t & _pBuffer) -> Render_t
 {
   using Vertex_t = ::covellite::api::Vertex;
-
-  ComponentPtr_t pData = _pComponent;
-
-  auto Prepare = 
-    [&](const ComponentPtr_t & _pComponent) { pData = _pComponent; };
-
-  PreRenderComponentsProcess(
-    {
-      { Vertex_t::Gui::GetName(), Prepare },
-      { Vertex_t::Textured::GetName(), Prepare },
-      { uT("Index"), Prepare },
-    });
 
   Creators_t Creators =
   {
@@ -722,27 +762,23 @@ auto DirectX10::CreateBuffer(const ComponentPtr_t & _pComponent) -> Render_t
     },
   };
 
-  return Creators[pData->GetValue(uT("kind"), uT("Unknown"))](pData);
+  return Creators[_pBuffer->Kind](
+    m_ServiceComponents.Get({ { uT("Buffer"), _pBuffer } })[0]);
+
 }
 
 auto DirectX10::CreatePresent(const ComponentPtr_t & _pComponent) -> Render_t
 {
   ::std::map<String_t, ::std::function<Render_t(void)>> Creators =
   {
-    { 
-      uT("Camera"),
-      [&](void) -> Render_t { return CreateCamera(_pComponent); } 
-    },
-    { 
-      uT("Geometry"),
-      [&](void) -> Render_t { return CreateGeometry(_pComponent); } 
-    },
+    { uT("Camera"), [&](void) { return CreateCamera(_pComponent); } },
+    { uT("Geometry"), [&](void) { return CreateGeometry(_pComponent); } },
   };
 
-  return Creators[_pComponent->GetValue(uT("kind"), uT("Unknown"))]();
+  return Creators[_pComponent->Kind]();
 }
 
-auto DirectX10::GetDeptRender(const ComponentPtr_t & _pComponent) -> Render_t
+auto DirectX10::CreateDeptRender(const ComponentPtr_t & _pComponent) -> Render_t
 {
   const auto Dept = _pComponent->GetValue(uT("dept"), uT("Disabled"));
 
@@ -765,20 +801,13 @@ auto DirectX10::GetDeptRender(const ComponentPtr_t & _pComponent) -> Render_t
 
 auto DirectX10::CreateCamera(const ComponentPtr_t & _pComponent) -> Render_t
 {
-  auto * const pWorldViewProjection = &m_WorldViewProjection;
-  auto * const pLights = &m_Lights;
-  auto * const pCurrentCameraId = &m_CurrentCameraId;
-  auto * const pCurrentLights = &m_CurrentLights;
   const auto CameraId = _pComponent->Id;
 
-  auto RenderDept = GetDeptRender(_pComponent);
+  auto RenderDept = CreateDeptRender(_pComponent);
 
   auto RenderLights = [=](void)
   {
-    *pCurrentCameraId = CameraId;
-    *pCurrentLights = (*pLights)[CameraId];
-
-    (*pLights)[CameraId].Data.Points.UsedSlotCount = 0;
+    m_pData->SetCameraId(CameraId);
   };
 
   auto DisableBlendRender = CreateBlendState(false);
@@ -793,23 +822,18 @@ auto DirectX10::CreateCamera(const ComponentPtr_t & _pComponent) -> Render_t
     D3D10_VIEWPORT Viewport = { 0 };
     m_pDevice->RSGetViewports(&ViewportCount, &Viewport);
 
-    pWorldViewProjection->Data.Projection = ::DirectX::XMMatrixTranspose(
+    m_pData->Get<::Matrices>().Projection = ::DirectX::XMMatrixTranspose(
       ::DirectX::XMMatrixOrthographicOffCenterLH(0, (float)Viewport.Width,
-      (float)Viewport.Height, 0, -1.0f, 1.0f));
+      (float)Viewport.Height, 0, 1.0f, -1.0f));
 
-    pWorldViewProjection->Data.View = ::DirectX::XMMatrixTranspose(
+    m_pData->Get<::Matrices>().View = ::DirectX::XMMatrixTranspose(
       ::DirectX::XMMatrixIdentity());
   };
 
-  auto pPosition = ::covellite::api::Component::Make({});
-  auto pRotation = ::covellite::api::Component::Make({});
-
-  PreRenderComponentsProcess(
+  const auto ServiceComponents = m_ServiceComponents.Get(
     {
-      { uT("Position"),
-        [&](const ComponentPtr_t & _pComponent) { pPosition = _pComponent; } },
-      { uT("Rotation"),
-        [&](const ComponentPtr_t & _pComponent) { pRotation = _pComponent; } },
+      { uT("Position"), api::Component::Make({}) },
+      { uT("Rotation"), api::Component::Make({}) },
     });
 
   Render_t CameraFocal = [=](void)
@@ -826,13 +850,13 @@ auto DirectX10::CreateCamera(const ComponentPtr_t & _pComponent) -> Render_t
       _pComponent->GetValue(uT("angle"), 90.0f);
     const auto aspectRatio = (float)Viewport.Width / (float)Viewport.Height;
 
-    pWorldViewProjection->Data.Projection = ::DirectX::XMMatrixTranspose(
+    m_pData->Get<::Matrices>().Projection = ::DirectX::XMMatrixTranspose(
       ::DirectX::XMMatrixPerspectiveFovLH(
         AngleY, aspectRatio, 0.01f, 100.0f));
 
     // Точка, куда смотрит камера - задается как компонент 
     // Transform.Position.
-    const Component::Position Pos{ pPosition };
+    const Component::Position Pos{ ServiceComponents[0] };
     const auto Look = ::DirectX::XMVectorSet(Pos.X, Pos.Y, Pos.Z, 1.0f);
 
     // Расстояние от камеры до Look.
@@ -841,7 +865,7 @@ auto DirectX10::CreateCamera(const ComponentPtr_t & _pComponent) -> Render_t
 
     // Точка, где расположена камера - вычисляется на основе Look, Distance и
     // компонента Transform.Rotation.
-    const Component::Position Rot{ pRotation };
+    const Component::Position Rot{ ServiceComponents[1] };
 
     auto Transform =
       ::DirectX::XMMatrixRotationX(Rot.X) *
@@ -852,7 +876,7 @@ auto DirectX10::CreateCamera(const ComponentPtr_t & _pComponent) -> Render_t
       ::DirectX::XMVectorSet(Distance, 0.0f, 0.0f, 1.0f),
       Transform);
 
-    pWorldViewProjection->Data.View = ::DirectX::XMMatrixTranspose(
+    m_pData->Get<::Matrices>().View = ::DirectX::XMMatrixTranspose(
       ::DirectX::XMMatrixLookAtLH(Eye, Look,
         ::DirectX::XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f)));
   };
@@ -863,7 +887,7 @@ auto DirectX10::CreateCamera(const ComponentPtr_t & _pComponent) -> Render_t
 
 auto DirectX10::CreateGeometry(const ComponentPtr_t &) -> Render_t
 {
-  auto PreRenders = GetPreRendersGeometry();
+  auto PreRenders = CreatePreRendersGeometry();
 
   return [=](void)
   {
@@ -909,31 +933,9 @@ auto DirectX10::CreateBlendState(bool _IsEnabled) -> Render_t
   };
 }
 
-void DirectX10::PreRenderComponentsProcess(const PreRenders_t & _PreRenders)
-{
-  for (; !m_PreRenderComponent.empty(); m_PreRenderComponent.pop_front())
-  {
-    const auto pComponent = m_PreRenderComponent.front();
-    const auto Kind = pComponent->GetValue(uT("kind"), uT("Unknown"));
-
-    auto itComponent = _PreRenders.find(Kind);
-    if (itComponent != _PreRenders.end())
-    {
-      itComponent->second(pComponent);
-    }
-    else
-    {
-      // 13 Декабрь 2018 14:22 (unicornum.verum@gmail.com)
-      TODO("Писать в лог warning о лишнем компоненте.");
-    }
-  }
-}
-
-auto DirectX10::GetPreRendersGeometry(void) -> Renders_t
+auto DirectX10::CreatePreRendersGeometry(void) -> Renders_t
 {
   Renders_t Result;
-
-  auto * const pWorldViewProjection = &m_WorldViewProjection;
 
   auto CreatePosition = [&](const ComponentPtr_t & _pPosition)
   {
@@ -941,7 +943,7 @@ auto DirectX10::GetPreRendersGeometry(void) -> Renders_t
     {
       const Component::Position Position{ _pPosition };
 
-      pWorldViewProjection->Data.World *=
+      m_pData->Get<::Matrices>().World *=
         ::DirectX::XMMatrixTranslation(Position.X, Position.Y, Position.Z);
     });
   };
@@ -952,11 +954,11 @@ auto DirectX10::GetPreRendersGeometry(void) -> Renders_t
     {
       const Component::Position Rotation{ _pRotation };
 
-      pWorldViewProjection->Data.World *= 
+      m_pData->Get<::Matrices>().World *= 
         ::DirectX::XMMatrixRotationX(Rotation.X);
-      pWorldViewProjection->Data.World *= 
+      m_pData->Get<::Matrices>().World *= 
         ::DirectX::XMMatrixRotationY(Rotation.Y);
-      pWorldViewProjection->Data.World *= 
+      m_pData->Get<::Matrices>().World *= 
         ::DirectX::XMMatrixRotationZ(Rotation.Z);
     });
   };
@@ -967,17 +969,17 @@ auto DirectX10::GetPreRendersGeometry(void) -> Renders_t
     {
       const Component::Position Scale{ _pScale };
 
-      pWorldViewProjection->Data.World *=
+      m_pData->Get<::Matrices>().World *=
         ::DirectX::XMMatrixScaling(Scale.X, Scale.Y, Scale.Z);
     });
   };
 
   Result.push_back([=](void)
   {
-    pWorldViewProjection->Data.World = ::DirectX::XMMatrixIdentity();
+    m_pData->Get<::Matrices>().World = ::DirectX::XMMatrixIdentity();
   });
 
-  PreRenderComponentsProcess(
+  m_ServiceComponents.Process(
   {
     { uT("Position"), CreatePosition },
     { uT("Rotation"), CreateRotation },
@@ -986,9 +988,7 @@ auto DirectX10::GetPreRendersGeometry(void) -> Renders_t
 
   Result.push_back([=](void)
   {
-    pWorldViewProjection->Data.World =
-      ::DirectX::XMMatrixTranspose(pWorldViewProjection->Data.World);
-    pWorldViewProjection->Update(m_pDevice);
+    m_pData->Update<Matrices>();
   });
 
   return Result;

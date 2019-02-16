@@ -17,7 +17,7 @@
     <ClCompile Include="stdafx.cpp">
       <Filter>Common</Filter>
     </ClCompile>
-    <ClCompile Include="ClickEventListener_test.cpp" />
+    <ClCompile Include="EventListener_test.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">

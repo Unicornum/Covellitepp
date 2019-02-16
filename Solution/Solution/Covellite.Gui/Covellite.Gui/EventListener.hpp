@@ -25,7 +25,7 @@ namespace gui
 * \copyright
 *  © CTAPOBEP 2016 - 2018
 */
-class Window::ClickEventListener final :
+class Window::EventListener final :
   public Rocket::Core::EventListener
 {
   using Event_t = Rocket::Core::Event;
@@ -35,13 +35,13 @@ public:
   void ProcessEvent(Event_t &) override;
 
 public:
-  static ClickEventListenerPtr_t Make(const Events_t &);
+  static EventListenerPtr_t Make(const Events_t &);
 
 private:
   Events_t m_Events;
 
 public:
-  explicit ClickEventListener(const Events_t &);
+  explicit EventListener(const Events_t &);
 };
 
 } // namespace gui

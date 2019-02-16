@@ -158,7 +158,7 @@ auto DirectX9::CreateState(const ComponentPtr_t & _pComponent) const -> Render_t
     { uT("Scissor"), CreateScissorState },
   };
 
-  return Creators[_pComponent->GetValue(uT("kind"), uT("Unknown"))](_pComponent);
+  return Creators[_pComponent->Kind](_pComponent);
 }
 
 auto DirectX9::CreatePosition(const ComponentPtr_t & _pComponent) -> Render_t
@@ -265,7 +265,7 @@ auto DirectX9::CreateBuffer(const ComponentPtr_t & _pComponent) const->Render_t
     { uT("Index"), CreateIndexBuffer },
   };
 
-  return Creators[_pComponent->GetValue(uT("kind"), uT("Unknown"))](_pComponent);
+  return Creators[_pComponent->Kind](_pComponent);
 }
 
 auto DirectX9::CreateDrawCall(const ComponentPtr_t &) const -> Render_t

@@ -1,11 +1,12 @@
 ﻿
 #pragma once
+#include <alicorn\std\string.forward.hpp>
+#include <alicorn\boost\filesystem.forward.hpp>
 #include <Covellite\Gui\Rocket.forward.hpp>
 #include <Covellite\Core\IWindow.hpp>
 #include <Covellite\Events\Events.hpp>
 #include <Covellite\Gui\ILayer.hpp>
 #include <Covellite\Gui\IWindow.hpp>
-#include <alicorn\boost\filesystem.forward.hpp>
 
 namespace covellite
 {
@@ -52,7 +53,7 @@ protected:
   using Document_t = Rocket::Core::ElementDocument;
   using Element_t = Rocket::Core::Element;
   using Path_t = ::boost::filesystem::path;
-  using String_t = Rocket::Core::String;
+  using String_t = ::alicorn::extension::std::String;
 
 public:
   /**
@@ -61,13 +62,19 @@ public:
   *  Класс входит в проект \ref CovelliteGuiPage \n
   *  Класс одного элемента .rml файла.
   */
-  class Element
+  class Element final
   {
   public:
+    void SetFocus(void);
+    void SetMeaning(const String_t &);
+    String_t GetMeaning(void) const;
+    void SetClassStyle(const String_t &);
+
+  public:
+    // deprecated
     void SetText(const Utf8String_t &);
     Utf8String_t GetText(void) const;
     void SetStyle(const Utf8String_t &);
-    void SetFocus(void);
 
   private:
     Element_t * const m_pElement;
@@ -87,10 +94,14 @@ public:
   Element GetElement(const ElementId_t &) const;
   int GetWidth(void) const;
   int GetHeight(void) const;
+  float EmployFontSize(float);
+
+public:
+  // deprecated
   void SetFontSize(double = 1.0);
 
 private:
-  static String_t Convert(const Path_t &);
+  static ::std::string Convert(const Path_t &);
 
 protected:
   ::covellite::events::Events m_Events;

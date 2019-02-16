@@ -52,20 +52,20 @@ void Common::Render(void) /*override*/
 void Common::LoadTexture(const Path_t & _RelativePathToSourceFile,
   const String_t & _TextureId)
 {
-  const auto CovelliteppSection = ::covellite::app::Settings_t::GetInstance();
-
-  const auto PathToFontsDirectory =
-    CovelliteppSection.Get<Path_t>(uT("PathToFontsDirectory"));
-
-  using namespace ::alicorn::source;
-
+  using ::covellite::app::Settings_t;
+  namespace image = ::alicorn::source::image;
+    
+  const auto PathToTextureDirectory =
+    Settings_t::GetInstance().Get<Path_t>(uT("PathToTextureDirectory"));
+    
+  /// [Load texture]
   const image::Universal_t<image::pixel::RGBA> Image
   {
     ::boost::filesystem::load_binary_file(
-      PathToFontsDirectory.parent_path() / _RelativePathToSourceFile)
+      PathToTextureDirectory / _RelativePathToSourceFile)
   };
-
-  m_pRenders->Obtain(
+    
+  const auto Renders = m_pRenders->Obtain(
     {
       Component_t::Make(
       {
@@ -81,4 +81,7 @@ void Common::LoadTexture(const Path_t & _RelativePathToSourceFile,
         { uT("type"), uT("Texture") },
       }),
     });
+    
+  ::boost::ignore_unused(Renders);
+  /// [Load texture]
 }

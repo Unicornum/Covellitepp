@@ -47,6 +47,7 @@ protected:
   // Вызывается ПОСЛЕ запуска каждого теста
   void TearDown(void) override
   {
+    ::testing::DefaultValue<const ::mock::GLfloat *>::Clear();
     ::testing::DefaultValue<String_t>::Clear();
   }
 

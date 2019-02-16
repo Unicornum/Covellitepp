@@ -12,18 +12,18 @@ namespace events
 * \ingroup CovelliteEventsTypeGroup
 * \brief
 *  Класс входит в проект \ref CovelliteGuiPage \n
-*  Класс событий клика мышью по элементу управления.
+*  Базовый класс для событий панели GUI.
 *  
 * \version
 *  1.0.0.0        \n
 * \date
-*  27 Июль 2018    \n
+*  04 Февраль 2019    \n
 * \author
 *  CTAPOBEP (unicornum.verum@gmail.com)
 * \copyright
-*  © CTAPOBEP 2018
+*  © CTAPOBEP 2019
 */
-class Click_t final
+class Gui
 {
 public:
   using TypeId_t = ::std::string;
@@ -71,26 +71,63 @@ public:
   */
   Document DocumentId(const TypeId_t & _Id) const
   {
-    return Document{ _Id };
+    return Document{ m_EventType + "::" + _Id };
   }
 
 public:
-  /**
-  * \ingroup CovelliteEventsParamsGroup
-  * \brief
-  *  Класс входит в проект \ref CovelliteGuiPage \n
-  *  Класс, содержащий информацию об элементе, для которого было сгенерировано
-  *  событие клика мышью.
-  */
-  class Info
-  {
-  public:
-    ::std::string Tag;  ///< Название xml тега элемента.
-    ::std::string Type; ///< Тип элемента (значение атрибута \b type).
-  };
+  const TypeId_t m_EventType;
+
+public:
+  explicit Gui(const TypeId_t & _EventType) : m_EventType(_EventType) { }
+};
+
+/**
+* \ingroup CovelliteEventsTypeGroup
+* \brief
+*  Класс входит в проект \ref CovelliteGuiPage \n
+*  Класс событий клика мышью по элементу управления.
+*  
+* \version
+*  1.0.0.0        \n
+* \date
+*  27 Июль 2018    \n
+* \author
+*  CTAPOBEP (unicornum.verum@gmail.com)
+* \copyright
+*  © CTAPOBEP 2018
+*/
+class Click_t final :
+  public Gui
+{
+public:
+  Click_t(void) : Gui("click") {}
 };
 
 namespace { Click_t Click; }
+
+/**
+* \ingroup CovelliteEventsTypeGroup
+* \brief
+*  Класс входит в проект \ref CovelliteGuiPage \n
+*  Класс событий изменения состояния элемента управления.
+*
+* \version
+*  1.0.0.0        \n
+* \date
+*  04 Февраль 2019    \n
+* \author
+*  CTAPOBEP (unicornum.verum@gmail.com)
+* \copyright
+*  © CTAPOBEP 2018 - 2019
+*/
+class Change_t final :
+  public Gui
+{
+public:
+  Change_t(void) : Gui("change") {}
+};
+
+namespace { Change_t Change; }
 
 } // namespace events
 
@@ -100,14 +137,14 @@ namespace std
 {
 
 template<>
-struct hash<::covellite::events::Click_t::Document::Element>
+struct hash<::covellite::events::Gui::Document::Element>
 {
-  using Element_t = ::covellite::events::Click_t::Document::Element;
+  using Element_t = ::covellite::events::Gui::Document::Element;
 
 public:
   inline size_t operator()(const Element_t & _Id) const
   {
-    return ::std::hash<::covellite::events::Click_t::TypeId_t>{}(_Id.m_Id);
+    return ::std::hash<::covellite::events::Gui::TypeId_t>{}(_Id.m_Id);
   }
 };
 

@@ -16,7 +16,8 @@
 #include <Covellite/Gui/Renderer.hpp>
 #include <Covellite/Gui/Initializer.hpp>
 #include <Covellite/Gui/StringTranslator.hpp>
-#include <Covellite/Gui/ClickEventListener.hpp>
+#include <Covellite/Gui/EventListener.hpp>
+#include <Covellite/Gui/Events.hpp>
 
 using namespace covellite::gui;
 
@@ -24,7 +25,7 @@ Window::Window(const WindowApi_t & _Window) :
   m_WindowApi(_Window),
   m_Events(_Window),
   m_pRenderer(::std::make_shared<covellite::gui::Renderer>(_Window.GetRenders())),
-  m_pClickEventListener(ClickEventListener::Make(_Window)),
+  m_pEventListener(EventListener::Make(_Window)),
   m_pEvents(::std::make_shared<EventHandler_t>(EventHandler_t::Dummy{})),
   m_pStringTranslator(::std::make_unique<covellite::gui::StringTranslator>()),
   m_pInitializer(::std::make_unique<Initializer_t>(Initializer_t::Data
@@ -56,7 +57,10 @@ Window::Window(const WindowApi_t & _Window) :
     }
   }
 
-  m_pContext->AddEventListener("click", m_pClickEventListener.get(), false);
+  m_pContext->AddEventListener(::covellite::events::Click.m_EventType.c_str(), 
+    m_pEventListener.get(), false);
+  m_pContext->AddEventListener(::covellite::events::Change.m_EventType.c_str(),
+    m_pEventListener.get(), false);
 
   LoadFonts();
 
@@ -106,7 +110,10 @@ Window::Window(const WindowApiPtr_t & _pWindowsApi) :
 Window::~Window(void) noexcept
 {
   m_pEvents->Unsubscribe(m_pContext.get());
-  m_pContext->RemoveEventListener("click", m_pClickEventListener.get(), false);
+  m_pContext->RemoveEventListener(::covellite::events::Click.m_EventType.c_str(), 
+    m_pEventListener.get(), false);
+  m_pContext->RemoveEventListener(::covellite::events::Change.m_EventType.c_str(),
+    m_pEventListener.get(), false);
 }
 
 /**

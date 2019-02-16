@@ -54,12 +54,11 @@ public:
   MOCK_METHOD1(wglCreateContext, HGLRC (HDC));
   MOCK_METHOD2(wglMakeCurrent, BOOL (HDC, HGLRC));
   MOCK_METHOD1(wglDeleteContext, BOOL (HGLRC _hRc));
-  MOCK_METHOD0(BuildClientRect, RECT(void));
+  MOCK_METHOD0(BuildRect, RECT(void));
   MOCK_METHOD1(GetClientRect, BOOL (HWND));
   MOCK_METHOD1(SwapBuffers, BOOL (HDC));
   MOCK_METHOD0(GetCommandLineA, LPSTR (VOID));
   MOCK_METHOD4(SetClientRect, void(LONG, LONG, LONG, LONG));
-  MOCK_METHOD0(GetWindowRect, RECT(void));
   MOCK_METHOD3(AdjustWindowRectEx, BOOL (DWORD, BOOL, DWORD));
   MOCK_METHOD1(GetSystemMetrics, int (int));
 
@@ -227,7 +226,7 @@ inline BOOL wglDeleteContext(HGLRC _hRc)
 
 inline BOOL GetClientRect(HWND _hWnd, LPRECT _pRect)
 {
-  *_pRect = WindowsProxy::GetInstance()->BuildClientRect();
+  *_pRect = WindowsProxy::GetInstance()->BuildRect();
   return WindowsProxy::GetInstance()->GetClientRect(_hWnd);
 }
 
@@ -246,7 +245,7 @@ inline BOOL AdjustWindowRectEx(RECT * _pRect, DWORD _Style, BOOL _IsMenu,
 {
   WindowsProxy::GetInstance()->SetClientRect(
     _pRect->left, _pRect->top, _pRect->right, _pRect->bottom);
-  *_pRect = WindowsProxy::GetInstance()->GetWindowRect();
+  *_pRect = WindowsProxy::GetInstance()->BuildRect();
   return WindowsProxy::GetInstance()->AdjustWindowRectEx(_Style, _IsMenu, _ExStyle);
 }
 

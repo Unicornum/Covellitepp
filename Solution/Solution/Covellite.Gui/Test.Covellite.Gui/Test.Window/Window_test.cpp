@@ -1,12 +1,12 @@
 
 #include "stdafx.h"
-#include <alicorn\boost\string-cast.hpp>
+#include <alicorn/boost/string-cast.hpp>
 
 // Примеры макросов библиотеки Google Test
-#include <alicorn\google\test\example.hpp>
+#include <alicorn/google/test/example.hpp>
 
 // Примеры макросов библиотеки Google Mock
-#include <alicorn\google\mock\example.hpp>
+#include <alicorn/google/mock/example.hpp>
 
 /**
 * \file
@@ -16,8 +16,8 @@
 // Расположение класса Window
 #include <Covellite/Gui/Window.hpp>
 
-#include <Covellite/Gui/ClickEventListener.hpp>
-#include "../Mock/ClickEventListener.inl"
+#include <Covellite/Gui/EventListener.hpp>
+#include "../Mock/EventListener.inl"
 #include "../../Covellite.Gui/Window.cpp"
 
 #include <Covellite/Os/Events.hpp>
@@ -50,7 +50,7 @@ protected:
   {
     using namespace ::alicorn::extension::std;
 
-    ::testing::DefaultValue<Tested_t::ClickEventListenerPtr_t>::Set(m_pClickEventListener);
+    ::testing::DefaultValue<Tested_t::EventListenerPtr_t>::Set(m_pEventListener);
     ::testing::DefaultValue<RenderInterfacePtr_t>::Set(m_pRenderInterface);
     ::testing::DefaultValue<String_t>::Set("DefaultString");
     ::testing::DefaultValue<String>::Set(string_cast<String>(m_PathToFontsDirectory));
@@ -64,7 +64,7 @@ protected:
   {
     using namespace ::alicorn::extension::std;
 
-    ::testing::DefaultValue<Tested_t::ClickEventListenerPtr_t>::Clear();
+    ::testing::DefaultValue<Tested_t::EventListenerPtr_t>::Clear();
     ::testing::DefaultValue<RenderInterfacePtr_t>::Clear();
     ::testing::DefaultValue<String_t>::Clear();
     ::testing::DefaultValue<String>::Clear();
@@ -78,8 +78,8 @@ protected:
 
 private:
   const Events_t m_Events;
-  Tested_t::ClickEventListenerPtr_t m_pClickEventListener =
-    ::std::make_shared<Tested_t::ClickEventListener>(m_Events);
+  Tested_t::EventListenerPtr_t m_pEventListener =
+    ::std::make_shared<Tested_t::EventListener>(m_Events);
   RenderInterfacePtr_t m_pRenderInterface =
     ::std::make_shared<::mock::covellite::api::RenderOpenGL>(0);
   Context_t m_Context;
@@ -127,9 +127,9 @@ TEST_F(Window_test, /*DISABLED_*/Test_Constructor)
   RendererProxy_t RendererProxy;
   RendererProxy_t::GetInstance() = &RendererProxy;
 
-  using ClickEventListenerProxy_t = ::covellite::gui::mock::ClickEventListenerProxy;
-  ClickEventListenerProxy_t ClickEventListenerProxy;
-  ClickEventListenerProxy_t::GetInstance() = &ClickEventListenerProxy;
+  using EventListenerProxy_t = ::covellite::gui::mock::EventListenerProxy;
+  EventListenerProxy_t EventListenerProxy;
+  EventListenerProxy_t::GetInstance() = &EventListenerProxy;
 
   using StringTranslatorProxy_t = ::mock::covellite::gui::StringTranslator::Proxy;
   StringTranslatorProxy_t StringTranslatorProxy;
@@ -211,12 +211,12 @@ TEST_F(Window_test, /*DISABLED_*/Test_Constructor)
     .Times(1)
     .WillOnce(Return(RendererId));
 
-  auto pClickEventListener =
-    ::std::make_shared<Tested_t::ClickEventListener>(IWindowApi);
+  auto pEventListener =
+    ::std::make_shared<Tested_t::EventListener>(IWindowApi);
 
-  EXPECT_CALL(ClickEventListenerProxy, Make(_))
+  EXPECT_CALL(EventListenerProxy, Make(_))
     .Times(1)
-    .WillOnce(Return(pClickEventListener));
+    .WillOnce(Return(pEventListener));
 
   EXPECT_CALL(StringTranslatorProxy, Constructor())
     .Times(1)
@@ -243,7 +243,11 @@ TEST_F(Window_test, /*DISABLED_*/Test_Constructor)
   }
 
   EXPECT_CALL(Context, 
-    AddEventListener(Eq("click"), pClickEventListener.get(), false))
+    AddEventListener(Eq("click"), pEventListener.get(), false))
+    .Times(1);
+
+  EXPECT_CALL(Context,
+    AddEventListener(Eq("change"), pEventListener.get(), false))
     .Times(1);
 
   EXPECT_CALL(FontDatabaseProxy, LoadFontFace(_))
@@ -252,7 +256,11 @@ TEST_F(Window_test, /*DISABLED_*/Test_Constructor)
   const Tested_t Example{ IWindowApi };
 
   EXPECT_CALL(Context,
-    RemoveEventListener(Eq("click"), pClickEventListener.get(), false))
+    RemoveEventListener(Eq("click"), pEventListener.get(), false))
+    .Times(1);
+
+  EXPECT_CALL(Context,
+    RemoveEventListener(Eq("change"), pEventListener.get(), false))
     .Times(1);
 }
 

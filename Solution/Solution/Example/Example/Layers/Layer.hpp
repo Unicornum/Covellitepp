@@ -48,10 +48,10 @@ public:
   void Subscribe(const EventHandlerPtr_t &) override {}
 
 protected:
-  const int m_FontSize;
+  const float m_FontSize;
 
 protected:
-  Layer(IWindowGui_t &, const ::std::string &, const String_t &, const String_t &);
+  Layer(IWindowGui_t &, const Path_t &, const String_t &, const String_t &);
 };
 
 } // namespace layers

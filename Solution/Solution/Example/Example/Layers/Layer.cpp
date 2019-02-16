@@ -3,28 +3,20 @@
 #include "Layer.hpp"
 #include <alicorn/std/string.hpp>
 #include <alicorn/version.hpp>
-#include <alicorn/application/current-module.hpp>
 #include "Description.hpp"
-
-static const auto PathToDataDirectory =
-  ::alicorn::system::application::CurrentModule::GetAppRootPath() / "data";
 
 using namespace layers;
 
-Layer::Layer(IWindowGui_t & _Window, const ::std::string & _FileName, 
+Layer::Layer(IWindowGui_t & _Window, const Path_t & _FileName,
   const String_t & _Title, const String_t & _Description) :
-  ::covellite::gui::Layer(_Window, PathToDataDirectory / _FileName),
-  m_FontSize(::std::max(GetWidth(), GetHeight()) / 40)
+  ::covellite::gui::Layer(_Window, "data" / _FileName),
+  m_FontSize(EmployFontSize(2.5))
 {
   using namespace ::alicorn::extension::std;
 
-  GetElement("id_body").SetStyle(string_cast<::std::string, Locale::UTF8>(
-    uT("font-size: %SIZE%px;").Replace(uT("%SIZE%"), m_FontSize)));
-
-  GetElement("id_back").SetText(u8"\uF060");
-  GetElement("id_help").SetText(u8"\uF059");
-  GetElement("id_title").SetText(
-    string_cast<::std::string, Locale::UTF8>(_Title));
+  GetElement("id_back").SetMeaning(uT("\uF060"));
+  GetElement("id_help").SetMeaning(uT("\uF059"));
+  GetElement("id_title").SetMeaning(_Title);
 
   using namespace ::covellite;
 

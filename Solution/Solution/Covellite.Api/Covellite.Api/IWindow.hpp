@@ -43,7 +43,9 @@ protected:
   using RendersPtr_t = ::std::shared_ptr<Component::Renders>;
 
 public:
+  /// Функция получения размеров клиентской области окна.
   virtual Rect_t GetClientRect(void) const = 0;
+  /// Функция получения объекта создания/удаления рендеров для компонентов.
   virtual RendersPtr_t GetRenders(void) const = 0;
 
   /// \deprecated

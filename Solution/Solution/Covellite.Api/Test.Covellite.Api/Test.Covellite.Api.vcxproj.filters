@@ -98,6 +98,9 @@
     <ClCompile Include="..\Covellite.Api\Renders.cpp">
       <Filter>Tests\Renders</Filter>
     </ClCompile>
+    <ClCompile Include="..\Covellite.Api\Renderer\CapturingServiceComponent.cpp">
+      <Filter>Tests</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">

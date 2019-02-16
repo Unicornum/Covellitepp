@@ -40,11 +40,11 @@
     <Filter Include="Tests\SystemToRocketKeyCode">
       <UniqueIdentifier>{b8253565-d85f-4afc-b245-9fb0dfc532e4}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Tests\ClickEventListener">
-      <UniqueIdentifier>{a7014373-bdbe-43ac-960b-f5f612a51a1c}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Tests\Renderer">
       <UniqueIdentifier>{e9b38aa4-cc64-432a-9c73-e8b39681d080}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Tests\EventListener">
+      <UniqueIdentifier>{a7014373-bdbe-43ac-960b-f5f612a51a1c}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -98,9 +98,6 @@
     <ClCompile Include="Test.SystemToRocketKeyCode\SystemToRocketKeyCode_test.cpp">
       <Filter>Tests\SystemToRocketKeyCode</Filter>
     </ClCompile>
-    <ClCompile Include="Test.ClickEventListener\ClickEventListener_test.cpp">
-      <Filter>Tests\ClickEventListener</Filter>
-    </ClCompile>
     <ClCompile Include="Test.Layer\Layer_test.deprecated.cpp">
       <Filter>Tests\Layer</Filter>
     </ClCompile>
@@ -124,6 +121,9 @@
     </ClCompile>
     <ClCompile Include="Test.Renderer\Renderer_test.cpp">
       <Filter>Tests\Renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="Test.EventListener\EventListener_test.cpp">
+      <Filter>Tests\EventListener</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -46,15 +46,15 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">
+    <ClCompile />
     <ClCompile>
-      <PrecompiledHeader>Use</PrecompiledHeader>
-      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <AdditionalOptions>-Wno-unused-variable %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">
+    <ClCompile />
     <ClCompile>
-      <PrecompiledHeader>Use</PrecompiledHeader>
-      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <AdditionalOptions>-Wno-unused-variable %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -63,6 +63,7 @@
     <ClInclude Include="IWindow.hpp" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="Renderer\Api.forward.hpp" />
+    <ClInclude Include="Renderer\CapturingServiceComponent.hpp" />
     <ClInclude Include="Renderer\Component.hpp" />
     <ClInclude Include="Renderer\GL.hpp" />
     <ClInclude Include="Renderer\GLMath.hpp" />
@@ -79,6 +80,7 @@
     <ClInclude Include="Window.mock.hpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Renderer\CapturingServiceComponent.cpp" />
     <ClCompile Include="Renderer\OpenGLCommon.cpp" />
     <ClCompile Include="Renderer\OpenGLES.cpp" />
     <ClCompile Include="Renderer\Renderer.android.cpp" />
