@@ -15,6 +15,7 @@ static const auto DescriptionLayer =
   uT("для оценки возможностей устройства по одновременному отображению ") +
   uT("количества полигонов).<br/>") +
   uT("<br/>") + 
+  uT("Checkbox'ы слева позволяют включать/отключать источники света.<br/>") +
   uT("Кнопками внизу окна можно менять:<br/>") + 
   uT("- Количество полигонов, из которых состоит кубик.<br/>") +
   uT("- Количество отображаемых кубиков.<br/>") +
@@ -34,58 +35,97 @@ Draw3DObject::Draw3DObject(IWindowGui_t & _Window) :
     .Replace(uT("{CUBES}"), m_CubesCount));
   GetElement("id_cubes_plus").SetMeaning(uT("\uF055"));
 
+  const auto ChangeLights = [&](::basement::Lights::Type _Type)
+  {
+    const auto Offset = (1 << _Type);
+
+    if ((m_LightFlags & Offset) != 0)
+    {
+      m_LightFlags &= ~Offset;
+    }
+    else
+    {
+      m_LightFlags |= Offset;
+    }
+
+    m_Events[::events::Simple3DObject.LightsChanged](m_LightFlags);
+  };
+
   using namespace ::covellite::events;
 
+  m_Events[Change.DocumentId(GetId()).ElementId("id_ambient")]
+    .Connect([=](void)
+  {
+    ChangeLights(::basement::Lights::Ambient);
+  });
+
+  m_Events[Change.DocumentId(GetId()).ElementId("id_directional")]
+    .Connect([=](void)
+  {
+    ChangeLights(::basement::Lights::Directional);
+  });
+
+  m_Events[Change.DocumentId(GetId()).ElementId("id_red")]
+    .Connect([=](void)
+  {
+    ChangeLights(::basement::Lights::Red);
+  });
+
+  m_Events[Change.DocumentId(GetId()).ElementId("id_green")]
+    .Connect([=](void)
+  {
+    ChangeLights(::basement::Lights::Green);
+  });
+
+  m_Events[Change.DocumentId(GetId()).ElementId("id_blue")]
+    .Connect([=](void)
+  {
+    ChangeLights(::basement::Lights::Blue);
+  });
+
+  const auto ChangeScene = [&](const ::std::string & _ElementId, int _Value)
+  {
+    if (!_ElementId.empty())
+    {
+      GetElement(_ElementId).SetMeaning(uT("{VALUE}")
+        .Replace(uT("{VALUE}"), _Value));
+    }
+
+    m_Events[::events::Simple3DObject.Start](
+      ::std::pair<int, int>{ m_Polygons, m_CubesCount });
+    m_Events[::events::Simple3DObject.LightsChanged](m_LightFlags);
+  };
+
   m_Events[Click.DocumentId(GetId()).ElementId("id_polygons_plus")]
-    .Connect([&](void) 
+    .Connect([&, ChangeScene](void)
   {
     if (m_LastFps < 15) return;
 
-    m_Polygons *= 2;
-    m_Events[::events::Simple3DObject.Start](
-      ::std::pair<int, int>{ m_Polygons, m_CubesCount });
-
-    GetElement("id_polygons").SetMeaning(uT("{POLYGONS}")
-      .Replace(uT("{POLYGONS}"), m_Polygons));
+    ChangeScene("id_polygons", m_Polygons *= 2);
   });
 
   m_Events[Click.DocumentId(GetId()).ElementId("id_polygons_minus")]
-    .Connect([&](void)
+    .Connect([&, ChangeScene](void)
   {
     if (m_Polygons <= 12) return;
 
-    m_Polygons /= 2;
-    m_Events[::events::Simple3DObject.Start](
-      ::std::pair<int, int>{ m_Polygons, m_CubesCount });
-
-    GetElement("id_polygons").SetMeaning(uT("{POLYGONS}")
-      .Replace(uT("{POLYGONS}"), m_Polygons));
+    ChangeScene("id_polygons", m_Polygons /= 2);
   });
 
   m_Events[Click.DocumentId(GetId()).ElementId("id_cubes_plus")]
-    .Connect([&](void)
+    .Connect([&, ChangeScene](void)
   {
     if (m_LastFps < 15) return;
 
-    m_CubesCount *= 4;
-    m_Events[::events::Simple3DObject.Start](
-      ::std::pair<int, int>{ m_Polygons, m_CubesCount });
-
-    GetElement("id_cubes").SetMeaning(uT("{CUBES}")
-      .Replace(uT("{CUBES}"), m_CubesCount));
+    ChangeScene("id_cubes", m_CubesCount *= 4);
   });
 
   m_Events[Click.DocumentId(GetId()).ElementId("id_cubes_minus")]
-    .Connect([&](void)
+    .Connect([&, ChangeScene](void)
   {
     if (m_CubesCount <= 1) return;
-    
-    m_CubesCount /= 4;
-    m_Events[::events::Simple3DObject.Start](
-      ::std::pair<int, int>{ m_Polygons, m_CubesCount });
 
-    GetElement("id_cubes").SetMeaning(uT("{CUBES}")
-      .Replace(uT("{CUBES}"), m_CubesCount));
+    ChangeScene("id_cubes", m_CubesCount /= 4);
   });
 
   m_Events[Drawing.Do].Connect([&](void)
@@ -98,8 +138,6 @@ Draw3DObject::Draw3DObject(IWindowGui_t & _Window) :
 
     if (duration_cast<seconds>(system_clock::now() - Begin) >= seconds{ 1 })
     {
-      using namespace ::alicorn::extension::std;
-
       GetElement("id_fps").SetMeaning(uT("FPS: {FPS}")
         .Replace(uT("{FPS}"), m_Fps));
 
@@ -109,8 +147,7 @@ Draw3DObject::Draw3DObject(IWindowGui_t & _Window) :
     }
   });
 
-  m_Events[::events::Simple3DObject.Start](
-    ::std::pair<int, int>{ m_Polygons, m_CubesCount });
+  ChangeScene("", 0);
 }
 
 Draw3DObject::~Draw3DObject(void)

@@ -36,7 +36,6 @@ namespace renderer
 class OpenGLCommon :
   public Registator_t<IGraphicApi>
 {
-  using CameraId_t = String_t;
   using Color_t = ::std::vector<GLfloat>;
 
 public:
@@ -47,15 +46,16 @@ public:
   const Creators_t & GetCreators(void) const final;
 
 private:
+  Render_t CreateCamera(const ComponentPtr_t &);
   Render_t CreateState(const ComponentPtr_t &);
   Render_t CreateLight(const ComponentPtr_t &);
   Render_t CreateMaterial(const ComponentPtr_t &);
   Render_t CreateTexture(const ComponentPtr_t &);
   Render_t CreateBuffer(const ComponentPtr_t &);
   Render_t CreatePresent(const ComponentPtr_t &);
-  Render_t CreateCamera(const ComponentPtr_t &);
+
+private:
   Render_t GetDeptRender(const ComponentPtr_t &);
-  Render_t GetLightsRender(const ComponentPtr_t &);
   Render_t GetCameraCommon(const ComponentPtr_t &);
   Render_t GetCameraGui(const ComponentPtr_t &);
   Render_t GetCameraFocal(const ComponentPtr_t &);
@@ -63,7 +63,6 @@ private:
   static Color_t ARGBtoFloat4(uint32_t);
 
 private:
-  CapturingServiceComponent   m_ServiceComponents;
   const Renderer::Data::Color m_BackgroundColor;
   const int                   m_Top;
   const String_t              m_PreVersion;
@@ -71,21 +70,12 @@ private:
   Render_t                    m_DrawElements;
 
 private:
+  class Data;
   class Texture;
-  class Light
-  {
-  public:
-    Color_t Ambient;
-    Color_t Diffuse;
-    Color_t Specular;
-    float Position[4] = { 0.0f, 0.0f, 1.0f, 0.0f };
-    float Const = 1.0f;
-    float Linear = 0.0f;
-    float Exponent = 0.0f;
-  };
 
-  ::std::map<CameraId_t, ::std::vector<Light>> m_Lights;
-  CameraId_t m_CurrentCameraId = uT("Unknown");
+private:
+  ::std::shared_ptr<Data>   m_pData;
+  CapturingServiceComponent m_ServiceComponents;
 
 public:
   OpenGLCommon(const Renderer::Data &, const String_t &);

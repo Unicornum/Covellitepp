@@ -148,8 +148,8 @@ Window::Window(const ::covellite::app::IApplication & _Application) :
   });
   m_Events[(UINT)WM_EXITSIZEMOVE].Connect([&]()
   {
-    // Это событин вызывается в конце перетаскивания окна, но задержки
-    // перерисовки окна это не вызывает.
+    // Это событие вызывается также и в конце перетаскивания окна за заголовок 
+    // (без изменения размера), но задержки перерисовки окна это не вызывает.
     m_Events[events::Window.Resize]();
   });
   m_Events[(UINT)WM_SIZE].Connect([&](const RawParams_t & _Params)

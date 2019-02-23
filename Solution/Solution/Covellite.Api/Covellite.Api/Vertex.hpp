@@ -12,52 +12,46 @@ namespace api
 * \ingroup CovelliteApiGroup
 * \brief
 *  Класс входит в проект \ref CovelliteApiPage \n
-*  Класс-контейнер доступных форматов вертексных буферов.
+*  Класс-контейнер форматов вертексных буферов.
 * \details
-*  - Форматы вложенных классов должны соответствовать фоматам входных
-*  параметров в файле VertexInput.fx.
+*  - Форматы классов вершин должны соответствовать фоматам входных параметров 
+*  в файле Input.fx.
 *  
 * \version
 *  1.0.0.0        \n
+*  1.1.0.0        \n
 * \date
 *  27 Ноябрь 2018    \n
+*  23 Февраль 2019    \n
 * \author
 *  CTAPOBEP (unicornum.verum@gmail.com)
 * \copyright
-*  © CTAPOBEP 2018
+*  © CTAPOBEP 2018 - 2019
 */
 class Vertex final
 {
-  using String_t = ::alicorn::extension::std::String;
-
 public:
   /// \brief
-  ///  Описание одной вершины меша для рендеринга Gui.
+  ///  Описание одной вершины меша для рендеринга плоских объектов.
   /// \details
   ///  - Формат вершины для минимизации операций копирования данных буфера 
   /// (должнен соответствовать формату Rocket::Core::Vertex).
-  class Gui final
+  class Polygon final
   {
   public:
     float x, y;
     uint32_t ABGRColor;
     float u, v;
-
-  public:
-    inline static String_t GetName(void) { return uT("Vertex.Gui"); }
   };
 
   /// \brief
-  ///  Описание одной вершины для рендеринга простых текстурированных мешей.
-  class Textured final
+  ///  Описание одной вершины для рендеринга объемных моделей.
+  class Polyhedron final
   {
   public:
     float x, y, z;
     float nx, ny, nz;
     float tu, tv;
-
-  public:
-    inline static String_t GetName(void) { return uT("Vertex.Textured"); }
   };
 };
 

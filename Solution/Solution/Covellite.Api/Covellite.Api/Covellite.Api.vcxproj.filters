@@ -71,6 +71,12 @@
     <ClInclude Include="Renderer\CapturingServiceComponent.hpp">
       <Filter>Renderer</Filter>
     </ClInclude>
+    <ClInclude Include="Renderer\DirectX.hpp">
+      <Filter>Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="Renderer\fx\Hlsl.hpp">
+      <Filter>Renderer\fx</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -103,6 +109,9 @@
       <Filter>Renderer</Filter>
     </ClCompile>
     <ClCompile Include="Renderer\CapturingServiceComponent.cpp">
+      <Filter>Renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="Renderer\DirectX.cpp">
       <Filter>Renderer</Filter>
     </ClCompile>
   </ItemGroup>

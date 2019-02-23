@@ -9,19 +9,13 @@
 #include <Covellite/Api/Renders.hpp>
 #include <Covellite/Api/Vertex.hpp>
 
-// 19 Ноябрь 2018 19:27 (unicornum.verum@gmail.com)
-TODO("Недопустимое обращение к файлам другого проекта.");
-#include <Covellite.Api/Covellite.Api/Renderer/IGraphicApi.hpp>
-#include <Covellite.Api/Covellite.Api/Renderer/fx/Vertex.auto.hpp>
-#include <Covellite.Api/Covellite.Api/Renderer/fx/Pixel.auto.hpp>
-
 namespace covellite
 {
 
 namespace gui
 {
 
-using Vertex_t = ::covellite::api::Vertex::Gui;
+using Vertex_t = ::covellite::api::Vertex::Polygon;
 
 Renderer::Renderer(const RendersPtr_t & _pRenders) :
   m_pRenders(_pRenders),
@@ -29,9 +23,9 @@ Renderer::Renderer(const RendersPtr_t & _pRenders) :
     {
       Component_t::Make(
         {
-          { uT("id"), uT("Covellite.Api.Present.Camera") },
-          { uT("type"), uT("Present") },
-          { uT("kind"), uT("Camera") },
+          { uT("id"), uT("Covellite.Api.Camera.Gui") },
+          { uT("type"), uT("Camera") },
+          { uT("kind"), uT("Orthographic") },
         }),
       Component_t::Make(
         {
@@ -43,11 +37,8 @@ Renderer::Renderer(const RendersPtr_t & _pRenders) :
         {
           { uT("id"), uT("Covellite.Api.Shader.Vertex") },
           { uT("type"), uT("Shader") },
-          { uT("kind"), Vertex_t::GetName() },
           { uT("version"), uT("vs_4_0") },
           { uT("entry"), uT("VS") },
-          { uT("data"), ::Vertex.data() },
-          { uT("count"), ::Vertex.size() },
         }),
     })),
     m_pScissorRect(Component_t::Make(
@@ -88,11 +79,8 @@ Rocket::Core::CompiledGeometryHandle Renderer::CompileGeometry(
       {
         { uT("id"), uT("Covellite.Api.Shader.Pixel.Colored") },
         { uT("type"), uT("Shader") },
-        { uT("kind"), uT("Pixel") },
         { uT("version"), uT("ps_4_0") },
         { uT("entry"), uT("psColored") },
-        { uT("data"), ::Pixel.data() },
-        { uT("count"), ::Pixel.size() }
       }));
   }
   else
@@ -101,11 +89,8 @@ Rocket::Core::CompiledGeometryHandle Renderer::CompileGeometry(
       {
         { uT("id"), uT("Covellite.Api.Shader.Pixel.Textured") },
         { uT("type"), uT("Shader") },
-        { uT("kind"), uT("Pixel") },
         { uT("version"), uT("ps_4_0") },
         { uT("entry"), uT("psTextured") },
-        { uT("data"), ::Pixel.data() },
-        { uT("count"), ::Pixel.size() }
       }));
 
     const auto strTextureId = uT("Covellite.Api.Texture.{ID}")
@@ -136,7 +121,6 @@ Rocket::Core::CompiledGeometryHandle Renderer::CompileGeometry(
     {
       { uT("id"), uT("Covellite.Api.Buffer.Vertex.") + strObjectId },
       { uT("type"), uT("Buffer") },
-      { uT("kind"), Vertex_t::GetName() },
       { uT("data"), reinterpret_cast<const Vertex_t *>(_pVertex) },
       { uT("count"), (size_t)_VertexCount }
     }));

@@ -1,5 +1,6 @@
 
 #pragma once
+#include <boost/any.hpp>
 
 /**
 * \defgroup ExampleBasementGroup Basement
@@ -44,6 +45,7 @@ namespace basement
 class IBasement
 {
 public:
+  virtual void Notify(int, const ::boost::any &) {};
   virtual void Render(void) = 0;
 
 public:

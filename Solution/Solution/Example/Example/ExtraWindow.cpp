@@ -17,6 +17,12 @@ ExtraWindow::ExtraWindow(const WindowApi_t & _WindowApi) :
       m_WindowApi.GetRenders(), _Info.first, _Info.second);
   });
 
+  m_Events[::events::Simple3DObject.LightsChanged].Connect(
+    [&](const int & _Info)
+  {
+    m_pBasement->Notify(::events::Simple3DObject.LightsChanged, _Info);
+  });
+
   m_Events[::events::Simple2DGame.Start].Connect(
     [&](const ::std::vector<float> & _Rect)
   {

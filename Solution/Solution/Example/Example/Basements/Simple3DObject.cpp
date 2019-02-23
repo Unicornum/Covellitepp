@@ -1,17 +1,14 @@
-
+п»ї
 #include "stdafx.h"
 #include "Simple3DObject.hpp"
 #include <chrono>
 #include <alicorn/std/vector.hpp>
+#include <alicorn/cpp/math.hpp>
 #include <Covellite/Api/Vertex.hpp>
 #include <Covellite/Api/Component.inl>
 
-// 26 Ноябрь 2018 17:54 (unicornum.verum@gmail.com)
-TODO("Недопустимое обращение к файлам другого проекта.");
-#include <Covellite.Api/Covellite.Api/Renderer/fx/Pixel.auto.hpp>
-#include <Covellite.Api/Covellite.Api/Renderer/fx/Vertex.auto.hpp>
-
 using namespace basement;
+namespace math = ::alicorn::extension::cpp::math;
 
 static const auto Begin = ::std::chrono::system_clock::now();
 
@@ -37,86 +34,125 @@ Simple3DObject::Simple3DObject(const RendersPtr_t & _pRenders,
     Offset += (float)Step / (2 * i);
   }
 
-  const float CenterX = 0.0f;
-  const float CenterY = 0.8f;
-
   for (int x = 0; x < Step; x++)
   {
     for (int y = 0; y < Step; y++)
     {
-      m_Scene.push_back(BuildCube(_PolygonsCount / 12, 3.0f / Step,
-        CenterX + (5.0f / Step) * (x - Offset),
-        CenterY + (5.0f / Step) * (y - Offset)));
+      m_Scene.push_back(BuildCube(
+        _PolygonsCount / 12, 
+        6.0f / Step,
+        m_CenterX + (10.0f / Step) * (x - Offset),
+        m_CenterY + (10.0f / Step) * (y - Offset)));
     }
   }
 
-  m_Scene.push_back(BuildLights()); // Источники света - в конце, чтобы 
-                                    // убедиться, что порядок их добавления 
-                                    // не влияет на результат.
+  // Р’С‹Р·РѕРІ РґР»СЏ Р±РѕР»СЊС€РѕРіРѕ РєРѕР»РёС‡РµСЃС‚РІР° РєСѓР±РѕРІ С‚РѕР»СЊРєРѕ Present'a РЅРµ СѓРІРµР»РёС‡РёРІР°РµС‚ fps!
 
-  // Рендеринг 30+ fps (Release версия после оптимизации):
+  // 21.02.2019 - c СѓРЅРёРІРµСЂСЃР°Р»СЊРЅС‹Рј РѕСЃРІРµС‰РµРЅРёРµРј РїРѕ Р“СѓСЂРѕ
 
-  // Это было без освещения???:
-  // - DirectX10 - 5000 кубов по 120 полигонов каждый.
-  // - DirectX10 - 2500 кубов по 240 полигонов каждый.
+  // Р РµРЅРґРµСЂРёРЅРі ~15 fps (Release РІРµСЂСЃРёСЏ РїРѕСЃР»Рµ РѕРїС‚РёРјРёР·Р°С†РёРё):
 
-  // 26.12.2018 - c освещением:
-  // - OpenGL - 2300 кубов по 96 полигонов каждый.
-  // - OpenGL - 1100 кубов по 192 полигонов каждый.
-  // - DirectX10 - 600 кубов по 96 полигонов каждый.
-  // - DirectX10 - 300 кубов по 192 полигонов каждый.
-  // - DirectX11 - 600 кубов по 96 полигонов каждый.
-  // - DirectX11 - 300 кубов по 192 полигонов каждый.
+  // Windows (СЃС‚Р°СЂС‹Р№ РЅРѕСѓС‚Р±СѓРє):
+  // - OpenGL     - 4096 РєСѓР±РѕРІ РїРѕ 768 РїРѕР»РёРіРѕРЅРѕРІ РєР°Р¶РґС‹Р№.
+  // - DirectX10  - 4096 РєСѓР±РѕРІ РїРѕ 1536 РїРѕР»РёРіРѕРЅРѕРІ РєР°Р¶РґС‹Р№.
+  // - DirectX11  - 4096 РєСѓР±РѕРІ РїРѕ 1536 РїРѕР»РёРіРѕРЅРѕРІ РєР°Р¶РґС‹Р№.
 
-  // 28.01.2019 - c освещением:
-  // - DirectX11 - 4096 кубов по 768 полигонов каждый.
+  // Windows (РЅРѕРІС‹Р№ РЅРѕСѓС‚Р±СѓРє):
+  // - OpenGL     - ??? РєСѓР±РѕРІ РїРѕ 96 РїРѕР»РёРіРѕРЅРѕРІ РєР°Р¶РґС‹Р№.
+  // - DirectX10  - ??? РєСѓР±РѕРІ РїРѕ 96 РїРѕР»РёРіРѕРЅРѕРІ РєР°Р¶РґС‹Р№.
+  // - DirectX11  - ??? РєСѓР±РѕРІ РїРѕ 96 РїРѕР»РёРіРѕРЅРѕРІ РєР°Р¶РґС‹Р№.
 
-  // Рендеринг 15+ fps (Release версия после оптимизации):
-
-  // При включенном android:hardwareAccelerated="true"
-  // - OpenGLES - 250 кубов по 48 полигонов каждый.
-  // - OpenGLES - 150 кубов по 96 полигонов каждый.
-
+  // Samsung Duos:
+  // - OpenGLES   - 256 РєСѓР±РѕРІ РїРѕ 96 РїРѕР»РёРіРѕРЅРѕРІ РєР°Р¶РґС‹Р№.
   // Samsung A5:
-  // - OpenGLES - 1024 кубов по 1536 полигонов каждый (15 fps).
-  // - OpenGLES - 4096 кубов по 768 полигонов каждый (5 fps).
+  // - OpenGLES   - ??? РєСѓР±РѕРІ РїРѕ ??? РїРѕР»РёРіРѕРЅРѕРІ РєР°Р¶РґС‹Р№.
+}
 
-  // Вызов для большого количества кубов только Present'a не увеличивает fps!
+void Simple3DObject::Notify(int _Message, const ::boost::any & _Value) /*override*/
+{
+  if (_Message == ::events::Simple3DObject.LightsChanged)
+  {
+    m_Lights.clear();
+    m_Lights.push_back(BuildLights(::boost::any_cast<int>(_Value)));
+  }
 }
 
 void Simple3DObject::Render(void) /*override*/
 {
-  const ::std::chrono::duration<float> Time =
+  const ::std::chrono::duration<double> Time =
     (::std::chrono::system_clock::now() - Begin) / 5.0;
+  const auto Angle = Time.count();
 
-  const float AngleX = 3.14f * (cosf(Time.count()) + 1.0f);
-  const float AngleZ = 3.14f * (sinf(Time.count()) + 1.0f);
+  m_pCubeRotation->SetValue(uT("x"), static_cast<float>(
+    math::PI * (math::radian::Cos(Angle) + 1.0)));
+  m_pCubeRotation->SetValue(uT("z"), static_cast<float>(
+    math::PI * (math::radian::Sin(Angle) + 1.0)));
 
-  m_pCubeRotation->SetValue(uT("x"), AngleX);
-  m_pCubeRotation->SetValue(uT("z"), AngleZ);
+  //m_pCubeRotation->SetValue(uT("x"), 0.785f);
+  //m_pCubeRotation->SetValue(uT("y"), -0.785f);
+  //m_pCubeRotation->SetValue(uT("z"), 0.0f);
 
   Common::Render();
+
+  // РСЃС‚РѕС‡РЅРёРєРё СЃРІРµС‚Р° - РІ РєРѕРЅС†Рµ, С‡С‚РѕР±С‹ СѓР±РµРґРёС‚СЊСЃСЏ, С‡С‚Рѕ РїРѕСЂСЏРґРѕРє РёС… РґРѕР±Р°РІР»РµРЅРёСЏ 
+  // РЅРµ РІР»РёСЏРµС‚ РЅР° СЂРµР·СѓР»СЊС‚Р°С‚.
+  for (const auto Id : m_Lights)
+  {
+    for (auto & Render : m_Objects[Id])
+    {
+      Render();
+    }
+  }
 }
 
-auto Simple3DObject::BuildLights(void) -> Id
+auto Simple3DObject::BuildLights(int _LightsFlags) -> Id
 {
-  const Id Id;
+  const auto IsActive = [=](Lights::Type _Type)
+  {
+    return (_LightsFlags & (1 << _Type)) != 0;
+  };
 
-  m_Objects[Id] = m_pRenders->Obtain(
+  const float X = 5.0f;
+  const float Y = 1.0f;
+  const float Z = 1.0f;
+
+  const float Const = 0.0f;
+  const float Linear = 0.1f;
+  const float Exponent = 0.05f;
+
+  //m_Scene.push_back(BuildCube2(0.05f, X, 0.0f,  Z + m_CenterY));
+  //m_Scene.push_back(BuildCube2(0.05f, X,    Y, -Z + m_CenterY));
+  //m_Scene.push_back(BuildCube2(0.05f, X,   -Y, -Z + m_CenterY));
+
+  using Object_t = Component_t::Renders::Object_t;
+  using namespace ::alicorn::extension::std;
+
+  Object_t Components;
+
+  if (IsActive(Lights::Ambient))
+  {
+    Components += Object_t
     {
       Component_t::Make(
       {
         { uT("id"), uT("Example.Light.Ambient") },
         { uT("type"), uT("Light") },
         { uT("kind"), uT("Ambient") },
-        { uT("ambient"), 0xFF404040 }, // ARGB
+        { uT("color"), 0xFF303030 }, // ARGB
       }),
+    };
+  }
+
+  if (IsActive(Lights::Directional))
+  {
+    Components += Object_t
+    {
       Component_t::Make(
       {
         { uT("type"), uT("Data") },
         { uT("kind"), uT("Direction") },
         { uT("x"), 1.0f },
-        { uT("y"), 1.0f },
+        { uT("y"), -1.0f },
         { uT("z"), 1.0f },
       }),
       Component_t::Make(
@@ -124,79 +160,104 @@ auto Simple3DObject::BuildLights(void) -> Id
         { uT("id"), uT("Example.Light.Direction") },
         { uT("type"), uT("Light") },
         { uT("kind"), uT("Direction") },
-        { uT("diffuse"), 0xFFF0F0F0 }, // ARGB
+        { uT("color"), 0xFF808080 }, // ARGB
       }),
+    };
+  }
+
+  if (IsActive(Lights::Red))
+  {
+    Components += Object_t
+    {
       Component_t::Make(
       {
         { uT("type"), uT("Data") },
         { uT("kind"), uT("Position") },
-        { uT("x"), 3.0f },
-        { uT("y"), 2.0f },
-        { uT("z"), 2.0f },
+        { uT("x"), X },
+        { uT("y"), 0.0f },
+        { uT("z"), Z + m_CenterY },
       }),
       Component_t::Make(
       {
         { uT("type"), uT("Data") },
         { uT("kind"), uT("Attenuation") },
-        { uT("const"), 0.0f },
-        { uT("linear"), 0.0f },
-        { uT("exponent"), 0.5f },
+        { uT("const"), Const },
+        { uT("linear"), Linear },
+        { uT("exponent"), Exponent },
       }),
       Component_t::Make(
       {
         { uT("id"), uT("Example.Light.Point.1") },
         { uT("type"), uT("Light") },
         { uT("kind"), uT("Point") },
-        { uT("diffuse"), 0xFFFF0000 }, // ARGB
+        { uT("color"), 0xFFFF0000 }, // ARGB
       }),
+    };
+  }
+
+  if (IsActive(Lights::Green))
+  {
+    Components += Object_t
+    {
       Component_t::Make(
       {
         { uT("type"), uT("Data") },
         { uT("kind"), uT("Position") },
-        { uT("x"), 3.0f },
-        { uT("y"), 2.0f },
-        { uT("z"), -2.0f },
+        { uT("x"), X },
+        { uT("y"), Y },
+        { uT("z"), -Z + m_CenterY },
       }),
       Component_t::Make(
       {
         { uT("type"), uT("Data") },
         { uT("kind"), uT("Attenuation") },
-        { uT("const"), 0.0f },
-        { uT("linear"), 0.0f },
-        { uT("exponent"), 0.5f },
+        { uT("const"), Const },
+        { uT("linear"), Linear },
+        { uT("exponent"), Exponent },
       }),
       Component_t::Make(
       {
         { uT("id"), uT("Example.Light.Point.2") },
         { uT("type"), uT("Light") },
         { uT("kind"), uT("Point") },
-        { uT("diffuse"), 0xFF00FF00 }, // ARGB
+        { uT("color"), 0xFF00FF00 }, // ARGB
       }),
+    };
+  }
+
+  if (IsActive(Lights::Blue))
+  {
+    Components += Object_t
+    {
       Component_t::Make(
       {
         { uT("type"), uT("Data") },
         { uT("kind"), uT("Position") },
-        { uT("x"), 3.0f },
-        { uT("y"), -2.0f },
-        { uT("z"), 2.0f },
+        { uT("x"), X },
+        { uT("y"), -Y },
+        { uT("z"), -Z + m_CenterY },
       }),
       Component_t::Make(
       {
         { uT("type"), uT("Data") },
         { uT("kind"), uT("Attenuation") },
-        { uT("const"), 0.0f },
-        { uT("linear"), 0.0f },
-        { uT("exponent"), 0.5f },
+        { uT("const"), Const },
+        { uT("linear"), Linear },
+        { uT("exponent"), Exponent },
       }),
       Component_t::Make(
       {
         { uT("id"), uT("Example.Light.Point.3") },
         { uT("type"), uT("Light") },
         { uT("kind"), uT("Point") },
-        { uT("diffuse"), 0xFF0000FF }, // ARGB
+        { uT("color"), 0xFF0000FF }, // ARGB
       }),
+    };
+  }
 
-    });
+  const Id Id;
+
+  m_Objects[Id] = m_pRenders->Obtain(Components);
 
   return Id;
 }
@@ -218,11 +279,10 @@ auto Simple3DObject::BuildCamera(void) -> Id
       Component_t::Make(
       {
         { uT("id"), uT("Example.Camera.") + Id.GetStringId() },
-        { uT("type"), uT("Present") },
-        { uT("kind"), uT("Camera") },
-        { uT("focal"), uT("Enabled") },
-        { uT("dept"), uT("Enabled") },
-        { uT("distance"), 5.0f },
+        { uT("type"), uT("Camera") },
+        { uT("kind"), uT("Perspective") },
+        { uT("dept"), uT("Clear") },
+        { uT("distance"), 10.0f },
         { uT("angle"), 90.0f },
       })
     });
@@ -231,10 +291,10 @@ auto Simple3DObject::BuildCamera(void) -> Id
 }
 
 auto Simple3DObject::BuildCube(int _PolygonsFactor, float _Scale,
-  float _PositionX, float _PositionY) // положение относительно экранных координат
+  float _PositionX, float _PositionY) // РїРѕР»РѕР¶РµРЅРёРµ РѕС‚РЅРѕСЃРёС‚РµР»СЊРЅРѕ СЌРєСЂР°РЅРЅС‹С… РєРѕРѕСЂРґРёРЅР°С‚
   -> Id
 {
-  using Vertex_t = ::covellite::api::Vertex::Textured;
+  using Vertex_t = ::covellite::api::Vertex::Polyhedron;
 
   const Id Id;
 
@@ -292,19 +352,15 @@ auto Simple3DObject::BuildCube(int _PolygonsFactor, float _Scale,
     {
       Component_t::Make(
       {
-        { uT("id"), uT("Example.Shader.Data") },
         { uT("type"), uT("Data") },
         { uT("kind"), uT("Shader.HLSL") },
         { uT("version"), uT("ps_4_0") },
-        { uT("entry"), uT("psLighted") },
-        { uT("data"), ::Pixel.data() },
-        { uT("count"), ::Pixel.size() }
+        { uT("entry"), uT("psTextured") },
       }),
       Component_t::Make(
       {
         { uT("id"), uT("Example.Shader.Pixel.Cube") },
         { uT("type"), uT("Shader") },
-        { uT("kind"), uT("Pixel") },
       }),
       Component_t::Make(
       {
@@ -325,25 +381,20 @@ auto Simple3DObject::BuildCube(int _PolygonsFactor, float _Scale,
       }),
       Component_t::Make(
       {
-        { uT("id"), uT("Example.Shader.Data") },
         { uT("type"), uT("Data") },
         { uT("kind"), uT("Shader.HLSL") },
         { uT("version"), uT("vs_4_0") },
         { uT("entry"), uT("vsTextured") },
-        { uT("data"), ::Vertex.data() },
-        { uT("count"), ::Vertex.size() },
       }),
       Component_t::Make(
       {
         { uT("id"), uT("Example.Shader.Vertex.Cube") },
         { uT("type"), uT("Shader") },
-        { uT("kind"), Vertex_t::GetName() },
       }),
       Component_t::Make(
       {
         { uT("id"), uT("Example.Buffer.Vertex.Cube") },
         { uT("type"), uT("Buffer") },
-        { uT("kind"), Vertex_t::GetName() },
         { uT("data"), VertexData.data() },
         { uT("count"), VertexData.size() },
       }),
@@ -357,7 +408,6 @@ auto Simple3DObject::BuildCube(int _PolygonsFactor, float _Scale,
       }),
       Component_t::Make(
       {
-        { uT("id"), uT("Example.Data.Scale.") + Id.GetStringId() },
         { uT("type"), uT("Data") },
         { uT("kind"), uT("Scale") },
         { uT("x"), _Scale },
@@ -367,12 +417,81 @@ auto Simple3DObject::BuildCube(int _PolygonsFactor, float _Scale,
       m_pCubeRotation,
       Component_t::Make(
       {
-        { uT("id"), uT("Example.Data.Position.") + Id.GetStringId() },
         { uT("type"), uT("Data") },
         { uT("kind"), uT("Position") },
         { uT("x"), 0.0f },
         { uT("y"), -_PositionX },
         { uT("z"), _PositionY },
+      }),
+      Component_t::Make(
+      {
+        { uT("id"), uT("Example.Present.Geometry.") + Id.GetStringId() },
+        { uT("type"), uT("Present") },
+        { uT("kind"), uT("Geometry") },
+      })
+    });
+
+  return Id;
+}
+
+auto Simple3DObject::BuildCube2(float _Scale, 
+  float _PositionX, float _PositionY, float _PositionZ) -> Id
+{
+  const Id Id;
+
+  ::std::vector<int> IndexData =
+  {
+     0,  1,  2,   2,  1,  3,
+     4,  5,  6,   6,  5,  7,
+     8,  9, 10,  10,  9, 11,
+    12, 13, 14,  14, 13, 15,
+    16, 17, 18,  18, 17, 19,
+    20, 21, 22,  22, 21, 23,
+  };
+
+  m_Objects[Id] = m_pRenders->Obtain(
+    {
+      Component_t::Make(
+      {
+        { uT("id"), uT("Example.Shader.Pixel.Cube") },
+      }),
+      Component_t::Make(
+      {
+        { uT("id"), uT("Example.Material.Emission") },
+        { uT("type"), uT("Material") },
+        { uT("emission"), 0xFFFFFFFF },
+      }),
+      Component_t::Make(
+      {
+        { uT("id"), uT("Example.Shader.Vertex.Cube") },
+      }),
+      Component_t::Make(
+      {
+        { uT("id"), uT("Example.Buffer.Vertex.Cube") },
+      }),
+      Component_t::Make(
+      {
+        { uT("id"), uT("Example.Buffer.Index.Cube.") + Id.GetStringId() },
+        { uT("type"), uT("Buffer") },
+        { uT("kind"), uT("Index") },
+        { uT("data"), (const int *)IndexData.data() },
+        { uT("count"), IndexData.size() },
+      }),
+      Component_t::Make(
+      {
+        { uT("type"), uT("Data") },
+        { uT("kind"), uT("Scale") },
+        { uT("x"), _Scale },
+        { uT("y"), _Scale },
+        { uT("z"), _Scale },
+      }),
+      Component_t::Make(
+      {
+        { uT("type"), uT("Data") },
+        { uT("kind"), uT("Position") },
+        { uT("x"), _PositionX },
+        { uT("y"), _PositionY },
+        { uT("z"), _PositionZ },
       }),
       Component_t::Make(
       {

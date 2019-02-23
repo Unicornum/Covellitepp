@@ -97,7 +97,6 @@ TEST_F(Context_test, /*DISABLED_*/Test_Using)
 }
 
 // ************************************************************************** //
-// cppcheck-suppress syntaxError
 TEST_F(Context_test, /*DISABLED_*/Test_CreateContext_Fail)
 {
   using EglProxy_t = ::mock::EglProxy;

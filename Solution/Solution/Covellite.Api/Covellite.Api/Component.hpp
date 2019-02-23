@@ -54,6 +54,8 @@ public:
 
 public:
   template<class T>
+  bool IsType(const Name_t &) const;
+  template<class T>
   T GetValue(const Name_t &, const T &) const;
   template<class T>
   T GetValue(size_t, const T &) const;

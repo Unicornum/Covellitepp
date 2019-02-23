@@ -80,9 +80,6 @@
     <ClCompile Include="Test.Renderer\Renderer_test.windows.cpp">
       <Filter>Tests\Renderer</Filter>
     </ClCompile>
-    <ClCompile Include="..\Covellite.Api\Renderer\DirectX11.cpp">
-      <Filter>Tests\DirectX11</Filter>
-    </ClCompile>
     <ClCompile Include="..\Covellite.Api\Renderer\DxCheck.cpp">
       <Filter>Tests\DxCheck</Filter>
     </ClCompile>
@@ -109,9 +106,6 @@
     <ClInclude Include="mock.hpp" />
     <ClInclude Include="..\Covellite.Api\IWindow.hpp">
       <Filter>Tests\IWindow</Filter>
-    </ClInclude>
-    <ClInclude Include="..\Covellite.Api\Renderer\DirectX11.hpp">
-      <Filter>Tests\DirectX11</Filter>
     </ClInclude>
     <ClInclude Include="..\Covellite.Api\Renderer\DxCheck.hpp">
       <Filter>Tests\DxCheck</Filter>

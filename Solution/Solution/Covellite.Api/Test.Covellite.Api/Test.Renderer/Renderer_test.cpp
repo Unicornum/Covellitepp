@@ -72,7 +72,7 @@ bool operator== (
       ::covellite::any_cast<const int *>(_Right);
   }
 
-  using Vertex_t = ::covellite::api::Vertex::Gui;
+  using Vertex_t = ::covellite::api::Vertex::Polygon;
 
   if (_Left.type() == typeid(const Vertex_t *))
   {
@@ -97,7 +97,7 @@ protected:
   using Component_t = ::covellite::api::Component;
   using Renders_t = ::covellite::api::Component::Renders;
   using Values_t = ::std::vector<::covellite::Any_t>;
-  using Vertex_t = ::covellite::api::Vertex::Gui;
+  using Vertex_t = ::covellite::api::Vertex::Polygon;
 
   // Вызывается ПЕРЕД запуском каждого теста
   void SetUp(void) override

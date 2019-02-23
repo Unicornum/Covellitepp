@@ -62,29 +62,28 @@ inline Component::Component(const Params_t & _Params, ConstructorTag _Tag) :
   ::boost::ignore_unused(_Tag);
 }
 
-template<>
-class Component::Convertor<true>
+/**
+* \brief
+*  Функция проверки совпадения указанного типа с типом значения с указанным 
+*  именем.
+* \detail
+*  - Функция не проверяет возможность конвертации параметра в указанный тип.
+*  
+* \param [in] _Name
+*  Строковое имя проверяемого параметра.
+*
+* \return \b false
+*  - Тип параметра не совпадает с указанным.
+*  - У компонента нет параметра с указанным именем.
+*/
+template<class T>
+inline bool Component::IsType(const Name_t & _Name) const
 {
-public:
-  template<class T>
-  inline static T To(const String_t &)
-  {
-    // Функция никогда не вызывается, потребовалась исключительно из-за того,
-    // что ::boost::lexical_cast<T>() не компилируется для указателей.
-    return nullptr;
-  }
-};
+  auto itValue = m_Params.find(m_Hasher(_Name));
+  if (itValue == m_Params.end()) return false;
 
-template<>
-class Component::Convertor<false>
-{
-public:
-  template<class T>
-  inline static T To(const String_t & _Value)
-  {
-    return ::boost::lexical_cast<T>(_Value);
-  }
-};
+  return (itValue->second.type() == typeid(T));
+}
 
 /**
 * \brief
@@ -116,6 +115,30 @@ T Component::GetValue(const Name_t & _Name, const T & _DefaultValue) const
 {
   return GetValue(m_Hasher(_Name), _DefaultValue);
 }
+
+template<>
+class Component::Convertor<true>
+{
+public:
+  template<class T>
+  inline static T To(const String_t &)
+  {
+    // Функция никогда не вызывается, потребовалась исключительно из-за того,
+    // что ::boost::lexical_cast<T>() не компилируется для указателей.
+    return nullptr;
+  }
+};
+
+template<>
+class Component::Convertor<false>
+{
+public:
+  template<class T>
+  inline static T To(const String_t & _Value)
+  {
+    return ::boost::lexical_cast<T>(_Value);
+  }
+};
 
 /**
 * \brief

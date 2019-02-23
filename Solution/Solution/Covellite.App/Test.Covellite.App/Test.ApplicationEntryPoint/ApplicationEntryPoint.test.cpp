@@ -49,7 +49,6 @@ protected:
 // FRIEND_TEST(ApplicationEntryPoint_test, Test_Function);
 
 // ************************************************************************** //
-// cppcheck-suppress syntaxError
 TEST_F(ApplicationEntryPoint_test, /*DISABLED_*/Test_WinMain)
 {
   using ApplicationProxy_t = ::mock::covellite::app::Application::Proxy;

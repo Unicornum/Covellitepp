@@ -64,6 +64,3 @@ public:
 #include <Covellite/Core.mock.hpp>
 #include <Covellite/Core/Settings.mock.hpp>
 #include <Covellite/Os/Configuration.mock.hpp>
-
-#include "Mock/OpenGL.hpp"
-#include "Mock/DirectX11.hpp"

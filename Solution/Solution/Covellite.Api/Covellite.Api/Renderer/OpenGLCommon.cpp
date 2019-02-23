@@ -1,10 +1,11 @@
-
+п»ї
 #include "stdafx.h"
 #include "OpenGLCommon.hpp"
 #include <alicorn/cpp/math.hpp>
 #include <Covellite/Api/Vertex.hpp>
 #include "Component.hpp"
 #include "GLMath.hpp"
+#include "fx/Data.h"
 
 namespace covellite
 {
@@ -15,10 +16,120 @@ namespace api
 namespace renderer
 {
 
+class OpenGLCommon::Data final
+{
+  using CameraId_t = String_t;
+
+public:
+  template<class T>
+  T & Get(void) = delete;
+
+  void SetCameraId(const CameraId_t & _Id);
+
+private:
+  class ClearedLights
+  {
+  public:
+    void Clear(void)
+    {
+      memset(&m_Lights, 0x00, sizeof(m_Lights));
+    }
+
+  public:
+    ::Lights m_Lights;
+
+  public:
+    ClearedLights(void)
+    {
+      Clear();
+    }
+  };
+
+  ::std::map<CameraId_t, ClearedLights> m_Lights;
+  CameraId_t                            m_CurrentCameraId = uT("Unknown");
+};
+
+template<>
+inline ::Lights & OpenGLCommon::Data::Get(void) 
+{ 
+  return m_Lights[m_CurrentCameraId].m_Lights; 
+}
+
+void OpenGLCommon::Data::SetCameraId(const CameraId_t & _Id)
+{
+  m_CurrentCameraId = _Id;
+  const auto Lights = Get<::Lights>();
+  m_Lights[m_CurrentCameraId].Clear();
+
+  if (Lights.Ambient.IsValid == 0 &&
+    Lights.Direction.IsValid == 0 &&
+    Lights.Points.UsedSlotCount == 0)
+  {
+    glDisable(GL_LIGHTING);
+    return;
+  }
+
+  glEnable(GL_LIGHTING);
+  glEnable(GL_NORMALIZE);
+
+  static const GLfloat DefaultAmbientColor[] = { 0.0f, 0.0f, 0.0f, 0.0f };
+  glLightModelfv(GL_LIGHT_MODEL_AMBIENT, DefaultAmbientColor);
+
+  int Index = GL_LIGHT0;
+
+  auto SetLight = [&](
+    const Color_t & _Ambient, const Color_t & _Diffuse, const Color_t & _Specular,
+    const ::glm::vec4 & _Position = { 0.0f, 0.0f, 1.0f, 0.0f },
+    const ::glm::vec4 & _Attenuation = ::glm::vec4{ 1.0f, 0.0f, 0.0f, 0.0f })
+  {
+    glEnable(Index);
+    glLightfv(Index, GL_AMBIENT, _Ambient.data());
+    glLightfv(Index, GL_DIFFUSE, _Diffuse.data());
+    glLightfv(Index, GL_SPECULAR, _Specular.data());
+    glLightfv(Index, GL_POSITION, ::glm::value_ptr(_Position));
+    glLightf(Index, GL_CONSTANT_ATTENUATION, _Attenuation.x);
+    glLightf(Index, GL_LINEAR_ATTENUATION, _Attenuation.y);
+    glLightf(Index, GL_QUADRATIC_ATTENUATION, _Attenuation.z);
+    Index++;
+  };
+
+  static const auto DefaultColor = ARGBtoFloat4(0xFF000000);
+
+  if (Lights.Ambient.IsValid != 0)
+  {
+    const auto & Light = Lights.Ambient;
+
+    const auto Color = ARGBtoFloat4(Light.ARGBColor);
+    SetLight(Color, DefaultColor, DefaultColor);
+  }
+
+  if (Lights.Direction.IsValid != 0)
+  {
+    const auto & Light = Lights.Direction;
+
+    const auto Color = ARGBtoFloat4(Light.ARGBColor);
+    SetLight(DefaultColor, Color, Color, Light.Direction);
+  }
+
+  for (uint32_t i = 0; i < Lights.Points.UsedSlotCount; i++)
+  {
+    const auto & Light = Lights.Points.Lights[i];
+
+    const auto Color = ARGBtoFloat4(Light.ARGBColor);
+    SetLight(DefaultColor, Color, Color, Light.Position, Light.Attenuation);
+  }
+
+  while (glIsEnabled(Index) && Index < (GL_LIGHT0 + MAX_LIGHT_POINT_COUNT))
+  {
+    glDisable(Index++);
+  }
+}
+
 OpenGLCommon::OpenGLCommon(const Renderer::Data & _Data, const String_t & _PreVersion) :
   m_BackgroundColor(_Data.BkColor),
-  m_Top(_Data.Top),
-  m_PreVersion(_PreVersion)
+  m_Top{ _Data.Top },
+  m_PreVersion{ _PreVersion },
+  m_pData{ ::std::make_shared<Data>() }
 {
   m_Creators =
   {
@@ -27,6 +138,8 @@ OpenGLCommon::OpenGLCommon(const Renderer::Data & _Data, const String_t & _PreVe
         m_ServiceComponents.Add(_pComponent);
         return Render_t{};
       } },
+    { uT("Camera"), [&](const ComponentPtr_t & _pComponent)
+      { return CreateCamera(_pComponent); } },
     { uT("State"), [&](const ComponentPtr_t & _pComponent)
       { return CreateState(_pComponent); } },
     { uT("Light"), [&](const ComponentPtr_t & _pComponent)
@@ -64,13 +177,31 @@ void OpenGLCommon::ClearFrame(void) /*final*/
 
 void OpenGLCommon::ResizeWindow(int32_t _Width, int32_t _Height) /*final*/
 {
-  // (x, y) - левый нижний угол!
+  // (x, y) - Р»РµРІС‹Р№ РЅРёР¶РЅРёР№ СѓРіРѕР»!
   glViewport(0, 0, _Width, _Height - m_Top);
 }
 
 auto OpenGLCommon::GetCreators(void) const -> const Creators_t & /*override*/
 {
   return m_Creators;
+}
+
+auto OpenGLCommon::CreateCamera(const ComponentPtr_t & _pComponent) -> Render_t
+{
+  const auto CameraId = _pComponent->Id;
+  const auto Focal = _pComponent->GetValue(uT("focal"), uT("Disabled"));
+
+  const auto Camera = 
+    (_pComponent->Kind == uT("Perspective") || Focal == uT("Enabled")) ?
+    GetCameraFocal(_pComponent) :
+    GetCameraGui(_pComponent);
+
+  return [=](void)
+  {
+    Camera();
+
+    m_pData->SetCameraId(CameraId);
+  };
 }
 
 auto OpenGLCommon::CreateState(const ComponentPtr_t & _pComponent) -> Render_t
@@ -110,7 +241,7 @@ auto OpenGLCommon::CreateState(const ComponentPtr_t & _pComponent) -> Render_t
       GLint ViewPort[4] = { 0 };
       glGetIntegerv(GL_VIEWPORT, ViewPort);
 
-      // (x, y) - левый нижний угол!
+      // (x, y) - Р»РµРІС‹Р№ РЅРёР¶РЅРёР№ СѓРіРѕР»!
       glScissor(Rect.Left, ViewPort[3] - Rect.Bottom,
         Rect.Right - Rect.Left, Rect.Bottom - Rect.Top);
     };
@@ -136,10 +267,10 @@ auto OpenGLCommon::CreateState(const ComponentPtr_t & _pComponent) -> Render_t
 
 auto OpenGLCommon::CreateLight(const ComponentPtr_t & _pComponent) -> Render_t
 {
-  auto * pCurrentCameraId = &m_CurrentCameraId;
-  auto * pLights = &m_Lights;
-
-  const auto DefaultColor = 0xFF000000;
+  const auto GetColor = [=](void)
+  {
+    return _pComponent->GetValue(uT("color"), 0xFF000000);
+  };
 
   const auto ServiceComponents = m_ServiceComponents.Get(
     {
@@ -152,15 +283,10 @@ auto OpenGLCommon::CreateLight(const ComponentPtr_t & _pComponent) -> Render_t
   {
     return [=](void)
     {
-      Light Value;
-      Value.Ambient = ARGBtoFloat4(
-        _pComponent->GetValue(uT("ambient"), DefaultColor));
-      Value.Diffuse = ARGBtoFloat4(
-        _pComponent->GetValue(uT("diffuse"), DefaultColor));
-      Value.Specular = ARGBtoFloat4(
-        _pComponent->GetValue(uT("specular"), DefaultColor));
+      auto & Light = m_pData->Get<::Lights>().Ambient;
 
-      (*pLights)[*pCurrentCameraId].push_back(Value);
+      Light.IsValid = 1;
+      Light.ARGBColor = GetColor();
     };
   };
 
@@ -170,22 +296,14 @@ auto OpenGLCommon::CreateLight(const ComponentPtr_t & _pComponent) -> Render_t
 
     return [=](void)
     {
-      Light Value;
-      Value.Ambient = ARGBtoFloat4(
-        _pComponent->GetValue(uT("ambient"), DefaultColor));
-      Value.Diffuse = ARGBtoFloat4(
-        _pComponent->GetValue(uT("diffuse"), DefaultColor));
-      Value.Specular = ARGBtoFloat4(
-        _pComponent->GetValue(uT("specular"), DefaultColor));
+      const Component::Position Direction{ pDirection };
 
-      const Component::Position Data{ pDirection };
+      auto & Light = m_pData->Get<::Lights>().Direction;
 
-      Value.Position[0] = Data.X;
-      Value.Position[1] = Data.Y;
-      Value.Position[2] = Data.Z;
-      Value.Position[3] = 0.0f; // w == 0.0f - direction
-
-      (*pLights)[*pCurrentCameraId].push_back(Value);
+      Light.IsValid = 1;
+      Light.ARGBColor = GetColor();
+      Light.Direction = { Direction.X, Direction.Y, Direction.Z, 
+        0.0f }; // w == 0.0f - direction light
     };
   };
 
@@ -196,29 +314,32 @@ auto OpenGLCommon::CreateLight(const ComponentPtr_t & _pComponent) -> Render_t
 
     return [=](void)
     {
-      Light Value;
-      Value.Ambient = ARGBtoFloat4(
-        _pComponent->GetValue(uT("ambient"), DefaultColor));
-      Value.Diffuse = ARGBtoFloat4(
-        _pComponent->GetValue(uT("diffuse"), DefaultColor));
-      Value.Specular = ARGBtoFloat4(
-        _pComponent->GetValue(uT("specular"), DefaultColor));
+      const Component::Position Position{ pPosition };
 
-      const Component::Position Data{ pPosition };
+      auto & Lights = m_pData->Get<::Lights>().Points;
 
-      Value.Position[0] = Data.X;
-      Value.Position[1] = Data.Y;
-      Value.Position[2] = Data.Z;
-      Value.Position[3] =                   // w == 1.0f - point
-        pPosition->GetValue(uT("w"), 1.0f); // Такой сложный способ из-за того,
-                                            // что здесь должен быть 0.0f, если
-                                            // pPosition не задан.
+      if (Lights.UsedSlotCount >= MAX_LIGHT_POINT_COUNT)
+      {
+        // 04 РЇРЅРІР°СЂСЊ 2019 19:30 (unicornum.verum@gmail.com)
+        TODO("Р—Р°РїРёСЃСЊ РІ Р»РѕРі РёРЅС„РѕСЂРјР°С†РёРё РѕР± РёР·Р±С‹С‚РѕС‡РЅС‹С… РёСЃС‚РѕС‡РЅРёРєР°С… СЃРІРµС‚Р°.");
+        return;
+      }
 
-      Value.Const = pAttenuation->GetValue(uT("const"), 1.0f);
-      Value.Linear = pAttenuation->GetValue(uT("linear"), 0.0f);
-      Value.Exponent = pAttenuation->GetValue(uT("exponent"), 0.0f);
+      auto & Light = Lights.Lights[Lights.UsedSlotCount++];
 
-      (*pLights)[*pCurrentCameraId].push_back(Value);
+      Light.ARGBColor = GetColor();
+      Light.Position = { Position.X, Position.Y, Position.Z,
+        pPosition->GetValue(uT("w"), 1.0f) }; // w == 1.0f - point light
+                                            // РўР°РєРѕР№ СЃР»РѕР¶РЅС‹Р№ СЃРїРѕСЃРѕР± РёР·-Р·Р° С‚РѕРіРѕ,
+                                            // С‡С‚Рѕ Р·РґРµСЃСЊ РґРѕР»Р¶РµРЅ Р±С‹С‚СЊ 0.0f, РµСЃР»Рё
+                                            // pPosition РЅРµ Р·Р°РґР°РЅ.
+      Light.Attenuation = 
+      {
+        pAttenuation->GetValue(uT("const"), 1.0f),
+        pAttenuation->GetValue(uT("linear"), 0.0f),
+        pAttenuation->GetValue(uT("exponent"), 0.0f),
+        0.0f
+      };
     };
   };
 
@@ -247,7 +368,7 @@ auto OpenGLCommon::CreateMaterial(const ComponentPtr_t & _pComponent) -> Render_
 
   return [=](void)
   {
-    // GL_FRONT на Android'е вызывает ошибку!!!
+    // GL_FRONT РЅР° Android'Рµ РІС‹Р·С‹РІР°РµС‚ РѕС€РёР±РєСѓ!!!
     glMaterialfv(GL_FRONT_AND_BACK, GL_AMBIENT, Ambient.data());
     glMaterialfv(GL_FRONT_AND_BACK, GL_DIFFUSE, Diffuse.data());
     glMaterialfv(GL_FRONT_AND_BACK, GL_SPECULAR, Specular.data());
@@ -276,8 +397,8 @@ public:
     glGenTextures(1, &m_TextureId);
     glBindTexture(GL_TEXTURE_2D, m_TextureId);
 
-    // glTexImage2D копирует переданные данные в видеопамять, поэтому копировать
-    // их в промежуточный буфер не нужно.
+    // glTexImage2D РєРѕРїРёСЂСѓРµС‚ РїРµСЂРµРґР°РЅРЅС‹Рµ РґР°РЅРЅС‹Рµ РІ РІРёРґРµРѕРїР°РјСЏС‚СЊ, РїРѕСЌС‚РѕРјСѓ РєРѕРїРёСЂРѕРІР°С‚СЊ
+    // РёС… РІ РїСЂРѕРјРµР¶СѓС‚РѕС‡РЅС‹Р№ Р±СѓС„РµСЂ РЅРµ РЅСѓР¶РЅРѕ.
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA,
       Data.Width, Data.Height, 0,
       GL_RGBA, GL_UNSIGNED_BYTE, Data.pData);
@@ -312,7 +433,7 @@ auto OpenGLCommon::CreateBuffer(const ComponentPtr_t & _pBuffer) -> Render_t
 
   auto CreateVertexGuiBuffer = [&](void) -> Render_t
   {
-    using Vertex_t = ::covellite::api::Vertex::Gui;
+    using Vertex_t = ::covellite::api::Vertex::Polygon;
 
     const Component::Buffer<Vertex_t> Info{ pBufferData };
 
@@ -333,7 +454,7 @@ auto OpenGLCommon::CreateBuffer(const ComponentPtr_t & _pBuffer) -> Render_t
 
   auto CreateVertexTexturedBuffer = [&](void) -> Render_t
   {
-    using Vertex_t = ::covellite::api::Vertex::Textured;
+    using Vertex_t = ::covellite::api::Vertex::Polyhedron;
 
     const Component::Buffer<Vertex_t> Info{ pBufferData };
 
@@ -373,14 +494,16 @@ auto OpenGLCommon::CreateBuffer(const ComponentPtr_t & _pBuffer) -> Render_t
 
   using Vertex_t = ::covellite::api::Vertex;
 
-  ::std::map<String_t, ::std::function<Render_t(void)>> Creators =
+  if (pBufferData->IsType<const Vertex_t::Polygon *>(uT("data")))
   {
-    { Vertex_t::Gui::GetName(), CreateVertexGuiBuffer },
-    { Vertex_t::Textured::GetName(), CreateVertexTexturedBuffer },
-    { uT("Index"), CreateIndexBuffer },
-  };
+    return CreateVertexGuiBuffer();
+  }
+  else if (pBufferData->IsType<const Vertex_t::Polyhedron *>(uT("data")))
+  {
+    return CreateVertexTexturedBuffer();
+  }
 
-  return Creators[_pBuffer->Kind]();
+  return CreateIndexBuffer();
 }
 
 auto OpenGLCommon::CreatePresent(const ComponentPtr_t & _pComponent) -> Render_t
@@ -394,19 +517,9 @@ auto OpenGLCommon::CreatePresent(const ComponentPtr_t & _pComponent) -> Render_t
   return Creators[_pComponent->Kind]();
 }
 
-auto OpenGLCommon::CreateCamera(const ComponentPtr_t & _pComponent) -> Render_t
-{
-  const auto Focal = _pComponent->GetValue(uT("focal"), uT("Disabled"));
-
-  return (Focal == uT("Enabled")) ? 
-    GetCameraFocal(_pComponent) :
-    GetCameraGui(_pComponent);
-}
-
 auto OpenGLCommon::GetCameraCommon(const ComponentPtr_t & _pComponent) -> Render_t
 {
   const auto DeptRender = GetDeptRender(_pComponent);
-  const auto LightsRender = GetLightsRender(_pComponent);
 
   return [=](void)
   {
@@ -421,8 +534,6 @@ auto OpenGLCommon::GetCameraCommon(const ComponentPtr_t & _pComponent) -> Render
     glEnable(GL_CULL_FACE);
     glCullFace(GL_BACK);
     glFrontFace(GL_CCW);
-
-    LightsRender();
   };
 }
 
@@ -434,14 +545,14 @@ auto OpenGLCommon::GetCameraGui(const ComponentPtr_t & _pComponent) -> Render_t
   {
     CommonRender();
 
+    GLfloat Viewport[4] = { 0 };
+    glGetFloatv(GL_VIEWPORT, Viewport);
+
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
 
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
-
-    GLfloat Viewport[4] = { 0 };
-    glGetFloatv(GL_VIEWPORT, Viewport);
 
     glOrthof(Viewport[0], Viewport[0] + Viewport[2],
       Viewport[1] + Viewport[3], Viewport[1], -1.0f, 1.0f);
@@ -462,14 +573,14 @@ auto OpenGLCommon::GetCameraFocal(const ComponentPtr_t & _pComponent) -> Render_
   {
     CommonRender();
 
-    // ************************** Матрица проекции ************************** //
+    GLfloat Viewport[4] = { 0 };
+    glGetFloatv(GL_VIEWPORT, Viewport);
+
+    // ************************** РњР°С‚СЂРёС†Р° РїСЂРѕРµРєС†РёРё ************************** //
 
     const auto AngleY = _pComponent->GetValue(uT("angle"), 90.0f) *
       static_cast<float>(::alicorn::extension::cpp::math::GreedToRadian);
     const float zFar = 200.0f;
-
-    GLfloat Viewport[4] = { 0 };
-    glGetFloatv(GL_VIEWPORT, Viewport);
 
     const ::glm::mat4 Perspective = ::glm::perspectiveFovLH(AngleY,
       Viewport[2], Viewport[3], 0.01f, zFar);
@@ -477,18 +588,18 @@ auto OpenGLCommon::GetCameraFocal(const ComponentPtr_t & _pComponent) -> Render_
     glMatrixMode(GL_PROJECTION);
     glLoadMatrixf(::glm::value_ptr(Perspective));
 
-    // **************************** Матрица вида **************************** //
+    // **************************** РњР°С‚СЂРёС†Р° РІРёРґР° **************************** //
 
-    // Точка, куда смотрит камера - задается как компонент Data.Position.
+    // РўРѕС‡РєР°, РєСѓРґР° СЃРјРѕС‚СЂРёС‚ РєР°РјРµСЂР° - Р·Р°РґР°РµС‚СЃСЏ РєР°Рє РєРѕРјРїРѕРЅРµРЅС‚ Data.Position.
     const Component::Position Look{ ServiceComponents[0] };
 
     auto GetEye = [&](void) -> ::glm::vec3
     {
-      // Расстояние от камеры до Look.
+      // Р Р°СЃСЃС‚РѕСЏРЅРёРµ РѕС‚ РєР°РјРµСЂС‹ РґРѕ Look.
       const auto Distance = _pComponent->GetValue(uT("distance"), 0.0f) + 0.1f;
 
-      // Точка, где расположена камера - вычисляется на основе Look, Distance и
-      // компонента Data.Rotation.
+      // РўРѕС‡РєР°, РіРґРµ СЂР°СЃРїРѕР»РѕР¶РµРЅР° РєР°РјРµСЂР° - РІС‹С‡РёСЃР»СЏРµС‚СЃСЏ РЅР° РѕСЃРЅРѕРІРµ Look, Distance Рё
+      // РєРѕРјРїРѕРЅРµРЅС‚Р° Data.Rotation.
 
       const Component::Position Rot{ ServiceComponents[1] };
 
@@ -518,56 +629,27 @@ auto OpenGLCommon::GetCameraFocal(const ComponentPtr_t & _pComponent) -> Render_
 
 auto OpenGLCommon::GetDeptRender(const ComponentPtr_t & _pComponent) -> Render_t
 {
-  Render_t DeptEnable = [](void)
-  {
-    glEnable(GL_DEPTH_TEST);
-    glClear(GL_DEPTH_BUFFER_BIT);
-  };
-
   Render_t DeptDisable = [](void)
   {
     glDisable(GL_DEPTH_TEST);
   };
 
-  const auto Dept = _pComponent->GetValue(uT("dept"), uT("Disabled"));
-  return (Dept == uT("Enabled")) ? DeptEnable : DeptDisable;
-}
-
-auto OpenGLCommon::GetLightsRender(const ComponentPtr_t & _pComponent) -> Render_t
-{
-  auto * pCurrentCameraId = &m_CurrentCameraId;
-  auto * pLights = &m_Lights;
-  const auto CameraId = _pComponent->Id;
-
-  return [=](void)
+  Render_t DeptEnable = [](void)
   {
-    if ((*pLights)[CameraId].empty())
-    {
-      glDisable(GL_LIGHTING);
-    }
-    else
-    {
-      glEnable(GL_LIGHTING);
-    }
-
-    int Index = GL_LIGHT0;
-
-    for (const auto & Light : (*pLights)[CameraId])
-    {
-      glEnable(Index);
-      glLightfv(Index, GL_AMBIENT, Light.Ambient.data());
-      glLightfv(Index, GL_DIFFUSE, Light.Diffuse.data());
-      glLightfv(Index, GL_SPECULAR, Light.Specular.data());
-      glLightfv(Index, GL_POSITION, Light.Position);
-      glLightf(Index, GL_CONSTANT_ATTENUATION, Light.Const);
-      glLightf(Index, GL_LINEAR_ATTENUATION, Light.Linear);
-      glLightf(Index, GL_QUADRATIC_ATTENUATION, Light.Exponent);
-      Index++;
-    }
-
-    (*pLights)[CameraId].clear();
-    *pCurrentCameraId = CameraId;
+    glEnable(GL_DEPTH_TEST);
   };
+
+  Render_t DeptClear = [](void)
+  {
+    glEnable(GL_DEPTH_TEST);
+    glClear(GL_DEPTH_BUFFER_BIT);
+  };
+
+  const auto Dept = _pComponent->GetValue(uT("dept"), uT("Disabled"));
+  return 
+    (Dept == uT("Clear")) ? DeptClear :
+    (Dept == uT("Enabled")) ? DeptEnable : 
+    DeptDisable;
 }
 
 auto OpenGLCommon::CreateGeometry(const ComponentPtr_t &) -> Render_t
@@ -576,7 +658,7 @@ auto OpenGLCommon::CreateGeometry(const ComponentPtr_t &) -> Render_t
 
   auto CreatePosition = [&](const ComponentPtr_t & _pPosition)
   {
-    // OpenGL требует фомирования мартиц тансформации в обратном порядке!
+    // OpenGL С‚СЂРµР±СѓРµС‚ С„РѕРјРёСЂРѕРІР°РЅРёСЏ РјР°СЂС‚РёС† С‚Р°РЅСЃС„РѕСЂРјР°С†РёРё РІ РѕР±СЂР°С‚РЅРѕРј РїРѕСЂСЏРґРєРµ!
     PreRenders.push_front([=](void)
     {
       const Component::Position Data{ _pPosition };
@@ -589,19 +671,19 @@ auto OpenGLCommon::CreateGeometry(const ComponentPtr_t &) -> Render_t
 
   auto CreateRotation = [&](const ComponentPtr_t & _pRotation)
   {
-    // OpenGL требует фомирования мартиц тансформации в обратном порядке!
+    // OpenGL С‚СЂРµР±СѓРµС‚ С„РѕРјРёСЂРѕРІР°РЅРёСЏ РјР°СЂС‚РёС† С‚Р°РЅСЃС„РѕСЂРјР°С†РёРё РІ РѕР±СЂР°С‚РЅРѕРј РїРѕСЂСЏРґРєРµ!
     PreRenders.push_front([=](void)
     {
       const Component::Position Data{ _pRotation };
-      glRotatef(Data.X * RadianToGreed, 1.0f, 0.0f, 0.0f);
-      glRotatef(Data.Y * RadianToGreed, 0.0f, 1.0f, 0.0f);
       glRotatef(Data.Z * RadianToGreed, 0.0f, 0.0f, 1.0f);
+      glRotatef(Data.Y * RadianToGreed, 0.0f, 1.0f, 0.0f);
+      glRotatef(Data.X * RadianToGreed, 1.0f, 0.0f, 0.0f);
     });
   };
 
   auto CreateScale = [&](const ComponentPtr_t & _pScale)
   {
-    // OpenGL требует фомирования мартиц тансформации в обратном порядке!
+    // OpenGL С‚СЂРµР±СѓРµС‚ С„РѕРјРёСЂРѕРІР°РЅРёСЏ РјР°СЂС‚РёС† С‚Р°РЅСЃС„РѕСЂРјР°С†РёРё РІ РѕР±СЂР°С‚РЅРѕРј РїРѕСЂСЏРґРєРµ!
     PreRenders.push_front([=](void)
     {
       const Component::Position Data{ _pScale };
@@ -616,18 +698,15 @@ auto OpenGLCommon::CreateGeometry(const ComponentPtr_t &) -> Render_t
       { uT("Scale"), CreateScale },
     });
 
-  PreRenders.push_front([](void)
-  {
-    // Сохраняем в стеке матрицу вида, сформированную камерой, чтобы после
-    // рендеринга меша (при котором она будет домножена на матрицу 
-    // трансформации) можно было восстановить ее обратно.
-    glPushMatrix();
-  });
-
   const auto * pDrawElements = &m_DrawElements;
 
   return [=](void)
   {
+    // РЎРѕС…СЂР°РЅСЏРµРј РІ СЃС‚РµРєРµ РјР°С‚СЂРёС†Сѓ РІРёРґР°, СЃС„РѕСЂРјРёСЂРѕРІР°РЅРЅСѓСЋ РєР°РјРµСЂРѕР№, С‡С‚РѕР±С‹ РїРѕСЃР»Рµ
+    // СЂРµРЅРґРµСЂРёРЅРіР° РјРµС€Р° (РїСЂРё РєРѕС‚РѕСЂРѕРј РѕРЅР° Р±СѓРґРµС‚ РґРѕРјРЅРѕР¶РµРЅР° РЅР° РјР°С‚СЂРёС†Сѓ 
+    // С‚СЂР°РЅСЃС„РѕСЂРјР°С†РёРё) РјРѕР¶РЅРѕ Р±С‹Р»Рѕ РІРѕСЃСЃС‚Р°РЅРѕРІРёС‚СЊ РµРµ РѕР±СЂР°С‚РЅРѕ.
+    glPushMatrix();
+
     for (auto & Render : PreRenders) Render();
 
     (*pDrawElements)();
@@ -638,7 +717,7 @@ auto OpenGLCommon::CreateGeometry(const ComponentPtr_t &) -> Render_t
     glDisableClientState(GL_TEXTURE_COORD_ARRAY);
     glDisable(GL_TEXTURE_2D);
 
-    // Восстанавливаем матрицу вида, сформированную камерой.
+    // Р’РѕСЃСЃС‚Р°РЅР°РІР»РёРІР°РµРј РјР°С‚СЂРёС†Сѓ РІРёРґР°, СЃС„РѕСЂРјРёСЂРѕРІР°РЅРЅСѓСЋ РєР°РјРµСЂРѕР№.
     glPopMatrix();
   };
 }

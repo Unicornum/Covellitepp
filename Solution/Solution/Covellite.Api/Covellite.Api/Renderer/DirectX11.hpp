@@ -4,7 +4,6 @@
 #include "IGraphicApi.hpp"
 #include "Api.forward.hpp"
 #include "CapturingServiceComponent.hpp"
-#include "fx/Data.h"
 
 struct ID3D11Device;
 struct ID3D11DeviceContext;
@@ -65,6 +64,7 @@ private:
   void CreateDepthStencilView(int, int);
 
 private:
+  Render_t CreateCamera(const ComponentPtr_t &);
   Render_t CreateState(const ComponentPtr_t &);
   Render_t CreateLight(const ComponentPtr_t &);
   Render_t CreateMaterial(const ComponentPtr_t &);
@@ -72,23 +72,16 @@ private:
   Render_t CreateShader(const ComponentPtr_t &);
   Render_t CreateBuffer(const ComponentPtr_t &);
   Render_t CreatePresent(const ComponentPtr_t &);
-  Render_t CreateCamera(const ComponentPtr_t &);
   Render_t CreateGeometry(const ComponentPtr_t &);
 
 private:
   Render_t CreateBlendState(bool);
-  Render_t GetLightsRender(void);
   Render_t GetDeptRender(const ComponentPtr_t &);
   Renders_t GetPreRendersGeometry(void);
 
 private:
-  CapturingServiceComponent       m_ServiceComponents;
-  FLOAT                           m_BkColor[4];
-  Creators_t                      m_Creators;
-  ::Matrices                      m_Constants;
-  ::std::map<String_t, ::Lights>  m_Lights;
-  String_t                        m_CurrentCameraId;
-  ::Lights                        m_CurrentLights;
+  const ::std::vector<FLOAT>  m_BkColor;
+  Creators_t                  m_Creators;
 
 private:
   ComPtr_t<ID3D11Device>            m_pDevice;
@@ -96,12 +89,14 @@ private:
   ComPtr_t<IDXGISwapChain>          m_pSwapChain;
   ComPtr_t<ID3D11RenderTargetView>  m_pRenderTargetView;
   ComPtr_t<ID3D11DepthStencilView>  m_pDepthStencilView;
-  ComPtr_t<ID3D11Buffer>            m_pMatrices;
-  ComPtr_t<ID3D11Buffer>            m_pLights;
 
 private:
-  class Shader;
   class Buffer;
+  class Data;
+
+private:
+  ::std::shared_ptr<Data>     m_pData;
+  CapturingServiceComponent   m_ServiceComponents;
 
 public:
   explicit DirectX11(const Renderer::Data &);

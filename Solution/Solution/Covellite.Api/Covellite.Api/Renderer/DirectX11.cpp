@@ -5,14 +5,14 @@
 #include <alicorn/boost/lexical-cast.hpp>
 #include <Covellite/Api/Vertex.hpp>
 #include "DxCheck.hpp"
+#include "DirectX.hpp"
 #include "Component.hpp"
-#include "fx/Data.auto.hpp"
-#include "fx/Input.auto.hpp"
 
 #include <d3d11.h>
-#include <d3dcompiler.h>
+#include <directxmath.h>
 #pragma comment(lib, "d3d11.lib")
-#pragma comment(lib, "d3dcompiler.lib" )
+
+#include "fx/Hlsl.hpp"
 
 using namespace covellite::api::renderer;
 
@@ -30,7 +30,16 @@ private:
   class Support<::Matrices>
   {
   public:
-    static UINT GetFlag(void) { return D3D11_BIND_CONSTANT_BUFFER; }
+    inline static UINT GetFlag(void) { return D3D11_BIND_CONSTANT_BUFFER; }
+    inline static void SetConstantBuffer(
+      const ComPtr_t<ID3D11DeviceContext> & _pImmediateContext,
+      const ComPtr_t<ID3D11Buffer> & _pBuffer)
+    {
+      _pImmediateContext->VSSetConstantBuffers(
+        MATRICES_BUFFER_INDEX, 1, _pBuffer.GetAddressOf());
+      _pImmediateContext->PSSetConstantBuffers(
+        MATRICES_BUFFER_INDEX, 1, _pBuffer.GetAddressOf());
+    }
   };
 
   template<>
@@ -44,7 +53,16 @@ private:
   class Support<::Lights>
   {
   public:
-    static UINT GetFlag(void) { return D3D11_BIND_CONSTANT_BUFFER; }
+    inline static UINT GetFlag(void) { return D3D11_BIND_CONSTANT_BUFFER; }
+    inline static void SetConstantBuffer(
+      const ComPtr_t<ID3D11DeviceContext> & _pImmediateContext,
+      const ComPtr_t<ID3D11Buffer> & _pBuffer)
+    {
+      _pImmediateContext->VSSetConstantBuffers(
+        LIGHTS_BUFFER_INDEX, 1, _pBuffer.GetAddressOf());
+      _pImmediateContext->PSSetConstantBuffers(
+        LIGHTS_BUFFER_INDEX, 1, _pBuffer.GetAddressOf());
+    }
   };
 
   template<>
@@ -56,7 +74,7 @@ private:
 
 public:
   template<class T>
-  static ComPtr_t<ID3D11Buffer> Create(ComPtr_t<ID3D11Device> _pDevice,
+  static ComPtr_t<ID3D11Buffer> Create(const ComPtr_t<ID3D11Device> & _pDevice,
     const T * _pData, size_t _Count)
   {
     D3D11_BUFFER_DESC Desc = { 0 };
@@ -77,18 +95,105 @@ public:
     DX_CHECK _pDevice->CreateBuffer(&Desc, &InitData, &pBuffer);
     return pBuffer;
   }
+
+  template<class T>
+  static ComPtr_t<ID3D11Buffer> Create(
+    const ComPtr_t<ID3D11Device> & _pDevice, 
+    const ComPtr_t<ID3D11DeviceContext> & _pImmediateContext,
+    const T * _pData)
+  {
+    const auto pResult = Create(_pDevice, _pData, 1);
+    Support<T>::SetConstantBuffer(_pImmediateContext, pResult);
+    return pResult;
+  }
 };
 
-DirectX11::DirectX11(const Renderer::Data & _Data)
+class DirectX11::Data final
 {
-  m_BkColor[0] = _Data.BkColor.R;
-  m_BkColor[1] = _Data.BkColor.G;
-  m_BkColor[2] = _Data.BkColor.B;
-  m_BkColor[3] = _Data.BkColor.A;
+  using CameraId_t = String_t;
 
-  memset(&m_Constants, 0, sizeof(m_Constants));
+private:
+  template<class T>
+  class ConstantBuffer final
+  {
+  public:
+    T Data;
 
+  public:
+    void Update(void)
+    {
+      m_pImmediateContext->UpdateSubresource(
+        m_pBuffer.Get(), 0, NULL, &Data, 0, 0);
+    }
+
+  private:
+    const ComPtr_t<ID3D11DeviceContext> m_pImmediateContext;
+    const ComPtr_t<ID3D11Buffer> m_pBuffer;
+
+  public:
+    ConstantBuffer(const ComPtr_t<ID3D11Device> & _pDevice,
+      const ComPtr_t<ID3D11DeviceContext> & _pImmediateContext) :
+      m_pImmediateContext{ _pImmediateContext },
+      m_pBuffer{ Buffer::Create(_pDevice, _pImmediateContext, &Data) }
+    {
+      memset(&Data, 0, sizeof(Data));
+    }
+  };
+
+public:
+  template<class T>
+  T & Get(void) = delete;
+
+  template<class T>
+  void Update(void) = delete;
+
+  template<>
+  inline ::Matrices & Get(void) { return m_Matrices.Data; }
+
+  template<>
+  inline void Update<::Matrices>(void)
+  {
+    Get<::Matrices>().World =
+      ::DirectX::XMMatrixTranspose(Get<::Matrices>().World);
+
+    m_Matrices.Update();
+  }
+
+  void SetCameraId(const CameraId_t & _CameraId)
+  {
+    m_CurrentCameraId = _CameraId;
+    m_CurrentLights.Data = Get<::Lights>();
+
+    memset(&Get<::Lights>(), 0, sizeof(::Lights));
+  }
+
+  template<>
+  inline ::Lights & Get(void) { return m_Lights[m_CurrentCameraId]; }
+
+  template<>
+  inline void Update<::Lights>(void) { m_CurrentLights.Update(); }
+
+private:
+  ConstantBuffer<::Matrices>        m_Matrices;
+  ConstantBuffer<::Lights>          m_CurrentLights;
+  ::std::map<CameraId_t, ::Lights>  m_Lights;
+  CameraId_t                        m_CurrentCameraId;
+
+public:
+  Data(const ComPtr_t<ID3D11Device> & _pDevice,
+    const ComPtr_t<ID3D11DeviceContext> & _pImmediateContext) :
+    m_Matrices{ _pDevice, _pImmediateContext },
+    m_CurrentLights{ _pDevice, _pImmediateContext }
+  {
+  }
+};
+
+DirectX11::DirectX11(const Renderer::Data & _Data) :
+  m_BkColor{ _Data.BkColor.R, _Data.BkColor.G, _Data.BkColor.B, _Data.BkColor.A }
+{
   CreateDeviceAndSwapChain(_Data);
+
+  m_pData = ::std::make_shared<Data>(m_pDevice, m_pImmediateContext);
 
   m_Creators =
   {
@@ -99,6 +204,8 @@ DirectX11::DirectX11(const Renderer::Data & _Data)
         return Render_t{};
       } 
     },
+    { uT("Camera"), [&](const ComponentPtr_t & _pComponent)
+      { return CreateCamera(_pComponent); } },
     { uT("State"), [&](const ComponentPtr_t & _pComponent)
       { return CreateState(_pComponent); } },
     { uT("Light"), [&](const ComponentPtr_t & _pComponent)
@@ -125,7 +232,8 @@ DirectX11::String_t DirectX11::GetUsingApi(void) const /*override*/
 
 void DirectX11::ClearFrame(void) /*override*/
 {
-  m_pImmediateContext->ClearRenderTargetView(m_pRenderTargetView.Get(), m_BkColor);
+  m_pImmediateContext->ClearRenderTargetView(m_pRenderTargetView.Get(), 
+    m_BkColor.data());
 }
 
 void DirectX11::PresentFrame(void) /*override*/
@@ -257,6 +365,92 @@ void DirectX11::CreateDepthStencilView(int _Width, int _Height)
     &DeptStencilViewDesc, &m_pDepthStencilView);
 }
 
+auto DirectX11::CreateCamera(const ComponentPtr_t & _pComponent) -> Render_t
+{
+  const auto CameraId = _pComponent->Id;
+
+  const auto BlendDisabledRender = CreateBlendState(false);
+  const auto DeptRender = GetDeptRender(_pComponent);
+
+  const auto LightsRender = [=](void)
+  {
+    m_pData->SetCameraId(CameraId);
+  };
+
+  const Render_t CameraGui = [=](void)
+  {
+    BlendDisabledRender();
+    DeptRender();
+    LightsRender();
+
+    UINT ViewportCount = 1;
+    D3D11_VIEWPORT Viewport = { 0 };
+    m_pImmediateContext->RSGetViewports(&ViewportCount, &Viewport);
+
+    m_pData->Get<::Matrices>().Projection = ::DirectX::XMMatrixTranspose(
+      ::DirectX::XMMatrixOrthographicOffCenterLH(0.0f,
+        Viewport.Width, Viewport.Height, 0.0f, 1.0f, -1.0f));
+
+    m_pData->Get<::Matrices>().View = ::DirectX::XMMatrixTranspose(
+      ::DirectX::XMMatrixIdentity());
+  };
+
+  const auto ServiceComponents = m_ServiceComponents.Get(
+    {
+      { uT("Position"), api::Component::Make({}) },
+      { uT("Rotation"), api::Component::Make({}) },
+    });
+
+  const Render_t CameraFocal = [=](void)
+  {
+    BlendDisabledRender();
+    DeptRender();
+    LightsRender();
+
+    UINT ViewportCount = 1;
+    D3D11_VIEWPORT Viewport = { 0 };
+    m_pImmediateContext->RSGetViewports(&ViewportCount, &Viewport);
+
+    const auto AngleY = (float)::alicorn::extension::cpp::math::GreedToRadian *
+      _pComponent->GetValue(uT("angle"), 90.0f);
+    const auto AspectRatio = Viewport.Width / Viewport.Height;
+
+    m_pData->Get<::Matrices>().Projection = ::DirectX::XMMatrixTranspose(
+      ::DirectX::XMMatrixPerspectiveFovLH(
+        AngleY, AspectRatio, 0.01f, 200.0f));
+
+    // Точка, куда смотрит камера - задается как компонент 
+    // Transform.Position.
+    const Component::Position Pos{ ServiceComponents[0] };
+    const auto Look = ::DirectX::XMVectorSet(Pos.X, Pos.Y, Pos.Z, 1.0f);
+
+    // Расстояние от камеры до Look.
+    const auto Distance =
+      _pComponent->GetValue(uT("distance"), 0.0f) + 0.1f;
+
+    // Точка, где расположена камера - вычисляется на основе Look, Distance и
+    // компонента Transform.Rotation.
+    const Component::Position Rot{ ServiceComponents[1] };
+
+    auto Transform =
+      ::DirectX::XMMatrixRotationX(Rot.X) *
+      ::DirectX::XMMatrixRotationY(Rot.Y) *
+      ::DirectX::XMMatrixRotationZ(Rot.Z) *
+      ::DirectX::XMMatrixTranslation(Pos.X, Pos.Y, Pos.Z);
+    auto Eye = ::DirectX::XMVector3TransformCoord(
+      ::DirectX::XMVectorSet(Distance, 0.0f, 0.0f, 1.0f),
+      Transform);
+
+    m_pData->Get<::Matrices>().View = ::DirectX::XMMatrixTranspose(
+      ::DirectX::XMMatrixLookAtLH(Eye, Look,
+        ::DirectX::XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f)));
+  };
+
+  const auto Focal = _pComponent->GetValue(uT("focal"), uT("Disabled"));
+  return (_pComponent->Kind == uT("Perspective") || Focal == uT("Enabled")) ? 
+    CameraFocal : CameraGui;
+}
+
 auto DirectX11::CreateState(const ComponentPtr_t & _pComponent) -> Render_t
 {
   auto CreateSamplerState = [&](void)
@@ -329,8 +523,10 @@ auto DirectX11::CreateState(const ComponentPtr_t & _pComponent) -> Render_t
 
 auto DirectX11::CreateLight(const ComponentPtr_t & _pComponent) -> Render_t
 {
-  auto * const pLights = &m_Lights;
-  auto * const pCurrentCameraId = &m_CurrentCameraId;
+  const auto GetColor = [=](void)
+  {
+    return _pComponent->GetValue(uT("color"), 0xFF000000);
+  };
 
   const auto ServiceComponents = m_ServiceComponents.Get(
     {
@@ -343,11 +539,10 @@ auto DirectX11::CreateLight(const ComponentPtr_t & _pComponent) -> Render_t
   {
     return [=](void)
     {
-      auto & Color = (*pLights)[*pCurrentCameraId].Ambient.Color;
+      auto & Light = m_pData->Get<::Lights>().Ambient;
 
-      Color.ARGBAmbient = _pComponent->GetValue(uT("ambient"), 0xFF000000);
-      Color.ARGBDiffuse = _pComponent->GetValue(uT("diffuse"), 0xFF000000);
-      Color.ARGBSpecular = _pComponent->GetValue(uT("specular"), 0xFF000000);
+      Light.IsValid = 1;
+      Light.ARGBColor = GetColor();
     };
   };
 
@@ -357,14 +552,13 @@ auto DirectX11::CreateLight(const ComponentPtr_t & _pComponent) -> Render_t
 
     return [=](void)
     {
-      auto & Light = (*pLights)[*pCurrentCameraId].Direction;
+      auto & Light = m_pData->Get<::Lights>().Direction;
 
-      Light.Color.ARGBAmbient = _pComponent->GetValue(uT("ambient"), 0xFF000000);
-      Light.Color.ARGBDiffuse = _pComponent->GetValue(uT("diffuse"), 0xFF000000);
-      Light.Color.ARGBSpecular = _pComponent->GetValue(uT("specular"), 0xFF000000);
+      Light.IsValid = 1;
+      Light.ARGBColor = GetColor();
 
       const Component::Position Direction{ pDirection };
-      Light.Direction = { Direction.X, Direction.Y, Direction.Z };
+      Light.Direction = { Direction.X, Direction.Y, Direction.Z, 0.0f };
     };
   };
 
@@ -375,7 +569,9 @@ auto DirectX11::CreateLight(const ComponentPtr_t & _pComponent) -> Render_t
 
     return [=](void)
     {
-      auto & Lights = (*pLights)[*pCurrentCameraId].Points;
+      const Component::Position Position{ pPosition };
+
+      auto & Lights = m_pData->Get<::Lights>().Points;
 
       if (Lights.UsedSlotCount >= MAX_LIGHT_POINT_COUNT)
       {
@@ -386,18 +582,14 @@ auto DirectX11::CreateLight(const ComponentPtr_t & _pComponent) -> Render_t
 
       auto & Light = Lights.Lights[Lights.UsedSlotCount++];
 
-      Light.Color.ARGBAmbient = _pComponent->GetValue(uT("ambient"), 0xFF000000);
-      Light.Color.ARGBDiffuse = _pComponent->GetValue(uT("diffuse"), 0xFF000000);
-      Light.Color.ARGBSpecular = _pComponent->GetValue(uT("specular"), 0xFF000000);
-
-      const Component::Position Position{ pPosition };
-      Light.Position = { Position.X, Position.Y, Position.Z };
-
+      Light.ARGBColor = GetColor();
+      Light.Position = { Position.X, Position.Y, Position.Z, 1.0f };
       Light.Attenuation =
       {
         pAttenuation->GetValue(uT("const"), 1.0f),
         pAttenuation->GetValue(uT("linear"), 0.0f),
-        pAttenuation->GetValue(uT("exponent"), 0.0f)
+        pAttenuation->GetValue(uT("exponent"), 0.0f),
+        0.0f
       };
     };
   };
@@ -415,26 +607,20 @@ auto DirectX11::CreateLight(const ComponentPtr_t & _pComponent) -> Render_t
 auto DirectX11::CreateMaterial(const ComponentPtr_t & _pComponent) -> Render_t
 {
   ::Material Material = { 0 };
-
-  Material.Color.ARGBAmbient =
-    _pComponent->GetValue(uT("ambient"), 0xFF000000);
-  Material.Color.ARGBDiffuse =
-    _pComponent->GetValue(uT("diffuse"), 0xFF000000);
-  Material.Color.ARGBSpecular =
-    _pComponent->GetValue(uT("specular"), 0xFF000000);
-  Material.ARGBEmission =
-    _pComponent->GetValue(uT("emission"), 0xFF000000);
-  Material.Shininess =
-    _pComponent->GetValue(uT("shininess"), 0.0f);
+  Material.ARGBAmbient  = _pComponent->GetValue(uT("ambient"), 0xFF000000);
+  Material.ARGBDiffuse  = _pComponent->GetValue(uT("diffuse"), 0xFF000000);
+  Material.ARGBSpecular = _pComponent->GetValue(uT("specular"), 0xFF000000);
+  Material.ARGBEmission = _pComponent->GetValue(uT("emission"), 0xFF000000);
+  Material.Shininess    = _pComponent->GetValue(uT("shininess"), 0.0f);
 
   auto pBuffer = Buffer::Create(m_pDevice, &Material, 1);
 
   return [=](void)
   {
-    m_pImmediateContext->PSSetConstantBuffers(MATERIAL_BUFFER_INDEX, 1,
-      pBuffer.GetAddressOf());
-    //m_pImmediateContext->UpdateSubresource(
-    //  pBuffer.Get(), 0, NULL, &Material, 0, 0);
+    m_pImmediateContext->VSSetConstantBuffers(
+      MATERIAL_BUFFER_INDEX, 1, pBuffer.GetAddressOf());
+    m_pImmediateContext->PSSetConstantBuffers(
+      MATERIAL_BUFFER_INDEX, 1, pBuffer.GetAddressOf());
   };
 }
 
@@ -478,155 +664,76 @@ auto DirectX11::CreateTexture(const ComponentPtr_t & _pComponent) -> Render_t
   };
 }
 
-class DirectX11::Shader
-{
-  using Creator_t = ::std::function<Render_t(void)>;
-
-  template<class T>
-  class Layout; // Not implement!
-
-  template<>
-  class Layout<api::Vertex::Gui>
-  {
-  public:
-    static ::std::vector<D3D11_INPUT_ELEMENT_DESC> GetDesc(void)
-    {
-      return
-      {
-        { "POSITION", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-        { "COLOR",    0, DXGI_FORMAT_R32_UINT, 0, 8, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-        { "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-      };
-    }
-  };
-
-  template<>
-  class Layout<api::Vertex::Textured>
-  {
-  public:
-    static ::std::vector<D3D11_INPUT_ELEMENT_DESC> GetDesc(void)
-    {
-      return
-      {
-        { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-        { "NORMAL",   0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-        { "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 24, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-      };
-    }
-  };
-
-public:
-  static ComPtr_t<ID3DBlob> Compile(const ::std::vector<uint8_t> & _Data,
-    LPCSTR _pEntryPoint, LPCSTR _pTarget)
-  {
-    // 20 Ноябрь 2018 17:46 (unicornum.verum@gmail.com)
-    TODO("Повтор кода из реализации DirectX10");
-
-    using ::alicorn::extension::cpp::IS_RELEASE_CONFIGURATION;
-
-    const DWORD ShaderFlags = (IS_RELEASE_CONFIGURATION) ? 0 :
-      D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION;
-
-    ::Microsoft::WRL::ComPtr<ID3DBlob> pCompiledEffect;
-    ::Microsoft::WRL::ComPtr<ID3DBlob> pError;
-    auto Result = D3DCompile(_Data.data(), _Data.size(),
-      (::std::string("[Covellite::Api]: ") + _pEntryPoint).c_str(),
-      NULL, NULL, _pEntryPoint, _pTarget, ShaderFlags, 0,
-      &pCompiledEffect, &pError);
-    if (FAILED(Result))
-    {
-      throw STD_EXCEPTION << "Failed: " << Result <<
-        " [" << (char *)pError->GetBufferPointer() << "].";
-    }
-
-    return pCompiledEffect;
-  }
-
-  template<class T>
-  static Creator_t GetCreator(
-    const ComPtr_t<ID3D11Device> & _pDevice,
-    const ComPtr_t<ID3D11DeviceContext> & _pImmediateContext,
-    const ComPtr_t<ID3DBlob> & _pCompiledShader)
-  {
-    return [&](void)
-    {
-      const auto LayoutDesc = Layout<T>::GetDesc();
-
-      const auto * const pData = _pCompiledShader->GetBufferPointer();
-      const auto DataSize = _pCompiledShader->GetBufferSize();
-      
-      // 31 Декабрь 2018 10:55 (unicornum.verum@gmail.com)
-      TODO("Получение девайса из _pImmediateContext");
-
-      ComPtr_t<ID3D11InputLayout> pVertexLayout;
-      DX_CHECK _pDevice->CreateInputLayout(
-        LayoutDesc.data(), static_cast<UINT>(LayoutDesc.size()),
-        pData, DataSize,
-        &pVertexLayout);
-
-      ComPtr_t<ID3D11VertexShader> pVertexShader;
-      DX_CHECK _pDevice->CreateVertexShader(
-        pData, DataSize,
-        NULL, &pVertexShader);
-
-      return [=](void)
-      {
-        _pImmediateContext->IASetInputLayout(pVertexLayout.Get());
-        _pImmediateContext->VSSetShader(pVertexShader.Get(), NULL, 0);
-      };
-    };
-  }
-};
-
 auto DirectX11::CreateShader(const ComponentPtr_t & _pComponent) -> Render_t
 {
-  const Component::Shader ShaderData{
-    m_ServiceComponents.Get({ { uT("Shader.HLSL"), _pComponent } })[0] };
-
   using namespace ::alicorn::extension::std;
+
+  const auto pShaderData =
+    m_ServiceComponents.Get({ { uT("Shader.HLSL"), _pComponent } })[0];
+
+  const auto DefaultShaderData = ::Vertex + ::Pixel;
+
+  const Component::Shader ShaderData{ pShaderData, DefaultShaderData };
 
   const auto CompleteShaderData = ::Data + ::Input +
     ::std::vector<uint8_t>{ ShaderData.pData, ShaderData.pData + ShaderData.Count };
 
-  const auto pCompiledShader = Shader::Compile(CompleteShaderData,
+  const auto pCompiledShader = DirectX::Shader::Compile(CompleteShaderData,
     ShaderData.Entry.c_str(), ShaderData.Version.c_str());
 
-  const auto PixelShader = [&](void)
+  const auto VertexShader = 
+    [&](const ::std::vector<D3D11_INPUT_ELEMENT_DESC> & _LayoutDesc)
   {
-    ComPtr_t<ID3D11PixelShader> pPixelShader;
-    DX_CHECK m_pDevice->CreatePixelShader(
-      pCompiledShader->GetBufferPointer(), pCompiledShader->GetBufferSize(),
-      NULL, &pPixelShader);
+    const auto * const pData = pCompiledShader->GetBufferPointer();
+    const auto DataSize = pCompiledShader->GetBufferSize();
 
-    const auto LightsRender = GetLightsRender();
+    ComPtr_t<ID3D11InputLayout> pVertexLayout;
+    DX_CHECK m_pDevice->CreateInputLayout(
+      _LayoutDesc.data(), static_cast<UINT>(_LayoutDesc.size()),
+      pData, DataSize,
+      &pVertexLayout);
+
+    ComPtr_t<ID3D11VertexShader> pVertexShader;
+    DX_CHECK m_pDevice->CreateVertexShader(
+      pData, DataSize,
+      NULL, &pVertexShader);
 
     return [=](void)
     {
-      m_pImmediateContext->PSSetShader(pPixelShader.Get(), NULL, 0);
-
-      LightsRender();
+      m_pImmediateContext->IASetInputLayout(pVertexLayout.Get());
+      m_pImmediateContext->VSSetShader(pVertexShader.Get(), NULL, 0);
     };
   };
 
-  using Vertex_t = ::covellite::api::Vertex;
-
-  ::std::map<String_t, ::std::function<Render_t(void)>> Creators =
+  if (ShaderData.Kind == uT("Polygon"))
   {
-    { 
-      Vertex_t::Gui::GetName(), 
-      Shader::GetCreator<Vertex_t::Gui>(m_pDevice, m_pImmediateContext, pCompiledShader)
-    },
-    { 
-      Vertex_t::Textured::GetName(), 
-      Shader::GetCreator<Vertex_t::Textured>(m_pDevice, m_pImmediateContext, pCompiledShader)
-    },
-    { 
-      uT("Pixel"), 
-      PixelShader
-    },
-  };
+    return VertexShader(
+    {
+      { "POSITION", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+      { "COLOR",    0, DXGI_FORMAT_R32_UINT, 0, 8, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+      { "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+    });
+  }
+  else if (ShaderData.Kind == uT("Polyhedron"))
+  {
+    return VertexShader(
+    {
+      { "POSITION", 0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+      { "NORMAL",   0, DXGI_FORMAT_R32G32B32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+      { "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 24, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+    });
+  }
 
-  return Creators[_pComponent->Kind]();
+  ComPtr_t<ID3D11PixelShader> pPixelShader;
+  DX_CHECK m_pDevice->CreatePixelShader(
+    pCompiledShader->GetBufferPointer(), pCompiledShader->GetBufferSize(),
+    NULL, &pPixelShader);
+
+  return [=](void)
+  {
+    m_pImmediateContext->PSSetShader(pPixelShader.Get(), NULL, 0);
+    m_pData->Update<::Lights>();
+  };
 }
 
 auto DirectX11::CreateBuffer(const ComponentPtr_t & _pComponent) -> Render_t
@@ -636,66 +743,44 @@ auto DirectX11::CreateBuffer(const ComponentPtr_t & _pComponent) -> Render_t
   const auto pBufferData =
     m_ServiceComponents.Get({ { uT("Buffer"), _pComponent } })[0];
 
-  auto CreateVertexGuiBuffer = [&](void)
+  if (pBufferData->IsType<const Vertex_t::Polygon *>(uT("data")))
   {
-    const Component::Buffer<Vertex_t::Gui> VertexData{ pBufferData };
+    const Component::Buffer<Vertex_t::Polygon> VertexData{ pBufferData };
 
     auto pBuffer = Buffer::Create(m_pDevice, VertexData.pData, VertexData.Count);
 
     return [=](void)
     {
-      const UINT Stride = sizeof(Vertex_t::Gui);
-      const UINT Offset = 0;
-      m_pImmediateContext->IASetVertexBuffers(0, 1, 
-        pBuffer.GetAddressOf(), &Stride, &Offset);
-    };
-  };
-
-  auto CreateVertexTexturedBuffer = [&](void)
-  {
-    const Component::Buffer<Vertex_t::Textured> VertexData{ pBufferData };
-
-    auto pBuffer = Buffer::Create(m_pDevice, VertexData.pData, VertexData.Count);
-
-    return [=](void)
-    {
-      const UINT Stride = sizeof(Vertex_t::Textured);
+      const UINT Stride = sizeof(Vertex_t::Polygon);
       const UINT Offset = 0;
       m_pImmediateContext->IASetVertexBuffers(0, 1,
         pBuffer.GetAddressOf(), &Stride, &Offset);
     };
-  };
-
-  auto CreateIndexBuffer = [&](void)
+  }
+  else if (pBufferData->IsType<const Vertex_t::Polyhedron *>(uT("data")))
   {
-    const Component::Buffer<int> IndexData{ pBufferData };
+    const Component::Buffer<Vertex_t::Polyhedron> VertexData{ pBufferData };
 
-    auto pBuffer = Buffer::Create(m_pDevice, IndexData.pData, IndexData.Count);
+    auto pBuffer = Buffer::Create(m_pDevice, VertexData.pData, VertexData.Count);
 
     return [=](void)
     {
-      m_pImmediateContext->IASetIndexBuffer(
-        pBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);
+      const UINT Stride = sizeof(Vertex_t::Polyhedron);
+      const UINT Offset = 0;
+      m_pImmediateContext->IASetVertexBuffers(0, 1,
+        pBuffer.GetAddressOf(), &Stride, &Offset);
     };
-  };
+  }
 
-  ::std::map<String_t, ::std::function<Render_t(void)>> Creators =
+  const Component::Buffer<int> IndexData{ pBufferData };
+
+  auto pBuffer = Buffer::Create(m_pDevice, IndexData.pData, IndexData.Count);
+
+  return [=](void)
   {
-    { 
-      Vertex_t::Gui::GetName(),
-      CreateVertexGuiBuffer 
-    },
-    {
-      Vertex_t::Textured::GetName(),
-      CreateVertexTexturedBuffer
-    },
-    { 
-      uT("Index"), 
-      CreateIndexBuffer 
-    },
+    m_pImmediateContext->IASetIndexBuffer(
+      pBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);
   };
-
-  return Creators[_pComponent->Kind]();
 }
 
 auto DirectX11::CreatePresent(const ComponentPtr_t & _pComponent) -> Render_t
@@ -713,104 +798,6 @@ auto DirectX11::CreatePresent(const ComponentPtr_t & _pComponent) -> Render_t
   };
 
   return Creators[_pComponent->Kind]();
-}
-
-auto DirectX11::CreateCamera(const ComponentPtr_t & _pComponent) -> Render_t
-{
-  // 03 Январь 2019 17:48 (unicornum.verum@gmail.com)
-  TODO("Выделить в отдельный класс информацию о сцене и вынести ее в общий базовый класс");
-  auto * const pMatrices = &m_Constants;
-  auto * const pLights = &m_Lights;
-  auto * const pCurrentCameraId = &m_CurrentCameraId;
-  auto * const pCurrentLights = &m_CurrentLights;
-
-  const auto CameraId = _pComponent->Id;
-
-  const auto BlendDisabledRender = CreateBlendState(false);
-  const auto DeptRender = GetDeptRender(_pComponent);
-
-  const auto LightsRender = [=](void)
-  {
-    *pCurrentCameraId = CameraId;
-    *pCurrentLights = (*pLights)[CameraId];
-
-    ::Lights EmptyLights;
-    memset(&EmptyLights, 0, sizeof(EmptyLights));
-
-    (*pLights)[CameraId] = EmptyLights;
-  };
-
-  const Render_t CameraGui = [=](void)
-  {
-    BlendDisabledRender();
-    DeptRender();
-    LightsRender();
-
-    UINT ViewportCount = 1;
-    D3D11_VIEWPORT Viewport = { 0 };
-    m_pImmediateContext->RSGetViewports(&ViewportCount, &Viewport);
-
-    pMatrices->Projection = ::DirectX::XMMatrixTranspose(
-      ::DirectX::XMMatrixOrthographicOffCenterLH(0.0f,
-      Viewport.Width, Viewport.Height, 0.0f, 1.0f, -1.0f));
-
-    pMatrices->View = ::DirectX::XMMatrixTranspose(
-      ::DirectX::XMMatrixIdentity());
-  };
-
-  const auto ServiceComponents = m_ServiceComponents.Get(
-    {
-      { uT("Position"), api::Component::Make({}) },
-      { uT("Rotation"), api::Component::Make({}) },
-    });
-
-  const Render_t CameraFocal = [=](void)
-  {
-    BlendDisabledRender();
-    DeptRender();
-    LightsRender();
-
-    UINT ViewportCount = 1;
-    D3D11_VIEWPORT Viewport = { 0 };
-    m_pImmediateContext->RSGetViewports(&ViewportCount, &Viewport);
-
-    const auto AngleY = (float)::alicorn::extension::cpp::math::GreedToRadian *
-      _pComponent->GetValue(uT("angle"), 90.0f);
-    const auto AspectRatio = Viewport.Width / Viewport.Height;
-
-    pMatrices->Projection = ::DirectX::XMMatrixTranspose(
-      ::DirectX::XMMatrixPerspectiveFovLH(
-        AngleY, AspectRatio, 0.01f, 200.0f));
-
-    // Точка, куда смотрит камера - задается как компонент 
-    // Transform.Position.
-    const Component::Position Pos{ ServiceComponents[0] };
-    const auto Look = ::DirectX::XMVectorSet(Pos.X, Pos.Y, Pos.Z, 1.0f);
-
-    // Расстояние от камеры до Look.
-    const auto Distance =
-      _pComponent->GetValue(uT("distance"), 0.0f) + 0.1f;
-
-    // Точка, где расположена камера - вычисляется на основе Look, Distance и
-    // компонента Transform.Rotation.
-    const Component::Position Rot{ ServiceComponents[1] };
-
-    auto Transform =
-      ::DirectX::XMMatrixRotationX(Rot.X) *
-      ::DirectX::XMMatrixRotationY(Rot.Y) *
-      ::DirectX::XMMatrixRotationZ(Rot.Z) *
-      ::DirectX::XMMatrixTranslation(Pos.X, Pos.Y, Pos.Z);
-    auto Eye = ::DirectX::XMVector3TransformCoord(
-      ::DirectX::XMVectorSet(Distance, 0.0f, 0.0f, 1.0f),
-      Transform);
-
-    pMatrices->View = ::DirectX::XMMatrixTranspose(
-      ::DirectX::XMMatrixLookAtLH(Eye, Look,
-        ::DirectX::XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f)));
-  };
-
-  const auto Focal = _pComponent->GetValue(uT("focal"), uT("Disabled"));
-  return (Focal == uT("Enabled")) ? CameraFocal : CameraGui;
 }
 
 auto DirectX11::CreateGeometry(const ComponentPtr_t &) -> Render_t
@@ -863,49 +850,42 @@ auto DirectX11::CreateBlendState(bool _IsEnabled) -> Render_t
   };
 }
 
-auto DirectX11::GetLightsRender(void) -> Render_t
-{
-  auto * const pCurrentLights = &m_CurrentLights;
-
-  if (m_pLights == nullptr)
-  {
-    m_pLights = Buffer::Create(m_pDevice, pCurrentLights, 1);
-  }
-
-  return [=](void)
-  {
-    m_pImmediateContext->PSSetConstantBuffers(LIGHTS_BUFFER_INDEX, 1,
-      m_pLights.GetAddressOf());
-    m_pImmediateContext->UpdateSubresource(
-      m_pLights.Get(), 0, NULL, pCurrentLights, 0, 0);
-  };
-}
-
 auto DirectX11::GetDeptRender(const ComponentPtr_t & _pComponent) -> Render_t
 {
+  Render_t RenderDeptDisabled = [=](void)
+  {
+    m_pImmediateContext->OMSetRenderTargets(1,
+      m_pRenderTargetView.GetAddressOf(), nullptr);
+  };
+
   Render_t RenderDeptEnabled = [=](void)
   {
     m_pImmediateContext->OMSetRenderTargets(1, 
       m_pRenderTargetView.GetAddressOf(), m_pDepthStencilView.Get());
+  };
+
+  Render_t RenderDeptClear = [=](void)
+  {
+    RenderDeptEnabled();
     m_pImmediateContext->ClearDepthStencilView(m_pDepthStencilView.Get(),
       D3D11_CLEAR_DEPTH, 1.0f, 0);
   };
 
-  Render_t RenderDeptDisabled = [=](void)
-  {
-    m_pImmediateContext->OMSetRenderTargets(1, 
-      m_pRenderTargetView.GetAddressOf(), nullptr);
-  };
-
   const auto Dept = _pComponent->GetValue(uT("dept"), uT("Disabled"));
-  return (Dept == uT("Enabled")) ? RenderDeptEnabled : RenderDeptDisabled;
+  return 
+    (Dept == uT("Clear"))   ? RenderDeptClear :
+    (Dept == uT("Enabled")) ? RenderDeptEnabled : 
+    RenderDeptDisabled;
 }
 
 auto DirectX11::GetPreRendersGeometry(void) -> Renders_t
 {
   Renders_t Result;
 
-  auto * const pWorldViewProjection = &m_Constants;
+  Result.push_back([=](void)
+  {
+    m_pData->Get<::Matrices>().World = ::DirectX::XMMatrixIdentity();
+  });
 
   auto CreatePosition = [&](const ComponentPtr_t & _pPosition)
   {
@@ -913,7 +893,7 @@ auto DirectX11::GetPreRendersGeometry(void) -> Renders_t
     {
       const Component::Position Position{ _pPosition };
 
-      pWorldViewProjection->World *=
+      m_pData->Get<::Matrices>().World *=
         ::DirectX::XMMatrixTranslation(Position.X, Position.Y, Position.Z);
     });
   };
@@ -924,9 +904,9 @@ auto DirectX11::GetPreRendersGeometry(void) -> Renders_t
     {
       const Component::Position Rotation{ _pRotation };
 
-      pWorldViewProjection->World *= ::DirectX::XMMatrixRotationX(Rotation.X);
-      pWorldViewProjection->World *= ::DirectX::XMMatrixRotationY(Rotation.Y);
-      pWorldViewProjection->World *= ::DirectX::XMMatrixRotationZ(Rotation.Z);
+      m_pData->Get<::Matrices>().World *= ::DirectX::XMMatrixRotationX(Rotation.X);
+      m_pData->Get<::Matrices>().World *= ::DirectX::XMMatrixRotationY(Rotation.Y);
+      m_pData->Get<::Matrices>().World *= ::DirectX::XMMatrixRotationZ(Rotation.Z);
     });
   };
 
@@ -936,15 +916,10 @@ auto DirectX11::GetPreRendersGeometry(void) -> Renders_t
     {
       const Component::Position Scale{ _pScale };
 
-      pWorldViewProjection->World *=
+      m_pData->Get<::Matrices>().World *=
         ::DirectX::XMMatrixScaling(Scale.X, Scale.Y, Scale.Z);
     });
   };
-
-  Result.push_back([=](void)
-  {
-    pWorldViewProjection->World = ::DirectX::XMMatrixIdentity();
-  });
 
   m_ServiceComponents.Process(
     {
@@ -953,19 +928,9 @@ auto DirectX11::GetPreRendersGeometry(void) -> Renders_t
       { uT("Scale"), CreateScale },
     });
 
-  if (m_pMatrices == nullptr)
-  {
-    m_pMatrices = Buffer::Create(m_pDevice, &m_Constants, 1);
-  }
-
   Result.push_back([=](void)
   {
-    pWorldViewProjection->World =
-      ::DirectX::XMMatrixTranspose(pWorldViewProjection->World);
-    m_pImmediateContext->VSSetConstantBuffers(MATRICES_BUFFER_INDEX, 1,
-      m_pMatrices.GetAddressOf());
-    m_pImmediateContext->UpdateSubresource(
-      m_pMatrices.Get(), 0, NULL, pWorldViewProjection, 0, 0);
+    m_pData->Update<::Matrices>();
   });
 
   return Result;

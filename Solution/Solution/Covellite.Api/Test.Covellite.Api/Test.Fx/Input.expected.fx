@@ -4,26 +4,6 @@ cbuffer cbMatrices : register(BUFFER_INDEX(MATRICES_BUFFER_INDEX))
   const ::Matrices MatricesData;
 };
 
-/// [Input vertex shared structures]
-
-// Используется совместно с covellite::api::Vertex::Gui
-struct VertexGui
-{
-  float2 Position : POSITION;
-  uint Color : COLOR;
-  float2 TexCoord : TEXCOORD;
-};
-  
-// Используется совместно с covellite::api::Vertex::Textured
-struct VertexTextured
-{
-  float3 Position : POSITION;
-  float3 Normal : NORMAL;
-  float2 Texture : TEXCOORD;
-};
-
-/// [Input vertex shared structures]
-
 cbuffer cbMaterial : register(BUFFER_INDEX(MATERIAL_BUFFER_INDEX))
 {
   const ::Material MaterialData;
@@ -34,7 +14,28 @@ cbuffer cbLights : register(BUFFER_INDEX(LIGHTS_BUFFER_INDEX))
   const ::Lights LightsData;
 };
 
-struct PixelInput
+/// [Input vertex shared structures]
+
+// Входные данные вертексного шейдера (используется совместно с форматом
+// буфера для отрисовки плоских объектов).
+struct Polygon
+{
+  float2 Position : POSITION;
+  uint Color : COLOR;
+  float2 TexCoord : TEXCOORD;
+};
+  
+// Входные данные вертексного шейдера (используется совместно с форматом
+// буфера для отрисовки объемных объектов).
+struct Polyhedron
+{
+  float3 Position : POSITION;
+  float3 Normal : NORMAL;
+  float2 Texture : TEXCOORD;
+};
+  
+// Входные данные пиксельного шейдера
+struct Pixel
 {
   float4 ScreenPos : SV_POSITION;
   float4 Color : COLOR;
@@ -42,6 +43,8 @@ struct PixelInput
   float2 TexCoord : TEXCOORD0;
   float4 WorldPos : TEXCOORD1;
 };
+
+/// [Input vertex shared structures]
 
 float4 GetRGBAColor(uint _ARGB)
 {

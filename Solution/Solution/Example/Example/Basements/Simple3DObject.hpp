@@ -11,6 +11,7 @@ public:
   enum Id
   {
     Start = 0,
+    LightsChanged,
   };
 };
 
@@ -20,6 +21,19 @@ namespace { Simple3DObject_t Simple3DObject; }
 
 namespace basement
 {
+
+class Lights final
+{
+public:
+  enum Type
+  {
+    Ambient = 0,
+    Directional,
+    Red,
+    Green,
+    Blue,
+  };
+};
 
 /**
 * \ingroup ExampleBasementGroup
@@ -40,15 +54,20 @@ class Simple3DObject final :
   public Common
 {
 public:
+  void Notify(int, const ::boost::any &) override;
   void Render(void) override;
 
 private:
   Id BuildCamera(void);
+  Id BuildLights(int);
   Id BuildCube(int, float, float, float);
-  Id BuildLights(void);
+  Id BuildCube2(float, float, float, float);
 
 private:
   Component_t::ComponentPtr_t m_pCubeRotation;
+  const float m_CenterX = 0.0f;
+  const float m_CenterY = 1.6f;
+  ::std::vector<Id> m_Lights;
 
 public:
   Simple3DObject(const RendersPtr_t &, int, int);

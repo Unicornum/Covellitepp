@@ -48,7 +48,7 @@
     <ClCompile>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;_LIB;TESTDLL_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_ENABLE_EXTENDED_ALIGNED_STORAGE;WIN32;_CONSOLE;_LIB;TESTDLL_EXPORTS;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <DisableSpecificWarnings>4324;4996;26439;26444;26495</DisableSpecificWarnings>
       <SDLCheck>false</SDLCheck>
       <AdditionalOptions>/bigobj %(AdditionalOptions)</AdditionalOptions>
@@ -63,7 +63,7 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;_LIB;TESTDLL_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_ENABLE_EXTENDED_ALIGNED_STORAGE;WIN32;_CONSOLE;_LIB;TESTDLL_EXPORTS;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <DisableSpecificWarnings>4324;4996;26439;26444;26495</DisableSpecificWarnings>
       <SDLCheck>false</SDLCheck>
       <AdditionalOptions>/bigobj %(AdditionalOptions)</AdditionalOptions>
@@ -79,7 +79,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Covellite.Api\Renderer\CapturingServiceComponent.cpp" />
-    <ClCompile Include="..\Covellite.Api\Renderer\DirectX11.cpp" />
     <ClCompile Include="..\Covellite.Api\Renderer\DxCheck.cpp" />
     <ClCompile Include="..\Covellite.Api\Renders.cpp" />
     <ClCompile Include="stdafx.cpp">
@@ -103,7 +102,6 @@
   <ItemGroup>
     <ClInclude Include="..\Covellite.Api\Component.hpp" />
     <ClInclude Include="..\Covellite.Api\IWindow.hpp" />
-    <ClInclude Include="..\Covellite.Api\Renderer\DirectX11.hpp" />
     <ClInclude Include="..\Covellite.Api\Renderer\DxCheck.hpp" />
     <ClInclude Include="..\Covellite.Api\Renders.hpp" />
     <ClInclude Include="mock.hpp" />

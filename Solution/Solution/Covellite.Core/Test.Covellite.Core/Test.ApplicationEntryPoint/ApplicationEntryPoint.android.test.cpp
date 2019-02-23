@@ -53,7 +53,6 @@ protected:
 // FRIEND_TEST(ApplicationEntryPoint_test, Test_Function);
 
 // ************************************************************************** //
-// cppcheck-suppress syntaxError
 TEST_F(ApplicationEntryPoint_test, /*DISABLED_*/Test_AndroidMain)
 {
   using ApplicationProxy_t = ::mock::covellite::core::Application::Proxy;

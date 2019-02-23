@@ -503,7 +503,6 @@ TEST_F(Window_test, /*DISABLED_*/Test_AddLayer)
   LayerProxy_t::GetInstance() = &LayerProxy;
 
   const ::mock::Id_t EventHandlerId = 1710121212;
-  ::mock::Rocket::Core::ElementDocument Document;
   const ::mock::Id_t LayersId = 1710021315;
   const ::mock::Id_t LayerId = 1612211020;
 

@@ -1,4 +1,4 @@
-
+п»ї
 #include "stdafx.h"
 #include "Simple2DGame.hpp"
 #include <chrono>
@@ -6,11 +6,6 @@
 #include <alicorn/cpp/math.hpp>
 #include <alicorn/std/vector.hpp>
 #include <Covellite/Api/Component.inl>
-
-// 26 Ноябрь 2018 17:54 (unicornum.verum@gmail.com)
-TODO("Недопустимое обращение к файлам другого проекта.");
-#include <Covellite.Api/Covellite.Api/Renderer/fx/Pixel.auto.hpp>
-#include <Covellite.Api/Covellite.Api/Renderer/fx/Vertex.auto.hpp>
 
 using namespace basement;
 namespace math = ::alicorn::extension::cpp::math;
@@ -147,7 +142,7 @@ void Simple2DGame::Render(void) /*override*/
 
   Common::Render();
 
-  // Синхронизация в 60 fps 
+  // РЎРёРЅС…СЂРѕРЅРёР·Р°С†РёСЏ РІ 60 fps 
 
   using namespace ::std::chrono;
 
@@ -164,8 +159,8 @@ void Simple2DGame::Render(void) /*override*/
 
 void Simple2DGame::AddCommonComponents(void)
 {
-  // Создание общих рендеров, которые будут использоваться всеми объектами
-  // (объекты будут запрашивать эти рендеры по их id).
+  // РЎРѕР·РґР°РЅРёРµ РѕР±С‰РёС… СЂРµРЅРґРµСЂРѕРІ, РєРѕС‚РѕСЂС‹Рµ Р±СѓРґСѓС‚ РёСЃРїРѕР»СЊР·РѕРІР°С‚СЊСЃСЏ РІСЃРµРјРё РѕР±СЉРµРєС‚Р°РјРё
+  // (РѕР±СЉРµРєС‚С‹ Р±СѓРґСѓС‚ Р·Р°РїСЂР°С€РёРІР°С‚СЊ СЌС‚Рё СЂРµРЅРґРµСЂС‹ РїРѕ РёС… id).
 
   LoadTexture("bricks.jpg", uT("Simple2DGame.Texture"));
 
@@ -201,14 +196,11 @@ void Simple2DGame::AddCommonComponents(void)
         { uT("kind"), uT("Shader.HLSL") },
         { uT("version"), uT("ps_4_0") },
         { uT("entry"), uT("psTextured") },
-        { uT("data"), ::Pixel.data() },
-        { uT("count"), ::Pixel.size() }
       }),
       Component_t::Make(
       {
         { uT("id"), uT("Simple2DGame.Shader.Pixel.Textured") },
         { uT("type"), uT("Shader") },
-        { uT("kind"), uT("Pixel") },
       }),
       Component_t::Make(
       {
@@ -216,14 +208,11 @@ void Simple2DGame::AddCommonComponents(void)
         { uT("kind"), uT("Shader.HLSL") },
         { uT("version"), uT("ps_4_0") },
         { uT("entry"), uT("psColored") },
-        { uT("data"), ::Pixel.data() },
-        { uT("count"), ::Pixel.size() }
       }),
       Component_t::Make(
       {
         { uT("id"), uT("Simple2DGame.Shader.Pixel.Colored") },
         { uT("type"), uT("Shader") },
-        { uT("kind"), uT("Pixel") },
       }),
     });
 
@@ -240,8 +229,8 @@ void Simple2DGame::AddCamera(void)
       Component_t::Make(
       {
         { uT("id"), uT("Simple2DGame.Camera.") + Id.GetStringId() },
-        { uT("type"), uT("Present") },
-        { uT("kind"), uT("Camera") },
+        { uT("type"), uT("Camera") },
+        { uT("kind"), uT("Orthographic") },
       }),
       Component_t::Make(
       {
@@ -255,14 +244,11 @@ void Simple2DGame::AddCamera(void)
         { uT("kind"), uT("Shader.HLSL") },
         { uT("version"), uT("vs_4_0") },
         { uT("entry"), uT("VS") },
-        { uT("data"), ::Vertex.data() },
-        { uT("count"), ::Vertex.size() },
       }),
       Component_t::Make(
       {
         { uT("id"), uT("Simple2DGame.Shader.Vertex.Rectangle") },
         { uT("type"), uT("Shader") },
-        { uT("kind"), Vertex_t::GetName() },
       }),
     });
     
@@ -285,7 +271,7 @@ void Simple2DGame::AddClock(void)
 {
   LoadTexture("clock.png", uT("Simple2DGame.Texture.Clock"));
 
-  // Циферблат
+  // Р¦РёС„РµСЂР±Р»Р°С‚
 
   m_Scene.push_back(BuildRectangle(
     Rect{ -0.5f, -0.5f, 0.5f, 0.5f },
@@ -294,7 +280,7 @@ void Simple2DGame::AddClock(void)
     uT("Simple2DGame.Texture.Clock"),
     {}));
 
-  // Секундная стрелка
+  // РЎРµРєСѓРЅРґРЅР°СЏ СЃС‚СЂРµР»РєР°
 
   auto pSecondArrowRotation = Component_t::Make(
     {
@@ -317,7 +303,7 @@ void Simple2DGame::AddClock(void)
       pSecondArrowRotation
     }));
 
-  // Миллисекундная стрелка
+  // РњРёР»Р»РёСЃРµРєСѓРЅРґРЅР°СЏ СЃС‚СЂРµР»РєР°
 
   auto pMillisecondArrowRotation = Component_t::Make(
     {
@@ -340,7 +326,7 @@ void Simple2DGame::AddClock(void)
       pMillisecondArrowRotation
     }));
 
-  // Заглушка над центром стрелок
+  // Р—Р°РіР»СѓС€РєР° РЅР°Рґ С†РµРЅС‚СЂРѕРј СЃС‚СЂРµР»РѕРє
 
   m_Scene.push_back(BuildRectangle(
     Rect{ -0.03f, -0.03f, 0.03f, 0.03f },
@@ -555,7 +541,6 @@ auto Simple2DGame::BuildRectangle(
       {
         { uT("id"), uT("Simple2DGame.Buffer.Vertex.") + Id.GetStringId() },
         { uT("type"), uT("Buffer") },
-        { uT("kind"), Vertex_t::GetName() },
       }),
       Component_t::Make(
       {

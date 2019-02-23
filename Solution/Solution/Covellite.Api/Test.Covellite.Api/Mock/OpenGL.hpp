@@ -59,6 +59,7 @@ inline bool operator== (
 #define GL_VERSION                        0x1F02
 #define GL_FRONT_AND_BACK                 0x0408
 #define GL_DEPTH_BUFFER_BIT               0x00000100
+#define GL_NORMALIZE                      0x0BA1
 
 #define GL_LIGHT0                         0x4000
 #define GL_AMBIENT                        0x1200
@@ -70,6 +71,7 @@ inline bool operator== (
 #define GL_QUADRATIC_ATTENUATION          0x1209
 #define GL_EMISSION                       0x1600
 #define GL_SHININESS                      0x1601
+#define GL_LIGHT_MODEL_AMBIENT            0x0B53
 
 namespace mock
 {
@@ -85,6 +87,7 @@ using GLvoid = void;
 using GLuint = size_t;
 using GLfixed = int32_t;
 using GLubyte = unsigned char;
+using GLboolean = bool;
 
 class GLProxy :
   public ::alicorn::extension::testing::Proxy<GLProxy>
@@ -97,6 +100,7 @@ public:
 public:
   MOCK_METHOD0(GetError, GLenum (void));
   MOCK_METHOD1(Enable, void(GLenum));
+  MOCK_METHOD1(IsEnabled, GLboolean(GLenum));
   MOCK_METHOD1(Disable, void(GLenum));
   MOCK_METHOD2(Hint, void(GLenum, GLenum));
   MOCK_METHOD1(ShadeModel, void(GLenum));
@@ -134,6 +138,7 @@ public:
   MOCK_METHOD3(Materialfv, void (GLenum, GLenum, Floats_t));
   MOCK_METHOD3(Lightfv, void(GLenum, GLenum, Floats_t));
   MOCK_METHOD3(Lightf, void(GLenum, GLenum, GLfloat));
+  MOCK_METHOD2(LightModelfv, void(GLenum, Floats_t));
   MOCK_METHOD1(LoadMatrixf, void(::DirectX::XMFLOAT4X4));
 
 public:
@@ -173,6 +178,11 @@ GLenum glGetError(void)
 void glEnable(GLenum _Param)
 {
   GLProxy::GetInstance()->Enable(_Param);
+}
+
+GLboolean glIsEnabled(GLenum _Param)
+{
+  return GLProxy::GetInstance()->IsEnabled(_Param);
 }
 
 void glDisable(GLenum _Param)
@@ -444,6 +454,18 @@ void glLightf(GLenum _Index, GLenum _Name, GLfloat _Param)
   GLProxy::GetInstance()->Lightf(_Index, _Name, _Param);
 }
 
+void glLightModelfv(GLenum _Index, const GLfloat * _pParams)
+{
+  ::std::vector<float> Params;
+
+  for (int i = 0; i < 4; i++)
+  {
+    Params.push_back(*(_pParams + i));
+  }
+
+  GLProxy::GetInstance()->LightModelfv(_Index, Params);
+}
+
 void glLoadMatrixf(const GLfloat * _pMatrix)
 {
   ::DirectX::XMFLOAT4X4 Matrix4x4;
@@ -483,6 +505,7 @@ using ::mock::GLubyte;
 
 using ::mock::glGetError;
 using ::mock::glEnable;
+using ::mock::glIsEnabled;
 using ::mock::glDisable;
 using ::mock::glHint;
 using ::mock::glShadeModel;
@@ -518,8 +541,9 @@ using ::mock::glGetIntegerv;
 using ::mock::glGetFloatv;
 using ::mock::glMaterialfv;
 using ::mock::glLightfv;
-using ::mock::glLoadMatrixf;
 using ::mock::glLightf;
+using ::mock::glLightModelfv;
+using ::mock::glLoadMatrixf;
 
 } // namespace api
 

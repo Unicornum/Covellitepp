@@ -78,6 +78,11 @@ public:
     Count(_pComponent->GetValue(uT("count"), m_Data.size()))
   {
   }
+  Buffer(const ComponentPtr_t & _pComponent, const ::std::vector<T> & _Data) :
+    pData(_pComponent->GetValue(uT("data"), _Data.data())),
+    Count(_pComponent->GetValue(uT("count"), _Data.size()))
+  {
+  }
 };
 
 class Component::Texture :
@@ -101,18 +106,51 @@ class Component::Shader :
   public Buffer<uint8_t>
 {
 public:
-  const String_t Kind;
   const ::std::string Version;
   const ::std::string Entry;
+  const String_t Kind;
+
+private:
+  static String_t GetShaderType(const ::std::string & _Entry,
+    const uint8_t * _pBegin, const uint8_t * _pEnd)
+  {
+    // Определение типа шейдера, функция вернет строку типа параметра 
+    // функции точки входа шейдера.
+
+    const auto * pLastBreak = _pBegin;
+
+    while (true)
+    {
+      const auto * pBreak = ::std::find(pLastBreak, _pEnd, '\n');
+      if (pBreak == _pEnd)
+      {
+        throw STD_EXCEPTION << "Entry point not found: " << _Entry;
+      }
+
+      const ::std::string Line{ pLastBreak, pBreak };
+      const auto EntryPosition = Line.find(_Entry, 0);
+      if (EntryPosition != ::std::string::npos)
+      {
+        const auto TypeBegin = EntryPosition + _Entry.length() + 1;
+        const auto TypeEnd = Line.find(" ", TypeBegin);
+
+        using namespace ::alicorn::extension::std;
+
+        return string_cast<String, Locale::Ascii128>(
+          Line.substr(TypeBegin, TypeEnd - TypeBegin));
+      }
+
+      pLastBreak = pBreak + 1;
+    }
+  }
 
 public:
-  explicit Shader(const ComponentPtr_t & _pComponent) :
-    Buffer(_pComponent),
-    Kind(_pComponent->Kind),
+  Shader(const ComponentPtr_t & _pComponent, const ::std::vector<uint8_t> & _Data) :
+    Buffer(_pComponent, _Data),
     Version(_pComponent->GetValue<::std::string>(uT("version"), "fx_unknown")),
-    Entry(_pComponent->GetValue<::std::string>(uT("entry"), "Unknown"))
+    Entry(_pComponent->GetValue<::std::string>(uT("entry"), "Unknown")),
+    Kind(GetShaderType(Entry, pData, pData + Count))
   {
-
   }
 };
 

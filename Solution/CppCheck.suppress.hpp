@@ -8,5 +8,6 @@
 
 //*
 
-syntaxError:*\*_test.cpp
+syntaxError:*\*test.cpp
 unusedFunction:*\*_test.cpp
+functionStatic:*\Covellite.Gui\Test.Covellite.Gui\Mock\*.hpp

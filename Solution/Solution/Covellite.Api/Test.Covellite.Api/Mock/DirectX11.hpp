@@ -2,6 +2,7 @@
 #pragma once
 #include <string>
 #include <vector>
+#include <directxmath.h>
 #include <d3d11.h>
 #include <d3dcompiler.h>
 #include "../../Covellite.Api/Renderer/fx/Data.h"
@@ -128,24 +129,27 @@ inline bool operator== (
 }
 
 inline bool operator== (
-  const ::float3 & _Left,
-  const ::float3 & _Right)
+  const ::float4 & _Left,
+  const ::float4 & _Right)
 {
   return DirectX::operator== (_Left, _Right);
 }
 
 inline bool operator== (
-  const ::Color & _Left,
-  const ::Color & _Right)
+  const ::Light::Ambient & _Left,
+  const ::Light::Ambient & _Right)
 {
-  return DirectX::operator== (_Left, _Right);
+  if (!(_Left.IsValid == _Right.IsValid)) return false;
+  if (!(_Left.ARGBColor == _Right.ARGBColor)) return false;
+  return true;
 }
 
 inline bool operator== (
   const ::Light::Direction & _Left,
   const ::Light::Direction & _Right)
 {
-  if (!(_Left.Color == _Right.Color)) return false;
+  if (!(_Left.IsValid == _Right.IsValid)) return false;
+  if (!(_Left.ARGBColor == _Right.ARGBColor)) return false;
   if (!(_Left.Direction == _Right.Direction)) return false;
   return true;
 }
@@ -154,7 +158,7 @@ inline bool operator== (
   const ::Light::Point & _Left,
   const ::Light::Point & _Right)
 {
-  if (!(_Left.Color == _Right.Color)) return false;
+  if (!(_Left.ARGBColor == _Right.ARGBColor)) return false;
   if (!(_Left.Position == _Right.Position)) return false;
   if (!(_Left.Attenuation == _Right.Attenuation)) return false;
   return true;
@@ -164,7 +168,7 @@ inline bool operator== (
   const ::Lights & _Left,
   const ::Lights & _Right)
 {
-  if (!(_Left.Ambient.Color == _Right.Ambient.Color)) return false;
+  if (!(_Left.Ambient == _Right.Ambient)) return false;
   if (!(_Left.Direction == _Right.Direction)) return false;
   if (_Left.Points.UsedSlotCount != _Right.Points.UsedSlotCount) return false;
 
@@ -199,24 +203,23 @@ public:
   MOCK_METHOD0(Release, ULONG(void));
 
 public:
-
   MOCK_METHOD2(CreateBuffer, ID3D11Buffer *(D3D11_BUFFER_DESC, D3D11_SUBRESOURCE_DATA));
   MOCK_METHOD1(CreateMaterialBuffer, void(::Material));
 
   virtual HRESULT STDMETHODCALLTYPE CreateBuffer(
     /* [annotation] */
-    _In_  const D3D11_BUFFER_DESC *pDesc,
+    _In_  const D3D11_BUFFER_DESC * pDesc,
     /* [annotation] */
     _In_opt_  const D3D11_SUBRESOURCE_DATA * _pInitialData,
     /* [annotation] */
-    _Out_opt_  ID3D11Buffer **ppBuffer) 
+    _Out_opt_  ID3D11Buffer ** ppBuffer) 
   {
     const D3D11_SUBRESOURCE_DATA EmptyInitData = { 0 };
 
     const auto * pInitialData = (_pInitialData != nullptr) ?
       _pInitialData : &EmptyInitData;
 
-    if (_pInitialData->pSysMem != nullptr)
+    if (pInitialData->pSysMem != nullptr)
     {
       CreateMaterialBuffer(
         *reinterpret_cast<const ::Material *>(_pInitialData->pSysMem));

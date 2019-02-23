@@ -1,20 +1,31 @@
 
-#define ALIGN(Value)
-
 #ifdef __cplusplus
 
 #pragma once
-#include <directxmath.h>
+
 using uint = uint32_t;
-using float3 = ::DirectX::XMFLOAT3;
+
+#ifdef GLM_VERSION
+
+using float4 = ::glm::vec4;
+using float4x4 = ::glm::mat4;
+
+#elif defined DIRECTX_MATH_VERSION
+
+// Структуры, используемые шейдерами HLSL, выравниваются по 16 байт, поэтому
+// для корректной передачи данных здесь следует использовать только выровненные
+// структуры.
+using float4 = ::DirectX::XMFLOAT4A;
 using float4x4 = ::DirectX::XMMATRIX;
 
-#undef ALIGN
-#define ALIGN(Value) \
-  alignas(Value)
+#endif // DIRECTX_MATH_VERSION
+
+#if BOOST_COMP_MSVC
 
 #pragma warning(push)
 #pragma warning(disable: 4324)
+
+#endif // BOOST_COMP_MSVC
 
 #endif // __cplusplus
 
@@ -60,33 +71,11 @@ using float4x4 = ::DirectX::XMMATRIX;
 * \copyright
 *  © CTAPOBEP 2018
 */
-struct ALIGN(16) Matrices
+struct Matrices
 {
   float4x4 World;
   float4x4 View;
   float4x4 Projection;
-};
-
-/**
-* \ingroup CovelliteApiFxGroup
-* \brief
-*  Класс входит в проект \ref CovelliteApiPage \n
-*  Структура для передачи шейдеру компонентов цвета.
-*
-* \version
-*  1.0.0.0        \n
-* \date
-*  27 Декабрь 2018    \n
-* \author
-*  CTAPOBEP (unicornum.verum@gmail.com)
-* \copyright
-*  © CTAPOBEP 2018
-*/
-struct ALIGN(16) Color
-{
-  uint ARGBAmbient;
-  uint ARGBDiffuse;
-  uint ARGBSpecular;
 };
 
 /**
@@ -104,11 +93,14 @@ struct ALIGN(16) Color
 * \copyright
 *  © CTAPOBEP 2018
 */
-struct ALIGN(16) Material
+struct Material
 {
-  Color Color;
+  uint ARGBAmbient;
+  uint ARGBDiffuse;
+  uint ARGBSpecular;
   uint ARGBEmission;
   float Shininess;
+  float Align16bytes[3];
 };
 
 /**
@@ -145,9 +137,10 @@ namespace Light
 * \copyright
 *  © CTAPOBEP 2018
 */
-struct ALIGN(16) Ambient
+struct Ambient
 {
-  Color Color;
+  uint IsValid;
+  uint ARGBColor;
 };
 
 /**
@@ -165,10 +158,11 @@ struct ALIGN(16) Ambient
 * \copyright
 *  © CTAPOBEP 2018
 */
-struct ALIGN(16) Direction
+struct Direction
 {
-  Color Color;
-  float3 Direction;
+  uint IsValid;
+  uint ARGBColor;
+  float4 Direction;
 };
 
 /**
@@ -186,12 +180,12 @@ struct ALIGN(16) Direction
 * \copyright
 *  © CTAPOBEP 2018
 */
-struct ALIGN(16) Point
+struct Point
 {
-  Color Color;
-  float3 Position;
-  float3 Attenuation; // Const, Linear, Exponent;
-  uint Dummy;
+  uint ARGBColor;
+  uint Align16bytes;
+  float4 Position;
+  float4 Attenuation; // Const, Linear, Exponent;
 };
 
 /**
@@ -209,7 +203,7 @@ struct ALIGN(16) Point
 * \copyright
 *  © CTAPOBEP 2018
 */
-struct ALIGN(16) Points
+struct Points
 {
   Point Lights[MAX_LIGHT_POINT_COUNT];
   uint UsedSlotCount;
@@ -232,15 +226,17 @@ struct ALIGN(16) Points
 * \copyright
 *  © CTAPOBEP 2018
 */
-struct ALIGN(16) Lights
+struct Lights
 {
   ::Light::Ambient Ambient;
   ::Light::Direction Direction;
   ::Light::Points Points;
 };
 
-#undef ALIGN
-
 #ifdef __cplusplus
+
+#if BOOST_COMP_MSVC
 #pragma warning(pop)
+#endif // BOOST_COMP_MSVC
+
 #endif // __cplusplus

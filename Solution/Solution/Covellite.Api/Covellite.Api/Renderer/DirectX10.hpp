@@ -83,7 +83,6 @@ private:
 private:
   class Buffer;
   class Data;
-  class Shader;
 
 private:
   const ::std::vector<FLOAT>  m_BkColor;

@@ -27,9 +27,6 @@ public:
   };
 
 public:
-  const ::mock::Id_t m_Id;
-
-public:
   // Интерфейс Rocket::Core::RenderererInterface
   void RenderGeometry(Rocket::Core::Vertex *, int, int *, int,
     Rocket::Core::TextureHandle, const Rocket::Core::Vector2f &) override
@@ -81,7 +78,7 @@ public:
 
 public:
   explicit Renderer(const RendersPtr_t & _pRenders) :
-    m_Id(Proxy::GetInstance()->Constructor(_pRenders))
+    RenderInterface(Proxy::GetInstance()->Constructor(_pRenders))
   {
 
   }

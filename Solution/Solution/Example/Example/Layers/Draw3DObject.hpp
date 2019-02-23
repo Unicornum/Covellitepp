@@ -28,6 +28,7 @@ private:
   int m_LastFps = 999;
   int m_Polygons = 12;
   int m_CubesCount = 1;
+  int m_LightFlags = 0xFFFFFFFF; // Все включено
 
 public:
   explicit Draw3DObject(IWindowGui_t &);

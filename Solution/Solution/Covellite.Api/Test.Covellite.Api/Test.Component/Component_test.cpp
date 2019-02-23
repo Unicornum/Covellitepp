@@ -123,6 +123,47 @@ TEST_F(Component_test, /*DISABLED_*/Test_Kind)
 }
 
 // ************************************************************************** //
+TEST_F(Component_test, /*DISABLED_*/Test_IsType)
+{
+  int * pPointer = (int *)1902230922;
+  const int * pConstPointer = (int *)1902230923;
+
+  const auto pExample = Tested_t::Make({
+    {
+      { uT("Param1"), uT("Value1") },
+      { uT("Param2"), uT("true") },
+      { uT("Param3"), true },
+      { uT("Param4"), uT("12345") },
+      { uT("Param5"), 12345 },
+      { uT("Param6"), pPointer },
+      { uT("Param7"), pConstPointer },
+    } });
+
+  EXPECT_EQ(false, pExample->IsType<String_t>(uT("Param0")));
+  EXPECT_EQ(false, pExample->IsType<bool>(uT("Param0")));
+  EXPECT_EQ(false, pExample->IsType<int>(uT("Param0")));
+  EXPECT_EQ(true, pExample->IsType<String_t>(uT("Param1")));
+  EXPECT_EQ(false, pExample->IsType<bool>(uT("Param1")));
+  EXPECT_EQ(false, pExample->IsType<int>(uT("Param1")));
+  EXPECT_EQ(true, pExample->IsType<String_t>(uT("Param2")));
+  EXPECT_EQ(false, pExample->IsType<bool>(uT("Param2")));
+  EXPECT_EQ(false, pExample->IsType<int>(uT("Param2")));
+  EXPECT_EQ(false, pExample->IsType<String_t>(uT("Param3")));
+  EXPECT_EQ(true, pExample->IsType<bool>(uT("Param3")));
+  EXPECT_EQ(false, pExample->IsType<int>(uT("Param3")));
+  EXPECT_EQ(true, pExample->IsType<String_t>(uT("Param4")));
+  EXPECT_EQ(false, pExample->IsType<bool>(uT("Param4")));
+  EXPECT_EQ(false, pExample->IsType<int>(uT("Param4")));
+  EXPECT_EQ(false, pExample->IsType<String_t>(uT("Param5")));
+  EXPECT_EQ(false, pExample->IsType<bool>(uT("Param5")));
+  EXPECT_EQ(true, pExample->IsType<int>(uT("Param5")));
+  EXPECT_EQ(true, pExample->IsType<int *>(uT("Param6")));
+  EXPECT_EQ(false, pExample->IsType<const int *>(uT("Param6")));
+  EXPECT_EQ(false, pExample->IsType<int *>(uT("Param7")));
+  EXPECT_EQ(true, pExample->IsType<const int *>(uT("Param7")));
+}
+
+// ************************************************************************** //
 TEST_F(Component_test, /*DISABLED_*/Test_GetValue_StringName)
 {
   const auto pExample = Tested_t::Make({

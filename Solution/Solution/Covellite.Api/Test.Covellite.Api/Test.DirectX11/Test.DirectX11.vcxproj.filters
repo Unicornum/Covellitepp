@@ -18,7 +18,6 @@
       <Filter>Common</Filter>
     </ClCompile>
     <ClCompile Include="DirectX11_test.cpp" />
-    <ClCompile Include="..\..\Covellite.Api\Renderer\DirectX11.cpp" />
     <ClCompile Include="..\..\Covellite.Api\Renderer\DxCheck.cpp">
       <Filter>Source</Filter>
     </ClCompile>
@@ -30,6 +29,5 @@
     <ClInclude Include="stdafx.h">
       <Filter>Common</Filter>
     </ClInclude>
-    <ClInclude Include="..\..\Covellite.Api\Renderer\DirectX11.hpp" />
   </ItemGroup>
 </Project>

@@ -180,7 +180,7 @@ auto DirectX9::CreateBuffer(const ComponentPtr_t & _pComponent) const->Render_t
 {
   auto CreateVertexBuffer = [&](const ComponentPtr_t & _pComponent) -> Render_t
   {
-    const Component::Buffer<Vertex::Gui> Data{ _pComponent };
+    const Component::Buffer<Vertex::Polygon> Data{ _pComponent };
 
     class D3D9Vertex final
     {

@@ -17,6 +17,7 @@ body {
 
 headline,
 input#id_fps,
+.ligths,
 cube-info {
   display: block;
   position: absolute;
@@ -46,6 +47,29 @@ input#id_fps {
   header-width: 1px;
   header-color: grey;
 }
+
+.ligths {
+  top: 7 em;
+  margin-left: 0.5 em;
+  background-color: rgba(0, 0, 0, 0);
+  header-font-effect: outline;
+  header-width: 1px;
+  header-color: grey;
+}
+
+input.checkbox {
+  background-color: #808080;
+  border-width: 2px;
+  border-left-color: #c3c3c3;
+  border-top-color: #c3c3c3;
+  border-right-color: #565656;
+  border-bottom-color: #565656;
+  margin-right: 0.5 em;
+}
+
+  input.checkbox:checked {
+    background-color: #00ff21;
+  }
 
 cube-info {
   bottom: 0;

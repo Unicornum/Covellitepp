@@ -82,11 +82,13 @@
     <ClInclude Include="Renderer\Api.forward.hpp" />
     <ClInclude Include="Renderer\CapturingServiceComponent.hpp" />
     <ClInclude Include="Renderer\Component.hpp" />
+    <ClInclude Include="Renderer\DirectX.hpp" />
     <ClInclude Include="Renderer\DirectX10.hpp" />
     <ClInclude Include="Renderer\DirectX11.hpp" />
     <ClInclude Include="Renderer\DirectX9.hpp" />
     <ClInclude Include="Renderer\DxCheck.hpp" />
     <ClInclude Include="Renderer\fx\Data.h" />
+    <ClInclude Include="Renderer\fx\Hlsl.hpp" />
     <ClInclude Include="Renderer\GL.hpp" />
     <ClInclude Include="Renderer\GLMath.hpp" />
     <ClInclude Include="Renderer\IGraphicApi.hpp" />
@@ -104,6 +106,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Renderer\CapturingServiceComponent.cpp" />
+    <ClCompile Include="Renderer\DirectX.cpp" />
     <ClCompile Include="Renderer\DirectX10.cpp" />
     <ClCompile Include="Renderer\DirectX11.cpp" />
     <ClCompile Include="Renderer\DirectX9.cpp" />
