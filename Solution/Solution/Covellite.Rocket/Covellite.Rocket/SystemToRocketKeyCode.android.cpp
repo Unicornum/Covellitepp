@@ -1,5 +1,6 @@
 ﻿
-#include <Covellite\Rocket\Rocket.forward.hpp>
+#include <Covellite/Rocket/Rocket.forward.hpp>
+#include <Rocket/Core/Input.h>
 #include <map>
 
 namespace covellite

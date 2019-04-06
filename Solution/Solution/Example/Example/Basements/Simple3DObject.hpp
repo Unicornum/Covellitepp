@@ -61,16 +61,14 @@ private:
   Id BuildCamera(void);
   Id BuildLights(int);
   Id BuildCube(int, float, float, float);
-  Id BuildCube2(float, float, float, float);
 
 private:
   Component_t::ComponentPtr_t m_pCubeRotation;
-  const float m_CenterX = 0.0f;
-  const float m_CenterY = 1.6f;
   ::std::vector<Id> m_Lights;
 
 public:
   Simple3DObject(const RendersPtr_t &, int, int);
+  ~Simple3DObject(void);
 };
 
 } // namespace basement

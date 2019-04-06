@@ -49,6 +49,13 @@ Renderer::Renderer(const RendersPtr_t & _pRenders) :
 {
 }
 
+Renderer::~Renderer(void)
+{
+  // Рендеры общих компонентов не удаляются, т.к. они будут удалены вместе с
+  // уникальным (для объектв класса Renderer) объектом m_pRenders.
+  // m_pRenders->Remove(...);
+}
+
 void Renderer::RenderGeometry(
   Rocket::Core::Vertex * _pVertex, int _VertexCount,
   int * _pIndex, int _IndexCount,
@@ -205,7 +212,7 @@ void Renderer::EnableScissorRegion(bool _IsEnable) /*override*/
         { uT("id"), uT("Covellite.Api.State.Scissor.Disabled") },
         { uT("type"), uT("State") },
         { uT("kind"), uT("Scissor") },
-        { uT("is_enabled"), uT("false") }
+        { uT("enabled"), uT("false") }
       })
     });
 }
@@ -230,7 +237,7 @@ void Renderer::SetScissorRegion(int _X, int _Y, int _Width, int _Height) /*overr
         { uT("id"), uT("Covellite.Api.State.Scissor.Enabled") },
         { uT("type"), uT("State") },
         { uT("kind"), uT("Scissor") },
-        { uT("is_enabled"), uT("true") }
+        { uT("enabled"), uT("true") }
       }),
     });
 }
@@ -240,20 +247,35 @@ bool Renderer::LoadTexture(
   Rocket::Core::Vector2i & _TextureDimensions,
   const Rocket::Core::String & _PathToFile) /*override*/
 {
+  // В Android'e файлы грузятся из 'папки' assets, кроме того, возможно
+  // использование виртуальной файловой системы, поэтому exists использовать 
+  // НЕЛЬЗЯ!!!
+  //if (!::boost::filesystem::exists(_PathToFile.CString())) return false;
+
   // Один файл грузится один раз, оптимизировать загрузку не нужно.
 
   using namespace ::alicorn::source;
 
-  const image::Universal_t<image::pixel::RGBA> Image
+  try
   {
-    ::boost::filesystem::load_binary_file(_PathToFile.CString())
-  };
+    const image::Universal_t<image::pixel::RGBA> Image
+    {
+      ::boost::filesystem::load_binary_file(_PathToFile.CString())
+    };
 
-  _TextureDimensions.x = static_cast<int>(Image.GetData().Width);
-  _TextureDimensions.y = static_cast<int>(Image.GetData().Height);
+    _TextureDimensions.x = static_cast<int>(Image.GetData().Width);
+    _TextureDimensions.y = static_cast<int>(Image.GetData().Height);
 
-  return GenerateTexture(_hTexture,
-    Image.GetData().Buffer.data(), _TextureDimensions);
+    return GenerateTexture(_hTexture,
+      Image.GetData().Buffer.data(), _TextureDimensions);
+  }
+  catch (const ::std::exception &)
+  {
+    // Сюда попадаем, если нет файла текстуры или он имеет невалидый формат
+    // (записывать в лог ничего не нужно, это libRocket сделает самостоятельно).
+  }
+
+  return false;
 }
 
 bool Renderer::GenerateTexture(

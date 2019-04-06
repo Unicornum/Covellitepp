@@ -49,9 +49,11 @@ public:
 
 protected:
   const float m_FontSize;
+  const bool  m_IsStopBasements;
 
 protected:
-  Layer(IWindowGui_t &, const Path_t &, const String_t &, const String_t &);
+  Layer(IWindowGui_t &, const Path_t &, const String_t &, const String_t &,
+    const bool = false);
 };
 
 } // namespace layers

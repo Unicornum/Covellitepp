@@ -17,7 +17,7 @@ Description::Description(IWindowGui_t & _Window) :
 
   m_Events[Help.Text].Connect([&](const String & _Text)
   {
-    GetElement("id_description").SetMeaning(_Text + uT("<br/>") +
+    GetElement("id_main_description").SetMeaning(_Text + uT("<br/>") +
         uT("- Для возврата на предыдущий экран нажмите иконку в левой части ") +
         uT("заголовка или <p>[BACK]</p>.<br/>") +
         uT("- Для выхода из программы нажмите <p>[EXIT]</p>."));

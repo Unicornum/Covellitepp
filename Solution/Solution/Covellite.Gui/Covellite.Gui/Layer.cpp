@@ -4,7 +4,9 @@
 #include <boost/format.hpp>
 #include <alicorn/std/string.hpp>
 #include <alicorn/std/string-cast.hpp>
+#include <alicorn/boost/lexical-cast.hpp>
 #include <Covellite/Core/EventHandler.hpp>
+#include <Rocket/ProgressBar/ElementProgressBar.h>
 
 #ifdef max
 # undef max
@@ -57,7 +59,12 @@ void Layer::Element::SetMeaning(const String_t & _Meaning)
   // 06 Февраль 2019 13:27 (unicornum.verum@gmail.com)
   TODO("Проверить работу функции для textarea");
 
+  // 05 Март 2019 12:42 (unicornum.verum@gmail.com)
+  TODO("Тест для progressbar и circularbar.");
+
   if (Tag == "textarea" ||
+    Tag == "progressbar" ||
+    Tag == "circularbar" ||
     (Tag == "input" && (Type == "range" || Type == "text")))
   {
     auto & Control =
@@ -119,6 +126,8 @@ auto Layer::Element::GetMeaning(void) const -> String_t
 * \details
 *  - Устанавливается класс стиля, который должен быть предварительно описан
 *  в .rcss файле (с точкой).
+*  - Для скрытия элемента установить ему класс, у которого задан параметр
+*  'visibility: hidden;'.
 *
 * \param [in] _Class
 *  Имя класса (без точки).

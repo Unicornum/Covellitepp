@@ -2,6 +2,7 @@
 #pragma once
 #include <Covellite\Core\IWindow.hpp>
 #include <Covellite\Gui\IWindow.hpp>
+#include <Covellite\Gui\ILayer.hpp>
 
 /*
 An example of use:
@@ -42,7 +43,8 @@ namespace gui
 {
 
 class Layer :
-  public ::covellite::core::IWindow
+  public ::covellite::core::IWindow,
+  public ::covellite::gui::ILayer
 {
   using Utf8String_t = ::std::string;
   using DocumentId_t = ::std::string;

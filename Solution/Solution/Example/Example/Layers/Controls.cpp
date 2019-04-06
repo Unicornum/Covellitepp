@@ -126,10 +126,8 @@ Controls::Controls(IWindowGui_t & _Window) :
     m_IsSoundEnabled = !m_IsSoundEnabled;
 
     GetElement("id_sound_enabled").SetMeaning(
-      // cppcheck-suppress duplicateExpressionTernary
       m_IsSoundEnabled ? uT("\uF205") : uT("\uF204"));
     GetElement("id_sound_enabled_value").SetMeaning(
-      // cppcheck-suppress duplicateExpressionTernary
       m_IsSoundEnabled ? uT("Включен") : uT("Выключен"));
   });
 

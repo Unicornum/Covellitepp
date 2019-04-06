@@ -2,8 +2,6 @@
 
 set PathToExternals=.\Solution\Solution\Externals
 
-call %PathToExternals%\MsBuild.auto.cmd
-
 FOR /F "usebackq delims=:/ tokens=1,3*" %%i IN (`svn info`) DO (
 if "%%i"=="Relative URL" (
 if "%%j"=="trunk" goto DoRelease
@@ -11,6 +9,9 @@ if "%%j"=="release" goto DoRelease
 if "%%j"=="tag" goto DoMaster
 if "%%j"=="master" goto DoMaster
 echo Unexpected branch: %%j
+echo Valid branch:
+echo   trunk or release - Debug and Release build configurations
+echo   master or tag - Debug.Product and Release.Product build configurations
 )
 )
 

@@ -76,7 +76,7 @@ private:
 
 private:
   Render_t CreateBlendState(bool);
-  Render_t GetDeptRender(const ComponentPtr_t &);
+  Render_t GetDepthState(bool, bool);
   Renders_t GetPreRendersGeometry(void);
 
 private:

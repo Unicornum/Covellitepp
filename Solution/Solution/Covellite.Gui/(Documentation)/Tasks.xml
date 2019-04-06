@@ -13,22 +13,16 @@
     </Task1>
   </Process>
   <Complete>
-    <Week6213>
-      <Task6 Text="Класс Layer." Type="Red" Version="None" ExternalProgram="None" Expanded="false" Completed="true" History="false" ParentTaskText="false">
-        <Task7 Text="Устаревшие функции помечены как deprecated." Type="None" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
-        <Task8 Text="Функция EmployFontSize()." Type="None" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
-        <Task9 Text="Функция SetMeaning()." Type="None" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
-        <Task10 Text="Функция GetMeaning()." Type="None" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
-        <Task11 Text="Функция SetClassStyle()." Type="None" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
-        <Task12 Text="Изменение логики работы функции GetMeaning()." Type="None" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
-        <Task13 Text="Изменение логики работы функции SetMeaning()." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
-      </Task6>
-      <Task14 Text="Изменение логики работы класса ClickEventListener + обработка события change." Type="Red" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="false"/>
-      <Task15 Text="Переименование класса-обработчика событий." Type="Red" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="false"/>
-      <Task19 Text="Подписка на событие изменения элемента Gui." Type="Red" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="true" ParentTaskText="false"/>
-    </Week6213>
-    <Week6212/>
-    <Week6211/>
-    <Week6210/>
+    <Week6221>
+      <Task13 Text="Ошибка при загрузке текстур на Android'e." Type="Bug" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="true" ParentTaskText="false"/>
+    </Week6221>
+    <Week6220/>
+    <Week6219>
+      <Task8 Text="Падение программы при закрытии окна, если в .rcss файле был использован несуществующий файл изображения." Type="Bug" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="true" ParentTaskText="false"/>
+      <Task9 Text="В стеке слоев может одновременно содержаться только один слой одного и того же класса." Type="Red" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="true" ParentTaskText="false"/>
+      <Task10 Text="Запись в лог информации о вставке/удалении слоев." Type="Red" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="true" ParentTaskText="false"/>
+      <Task11 Text="Событие НАЖАТИЯ кнопки Gui." Type="Red" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="true" ParentTaskText="false"/>
+    </Week6219>
+    <Week6218/>
   </Complete>
 </Tasks>

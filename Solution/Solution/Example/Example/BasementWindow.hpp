@@ -5,28 +5,29 @@
 
 namespace basement { class IBasement; }
 
-// 10 Февраль 2019 19:06 (unicornum.verum@gmail.com)
-TODO("Требуется более подходящее название класса.");
 /**
 * \ingroup ExampleGroup
 * \brief
 *  Класс входит в проект \ref ExamplePage \n
-*  Простой пример класса промежуточного кода.
+*  Промежуточный класс окна отрисовки 3D сцены.
 *  
 * \version
 *  1.0.0.0        \n
+*  2.0.0.0        \n
 * \date
 *  04 Ноябрь 2017    \n
+*  11 Март 2019    \n
 * \author
 *  CTAPOBEP (unicornum.verum@gmail.com)
 * \copyright
-*  © CTAPOBEP 2017
+*  © CTAPOBEP 2017 - 2019
 */
-class ExtraWindow final :
+class BasementWindow final :
   public ::covellite::app::IWindow
 {
   using Events_t = ::covellite::events::Events;
   using WindowApi_t = ::covellite::api::IWindow;
+  using BasementPtr_t = ::std::shared_ptr<::basement::IBasement>;
 
 public:
   operator const WindowApi_t & (void) const;
@@ -34,8 +35,8 @@ public:
 private:
   const WindowApi_t & m_WindowApi;
   Events_t            m_Events;
-  ::std::shared_ptr<::basement::IBasement> m_pBasement;
+  BasementPtr_t       m_pBasement;
 
 public:
-  explicit ExtraWindow(const WindowApi_t &);
+  explicit BasementWindow(const WindowApi_t &);
 };

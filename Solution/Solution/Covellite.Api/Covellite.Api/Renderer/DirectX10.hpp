@@ -75,7 +75,7 @@ private:
 
 private:
   Render_t CreateBlendState(bool);
-  Render_t CreateDeptRender(const ComponentPtr_t &);
+  Render_t GetDepthState(bool, bool);
   Render_t CreateCamera(const ComponentPtr_t &);
   Render_t CreateGeometry(const ComponentPtr_t &);
   Renders_t CreatePreRendersGeometry(void);

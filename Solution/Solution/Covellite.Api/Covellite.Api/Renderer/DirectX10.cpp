@@ -48,9 +48,6 @@ public:
     static void SetConstantBuffer(const ComPtr_t<ID3D10Device> & _pDevice,
       const ComPtr_t<ID3D10Buffer> & _pBuffer)
     {
-      const auto FloatSize = sizeof(float);
-      const auto Size = sizeof(::Lights::Direction);
-
       _pDevice->VSSetConstantBuffers(
         LIGHTS_BUFFER_INDEX, 1, _pBuffer.GetAddressOf());
       _pDevice->PSSetConstantBuffers(
@@ -383,7 +380,7 @@ void DirectX10::SetViewport(int _Width, int _Height)
 
 auto DirectX10::CreateState(const ComponentPtr_t & _pComponent) -> Render_t
 {
-  auto CreateSamplerState = [&](void)
+  const auto CreateSamplerState = [&](void)
   {
     D3D10_SAMPLER_DESC sampDesc = { 0 };
     sampDesc.Filter = D3D10_FILTER_MIN_MAG_MIP_LINEAR;
@@ -403,7 +400,7 @@ auto DirectX10::CreateState(const ComponentPtr_t & _pComponent) -> Render_t
     };
   };
 
-  auto CreateScissorState = [&](void)
+  const auto CreateScissorState = [&](void)
   {
     const Component::Scissor ScissorData{ _pComponent };
 
@@ -441,11 +438,43 @@ auto DirectX10::CreateState(const ComponentPtr_t & _pComponent) -> Render_t
     return (ScissorData.IsEnabled) ? ScissorEnabled : ScissorDisabled;
   };
 
+  const auto CreateDepthState = [&](void)
+  {
+    return GetDepthState(
+      _pComponent->GetValue(uT("enabled"), false),
+      _pComponent->GetValue(uT("clear"), false));
+  };
+
+  const auto CreateClearState = [&](void)
+  {
+    const auto ARGBtoFloat4 = [](const uint32_t _HexColor)
+    {
+      return ::std::vector<FLOAT>
+      {
+        ((_HexColor & 0x00FF0000) >> 16) / 255.0f,
+        ((_HexColor & 0x0000FF00) >> 8) / 255.0f,
+        ((_HexColor & 0x000000FF) >> 0) / 255.0f,
+        ((_HexColor & 0xFF000000) >> 24) / 255.0f,
+      };
+    };
+
+    const auto BackgroundColor = 
+      ARGBtoFloat4(_pComponent->GetValue(uT("color"), 0xFF000000));
+
+    return [=](void)
+    {
+      m_pDevice->ClearRenderTargetView(
+        m_pRenderTargetView.Get(), BackgroundColor.data());
+    };
+  };
+
   ::std::map<String_t, ::std::function<Render_t(void)>> Creators =
   {
-    { uT("Blend"), [&]() { return CreateBlendState(true); } },
+    { uT("Blend"),   [&](void) { return CreateBlendState(true); } },
     { uT("Sampler"), CreateSamplerState },
     { uT("Scissor"), CreateScissorState },
+    { uT("Depth"),   CreateDepthState   },
+    { uT("Clear"),   CreateClearState   },
   };
 
   return Creators[_pComponent->Kind]();
@@ -705,71 +734,42 @@ auto DirectX10::CreatePresent(const ComponentPtr_t & _pComponent) -> Render_t
   return Creators[_pComponent->Kind]();
 }
 
-auto DirectX10::CreateDeptRender(const ComponentPtr_t & _pComponent) -> Render_t
+auto DirectX10::GetDepthState(bool _IsEnabled, bool _IsClear) -> Render_t
 {
-  const auto Dept = _pComponent->GetValue(uT("dept"), uT("Disabled"));
-
-  Render_t RenderDeptError = [=](void)
-  {
-    throw STD_EXCEPTION << "Unexpected dept value: " << Dept
-      << " [camera id=" << _pComponent->Id << "].";
-  };
-
-  Render_t RenderDeptDisabled = [=](void)
+  Render_t RenderDepthDisabled = [=](void)
   {
     m_pDevice->OMSetRenderTargets(1, m_pRenderTargetView.GetAddressOf(),
       nullptr);
   };
 
-  Render_t RenderDeptEnabled = [=](void)
+  Render_t RenderDepthEnabled = [=](void)
   {
     m_pDevice->OMSetRenderTargets(1, m_pRenderTargetView.GetAddressOf(),
       m_pDepthStencilView.Get());
   };
 
-  Render_t RenderDeptClear = [=](void)
+  Render_t RenderDepthClear = [=](void)
   {
-    RenderDeptEnabled();
+    RenderDepthEnabled();
     m_pDevice->ClearDepthStencilView(m_pDepthStencilView.Get(),
       D3D10_CLEAR_DEPTH, 1.0f, 0);
   };
 
-  return 
-    (Dept == uT("Clear"))    ? RenderDeptClear :
-    (Dept == uT("Enabled"))  ? RenderDeptEnabled : 
-    (Dept == uT("Disabled")) ? RenderDeptDisabled : RenderDeptError;
+  return _IsEnabled ? 
+    (_IsClear ? RenderDepthClear : RenderDepthEnabled) : RenderDepthDisabled;
 }
 
 auto DirectX10::CreateCamera(const ComponentPtr_t & _pComponent) -> Render_t
 {
   const auto CameraId = _pComponent->Id;
 
-  auto RenderDept = CreateDeptRender(_pComponent);
-
   auto RenderLights = [=](void)
   {
     m_pData->SetCameraId(CameraId);
   };
 
-  auto DisableBlendRender = CreateBlendState(false);
-
-  const Render_t CameraGui = [=](void)
-  {
-    RenderDept();
-    RenderLights();
-    DisableBlendRender();
-
-    UINT ViewportCount = 1;
-    D3D10_VIEWPORT Viewport = { 0 };
-    m_pDevice->RSGetViewports(&ViewportCount, &Viewport);
-
-    m_pData->Get<::Matrices>().Projection = ::DirectX::XMMatrixTranspose(
-      ::DirectX::XMMatrixOrthographicOffCenterLH(0, (float)Viewport.Width,
-      (float)Viewport.Height, 0, 1.0f, -1.0f));
-
-    m_pData->Get<::Matrices>().View = ::DirectX::XMMatrixTranspose(
-      ::DirectX::XMMatrixIdentity());
-  };
+  const auto DisableBlendRender = CreateBlendState(false);
+  const auto DisableDepthRender = GetDepthState(false, false);
 
   const auto ServiceComponents = m_ServiceComponents.Get(
     {
@@ -777,23 +777,45 @@ auto DirectX10::CreateCamera(const ComponentPtr_t & _pComponent) -> Render_t
       { uT("Rotation"), api::Component::Make({}) },
     });
 
-  const Render_t CameraFocal = [=](void)
+  const Render_t CameraOrthographic = [=](void)
   {
-    RenderDept();
     RenderLights();
     DisableBlendRender();
+    DisableDepthRender();
+
+    UINT ViewportCount = 1;
+    D3D10_VIEWPORT Viewport = { 0 };
+    m_pDevice->RSGetViewports(&ViewportCount, &Viewport);
+
+    const Component::Position Pos{ ServiceComponents[0] };
+
+    m_pData->Get<::Matrices>().Projection = ::DirectX::XMMatrixTranspose(
+      ::DirectX::XMMatrixOrthographicOffCenterLH(
+        Pos.X, Pos.X + Viewport.Width,
+        Pos.Y + Viewport.Height, Pos.Y,
+        1.0f, -1.0f));
+
+    m_pData->Get<::Matrices>().View = ::DirectX::XMMatrixTranspose(
+      ::DirectX::XMMatrixIdentity());
+  };
+
+  const Render_t CameraPerspective = [=](void)
+  {
+    RenderLights();
+    DisableBlendRender();
+    DisableDepthRender();
 
     UINT ViewportCount = 1;
     D3D10_VIEWPORT Viewport = { 0 };
     m_pDevice->RSGetViewports(&ViewportCount, &Viewport);
 
     const auto AngleY = (float)::alicorn::extension::cpp::math::GreedToRadian *
-      _pComponent->GetValue(uT("angle"), 90.0f);
+      _pComponent->GetValue(uT("fov"), 90.0f);
     const auto aspectRatio = (float)Viewport.Width / (float)Viewport.Height;
 
     m_pData->Get<::Matrices>().Projection = ::DirectX::XMMatrixTranspose(
-      ::DirectX::XMMatrixPerspectiveFovLH(
-        AngleY, aspectRatio, 0.01f, 100.0f));
+      ::DirectX::XMMatrixPerspectiveFovRH(
+        AngleY, aspectRatio, 0.01f, 200.0f));
 
     // Точка, куда смотрит камера - задается как компонент 
     // Transform.Position.
@@ -818,14 +840,14 @@ auto DirectX10::CreateCamera(const ComponentPtr_t & _pComponent) -> Render_t
       Transform);
 
     m_pData->Get<::Matrices>().View = ::DirectX::XMMatrixTranspose(
-      ::DirectX::XMMatrixLookAtLH(Eye, Look,
+      ::DirectX::XMMatrixLookAtRH(Eye, Look,
         ::DirectX::XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f)));
   };
 
   const auto Focal = _pComponent->GetValue(uT("focal"), uT("Disabled"));
 
   return (_pComponent->Kind == uT("Perspective") || Focal == uT("Enabled")) ? 
-    CameraFocal : CameraGui;
+    CameraPerspective : CameraOrthographic;
 }
 
 auto DirectX10::CreateGeometry(const ComponentPtr_t &) -> Render_t

@@ -1,0 +1,167 @@
+
+/*form,*/
+/*button,*/
+/*progressbar,*/
+/*circularbar,*/
+/*label,*/
+dummy {
+  border-width: 1px;
+  border-color: red;
+}
+
+body {
+  min-width: 480px;
+  min-height: 480px;
+  background-color: rgba(0, 0, 0, 0);
+  background-decorator: none;
+}
+
+form {
+  display: block;
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  font-family: Times New Roman;
+}
+
+.hidden {
+  visibility: hidden;
+}
+
+button {
+  display: block;
+  font-family: Ubuntu;
+  color: white;
+  header-font-effect: outline;
+  header-width: 2px;
+  header-color: grey;
+}
+
+/**************************** Main menu ***************************************/
+
+form#id_main_menu {
+  left: 0;
+  top: 0;
+  background-decorator: image;
+  background-image: demo.background.jpg 0px 0px 800px 450px;
+}
+
+button#id_auto,
+button#id_manual,
+button#id_help,
+button#id_back {
+  max-width: 51%;
+  float: right;
+  font-size: 2 em;
+  text-align: right;
+  padding-top: 0.16 em;
+  padding-bottom: 0.16 em;
+  padding-right: 0.5 em;
+  margin-right: 0.5 em;
+  margin-bottom: 10px;
+}
+
+  button#id_auto:hover,
+  button#id_manual:hover,
+  button#id_help:hover,
+  button#id_back:hover {
+    font-size: 2.26 em;
+    padding-top: 0.07375 em;
+    padding-bottom: 0.07375 em;
+    padding-right: 0.4 em;
+    margin-right: 0.45 em;
+    background-color: rgba(128, 128, 128, 128);
+  }
+
+  button#id_auto:active,
+  button#id_manual:active,
+  button#id_help:active,
+  button#id_back:active {
+    font-size: 2 em;
+    padding-top: 0.16 em;
+    padding-bottom: 0.16 em;
+    padding-right: 0.5 em;
+    margin-right: 0.5 em;
+  }
+
+
+/****************************** Loading ***************************************/
+
+form#id_loading {
+  left: 0;
+  top: 0;
+  background-decorator: image;
+  background-image: demo.background.jpg 0px 0px 800px 450px;
+}
+
+progressbar {
+  display: block;
+  margin-left: 10%;
+  margin-right: 10%;
+  margin-bottom: 1 em;
+  height: 3 em;
+  background-decorator: tiled-horizontal;
+  background-left-image: demo.progress.png 1px 0px 25px 31px;
+  background-center-image: demo.progress.png 25px 0px 31px 31px;
+  background-right-image: demo.progress.png 25px 0px 1px 31px;
+  progress-start-image: demo.progress.png 1px 32px 25px 63px;
+  progress-center-image: demo.progress.png 25px 32px 31px 63px;
+  progress-end-image: demo.progress.png 25px 32px 1px 63px;
+  /*mask: true; ??? */
+}
+
+circularbar {
+  display: block;
+  position: absolute;
+  left: 0px;
+  top: 0px;
+  width: 100px;
+  height: 100px;
+  vertical-align: middle;
+  gauge-src: demo.circular.png;
+}
+
+/**************************** Game menu ***************************************/
+
+form#id_game_menu {
+  left: 0;
+  top: 0;
+}
+
+button#id_back_to_main_menu {
+  position: absolute;
+  text-align: center;
+  font-size: 2 em;
+  max-width: 1.2 em;
+  padding-left: 0.25 em;
+  padding-top: 0.25 em;
+  padding-right: 0.25 em;
+  padding-bottom: 0.25 em;
+}
+
+  button#id_back_to_main_menu:hover {
+    font-size: 2.5 em;
+    padding-left: 0.075 em;
+    padding-top: 0.075 em;
+    padding-right: 0.075 em;
+    padding-bottom: 0.075 em;
+  }
+
+  button#id_back_to_main_menu:active {
+    font-size: 2 em;
+    padding-left: 0.25 em;
+    padding-top: 0.25 em;
+    padding-right: 0.25 em;
+    padding-bottom: 0.25 em;
+  }
+
+input#id_fps {
+  position: absolute;
+  top: 0.25 em;
+  right: 0;
+  max-width: 4 em;
+  header-font-effect: outline;
+  header-width: 2px;
+  header-color: grey;
+  /*padding-top: 0.25 em;*/ /*!!! Существенно (~25%) роняет fps !!!*/
+}

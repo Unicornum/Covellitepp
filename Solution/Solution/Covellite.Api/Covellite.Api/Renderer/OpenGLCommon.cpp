@@ -206,28 +206,33 @@ auto OpenGLCommon::CreateCamera(const ComponentPtr_t & _pComponent) -> Render_t
 
 auto OpenGLCommon::CreateState(const ComponentPtr_t & _pComponent) -> Render_t
 {
-  auto CreateBlendState = [](void) -> Render_t
+  const auto CreateBlendState = [](void)
   {
-    return []()
+    return [](void)
     {
       glEnable(GL_BLEND);
       glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
     };
   };
 
-  auto CreateSamplerState = [&](void) -> Render_t
+  const auto CreateSamplerState = [&](void)
   {
-    return []()
-    {
-      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    auto * pSamplerState = &m_SampleState;
 
-      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    return [=](void)
+    {
+      *pSamplerState = [](void)
+      {
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+      };
     };
   };
 
-  auto CreateScissorState = [&](void) -> Render_t
+  const auto CreateScissorState = [&](void)
   {
     const auto pScissorRect = 
       m_ServiceComponents.Get({ { uT("Rect"), api::Component::Make({}) } })[0];
@@ -246,7 +251,7 @@ auto OpenGLCommon::CreateState(const ComponentPtr_t & _pComponent) -> Render_t
         Rect.Right - Rect.Left, Rect.Bottom - Rect.Top);
     };
 
-    Render_t ScissorDisabled = []()
+    Render_t ScissorDisabled = [](void)
     {
       glDisable(GL_SCISSOR_TEST);
     };
@@ -255,11 +260,37 @@ auto OpenGLCommon::CreateState(const ComponentPtr_t & _pComponent) -> Render_t
     return (Scissor.IsEnabled) ? ScissorEnabled : ScissorDisabled;
   };
 
+  const auto CreateDepthState = [&](void)
+  {
+    return GetDepthRender(
+      _pComponent->GetValue(uT("enabled"), false),
+      _pComponent->GetValue(uT("clear"), false));
+  };
+
+  const auto CreateClearState = [&](void)
+  {
+    const auto BackgroundColor =
+      ARGBtoFloat4(_pComponent->GetValue(uT("color"), 0xFF000000));
+
+    return [=](void)
+    {
+      glClearColor(
+        BackgroundColor[0],
+        BackgroundColor[1],
+        BackgroundColor[2],
+        BackgroundColor[3]);
+      glClear(GL_COLOR_BUFFER_BIT);
+    };
+  };
+
+
   ::std::map<String_t, ::std::function<Render_t(void)>> Creators =
   {
-    { uT("Blend"), CreateBlendState },
-    { uT("Sampler"), CreateSamplerState },
-    { uT("Scissor"), CreateScissorState },
+    { uT("Blend"),    CreateBlendState },
+    { uT("Sampler"),  CreateSamplerState },
+    { uT("Scissor"),  CreateScissorState },
+    { uT("Depth"),    CreateDepthState },
+    { uT("Clear"),    CreateClearState   },
   };
 
   return Creators[_pComponent->Kind]();
@@ -417,12 +448,16 @@ public:
 
 auto OpenGLCommon::CreateTexture(const ComponentPtr_t & _pComponent) -> Render_t
 {
+  const auto * pSampleState = &m_SampleState;
+
   const auto pTexture = ::std::make_shared<Texture>(
     m_ServiceComponents.Get({ { uT("Texture"), _pComponent } })[0]);
 
   return [=](void)
   {
     pTexture->Render();
+
+    (*pSampleState)();
   };
 }
 
@@ -431,79 +466,99 @@ auto OpenGLCommon::CreateBuffer(const ComponentPtr_t & _pBuffer) -> Render_t
   const auto pBufferData = 
     m_ServiceComponents.Get({ { uT("Buffer"), _pBuffer } })[0];
 
-  auto CreateVertexGuiBuffer = [&](void) -> Render_t
-  {
-    using Vertex_t = ::covellite::api::Vertex::Polygon;
-
-    const Component::Buffer<Vertex_t> Info{ pBufferData };
-
-    ::std::vector<Vertex_t> Data{ Info.pData, Info.pData + Info.Count };
-
-    return [=](void)
-    {
-      glVertexPointer(2, GL_FLOAT, sizeof(Vertex_t), &Data[0].x);
-      glEnableClientState(GL_VERTEX_ARRAY);
-
-      glColorPointer(4, GL_UNSIGNED_BYTE, sizeof(Vertex_t), &Data[0].ABGRColor);
-      glEnableClientState(GL_COLOR_ARRAY);
-
-      glTexCoordPointer(2, GL_FLOAT, sizeof(Vertex_t), &Data[0].u);
-      glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-    };
-  };
-
-  auto CreateVertexTexturedBuffer = [&](void) -> Render_t
-  {
-    using Vertex_t = ::covellite::api::Vertex::Polyhedron;
-
-    const Component::Buffer<Vertex_t> Info{ pBufferData };
-
-    ::std::vector<Vertex_t> Data{ Info.pData, Info.pData + Info.Count };
-
-    return [=](void)
-    {
-      glVertexPointer(3, GL_FLOAT, sizeof(Vertex_t), &Data[0].x);
-      glEnableClientState(GL_VERTEX_ARRAY);
-
-      glNormalPointer(GL_FLOAT, sizeof(Vertex_t), &Data[0].nx);
-      glEnableClientState(GL_NORMAL_ARRAY);
-
-      glTexCoordPointer(2, GL_FLOAT, sizeof(Vertex_t), &Data[0].tu);
-      glEnableClientState(GL_TEXTURE_COORD_ARRAY);
-    };
-  };
-
-  auto CreateIndexBuffer = [&](void) -> Render_t
+  auto CreateIndexBuffer = [&](void)
   {
     auto * pDrawElements = &m_DrawElements;
 
-    const Component::Buffer<int> IndexBufferInfo{ pBufferData };
+    using Type_t = int;
 
-    ::std::vector<int> IndexBufferData{
-      IndexBufferInfo.pData, IndexBufferInfo.pData + IndexBufferInfo.Count };
+    if (!pBufferData->IsType<const Type_t *>(uT("data")))
+    {
+      throw STD_EXCEPTION << "Unexpected buffer format [" << 
+        "id: " << _pBuffer->Id << ", " <<
+        "type: " << _pBuffer->Type << ", " <<
+        "kind: " << _pBuffer->Kind << "].";
+    }
+
+    const Component::Buffer<Type_t> Info{ pBufferData };
+
+    const ::std::vector<Type_t> Data{ Info.pData, Info.pData + Info.Count };
 
     return [=](void)
     {
       *pDrawElements = [=](void)
       {
-        glDrawElements(GL_TRIANGLES, (GLsizei)IndexBufferData.size(),
-          GL_UNSIGNED_INT, IndexBufferData.data());
+        glDrawElements(GL_TRIANGLES, (GLsizei)Data.size(),
+          GL_UNSIGNED_INT, Data.data());
       };
     };
   };
 
-  using Vertex_t = ::covellite::api::Vertex;
-
-  if (pBufferData->IsType<const Vertex_t::Polygon *>(uT("data")))
+  auto CreatePolyhedronVertexBuffer = [&](void) -> Render_t
   {
-    return CreateVertexGuiBuffer();
-  }
-  else if (pBufferData->IsType<const Vertex_t::Polyhedron *>(uT("data")))
-  {
-    return CreateVertexTexturedBuffer();
-  }
+    using Type_t = ::covellite::api::Vertex::Polyhedron;
 
-  return CreateIndexBuffer();
+    if (!pBufferData->IsType<const Type_t *>(uT("data")))
+    {
+      return CreateIndexBuffer();
+    }
+
+    const Component::Buffer<Type_t> Info{ pBufferData };
+
+    const ::std::vector<Type_t> Data{ Info.pData, Info.pData + Info.Count };
+
+    return [=](void)
+    {
+      glVertexPointer(3, GL_FLOAT, sizeof(Type_t), &Data[0].x);
+      glEnableClientState(GL_VERTEX_ARRAY);
+
+      glNormalPointer(GL_FLOAT, sizeof(Type_t), &Data[0].nx);
+      glEnableClientState(GL_NORMAL_ARRAY);
+
+      glTexCoordPointer(2, GL_FLOAT, sizeof(Type_t), &Data[0].tu);
+      glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+    };
+  };
+
+  auto CreatePolygonVertexBuffer = [&](void) -> Render_t
+  {
+    using Type_t = ::covellite::api::Vertex::Polygon;
+
+    if (!pBufferData->IsType<const Type_t *>(uT("data")))
+    {
+      return CreatePolyhedronVertexBuffer();
+    }
+
+    const Component::Buffer<Type_t> Info{ pBufferData };
+
+    const ::std::vector<Type_t> Data{ Info.pData, Info.pData + Info.Count };
+
+    class Normal
+    {
+    public:
+      float nx, ny, nz;
+    };
+
+    ::std::vector<Normal> NormalData{ Data.size(), Normal{ 0.0f, 0.0f, 1.0f } };
+    NormalData.push_back(Normal{ 0.0f, 0.0f, 0.0f }); // Для тестов.
+
+    return [=](void)
+    {
+      glVertexPointer(2, GL_FLOAT, sizeof(Type_t), &Data[0].x);
+      glEnableClientState(GL_VERTEX_ARRAY);
+
+      glColorPointer(4, GL_UNSIGNED_BYTE, sizeof(Type_t), &Data[0].ABGRColor);
+      glEnableClientState(GL_COLOR_ARRAY);
+
+      glNormalPointer(GL_FLOAT, sizeof(Normal), &NormalData[0].nx);
+      glEnableClientState(GL_NORMAL_ARRAY);
+
+      glTexCoordPointer(2, GL_FLOAT, sizeof(Type_t), &Data[0].u);
+      glEnableClientState(GL_TEXTURE_COORD_ARRAY);
+    };
+  };
+
+  return CreatePolygonVertexBuffer();
 }
 
 auto OpenGLCommon::CreatePresent(const ComponentPtr_t & _pComponent) -> Render_t
@@ -517,13 +572,13 @@ auto OpenGLCommon::CreatePresent(const ComponentPtr_t & _pComponent) -> Render_t
   return Creators[_pComponent->Kind]();
 }
 
-auto OpenGLCommon::GetCameraCommon(const ComponentPtr_t & _pComponent) -> Render_t
+auto OpenGLCommon::GetCameraCommon(void) -> Render_t
 {
-  const auto DeptRender = GetDeptRender(_pComponent);
+  const auto DisableDepthRender = GetDepthRender(false, false);
 
   return [=](void)
   {
-    DeptRender();
+    DisableDepthRender();
 
     glDisable(GL_BLEND);
     glDisable(GL_DITHER);
@@ -537,12 +592,19 @@ auto OpenGLCommon::GetCameraCommon(const ComponentPtr_t & _pComponent) -> Render
   };
 }
 
-auto OpenGLCommon::GetCameraGui(const ComponentPtr_t & _pComponent) -> Render_t
+auto OpenGLCommon::GetCameraGui(const ComponentPtr_t &) -> Render_t
 {
-  const auto CommonRender = GetCameraCommon(_pComponent);
+  const auto CommonRender = GetCameraCommon();
+
+  const auto ServiceComponents = m_ServiceComponents.Get(
+    {
+      { uT("Position"), api::Component::Make({}) },
+    });
 
   return [=](void)
   {
+    const Component::Position Pos{ ServiceComponents[0] };
+
     CommonRender();
 
     GLfloat Viewport[4] = { 0 };
@@ -554,14 +616,16 @@ auto OpenGLCommon::GetCameraGui(const ComponentPtr_t & _pComponent) -> Render_t
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
 
-    glOrthof(Viewport[0], Viewport[0] + Viewport[2],
-      Viewport[1] + Viewport[3], Viewport[1], -1.0f, 1.0f);
+    glOrthof(
+      Viewport[0] + Pos.X, Viewport[0] + Viewport[2] + Pos.X,
+      Viewport[1] + Viewport[3] + Pos.Y, Viewport[1] + Pos.Y,
+      -1.0f, 1.0f);
   };
 }
 
 auto OpenGLCommon::GetCameraFocal(const ComponentPtr_t & _pComponent) -> Render_t
 {
-  const auto CommonRender = GetCameraCommon(_pComponent);
+  const auto CommonRender = GetCameraCommon();
 
   const auto ServiceComponents = m_ServiceComponents.Get(
     {
@@ -578,11 +642,11 @@ auto OpenGLCommon::GetCameraFocal(const ComponentPtr_t & _pComponent) -> Render_
 
     // ************************** Матрица проекции ************************** //
 
-    const auto AngleY = _pComponent->GetValue(uT("angle"), 90.0f) *
+    const auto AngleY = _pComponent->GetValue(uT("fov"), 90.0f) *
       static_cast<float>(::alicorn::extension::cpp::math::GreedToRadian);
     const float zFar = 200.0f;
 
-    const ::glm::mat4 Perspective = ::glm::perspectiveFovLH(AngleY,
+    const ::glm::mat4 Perspective = ::glm::perspectiveFovRH(AngleY,
       Viewport[2], Viewport[3], 0.01f, zFar);
 
     glMatrixMode(GL_PROJECTION);
@@ -617,7 +681,7 @@ auto OpenGLCommon::GetCameraFocal(const ComponentPtr_t & _pComponent) -> Render_
       return Transform * ::glm::vec4{ Distance, 0.0f, 0.0f, 1.0f };
     };
 
-    const ::glm::mat4 LookAt = ::glm::lookAt(
+    const ::glm::mat4 LookAt = ::glm::lookAtRH(
       GetEye(),
       ::glm::vec3{ Look.X, Look.Y, Look.Z },
       ::glm::vec3{ 0.0f, 0.0f, 1.0f }); // Up
@@ -627,29 +691,25 @@ auto OpenGLCommon::GetCameraFocal(const ComponentPtr_t & _pComponent) -> Render_
   };
 }
 
-auto OpenGLCommon::GetDeptRender(const ComponentPtr_t & _pComponent) -> Render_t
+auto OpenGLCommon::GetDepthRender(bool _IsEnabled, bool _IsClear) -> Render_t
 {
-  Render_t DeptDisable = [](void)
+  const Render_t DepthDisable = [](void)
   {
     glDisable(GL_DEPTH_TEST);
   };
 
-  Render_t DeptEnable = [](void)
+  const Render_t DepthEnable = [](void)
   {
     glEnable(GL_DEPTH_TEST);
   };
 
-  Render_t DeptClear = [](void)
+  const Render_t DepthClear = [](void)
   {
     glEnable(GL_DEPTH_TEST);
     glClear(GL_DEPTH_BUFFER_BIT);
   };
 
-  const auto Dept = _pComponent->GetValue(uT("dept"), uT("Disabled"));
-  return 
-    (Dept == uT("Clear")) ? DeptClear :
-    (Dept == uT("Enabled")) ? DeptEnable : 
-    DeptDisable;
+  return _IsEnabled ? (_IsClear ? DepthClear : DepthEnable) : DepthDisable;
 }
 
 auto OpenGLCommon::CreateGeometry(const ComponentPtr_t &) -> Render_t

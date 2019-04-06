@@ -9,7 +9,6 @@
 #include <Covellite\Core\Params.hpp>
 #include <Covellite\App\IWindow.hpp>
 #include <Covellite\Gui\IWindow.hpp>
-#include <Covellite\Gui\Rocket.forward.hpp>
 #include <Covellite\Gui\Layers.hpp>
 
 namespace covellite
@@ -92,10 +91,16 @@ public:
 public:
   // Функции работы со слоями (экранами) окна.
   template<class TLayer>
-  ::std::shared_ptr<TLayer> AddLayer(void);
-  template<class TLayer>
   void PushLayer(void);
   void Back(void);
+
+private:
+  void PushLayer(const LayerPtr_t &);
+
+public:
+  // deprecated
+  template<class TLayer>
+  ::std::shared_ptr<TLayer> AddLayer(void);
 
 private:
   Vector_t GetContextSize(void) const;

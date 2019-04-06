@@ -247,6 +247,10 @@ TEST_F(Window_test, /*DISABLED_*/Test_Constructor)
     .Times(1);
 
   EXPECT_CALL(Context,
+    AddEventListener(Eq("mousedown"), pEventListener.get(), false))
+    .Times(1);
+
+  EXPECT_CALL(Context,
     AddEventListener(Eq("change"), pEventListener.get(), false))
     .Times(1);
 
@@ -257,6 +261,10 @@ TEST_F(Window_test, /*DISABLED_*/Test_Constructor)
 
   EXPECT_CALL(Context,
     RemoveEventListener(Eq("click"), pEventListener.get(), false))
+    .Times(1);
+
+  EXPECT_CALL(Context,
+    RemoveEventListener(Eq("mousedown"), pEventListener.get(), false))
     .Times(1);
 
   EXPECT_CALL(Context,
@@ -537,6 +545,10 @@ TEST_F(Window_test, /*DISABLED_*/Test_Set)
 // ************************************************************************** //
 TEST_F(Window_test, /*DISABLED_*/Test_PushLayer)
 {
+  using LoggerProxy_t = ::mock::alicorn::modules::logger::LoggerProxy;
+  LoggerProxy_t LoggerProxy;
+  LoggerProxy_t::GetInstance() = &LoggerProxy;
+
   using LayersProxy_t = ::mock::covellite::gui::Layers::Proxy;
   LayersProxy_t LayersProxy;
   LayersProxy_t::GetInstance() = &LayersProxy;
@@ -587,12 +599,19 @@ TEST_F(Window_test, /*DISABLED_*/Test_PushLayer)
   EXPECT_CALL(LayersProxy, Push(LayersId, LayerId))
     .Times(1);
 
+  EXPECT_CALL(LoggerProxy, ToLog(uT("Info: Push layer [Layer]")))
+    .Times(1);
+
   Example.PushLayer<Layer>();
 }
 
 // ************************************************************************** //
 TEST_F(Window_test, /*DISABLED_*/Test_Back_ExistsLayer)
 {
+  using LoggerProxy_t = ::mock::alicorn::modules::logger::LoggerProxy;
+  LoggerProxy_t LoggerProxy;
+  LoggerProxy_t::GetInstance() = &LoggerProxy;
+
   using LayersProxy_t = ::mock::covellite::gui::Layers::Proxy;
   LayersProxy_t LayersProxy;
   LayersProxy_t::GetInstance() = &LayersProxy;
@@ -611,6 +630,9 @@ TEST_F(Window_test, /*DISABLED_*/Test_Back_ExistsLayer)
 
   Tested_t Example{ IWindowApi };
 
+  EXPECT_CALL(LoggerProxy, ToLog(uT("Info: Pop layer")))
+    .Times(1);
+
   EXPECT_CALL(LayersProxy, Pop(_))
     .Times(1)
     .WillOnce(Return(true));
@@ -624,6 +646,10 @@ TEST_F(Window_test, /*DISABLED_*/Test_Back_ExistsLayer)
 // ************************************************************************** //
 TEST_F(Window_test, /*DISABLED_*/Test_Back_NotExistsLayer)
 {
+  using LoggerProxy_t = ::mock::alicorn::modules::logger::LoggerProxy;
+  LoggerProxy_t LoggerProxy;
+  LoggerProxy_t::GetInstance() = &LoggerProxy;
+
   using LayersProxy_t = ::mock::covellite::gui::Layers::Proxy;
   LayersProxy_t LayersProxy;
   LayersProxy_t::GetInstance() = &LayersProxy;
@@ -647,6 +673,9 @@ TEST_F(Window_test, /*DISABLED_*/Test_Back_NotExistsLayer)
   Tested_t Example{ IWindowApi };
 
   InSequence Dummy;
+
+  EXPECT_CALL(LoggerProxy, ToLog(uT("Info: Pop layer")))
+    .Times(1);
 
   EXPECT_CALL(LayersProxy, Pop(_))
     .Times(1)

@@ -24,7 +24,9 @@ float4 CalcPointLight(Light::Point _Light, float4 _Position, float3 _Normal)
   float4 Direction = _Light.Position - _Position;
 
   float LightFactor = max(dot(_Normal, normalize(Direction.xyz)), 0.0f);
-  float4 Color = GetRGBAColor(_Light.ARGBColor) * LightFactor;
+  float4 Color = LightFactor *
+    GetRGBAColor(_Light.ARGBColor) * 
+    GetRGBAColor(MaterialData.ARGBDiffuse);
   float Distance = length(Direction);
 
   float Attenuation = 
@@ -50,13 +52,15 @@ float4 GetGouraudLightsColor(float4 _WorldPos, float3 _Normal)
 
   // Ambient
 
-  float4 AmbientColor = GetRGBAColor(LightsData.Ambient.ARGBColor);
+  float4 AmbientColor = GetRGBAColor(LightsData.Ambient.ARGBColor) *
+    GetRGBAColor(MaterialData.ARGBAmbient);
 
   // Direction
 
   float3 Direction = normalize(LightsData.Direction.Direction.xyz);
-  float4 DirectColor = GetRGBAColor(LightsData.Direction.ARGBColor) * 
-    max(dot(_Normal, Direction), 0.0f);
+  float4 DirectColor = max(dot(_Normal, Direction), 0.0f) *
+    GetRGBAColor(LightsData.Direction.ARGBColor) * 
+    GetRGBAColor(MaterialData.ARGBDiffuse);
 
   // Points
 

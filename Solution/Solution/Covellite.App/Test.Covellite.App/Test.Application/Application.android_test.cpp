@@ -558,9 +558,19 @@ TEST_F(Application_test, /*DISABLED_*/Test_Run_DrawingMode_Continuous)
     .Times(1);
 
   EXPECT_CALL(Example, DoPostCommand(true))
-    .WillOnce(Return(true))
-    .WillOnce(Return(true))
-    .WillOnce(Return(false));
+    .WillOnce(Return(true));
+
+  EXPECT_CALL(Example, DoUpdate())
+    .Times(1);
+
+  EXPECT_CALL(Example, DoPostCommand(true))
+    .WillOnce(Return(true));
+
+  EXPECT_CALL(Example, DoUpdate())
+    .Times(1);
+
+  EXPECT_CALL(Example, DoPostCommand(true))
+    .WillOnce(Return(true));
 
   EXPECT_CALL(Example, DoUpdate())
     .Times(1);

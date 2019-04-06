@@ -3,6 +3,7 @@
 #include "MainScreen.hpp"
 #include <alicorn/std/string.hpp>
 #include <alicorn/version.hpp>
+#include "Layer.hpp"
 
 using namespace layers;
 

@@ -126,18 +126,32 @@ TEST_F(OpenGLCommon_test, /*DISABLED_*/Test_SamplerState)
   const Tested_t Example{ Data_t{} };
   const ITested_t & IExample = Example;
 
-  auto itCreator = IExample.GetCreators().find(uT("State"));
-  ASSERT_NE(IExample.GetCreators().end(), itCreator);
+  auto itStateCreator = IExample.GetCreators().find(uT("State"));
+  ASSERT_NE(IExample.GetCreators().end(), itStateCreator);
 
-  auto Render = itCreator->second(Component_t::Make(
-    {
+  auto itTextureCreator = IExample.GetCreators().find(uT("Texture"));
+  ASSERT_NE(IExample.GetCreators().end(), itTextureCreator);
+
+  auto SamplerRender = itStateCreator->second(Component_t::Make(
+    { 
       { uT("kind"), uT("Sampler") }
     }));
-  ASSERT_NE(nullptr, Render);
+  ASSERT_NE(nullptr, SamplerRender);
+
+  auto TextureRender = itTextureCreator->second(Component_t::Make({ }));
+  ASSERT_NE(nullptr, TextureRender);
 
   using namespace ::testing;
 
+  EXPECT_CALL(GLProxy, TexParameteri(_, _, _))
+    .Times(0);
+
+  SamplerRender();
+
   InSequence Dummy;
+
+  EXPECT_CALL(GLProxy, BindTexture(GL_TEXTURE_2D, _))
+    .Times(1);
 
   EXPECT_CALL(GLProxy, TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,
     GL_LINEAR))
@@ -153,7 +167,7 @@ TEST_F(OpenGLCommon_test, /*DISABLED_*/Test_SamplerState)
   EXPECT_CALL(GLProxy, TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT))
     .Times(1);
 
-  Render();
+  TextureRender();
 }
 
 // ************************************************************************** //
@@ -183,7 +197,7 @@ TEST_F(OpenGLCommon_test, /*DISABLED_*/Test_Scissor_Enable)
   const auto pScissor = Component_t::Make(
     {
       { uT("kind"), uT("Scissor") },
-      { uT("is_enabled"), true },
+      { uT("enabled"), true },
     });
 
   auto Render = itCreatorState->second(pScissor);
@@ -240,7 +254,7 @@ TEST_F(OpenGLCommon_test, /*DISABLED_*/Test_Scissor_Disable)
   const auto pComponent = Component_t::Make(
     {
       { uT("kind"), uT("Scissor") },
-      { uT("is_enabled"), false },
+      { uT("enabled"), false },
     });
 
   auto Render = itCreator->second(pComponent);
@@ -252,6 +266,190 @@ TEST_F(OpenGLCommon_test, /*DISABLED_*/Test_Scissor_Disable)
     .Times(1);
 
   Render();
+}
+
+// ************************************************************************** //
+TEST_F(OpenGLCommon_test, /*DISABLED_*/Test_State_Depth_Disabled)
+{
+  using GLProxy_t = ::mock::GLProxy;
+  GLProxy_t GLProxy;
+  GLProxy_t::GetInstance() = &GLProxy;
+
+  const Tested_t Example{ Data_t{} };
+  const ITested_t & IExample = Example;
+
+  auto itCreator = IExample.GetCreators().find(uT("State"));
+  ASSERT_NE(IExample.GetCreators().end(), itCreator);
+
+  using namespace ::testing;
+
+  const auto TestCallRender = [&](const Component_t::ComponentPtr_t & _pState)
+  {
+    auto Render = itCreator->second(_pState);
+    ASSERT_NE(nullptr, Render);
+
+    EXPECT_CALL(GLProxy, Disable(GL_DEPTH_TEST))
+      .Times(1);
+
+    EXPECT_CALL(GLProxy, Enable(GL_DEPTH_TEST))
+      .Times(0);
+
+    EXPECT_CALL(GLProxy, Clear(GL_DEPTH_BUFFER_BIT))
+      .Times(0);
+
+    Render();
+  };
+
+  TestCallRender(Component_t::Make(
+    {
+      { uT("kind"), uT("Depth") },
+    }));
+
+  TestCallRender(Component_t::Make(
+    {
+      { uT("kind"), uT("Depth") },
+      { uT("enabled"), false },
+    }));
+}
+
+// ************************************************************************** //
+TEST_F(OpenGLCommon_test, /*DISABLED_*/Test_State_Depth_Enabled)
+{
+  using GLProxy_t = ::mock::GLProxy;
+  GLProxy_t GLProxy;
+  GLProxy_t::GetInstance() = &GLProxy;
+
+  const Tested_t Example{ Data_t{} };
+  const ITested_t & IExample = Example;
+
+  auto itCreator = IExample.GetCreators().find(uT("State"));
+  ASSERT_NE(IExample.GetCreators().end(), itCreator);
+
+  using namespace ::testing;
+
+  const auto Render = itCreator->second(Component_t::Make(
+    {
+      { uT("kind"), uT("Depth") },
+      { uT("enabled"), true },
+      { uT("clear"), false },
+    }));
+  ASSERT_NE(nullptr, Render);
+
+  EXPECT_CALL(GLProxy, Disable(GL_DEPTH_TEST))
+    .Times(0);
+
+  EXPECT_CALL(GLProxy, Enable(GL_DEPTH_TEST))
+    .Times(1);
+
+  EXPECT_CALL(GLProxy, Clear(GL_DEPTH_BUFFER_BIT))
+    .Times(0);
+
+  Render();
+}
+
+// ************************************************************************** //
+TEST_F(OpenGLCommon_test, /*DISABLED_*/Test_State_Depth_Clear)
+{
+  using GLProxy_t = ::mock::GLProxy;
+  GLProxy_t GLProxy;
+  GLProxy_t::GetInstance() = &GLProxy;
+
+  const Tested_t Example{ Data_t{} };
+  const ITested_t & IExample = Example;
+
+  auto itCreator = IExample.GetCreators().find(uT("State"));
+  ASSERT_NE(IExample.GetCreators().end(), itCreator);
+
+  using namespace ::testing;
+
+  const auto Render = itCreator->second(Component_t::Make(
+    {
+      { uT("kind"), uT("Depth") },
+      { uT("enabled"), true },
+      { uT("clear"), true },
+    }));
+  ASSERT_NE(nullptr, Render);
+
+  EXPECT_CALL(GLProxy, Disable(GL_DEPTH_TEST))
+    .Times(0);
+
+  EXPECT_CALL(GLProxy, Enable(GL_DEPTH_TEST))
+    .Times(1);
+
+  EXPECT_CALL(GLProxy, Clear(GL_DEPTH_BUFFER_BIT))
+    .Times(1);
+
+  Render();
+}
+
+// ************************************************************************** //
+TEST_F(OpenGLCommon_test, /*DISABLED_*/Test_State_Clear)
+{
+  using Color_t = ::std::vector<float>;
+
+  using GLProxy_t = ::mock::GLProxy;
+  GLProxy_t GLProxy;
+  GLProxy_t::GetInstance() = &GLProxy;
+
+  Tested_t Example{ Data_t{} };
+  ITested_t & IExample = Example;
+
+  auto itCreator = IExample.GetCreators().find(uT("State"));
+  ASSERT_NE(IExample.GetCreators().end(), itCreator);
+
+  const auto TestCallRender = [&](
+    const Component_t::ComponentPtr_t & _pState,
+    const Color_t & _ExpectedColor)
+  {
+    const auto Render = itCreator->second(_pState);
+    ASSERT_NE(nullptr, Render);
+
+    using namespace ::testing;
+
+    InSequence Dummy;
+
+    ASSERT_EQ(4, _ExpectedColor.size());
+
+    EXPECT_CALL(GLProxy, ClearColor(_ExpectedColor[0], _ExpectedColor[1],
+      _ExpectedColor[2], _ExpectedColor[3]))
+      .Times(1);
+
+    EXPECT_CALL(GLProxy, Clear(GL_COLOR_BUFFER_BIT))
+      .Times(1);
+
+    Render();
+  };
+
+  {
+    const ::std::vector<FLOAT> DefaultColor =
+    {
+      0.0f,
+      0.0f,
+      0.0f,
+      1.0f,
+    };
+
+    TestCallRender(Component_t::Make(
+      {
+        { uT("kind"), uT("Clear") },
+      }), DefaultColor);
+  }
+
+  {
+    const ::std::vector<FLOAT> Color =
+    {
+      0.86274509803921568627450980392157f, // DC
+      0.72941176470588235294117647058824f, // BA
+      0.5960784313725490196078431372549f, // 98
+      0.9960784313725490196078431372549f, // FE
+    };
+
+    TestCallRender(Component_t::Make(
+      {
+        { uT("kind"), uT("Clear") },
+        { uT("color"), 0xFEDCBA98 },
+      }), Color);
+  }
 }
 
 // ************************************************************************** //
@@ -515,7 +713,7 @@ TEST_F(OpenGLCommon_test, /*DISABLED_*/Test_Texture_FromDataComponent)
 }
 
 // ************************************************************************** //
-TEST_F(OpenGLCommon_test, /*DISABLED_*/Test_Buffer_VertexGui)
+TEST_F(OpenGLCommon_test, /*DISABLED_*/Test_Buffer_Vertex_Polygon)
 {
   using Vertex_t = ::covellite::api::Vertex::Polygon;
 
@@ -544,6 +742,20 @@ TEST_F(OpenGLCommon_test, /*DISABLED_*/Test_Buffer_VertexGui)
   {
     Source[0].ABGRColor,
     Source[1].ABGRColor,
+  };
+
+  class Normal
+  {
+  public:
+    float nx, ny, nz;
+  };
+
+  const ::mock::GLProxy::Floats_t ExpectedNormalData =
+  {
+    0.0f, 0.0f, 1.0f,
+    0.0f, 0.0f, 1.0f,
+    0.0f, 0.0f, 1.0f, // Здесь 3 элемента, потому что в исходном массиве вершин
+                      // 3 элемента.
   };
 
   const ::mock::GLProxy::Floats_t ExpectedTexCoordData =
@@ -581,6 +793,13 @@ TEST_F(OpenGLCommon_test, /*DISABLED_*/Test_Buffer_VertexGui)
     EXPECT_CALL(GLProxy, EnableClientState(GL_COLOR_ARRAY))
       .Times(1);
 
+    EXPECT_CALL(GLProxy, NormalPointer(GL_FLOAT,
+      sizeof(Normal), ExpectedNormalData))
+      .Times(1);
+
+    EXPECT_CALL(GLProxy, EnableClientState(GL_NORMAL_ARRAY))
+      .Times(1);
+
     EXPECT_CALL(GLProxy, TexCoordPointer(2, GL_FLOAT,
       sizeof(Vertex_t), ExpectedTexCoordData))
       .Times(1);
@@ -603,14 +822,13 @@ TEST_F(OpenGLCommon_test, /*DISABLED_*/Test_Buffer_VertexGui)
     // хранить копию данных.
     const auto Data = Source;
 
-    const auto pComponent = Component_t::Make(
+    const auto pBuffer = Component_t::Make(
       {
-        { uT("kind"), uT("Vertex.Gui") },
         { uT("data"), Data.data() },
         { uT("count"), Data.size() },
       });
 
-    Render = itCreator->second(pComponent);
+    Render = itCreator->second(pBuffer);
   }
 
   TestCallRender(Render);
@@ -635,19 +853,16 @@ TEST_F(OpenGLCommon_test, /*DISABLED_*/Test_Buffer_VertexGui)
     auto DataRender = itDataCreator->second(pData);
     EXPECT_EQ(nullptr, DataRender);
 
-    const auto pComponent = Component_t::Make(
-      {
-        { uT("kind"), uT("Vertex.Gui") },
-      });
+    const auto pBuffer = Component_t::Make({ });
 
-    Render = itCreator->second(pComponent);
+    Render = itCreator->second(pBuffer);
   }
 
   TestCallRender(Render);
 }
 
 // ************************************************************************** //
-TEST_F(OpenGLCommon_test, /*DISABLED_*/Test_Buffer_VertexTextured)
+TEST_F(OpenGLCommon_test, /*DISABLED_*/Test_Buffer_Vertex_Polyhedron)
 {
   using Vertex_t = ::covellite::api::Vertex::Polyhedron;
 
@@ -734,14 +949,13 @@ TEST_F(OpenGLCommon_test, /*DISABLED_*/Test_Buffer_VertexTextured)
     // хранить копию данных.
     const auto Data = Source;
 
-    const auto pComponent = Component_t::Make(
+    const auto pBuffer = Component_t::Make(
       {
-        { uT("kind"), uT("Vertex.Textured") },
         { uT("data"), Data.data() },
         { uT("count"), Data.size() },
       });
 
-    Render = itCreator->second(pComponent);
+    Render = itCreator->second(pBuffer);
   }
 
   TestCallRender(Render);
@@ -766,19 +980,16 @@ TEST_F(OpenGLCommon_test, /*DISABLED_*/Test_Buffer_VertexTextured)
     auto DataRender = itDataCreator->second(pData);
     EXPECT_EQ(nullptr, DataRender);
 
-    const auto pComponent = Component_t::Make(
-      {
-        { uT("kind"), uT("Vertex.Textured") },
-      });
+    const auto pBuffer = Component_t::Make({ });
 
-    Render = itCreator->second(pComponent);
+    Render = itCreator->second(pBuffer);
   }
 
   TestCallRender(Render);
 }
 
 // ************************************************************************** //
-TEST_F(OpenGLCommon_test, /*DISABLED_*/Test_Camera_Orthographic)
+TEST_F(OpenGLCommon_test, /*DISABLED_*/Test_Camera_Orthographic_DefaultPosition)
 {
   using GLProxy_t = ::mock::GLProxy;
   GLProxy_t GLProxy;
@@ -850,61 +1061,127 @@ TEST_F(OpenGLCommon_test, /*DISABLED_*/Test_Camera_Orthographic)
     _Render();
   };
 
+  auto Render = itCreator->second(Component_t::Make(
+    {
+      { uT("kind"), uT("Orthographic") },
+    }));
+
+  EXPECT_CALL(GLProxy, Disable(GL_DEPTH_TEST))
+    .Times(1);
+
+  EXPECT_CALL(GLProxy, Enable(GL_DEPTH_TEST))
+    .Times(0);
+
+  EXPECT_CALL(GLProxy, Clear(GL_DEPTH_BUFFER_BIT))
+    .Times(0);
+
+  TestCallRender(Render);
+}
+
+// ************************************************************************** //
+TEST_F(OpenGLCommon_test, /*DISABLED_*/Test_Camera_Orthographic)
+{
+  using GLProxy_t = ::mock::GLProxy;
+  GLProxy_t GLProxy;
+  GLProxy_t::GetInstance() = &GLProxy;
+
+  const auto X = 11111.0f;
+  const auto Y = 22222.0f;
+
+  const float SourceViewport[] =
   {
-    auto Render = itCreator->second(Component_t::Make(
-      {
-        { uT("kind"), uT("Orthographic") },
-      }));
+    19022.82014f, 19022.82015f, 19022.82016f, 19022.82017f
+  };
 
-    EXPECT_CALL(GLProxy, Disable(GL_DEPTH_TEST))
-      .Times(1);
+  const Tested_t Example{ Data_t{} };
+  const ITested_t & IExample = Example;
 
-    EXPECT_CALL(GLProxy, Enable(GL_DEPTH_TEST))
-      .Times(0);
+  auto itDataCreator = IExample.GetCreators().find(uT("Data"));
+  ASSERT_NE(IExample.GetCreators().end(), itDataCreator);
 
-    EXPECT_CALL(GLProxy, Clear(GL_DEPTH_BUFFER_BIT))
-      .Times(0);
+  auto itCreator = IExample.GetCreators().find(uT("Camera"));
+  ASSERT_NE(IExample.GetCreators().end(), itCreator);
 
-    TestCallRender(Render);
-  }
+  using namespace ::testing;
 
+  auto TestCallRender = [&](Render_t & _Render)
   {
-    auto Render = itCreator->second(Component_t::Make(
-      {
-        { uT("kind"), uT("Orthographic") },
-        { uT("dept"), uT("Enabled") },
-      }));
+    ASSERT_NE(nullptr, _Render);
 
-    EXPECT_CALL(GLProxy, Disable(GL_DEPTH_TEST))
-      .Times(0);
+    InSequence Dummy;
 
-    EXPECT_CALL(GLProxy, Enable(GL_DEPTH_TEST))
+    EXPECT_CALL(GLProxy, Disable(GL_BLEND))
       .Times(1);
 
-    EXPECT_CALL(GLProxy, Clear(GL_DEPTH_BUFFER_BIT))
-      .Times(0);
-
-    TestCallRender(Render);
-  }
-
-  {
-    auto Render = itCreator->second(Component_t::Make(
-      {
-        { uT("kind"), uT("Orthographic") },
-        { uT("dept"), uT("Clear") },
-      }));
-
-    EXPECT_CALL(GLProxy, Disable(GL_DEPTH_TEST))
-      .Times(0);
-
-    EXPECT_CALL(GLProxy, Enable(GL_DEPTH_TEST))
+    EXPECT_CALL(GLProxy, Disable(GL_DITHER))
       .Times(1);
 
-    EXPECT_CALL(GLProxy, Clear(GL_DEPTH_BUFFER_BIT))
+    EXPECT_CALL(GLProxy, ShadeModel(GL_SMOOTH))
       .Times(1);
 
-    TestCallRender(Render);
-  }
+    EXPECT_CALL(GLProxy, Hint(GL_PERSPECTIVE_CORRECTION_HINT, GL_FASTEST))
+      .Times(1);
+
+    EXPECT_CALL(GLProxy, Enable(GL_CULL_FACE))
+      .Times(1);
+
+    EXPECT_CALL(GLProxy, CullFace(GL_BACK))
+      .Times(1);
+
+    EXPECT_CALL(GLProxy, FrontFace(GL_CCW))
+      .Times(1);
+
+    EXPECT_CALL(GLProxy, GetFloatv(GL_VIEWPORT))
+      .Times(1)
+      .WillOnce(Return(SourceViewport));
+
+    EXPECT_CALL(GLProxy, MatrixMode(GL_PROJECTION))
+      .Times(1);
+
+    EXPECT_CALL(GLProxy, LoadIdentity())
+      .Times(1);
+
+    EXPECT_CALL(GLProxy, MatrixMode(GL_MODELVIEW))
+      .Times(1);
+
+    EXPECT_CALL(GLProxy, LoadIdentity())
+      .Times(1);
+
+    EXPECT_CALL(GLProxy, Ortho(
+      SourceViewport[0] + X, SourceViewport[0] + SourceViewport[2] + X,
+      SourceViewport[1] + SourceViewport[3] + Y, SourceViewport[1] + Y, 
+      -1, 1))
+      .Times(1);
+
+    EXPECT_CALL(GLProxy, Disable(_))
+      .Times(AtLeast(1));
+
+    _Render();
+  };
+
+  auto PositionRender = itDataCreator->second(Component_t::Make(
+    {
+      { uT("kind"), uT("Position") },
+      { uT("x"), X },
+      { uT("y"), Y },
+    }));
+  EXPECT_EQ(nullptr, PositionRender);
+
+  auto Render = itCreator->second(Component_t::Make(
+    {
+      { uT("kind"), uT("Orthographic") },
+    }));
+
+  EXPECT_CALL(GLProxy, Disable(GL_DEPTH_TEST))
+    .Times(1);
+
+  EXPECT_CALL(GLProxy, Enable(GL_DEPTH_TEST))
+    .Times(0);
+
+  EXPECT_CALL(GLProxy, Clear(GL_DEPTH_BUFFER_BIT))
+    .Times(0);
+
+  TestCallRender(Render);
 }
 
 // ************************************************************************** //
@@ -923,7 +1200,6 @@ TEST_F(OpenGLCommon_test, /*DISABLED_*/Test_Camera_Perspective)
   using namespace ::testing;
 
   auto TestCallRender = [&](Render_t & _Render, 
-    bool _IsDeptEnabled, bool _IsDeptClear,
     float _AngleY, float _zFar,
     float _X, float _Y, float _Z,
     float _A, float _B, float _C,
@@ -941,7 +1217,7 @@ TEST_F(OpenGLCommon_test, /*DISABLED_*/Test_Camera_Perspective)
 
     const auto ProjectionMatrix = GetMatrixLineValues(
       ::DirectX::XMMatrixTranspose(
-        ::DirectX::XMMatrixPerspectiveFovLH(
+        ::DirectX::XMMatrixPerspectiveFovRH(
           AngleYRadians, Width / Height, 0.01f, _zFar)));
 
     const auto Look = ::DirectX::XMVectorSet(_X, _Y, _Z, 1.0f);
@@ -957,40 +1233,21 @@ TEST_F(OpenGLCommon_test, /*DISABLED_*/Test_Camera_Perspective)
 
     const auto ViewMatrix = GetMatrixLineValues(
       ::DirectX::XMMatrixTranspose(
-        ::DirectX::XMMatrixLookAtLH(Eye, Look,
+        ::DirectX::XMMatrixLookAtRH(Eye, Look,
           ::DirectX::XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f))));
 
     ASSERT_NE(nullptr, _Render);
 
     InSequence Dummy;
 
-    if (_IsDeptEnabled)
-    {
-      EXPECT_CALL(GLProxy, Disable(GL_DEPTH_TEST))
-        .Times(0);
+    EXPECT_CALL(GLProxy, Disable(GL_DEPTH_TEST))
+      .Times(1);
 
-      EXPECT_CALL(GLProxy, Enable(GL_DEPTH_TEST))
-        .Times(1);
-    }
-    else
-    {
-      EXPECT_CALL(GLProxy, Disable(GL_DEPTH_TEST))
-        .Times(1);
+    EXPECT_CALL(GLProxy, Enable(GL_DEPTH_TEST))
+      .Times(0);
 
-      EXPECT_CALL(GLProxy, Enable(GL_DEPTH_TEST))
-        .Times(0);
-    }
-
-    if (_IsDeptClear)
-    {
-      EXPECT_CALL(GLProxy, Clear(GL_DEPTH_BUFFER_BIT))
-        .Times(1);
-    }
-    else
-    {
-      EXPECT_CALL(GLProxy, Clear(GL_DEPTH_BUFFER_BIT))
-        .Times(0);
-    }
+    EXPECT_CALL(GLProxy, Clear(GL_DEPTH_BUFFER_BIT))
+      .Times(0);
 
     EXPECT_CALL(GLProxy, Disable(GL_BLEND))
       .Times(1);
@@ -1061,8 +1318,7 @@ TEST_F(OpenGLCommon_test, /*DISABLED_*/Test_Camera_Perspective)
     { 92.0f, 2.0f, 3.0f, 4.0f, 5.0f, 6.0f, 7.0f, 8.0f },
   };
 
-  auto TestCamera = [&](bool _IsDeptEnabled, bool _IsDeptClear,
-    const Component_t::ComponentPtr_t & _pCamera)
+  auto TestCamera = [&](const Component_t::ComponentPtr_t & _pCamera)
   {
     {
       // Default values + not using Position & Rotation
@@ -1072,7 +1328,6 @@ TEST_F(OpenGLCommon_test, /*DISABLED_*/Test_Camera_Perspective)
       auto Info = CameraInfos[0];
 
       TestCallRender(Render, 
-        _IsDeptEnabled, _IsDeptClear,
         Info.AngleY, zFar,
         Info.X, Info.Y, Info.Z,
         Info.A, Info.B, Info.C,
@@ -1103,7 +1358,6 @@ TEST_F(OpenGLCommon_test, /*DISABLED_*/Test_Camera_Perspective)
       auto Info = CameraInfos[0];
 
       TestCallRender(Render, 
-        _IsDeptEnabled, _IsDeptClear,
         Info.AngleY, zFar,
         Info.X, Info.Y, Info.Z,
         Info.A, Info.B, Info.C,
@@ -1133,11 +1387,10 @@ TEST_F(OpenGLCommon_test, /*DISABLED_*/Test_Camera_Perspective)
         pRotation->SetValue(uT("y"), Info.B);
         pRotation->SetValue(uT("z"), Info.C);
 
-        _pCamera->SetValue(uT("angle"), Info.AngleY);
+        _pCamera->SetValue(uT("fov"), Info.AngleY);
         _pCamera->SetValue(uT("distance"), Info.Distance);
 
         TestCallRender(Render, 
-          _IsDeptEnabled, _IsDeptClear,
           Info.AngleY, zFar,
           Info.X, Info.Y, Info.Z,
           Info.A, Info.B, Info.C,
@@ -1146,21 +1399,9 @@ TEST_F(OpenGLCommon_test, /*DISABLED_*/Test_Camera_Perspective)
     }
   };
 
-  TestCamera(false, false, Component_t::Make(
+  TestCamera(Component_t::Make(
     {
       { uT("kind"), uT("Perspective") },
-    }));
-
-  TestCamera(true, false, Component_t::Make(
-    {
-      { uT("kind"), uT("Perspective") },
-      { uT("dept"), uT("Enabled") },
-    }));
-
-  TestCamera(true, true, Component_t::Make(
-    {
-      { uT("kind"), uT("Perspective") },
-      { uT("dept"), uT("Clear") },
     }));
 }
 
@@ -1946,61 +2187,21 @@ TEST_F(OpenGLCommon_test, /*DISABLED_*/Test_Present_Camera_deprecated)
     _Render();
   };
 
-  {
-    auto Render = itCreator->second(Component_t::Make(
-      {
-        { uT("kind"), uT("Camera") },
-      }));
+  auto Render = itCreator->second(Component_t::Make(
+    {
+      { uT("kind"), uT("Camera") },
+    }));
 
-    EXPECT_CALL(GLProxy, Enable(GL_DEPTH_TEST))
-      .Times(0);
+  EXPECT_CALL(GLProxy, Enable(GL_DEPTH_TEST))
+    .Times(0);
 
-    EXPECT_CALL(GLProxy, Disable(GL_DEPTH_TEST))
-      .Times(1);
+  EXPECT_CALL(GLProxy, Disable(GL_DEPTH_TEST))
+    .Times(1);
 
-    EXPECT_CALL(GLProxy, Clear(GL_DEPTH_BUFFER_BIT))
-      .Times(0);
+  EXPECT_CALL(GLProxy, Clear(GL_DEPTH_BUFFER_BIT))
+    .Times(0);
 
-    TestCallRender(Render);
-  }
-
-  {
-    auto Render = itCreator->second(Component_t::Make(
-      {
-        { uT("kind"), uT("Camera") },
-        { uT("dept"), uT("Enabled") },
-      }));
-
-    EXPECT_CALL(GLProxy, Disable(GL_DEPTH_TEST))
-      .Times(0);
-
-    EXPECT_CALL(GLProxy, Enable(GL_DEPTH_TEST))
-      .Times(1);
-
-    EXPECT_CALL(GLProxy, Clear(GL_DEPTH_BUFFER_BIT))
-      .Times(0);
-
-    TestCallRender(Render);
-  }
-
-  {
-    auto Render = itCreator->second(Component_t::Make(
-      {
-        { uT("kind"), uT("Camera") },
-        { uT("dept"), uT("Clear") },
-      }));
-
-    EXPECT_CALL(GLProxy, Disable(GL_DEPTH_TEST))
-      .Times(0);
-
-    EXPECT_CALL(GLProxy, Enable(GL_DEPTH_TEST))
-      .Times(1);
-
-    EXPECT_CALL(GLProxy, Clear(GL_DEPTH_BUFFER_BIT))
-      .Times(1);
-
-    TestCallRender(Render);
-  }
+  TestCallRender(Render);
 }
 
 // ************************************************************************** //
@@ -2018,7 +2219,7 @@ TEST_F(OpenGLCommon_test, /*DISABLED_*/Test_Present_FocalCamera_deprecated)
 
   using namespace ::testing;
 
-  auto TestCallRender = [&](Render_t & _Render, bool _IsDeptEnabled,
+  auto TestCallRender = [&](Render_t & _Render,
     float _AngleY, float _zFar,
     float _X, float _Y, float _Z,
     float _A, float _B, float _C,
@@ -2036,7 +2237,7 @@ TEST_F(OpenGLCommon_test, /*DISABLED_*/Test_Present_FocalCamera_deprecated)
 
     const auto ProjectionMatrix = GetMatrixLineValues(
       ::DirectX::XMMatrixTranspose(
-        ::DirectX::XMMatrixPerspectiveFovLH(
+        ::DirectX::XMMatrixPerspectiveFovRH(
           AngleYRadians, Width / Height, 0.01f, _zFar)));
 
     const auto Look = ::DirectX::XMVectorSet(_X, _Y, _Z, 1.0f);
@@ -2052,26 +2253,15 @@ TEST_F(OpenGLCommon_test, /*DISABLED_*/Test_Present_FocalCamera_deprecated)
 
     const auto ViewMatrix = GetMatrixLineValues(
       ::DirectX::XMMatrixTranspose(
-        ::DirectX::XMMatrixLookAtLH(Eye, Look,
+        ::DirectX::XMMatrixLookAtRH(Eye, Look,
           ::DirectX::XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f))));
 
     ASSERT_NE(nullptr, _Render);
 
     InSequence Dummy;
 
-    if (_IsDeptEnabled)
-    {
-      EXPECT_CALL(GLProxy, Enable(GL_DEPTH_TEST))
-        .Times(1);
-
-      EXPECT_CALL(GLProxy, Clear(GL_DEPTH_BUFFER_BIT))
-        .Times(1);
-    }
-    else
-    {
-      EXPECT_CALL(GLProxy, Disable(GL_DEPTH_TEST))
-        .Times(1);
-    }
+    EXPECT_CALL(GLProxy, Disable(GL_DEPTH_TEST))
+      .Times(1);
 
     EXPECT_CALL(GLProxy, Disable(GL_BLEND))
       .Times(1);
@@ -2142,8 +2332,7 @@ TEST_F(OpenGLCommon_test, /*DISABLED_*/Test_Present_FocalCamera_deprecated)
     { 92.0f, 2.0f, 3.0f, 4.0f, 5.0f, 6.0f, 7.0f, 8.0f },
   };
 
-  auto TestCamera = [&](bool _IsDeptEnabled,
-    const Component_t::ComponentPtr_t & _pCamera)
+  auto TestCamera = [&](const Component_t::ComponentPtr_t & _pCamera)
   {
     {
       // Default values + not using Position & Rotation
@@ -2152,7 +2341,7 @@ TEST_F(OpenGLCommon_test, /*DISABLED_*/Test_Present_FocalCamera_deprecated)
 
       auto Info = CameraInfos[0];
 
-      TestCallRender(Render, _IsDeptEnabled,
+      TestCallRender(Render, 
         Info.AngleY, zFar,
         Info.X, Info.Y, Info.Z,
         Info.A, Info.B, Info.C,
@@ -2182,7 +2371,7 @@ TEST_F(OpenGLCommon_test, /*DISABLED_*/Test_Present_FocalCamera_deprecated)
 
       auto Info = CameraInfos[0];
 
-      TestCallRender(Render, _IsDeptEnabled,
+      TestCallRender(Render,
         Info.AngleY, zFar,
         Info.X, Info.Y, Info.Z,
         Info.A, Info.B, Info.C,
@@ -2212,10 +2401,10 @@ TEST_F(OpenGLCommon_test, /*DISABLED_*/Test_Present_FocalCamera_deprecated)
         pRotation->SetValue(uT("y"), Info.B);
         pRotation->SetValue(uT("z"), Info.C);
 
-        _pCamera->SetValue(uT("angle"), Info.AngleY);
+        _pCamera->SetValue(uT("fov"), Info.AngleY);
         _pCamera->SetValue(uT("distance"), Info.Distance);
 
-        TestCallRender(Render, _IsDeptEnabled,
+        TestCallRender(Render, 
           Info.AngleY, zFar,
           Info.X, Info.Y, Info.Z,
           Info.A, Info.B, Info.C,
@@ -2224,16 +2413,9 @@ TEST_F(OpenGLCommon_test, /*DISABLED_*/Test_Present_FocalCamera_deprecated)
     }
   };
 
-  TestCamera(false, Component_t::Make(
+  TestCamera(Component_t::Make(
     {
       { uT("kind"), uT("Camera") },
-      { uT("focal"), uT("Enabled") },
-    }));
-
-  TestCamera(true, Component_t::Make(
-    {
-      { uT("kind"), uT("Camera") },
-      { uT("dept"), uT("Clear") },
       { uT("focal"), uT("Enabled") },
     }));
 }

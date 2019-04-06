@@ -40,6 +40,8 @@ namespace gui
 
 class Layers
 {
+  using LayerPtr_t = ::std::shared_ptr<::covellite::gui::ILayer>;
+
 public:
   class Proxy :
     public ::alicorn::extension::testing::Proxy<Proxy>
@@ -56,10 +58,10 @@ public:
   bool operator== (const Layers & _Value) const { return (m_Id == _Value.m_Id); }
 
 public:
-  template<class TLayer>
-  void Push(const ::std::shared_ptr<TLayer> & _pLayer)
+  void Push(const LayerPtr_t & _pLayer)
   {
-    Proxy::GetInstance()->Push(m_Id, _pLayer->m_Id);
+    Proxy::GetInstance()->Push(m_Id, 
+      dynamic_cast<const ::mock::covellite::gui::Layer &>(*_pLayer).m_Id);
   }
 
   bool Pop(void)

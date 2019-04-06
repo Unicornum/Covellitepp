@@ -153,7 +153,19 @@ public:
     while (true)
     {
       auto * pData = reinterpret_cast<const T *>(pRawData);
-      if (*pData == (T)0) break;
+      //if (*pData == (T)0) break;
+
+      auto IsEnd = [=](void)
+      {
+        for (GLint i = 0; i < _Count; ++i)
+        {
+          if (pData[i] != static_cast<T>(0)) return false;
+        }
+
+        return true;
+      };
+
+      if (IsEnd()) break;
 
       for (GLint i = 0; i < _Count; ++i)
       {

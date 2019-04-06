@@ -105,6 +105,7 @@
     <ClInclude Include="..\Covellite.Api\Renderer\DxCheck.hpp" />
     <ClInclude Include="..\Covellite.Api\Renders.hpp" />
     <ClInclude Include="mock.hpp" />
+    <ClInclude Include="OpenGLCommon_test.hpp" />
     <ClInclude Include="stdafx.h" />
   </ItemGroup>
   <ItemGroup>

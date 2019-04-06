@@ -18,7 +18,7 @@
       <Filter>Common</Filter>
     </ClCompile>
     <ClCompile Include="Layers_test.cpp" />
-    <ClCompile Include="..\..\Covellite.Rocket\Layers.cpp" />
+    <ClCompile Include="..\..\Covellite.Gui\Layers.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">

@@ -1,9 +1,27 @@
 ﻿<rml>
   <head>
-    <link type="text/template" href="layer.template.rml"/>
+    <link type="text/rcss" href="fonts.rcss"/>
+    <link type="text/rcss" href="body.rcss"/>    
     <link type="text/rcss" href="demo.rcss"/>
   </head>
-  <body template="layer">
-    Не реализовано.
+  <body id="id_demo">
+    <form id="id_main_menu">
+      <form>
+        <button id="id_auto">Auto</button>        
+        <button id="id_manual">Manual</button>
+        <button id="id_help">Help</button>
+        <button id="id_back">Exit</button>
+      </form>
+    </form>
+    <form id="id_loading" class="hidden">
+      <!--<circularbar id="id_circular" value="0.667"/>-->
+      <form>
+        <progressbar id="id_progress"/>
+      </form>
+    </form>
+    <form id="id_game_menu" class="hidden">
+      <input type="text" id="id_fps" disabled="disabled" />
+      <button class="fbutton" id="id_back_to_main_menu" />
+    </form>  
   </body>
 </rml>

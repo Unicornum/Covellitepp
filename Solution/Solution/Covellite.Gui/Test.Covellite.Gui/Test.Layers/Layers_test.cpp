@@ -42,6 +42,10 @@ protected:
     MOCK_METHOD0(Hide, void(void));
   };
 
+  class Layer1 : public Layer {};
+  class Layer2 : public Layer {};
+  class Layer3 : public Layer {};
+
   using LayerPtr_t = ::std::shared_ptr<Layer>;
 };
 
@@ -61,9 +65,9 @@ TEST_F(Layers_test, /*DISABLED_*/Test_Destructor)
 // ************************************************************************** //
 TEST_F(Layers_test, /*DISABLED_*/Test_Push)
 {
-  LayerPtr_t pLayer1 = ::std::make_shared<Layer>();
-  LayerPtr_t pLayer2 = ::std::make_shared<Layer>();
-  LayerPtr_t pLayer3 = ::std::make_shared<Layer>();
+  LayerPtr_t pLayer1 = ::std::make_shared<Layer1>();
+  LayerPtr_t pLayer2 = ::std::make_shared<Layer2>();
+  LayerPtr_t pLayer3 = ::std::make_shared<Layer3>();
 
   Tested_t Example;
 
@@ -94,6 +98,50 @@ TEST_F(Layers_test, /*DISABLED_*/Test_Push)
 }
 
 // ************************************************************************** //
+TEST_F(Layers_test, /*DISABLED_*/Test_Push_ExistsLayerClass)
+{
+  LayerPtr_t pLayer1 = ::std::make_shared<Layer1>();
+  LayerPtr_t pLayer2 = ::std::make_shared<Layer2>();
+  LayerPtr_t pLayer3 = ::std::make_shared<Layer1>();
+  LayerPtr_t pLayer4 = ::std::make_shared<Layer2>();
+
+  Tested_t Example;
+
+  using namespace ::testing;
+
+  InSequence Dummy;
+
+  EXPECT_CALL(*pLayer1, Show())
+    .Times(1);
+
+  Example.Push(pLayer1);
+
+  EXPECT_CALL(*pLayer1, Hide())
+    .Times(1);
+
+  EXPECT_CALL(*pLayer2, Show())
+    .Times(1);
+
+  Example.Push(pLayer2);
+
+  EXPECT_CALL(*pLayer2, Hide())
+    .Times(0);
+
+  EXPECT_CALL(*pLayer3, Show())
+    .Times(0);
+
+  EXPECT_STDEXCEPTION(Example.Push(pLayer3), ".*Exists layer: Layer1");
+
+  EXPECT_CALL(*pLayer2, Hide())
+    .Times(0);
+
+  EXPECT_CALL(*pLayer4, Show())
+    .Times(0);
+
+  EXPECT_STDEXCEPTION(Example.Push(pLayer4), ".*Exists layer: Layer2");
+}
+
+// ************************************************************************** //
 TEST_F(Layers_test, /*DISABLED_*/Test_Pop_EmptyStack)
 {
   Tested_t Example;
@@ -103,9 +151,9 @@ TEST_F(Layers_test, /*DISABLED_*/Test_Pop_EmptyStack)
 // ************************************************************************** //
 TEST_F(Layers_test, /*DISABLED_*/Test_Pop)
 {
-  LayerPtr_t pLayer1 = ::std::make_shared<Layer>();
-  LayerPtr_t pLayer2 = ::std::make_shared<Layer>();
-  LayerPtr_t pLayer3 = ::std::make_shared<Layer>();
+  LayerPtr_t pLayer1 = ::std::make_shared<Layer1>();
+  LayerPtr_t pLayer2 = ::std::make_shared<Layer2>();
+  LayerPtr_t pLayer3 = ::std::make_shared<Layer3>();
 
   Tested_t Example;
 

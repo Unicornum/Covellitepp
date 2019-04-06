@@ -80,8 +80,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Example", "Example", "{E347
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "(Documentation)", "(Documentation)", "{3B5848AF-4A35-4586-A085-59C23B3EA899}"
 	ProjectSection(SolutionItems) = preProject
-		Solution\Solution\Example\(Documentation)\ExampleH.png = Solution\Solution\Example\(Documentation)\ExampleH.png
-		Solution\Solution\Example\(Documentation)\ExampleW.png = Solution\Solution\Example\(Documentation)\ExampleW.png
+		Solution\Solution\Example\(Documentation)\DemoPage.hpp = Solution\Solution\Example\(Documentation)\DemoPage.hpp
+		Solution\Solution\Example\(Documentation)\ExampleDemo.classes.txt = Solution\Solution\Example\(Documentation)\ExampleDemo.classes.txt
 		Solution\Solution\Example\(Documentation)\ProjectPage.hpp = Solution\Solution\Example\(Documentation)\ProjectPage.hpp
 		Solution\Solution\Example\(Documentation)\Screenshots.hpp = Solution\Solution\Example\(Documentation)\Screenshots.hpp
 	EndProjectSection
@@ -917,6 +917,7 @@ Global
 		{5200C065-9E58-4933-99FF-A64E20F6AB5E}.Debug.Product|x64.ActiveCfg = Debug|x64
 		{5200C065-9E58-4933-99FF-A64E20F6AB5E}.Debug.Product|x64.Build.0 = Debug|x64
 		{5200C065-9E58-4933-99FF-A64E20F6AB5E}.Debug|ARM.ActiveCfg = Debug|x64
+		{5200C065-9E58-4933-99FF-A64E20F6AB5E}.Debug|ARM.Build.0 = Debug|x64
 		{5200C065-9E58-4933-99FF-A64E20F6AB5E}.Debug|Win32.ActiveCfg = Debug|x64
 		{5200C065-9E58-4933-99FF-A64E20F6AB5E}.Debug|x64.ActiveCfg = Debug|x64
 		{5200C065-9E58-4933-99FF-A64E20F6AB5E}.Debug|x64.Build.0 = Debug|x64
@@ -935,6 +936,7 @@ Global
 		{76C3E197-C212-4438-A794-A36110615344}.Debug.Product|x64.ActiveCfg = Debug|x64
 		{76C3E197-C212-4438-A794-A36110615344}.Debug.Product|x64.Build.0 = Debug|x64
 		{76C3E197-C212-4438-A794-A36110615344}.Debug|ARM.ActiveCfg = Debug|x64
+		{76C3E197-C212-4438-A794-A36110615344}.Debug|ARM.Build.0 = Debug|x64
 		{76C3E197-C212-4438-A794-A36110615344}.Debug|Win32.ActiveCfg = Debug|x64
 		{76C3E197-C212-4438-A794-A36110615344}.Debug|x64.ActiveCfg = Debug|x64
 		{76C3E197-C212-4438-A794-A36110615344}.Debug|x64.Build.0 = Debug|x64

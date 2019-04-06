@@ -8,11 +8,12 @@
   </Options>
   <Process/>
   <Complete>
-    <Week6196>
-      <Task6 Text="Попытка отрисовки окна после того, как оно стало невалидным в Android версии." Type="Bug" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="true" ParentTaskText="false"/>
-    </Week6196>
-    <Week6195/>
-    <Week6194/>
-    <Week6193/>
+    <Week6217>
+      <Task6 Text="Зависание цикла обработки событий Android программы в режиме непрерывной отрисовки при завершении работы приложения." Type="Bug" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="true" ParentTaskText="false"/>
+      <Task7 Text="Неверный порядок удаления объектов окон у Android программы." Type="Bug" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="true" ParentTaskText="false"/>
+    </Week6217>
+    <Week6216/>
+    <Week6215/>
+    <Week6214/>
   </Complete>
 </Tasks>

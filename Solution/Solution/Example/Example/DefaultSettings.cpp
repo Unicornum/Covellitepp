@@ -1,6 +1,6 @@
 ﻿
 #include "stdafx.h"
-#include <Covellite\Core\Settings.hpp>
+#include <Covellite/App/Settings.hpp>
   
 namespace alicorn
 {
@@ -45,11 +45,11 @@ template<>
     480); // Минимальная высота клиентской области окна программы.
     
   (*pSettings)[uT("Window")][uT("BackgroundColor")].AddExtra(uT("R"), 
-    0); // Цвет фона окна программы по умолчанию: красная компонента [0...255].
+    255); // Цвет фона окна программы по умолчанию: красная компонента [0...255].
   (*pSettings)[uT("Window")][uT("BackgroundColor")].AddExtra(uT("G"), 
     0); // Цвет фона окна программы по умолчанию: зеленая компонента [0...255].
   (*pSettings)[uT("Window")][uT("BackgroundColor")].AddExtra(uT("B"), 
-    255); // Цвет фона окна программы по умолчанию: синяя компонента [0...255].
+    0); // Цвет фона окна программы по умолчанию: синяя компонента [0...255].
   (*pSettings)[uT("Window")][uT("BackgroundColor")].AddExtra(uT("A"), 
     255); // Цвет фона окна программы по умолчанию: прозрачность [0...255].
     

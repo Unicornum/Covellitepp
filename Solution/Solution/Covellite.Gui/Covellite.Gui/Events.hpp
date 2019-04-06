@@ -85,7 +85,9 @@ public:
 * \ingroup CovelliteEventsTypeGroup
 * \brief
 *  Класс входит в проект \ref CovelliteGuiPage \n
-*  Класс событий клика мышью по элементу управления.
+*  Класс событий клика по элементу управления.
+* \details
+*  - Генерируется по отжатию кнопки.
 *  
 * \version
 *  1.0.0.0        \n
@@ -104,6 +106,30 @@ public:
 };
 
 namespace { Click_t Click; }
+
+/**
+* \ingroup CovelliteEventsTypeGroup
+* \brief
+*  Класс входит в проект \ref CovelliteGuiPage \n
+*  Класс событий нажатия элемента управления.
+*
+* \version
+*  1.0.0.0        \n
+* \date
+*  16 Март 2019    \n
+* \author
+*  CTAPOBEP (unicornum.verum@gmail.com)
+* \copyright
+*  © CTAPOBEP 2018 - 2019
+*/
+class Press_t final :
+  public Gui
+{
+public:
+  Press_t(void) : Gui("mousedown") {}
+};
+
+namespace { Press_t Press; }
 
 /**
 * \ingroup CovelliteEventsTypeGroup

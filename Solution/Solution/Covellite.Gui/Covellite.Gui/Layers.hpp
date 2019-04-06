@@ -23,12 +23,14 @@ class ILayer;
 *
 * \version
 *  1.0.0.0        \n
+*  1.1.0.0        \n
 * \date
 *  09 Декабрь 2016    \n
+*  16 Март 2019    \n
 * \author
 *  CTAPOBEP (unicornum.verum@gmail.com)
 * \copyright
-*  © CTAPOBEP 2016
+*  © CTAPOBEP 2016 - 2019
 */
 class Layers final
 {
@@ -38,7 +40,7 @@ private:
   ::std::vector<LayerPtr_t> m_Layers;
 
 public:
-  void Push(const LayerPtr_t &) noexcept;
+  void Push(const LayerPtr_t &);
   bool Pop(void);
 };
 

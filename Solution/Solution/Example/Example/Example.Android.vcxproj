@@ -68,13 +68,38 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="Basements\Common.hpp" />
+    <ClInclude Include="Basements\Demo.hpp" />
+    <ClInclude Include="Basements\Demo\3DScene.hpp" />
+    <ClInclude Include="Basements\Demo\Camera.hpp" />
+    <ClInclude Include="Basements\Demo\Compass.hpp" />
+    <ClInclude Include="Basements\Demo\Constants.hpp" />
+    <ClInclude Include="Basements\Demo\Controller.hpp" />
+    <ClInclude Include="Basements\Demo\CubeCoords.hpp" />
+    <ClInclude Include="Basements\Demo\DbComponents.hpp" />
+    <ClInclude Include="Basements\Demo\DbRenders.hpp" />
+    <ClInclude Include="Basements\Demo\DbUpdaters.hpp" />
+    <ClInclude Include="Basements\Demo\Defines.hpp" />
+    <ClInclude Include="Basements\Demo\GameObject.hpp" />
+    <ClInclude Include="Basements\Demo\GameScene.hpp" />
+    <ClInclude Include="Basements\Demo\GameWorld.hpp" />
+    <ClInclude Include="Basements\Demo\I3DScene.hpp" />
+    <ClInclude Include="Basements\Demo\IDbComponents.hpp" />
+    <ClInclude Include="Basements\Demo\IDbRenders.hpp" />
+    <ClInclude Include="Basements\Demo\IGameObject.hpp" />
+    <ClInclude Include="Basements\Demo\IGameWorld.hpp" />
+    <ClInclude Include="Basements\Demo\Landscape.hpp" />
+    <ClInclude Include="Basements\Demo\Loader.hpp" />
+    <ClInclude Include="Basements\Demo\Model.hpp" />
+    <ClInclude Include="Basements\Demo\stdafx.h" />
+    <ClInclude Include="Basements\Demo\View.hpp" />
+    <ClInclude Include="Basements\Demo\Water.hpp" />
     <ClInclude Include="Basements\Dummy.hpp" />
     <ClInclude Include="Basements\IBasement.hpp" />
     <ClInclude Include="Basements\Simple2DGame.hpp" />
     <ClInclude Include="Basements\Simple3DObject.hpp" />
+    <ClInclude Include="BasementWindow.hpp" />
     <ClInclude Include="ExampleApp.hpp" />
     <ClInclude Include="ExampleWindow.hpp" />
-    <ClInclude Include="ExtraWindow.hpp" />
     <ClInclude Include="Layers\Controls.hpp" />
     <ClInclude Include="Layers\Demo.hpp" />
     <ClInclude Include="Layers\Description.hpp" />
@@ -93,13 +118,35 @@
     </ResourceCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\..\Externals.doxygen.ignore\CircularBar\Source\CircularBar\CircularBar.cpp" />
+    <ClCompile Include="..\..\Externals.doxygen.ignore\CircularBar\Source\CircularBar\ElementCircularBar.cpp" />
+    <ClCompile Include="..\..\Externals.doxygen.ignore\ProgressBar\Source\ProgressBar\ElementProgressBar.cpp" />
+    <ClCompile Include="..\..\Externals.doxygen.ignore\ProgressBar\Source\ProgressBar\ProgressBar.cpp" />
     <ClCompile Include="Basements\Common.cpp" />
+    <ClCompile Include="Basements\Demo.cpp">
+      <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">$(IntDir)%(filename).basement.o</ObjectFileName>
+      <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">$(IntDir)%(filename).basement.o</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="Basements\Demo\3DScene.cpp" />
+    <ClCompile Include="Basements\Demo\Camera.cpp" />
+    <ClCompile Include="Basements\Demo\Compass.cpp" />
+    <ClCompile Include="Basements\Demo\Controller.cpp" />
+    <ClCompile Include="Basements\Demo\DbComponents.cpp" />
+    <ClCompile Include="Basements\Demo\DbRenders.cpp" />
+    <ClCompile Include="Basements\Demo\DbUpdaters.cpp" />
+    <ClCompile Include="Basements\Demo\GameObject.cpp" />
+    <ClCompile Include="Basements\Demo\GameWorld.cpp" />
+    <ClCompile Include="Basements\Demo\Landscape.cpp" />
+    <ClCompile Include="Basements\Demo\Loader.cpp" />
+    <ClCompile Include="Basements\Demo\Model.cpp" />
+    <ClCompile Include="Basements\Demo\View.cpp" />
+    <ClCompile Include="Basements\Demo\Water.cpp" />
     <ClCompile Include="Basements\Simple2DGame.cpp" />
     <ClCompile Include="Basements\Simple3DObject.cpp" />
+    <ClCompile Include="BasementWindow.cpp" />
     <ClCompile Include="DefaultSettings.cpp" />
     <ClCompile Include="ExampleApp.cpp" />
     <ClCompile Include="ExampleWindow.cpp" />
-    <ClCompile Include="ExtraWindow.cpp" />
     <ClCompile Include="Layers\Controls.cpp" />
     <ClCompile Include="Layers\Demo.cpp" />
     <ClCompile Include="Layers\Description.cpp" />

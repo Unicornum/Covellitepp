@@ -8,9 +8,10 @@
 using namespace layers;
 
 Layer::Layer(IWindowGui_t & _Window, const Path_t & _FileName,
-  const String_t & _Title, const String_t & _Description) :
+  const String_t & _Title, const String_t & _Description, const bool _IsStopBasements) :
   ::covellite::gui::Layer(_Window, "data" / _FileName),
-  m_FontSize(EmployFontSize(2.5))
+  m_FontSize(EmployFontSize(2.5)),
+  m_IsStopBasements(_IsStopBasements)
 {
   using namespace ::alicorn::extension::std;
 
@@ -29,5 +30,5 @@ Layer::Layer(IWindowGui_t & _Window, const Path_t & _FileName,
   m_Events[events::Click.DocumentId(GetId()).ElementId("id_help")]
     .Connect([&](void) { m_Events[Button.Help](); });
   m_Events[events::Click.DocumentId(GetId()).ElementId("id_back")]
-    .Connect([&](void) { m_Events[Button.Back](); });
+    .Connect([&](void) { m_Events[Button.Back](m_IsStopBasements); });
 }

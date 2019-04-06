@@ -8,52 +8,40 @@
   </Options>
   <Process/>
   <Complete>
-    <Week6216>
-      <Task3 Text="Функция класса компонента для проверки типа параметра." Type="Red" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="false"/>
-      <Task4 Text="Автоматический вывод типа буфера." Type="Red" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="false"/>
-      <Task5 Text="Автоматический вывод типа шейдера." Type="Red" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="true" ParentTaskText="false">
-        <Task6 Text="Прототип на реализации DirectX10." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
-        <Task7 Text="Реализация DirectX11." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
-      </Task5>
-      <Task8 Text="Шейдеры по умолчанию." Type="Red" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="false">
-        <Task9 Text="Прототип для реализации DirectX10." Type="None" Version="None" ExternalProgram="None" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
-        <Task10 Text="Реализация для DirectX11." Type="None" Version="None" ExternalProgram="None" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
-      </Task8>
-      <Task39 Text="Изменение названий классов вершин." Type="Red" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="true" ParentTaskText="false"/>
-    </Week6216>
-    <Week6215>
-      <Task12 Text="DirectX10/11: реорганизация кода создания шейдеров." Type="Red" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="false"/>
-      <Task13 Text="Обобщение кода данных сцены." Type="Red" Version="None" ExternalProgram="None" Expanded="false" Completed="true" History="false" ParentTaskText="false">
-        <Task14 Text="DirectX11." Type="None" Version="None" ExternalProgram="None" Expanded="false" Completed="true" History="false" ParentTaskText="true">
-          <Task15 Text="Передача матриц шейдеру." Type="None" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
-          <Task16 Text="Передача источников света шейдеру." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
-        </Task14>
-        <Task17 Text="OpenGL|ES." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
-      </Task13>
-      <Task18 Text="OpenGL: исправление работы с точечными источниками света." Type="Red" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="false"/>
-      <Task19 Text="Изменение способа указания цвета компонентам источников света." Type="Red" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="true" ParentTaskText="false"/>
-      <Task20 Text="Разный результат рендеринга с использованием источников света для реализаций OpenGL и DirectX." Type="Red" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="true" ParentTaskText="false"/>
-      <Task21 Text="Изменение способа выравнивания структур данных, передаваемых шейдеру." Type="Red" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="false"/>
-      <Task22 Text="Исправление/дополнение тестов." Type="Red" Version="None" ExternalProgram="None" Expanded="false" Completed="true" History="false" ParentTaskText="false">
-        <Task23 Text="Шейдеры." Type="None" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
-        <Task24 Text="Реализация DirectX11." Type="None" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
-        <Task25 Text="Реализации OpenGL|ES." Type="None" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
-      </Task22>
-      <Task26 Text="Изменение способа создания камер." Type="Red" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="true" ParentTaskText="false">
-        <Task27 Text="Экспериментальная версия." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
-        <Task28 Text="Реализация DirectX11." Type="None" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
-        <Task29 Text="Реализации OpenGL|ES." Type="None" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+    <Week6219>
+      <Task26 Text="Правосторонняя система координат при использовании перспективной камеры." Type="Red" Version="None" ExternalProgram="None" Expanded="false" Completed="true" History="true" ParentTaskText="false">
+        <Task27 Text="Реализация DirectX10." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+        <Task28 Text="Реализация OpenGL." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+        <Task29 Text="Реализация DirectX11." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
       </Task26>
-    </Week6215>
-    <Week6214>
-      <Task31 Text="OpenGL: некорректная отрисовка с единым для всей сцены индексным буфером." Type="Bug" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="true" ParentTaskText="false"/>
-      <Task32 Text="DirectX: неверное направление оси Z при использовании буфера глубины для камеры отрисовки плоских объектов." Type="Bug" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="true" ParentTaskText="false"/>
-      <Task33 Text="Объект прямого доступа к параметру kind компонента." Type="Red" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="true" ParentTaskText="false"/>
-      <Task34 Text="Обобщение логики извлечения вспомогательных компонентов для всех реализаций графических Api." Type="Red" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="false"/>
-      <Task35 Text="Передача данных вертексных и индексных буферов при помощи компонента Data.Buffer." Type="Red" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="true" ParentTaskText="false"/>
-      <Task36 Text="Ошибка при повторном создании объекта с одни и тем же id и передачей информации через компонент Data.Buffer." Type="Bug" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="true" ParentTaskText="false"/>
-      <Task37 Text="DirectX10: реорганизация кода." Type="Red" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="false"/>
-    </Week6214>
-    <Week6213/>
+    </Week6219>
+    <Week6218>
+      <Task4 Text="Подсчет количества запросов рендера и автоматическое удаление рендера при обнулении счетчика." Type="Red" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="true" ParentTaskText="false"/>
+      <Task5 Text="Camera: замена названия параметра 'angle' на 'fov'." Type="Red" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="true" ParentTaskText="false"/>
+      <Task6 Text="Компонент заливки буфера кадра указанным цветом." Type="Red" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="true" ParentTaskText="false">
+        <Task7 Text="Прототип на реализации DirectX10." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+        <Task8 Text="Реализация для DirectX11." Type="None" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+        <Task9 Text="Реализация для OpenGL|ES." Type="None" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+      </Task6>
+    </Week6218>
+    <Week6217/>
+    <Week6216>
+      <Task12 Text="Функция класса компонента для проверки типа параметра." Type="Red" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="false"/>
+      <Task13 Text="Автоматический вывод типа буфера." Type="Red" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="false"/>
+      <Task14 Text="Автоматический вывод типа шейдера." Type="Red" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="true" ParentTaskText="false">
+        <Task15 Text="Прототип на реализации DirectX10." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+        <Task16 Text="Реализация DirectX11." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+      </Task14>
+      <Task17 Text="Шейдеры по умолчанию." Type="Red" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="false">
+        <Task18 Text="Прототип для реализации DirectX10." Type="None" Version="None" ExternalProgram="None" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+        <Task19 Text="Реализация для DirectX11." Type="None" Version="None" ExternalProgram="None" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+      </Task17>
+      <Task20 Text="Изменение названий классов вершин." Type="Red" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="true" ParentTaskText="false"/>
+      <Task21 Text="OpenGL: установка нормалей по умолчанию для плоских объектов." Type="Red" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="true" ParentTaskText="false"/>
+      <Task22 Text="OpenGL: автоматическая привязка компонента State.Sampler к текстуре." Type="Red" Version="None" ExternalProgram="RootPart" Expanded="false" Completed="true" History="true" ParentTaskText="false"/>
+      <Task23 Text="Использование компонента положения совместно с ортографической камерой." Type="Red" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="true" ParentTaskText="false"/>
+      <Task24 Text="Отдельный компонент буфера глубины." Type="Red" Version="None" ExternalProgram="RootPart" Expanded="false" Completed="true" History="true" ParentTaskText="false"/>
+      <Task25 Text="State.Scissor: замена имени параметра на enabled." Type="Red" Version="None" ExternalProgram="RootPart" Expanded="false" Completed="true" History="true" ParentTaskText="false"/>
+    </Week6216>
   </Complete>
 </Tasks>

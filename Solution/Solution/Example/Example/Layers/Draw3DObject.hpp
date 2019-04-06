@@ -32,7 +32,6 @@ private:
 
 public:
   explicit Draw3DObject(IWindowGui_t &);
-  ~Draw3DObject(void);
 };
 
 } // namespace layers

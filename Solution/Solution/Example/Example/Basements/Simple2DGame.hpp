@@ -12,7 +12,8 @@ class Simple2DGame_t
 public:
   enum Id
   {
-    Start = 0,
+    Rect = 0,
+    Start,
     Finish,
   };
 };
@@ -96,7 +97,7 @@ private:
 
 private:
   void AddCommonComponents(void);
-  void AddCamera(void);
+  void AddCamera(float, float);
   void AddBackground(void);
   void AddClock(void);
   void AddActors(void);
@@ -114,8 +115,6 @@ private:
   float m_MouseY = 0.0f;
 
 private:
-  const float m_Xo;
-  const float m_Yo;
   const float m_Width;
   const float m_Height;
   const float m_GameFieldSize;

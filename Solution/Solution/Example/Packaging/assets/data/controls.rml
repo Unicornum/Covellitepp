@@ -3,7 +3,7 @@
     <link type="text/template" href="layer.template.rml"/>
     <link type="text/rcss" href="controls.rcss"/>
   </head>
-  <body template="layer">
+  <body template="layer" id="id_controls">
     <settings class="fdefault" id="id_settings" />
   </body>
 </rml>

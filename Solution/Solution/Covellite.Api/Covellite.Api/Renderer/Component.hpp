@@ -52,7 +52,7 @@ public:
 
 public:
   explicit Scissor(const ComponentPtr_t & _pComponent) :
-    IsEnabled(_pComponent->GetValue(uT("is_enabled"), false)),
+    IsEnabled(_pComponent->GetValue(uT("enabled"), false)),
     Left(_pComponent->GetValue(uT("left"), 0)),
     Top(_pComponent->GetValue(uT("top"), 0)),
     Right(_pComponent->GetValue(uT("right"), 0)),

@@ -1622,14 +1622,14 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_ScissorState_Enabled)
 
   D3D11_RASTERIZER_DESC Desc = { 0 };
   Desc.FillMode = D3D11_FILL_SOLID;
-  Desc.CullMode = D3D11_CULL_NONE;
+  Desc.CullMode = D3D11_CULL_BACK;
   Desc.FrontCounterClockwise = TRUE;
   Desc.ScissorEnable = TRUE;
 
   const auto pComponent = Component_t::Make(
     {
       { uT("kind"), uT("Scissor") },
-      { uT("is_enabled"), uT("true") },
+      { uT("enabled"), true },
     });
 
   using namespace ::testing;
@@ -1698,7 +1698,7 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_ScissorState_Enabled_FromData)
 
   D3D11_RASTERIZER_DESC Desc = { 0 };
   Desc.FillMode = D3D11_FILL_SOLID;
-  Desc.CullMode = D3D11_CULL_NONE;
+  Desc.CullMode = D3D11_CULL_BACK;
   Desc.FrontCounterClockwise = TRUE;
   Desc.ScissorEnable = TRUE;
 
@@ -1710,7 +1710,7 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_ScissorState_Enabled_FromData)
   const auto pComponent = Component_t::Make(
     {
       { uT("kind"), uT("Scissor") },
-      { uT("is_enabled"), uT("true") },
+      { uT("enabled"), true },
     });
 
   using namespace ::testing;
@@ -1787,7 +1787,7 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_ScissorState_Disabled)
 
   D3D11_RASTERIZER_DESC Desc = { 0 };
   Desc.FillMode = D3D11_FILL_SOLID;
-  Desc.CullMode = D3D11_CULL_NONE;
+  Desc.CullMode = D3D11_CULL_BACK;
   Desc.FrontCounterClockwise = TRUE;
   Desc.ScissorEnable = FALSE;
 
@@ -1795,7 +1795,7 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_ScissorState_Disabled)
   const auto pComponent = Component_t::Make(
     {
       { uT("kind"), uT("Scissor") },
-      { uT("is_enabled"), uT("false") },
+      { uT("enabled"), false },
     });
 
   using namespace ::testing;
@@ -1830,6 +1830,261 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_ScissorState_Disabled)
 
   EXPECT_CALL(Disable, Release())
     .Times(1);
+}
+
+// ************************************************************************** //
+TEST_F(DirectX11_test, /*DISABLED_*/Test_State_Depth_Disabled)
+{
+  using DirectXProxy_t = ::mock::DirectX11::Proxy;
+  DirectXProxy_t DirectXProxy;
+  DirectXProxy_t::GetInstance() = &DirectXProxy;
+
+  ::mock::DirectX11::Device Device;
+  ::mock::DirectX11::DeviceContext DeviceContext;
+  ::mock::DirectX11::RenderTargetView RenderTargetView;
+  ::mock::DirectX11::DepthStencilView DepthStencilView;
+
+  using namespace ::testing;
+
+  EXPECT_CALL(DirectXProxy, CreateDevice())
+    .Times(1)
+    .WillOnce(Return(&Device));
+
+  EXPECT_CALL(DirectXProxy, CreateDeviceContext())
+    .Times(1)
+    .WillOnce(Return(&DeviceContext));
+
+  EXPECT_CALL(Device, CreateRenderTargetView(_, _))
+    .Times(1)
+    .WillOnce(Return(&RenderTargetView));
+
+  EXPECT_CALL(Device, CreateDepthStencilView(_, _))
+    .Times(1)
+    .WillOnce(Return(&DepthStencilView));
+
+  const Tested_t Example{ Data_t{} };
+  const ITested_t & IExample = Example;
+
+  auto itCreator = IExample.GetCreators().find(uT("State"));
+  ASSERT_NE(IExample.GetCreators().end(), itCreator);
+
+  const auto TestCallRender = [&](const Component_t::ComponentPtr_t & _pState)
+  {
+    auto Render = itCreator->second(_pState);
+    ASSERT_NE(nullptr, Render);
+
+    EXPECT_CALL(DeviceContext,
+      OMSetRenderTargets(1, &RenderTargetView, nullptr))
+      .Times(1);
+
+    Render();
+  };
+
+  TestCallRender(Component_t::Make(
+    {
+      { uT("kind"), uT("Depth") }
+    }));
+  TestCallRender(Component_t::Make(
+    {
+      { uT("kind"), uT("Depth") },
+      { uT("enabled"), false } 
+    }));
+}
+
+// ************************************************************************** //
+TEST_F(DirectX11_test, /*DISABLED_*/Test_State_Depth_Enabled)
+{
+  using DirectXProxy_t = ::mock::DirectX11::Proxy;
+  DirectXProxy_t DirectXProxy;
+  DirectXProxy_t::GetInstance() = &DirectXProxy;
+
+  ::mock::DirectX11::Device Device;
+  ::mock::DirectX11::DeviceContext DeviceContext;
+  ::mock::DirectX11::RenderTargetView RenderTargetView;
+  ::mock::DirectX11::DepthStencilView DepthStencilView;
+
+  using namespace ::testing;
+
+  EXPECT_CALL(DirectXProxy, CreateDevice())
+    .Times(1)
+    .WillOnce(Return(&Device));
+
+  EXPECT_CALL(DirectXProxy, CreateDeviceContext())
+    .Times(1)
+    .WillOnce(Return(&DeviceContext));
+
+  EXPECT_CALL(Device, CreateRenderTargetView(_, _))
+    .Times(1)
+    .WillOnce(Return(&RenderTargetView));
+
+  EXPECT_CALL(Device, CreateDepthStencilView(_, _))
+    .Times(1)
+    .WillOnce(Return(&DepthStencilView));
+
+  const Tested_t Example{ Data_t{} };
+  const ITested_t & IExample = Example;
+
+  auto itCreator = IExample.GetCreators().find(uT("State"));
+  ASSERT_NE(IExample.GetCreators().end(), itCreator);
+
+  const auto TestCallRender = [&](const Component_t::ComponentPtr_t & _pState)
+  {
+    auto Render = itCreator->second(_pState);
+    ASSERT_NE(nullptr, Render);
+
+    EXPECT_CALL(DeviceContext,
+      OMSetRenderTargets(1, &RenderTargetView, &DepthStencilView))
+      .Times(1);
+
+    EXPECT_CALL(DeviceContext, ClearDepthStencilView(_, _, _, _))
+      .Times(0);
+
+    Render();
+  };
+
+  TestCallRender(Component_t::Make(
+    {
+      { uT("kind"), uT("Depth") },
+      { uT("enabled"), true },
+      { uT("clear"), false }
+    }));
+}
+
+// ************************************************************************** //
+TEST_F(DirectX11_test, /*DISABLED_*/Test_State_Depth_Clear)
+{
+  using DirectXProxy_t = ::mock::DirectX11::Proxy;
+  DirectXProxy_t DirectXProxy;
+  DirectXProxy_t::GetInstance() = &DirectXProxy;
+
+  ::mock::DirectX11::Device Device;
+  ::mock::DirectX11::DeviceContext DeviceContext;
+  ::mock::DirectX11::RenderTargetView RenderTargetView;
+  ::mock::DirectX11::DepthStencilView DepthStencilView;
+
+  using namespace ::testing;
+
+  EXPECT_CALL(DirectXProxy, CreateDevice())
+    .Times(1)
+    .WillOnce(Return(&Device));
+
+  EXPECT_CALL(DirectXProxy, CreateDeviceContext())
+    .Times(1)
+    .WillOnce(Return(&DeviceContext));
+
+  EXPECT_CALL(Device, CreateRenderTargetView(_, _))
+    .Times(1)
+    .WillOnce(Return(&RenderTargetView));
+
+  EXPECT_CALL(Device, CreateDepthStencilView(_, _))
+    .Times(1)
+    .WillOnce(Return(&DepthStencilView));
+
+  const Tested_t Example{ Data_t{} };
+  const ITested_t & IExample = Example;
+
+  auto itCreator = IExample.GetCreators().find(uT("State"));
+  ASSERT_NE(IExample.GetCreators().end(), itCreator);
+
+  const auto TestCallRender = [&](const Component_t::ComponentPtr_t & _pState)
+  {
+    auto Render = itCreator->second(_pState);
+    ASSERT_NE(nullptr, Render);
+
+    EXPECT_CALL(DeviceContext,
+      OMSetRenderTargets(1, &RenderTargetView, &DepthStencilView))
+      .Times(1);
+
+    EXPECT_CALL(DeviceContext,
+      ClearDepthStencilView(&DepthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0))
+      .Times(1);
+
+    Render();
+  };
+
+  TestCallRender(Component_t::Make(
+    {
+      { uT("kind"), uT("Depth") },
+      { uT("enabled"), true },
+      { uT("clear"), true }
+    }));
+}
+
+// ************************************************************************** //
+TEST_F(DirectX11_test, /*DISABLED_*/Test_State_Clear)
+{
+  using DirectXProxy_t = ::mock::DirectX11::Proxy;
+  DirectXProxy_t DirectXProxy;
+  DirectXProxy_t::GetInstance() = &DirectXProxy;
+
+  ::mock::DirectX11::Device Device;
+  ::mock::DirectX11::DeviceContext DeviceContext;
+  ::mock::DirectX11::RenderTargetView RenderTargetView;
+
+  using namespace ::testing;
+
+  EXPECT_CALL(DirectXProxy, CreateDevice())
+    .Times(1)
+    .WillOnce(Return(&Device));
+
+  EXPECT_CALL(DirectXProxy, CreateDeviceContext())
+    .Times(1)
+    .WillOnce(Return(&DeviceContext));
+
+  EXPECT_CALL(Device, CreateRenderTargetView(_, _))
+    .Times(1)
+    .WillOnce(Return(&RenderTargetView));
+
+  const Tested_t Example{ Data_t{} };
+  const ITested_t & IExample = Example;
+
+  auto itCreator = IExample.GetCreators().find(uT("State"));
+  ASSERT_NE(IExample.GetCreators().end(), itCreator);
+
+  const auto TestCallRender = [&](
+    const Component_t::ComponentPtr_t & _pComponent,
+    const ::std::vector<FLOAT> & _ExpectedColor)
+  {
+    auto Render = itCreator->second(_pComponent);
+    ASSERT_NE(nullptr, Render);
+
+    EXPECT_CALL(DeviceContext, 
+      ClearRenderTargetView(&RenderTargetView, _ExpectedColor))
+      .Times(1);
+
+    Render();
+  };
+
+  {
+    const ::std::vector<FLOAT> DefaultColor =
+    {
+      0.0f,
+      0.0f,
+      0.0f,
+      1.0f,
+    };
+
+    TestCallRender(Component_t::Make(
+      {
+        { uT("kind"), uT("Clear") },
+      }), DefaultColor);
+  }
+
+  {
+    const ::std::vector<FLOAT> Color =
+    {
+      0.86274509803921568627450980392157f, // DC
+      0.72941176470588235294117647058824f, // BA
+      0.5960784313725490196078431372549f, // 98
+      0.9960784313725490196078431372549f, // FE
+    };
+
+    TestCallRender(Component_t::Make(
+      {
+        { uT("kind"), uT("Clear") },
+        { uT("color"), 0xFEDCBA98 },
+      }), Color);
+  }
 }
 
 // ************************************************************************** //
@@ -3411,7 +3666,7 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Present_Geometry)
 }
 
 // ************************************************************************** //
-TEST_F(DirectX11_test, /*DISABLED_*/Test_Camera_Orthographic)
+TEST_F(DirectX11_test, /*DISABLED_*/Test_Camera_Orthographic_DefaultPosition)
 {
   using DirectXProxy_t = ::mock::DirectX11::Proxy;
   DirectXProxy_t DirectXProxy;
@@ -3463,6 +3718,103 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Camera_Orthographic)
     Viewport.Height = Height;
 
     auto Render = itCameraCreator->second(pComponent);
+    ASSERT_NE(nullptr, Render);
+
+    EXPECT_CALL(DeviceContext, RSGetViewports(1))
+      .Times(1)
+      .WillOnce(Return(Viewport));
+
+    Render();
+  }
+
+  // Present.Geometry
+  {
+    const auto pComponent = Component_t::Make(
+      {
+        { uT("kind"), uT("Geometry") },
+      });
+
+    auto Render = itPresentCreator->second(pComponent);
+    ASSERT_NE(nullptr, Render);
+
+    EXPECT_CALL(DeviceContext, UpdateSubresource(_, _, _, Matrices, _, _))
+      .Times(1);
+
+    Render();
+  }
+}
+
+// ************************************************************************** //
+TEST_F(DirectX11_test, /*DISABLED_*/Test_Camera_Orthographic)
+{
+  using DirectXProxy_t = ::mock::DirectX11::Proxy;
+  DirectXProxy_t DirectXProxy;
+  DirectXProxy_t::GetInstance() = &DirectXProxy;
+
+  ::mock::DirectX11::DeviceContext DeviceContext;
+
+  const auto X = 1902282004.0f;
+  const auto Y = 1902282005.0f;
+  const auto Width = 1902282006.0f;
+  const auto Height = 1902282007.0f;
+
+# pragma warning(push)
+# pragma warning(disable: 6001)
+
+  ::Matrices Matrices;
+
+  Matrices.World = ::DirectX::XMMatrixTranspose(
+    ::DirectX::XMMatrixIdentity());
+  Matrices.Projection = ::DirectX::XMMatrixTranspose(
+    ::DirectX::XMMatrixOrthographicOffCenterLH(
+      X, X + Width, 
+      Y + Height, Y, 
+      1.0f, -1.0f));
+  Matrices.View = ::DirectX::XMMatrixTranspose(
+    ::DirectX::XMMatrixIdentity());
+
+# pragma warning(pop)
+
+  using namespace ::testing;
+
+  EXPECT_CALL(DirectXProxy, CreateDeviceContext())
+    .Times(1)
+    .WillOnce(Return(&DeviceContext));
+
+  const Tested_t Example{ Data_t{} };
+  const ITested_t & IExample = Example;
+
+  auto itDataCreator = IExample.GetCreators().find(uT("Data"));
+  ASSERT_NE(IExample.GetCreators().end(), itDataCreator);
+
+  auto itCameraCreator = IExample.GetCreators().find(uT("Camera"));
+  ASSERT_NE(IExample.GetCreators().end(), itCameraCreator);
+
+  auto itPresentCreator = IExample.GetCreators().find(uT("Present"));
+  ASSERT_NE(IExample.GetCreators().end(), itPresentCreator);
+
+  // Camera.Orthographic
+  {
+    const auto pPosition = Component_t::Make(
+      {
+        { uT("kind"), uT("Position") },
+        { uT("x"), X },
+        { uT("y"), Y },
+      });
+
+    auto DataRender = itDataCreator->second(pPosition);
+    EXPECT_EQ(nullptr, DataRender);
+
+    const auto pCamera = Component_t::Make(
+      {
+        { uT("kind"), uT("Orthographic") },
+      });
+
+    D3D11_VIEWPORT Viewport = { 0 };
+    Viewport.Width = Width;
+    Viewport.Height = Height;
+
+    auto Render = itCameraCreator->second(pCamera);
     ASSERT_NE(nullptr, Render);
 
     EXPECT_CALL(DeviceContext, RSGetViewports(1))
@@ -3549,7 +3901,7 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Camera_Perspective)
 
   const auto GetProjection = [](float _AngleY, float _Width, float _Height)
   {
-    return ::DirectX::XMMatrixPerspectiveFovLH(
+    return ::DirectX::XMMatrixPerspectiveFovRH(
       _AngleY * (float)::alicorn::extension::cpp::math::GreedToRadian,
       _Width / _Height, 0.01f, 200.0f);
   };
@@ -3570,7 +3922,7 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Camera_Perspective)
       ::DirectX::XMVectorSet(_Distance, 0.0f, 0.0f, 1.0f),
       Transform);
 
-    return ::DirectX::XMMatrixLookAtLH(Eye, Look,
+    return ::DirectX::XMMatrixLookAtRH(Eye, Look,
       ::DirectX::XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f));
   };
 
@@ -3647,7 +3999,7 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Camera_Perspective)
       pRotation->SetValue(uT("y"), B);
       pRotation->SetValue(uT("z"), C);
 
-      pCamera->SetValue(uT("angle"), AngleY);
+      pCamera->SetValue(uT("fov"), AngleY);
       pCamera->SetValue(uT("distance"), Distance);
 
       TestCallRender(CameraRender, Width, Height, Matrices);
@@ -3682,7 +4034,7 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Camera_Perspective)
       pRotation->SetValue(uT("y"), B);
       pRotation->SetValue(uT("z"), C);
 
-      pCamera->SetValue(uT("angle"), AngleY);
+      pCamera->SetValue(uT("fov"), AngleY);
       pCamera->SetValue(uT("distance"), Distance);
 
       TestCallRender(CameraRender, Width, Height, Matrices);
@@ -3739,7 +4091,7 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Camera_DisableBlend)
 }
 
 // ************************************************************************** //
-TEST_F(DirectX11_test, /*DISABLED_*/Test_Camera_Dept)
+TEST_F(DirectX11_test, /*DISABLED_*/Test_Camera_Depth_Disabled)
 {
   using DirectXProxy_t = ::mock::DirectX11::Proxy;
   DirectXProxy_t DirectXProxy;
@@ -3776,49 +4128,14 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Camera_Dept)
 
   const auto TestCallRender = [&](const Component_t::ComponentPtr_t & _pCamera)
   {
-    {
-      auto Render = itCreator->second(_pCamera);
-      ASSERT_NE(nullptr, Render);
+    auto Render = itCreator->second(_pCamera);
+    ASSERT_NE(nullptr, Render);
 
-      EXPECT_CALL(DeviceContext, 
-        OMSetRenderTargets(1, &RenderTargetView, nullptr))
-        .Times(1);
+    EXPECT_CALL(DeviceContext,
+      OMSetRenderTargets(1, &RenderTargetView, nullptr))
+      .Times(1);
 
-      Render();
-    }
-
-    _pCamera->SetValue(uT("dept"), uT("Enabled"));
-
-    {
-      auto Render = itCreator->second(_pCamera);
-      ASSERT_NE(nullptr, Render);
-
-      EXPECT_CALL(DeviceContext,
-        OMSetRenderTargets(1, &RenderTargetView, &DepthStencilView))
-        .Times(1);
-
-      EXPECT_CALL(DeviceContext, ClearDepthStencilView(_, _, _, _))
-        .Times(0);
-
-      Render();
-    }
-
-    _pCamera->SetValue(uT("dept"), uT("Clear"));
-
-    {
-      auto Render = itCreator->second(_pCamera);
-      ASSERT_NE(nullptr, Render);
-
-      EXPECT_CALL(DeviceContext,
-        OMSetRenderTargets(1, &RenderTargetView, &DepthStencilView))
-        .Times(1);
-
-      EXPECT_CALL(DeviceContext,
-        ClearDepthStencilView(&DepthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0))
-        .Times(1);
-
-      Render();
-    }
+    Render();
   };
 
   TestCallRender(Component_t::Make({ { uT("kind"), uT("Orthographic") } }));
@@ -4636,7 +4953,7 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Present_Camera_Focal_deprecated)
 
   const auto GetProjection = [](float _AngleY, float _Width, float _Height)
   {
-    return ::DirectX::XMMatrixPerspectiveFovLH(
+    return ::DirectX::XMMatrixPerspectiveFovRH(
       _AngleY * (float)::alicorn::extension::cpp::math::GreedToRadian,
       _Width / _Height, 0.01f, 200.0f);
   };
@@ -4657,7 +4974,7 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Present_Camera_Focal_deprecated)
       ::DirectX::XMVectorSet(_Distance, 0.0f, 0.0f, 1.0f),
       Transform);
 
-    return ::DirectX::XMMatrixLookAtLH(Eye, Look,
+    return ::DirectX::XMMatrixLookAtRH(Eye, Look,
       ::DirectX::XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f));
   };
 
@@ -4735,7 +5052,7 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Present_Camera_Focal_deprecated)
       pRotation->SetValue(uT("y"), B);
       pRotation->SetValue(uT("z"), C);
 
-      pCamera->SetValue(uT("angle"), AngleY);
+      pCamera->SetValue(uT("fov"), AngleY);
       pCamera->SetValue(uT("distance"), Distance);
 
       TestCallRender(CameraRender, Width, Height, Matrices);
@@ -4770,7 +5087,7 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Present_Camera_Focal_deprecated)
       pRotation->SetValue(uT("y"), B);
       pRotation->SetValue(uT("z"), C);
 
-      pCamera->SetValue(uT("angle"), AngleY);
+      pCamera->SetValue(uT("fov"), AngleY);
       pCamera->SetValue(uT("distance"), Distance);
 
       TestCallRender(CameraRender, Width, Height, Matrices);
@@ -4835,7 +5152,7 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Present_Camera_DisableBlend_deprecated)
 }
 
 // ************************************************************************** //
-TEST_F(DirectX11_test, /*DISABLED_*/Test_Present_Camera_Dept_deprecated)
+TEST_F(DirectX11_test, /*DISABLED_*/Test_Present_Camera_Depth_deprecated)
 {
   using DirectXProxy_t = ::mock::DirectX11::Proxy;
   DirectXProxy_t DirectXProxy;
@@ -4872,32 +5189,13 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Present_Camera_Dept_deprecated)
 
   const auto TestCallRender = [&](const Component_t::ComponentPtr_t & _pComponent)
   {
-    {
-      auto Render = itCreator->second(_pComponent);
-      ASSERT_NE(nullptr, Render);
+    auto Render = itCreator->second(_pComponent);
+    ASSERT_NE(nullptr, Render);
 
-      EXPECT_CALL(DeviceContext, OMSetRenderTargets(1, &RenderTargetView, nullptr))
-        .Times(1);
+    EXPECT_CALL(DeviceContext, OMSetRenderTargets(1, &RenderTargetView, nullptr))
+      .Times(1);
 
-      Render();
-    }
-
-    _pComponent->SetValue(uT("dept"), uT("Clear"));
-
-    {
-      auto Render = itCreator->second(_pComponent);
-      ASSERT_NE(nullptr, Render);
-
-      EXPECT_CALL(DeviceContext,
-        OMSetRenderTargets(1, &RenderTargetView, &DepthStencilView))
-        .Times(1);
-
-      EXPECT_CALL(DeviceContext,
-        ClearDepthStencilView(&DepthStencilView, D3D11_CLEAR_DEPTH, 1.0f, 0))
-        .Times(1);
-
-      Render();
-    }
+    Render();
   };
 
   const auto pCameraGui = Component_t::Make(

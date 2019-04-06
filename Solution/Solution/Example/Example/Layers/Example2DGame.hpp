@@ -29,7 +29,6 @@ private:
 
 public:
   explicit Simple2DGame(IWindowGui_t &);
-  ~Simple2DGame(void);
 };
 
 } // namespace layers

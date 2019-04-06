@@ -1,0 +1,127 @@
+﻿
+@startuml
+
+class Events as "covellite::events::Events"
+{
+}
+
+class GuiPanels as "layers::Demo"
+{
+}
+
+interface model_IScene as "model::IGameWorld"
+{
+  {abstract} + GameScene * CreateGameScene();
+  ---
+}
+
+interface model_IComponents as "model::IDbComponents"
+{
+  {abstract} + Components_t GetObject(Id);
+  ---
+  signal DoAddObject
+  signal DoRemoveObject
+}
+
+class model_Main as "model::Model"
+{
+  + Model(Events &);
+  ---
+}
+
+class model_Components as "model::DbComponents"
+{
+  + Id AddGameObject(Object_t);
+  + void RemoveGameObject(Id);
+  + Component GetComponent(ObjectId, ComponentId);
+  ---
+}
+
+class model_GameWorld as "model::GameWorld"
+{
+  + GameWorld(Events &, DbComponents &);
+  ---
+}
+
+class model_GameScene as "support::GameScene"
+{
+  + std::vector<support::Scene>
+}
+
+class model_Scene as "support::Scene"
+{
+  + Id CameraId
+  + Objects_t Objects
+  + Updaters_t Updaters;
+}
+
+model_IComponents <|-.- model_Components
+model_IComponents <|-.- model_Main
+model_IScene <|-.- model_GameWorld
+model_IScene <|-.- model_Main
+model_Main --* model_Components
+model_Main --* model_GameWorld
+model_Components o-- model_GameWorld
+
+model_GameWorld --o Filesystem
+model_GameWorld --* model_GameScene
+
+model_GameScene --* model_Scene
+
+Events o-- model_GameWorld
+Events o-- GuiPanels
+
+interface view_IScene as "view::I3DScene"
+{
+  {abstract} + void SetGameScene(GameScene *);
+  {abstract} + void Render();
+  ---
+}
+
+interface view_IRenders as "view::IDbRenders"
+{
+  {abstract} + void AddObjects(std::vector<Id>);
+  {abstract} + void RemoveObjects(std::vector<Id>);
+  ---
+}
+
+class view_Main as "view::View"
+{
+  + View(Renders &);
+}
+
+class view_Renders as "view::DbRenders"
+{
+  + Renders_t GetRenders(Id);
+  ---
+  + DbRenders(Renders &);
+}
+
+class view_3DScene as "view::3DScene"
+{
+  + 3DScene(DbRenders &);
+  ---
+}
+
+view_IRenders <|-.- view_Renders
+view_IRenders <|-.- view_Main
+view_IScene <|-.- view_3DScene
+view_IScene <|-.- view_Main
+view_Main --* view_Renders
+view_Main --* view_3DScene
+view_Renders o-- view_3DScene
+view_3DScene --* model_GameScene
+
+class controller_Main as "controller::Controller"
+{
+  + Main(mode::IGameWorld &, view::I3DScene &);
+  + Main(model::IDbComponents &, view::IDbRenders &);
+  ---
+}
+
+model_IScene --o controller_Main
+model_IComponents --o controller_Main
+view_IScene --o controller_Main
+view_IRenders --o controller_Main
+
+@enduml

@@ -91,16 +91,26 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <Content Include="assets\data\body.rcss" />
-    <Content Include="assets\data\bricks.jpg" />
-    <Content Include="assets\data\clock.png" />
     <Content Include="assets\data\controls.rcss" />
     <Content Include="assets\data\controls.rml">
       <SubType>Designer</SubType>
     </Content>
+    <Content Include="assets\data\demo.background.jpg" />
+    <Content Include="assets\data\demo.circular.png" />
+    <Content Include="assets\data\demo.progress.png" />
     <Content Include="assets\data\demo.rcss" />
     <Content Include="assets\data\demo.rml">
       <SubType>Designer</SubType>
     </Content>
+    <Content Include="assets\data\demo\demo.bush.png" />
+    <Content Include="assets\data\demo\demo.compass.png" />
+    <Content Include="assets\data\demo\demo.dummy.png" />
+    <Content Include="assets\data\demo\demo.grass.png" />
+    <Content Include="assets\data\demo\demo.none.png" />
+    <Content Include="assets\data\demo\demo.rock.png" />
+    <Content Include="assets\data\demo\demo.sand.png" />
+    <Content Include="assets\data\demo\demo.tree.png" />
+    <Content Include="assets\data\demo\demo.water.png" />
     <Content Include="assets\data\description.rcss" />
     <Content Include="assets\data\description.rml">
       <SubType>Designer</SubType>
@@ -109,6 +119,7 @@
     <Content Include="assets\data\draw3dobject.rml">
       <SubType>Designer</SubType>
     </Content>
+    <Content Include="assets\data\draw3dobject.title.png" />
     <Content Include="assets\data\experimental.rcss" />
     <Content Include="assets\data\experimental.rml" />
     <Content Include="assets\data\fonts.rcss" />
@@ -134,18 +145,19 @@
     <Content Include="assets\data\main.rml">
       <SubType>Designer</SubType>
     </Content>
-    <Content Include="assets\data\npc.jpg" />
-    <Content Include="assets\data\paper.png" />
     <Content Include="assets\data\scrollbar.rcss" />
+    <Content Include="assets\data\simple2dgame.bricks.jpg" />
+    <Content Include="assets\data\simple2dgame.clock.png" />
     <Content Include="assets\data\simple2dgame.rcss" />
     <Content Include="assets\data\simple2dgame.rml">
       <SubType>Designer</SubType>
     </Content>
+    <Content Include="assets\data\text.npc.jpg" />
+    <Content Include="assets\data\text.paper.png" />
     <Content Include="assets\data\text.rcss" />
     <Content Include="assets\data\text.rml">
       <SubType>Designer</SubType>
     </Content>
-    <Content Include="assets\data\title.png" />
     <Content Include="res\drawable\icon.png" />
     <Content Include="res\values\strings.xml" />
     <AntBuildXml Include="build.xml" />
@@ -153,7 +165,9 @@
       <SubType>Designer</SubType>
     </AndroidManifest>
     <AntProjectPropertiesFile Include="project.properties" />
-    <Content Include="res\values\version.auto.xml" />
+    <Content Include="res\values\version.auto.xml">
+      <SubType>Designer</SubType>
+    </Content>
     <JavaCompile Include="src\com\Example\Example.java" />
     <JavaCompile Include="src\externals\Activity.java" />
     <JavaCompile Include="src\externals\Context.java" />

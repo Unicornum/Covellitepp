@@ -5,6 +5,7 @@
 #include <thread>
 #include <alicorn/cpp/math.hpp>
 #include <alicorn/std/vector.hpp>
+#include <alicorn/logger.hpp>
 #include <Covellite/Api/Component.inl>
 
 using namespace basement;
@@ -67,15 +68,16 @@ Simple2DGame::Simple2DGame(const Events_t & _Events,
   const RendersPtr_t & _pRenders, const Rect & _Rect) :
   Common(_pRenders),
   m_Events(_Events),
-  m_Xo((_Rect.Right + _Rect.Left) / 2.0f),
-  m_Yo((_Rect.Bottom + _Rect.Top) / 2.0f),
   m_Width(_Rect.Right - _Rect.Left),
   m_Height(_Rect.Bottom - _Rect.Top),
   m_GameFieldSize(0.9f * math::Min(m_Width, m_Height)),
   m_UserUnit(0.0f, 0.0f, 0.15f, 0.15f, 0.0f)
 {
+  const auto Xo = (_Rect.Right + _Rect.Left) / 2.0f;
+  const auto Yo = (_Rect.Bottom + _Rect.Top) / 2.0f;
+
   AddCommonComponents();
-  AddCamera();
+  AddCamera(Xo, Yo);
   AddBackground();
   AddClock();
   AddActors();
@@ -95,10 +97,10 @@ Simple2DGame::Simple2DGame(const Events_t & _Events,
   });
 
   m_Events[events::Cursor.Motion].Connect(
-    [&](const events::Cursor_t::Position & _Position)
+    [&, Xo, Yo](const events::Cursor_t::Position & _Position)
   {
-    m_MouseX = (static_cast<float>(_Position.X) - m_Xo) / m_GameFieldSize;
-    m_MouseY = (static_cast<float>(_Position.Y) - m_Yo) / m_GameFieldSize;
+    m_MouseX = (static_cast<float>(_Position.X) - Xo) / m_GameFieldSize;
+    m_MouseY = (static_cast<float>(_Position.Y) - Yo) / m_GameFieldSize;
   });
 
   m_BeginRenderFrameTime = ::std::chrono::system_clock::now();
@@ -106,33 +108,11 @@ Simple2DGame::Simple2DGame(const Events_t & _Events,
 
 Simple2DGame::~Simple2DGame(void)
 {
-  m_pRenders->Remove(
-    {
-      Component_t::Make(
-      {
-        { uT("id"), uT("Simple2DGame.Texture") },
-      }),
-      Component_t::Make(
-      {
-        { uT("id"), uT("Simple2DGame.Texture.Clock") },
-      }),
-      Component_t::Make(
-      {
-        { uT("id"), uT("Simple2DGame.Buffer.Index.Rectangle") },
-      }),
-      Component_t::Make(
-      {
-        { uT("id"), uT("Simple2DGame.Shader.Pixel.Textured") },
-      }),
-      Component_t::Make(
-      {
-        { uT("id"), uT("Simple2DGame.Shader.Pixel.Colored") },
-      }),
-      Component_t::Make(
-      {
-        { uT("id"), uT("Simple2DGame.Shader.Vertex.Rectangle") },
-      }),
-    });
+  LOGGER(Info) << "Basements Simple2DGame destoyed.";
+
+  // Рендеры не удаляются, т.к. объект класса Simple2DGame содержит уникальный
+  // объект m_pRenders, который удаляется вместе со всеми рендерами.
+  // m_pRenders->Remove(...);
 }
 
 void Simple2DGame::Render(void) /*override*/
@@ -162,7 +142,7 @@ void Simple2DGame::AddCommonComponents(void)
   // Создание общих рендеров, которые будут использоваться всеми объектами
   // (объекты будут запрашивать эти рендеры по их id).
 
-  LoadTexture("bricks.jpg", uT("Simple2DGame.Texture"));
+  LoadTexture("simple2dgame.bricks.jpg", uT("Simple2DGame.Texture"));
 
   /// [Common objects]
   const ::std::vector<int> IndexData = { 0,  1,  2,   2,  1,  3, };
@@ -170,12 +150,6 @@ void Simple2DGame::AddCommonComponents(void)
   const auto Renders = 
     m_pRenders->Obtain(
     {
-      Component_t::Make(
-      {
-        { uT("id"), uT("Simple2DGame.State.Sampler") },
-        { uT("type"), uT("State") },
-        { uT("kind"), uT("Sampler") },
-      }),
       Component_t::Make(
       {
         { uT("type"), uT("Data") },
@@ -219,13 +193,20 @@ void Simple2DGame::AddCommonComponents(void)
   ::boost::ignore_unused(Renders);
 }
 
-void Simple2DGame::AddCamera(void)
+void Simple2DGame::AddCamera(float _Xo, float _Yo)
 {
   const Id Id;
 
   /// [Create camera]
   m_Objects[Id] = m_pRenders->Obtain(
     {
+      Component_t::Make(
+      {
+        { uT("type"), uT("Data") },
+        { uT("kind"), uT("Position") },
+        { uT("x"), -_Xo },
+        { uT("y"), -_Yo },
+      }),
       Component_t::Make(
       {
         { uT("id"), uT("Simple2DGame.Camera.") + Id.GetStringId() },
@@ -237,6 +218,12 @@ void Simple2DGame::AddCamera(void)
         { uT("id"), uT("Simple2DGame.State.Blend") },
         { uT("type"), uT("State") },
         { uT("kind"), uT("Blend") },
+      }),
+      Component_t::Make(
+      {
+        { uT("id"), uT("Simple2DGame.State.Sampler") },
+        { uT("type"), uT("State") },
+        { uT("kind"), uT("Sampler") },
       }),
       Component_t::Make(
       {
@@ -269,7 +256,7 @@ void Simple2DGame::AddBackground(void)
 
 void Simple2DGame::AddClock(void)
 {
-  LoadTexture("clock.png", uT("Simple2DGame.Texture.Clock"));
+  LoadTexture("simple2dgame.clock.png", uT("Simple2DGame.Texture.Clock"));
 
   // Циферблат
 
@@ -496,10 +483,6 @@ auto Simple2DGame::BuildRectangle(
       {
         { uT("id"), _TextureId },
       }),
-      Component_t::Make(
-      {
-        { uT("id"), uT("Simple2DGame.State.Sampler") },
-      }),
       /// [Textured object]
     }, _Transform);
 }
@@ -556,13 +539,6 @@ auto Simple2DGame::BuildRectangle(
         { uT("kind"), uT("Scale") },
         { uT("x"), m_GameFieldSize },
         { uT("y"), m_GameFieldSize },
-      }),
-      Component_t::Make(
-      {
-        { uT("type"), uT("Data") },
-        { uT("kind"), uT("Position") },
-        { uT("x"), m_Xo },
-        { uT("y"), m_Yo },
       }),
       Component_t::Make(
       {

@@ -89,6 +89,7 @@ private:
 
 public:
   explicit Renderer(const RendersPtr_t &);
+  ~Renderer(void);
 
 private:
   friend ::covellite::api::renderer::Renderer;

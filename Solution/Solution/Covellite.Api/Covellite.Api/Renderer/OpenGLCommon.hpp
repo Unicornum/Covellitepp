@@ -55,8 +55,8 @@ private:
   Render_t CreatePresent(const ComponentPtr_t &);
 
 private:
-  Render_t GetDeptRender(const ComponentPtr_t &);
-  Render_t GetCameraCommon(const ComponentPtr_t &);
+  Render_t GetDepthRender(bool, bool);
+  Render_t GetCameraCommon(void);
   Render_t GetCameraGui(const ComponentPtr_t &);
   Render_t GetCameraFocal(const ComponentPtr_t &);
   Render_t CreateGeometry(const ComponentPtr_t &);
@@ -68,6 +68,7 @@ private:
   const String_t              m_PreVersion;
   Creators_t                  m_Creators;
   Render_t                    m_DrawElements;
+  Render_t                    m_SampleState = [](void) {};
 
 private:
   class Data;

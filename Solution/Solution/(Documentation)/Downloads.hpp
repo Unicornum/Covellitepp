@@ -2,13 +2,16 @@
 /**
 * \page DownloadsPage Скачать
 *  
-* ### Тестовое демо (текущая версия)
+*  Тестовое демо
+*  -------------
 *  
-*  - Сборка для Windows (x64): [Covellite++ Windows example]
+* ### Текущая версия
+*  
+*  - Сборка для Windows (Win7+ x64): [Covellite++ Windows example]
 *   + Распаковать архив, запускать файл ./Bin/x64/Example.exe
 *   + Вместо кнопки \b Back Android'a использовать \b Alt + \b Left.
 *  
-*  - Сборка для Android (ARM, API15+): [Covellite++ Android example] \n
+*  - Сборка для Android (ARM/ARM64, API15+): [Covellite++ Android example] \n
 *   + Скопировать .apk файл на карту устройства, выбрать в папке, следовать
 *  указаниям установщика пакетов.
 *
@@ -19,6 +22,7 @@
 *  
 * | Версия | Windows               | Android               | Комментарий             |
 * | :----: | :-------------------: | :-------------------: | :---------------------- |
+* | 2.1.11 | [Windows v2.1.11]     | [Android v2.1.11]     |                         |
 * | 2.1.10 | [Windows v2.1.10]     | [Android v2.1.10]     |                         |
 * | 2.1.9  | [Windows v2.1.9]      | [Android v2.1.9]      |                         |
 * | 2.1.8  | [Windows v2.1.8]      | [Android v2.1.8]      |                         |
@@ -32,6 +36,8 @@
 * | 2.1.0  | [Windows v2.1.0]      | [Android v2.1.0]      |                         |
 * | 1.0.0  | -                     | [Android v1.0.0]      |                         |
 *  
+*  [Windows v2.1.11]: https://github.com/Unicornum/Unicornum.github.io/releases/download/covellite/Covellitepp_v2.1.11.zip "Covellite++ Windows example"
+*  [Android v2.1.11]: https://github.com/Unicornum/Unicornum.github.io/releases/download/covellite/Covellitepp_v2.1.11.apk "Covellite++ Android example"
 *  [Windows v2.1.10]: https://github.com/Unicornum/Unicornum.github.io/releases/download/covellite/Covellitepp_v2.1.10.zip "Covellite++ Windows example"
 *  [Android v2.1.10]: https://github.com/Unicornum/Unicornum.github.io/releases/download/covellite/Covellitepp_v2.1.10.apk "Covellite++ Android example"
 *  [Windows v2.1.9]: https://github.com/Unicornum/Unicornum.github.io/releases/download/covellite/Covellitepp_v2.1.9.zip "Covellite++ Windows example"

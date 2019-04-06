@@ -369,30 +369,12 @@ auto DirectX11::CreateCamera(const ComponentPtr_t & _pComponent) -> Render_t
 {
   const auto CameraId = _pComponent->Id;
 
-  const auto BlendDisabledRender = CreateBlendState(false);
-  const auto DeptRender = GetDeptRender(_pComponent);
+  const auto DisabledBlendRender = CreateBlendState(false);
+  const auto DisableDepthRender = GetDepthState(false, false);
 
   const auto LightsRender = [=](void)
   {
     m_pData->SetCameraId(CameraId);
-  };
-
-  const Render_t CameraGui = [=](void)
-  {
-    BlendDisabledRender();
-    DeptRender();
-    LightsRender();
-
-    UINT ViewportCount = 1;
-    D3D11_VIEWPORT Viewport = { 0 };
-    m_pImmediateContext->RSGetViewports(&ViewportCount, &Viewport);
-
-    m_pData->Get<::Matrices>().Projection = ::DirectX::XMMatrixTranspose(
-      ::DirectX::XMMatrixOrthographicOffCenterLH(0.0f,
-        Viewport.Width, Viewport.Height, 0.0f, 1.0f, -1.0f));
-
-    m_pData->Get<::Matrices>().View = ::DirectX::XMMatrixTranspose(
-      ::DirectX::XMMatrixIdentity());
   };
 
   const auto ServiceComponents = m_ServiceComponents.Get(
@@ -401,10 +383,32 @@ auto DirectX11::CreateCamera(const ComponentPtr_t & _pComponent) -> Render_t
       { uT("Rotation"), api::Component::Make({}) },
     });
 
+  const Render_t CameraGui = [=](void)
+  {
+    const Component::Position Pos{ ServiceComponents[0] };
+
+    DisabledBlendRender();
+    DisableDepthRender();
+    LightsRender();
+
+    UINT ViewportCount = 1;
+    D3D11_VIEWPORT Viewport = { 0 };
+    m_pImmediateContext->RSGetViewports(&ViewportCount, &Viewport);
+
+    m_pData->Get<::Matrices>().Projection = ::DirectX::XMMatrixTranspose(
+      ::DirectX::XMMatrixOrthographicOffCenterLH(
+        Pos.X, Pos.X + Viewport.Width,
+        Pos.Y + Viewport.Height, Pos.Y,
+        1.0f, -1.0f));
+
+    m_pData->Get<::Matrices>().View = ::DirectX::XMMatrixTranspose(
+      ::DirectX::XMMatrixIdentity());
+  };
+
   const Render_t CameraFocal = [=](void)
   {
-    BlendDisabledRender();
-    DeptRender();
+    DisabledBlendRender();
+    DisableDepthRender();
     LightsRender();
 
     UINT ViewportCount = 1;
@@ -412,11 +416,11 @@ auto DirectX11::CreateCamera(const ComponentPtr_t & _pComponent) -> Render_t
     m_pImmediateContext->RSGetViewports(&ViewportCount, &Viewport);
 
     const auto AngleY = (float)::alicorn::extension::cpp::math::GreedToRadian *
-      _pComponent->GetValue(uT("angle"), 90.0f);
+      _pComponent->GetValue(uT("fov"), 90.0f);
     const auto AspectRatio = Viewport.Width / Viewport.Height;
 
     m_pData->Get<::Matrices>().Projection = ::DirectX::XMMatrixTranspose(
-      ::DirectX::XMMatrixPerspectiveFovLH(
+      ::DirectX::XMMatrixPerspectiveFovRH(
         AngleY, AspectRatio, 0.01f, 200.0f));
 
     // Точка, куда смотрит камера - задается как компонент 
@@ -442,7 +446,7 @@ auto DirectX11::CreateCamera(const ComponentPtr_t & _pComponent) -> Render_t
       Transform);
 
     m_pData->Get<::Matrices>().View = ::DirectX::XMMatrixTranspose(
-      ::DirectX::XMMatrixLookAtLH(Eye, Look,
+      ::DirectX::XMMatrixLookAtRH(Eye, Look,
         ::DirectX::XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f)));
   };
 
@@ -453,7 +457,7 @@ auto DirectX11::CreateCamera(const ComponentPtr_t & _pComponent) -> Render_t
 
 auto DirectX11::CreateState(const ComponentPtr_t & _pComponent) -> Render_t
 {
-  auto CreateSamplerState = [&](void)
+  const auto CreateSamplerState = [&](void)
   {
     D3D11_SAMPLER_DESC SamplerDesc = { 0 };
     SamplerDesc.Filter = D3D11_FILTER_MIN_MAG_MIP_LINEAR;
@@ -473,13 +477,13 @@ auto DirectX11::CreateState(const ComponentPtr_t & _pComponent) -> Render_t
     };
   };
 
-  auto CreateScissorState = [&](void)
+  const auto CreateScissorState = [&](void)
   {
     const Component::Scissor ScissorData{ _pComponent };
 
     D3D11_RASTERIZER_DESC rasterDesc = { 0 };
     rasterDesc.FillMode = D3D11_FILL_SOLID;
-    rasterDesc.CullMode = D3D11_CULL_NONE;
+    rasterDesc.CullMode = D3D11_CULL_BACK;
     rasterDesc.FrontCounterClockwise = TRUE;
     rasterDesc.ScissorEnable = (ScissorData.IsEnabled) ? TRUE : FALSE;
 
@@ -511,11 +515,41 @@ auto DirectX11::CreateState(const ComponentPtr_t & _pComponent) -> Render_t
     return (ScissorData.IsEnabled) ? ScissorEnabled : ScissorDisabled;
   };
 
+  const auto CreateDepthState = [&](void)
+  {
+    return GetDepthState(_pComponent->GetValue(uT("enabled"), false),
+      _pComponent->GetValue(uT("clear"), false));
+  };
+
+  const auto CreateClearState = [&](void)
+  {
+    const auto ARGBtoFloat4 = [](const uint32_t _HexColor)
+    {
+      return ::std::vector<FLOAT>
+      {
+        ((_HexColor & 0x00FF0000) >> 16) / 255.0f,
+        ((_HexColor & 0x0000FF00) >> 8) / 255.0f,
+        ((_HexColor & 0x000000FF) >> 0) / 255.0f,
+        ((_HexColor & 0xFF000000) >> 24) / 255.0f,
+      };
+    };
+    const auto BackgroundColor =
+      ARGBtoFloat4(_pComponent->GetValue(uT("color"), 0xFF000000));
+
+    return [=](void)
+    {
+      m_pImmediateContext->ClearRenderTargetView(
+        m_pRenderTargetView.Get(), BackgroundColor.data());
+    };
+  };
+
   ::std::map<String_t, ::std::function<Render_t(void)>> Creators =
   {
     { uT("Blend"), [&](void) { return CreateBlendState(true); } },
     { uT("Sampler"), CreateSamplerState },
     { uT("Scissor"), CreateScissorState },
+    { uT("Depth"),   CreateDepthState },
+    { uT("Clear"),   CreateClearState   },
   };
 
   return Creators[_pComponent->Kind]();
@@ -850,32 +884,29 @@ auto DirectX11::CreateBlendState(bool _IsEnabled) -> Render_t
   };
 }
 
-auto DirectX11::GetDeptRender(const ComponentPtr_t & _pComponent) -> Render_t
+auto DirectX11::GetDepthState(bool _IsEnabled, bool _IsClear) -> Render_t
 {
-  Render_t RenderDeptDisabled = [=](void)
+  Render_t RenderDepthDisabled = [=](void)
   {
     m_pImmediateContext->OMSetRenderTargets(1,
       m_pRenderTargetView.GetAddressOf(), nullptr);
   };
 
-  Render_t RenderDeptEnabled = [=](void)
+  Render_t RenderDepthEnabled = [=](void)
   {
     m_pImmediateContext->OMSetRenderTargets(1, 
       m_pRenderTargetView.GetAddressOf(), m_pDepthStencilView.Get());
   };
 
-  Render_t RenderDeptClear = [=](void)
+  Render_t RenderDepthClear = [=](void)
   {
-    RenderDeptEnabled();
+    RenderDepthEnabled();
     m_pImmediateContext->ClearDepthStencilView(m_pDepthStencilView.Get(),
       D3D11_CLEAR_DEPTH, 1.0f, 0);
   };
 
-  const auto Dept = _pComponent->GetValue(uT("dept"), uT("Disabled"));
-  return 
-    (Dept == uT("Clear"))   ? RenderDeptClear :
-    (Dept == uT("Enabled")) ? RenderDeptEnabled : 
-    RenderDeptDisabled;
+  return _IsEnabled ? 
+    (_IsClear ? RenderDepthClear : RenderDepthEnabled) : RenderDepthDisabled;
 }
 
 auto DirectX11::GetPreRendersGeometry(void) -> Renders_t

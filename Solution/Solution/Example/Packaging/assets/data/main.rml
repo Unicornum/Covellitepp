@@ -5,8 +5,8 @@
     <link type="text/rcss" href="scrollbar.rcss"/>
     <link type="text/rcss" href="main.rcss"/>
   </head>
-  <body id="id_body">
-    <header class="fheader">
+  <body>
+    <header class="fheader" id="id_main">
       <p><h1>Covellite++ app demo</h1></p>
       <p id="id_version" />
     </header>  

@@ -908,7 +908,7 @@ TEST_F(Renderer_test, /*DISABLED_*/Test_EnableScissorRegion_False)
         .AddValue(uT("id"), uT(""))
         .AddValue(uT("type"), uT(""))
         .AddValue(uT("kind"), uT(""))
-        .AddValue(uT("is_enabled"), uT(""))
+        .AddValue(uT("enabled"), uT(""))
         .GetValues());
     };
   };
@@ -974,7 +974,7 @@ TEST_F(Renderer_test, /*DISABLED_*/Test_SetScissorRegion)
         .AddValue(uT("id"), uT(""))
         .AddValue(uT("type"), uT(""))
         .AddValue(uT("kind"), uT(""))
-        .AddValue(uT("is_enabled"), uT(""))
+        .AddValue(uT("enabled"), uT(""))
         .GetValues());
     };
   };
@@ -1055,6 +1055,57 @@ TEST_F(Renderer_test, /*DISABLED_*/Test_SetScissorRegion)
 
     Example.RenderScene();
   }
+}
+
+// ************************************************************************** //
+TEST_F(Renderer_test, /*DISABLED_*/Test_LoadTexture_NotExistsFile)
+{
+  using TextureHandle_t = ::mock::Rocket::Core::TextureHandle;
+  using TextureDimensions_t = ::mock::Rocket::Core::Vector2i;
+
+  class Tested :
+    public Tested_t
+  {
+    using Renders_t = ::covellite::api::Component::Renders;
+
+  public:
+    MOCK_METHOD0(DoGenerateTexture, bool(void));
+
+  public:
+    bool GenerateTexture(TextureHandle_t &,
+      const ::mock::Rocket::Core::byte *,
+      const TextureDimensions_t &) override
+    {
+      return DoGenerateTexture();
+    }
+
+  public:
+    Tested(void) :
+      Tested_t(::std::make_shared<Renders_t>(Renders_t::Creators_t{}))
+    {
+
+    }
+  };
+
+  const auto PathToSourceImage = THIS_DIRECTORY / "NotExists.png";
+  const TextureDimensions_t ExpectedDimensions{ 0, 0 };
+
+  Tested Example;
+  RenderInterface_t & IExample = Example;
+
+  using namespace ::testing;
+
+  EXPECT_CALL(Example, DoGenerateTexture())
+    .Times(0);
+
+  TextureHandle_t hTexture = 0;
+  TextureDimensions_t TextureDimensions{ 0, 0 };
+
+  const auto Result = IExample.LoadTexture(hTexture, TextureDimensions,
+    PathToSourceImage.string().c_str());
+  EXPECT_FALSE(Result);
+  EXPECT_EQ(0, hTexture);
+  EXPECT_EQ(ExpectedDimensions, TextureDimensions);
 }
 
 // ************************************************************************** //

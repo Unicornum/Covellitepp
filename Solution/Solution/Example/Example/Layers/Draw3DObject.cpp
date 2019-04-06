@@ -3,6 +3,9 @@
 #include "Draw3DObject.hpp"
 #include <alicorn/std/string.hpp>
 #include "Description.hpp"
+
+// 17 Март 2019 11:45 (unicornum.verum@gmail.com)
+TODO("Недопустимая ссылка на заголовочный файл!");
 #include "../Basements/Simple3DObject.hpp"
 
 using namespace layers;
@@ -22,7 +25,7 @@ static const auto DescriptionLayer =
   uT("");
 
 Draw3DObject::Draw3DObject(IWindowGui_t & _Window) :
-  Layer(_Window, "draw3dobject.rml", uT("3D объект"), DescriptionLayer)
+  Layer(_Window, "draw3dobject.rml", uT("3D объект"), DescriptionLayer, true)
 {
   using namespace ::alicorn::extension::std;
 
@@ -148,9 +151,4 @@ Draw3DObject::Draw3DObject(IWindowGui_t & _Window) :
   });
 
   ChangeScene("", 0);
-}
-
-Draw3DObject::~Draw3DObject(void)
-{
-  m_Events[::events::Basement.Stop]();
 }

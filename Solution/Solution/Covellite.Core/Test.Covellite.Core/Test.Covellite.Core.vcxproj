@@ -49,7 +49,6 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;_LIB;TESTDLL_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalOptions>-Zm200 %(AdditionalOptions)</AdditionalOptions>
       <DisableSpecificWarnings>4996;6387;26439;26444</DisableSpecificWarnings>
       <SDLCheck>false</SDLCheck>
     </ClCompile>
@@ -65,7 +64,6 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;_LIB;TESTDLL_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AdditionalOptions>-Zm200 %(AdditionalOptions)</AdditionalOptions>
       <DisableSpecificWarnings>4996;6387;26439;26444</DisableSpecificWarnings>
       <SDLCheck>false</SDLCheck>
     </ClCompile>

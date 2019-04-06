@@ -5,7 +5,7 @@
     <link type="text/rcss" href="scrollbar.rcss"/>
     <link type="text/rcss" href="layer.template.rcss"/>
   </head>
-  <body class="fdefault" id="id_body">
+  <body class="fdefault">
     <header class="fheader">
       <button class="fbutton help" id="id_help"/>
       <button class="fbutton back" id="id_back" />

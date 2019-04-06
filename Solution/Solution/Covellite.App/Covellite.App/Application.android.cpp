@@ -43,7 +43,15 @@ Application::Application(const Run_t & _Run) :
   m_Events[(int32_t)APP_CMD_STOP]
     .Connect([&]() { m_Events[events::Application.Exit](); });
   m_Events[(int32_t)APP_CMD_TERM_WINDOW]
-    .Connect([&]() { m_Windows = Windows_t{}; });
+    .Connect([&]() 
+  {
+    // Простую очистку стека здесь делать нельзя, т.к. реализация std::stack
+    // в CrystaX удаляет объекты стека в порядке их создания (в отличие от 
+    // реализации от Microsoft, которая удаляет их в обратном порядке).
+    //m_Windows = Windows_t{};
+
+    while(!m_Windows.empty()) m_Windows.pop();
+  });
   m_Events[events::Application.Exit]
     .Connect([=]() { ANativeActivity_finish(App.activity); });
 }
@@ -62,7 +70,21 @@ Application::Application(Continuous) :
 
       while (DestroyRequested == 0)
       {
-        while (PostCommand(!m_IsFocused)) {}
+        if (m_IsFocused)
+        {
+          // Выбирает все события, которые есть в очереди событий, не ожидая
+          // появлений новых.
+          while (PostCommand(false)) {}
+        }
+        else
+        {
+          // Ждем появления события (использовать while здесь нельзя, т.к.
+          // эта функция, вызванная с параметром true, не может вернуть false
+          // ни при каких условиях! Это не проблема во время работы, но при
+          // завершении работы программы это приводит к бесконечному циклу.)
+          PostCommand(true);
+        }
+
         m_Events[events::Application.Update]();
       }
     })

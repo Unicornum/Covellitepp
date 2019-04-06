@@ -3,6 +3,9 @@
 #include "Example2DGame.hpp"
 #include <alicorn/std/string.hpp>
 #include "Description.hpp"
+
+// 17 Март 2019 11:45 (unicornum.verum@gmail.com)
+TODO("Недопустимая ссылка на заголовочный файл!");
 #include "../Basements/Simple2DGame.hpp"
 
 using namespace layers;
@@ -25,7 +28,7 @@ static const auto DescriptionLayer =
   uT("");
 
 Simple2DGame::Simple2DGame(IWindowGui_t & _Window) :
-  Layer(_Window, "simple2dgame.rml", uT("Простая 2D игра"), DescriptionLayer)
+  Layer(_Window, "simple2dgame.rml", uT("Простая 2D игра"), DescriptionLayer, true)
 {
   using ::events::Simple2DGame;
   using ::covellite::events::Drawing;
@@ -35,7 +38,7 @@ Simple2DGame::Simple2DGame(IWindowGui_t & _Window) :
   const auto Right = static_cast<float>(GetWidth());
   const auto Bottom = static_cast<float>(GetHeight());
 
-  m_Events[Simple2DGame.Start](::std::vector<float>{ Left, Top, Right, Bottom });
+  m_Events[Simple2DGame.Rect](::std::vector<float>{ Left, Top, Right, Bottom });
 
   m_Events[Simple2DGame.Finish].Connect([&](const float & _GameTime)
   {
@@ -70,9 +73,4 @@ Simple2DGame::Simple2DGame(IWindowGui_t & _Window) :
       Begin = system_clock::now();
     }
   });
-}
-
-Simple2DGame::~Simple2DGame(void)
-{
-  m_Events[::events::Basement.Stop]();
 }

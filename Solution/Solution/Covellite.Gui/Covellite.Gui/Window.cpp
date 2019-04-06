@@ -2,6 +2,7 @@
 #include "stdafx.h"
 #include <Covellite/Gui/Window.hpp>
 #include <alicorn/platform/app-info.hpp>
+#include <alicorn/std/class-info.hpp>
 #include <alicorn/std/string.hpp>
 #include <alicorn/boost/string-cast.hpp>
 #include <Covellite/Core/Event.hpp>
@@ -18,6 +19,14 @@
 #include <Covellite/Gui/StringTranslator.hpp>
 #include <Covellite/Gui/EventListener.hpp>
 #include <Covellite/Gui/Events.hpp>
+
+#ifndef __USING_GTEST
+# include <alicorn\logger.hpp>
+#endif
+
+#if BOOST_COMP_MSVC
+# pragma comment(lib, "freetype.lib")
+#endif
 
 using namespace covellite::gui;
 
@@ -58,6 +67,8 @@ Window::Window(const WindowApi_t & _Window) :
   }
 
   m_pContext->AddEventListener(::covellite::events::Click.m_EventType.c_str(), 
+    m_pEventListener.get(), false);
+  m_pContext->AddEventListener(::covellite::events::Press.m_EventType.c_str(),
     m_pEventListener.get(), false);
   m_pContext->AddEventListener(::covellite::events::Change.m_EventType.c_str(),
     m_pEventListener.get(), false);
@@ -111,6 +122,8 @@ Window::~Window(void) noexcept
 {
   m_pEvents->Unsubscribe(m_pContext.get());
   m_pContext->RemoveEventListener(::covellite::events::Click.m_EventType.c_str(), 
+    m_pEventListener.get(), false);
+  m_pContext->RemoveEventListener(::covellite::events::Press.m_EventType.c_str(),
     m_pEventListener.get(), false);
   m_pContext->RemoveEventListener(::covellite::events::Change.m_EventType.c_str(),
     m_pEventListener.get(), false);
@@ -205,8 +218,22 @@ void Window::Set(const StringBank_t & _Bank)
 */
 void Window::Back(void)
 {
+  LOGGER(Info) << "Pop layer";
+
   const auto IsExistsLayer = m_Layers.Pop();
   if (!IsExistsLayer) Exit();
+}
+
+/**
+* \brief
+*  Функция реаизации вставки нового слоя.
+*/
+void Window::PushLayer(const LayerPtr_t & _pLayer)
+{
+  m_Layers.Push(_pLayer);
+
+  LOGGER(Info) << "Push layer [" <<
+    ::alicorn::extension::std::ClassInfo::GetPureName(*_pLayer) << "]";
 }
 
 /**

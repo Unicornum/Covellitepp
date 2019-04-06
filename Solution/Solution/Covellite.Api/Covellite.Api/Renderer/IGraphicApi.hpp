@@ -48,10 +48,13 @@ protected:
 
 public:
   virtual String_t GetUsingApi(void) const = 0;
-  virtual void ClearFrame(void) = 0;
   virtual void PresentFrame(void) = 0;
   virtual void ResizeWindow(int32_t, int32_t) = 0;
   virtual const Creators_t & GetCreators(void) const = 0;
+
+public:
+  // deprecated
+  virtual void ClearFrame(void) = 0;
 
 public:
   virtual ~IGraphicApi(void) = default;

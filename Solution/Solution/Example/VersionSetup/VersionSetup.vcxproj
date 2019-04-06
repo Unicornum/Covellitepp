@@ -10,6 +10,15 @@
       <Platform>x64</Platform>
     </ProjectConfiguration>
   </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Time.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="Version.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="DateTime.cmd" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{5200C065-9E58-4933-99FF-A64E20F6AB5E}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
@@ -18,13 +27,13 @@
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
-    <ConfigurationType>Utility</ConfigurationType>
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>$(DefaultPlatformToolset)</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
-    <ConfigurationType>Utility</ConfigurationType>
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
     <UseDebugLibraries>false</UseDebugLibraries>
     <PlatformToolset>$(DefaultPlatformToolset)</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
@@ -74,6 +83,9 @@ set PathToAndroidVersionFile="$(ProjectDir)..\Packaging\res\values\version.auto.
 
 Version.exe --file=%PathToVersionFile% --update-android-manifest=%PathToAndroidManifest% --build-android-version=%PathToAndroidVersionFile% --configuration=ARM
 
+rem Перезапись файла в проекте, чтобы проект пересобирался в любом случае.
+$(ProjectDir)DateTime.cmd "$(ProjectDir)"
+
 %(Command)
 </Command>
     </PostBuildEvent>
@@ -107,6 +119,9 @@ set PathToAndroidVersionFile="$(ProjectDir)..\Packaging\res\values\version.auto.
 
 Version.exe --file=%PathToVersionFile% --update-android-manifest=%PathToAndroidManifest% --build-android-version=%PathToAndroidVersionFile% --configuration=ARM
 
+rem Перезапись файла в проекте, чтобы проект пересобирался в любом случае.
+$(ProjectDir)DateTime.cmd "$(ProjectDir)"
+
 %(Command)
 </Command>
     </PostBuildEvent>
@@ -114,9 +129,6 @@ Version.exe --file=%PathToVersionFile% --update-android-manifest=%PathToAndroidM
       <Message>Установка текущей версии решения .apk файлу программы.</Message>
     </PostBuildEvent>
   </ItemDefinitionGroup>
-  <ItemGroup>
-    <Text Include="NotExists.txt" />
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

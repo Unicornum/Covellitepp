@@ -4,6 +4,7 @@
 #include <chrono>
 #include <alicorn/std/vector.hpp>
 #include <alicorn/cpp/math.hpp>
+#include <alicorn/logger.hpp>
 #include <Covellite/Api/Vertex.hpp>
 #include <Covellite/Api/Component.inl>
 
@@ -17,12 +18,11 @@ Simple3DObject::Simple3DObject(const RendersPtr_t & _pRenders,
   Common(_pRenders),
   m_pCubeRotation(Component_t::Make(
     {
-      { uT("id"), uT("Example.Data.Rotation.Cube") },
       { uT("type"), uT("Data") },
       { uT("kind"), uT("Rotation") },
     }))
 {
-  LoadTexture("title.png", uT("Example.Texture"));
+  LoadTexture("draw3dobject.title.png", uT("Example.Texture"));
 
   m_Scene.push_back(BuildCamera());
 
@@ -41,8 +41,8 @@ Simple3DObject::Simple3DObject(const RendersPtr_t & _pRenders,
       m_Scene.push_back(BuildCube(
         _PolygonsCount / 12, 
         6.0f / Step,
-        m_CenterX + (10.0f / Step) * (x - Offset),
-        m_CenterY + (10.0f / Step) * (y - Offset)));
+        (10.0f / Step) * (x - Offset),
+        (10.0f / Step) * (y - Offset)));
     }
   }
 
@@ -60,12 +60,21 @@ Simple3DObject::Simple3DObject(const RendersPtr_t & _pRenders,
   // Windows (новый ноутбук):
   // - OpenGL     - ??? кубов по 96 полигонов каждый.
   // - DirectX10  - ??? кубов по 96 полигонов каждый.
-  // - DirectX11  - ??? кубов по 96 полигонов каждый.
+  // - DirectX11  - 16384 кубов по 3072 полигона каждый.
 
   // Samsung Duos:
   // - OpenGLES   - 256 кубов по 96 полигонов каждый.
   // Samsung A5:
   // - OpenGLES   - ??? кубов по ??? полигонов каждый.
+}
+
+Simple3DObject::~Simple3DObject(void)
+{
+  LOGGER(Info) << "Basements Simple3DObject destoyed.";
+
+  // Рендеры не удаляются, т.к. объект класса Simple3DObject содержит уникальный
+  // объект m_pRenders, который удаляется вместе со всеми рендерами.
+  // m_pRenders->Remove(...);
 }
 
 void Simple3DObject::Notify(int _Message, const ::boost::any & _Value) /*override*/
@@ -87,10 +96,6 @@ void Simple3DObject::Render(void) /*override*/
     math::PI * (math::radian::Cos(Angle) + 1.0)));
   m_pCubeRotation->SetValue(uT("z"), static_cast<float>(
     math::PI * (math::radian::Sin(Angle) + 1.0)));
-
-  //m_pCubeRotation->SetValue(uT("x"), 0.785f);
-  //m_pCubeRotation->SetValue(uT("y"), -0.785f);
-  //m_pCubeRotation->SetValue(uT("z"), 0.0f);
 
   Common::Render();
 
@@ -119,10 +124,6 @@ auto Simple3DObject::BuildLights(int _LightsFlags) -> Id
   const float Const = 0.0f;
   const float Linear = 0.1f;
   const float Exponent = 0.05f;
-
-  //m_Scene.push_back(BuildCube2(0.05f, X, 0.0f,  Z + m_CenterY));
-  //m_Scene.push_back(BuildCube2(0.05f, X,    Y, -Z + m_CenterY));
-  //m_Scene.push_back(BuildCube2(0.05f, X,   -Y, -Z + m_CenterY));
 
   using Object_t = Component_t::Renders::Object_t;
   using namespace ::alicorn::extension::std;
@@ -175,7 +176,7 @@ auto Simple3DObject::BuildLights(int _LightsFlags) -> Id
         { uT("kind"), uT("Position") },
         { uT("x"), X },
         { uT("y"), 0.0f },
-        { uT("z"), Z + m_CenterY },
+        { uT("z"), Z },
       }),
       Component_t::Make(
       {
@@ -205,7 +206,7 @@ auto Simple3DObject::BuildLights(int _LightsFlags) -> Id
         { uT("kind"), uT("Position") },
         { uT("x"), X },
         { uT("y"), Y },
-        { uT("z"), -Z + m_CenterY },
+        { uT("z"), -Z },
       }),
       Component_t::Make(
       {
@@ -235,7 +236,7 @@ auto Simple3DObject::BuildLights(int _LightsFlags) -> Id
         { uT("kind"), uT("Position") },
         { uT("x"), X },
         { uT("y"), -Y },
-        { uT("z"), -Z + m_CenterY },
+        { uT("z"), -Z },
       }),
       Component_t::Make(
       {
@@ -274,17 +275,37 @@ auto Simple3DObject::BuildCamera(void) -> Id
         { uT("kind"), uT("Position") },
         { uT("x"), 0.0f },
         { uT("y"), 0.0f },
-        { uT("z"), 0.0f },
+        { uT("z"), -1.6f },
       }),
       Component_t::Make(
       {
         { uT("id"), uT("Example.Camera.") + Id.GetStringId() },
         { uT("type"), uT("Camera") },
         { uT("kind"), uT("Perspective") },
-        { uT("dept"), uT("Clear") },
         { uT("distance"), 10.0f },
-        { uT("angle"), 90.0f },
-      })
+        { uT("fov"), 90.0f },
+      }),
+      Component_t::Make(
+      {
+        { uT("id"), uT("Example.State.Clear") },
+        { uT("type"), uT("State") },
+        { uT("kind"), uT("Clear") },
+        { uT("color"), 0xFF0000FF },
+      }),
+      Component_t::Make(
+      {
+        { uT("id"), uT("Example.State.Depth") },
+        { uT("type"), uT("State") },
+        { uT("kind"), uT("Depth") },
+        { uT("enabled"), true },
+        { uT("clear"), true },
+      }),
+      Component_t::Make(
+      {
+        { uT("id"), uT("Example.State.Sampler") },
+        { uT("type"), uT("State") },
+        { uT("kind"), uT("Sampler") },
+      }),
     });
 
   return Id;
@@ -333,12 +354,12 @@ auto Simple3DObject::BuildCube(int _PolygonsFactor, float _Scale,
 
   ::std::vector<int> IndexData =
   {
-     0,  1,  2,   2,  1,  3,
-     4,  5,  6,   6,  5,  7,
-     8,  9, 10,  10,  9, 11,
-    12, 13, 14,  14, 13, 15,
-    16, 17, 18,  18, 17, 19,
-    20, 21, 22,  22, 21, 23,
+     0,  2,  1,   2,  3,  1,
+     4,  6,  5,   6,  7,  5,
+     8, 10,  9,  10, 11,  9,
+    12, 14, 13,  14, 15, 13,
+    16, 18, 17,  18, 19, 17,
+    20, 22, 21,  22, 23, 21,
   };
 
   while (_PolygonsFactor /= 2)
@@ -372,12 +393,6 @@ auto Simple3DObject::BuildCube(int _PolygonsFactor, float _Scale,
       Component_t::Make(
       {
         { uT("id"), uT("Example.Texture") },
-      }),
-      Component_t::Make(
-      {
-        { uT("id"), uT("Example.State.Sampler") },
-        { uT("type"), uT("State") },
-        { uT("kind"), uT("Sampler") },
       }),
       Component_t::Make(
       {
@@ -422,76 +437,6 @@ auto Simple3DObject::BuildCube(int _PolygonsFactor, float _Scale,
         { uT("x"), 0.0f },
         { uT("y"), -_PositionX },
         { uT("z"), _PositionY },
-      }),
-      Component_t::Make(
-      {
-        { uT("id"), uT("Example.Present.Geometry.") + Id.GetStringId() },
-        { uT("type"), uT("Present") },
-        { uT("kind"), uT("Geometry") },
-      })
-    });
-
-  return Id;
-}
-
-auto Simple3DObject::BuildCube2(float _Scale, 
-  float _PositionX, float _PositionY, float _PositionZ) -> Id
-{
-  const Id Id;
-
-  ::std::vector<int> IndexData =
-  {
-     0,  1,  2,   2,  1,  3,
-     4,  5,  6,   6,  5,  7,
-     8,  9, 10,  10,  9, 11,
-    12, 13, 14,  14, 13, 15,
-    16, 17, 18,  18, 17, 19,
-    20, 21, 22,  22, 21, 23,
-  };
-
-  m_Objects[Id] = m_pRenders->Obtain(
-    {
-      Component_t::Make(
-      {
-        { uT("id"), uT("Example.Shader.Pixel.Cube") },
-      }),
-      Component_t::Make(
-      {
-        { uT("id"), uT("Example.Material.Emission") },
-        { uT("type"), uT("Material") },
-        { uT("emission"), 0xFFFFFFFF },
-      }),
-      Component_t::Make(
-      {
-        { uT("id"), uT("Example.Shader.Vertex.Cube") },
-      }),
-      Component_t::Make(
-      {
-        { uT("id"), uT("Example.Buffer.Vertex.Cube") },
-      }),
-      Component_t::Make(
-      {
-        { uT("id"), uT("Example.Buffer.Index.Cube.") + Id.GetStringId() },
-        { uT("type"), uT("Buffer") },
-        { uT("kind"), uT("Index") },
-        { uT("data"), (const int *)IndexData.data() },
-        { uT("count"), IndexData.size() },
-      }),
-      Component_t::Make(
-      {
-        { uT("type"), uT("Data") },
-        { uT("kind"), uT("Scale") },
-        { uT("x"), _Scale },
-        { uT("y"), _Scale },
-        { uT("z"), _Scale },
-      }),
-      Component_t::Make(
-      {
-        { uT("type"), uT("Data") },
-        { uT("kind"), uT("Position") },
-        { uT("x"), _PositionX },
-        { uT("y"), _PositionY },
-        { uT("z"), _PositionZ },
       }),
       Component_t::Make(
       {

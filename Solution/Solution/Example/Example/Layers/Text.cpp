@@ -22,7 +22,7 @@ Text::Text(IWindowGui_t & _Window) :
 {
   using namespace ::alicorn::extension::std;
 
-  GetElement("id_text").SetMeaning(
+  GetElement("id_main_text").SetMeaning(
     uT("<big>Д</big>а, мы слышали о проблемах на побережье и поэтому меня ") +
     uT("отправили на разведку. До сих пор я видел только <i>странное ") +
     uT("поведение</i> животных, но их <u>тревога нарастает</u>. Мы могли бы ") +
@@ -35,7 +35,7 @@ Text::Text(IWindowGui_t & _Window) :
   { 
     GetElement("id_status").SetClassStyle(uT("evil"));
     GetElement("id_status").SetMeaning(uT("рассержен"));
-    GetElement("id_text").SetMeaning(uT("<big>Э</big>й, что ты делаешь?"));
+    GetElement("id_main_text").SetMeaning(uT("<big>Э</big>й, что ты делаешь?"));
   });
 
   m_Events[events::Click.DocumentId(GetId()).ElementId("id_neutral")]
@@ -43,7 +43,7 @@ Text::Text(IWindowGui_t & _Window) :
   {
     GetElement("id_status").SetClassStyle(uT("neutral"));
     GetElement("id_status").SetMeaning(uT("нейтрален"));
-    GetElement("id_text").SetMeaning(uT("<big>Н</big>у нет, так нет."));
+    GetElement("id_main_text").SetMeaning(uT("<big>Н</big>у нет, так нет."));
   });
 
   m_Events[events::Click.DocumentId(GetId()).ElementId("id_good")]
@@ -51,6 +51,6 @@ Text::Text(IWindowGui_t & _Window) :
   {
     GetElement("id_status").SetClassStyle(uT("good"));
     GetElement("id_status").SetMeaning(uT("добродушен"));
-    GetElement("id_text").SetMeaning(uT("<big>О</big>тлично, идем!"));
+    GetElement("id_main_text").SetMeaning(uT("<big>О</big>тлично, идем!"));
   });
 }

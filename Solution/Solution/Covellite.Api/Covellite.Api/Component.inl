@@ -66,7 +66,7 @@ inline Component::Component(const Params_t & _Params, ConstructorTag _Tag) :
 * \brief
 *  Функция проверки совпадения указанного типа с типом значения с указанным 
 *  именем.
-* \detail
+* \details
 *  - Функция не проверяет возможность конвертации параметра в указанный тип.
 *  
 * \param [in] _Name

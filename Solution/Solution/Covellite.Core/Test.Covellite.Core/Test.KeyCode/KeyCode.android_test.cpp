@@ -1,5 +1,6 @@
 
 #include "stdafx.h"
+#include <Platform\Android.mock.hpp>
 
 // Примеры макросов библиотеки Google Test
 #include <alicorn\google\test\example.hpp>

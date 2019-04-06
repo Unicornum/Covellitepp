@@ -116,6 +116,9 @@
     <ClInclude Include="..\Covellite.Api\Renders.hpp">
       <Filter>Tests\Renders</Filter>
     </ClInclude>
+    <ClInclude Include="OpenGLCommon_test.hpp">
+      <Filter>Tests\OpenGL</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\Covellite.Api\Component.inl">

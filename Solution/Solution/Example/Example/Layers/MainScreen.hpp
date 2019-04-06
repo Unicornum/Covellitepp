@@ -1,6 +1,6 @@
 
 #pragma once
-#include "Layer.hpp"
+#include <Covellite/Covellite.hpp>
 
 namespace layers
 {
@@ -27,7 +27,6 @@ class MainScreen final :
   /// [Layer example]
 
 public:
-  // Èםעונפויס IWindow:
   void Subscribe(const EventHandlerPtr_t &) override {}
 
 public:

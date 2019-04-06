@@ -1,6 +1,7 @@
 ﻿
 #include "stdafx.h"
 #include <Covellite/Api/Renders.hpp>
+#include <boost/thread/lock_guard.hpp>
 
 using namespace covellite::api;
 
@@ -25,7 +26,8 @@ Component::Renders::Renders(const Creators_t & _Creators) :
 *  - Для каждого компонента в исходном наборе будет добавлен рендер 
 *  соответствующего типа.
 *  - Если для компонента (с его идентификатором) рендер уже существует,
-*  в результат будет добавлен существующий, если нет - будет создан новый.
+*  в результат будет добавлен существующий (с увеличением счетчика ссылок,
+*  см. описание функции Remove()), если нет - будет создан новый.
 *  - Компоненты неподдерживаемых типов будут проигнорированы.
 *  - Пустые рендеры (nullptr) будут проигнорированы.
 *  - Порядок следования рендеров будет соответствовать порядку следования
@@ -39,14 +41,26 @@ Component::Renders::Renders(const Creators_t & _Creators) :
 */
 auto Component::Renders::Obtain(const Object_t & _Object) -> Renders_t
 {
+  // 23 Март 2019 18:20 (unicornum.verum@gmail.com)
+  TODO("Тест работы в многопоточном режиме.");
+  // Когда будут использоваться разные объекты этого класса, синхронизация
+  // должная быть реализована общая.
+  ::boost::lock_guard<::boost::mutex> Lock(m_Mutex);
+
   Renders_t Result;
 
   for (const auto & _pComponent : _Object)
   {
     auto itRender = m_AllExistingRenders.find(_pComponent->Id);
 
+    const auto GetExistsRender = [&](void)
+    {
+      itRender->second.first++;
+      return itRender->second.second;
+    };
+
     const auto ComponentRender = (itRender == m_AllExistingRenders.end()) ?
-      Create(_pComponent) : itRender->second;
+      Create(_pComponent) : GetExistsRender();
     if (ComponentRender) Result.push_back(ComponentRender);
   }
 
@@ -56,12 +70,26 @@ auto Component::Renders::Obtain(const Object_t & _Object) -> Renders_t
 /**
 * \brief
 *  Функция удаления рендеров для указанных компонентов.
+* \details
+*  - Для каждого компонента в наборе функция уменьшает на 1 счетчик 
+*  соответсвующего ему рендера; когда счетчик уменьшается до нуля, рендер
+*  удаляется.
 */
 void Component::Renders::Remove(const Object_t & _Object)
 {
+  ::boost::lock_guard<::boost::mutex> Lock(m_Mutex);
+
   for (const auto & _pComponent : _Object)
   {
-    m_AllExistingRenders.erase(_pComponent->Id);
+    auto itRender = m_AllExistingRenders.find(_pComponent->Id);
+    if (itRender == m_AllExistingRenders.end()) continue;
+
+    itRender->second.first--;
+
+    if (itRender->second.first == 0)
+    {
+      m_AllExistingRenders.erase(itRender);
+    }
   }
 }
 
@@ -90,7 +118,7 @@ auto Component::Renders::Create(const ComponentPtr_t & _pComponent) -> Render_t
     return nullptr;
   }
 
-  if (Result) m_AllExistingRenders[_pComponent->Id] = Result;
+  if (Result) m_AllExistingRenders[_pComponent->Id] = { 1, Result };
 
   return Result;
 }

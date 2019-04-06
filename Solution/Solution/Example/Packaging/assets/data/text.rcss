@@ -7,7 +7,7 @@ dummy {
   border-color: red;
 }
 
-body#id_body {
+body {
   min-width: 480px;
   min-height: 480px;
 }
@@ -20,7 +20,7 @@ form#id_bkimage {
   left: 0;
   right: 0;
   background-decorator: image;
-  background-image: paper.png 0px 0px 479px 612px;
+  background-image: text.paper.png 0px 0px 479px 612px;
   padding-left: 3 em;
   padding-top: 4 em;
   padding-right: 2 em;
@@ -57,7 +57,7 @@ form#id_icon {
   width: 5 em;
   height: 5 em;
   background-decorator: image;
-  background-image: npc.jpg 140px 50px 360px 270px;
+  background-image: text.npc.jpg 140px 50px 360px 270px;
 }
 
 form#id_char {

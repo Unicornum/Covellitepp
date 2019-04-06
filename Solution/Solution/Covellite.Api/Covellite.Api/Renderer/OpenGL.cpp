@@ -3,6 +3,8 @@
 #include "OpenGL.hpp"
 #include <alicorn\platform\winapi-check.hpp>
 
+#pragma comment(lib, "opengl32.lib")
+
 namespace covellite
 {
 
@@ -44,7 +46,7 @@ OpenGL::OpenGL(const Renderer::Data & _Data) :
     &PixelFormatDescriptor);
 
 # pragma warning(pop)
-//
+
   m_hRenderContex = USING_MOCK ::wglCreateContext(m_hDeviceContex);
   WINAPI_CHECK (m_hRenderContex != NULL);
 

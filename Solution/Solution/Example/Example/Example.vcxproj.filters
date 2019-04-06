@@ -13,6 +13,15 @@
     <Filter Include="Basements">
       <UniqueIdentifier>{2ecb0207-bc8d-4e79-abcd-b8d9224423ac}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Basements\Demo">
+      <UniqueIdentifier>{186d593e-9f21-44f6-9b38-152f5ab2e787}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Layers\CircularBar">
+      <UniqueIdentifier>{ae648b89-3ec0-469a-b809-c465dd3cb68e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Layers\ProgressBar">
+      <UniqueIdentifier>{00a91ba4-038a-420c-86eb-15eb85fd59d5}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">
@@ -23,7 +32,6 @@
     </ClInclude>
     <ClInclude Include="ExampleApp.hpp" />
     <ClInclude Include="ExampleWindow.hpp" />
-    <ClInclude Include="ExtraWindow.hpp" />
     <ClInclude Include="Layers\MainScreen.hpp">
       <Filter>Layers</Filter>
     </ClInclude>
@@ -69,6 +77,82 @@
     <ClInclude Include="Basements\Common.hpp">
       <Filter>Basements</Filter>
     </ClInclude>
+    <ClInclude Include="Basements\Demo\Controller.hpp">
+      <Filter>Basements\Demo</Filter>
+    </ClInclude>
+    <ClInclude Include="Basements\Demo\I3DScene.hpp">
+      <Filter>Basements\Demo</Filter>
+    </ClInclude>
+    <ClInclude Include="Basements\Demo\IDbComponents.hpp">
+      <Filter>Basements\Demo</Filter>
+    </ClInclude>
+    <ClInclude Include="Basements\Demo\IDbRenders.hpp">
+      <Filter>Basements\Demo</Filter>
+    </ClInclude>
+    <ClInclude Include="Basements\Demo\IGameWorld.hpp">
+      <Filter>Basements\Demo</Filter>
+    </ClInclude>
+    <ClInclude Include="Basements\Demo\Model.hpp">
+      <Filter>Basements\Demo</Filter>
+    </ClInclude>
+    <ClInclude Include="Basements\Demo\stdafx.h">
+      <Filter>Basements\Demo</Filter>
+    </ClInclude>
+    <ClInclude Include="Basements\Demo\View.hpp">
+      <Filter>Basements\Demo</Filter>
+    </ClInclude>
+    <ClInclude Include="Basements\Demo.hpp">
+      <Filter>Basements</Filter>
+    </ClInclude>
+    <ClInclude Include="Basements\Demo\DbComponents.hpp">
+      <Filter>Basements\Demo</Filter>
+    </ClInclude>
+    <ClInclude Include="Basements\Demo\GameWorld.hpp">
+      <Filter>Basements\Demo</Filter>
+    </ClInclude>
+    <ClInclude Include="Basements\Demo\3DScene.hpp">
+      <Filter>Basements\Demo</Filter>
+    </ClInclude>
+    <ClInclude Include="Basements\Demo\DbRenders.hpp">
+      <Filter>Basements\Demo</Filter>
+    </ClInclude>
+    <ClInclude Include="Basements\Demo\GameScene.hpp">
+      <Filter>Basements\Demo</Filter>
+    </ClInclude>
+    <ClInclude Include="BasementWindow.hpp" />
+    <ClInclude Include="Basements\Demo\Defines.hpp">
+      <Filter>Basements\Demo</Filter>
+    </ClInclude>
+    <ClInclude Include="Basements\Demo\DbUpdaters.hpp">
+      <Filter>Basements\Demo</Filter>
+    </ClInclude>
+    <ClInclude Include="Basements\Demo\IGameObject.hpp">
+      <Filter>Basements\Demo</Filter>
+    </ClInclude>
+    <ClInclude Include="Basements\Demo\GameObject.hpp">
+      <Filter>Basements\Demo</Filter>
+    </ClInclude>
+    <ClInclude Include="Basements\Demo\Camera.hpp">
+      <Filter>Basements\Demo</Filter>
+    </ClInclude>
+    <ClInclude Include="Basements\Demo\Constants.hpp">
+      <Filter>Basements\Demo</Filter>
+    </ClInclude>
+    <ClInclude Include="Basements\Demo\CubeCoords.hpp">
+      <Filter>Basements\Demo</Filter>
+    </ClInclude>
+    <ClInclude Include="Basements\Demo\Compass.hpp">
+      <Filter>Basements\Demo</Filter>
+    </ClInclude>
+    <ClInclude Include="Basements\Demo\Landscape.hpp">
+      <Filter>Basements\Demo</Filter>
+    </ClInclude>
+    <ClInclude Include="Basements\Demo\Loader.hpp">
+      <Filter>Basements\Demo</Filter>
+    </ClInclude>
+    <ClInclude Include="Basements\Demo\Water.hpp">
+      <Filter>Basements\Demo</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -76,7 +160,6 @@
     </ClCompile>
     <ClCompile Include="ExampleApp.cpp" />
     <ClCompile Include="ExampleWindow.cpp" />
-    <ClCompile Include="ExtraWindow.cpp" />
     <ClCompile Include="DefaultSettings.cpp" />
     <ClCompile Include="ReadFileData.cpp" />
     <ClCompile Include="Layers\MainScreen.cpp">
@@ -111,6 +194,64 @@
     </ClCompile>
     <ClCompile Include="Basements\Common.cpp">
       <Filter>Basements</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Externals.doxygen.ignore\ProgressBar\Source\ProgressBar\ElementProgressBar.cpp">
+      <Filter>Layers\ProgressBar</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Externals.doxygen.ignore\ProgressBar\Source\ProgressBar\ProgressBar.cpp">
+      <Filter>Layers\ProgressBar</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Externals.doxygen.ignore\CircularBar\Source\CircularBar\CircularBar.cpp">
+      <Filter>Layers\CircularBar</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\Externals.doxygen.ignore\CircularBar\Source\CircularBar\ElementCircularBar.cpp">
+      <Filter>Layers\CircularBar</Filter>
+    </ClCompile>
+    <ClCompile Include="Basements\Demo\Controller.cpp">
+      <Filter>Basements\Demo</Filter>
+    </ClCompile>
+    <ClCompile Include="Basements\Demo\Model.cpp">
+      <Filter>Basements\Demo</Filter>
+    </ClCompile>
+    <ClCompile Include="Basements\Demo\View.cpp">
+      <Filter>Basements\Demo</Filter>
+    </ClCompile>
+    <ClCompile Include="Basements\Demo.cpp">
+      <Filter>Basements</Filter>
+    </ClCompile>
+    <ClCompile Include="Basements\Demo\DbComponents.cpp">
+      <Filter>Basements\Demo</Filter>
+    </ClCompile>
+    <ClCompile Include="Basements\Demo\GameWorld.cpp">
+      <Filter>Basements\Demo</Filter>
+    </ClCompile>
+    <ClCompile Include="Basements\Demo\3DScene.cpp">
+      <Filter>Basements\Demo</Filter>
+    </ClCompile>
+    <ClCompile Include="Basements\Demo\DbRenders.cpp">
+      <Filter>Basements\Demo</Filter>
+    </ClCompile>
+    <ClCompile Include="BasementWindow.cpp" />
+    <ClCompile Include="Basements\Demo\DbUpdaters.cpp">
+      <Filter>Basements\Demo</Filter>
+    </ClCompile>
+    <ClCompile Include="Basements\Demo\GameObject.cpp">
+      <Filter>Basements\Demo</Filter>
+    </ClCompile>
+    <ClCompile Include="Basements\Demo\Camera.cpp">
+      <Filter>Basements\Demo</Filter>
+    </ClCompile>
+    <ClCompile Include="Basements\Demo\Compass.cpp">
+      <Filter>Basements\Demo</Filter>
+    </ClCompile>
+    <ClCompile Include="Basements\Demo\Landscape.cpp">
+      <Filter>Basements\Demo</Filter>
+    </ClCompile>
+    <ClCompile Include="Basements\Demo\Loader.cpp">
+      <Filter>Basements\Demo</Filter>
+    </ClCompile>
+    <ClCompile Include="Basements\Demo\Water.cpp">
+      <Filter>Basements\Demo</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

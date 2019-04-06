@@ -413,6 +413,16 @@ TEST_F(Renders_test, /*DISABLED_*/Test_Remove)
       { uT("Mesh"), Creator },
     } };
 
+  using namespace ::testing;
+
+  InSequence Dummy;
+
+  EXPECT_CALL(Caller, Creator(uT("Texture")))
+    .Times(1);
+
+  EXPECT_CALL(Caller, Creator(uT("Mesh")))
+    .Times(1);
+
   Example.Obtain(
     {
       Component_t::Make({
@@ -422,6 +432,17 @@ TEST_F(Renders_test, /*DISABLED_*/Test_Remove)
       Component_t::Make({
         { uT("type"), uT("Mesh") },
         { uT("id"), uT("MeshId") },
+        }),
+    });
+
+  EXPECT_CALL(Caller, Creator(_))
+    .Times(0);
+
+  Example.Obtain(
+    {
+      Component_t::Make({
+        { uT("type"), uT("Texture") },
+        { uT("id"), uT("TextureId") },
         }),
     });
 
@@ -437,9 +458,40 @@ TEST_F(Renders_test, /*DISABLED_*/Test_Remove)
         }),
     });
 
-  using namespace ::testing;
+  EXPECT_CALL(Caller, Creator(_))
+    .Times(0);
 
-  InSequence Dummy;
+  Example.Obtain(
+    {
+      Component_t::Make({
+        { uT("type"), uT("Texture") },
+        { uT("id"), uT("TextureId") },
+        }),
+    });
+
+  Example.Remove(
+    {
+      Component_t::Make({
+        { uT("type"), uT("Texture") },
+        { uT("id"), uT("TextureId") },
+        }),
+    });
+
+  Example.Remove(
+    {
+      Component_t::Make({
+        { uT("type"), uT("Texture") },
+        { uT("id"), uT("TextureId") },
+        }),
+    });
+
+  Example.Remove( // Лишний раз - умышленно
+    {
+      Component_t::Make({
+        { uT("type"), uT("Texture") },
+        { uT("id"), uT("TextureId") },
+        }),
+    });
 
   EXPECT_CALL(Caller, Creator(uT("Texture")))
     .Times(1);
@@ -447,7 +499,7 @@ TEST_F(Renders_test, /*DISABLED_*/Test_Remove)
   EXPECT_CALL(Caller, Creator(uT("Mesh")))
     .Times(1);
 
-  const auto Result = Example.Obtain(
+  Example.Obtain(
     {
       Component_t::Make({
         { uT("type"), uT("Texture") },
