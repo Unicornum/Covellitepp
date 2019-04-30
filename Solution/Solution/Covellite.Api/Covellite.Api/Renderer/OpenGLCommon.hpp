@@ -3,6 +3,7 @@
 #include "IGraphicApi.hpp"
 #include "Api.forward.hpp"
 #include "CapturingServiceComponent.hpp"
+#include "GLMath.hpp"
 
 namespace covellite
 {
@@ -37,6 +38,7 @@ class OpenGLCommon :
   public Registator_t<IGraphicApi>
 {
   using Color_t = ::std::vector<GLfloat>;
+  using MatrixBuilder_t = ::std::function<void(::glm::mat4 &)>;
 
 public:
   // Èםעונפויס IGraphicApi:
@@ -57,9 +59,10 @@ private:
 private:
   Render_t GetDepthRender(bool, bool);
   Render_t GetCameraCommon(void);
-  Render_t GetCameraGui(const ComponentPtr_t &);
-  Render_t GetCameraFocal(const ComponentPtr_t &);
+  Render_t GetCameraOrthographic(const ComponentPtr_t &);
+  Render_t GetCameraPerspective(const ComponentPtr_t &);
   Render_t CreateGeometry(const ComponentPtr_t &);
+  MatrixBuilder_t GetPreRenderGeometry(void);
   static Color_t ARGBtoFloat4(uint32_t);
 
 private:
@@ -67,7 +70,7 @@ private:
   const int                   m_Top;
   const String_t              m_PreVersion;
   Creators_t                  m_Creators;
-  Render_t                    m_DrawElements;
+  Render_t                    m_DrawElements = [](void) {};
   Render_t                    m_SampleState = [](void) {};
 
 private:

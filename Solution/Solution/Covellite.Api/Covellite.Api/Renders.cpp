@@ -1,7 +1,8 @@
 ﻿
 #include "stdafx.h"
 #include <Covellite/Api/Renders.hpp>
-#include <boost/thread/lock_guard.hpp>
+#include <Covellite/Api/Component.inl>
+//#include <boost/thread/lock_guard.hpp>
 
 using namespace covellite::api;
 
@@ -45,7 +46,7 @@ auto Component::Renders::Obtain(const Object_t & _Object) -> Renders_t
   TODO("Тест работы в многопоточном режиме.");
   // Когда будут использоваться разные объекты этого класса, синхронизация
   // должная быть реализована общая.
-  ::boost::lock_guard<::boost::mutex> Lock(m_Mutex);
+  //::boost::lock_guard<::boost::mutex> Lock(m_Mutex);
 
   Renders_t Result;
 
@@ -77,7 +78,7 @@ auto Component::Renders::Obtain(const Object_t & _Object) -> Renders_t
 */
 void Component::Renders::Remove(const Object_t & _Object)
 {
-  ::boost::lock_guard<::boost::mutex> Lock(m_Mutex);
+  //::boost::lock_guard<::boost::mutex> Lock(m_Mutex);
 
   for (const auto & _pComponent : _Object)
   {
@@ -95,20 +96,19 @@ void Component::Renders::Remove(const Object_t & _Object)
 
 auto Component::Renders::Create(const ComponentPtr_t & _pComponent) -> Render_t
 {
-  auto itCreator = m_Creators.find(_pComponent->Type);
-  if (itCreator == m_Creators.end())
-  {
-    // 10 Декабрь 2018 19:11 (unicornum.verum@gmail.com)
-    TODO("Писать в лог??? А если он и должен игнорироваться, как шейдер для OpenGL?");
-
-    return nullptr;
-  }
-
-  Render_t Result;
+  Render_t Result = nullptr;
 
   try
   {
-    Result = itCreator->second(_pComponent);
+    auto itCreator = m_Creators.find(_pComponent->Type);
+    if (itCreator != m_Creators.end())
+    {
+      Result = itCreator->second(_pComponent);
+    }
+    else if (_pComponent->Type == uT("Updater"))
+    {
+      Result = CreateUpdater(_pComponent);
+    }
   }
   catch (const ::std::exception & _Ex)
   {
@@ -118,7 +118,40 @@ auto Component::Renders::Create(const ComponentPtr_t & _pComponent) -> Render_t
     return nullptr;
   }
 
-  if (Result) m_AllExistingRenders[_pComponent->Id] = { 1, Result };
+  if (Result != nullptr)
+  {
+    m_AllExistingRenders[_pComponent->Id] = { 1, Result };
+  }
+  else
+  {
+    // 10 Декабрь 2018 19:11 (unicornum.verum@gmail.com)
+    TODO("Писать в лог??? А если он и должен игнорироваться, как шейдер для OpenGL?");
+  }
 
   return Result;
+}
+
+auto Component::Renders::CreateUpdater(const ComponentPtr_t & _pComponent) -> Render_t
+{
+  // Реализация компонента обновления; реализация рабочая (см. реализацию
+  // класса Simple3DObject), но есть проблемы:
+  // - Рендерятся объекты, попадающие в поле зрения камеры, а обновлять
+  // нужно объекты рядом с камерой (включая те, что позади).
+  // - Все updater'ы всех объектов в рамках рендеринга одного кадра должны
+  // получать одно и то же значение времени.
+
+  using Updater_t = ::std::function<void(const float)>;
+  const Updater_t Empty = [](const float) {};
+
+  const auto Updater = _pComponent->GetValue(uT("function"), Empty);
+
+  return [Updater](void)
+  {
+    static const auto Begin = ::std::chrono::system_clock::now();
+
+    const ::std::chrono::duration<float> Time = 
+      (::std::chrono::system_clock::now() - Begin);
+
+    Updater(Time.count());
+  };
 }

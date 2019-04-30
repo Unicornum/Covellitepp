@@ -9,7 +9,7 @@ using namespace layers;
 
 Layer::Layer(IWindowGui_t & _Window, const Path_t & _FileName,
   const String_t & _Title, const String_t & _Description, const bool _IsStopBasements) :
-  ::covellite::gui::Layer(_Window, "data" / _FileName),
+  ::covellite::gui::Layer(_Window, "Data" / _FileName),
   m_FontSize(EmployFontSize(2.5)),
   m_IsStopBasements(_IsStopBasements)
 {

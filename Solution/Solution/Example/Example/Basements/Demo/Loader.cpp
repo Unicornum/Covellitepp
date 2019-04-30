@@ -14,9 +14,9 @@ Loader::Loader(void) :
 
 }
 
-Object_t Loader::GetObject(const Any_t &) const /*override*/
+auto Loader::GetObject(const Any_t &) const /*override*/ -> Objects_t
 {
-  return {};
+  return { {} };
 }
 
 } // namespace model

@@ -8,40 +8,17 @@
   </Options>
   <Process/>
   <Complete>
-    <Week6219>
-      <Task26 Text="Правосторонняя система координат при использовании перспективной камеры." Type="Red" Version="None" ExternalProgram="None" Expanded="false" Completed="true" History="true" ParentTaskText="false">
-        <Task27 Text="Реализация DirectX10." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
-        <Task28 Text="Реализация OpenGL." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
-        <Task29 Text="Реализация DirectX11." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
-      </Task26>
-    </Week6219>
-    <Week6218>
-      <Task4 Text="Подсчет количества запросов рендера и автоматическое удаление рендера при обнулении счетчика." Type="Red" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="true" ParentTaskText="false"/>
-      <Task5 Text="Camera: замена названия параметра 'angle' на 'fov'." Type="Red" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="true" ParentTaskText="false"/>
-      <Task6 Text="Компонент заливки буфера кадра указанным цветом." Type="Red" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="true" ParentTaskText="false">
-        <Task7 Text="Прототип на реализации DirectX10." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
-        <Task8 Text="Реализация для DirectX11." Type="None" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
-        <Task9 Text="Реализация для OpenGL|ES." Type="None" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
-      </Task6>
-    </Week6218>
-    <Week6217/>
-    <Week6216>
-      <Task12 Text="Функция класса компонента для проверки типа параметра." Type="Red" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="false"/>
-      <Task13 Text="Автоматический вывод типа буфера." Type="Red" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="false"/>
-      <Task14 Text="Автоматический вывод типа шейдера." Type="Red" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="true" ParentTaskText="false">
-        <Task15 Text="Прототип на реализации DirectX10." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
-        <Task16 Text="Реализация DirectX11." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
-      </Task14>
-      <Task17 Text="Шейдеры по умолчанию." Type="Red" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="false">
-        <Task18 Text="Прототип для реализации DirectX10." Type="None" Version="None" ExternalProgram="None" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
-        <Task19 Text="Реализация для DirectX11." Type="None" Version="None" ExternalProgram="None" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
-      </Task17>
-      <Task20 Text="Изменение названий классов вершин." Type="Red" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="true" ParentTaskText="false"/>
-      <Task21 Text="OpenGL: установка нормалей по умолчанию для плоских объектов." Type="Red" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="true" ParentTaskText="false"/>
-      <Task22 Text="OpenGL: автоматическая привязка компонента State.Sampler к текстуре." Type="Red" Version="None" ExternalProgram="RootPart" Expanded="false" Completed="true" History="true" ParentTaskText="false"/>
-      <Task23 Text="Использование компонента положения совместно с ортографической камерой." Type="Red" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="true" ParentTaskText="false"/>
-      <Task24 Text="Отдельный компонент буфера глубины." Type="Red" Version="None" ExternalProgram="RootPart" Expanded="false" Completed="true" History="true" ParentTaskText="false"/>
-      <Task25 Text="State.Scissor: замена имени параметра на enabled." Type="Red" Version="None" ExternalProgram="RootPart" Expanded="false" Completed="true" History="true" ParentTaskText="false"/>
-    </Week6216>
+    <Week6225>
+      <Task3 Text="Флаг 'static' для компонента Present.Geometry (ускорение рендеринга объектов, положение/ориентация/масштаб которых не меняется)." Type="Red" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="true" ParentTaskText="false"/>
+      <Task4 Text="Установка в 1.0f значений по умолчанию для компонента масштабирования." Type="Red" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="true" ParentTaskText="false"/>
+      <Task5 Text="Компонент включения alpha теста для реализации OpenGL|ES." Type="Red" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="true" ParentTaskText="false"/>
+      <Task10 Text="Экспериментальная реализация компонента обновления." Type="Red" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="false"/>
+      <Task11 Text="Поломанные/не компилирующиеся тесты." Type="Bug" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="false"/>
+    </Week6225>
+    <Week6224>
+      <Task7 Text="Включение для OpenGL альфа-теста." Type="Red" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="false"/>
+    </Week6224>
+    <Week6223/>
+    <Week6222/>
   </Complete>
 </Tasks>

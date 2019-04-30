@@ -50,14 +50,21 @@ public:
 private:
   void PrepareScene(const IntPtr_t &);
   void RemoveAllObjects(void);
-  void ActivateProcessMovingEvents(void);
+  Updater_t GetAutoProcessMoving(void);
+  Updater_t GetManualProcessMoving(void);
 
 private:
   void LoadObject(const GameObject::IGameObjectPtr_t &, const Any_t & = Any_t{});
-  void LoadObject(const GameObject::IGameObjectPtr_t &, const Updater_t &);
+  Id_t LoadObject(const GameObject::IGameObjectPtr_t &, const Updater_t &);
+  void LoadObject(const GameObject::IGameObjectPtr_t &, const CubeCoords &);
   void PrepareLoader(const IntPtr_t &);
+  void PrepareLoader(void);
   void PrepareCamera(void);
   void PreparePlane(void);
+  void PrepareExtensionPlane(const CubeCoords &);
+  void PrepareCompressionPlane(const CubeCoords &);
+  Updater_t GetCellLoader(const CubeCoords &);
+  Updater_t GetCellRemover(const CubeCoords &);
   float GetHeight(const float, const float) const;
 
 private:
@@ -66,6 +73,7 @@ private:
   DbUpdaters              m_DbUpdaters;
   GameScenePtr_t          m_pGameScene;
   ::std::queue<Updater_t> m_LoadingQueue;
+  Updater_t               m_ProcessingMode = [](void) {};
 
 private:
   class Step final
@@ -73,12 +81,15 @@ private:
   public:
     CubeCoords m_ChangePosition;
     CubeCoords m_Orientation;
+    float      m_Pitch = 0.0f;
     float      m_BeginTime = 0.0f;
   };
 
   CubeCoords m_Position;
   CubeCoords m_Orientation{ 0, 1 };
+  float      m_Pitch = 0.0f;
   ::std::queue<Step> m_Steps;
+  ::std::map<size_t, GameObject::IGameObjectPtr_t> m_LandscapeObjects;
 
 public:
   GameWorld(const Events_t &, DbComponents &);

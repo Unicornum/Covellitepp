@@ -123,46 +123,47 @@ Application::Application(EventBased) :
 
 bool Application::PostCommand(bool _IsWaitMessage)
 {
-  using ProcessEvents_t = void(*)(MSG &, bool &);
+  using ProcessEvents_t = ::std::function<bool(MSG &)>;
 
-  ProcessEvents_t ProcessEventsContinuous = 
-    [](MSG & _Message, bool & _IsLostFocus)
+  const ProcessEvents_t ProcessEventsEventBased = [](MSG & _Message)
   {
-    const auto Result = (_IsLostFocus) ?
-      USING_MOCK ::GetMessage(&_Message, NULL, 0, 0) :
-      USING_MOCK ::PeekMessage(&_Message, 0, 0, 0, PM_REMOVE);
-    if (Result == FALSE) return;
-
-    if (_Message.message == WM_SETFOCUS) _IsLostFocus = false;
-    if (_Message.message == WM_KILLFOCUS) _IsLostFocus = true;
-    if (_Message.message == WM_QUIT) return;
+    const auto Result = USING_MOCK::GetMessage(&_Message, NULL, 0, 0);
+    if (Result == -1) WINAPI_CHECK FALSE;
+    if (_Message.message == WM_QUIT) return true;
 
     USING_MOCK::TranslateMessage(&_Message);
     USING_MOCK::DispatchMessage(&_Message);
+    return true;
   };
 
-  ProcessEvents_t ProcessEventsEventBased = 
-    [](MSG & _Message, bool & /*_IsLostFocus*/)
-  {
-    const auto Result = USING_MOCK ::GetMessage(&_Message, NULL, 0, 0);
-    if (Result == -1) WINAPI_CHECK FALSE;
-    if (_Message.message == WM_QUIT) return;
-
-    USING_MOCK ::TranslateMessage(&_Message);
-    USING_MOCK ::DispatchMessage(&_Message);
-  };
-
-  auto ProcessEvents = (_IsWaitMessage) ?
-    ProcessEventsEventBased : ProcessEventsContinuous;
-
-  MSG Message = { 0 };
   bool IsLostFocus = false;
+
+  const ProcessEvents_t ProcessEventsContinuous = [&IsLostFocus](MSG & _Message)
+  {
+    const auto Result = (IsLostFocus) ?
+      USING_MOCK ::GetMessage(&_Message, NULL, 0, 0) :
+      USING_MOCK ::PeekMessage(&_Message, 0, 0, 0, PM_REMOVE);
+    if (Result == FALSE) return true;
+
+    if (_Message.message == WM_SETFOCUS) IsLostFocus = false;
+    if (_Message.message == WM_KILLFOCUS) IsLostFocus = true;
+    if (_Message.message == WM_QUIT) return true;
+
+    USING_MOCK::TranslateMessage(&_Message);
+    USING_MOCK::DispatchMessage(&_Message);
+    return false;
+  };
+
+  const auto ProcessEvents = (_IsWaitMessage) ?
+    ProcessEventsEventBased : ProcessEventsContinuous;
 
   m_Events[events::Application.Start]();
 
+  MSG Message = { 0 };
+
   while (true)
   {
-    ProcessEvents(Message, IsLostFocus);
+    while (!ProcessEvents(Message)) {};
     if (Message.message == WM_QUIT) break;
 
     m_Events[events::Application.Update]();

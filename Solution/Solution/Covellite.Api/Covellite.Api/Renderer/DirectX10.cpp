@@ -184,8 +184,6 @@ public:
     // транспонированы один раз для каждой камеры, а эта функция вызывается для
     // каждого объекта.
     // 
-    Get<::Matrices>().World =
-      ::DirectX::XMMatrixTranspose(Get<::Matrices>().World);
     m_WorldViewProjection.Update();
   }
 
@@ -583,13 +581,16 @@ auto DirectX10::CreateMaterial(const ComponentPtr_t & _pComponent) -> Render_t
 
 auto DirectX10::CreateTexture(const ComponentPtr_t & _pComponent) -> Render_t
 {
-  const Component::Texture TextureData{ 
-    m_ServiceComponents.Get({ { uT("Texture"), _pComponent } })[0] };
+  const auto pData = 
+    m_ServiceComponents.Get({ { uT("Texture"), _pComponent } })[0];
+
+  const Component::Texture TextureData{ pData };
+  const UINT MipLevels = pData->GetValue(uT("mipmapping"), false) ? 4 : 1;
 
   D3D10_TEXTURE2D_DESC textureDesc = { 0 };
   textureDesc.Width = TextureData.Width;
   textureDesc.Height = TextureData.Height;
-  textureDesc.MipLevels = 1;
+  textureDesc.MipLevels = MipLevels; //0 - full set of subtextures
   textureDesc.ArraySize = 1;
   textureDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
   textureDesc.Usage = D3D10_USAGE_DEFAULT;
@@ -598,18 +599,23 @@ auto DirectX10::CreateTexture(const ComponentPtr_t & _pComponent) -> Render_t
   textureDesc.SampleDesc.Count = 1;
   textureDesc.SampleDesc.Quality = 0;
 
-  D3D10_SUBRESOURCE_DATA Init = { 0 };
-  Init.pSysMem = TextureData.pData;
-  Init.SysMemPitch = TextureData.Width * 4;
+  ::std::vector<D3D10_SUBRESOURCE_DATA> Init{ MipLevels };
+
+  for (size_t i = 0; i < MipLevels; i++)
+  {
+    memset(&Init[i], 0x00, sizeof(D3D10_SUBRESOURCE_DATA));
+    Init[i].pSysMem = TextureData.pData;
+    Init[i].SysMemPitch = TextureData.Width * 4;
+  }
 
   ComPtr_t<ID3D10Texture2D> pTexture;
-  DX_CHECK m_pDevice->CreateTexture2D(&textureDesc, &Init, &pTexture);
+  DX_CHECK m_pDevice->CreateTexture2D(&textureDesc, Init.data(), &pTexture);
 
   D3D10_SHADER_RESOURCE_VIEW_DESC srvDesc = { 0 };
   srvDesc.Format = textureDesc.Format;
   srvDesc.ViewDimension = D3D10_SRV_DIMENSION_TEXTURE2D;
   srvDesc.Texture2D.MipLevels = textureDesc.MipLevels;
-  srvDesc.Texture2D.MostDetailedMip = 0;
+  srvDesc.Texture2D.MostDetailedMip = textureDesc.MipLevels - 1;
 
   ComPtr_t<ID3D10ShaderResourceView> pShaderResourceView;
   DX_CHECK m_pDevice->CreateShaderResourceView(pTexture.Get(),
@@ -850,13 +856,26 @@ auto DirectX10::CreateCamera(const ComponentPtr_t & _pComponent) -> Render_t
     CameraPerspective : CameraOrthographic;
 }
 
-auto DirectX10::CreateGeometry(const ComponentPtr_t &) -> Render_t
+auto DirectX10::CreateGeometry(const ComponentPtr_t & _pComponent) -> Render_t
 {
-  auto PreRenders = CreatePreRendersGeometry();
+  const auto GetStaticPreRenderGeometry = [this](void) -> Render_t
+  {
+    CreatePreRenderGeometry()();
+    const auto World = m_pData->Get<::Matrices>().World;
+
+    return [=](void)
+    {
+      m_pData->Get<::Matrices>().World = World;
+      m_pData->Update<::Matrices>();
+    };
+  };
+
+  const auto PreRender = _pComponent->GetValue(uT("static"), false) ?
+    GetStaticPreRenderGeometry() : CreatePreRenderGeometry();
 
   return [=](void)
   {
-    for (auto & Render : PreRenders) Render();
+    PreRender();
 
     ComPtr_t<ID3D10Buffer> pIndexBuffer;
     DXGI_FORMAT Format = DXGI_FORMAT_UNKNOWN;
@@ -898,7 +917,7 @@ auto DirectX10::CreateBlendState(bool _IsEnabled) -> Render_t
   };
 }
 
-auto DirectX10::CreatePreRendersGeometry(void) -> Renders_t
+auto DirectX10::CreatePreRenderGeometry(void) -> Render_t
 {
   Renders_t Result;
 
@@ -953,8 +972,13 @@ auto DirectX10::CreatePreRendersGeometry(void) -> Renders_t
 
   Result.push_back([=](void)
   {
+    m_pData->Get<::Matrices>().World =
+      ::DirectX::XMMatrixTranspose(m_pData->Get<::Matrices>().World);
     m_pData->Update<::Matrices>();
   });
 
-  return Result;
+  return [Result](void)
+  {
+    for (auto & Render : Result) Render();
+  };
 }

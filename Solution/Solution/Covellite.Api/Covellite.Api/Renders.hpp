@@ -39,6 +39,7 @@ public:
 
 private:
   Render_t Create(const ComponentPtr_t &);
+  Render_t CreateUpdater(const ComponentPtr_t &);
 
 private:
   const Creators_t m_Creators;

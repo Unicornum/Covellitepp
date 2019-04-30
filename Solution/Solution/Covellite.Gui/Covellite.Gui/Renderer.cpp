@@ -8,6 +8,7 @@
 #include <Covellite/Api/Component.inl>
 #include <Covellite/Api/Renders.hpp>
 #include <Covellite/Api/Vertex.hpp>
+#include <Covellite/Gui/Vfs.hpp>
 
 namespace covellite
 {
@@ -260,7 +261,7 @@ bool Renderer::LoadTexture(
   {
     const image::Universal_t<image::pixel::RGBA> Image
     {
-      ::boost::filesystem::load_binary_file(_PathToFile.CString())
+      Vfs_t::GetInstance().GetData(_PathToFile.CString())
     };
 
     _TextureDimensions.x = static_cast<int>(Image.GetData().Width);

@@ -58,6 +58,12 @@ public:
   const Configuration_t & GetConfiguration(void) const override;
 
 private:
+  void ActivateApplicationEvents(void);
+  void ActivateResizeEvents(void);
+  void ActivateMouseEvents(void);
+  void ActivateKeyEvents(void);
+
+private:
   Events_t        m_Events;
   long            m_MinWindowWidth = 0;
   long            m_MinWindowHeight = 0;

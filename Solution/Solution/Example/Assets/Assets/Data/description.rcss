@@ -1,0 +1,23 @@
+
+.help {
+  visibility: hidden;
+}
+
+description {
+  display: block;
+  color: black;
+  padding-left: 0.75 em;
+  padding-right: 0.75 em;
+  padding-top: 0.75 em;
+  padding-bottom: 0.75 em;
+  border-width: 1px;
+  border-color: grey;
+  min-height: 10 em;
+  position: fixed;
+  top: 5.5 em;
+  bottom: 0.5 em;
+  left: 0.5 em;
+  right: 0.5 em;
+  overflow-y: auto;
+  background-color: rgba(255, 255, 255, 64);
+}

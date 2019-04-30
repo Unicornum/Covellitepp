@@ -14,6 +14,8 @@ public:
     Auto,
     Manual,
     Exit,
+
+    None,
     MoveForward,
     MoveBackward,
     MoveLeftForward,
@@ -22,6 +24,8 @@ public:
     MoveRightBackward,
     TurnLeft,
     TurnRight,
+    TurnUp,
+    TurnDown,
   };
 };
 

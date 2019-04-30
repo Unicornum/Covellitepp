@@ -9,7 +9,7 @@ using namespace layers;
 
 /// [Layer example]
 MainScreen::MainScreen(IWindowGui_t & _Window) :
-  Layer(_Window, "data/main.rml")
+  Layer(_Window, "Data/main.rml")
 {
   /// [Layer example]
 

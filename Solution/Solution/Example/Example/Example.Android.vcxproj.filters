@@ -124,6 +124,9 @@
     <ClInclude Include="Basements\Demo\Water.hpp">
       <Filter>Basements\Demo</Filter>
     </ClInclude>
+    <ClInclude Include="Basements\Demo\Skybox.hpp">
+      <Filter>Basements\Demo</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Common">
@@ -244,6 +247,24 @@
       <Filter>Basements\Demo</Filter>
     </ClCompile>
     <ClCompile Include="Basements\Demo\Water.cpp">
+      <Filter>Basements\Demo</Filter>
+    </ClCompile>
+    <ClCompile Include="Basements\Demo\CubeCoords.cpp">
+      <Filter>Basements\Demo</Filter>
+    </ClCompile>
+    <ClCompile Include="Basements\Demo\GameScene.cpp">
+      <Filter>Basements\Demo</Filter>
+    </ClCompile>
+    <ClCompile Include="Basements\Demo\Landscape.Mesh.cpp">
+      <Filter>Basements\Demo</Filter>
+    </ClCompile>
+    <ClCompile Include="Basements\Demo\GameObject.Mesh.cpp">
+      <Filter>Basements\Demo</Filter>
+    </ClCompile>
+    <ClCompile Include="Basements\Demo\GameObject.Texture.cpp">
+      <Filter>Basements\Demo</Filter>
+    </ClCompile>
+    <ClCompile Include="Basements\Demo\Skybox.cpp">
       <Filter>Basements\Demo</Filter>
     </ClCompile>
   </ItemGroup>

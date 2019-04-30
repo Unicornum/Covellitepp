@@ -1,9 +1,0 @@
-﻿<rml>
-  <head>
-    <link type="text/template" href="layer.template.rml"/>
-    <link type="text/rcss" href="description.rcss"/>
-  </head>
-  <body template="layer" id="id_description">
-    <description id="id_main_description" />
-  </body>
-</rml>

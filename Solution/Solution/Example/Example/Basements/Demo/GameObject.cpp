@@ -1,16 +1,9 @@
 
 #include "stdafx.h"
 #include "GameObject.hpp"
-#include <boost/any.hpp>
-#include <alicorn/cpp/math.hpp>
 #include <alicorn/std/exception.hpp>
-#include <alicorn/std/vector.hpp>
-#include <alicorn/boost/filesystem.hpp>
-#include <alicorn/image.hpp>
-#include <alicorn/logger.hpp>
 #include <Covellite/Api/Component.inl>
-#include <Covellite/App/Settings.hpp>
-#include "CubeCoords.hpp"
+#include "Skybox.hpp"
 #include "Camera.hpp"
 #include "Loader.hpp"
 #include "Landscape.hpp"
@@ -24,20 +17,6 @@ namespace model
 {
 
 namespace math = ::alicorn::extension::cpp::math;
-namespace image = ::alicorn::source::image;
-
-class GameObject::Image final
-{
-public:
-  const image::Universal_t<image::pixel::RGBA> m_Image;
-
-public:
-  explicit Image(const Path_t & _PathToTextureFile) :
-    m_Image(::boost::filesystem::load_binary_file(_PathToTextureFile))
-  {
-
-  }
-};
 
 GameObject::GameObject(const Type::Value _Type) :
   m_Type(_Type)
@@ -51,9 +30,13 @@ auto GameObject::GetType(void) const /*final*/ -> Type::Value
 }
 
 /*static*/ auto GameObject::Create(const Type::Value _Type,
-  const IGameWorld & _GameWorld) -> IGameObjectPtr_t
+  const IGameWorld * _pGameWorld) -> IGameObjectPtr_t
 {
-  if (_Type == Type::Camera)
+  if (_Type == Type::Skybox)
+  {
+    return IGameObjectPtr_t{ new Skybox };
+  }
+  else if (_Type == Type::Camera)
   {
     return IGameObjectPtr_t{ new Camera };
   }
@@ -70,41 +53,10 @@ auto GameObject::GetType(void) const /*final*/ -> Type::Value
     return IGameObjectPtr_t{ new Compass };
   }
 
-  return IGameObjectPtr_t{ new Landscape{ _Type, _GameWorld } };
+  return IGameObjectPtr_t{ new Landscape{ _Type, *_pGameWorld } };
 }
 
-Object_t GameObject::LoadTexture(const Path_t & _TextureFileName) const
-{
-  LOGGER(Trace) << "Load texture file: " << _TextureFileName.c_str();
-
-  using ::covellite::app::Settings_t;
-
-  const auto PathToTextureDirectory =
-    Settings_t::GetInstance().Get<Path_t>(uT("PathToTextureDirectory"));
-
-  m_pTextureImage = ::std::make_shared<Image>(
-    PathToTextureDirectory / "demo" / _TextureFileName);
-  auto & ImageData = m_pTextureImage->m_Image.GetData();
-
-  return
-  {
-    Component_t::Make(
-    {
-      { uT("type"), uT("Data") },
-      { uT("kind"), uT("Texture") },
-      { uT("data"), ImageData.Buffer.data() },
-      { uT("width"), static_cast<int>(ImageData.Width) },
-      { uT("height"), static_cast<int>(ImageData.Height) },
-    }),
-    Component_t::Make(
-    {
-      { uT("id"), uT("Demo.Texture.%TYPE%").Replace(uT("%TYPE%"), GetType()) },
-      { uT("type"), uT("Texture") },
-    }),
-  };
-}
-
-Object_t GameObject::GetShaderObject(void) const
+/*static*/ Object_t GameObject::GetShaderObject(void)
 {
   return Object_t
   {
@@ -113,11 +65,11 @@ Object_t GameObject::GetShaderObject(void) const
       { uT("type"), uT("Data") },
       { uT("kind"), uT("Shader.HLSL") },
       { uT("version"), uT("ps_4_0") },
-      { uT("entry"), uT("psTextured") },
+      { uT("entry"), uT("psDiscardAlpha") },
     }),
     Component_t::Make(
     {
-      { uT("id"), uT("Demo.Shader.Pixel.Compass") },
+      { uT("id"), uT("Demo.Shader.Pixel") },
       { uT("type"), uT("Shader") },
     }),
     Component_t::Make(
@@ -132,53 +84,40 @@ Object_t GameObject::GetShaderObject(void) const
       { uT("id"), uT("Demo.Shader.Vertex") },
       { uT("type"), uT("Shader") },
     }),
+    Component_t::Make(
+    {
+      { uT("id"), uT("Demo.State.AlphaTest") },
+      { uT("type"), uT("State") },
+      { uT("kind"), uT("AlphaTest") },
+      { uT("discard"), 0.45f },
+    }),
   };
 }
 
-Object_t GameObject::GetMeshObject(
-  const ::std::vector<Vertex_t> & _VertexData,
-  const ::std::vector<int> & _IndexData) const
+size_t GameObject::AddTexture(const Path_t & _FileName) const
 {
-  static size_t Index = 0;
-  Index++;
+  m_Textures.push_back(::std::make_unique<Texture>(_FileName));
+  return m_Textures.size() - 1;
+}
 
-  return Object_t
+const GameObject::Texture & GameObject::GetTexture(const size_t _Index) const
+{
+  if (_Index >= m_Textures.size())
   {
-    Component_t::Make(
-    {
-      { uT("type"), uT("Data") },
-      { uT("kind"), uT("Buffer") },
-      { uT("data"), _VertexData.data() },
-      { uT("count"), _VertexData.size() },
-    }),
-    Component_t::Make(
-    {
-      { uT("id"), uT("Demo.Buffer.Vertex.%ID%").Replace(uT("%ID%"), Index) },
-      { uT("type"), uT("Buffer") },
-    }),
-    Component_t::Make(
-    {
-      { uT("type"), uT("Data") },
-      { uT("kind"), uT("Buffer") },
-      { uT("data"), _IndexData.data() },
-      { uT("count"), _IndexData.size() },
-    }),
-    Component_t::Make(
-    {
-      { uT("id"), uT("Demo.Buffer.Index.%ID%").Replace(uT("%ID%"), Index) },
-      { uT("type"), uT("Buffer") },
-    }),
-  };
+    throw STD_EXCEPTION << "Unexpected index texture: " << _Index;
+  }
+
+  return *m_Textures[_Index].get();
 }
 
-Object_t GameObject::GetCommonObject(
-  const ::std::vector<Vertex_t> & _VertexData,
-  const ::std::vector<int> & _IndexData) const
+const GameObject::Mesh & GameObject::GetMesh(const size_t _Index) const
 {
-  using namespace ::alicorn::extension::std;
+  if (_Index >= m_Meshes.size())
+  {
+    throw STD_EXCEPTION << "Unexpected index mesh: " << _Index;
+  }
 
-  return GetShaderObject() +
-    GetMeshObject(_VertexData, _IndexData);
+  return *m_Meshes[_Index].get();
 }
 
 } // namespace model

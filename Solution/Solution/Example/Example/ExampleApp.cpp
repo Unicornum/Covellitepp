@@ -1,9 +1,9 @@
 ﻿
 #include "stdafx.h"
 #include "ExampleApp.hpp"
-#include <alicorn/logger.hpp>
 #include <alicorn/version.hpp>
 #include <alicorn/application/current-module.hpp>
+#include <alicorn/logger.hpp>
 #include "ExampleWindow.hpp"
 #include "BasementWindow.hpp"
 
@@ -21,10 +21,11 @@ ExampleApp::ExampleApp(void) noexcept :
   // ...
   /// [Constructor main application class]
 
-  // В Android будет ошибка, игнорирунм ее.
+  using ::alicorn::system::application::CurrentModule;
+
+  // В Android будет ошибка, игнорируем ее.
   ::boost::system::error_code ErrorCode;
-  ::boost::filesystem::current_path(
-    ::alicorn::system::application::CurrentModule::GetAppRootPath(), ErrorCode);
+  ::boost::filesystem::current_path(CurrentModule::GetAppRootPath(), ErrorCode);
 
   DoInitLogger();
 

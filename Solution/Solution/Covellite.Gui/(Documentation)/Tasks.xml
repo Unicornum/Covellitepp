@@ -13,16 +13,11 @@
     </Task1>
   </Process>
   <Complete>
-    <Week6221>
-      <Task13 Text="Ошибка при загрузке текстур на Android'e." Type="Bug" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="true" ParentTaskText="false"/>
-    </Week6221>
-    <Week6220/>
-    <Week6219>
-      <Task8 Text="Падение программы при закрытии окна, если в .rcss файле был использован несуществующий файл изображения." Type="Bug" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="true" ParentTaskText="false"/>
-      <Task9 Text="В стеке слоев может одновременно содержаться только один слой одного и того же класса." Type="Red" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="true" ParentTaskText="false"/>
-      <Task10 Text="Запись в лог информации о вставке/удалении слоев." Type="Red" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="true" ParentTaskText="false"/>
-      <Task11 Text="Событие НАЖАТИЯ кнопки Gui." Type="Red" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="true" ParentTaskText="false"/>
-    </Week6219>
-    <Week6218/>
+    <Week6225>
+      <Task9 Text="Загрузка файлов текстур через виртуальную файловую систему." Type="Red" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="true" ParentTaskText="false"/>
+    </Week6225>
+    <Week6224/>
+    <Week6223/>
+    <Week6222/>
   </Complete>
 </Tasks>

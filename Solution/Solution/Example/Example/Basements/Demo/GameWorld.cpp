@@ -26,30 +26,47 @@ namespace model
 namespace math = ::alicorn::extension::cpp::math;
 using Vertex_t = ::covellite::api::Vertex::Polyhedron;
 
+const auto Random = [](const int _From, const int _To)
+{
+  static ::std::mt19937 Generator{ ::std::random_device{}() };
+  return ::std::uniform_int_distribution<>{ _From, _To }(Generator);
+};
+
 GameWorld::GameWorld(const Events_t & _Events, DbComponents & _DbComponents) :
   m_Events(_Events),
   m_DbComponents(_DbComponents)
 {
   LOGGER(Trace) << "Create GameWorld.";
 
-  const auto LoadScene = [=](const IntPtr_t & _pLoadingPercent)
+  m_Events[::covellite::events::Application.Update].Connect([this](void)
   {
-    PrepareScene(_pLoadingPercent);
-  };
-
-  m_Events[::events::Demo.Auto].Connect(LoadScene);
-  m_Events[::events::Demo.Manual].Connect(LoadScene);
-  m_Events[::events::Demo.Exit].Connect([=](void) { RemoveAllObjects(); });
-
-  m_Events[::covellite::events::Application.Update].Connect([=](void) 
-  { 
-    m_pGameScene->CallForEach([=](const Id_t _Id) 
-    { 
-      m_DbUpdaters.CallUpdater(_Id);
-    }, nullptr);
+    m_ProcessingMode();
   });
 
-  ActivateProcessMovingEvents();
+  m_Events[::events::Demo.Auto].Connect([this](const IntPtr_t & _pLoadingPercent)
+  {
+    PrepareScene(_pLoadingPercent);
+    m_ProcessingMode = GetAutoProcessMoving();
+  });
+
+  m_Events[::events::Demo.Manual].Connect([this](const IntPtr_t & _pLoadingPercent)
+  {
+    PrepareScene(_pLoadingPercent);
+    m_ProcessingMode = GetManualProcessMoving();
+  });
+
+  m_Events[::events::Demo.Exit].Connect([this](void) 
+  { 
+    RemoveAllObjects(); 
+  });
+
+  m_Events[::covellite::events::Application.Update].Connect([this](void) 
+  { 
+    m_pGameScene->Update([this](const Id_t _Id) 
+    { 
+      m_DbUpdaters.CallUpdater(_Id);
+    });
+  });
 }
 
 GameWorld::~GameWorld(void)
@@ -70,29 +87,29 @@ GameScenePtr_t GameWorld::CreateGameScene(void) /*override*/
 float GameWorld::GetLandscapeHeight(const CubeCoords & _CellPosition) const /*override*/
 {
   const auto Position = _CellPosition.ToPlane();
-  return GetHeight(0.5f * Position.first, 0.5f * Position.second);
+  return GetHeight(Position.first, Position.second);
 }
 
 size_t GameWorld::GetGameObjectType(const CubeCoords & _CellPosition) const /*override*/
 {
-  const auto Random = [](const int _From, const int _To)
+  if (_CellPosition.GetX() == -3 &&
+    _CellPosition.GetY() == -3)
   {
-    static ::std::mt19937 Generator{ ::std::random_device{}() };
-    return ::std::uniform_int_distribution<>{ _From, _To }(Generator);
-  };
+    return GameObject::Type::Well;
+  }
 
-  if (GetLandscapeHeight(_CellPosition) < 0.2f)
+  if (GetLandscapeHeight(_CellPosition) < 0.05f)
   {
     return GameObject::Type::Sand;
   }
 
   const auto Type = Random(0, 100);
 
-  if (Type > 80) return GameObject::Type::None;
-  if (Type > 75) return GameObject::Type::Rock;
-  if (Type > 70) return GameObject::Type::Bush;
-  if (Type > 65) return GameObject::Type::Tree;
-  return GameObject::Type::Grass;
+  if (Type > 27) return GameObject::Type::Grass;
+  if (Type > 25) return GameObject::Type::Rock;
+  if (Type > 10) return GameObject::Type::Bush;
+  if (Type > 2) return GameObject::Type::Tree;
+  return GameObject::Type::None;
 }
 
 void GameWorld::PrepareScene(const IntPtr_t & _pLoadingPercent)
@@ -100,53 +117,259 @@ void GameWorld::PrepareScene(const IntPtr_t & _pLoadingPercent)
   LOGGER(Trace) << "Create game objects...";
 
   PrepareLoader(_pLoadingPercent);
-  m_pGameScene->Complete();
+  m_pGameScene->CompleteReplace();
 
-  m_Position = CubeCoords{};
-  m_Orientation = CubeCoords{ 0, 1 };
+  // Порядок добавления объектов не важен, рендерится они будут в порядке
+  // увеличения значений типа объектов.
 
-  Step Step;
-  Step.m_ChangePosition = CubeCoords{};
-  Step.m_Orientation = m_Orientation;
-  m_Steps.push(Step);
-
+  PrepareLoader();
   PrepareCamera();
   PreparePlane();
 
-  m_LoadingQueue.push([=](void)
+  m_LoadingQueue.push([this](void)
   {
-    LoadObject(GameObject::Create(GameObject::Type::Water, *this));
+    // Скайбокс должен быть добавлен после камеры, т.к. он извлекает
+    // компонент положения камеры.
+    LoadObject(GameObject::Create(GameObject::Type::Skybox),
+      static_cast<const IDbComponents *>(&m_DbComponents));
   });
 
-  const IDbComponents * pDbComponents = &m_DbComponents;
-
-  m_LoadingQueue.push([=](void)
+  m_LoadingQueue.push([this](void)
   {
-    LoadObject(GameObject::Create(GameObject::Type::Compass, *this), pDbComponents);
+    LoadObject(GameObject::Create(GameObject::Type::Water));
   });
+
+  //m_LoadingQueue.push([this](void)
+  //{
+  //  LoadObject(GameObject::Create(GameObject::Type::Compass), 
+  //    static_cast<const IDbComponents *>(&m_DbComponents));
+  //});
+}
+
+void GameWorld::RemoveAllObjects(void)
+{
+  m_pGameScene->Update([this](const Id_t _Id)
+    {
+      m_DbUpdaters.RemoveUpdater(_Id);
+    });
+
+  m_pGameScene->ProcessAll([this](const Id_t _Id)
+    {
+      m_DbComponents.RemoveGameObject(_Id);
+    });
+
+  m_pGameScene->CompleteReplace();
+  m_LandscapeObjects.clear();
+  m_ProcessingMode = [](void) {};
+
+  {
+    ::std::queue<Updater_t> Empty;
+    m_LoadingQueue.swap(Empty);
+  }
+}
+
+Updater_t GameWorld::GetAutoProcessMoving(void)
+{
+  const auto PushStep =
+    [this](const CubeCoords & _Position, const CubeCoords & _Orientation)
+  {
+    using namespace ::std::chrono;
+
+    Step Step;
+    Step.m_ChangePosition = _Position;
+    Step.m_Orientation = _Orientation;
+    Step.m_Pitch = m_Pitch;
+    Step.m_BeginTime = m_Steps.empty() ?
+      duration<float>{ system_clock::now() - Constant::BeginTime }.count() :
+      m_Steps.back().m_BeginTime + Constant::TimeStepSecond;
+
+    m_Steps.push(Step);
+  };
+
+  namespace events = ::covellite::events;
+
+  return [this, PushStep](void)
+  {
+    if (m_Steps.empty())
+    {
+      const auto ForwardStepCount = Random(10, 30);
+
+      for (int i = 0; i < ForwardStepCount; i++)
+      {
+        PushStep(m_Orientation, m_Orientation);
+      }
+
+      const auto Turn = Random(-1, 1);
+
+      if (Turn > 0)
+      {
+        PushStep(CubeCoords{}, m_Orientation.TurnRight());
+      }
+      else if (Turn < 0)
+      {
+        PushStep(CubeCoords{}, m_Orientation.TurnLeft());
+      }
+      else
+      {
+        PushStep(m_Orientation.TurnLeft(), m_Orientation);
+        PushStep(m_Orientation.TurnLeft(), m_Orientation);
+        PushStep(m_Orientation.TurnLeft(), m_Orientation);
+      }
+    }
+  };
+}
+
+Updater_t GameWorld::GetManualProcessMoving(void)
+{
+  const auto PushStep = [this](
+    const CubeCoords & _ChangePosition,
+    const CubeCoords & _Orientation,
+    const float _ChangePitch = 0.0f)
+  {
+    if (!m_Steps.empty()) return;
+
+    using namespace ::std::chrono;
+
+    Step Step;
+    Step.m_ChangePosition = _ChangePosition;
+    Step.m_Orientation = _Orientation;
+    Step.m_Pitch = m_Pitch + _ChangePitch;
+    Step.m_BeginTime =
+      duration<float>{ system_clock::now() - Constant::BeginTime }.count();
+
+    m_Steps.push(Step);
+  };
+
+  m_Events[::events::Demo.MoveForward].Connect([this, PushStep](void)
+  {
+    PushStep(m_Orientation, m_Orientation);
+  });
+
+  m_Events[::events::Demo.MoveBackward].Connect([this, PushStep](void)
+  {
+    PushStep(CubeCoords{ 0, 0 } - m_Orientation, m_Orientation);
+  });
+
+  m_Events[::events::Demo.MoveLeftForward].Connect([this, PushStep](void)
+  {
+    PushStep(m_Orientation.TurnLeft(), m_Orientation);
+  });
+
+  m_Events[::events::Demo.MoveLeftBackward].Connect([this, PushStep](void)
+  {
+    PushStep(CubeCoords{ 0, 0 } - m_Orientation.TurnRight(), m_Orientation);
+  });
+
+  m_Events[::events::Demo.MoveRightForward].Connect([this, PushStep](void)
+  {
+    PushStep(m_Orientation.TurnRight(), m_Orientation);
+  });
+
+  m_Events[::events::Demo.MoveRightBackward].Connect([this, PushStep](void)
+  {
+    PushStep(CubeCoords{ 0, 0 } -m_Orientation.TurnLeft(), m_Orientation);
+  });
+
+  m_Events[::events::Demo.TurnLeft].Connect([this, PushStep](void)
+  {
+    PushStep(CubeCoords{}, m_Orientation.TurnLeft());
+  });
+
+  m_Events[::events::Demo.TurnRight].Connect([this, PushStep](void)
+  {
+    PushStep(CubeCoords{}, m_Orientation.TurnRight());
+  });
+
+  m_Events[::events::Demo.TurnUp].Connect([this, PushStep](void)
+  {
+    if (m_Pitch > 0.1f) return;
+    PushStep(CubeCoords{}, m_Orientation, - Constant::Camera::Pitch);
+  });
+
+  m_Events[::events::Demo.TurnDown].Connect([this, PushStep](void)
+  {
+    if (m_Pitch < -0.1f) return;
+    PushStep(CubeCoords{}, m_Orientation, Constant::Camera::Pitch);
+  });
+
+  return [](void) {};
+}
+
+void GameWorld::LoadObject(
+  const GameObject::IGameObjectPtr_t & _pObject, 
+  const Any_t & _Param)
+{
+  const auto Objects = _pObject->GetObject(_Param);
+  ::std::vector<Id_t> ObjectIds;
+
+  for (const auto & Object : Objects)
+  {
+    ObjectIds.push_back(m_DbComponents.AddGameObject(Object));
+  }
+
+  m_pGameScene->Add(_pObject->GetType(), ObjectIds);
+}
+
+Id_t GameWorld::LoadObject(
+  const GameObject::IGameObjectPtr_t & _pObject,
+  const Updater_t & _Updater)
+{
+  const auto Id = m_DbComponents.AddGameObject(_pObject->GetObject()[0]);
+
+  m_pGameScene->Add(_pObject->GetType(), { Id }, true);
+  m_DbUpdaters.AddUpdater(Id, _Updater);
+
+  return Id;
+}
+
+void GameWorld::LoadObject(
+  const GameObject::IGameObjectPtr_t & _pObject,
+  const CubeCoords & _Coords)
+{
+  const auto Objects = _pObject->GetObject(_Coords);
+  ::std::vector<Id_t> ObjectIds;
+
+  for (const auto & Object : Objects)
+  {
+    ObjectIds.push_back(m_DbComponents.AddGameObject(Object));
+  }
+
+  m_pGameScene->Add(_pObject->GetType(), ObjectIds, _Coords);
 }
 
 void GameWorld::PrepareLoader(const IntPtr_t & _pLoadingPercent)
 {
   const auto pLoadedObjects = ::std::make_shared<size_t>(0);
+  const auto pIdLoader = ::std::make_shared<Id_t>(0);
 
   const Updater_t LoaderUpdater = [=](void)
   {
     if (m_LoadingQueue.empty())
     {
       *_pLoadingPercent = 101; // 101 для того, чтобы отрисовалось 100%
-      m_pGameScene->Complete();
+      m_pGameScene->CompleteReplace();
+      m_DbUpdaters.RemoveUpdater(*pIdLoader);
       return;
     }
 
     using namespace ::std::chrono;
 
-    const auto Begin = system_clock::now();
-
-    while (!m_LoadingQueue.empty() &&
-      duration_cast<milliseconds>(system_clock::now() - Begin) < milliseconds{ 50 })
+    const auto GetTime = [Begin = system_clock::now()](void)
     {
-      m_LoadingQueue.front()();
+      return duration_cast<milliseconds>(system_clock::now() - Begin);
+    };
+
+    while (!m_LoadingQueue.empty() && GetTime() < milliseconds{ 50 })
+    {
+      try
+      {
+        m_LoadingQueue.front()();
+      }
+      catch (const ::std::exception & _Ex)
+      {
+        LOGGER(Error) << _Ex.what();
+      }
+
       m_LoadingQueue.pop();
       (*pLoadedObjects)++;
     }
@@ -155,120 +378,71 @@ void GameWorld::PrepareLoader(const IntPtr_t & _pLoadingPercent)
       (*pLoadedObjects + m_LoadingQueue.size()));
   };
 
-  LoadObject(GameObject::Create(GameObject::Type::Loader, *this), LoaderUpdater);
+  *pIdLoader =
+    LoadObject(GameObject::Create(GameObject::Type::Loader), LoaderUpdater);
 }
 
-void GameWorld::RemoveAllObjects(void)
+void GameWorld::PrepareLoader(void)
 {
-  m_pGameScene->CallForEach(
-    [=](const Id_t _Id)
-    {
-      m_DbUpdaters.RemoveUpdater(_Id);
-    }, 
-    [=](const Id_t _Id)
-    {
-      m_DbComponents.RemoveGameObject(_Id);
-    });
-
-  m_pGameScene->Complete();
-}
-
-void GameWorld::ActivateProcessMovingEvents(void)
-{
-  const auto PushStep = 
-    [=](const CubeCoords & _Position, const CubeCoords & _Orientation)
+  const Updater_t LoaderUpdater = [this](void)
   {
+    if (m_LoadingQueue.empty()) return;
+
     using namespace ::std::chrono;
 
-    Step Step;
-    Step.m_ChangePosition = _Position;
-    Step.m_Orientation = _Orientation;
-
-    if (m_Steps.empty())
+    const auto GetTime = [Begin = system_clock::now()](void)
     {
-      Step.m_BeginTime = duration<float>{ 
-        system_clock::now() - Constant::BeginTime }.count();
-    }
-    else
+      return duration_cast<milliseconds>(system_clock::now() - Begin);
+    };
+
+    while (!m_LoadingQueue.empty() && GetTime() < milliseconds{ 20 })
     {
-      Step.m_BeginTime = m_Steps.back().m_BeginTime + Constant::TimeStepSecond;
+      try
+      {
+        m_LoadingQueue.front()();
+      }
+      catch (const ::std::exception & _Ex)
+      {
+        LOGGER(Error) << _Ex.what();
+      }
+
+      m_LoadingQueue.pop();
     }
 
-    m_Steps.push(Step);
+    m_pGameScene->CompleteUpdate();
   };
 
-  m_Events[::events::Demo.MoveForward].Connect([=](void)
-  {
-    PushStep(m_Orientation, m_Orientation);
-  });
-
-  m_Events[::events::Demo.MoveBackward].Connect([=](void)
-  {
-    PushStep(CubeCoords{ 0, 0 } - m_Orientation, m_Orientation);
-  });
-
-  m_Events[::events::Demo.MoveLeftForward].Connect([=](void)
-  {
-    PushStep(m_Orientation.TurnLeft(), m_Orientation);
-  });
-
-  m_Events[::events::Demo.MoveLeftBackward].Connect([=](void)
-  {
-    PushStep(CubeCoords{ 0, 0 } - m_Orientation.TurnRight(), m_Orientation);
-  });
-
-  m_Events[::events::Demo.MoveRightForward].Connect([=](void)
-  {
-    PushStep(m_Orientation.TurnRight(), m_Orientation);
-  });
-
-  m_Events[::events::Demo.MoveRightBackward].Connect([=](void)
-  {
-    PushStep(CubeCoords{ 0, 0 } -m_Orientation.TurnLeft(), m_Orientation);
-  });
-
-  m_Events[::events::Demo.TurnLeft].Connect([=](void)
-  {
-    PushStep(CubeCoords{}, m_Orientation.TurnLeft());
-  });
-
-  m_Events[::events::Demo.TurnRight].Connect([=](void)
-  {
-    PushStep(CubeCoords{}, m_Orientation.TurnRight());
-  });
-}
-
-void GameWorld::LoadObject(const GameObject::IGameObjectPtr_t & _pObject, 
-  const Any_t & _Param)
-{
-  const auto Id = m_DbComponents.AddGameObject(_pObject->GetObject(_Param));
-
-  m_pGameScene->Add(_pObject->GetType(), Id);
-}
-
-void GameWorld::LoadObject(const GameObject::IGameObjectPtr_t & _pObject,
-  const Updater_t & _Updater)
-{
-  const auto Id = m_DbComponents.AddGameObject(_pObject->GetObject());
-
-  m_pGameScene->Add(_pObject->GetType(), Id, true);
-  m_DbUpdaters.AddUpdater(Id, _Updater);
+  LoadObject(GameObject::Create(GameObject::Type::Loader), LoaderUpdater);
 }
 
 void GameWorld::PrepareCamera(void)
 {
+  m_Position = CubeCoords{};
+  m_Orientation = CubeCoords{ 0, 1 };
+
+  {
+    ::std::queue<Step> Empty;
+    m_Steps.swap(Empty);
+  }
+
+  Step Step;
+  Step.m_ChangePosition = CubeCoords{};
+  Step.m_Orientation = m_Orientation;
+  Step.m_Pitch = Constant::Camera::Pitch;
+  m_Steps.push(Step);
+
   const Updater_t CameraUpdater = [=](void)
   {
-    auto pPosition =
+    if (m_Steps.empty()) return;
+
+    const auto pPosition =
       m_DbComponents.GetComponent(Constant::Player::ComponentPositionId);
-    auto pRotation =
+    const auto pRotation =
       m_DbComponents.GetComponent(Constant::Player::ComponentRotationId);
 
     using namespace ::std::chrono;
 
     const duration<float> Time = system_clock::now() - Constant::BeginTime;
-
-    if (m_Steps.empty()) return;
 
     const auto & Step = m_Steps.front();
 
@@ -278,53 +452,71 @@ void GameWorld::PrepareCamera(void)
     const auto NewWorldPosition = NewPosition.ToPlane();
     const auto NewHeight = GetLandscapeHeight(NewPosition);
     const auto NewDirection = Step.m_Orientation.ToPlane();
+    const auto NewPitch = Step.m_Pitch;
 
-    if (NewHeight < 0)
-    {
-      m_Steps.pop();
-      return;
-    }
+    //if (NewHeight < 0)
+    //{
+    //  m_Steps.pop();
+    //  return;
+    //}
 
     if (T > 1.0f)
     {
       T = 0.0f;
+
+      // До изменения m_Position
+      PrepareCompressionPlane(CubeCoords{ 0, 0 } - Step.m_ChangePosition);
+
       m_Position = m_Position + Step.m_ChangePosition;
       m_Orientation = Step.m_Orientation;
+      m_Pitch = Step.m_Pitch;
       m_Steps.pop();
+
+      // После изменения m_Position
+      PrepareExtensionPlane(Step.m_ChangePosition);
     }
 
     const auto OldWorldPosition = m_Position.ToPlane();
     const auto OldHeight = GetLandscapeHeight(m_Position);
     const auto OldDirection = m_Orientation.ToPlane();
+    const auto OldPitch = m_Pitch;
 
-    const auto Interpolation = [=](const float _Old, const float _New)
+    const auto Interpolation = [T](const float _Old, const float _New)
     {
       return _Old + T * (_New - _Old);
     };
 
-    pPosition->SetValue(uT("x"), 
-      0.5f * Interpolation(OldWorldPosition.first, NewWorldPosition.first));
-    pPosition->SetValue(uT("y"), 
-      0.5f * Interpolation(OldWorldPosition.second, NewWorldPosition.second));
-    pPosition->SetValue(uT("z"),
+    const auto X = 
+      Interpolation(OldWorldPosition.first, NewWorldPosition.first);
+    const auto Y =
+      Interpolation(OldWorldPosition.second, NewWorldPosition.second);
+
+    pPosition->SetValue(uT("x"), X);
+    pPosition->SetValue(uT("y"), Y);
+    pPosition->SetValue(uT("z"), 
       Constant::Player::Height + Interpolation(OldHeight, NewHeight));
 
-    pRotation->SetValue(uT("z"), math::radian::ArcTan(
+    const auto CameraPitch = Interpolation(OldPitch, NewPitch);
+
+    const auto CameraDirection = math::radian::ArcTan(
       -Interpolation(OldDirection.first, NewDirection.first),
-      -Interpolation(OldDirection.second, NewDirection.second)));
+      -Interpolation(OldDirection.second, NewDirection.second));
+
+    pRotation->SetValue(uT("y"), CameraPitch);
+    pRotation->SetValue(uT("z"), CameraDirection);
+
+    m_pGameScene->SetCameraInfo(
+      support::GameScene::Camera{ X, Y, CameraDirection });
   };
 
   m_LoadingQueue.push([=](void)
   {
-    LoadObject(GameObject::Create(GameObject::Type::Camera, *this), CameraUpdater);
+    LoadObject(GameObject::Create(GameObject::Type::Camera), CameraUpdater);
   });
 }
 
 void GameWorld::PreparePlane(void)
 {
-  using LanscapeObjects_t = ::std::map<size_t, GameObject::IGameObjectPtr_t>;
-  const auto pLandscapeObjects = ::std::make_shared<LanscapeObjects_t>();
-
   for (int y = -Constant::CellRadius; y <= Constant::CellRadius; y++)
   {
     for (int x = -Constant::CellRadius; x <= Constant::CellRadius; x++)
@@ -334,38 +526,108 @@ void GameWorld::PreparePlane(void)
       if (CellPosition.GetZ() >= -Constant::CellRadius &&
           CellPosition.GetZ() <= Constant::CellRadius)
       {
-        m_LoadingQueue.push([=](void)
-        {
-          const auto ObjectType = GetGameObjectType(CellPosition);
-          if (pLandscapeObjects->find(ObjectType) == pLandscapeObjects->end())
-          {
-            const auto pPrototype =
-              GameObject::Create(static_cast<Type_t::Value>(ObjectType), *this);
-
-            LoadObject(pPrototype);
-            (*pLandscapeObjects)[ObjectType] = pPrototype;
-          }
-
-          LoadObject((*pLandscapeObjects)[ObjectType], CellPosition);
-        });
+        m_LoadingQueue.push(GetCellLoader(CellPosition));
       }
     }
   }
 }
 
+void GameWorld::PrepareExtensionPlane(const CubeCoords & _Offset)
+{
+  if (_Offset.GetX() == 0 && _Offset.GetY() == 0) return;
+
+  const auto CellStep = Constant::CellRadius;
+  const auto NewFarCell = m_Position + _Offset * CellStep;
+  const auto LeftOffset = _Offset.TurnLeft(2);
+  const auto RightOffset = _Offset.TurnRight(2);
+
+  m_LoadingQueue.push(GetCellLoader(NewFarCell));
+
+  for (const auto & Offset : { LeftOffset, RightOffset })
+  {
+    for (int i = 1; i <= CellStep; i++)
+    {
+      const auto CellPosition = NewFarCell + Offset * i;
+
+      m_LoadingQueue.push(GetCellLoader(CellPosition));
+    }
+  }
+}
+
+void GameWorld::PrepareCompressionPlane(const CubeCoords & _Offset)
+{
+  if (_Offset.GetX() == 0 && _Offset.GetY() == 0) return;
+
+  const auto CellStep = Constant::CellRadius;
+  const auto NewFarCell = m_Position + _Offset * CellStep;
+  const auto LeftOffset = _Offset.TurnLeft(2);
+  const auto RightOffset = _Offset.TurnRight(2);
+
+  m_LoadingQueue.push(GetCellRemover(NewFarCell));
+
+  for (const auto & Offset : { LeftOffset, RightOffset })
+  {
+    for (int i = 1; i <= CellStep; i++)
+    {
+      const auto CellPosition = NewFarCell + Offset * i;
+
+      m_LoadingQueue.push(GetCellRemover(CellPosition));
+    }
+  }
+}
+
+Updater_t GameWorld::GetCellLoader(const CubeCoords & _CellPosition)
+{
+  return [=](void)
+  {
+    LOGGER(Trace) << "Load cell [" <<
+      _CellPosition.GetX() << ", " << _CellPosition.GetY() << "].";
+
+    const auto ObjectType = GetGameObjectType(_CellPosition);
+    if (m_LandscapeObjects.find(ObjectType) == m_LandscapeObjects.end())
+    {
+      const auto pPrototype =
+        GameObject::Create(static_cast<Type_t::Value>(ObjectType), this);
+
+      LoadObject(pPrototype);
+      m_LandscapeObjects[ObjectType] = pPrototype;
+    }
+
+    LoadObject(m_LandscapeObjects[ObjectType], _CellPosition);
+  };
+}
+
+Updater_t GameWorld::GetCellRemover(const CubeCoords & _CellPosition)
+{
+  return [=](void)
+  {
+    LOGGER(Trace) << "Remove cell [" << 
+      _CellPosition.GetX() << ", " << _CellPosition.GetY() << "].";
+
+    const auto Objects = m_pGameScene->Remove(_CellPosition);
+
+    for (const auto & Object : Objects)
+    {
+      m_DbComponents.RemoveGameObject(Object);
+    }
+  };
+}
+
 float GameWorld::GetHeight(const float _X, const float _Y) const
 {
-# ifdef _DEBUG
-  const auto K = 1.5f;
-# else
-  const auto K = 0.75f;
-# endif
+  const auto Distance = 0.7f * math::Root<2>(_X * _X + _Y * _Y);
+  if (Distance < 2.0f) return -0.1f;
+  if (Distance < 3.0f) return 0.03f;
 
-  const auto Distance = K * math::Root<2>(_X * _X + _Y * _Y);
-  if (Distance > 12.0f) return -0.1f;
-  if (Distance > 10.0f) return 0.03f;
+  const auto Value = ((Distance / math::Constant<float>::Pi) - 1.0f) / 8.0f;
 
-  return 0.7f + 0.5f * math::radian::Cos(Distance);
+  if (Value > 0.5f && 
+    math::Abs(Value - math::Floor(Value + 0.5f)) < 0.025f)
+  {
+    return -0.05f;
+  }
+
+  return 0.55f + 0.5f * math::radian::Cos(Distance);
 }
 
 } // namespace model

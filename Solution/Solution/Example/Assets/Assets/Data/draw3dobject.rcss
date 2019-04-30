@@ -1,0 +1,122 @@
+
+/*headline,*/
+/*value,*/
+/*button,*/
+/*input,*/
+dummy {
+  border-width: 1px;
+  border-color: red;
+}
+
+body {
+  min-width: 480px;
+  min-height: 480px;
+  background-color: rgba(0, 0, 0, 0);
+  background-decorator: none;
+}
+
+headline,
+input#id_fps,
+.ligths,
+cube-info {
+  display: block;
+  position: absolute;
+  left: 0;
+  right: 0;
+}
+
+headline,
+polygons-per-cube,
+cubes-count {
+  background-color: #1E90FF;
+  background-decorator: image;
+  background-image: gradient.png 32px 32px 64px 64px;
+}
+
+headline {
+  top: 0;
+  height: 5 em;
+  z-index: -1;
+}
+
+input#id_fps {
+  margin-left: 1 em;
+  margin-top: 0.5 em;
+  top: 5 em;
+  header-font-effect: outline;
+  header-width: 1px;
+  header-color: grey;
+}
+
+.ligths {
+  top: 7 em;
+  margin-left: 0.5 em;
+  background-color: rgba(0, 0, 0, 0);
+  header-font-effect: outline;
+  header-width: 1px;
+  header-color: grey;
+}
+
+input.checkbox {
+  background-color: #808080;
+  border-width: 2px;
+  border-left-color: #c3c3c3;
+  border-top-color: #c3c3c3;
+  border-right-color: #565656;
+  border-bottom-color: #565656;
+  margin-right: 0.5 em;
+}
+
+  input.checkbox:checked {
+    background-color: #00ff21;
+  }
+
+cube-info {
+  bottom: 0;
+  text-align: center;
+}
+
+  cube-info title {
+    display: block;
+    color: black;
+    text-align: left;
+    font-size: 1.1 em;
+    font-weight: bold;
+    padding-left: 0.5 em;
+    padding-top: 0.25 em;
+    header-font-effect: none;
+  }
+
+  cube-info value {
+    display: inline;
+    font-size: 3 em;
+    min-width: 3 em;
+    height: 1 em;
+    margin-left: 0.25 em;
+    margin-right: 0.25 em;
+    text-align: center;
+  }
+
+  cube-info button {
+    display: inline;
+    font-size: 2.5 em;
+    padding-left: 0.25 em;
+    padding-right: 0.25 em;
+    text-align: center;
+    header-font-effect: outline;
+    header-width: 2px;
+    header-color: grey;
+  }
+
+    cube-info button:active {
+      color: grey;
+      header-font-effect: outline;
+      header-width: 2px;
+      header-color: white;
+    }
+
+polygons-per-cube,
+cubes-count {
+  display: block;
+  height: 6 em;
+}

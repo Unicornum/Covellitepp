@@ -26,97 +26,9 @@ Window::Window(const ::covellite::app::IApplication & _Application) :
   m_Handle(AppInfo_t::Get<ANativeWindow *>()),
   m_LastTypeSizeMessage(0)
 {
-  m_Events[(int32_t)APP_CMD_WINDOW_REDRAW_NEEDED].Connect([&]()
-  {
-    m_Events[events::Window.Resize]();
-  });
-
-  using AInputEvent_t = AInputEvent *;
-
-  auto BuildMessage = [](int32_t _Type, int32_t _Value) -> int32_t
-  {
-    return (_Type << 8) | _Value;
-  };
-
-  const auto Motion = 
-    BuildMessage(AINPUT_EVENT_TYPE_MOTION, AMOTION_EVENT_ACTION_MOVE);
-
-  m_Events[Motion].Connect([&](const AInputEvent_t & _pEvent)
-  {
-    const auto X = static_cast<int32_t>(AMotionEvent_getX(_pEvent, 0));
-    const auto Y = static_cast<int32_t>(AMotionEvent_getY(_pEvent, 0));
-
-    m_Events[events::Cursor.Motion](events::Cursor_t::Position{ X, Y });
-  });
-
-  const auto Touch =
-    BuildMessage(AINPUT_EVENT_TYPE_MOTION, AMOTION_EVENT_ACTION_DOWN);
-
-  m_Events[Touch].Connect([&](const AInputEvent_t & _pEvent)
-  {
-    const auto X = static_cast<int32_t>(AMotionEvent_getX(_pEvent, 0));
-    const auto Y = static_cast<int32_t>(AMotionEvent_getY(_pEvent, 0));
-
-    // Отдельный Motion необходим, т.к. Android не генерирует отдельное
-    // сообщение при касании пальцем экрана.
-    m_Events[events::Cursor.Motion](events::Cursor_t::Position{ X, Y });
-    m_Events[events::Cursor.Touch]();
-  });
-
-  const auto Release =
-    BuildMessage(AINPUT_EVENT_TYPE_MOTION, AMOTION_EVENT_ACTION_UP);
-
-  m_Events[Release].Connect([&](const AInputEvent_t & _pEvent)
-  {
-    const auto X = static_cast<int32_t>(AMotionEvent_getX(_pEvent, 0));
-    const auto Y = static_cast<int32_t>(AMotionEvent_getY(_pEvent, 0));
-
-    // Отдельный Motion необходим, т.к. Android не генерирует отдельное
-    // сообщение при отпускании пальцем экрана.
-    m_Events[events::Cursor.Motion](events::Cursor_t::Position{ X, Y });
-    m_Events[events::Cursor.Release]();
-  });
-
-  const auto Pressed =
-    BuildMessage(AINPUT_EVENT_TYPE_KEY, events::Key_t::APP_CMD_KEY_PRESSED);
-
-  m_Events[Pressed].Connect([&](const AInputEvent_t & _pEvent)
-  {
-    const events::Key_t::Code Code = AKeyEvent_getKeyCode(_pEvent);
-
-    m_Events[events::Key.Pressed](Code);
-  });
-
-  const auto Down =
-    BuildMessage(AINPUT_EVENT_TYPE_KEY, AKEY_EVENT_ACTION_DOWN);
-
-  m_Events[Down].Connect([&](const AInputEvent_t & _pEvent)
-  {
-    const events::Key_t::Code Code = AKeyEvent_getKeyCode(_pEvent);
-
-    m_Events[events::Key.Down](Code);
-  });
-
-  const auto Up =
-    BuildMessage(AINPUT_EVENT_TYPE_KEY, AKEY_EVENT_ACTION_UP);
-
-  m_Events[Up].Connect([&](const AInputEvent_t & _pEvent)
-  {
-    const events::Key_t::Code Code = AKeyEvent_getKeyCode(_pEvent);
-
-    if (Code == AKEYCODE_BACK)
-    {
-      m_Events[events::Key.Back]();
-    }
-    else if (Code == AKEYCODE_MENU)
-    {
-      m_Events[events::Key.Menu]();
-    }
-    else
-    {
-      m_Events[events::Key.Up](Code);
-    }
-  });
+  ActivateResizeEvents();
+  ActivateMouseEvents();
+  ActivateKeyEvents();
 }
 
 Window::~Window(void) = default;
@@ -150,4 +62,117 @@ Window::Rect Window::GetClientRect(void) const /*override*/
     ANativeWindow_getWidth(m_Handle),
     ANativeWindow_getHeight(m_Handle)
   };
+}
+
+void Window::ActivateApplicationEvents(void)
+{
+
+}
+
+void Window::ActivateResizeEvents(void)
+{
+  m_Events[(int32_t)APP_CMD_WINDOW_REDRAW_NEEDED].Connect([=](void)
+  {
+    m_Events[events::Window.Resize]();
+  });
+}
+
+void Window::ActivateMouseEvents(void)
+{
+  using AInputEvent_t = AInputEvent * ;
+
+  auto BuildMessage = [](int32_t _Type, int32_t _Value) -> int32_t
+  {
+    return (_Type << 8) | _Value;
+  };
+
+  const auto Motion =
+    BuildMessage(AINPUT_EVENT_TYPE_MOTION, AMOTION_EVENT_ACTION_MOVE);
+
+  m_Events[Motion].Connect([=](const AInputEvent_t & _pEvent)
+  {
+    const auto X = static_cast<int32_t>(AMotionEvent_getX(_pEvent, 0));
+    const auto Y = static_cast<int32_t>(AMotionEvent_getY(_pEvent, 0));
+
+    m_Events[events::Cursor.Motion](events::Cursor_t::Position{ X, Y });
+  });
+
+  const auto Touch =
+    BuildMessage(AINPUT_EVENT_TYPE_MOTION, AMOTION_EVENT_ACTION_DOWN);
+
+  m_Events[Touch].Connect([=](const AInputEvent_t & _pEvent)
+  {
+    const auto X = static_cast<int32_t>(AMotionEvent_getX(_pEvent, 0));
+    const auto Y = static_cast<int32_t>(AMotionEvent_getY(_pEvent, 0));
+
+    // Отдельный Motion необходим, т.к. Android не генерирует отдельное
+    // сообщение при касании пальцем экрана.
+    m_Events[events::Cursor.Motion](events::Cursor_t::Position{ X, Y });
+    m_Events[events::Cursor.Touch]();
+  });
+
+  const auto Release =
+    BuildMessage(AINPUT_EVENT_TYPE_MOTION, AMOTION_EVENT_ACTION_UP);
+
+  m_Events[Release].Connect([=](const AInputEvent_t & _pEvent)
+  {
+    const auto X = static_cast<int32_t>(AMotionEvent_getX(_pEvent, 0));
+    const auto Y = static_cast<int32_t>(AMotionEvent_getY(_pEvent, 0));
+
+    // Отдельный Motion необходим, т.к. Android не генерирует отдельное
+    // сообщение при отпускании пальцем экрана.
+    m_Events[events::Cursor.Motion](events::Cursor_t::Position{ X, Y });
+    m_Events[events::Cursor.Release]();
+  });
+}
+
+void Window::ActivateKeyEvents(void)
+{
+  using AInputEvent_t = AInputEvent * ;
+
+  auto BuildMessage = [](int32_t _Type, int32_t _Value) -> int32_t
+  {
+    return (_Type << 8) | _Value;
+  };
+
+  const auto Pressed =
+    BuildMessage(AINPUT_EVENT_TYPE_KEY, events::Key_t::APP_CMD_KEY_PRESSED);
+
+  m_Events[Pressed].Connect([=](const AInputEvent_t & _pEvent)
+  {
+    const events::Key_t::Code Code = AKeyEvent_getKeyCode(_pEvent);
+
+    m_Events[events::Key.Pressed](Code);
+  });
+
+  const auto Down =
+    BuildMessage(AINPUT_EVENT_TYPE_KEY, AKEY_EVENT_ACTION_DOWN);
+
+  m_Events[Down].Connect([=](const AInputEvent_t & _pEvent)
+  {
+    const events::Key_t::Code Code = AKeyEvent_getKeyCode(_pEvent);
+
+    m_Events[events::Key.Down](Code);
+  });
+
+  const auto Up =
+    BuildMessage(AINPUT_EVENT_TYPE_KEY, AKEY_EVENT_ACTION_UP);
+
+  m_Events[Up].Connect([=](const AInputEvent_t & _pEvent)
+  {
+    const events::Key_t::Code Code = AKeyEvent_getKeyCode(_pEvent);
+
+    if (Code == AKEYCODE_BACK)
+    {
+      m_Events[events::Key.Back]();
+    }
+    else if (Code == AKEYCODE_MENU)
+    {
+      m_Events[events::Key.Menu]();
+    }
+    else
+    {
+      m_Events[events::Key.Up](Code);
+    }
+  });
 }

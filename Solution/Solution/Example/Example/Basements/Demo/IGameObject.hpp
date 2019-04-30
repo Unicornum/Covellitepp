@@ -25,22 +25,36 @@ namespace model
 */
 class IGameObject
 {
+protected:
+  using Objects_t = ::std::vector<Object_t>;
+
 public:
   class Type final
   {
   public:
     enum Value
     {
-      Camera = 0,
-      Loader,
-      None,
-      Tree,
-      Bush,
-      Rock,
-      Grass,
+      Skybox = 0x00,
+      Camera = 0x08,
+
+      // Объекты поверхности, не содержащие прозрачных пикселей
+      None = 0x09,
       Sand,
-      Water,
-      Compass,
+      Rock,
+      Well,
+
+      Water = 0x10, // Вода - особый случай - прозрачная      
+
+      // Объекты поверхности, содержащие прозрачные пиксели
+      Grass = 0x11,
+      Bush,
+      Tree,
+
+      // Маска объектов поверхности
+      LandscapeMask = 0x07,
+      
+      Compass= 0x18, // Должен рендерится гарантированно последним
+      Loader = 0x20,
     };
   };
 
@@ -55,7 +69,7 @@ public:
   * \brief
   *  Функция получения уникального набора компонентов игрового объекта.
   */
-  virtual Object_t GetObject(const Any_t & = {}) const = 0;
+  virtual Objects_t GetObject(const Any_t & = {}) const = 0;
 
 public:
   virtual ~IGameObject(void) = default;

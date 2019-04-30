@@ -26,6 +26,7 @@ public:
     return m_NextId++;
   }
 
+  // cppcheck-suppress passedByValue
   void AddRemovedObjectId(const Id_t _Id)
   {
     m_FreeIds.push(_Id);
@@ -53,6 +54,7 @@ DbComponents::~DbComponents(void)
   LOGGER(Trace) << "Destroy DbComponents.";
 }
 
+// cppcheck-suppress passedByValue
 const Object_t & DbComponents::GetObject(const Id_t _Id) const /*override*/
 {
   if (_Id >= m_Objects.size())
@@ -91,6 +93,7 @@ Id_t DbComponents::AddGameObject(const Object_t & _Object)
   return Id;
 }
 
+// cppcheck-suppress passedByValue
 void DbComponents::RemoveGameObject(const Id_t _Id)
 {
   DoRemoveObject(_Id);
@@ -102,8 +105,11 @@ void DbComponents::RemoveGameObject(const Id_t _Id)
   m_pId->AddRemovedObjectId(_Id);
 }
 
-ComponentPtr_t DbComponents::GetComponent(const Id_t _ObjectId, 
-  const String_t & _ComponentType, const String_t & _ComponentKind) const
+// cppcheck-suppress passedByValue
+ComponentPtr_t DbComponents::GetComponent(
+  const Id_t /*_ObjectId*/, 
+  const String_t & /*_ComponentType*/, 
+  const String_t & /*_ComponentKind*/) const
 {
   throw STD_EXCEPTION << "Not released.";
 }

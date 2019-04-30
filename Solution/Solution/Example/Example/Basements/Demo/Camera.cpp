@@ -1,10 +1,8 @@
 
 #include "stdafx.h"
 #include "Camera.hpp"
-#include <alicorn/std/exception.hpp>
 #include <Covellite/Api/Component.inl>
 #include "Constants.hpp"
-#include "IDbComponents.hpp"
 
 namespace basement
 {
@@ -18,12 +16,13 @@ Camera::Camera(void) :
 
 }
 
-Object_t Camera::GetObject(const Any_t &) const /*override*/
+auto Camera::GetObject(const Any_t &) const /*override*/ -> Objects_t
 {
   namespace math = ::alicorn::extension::cpp::math;
 
   return
   {
+    {
     Component_t::Make(
     {
       { uT("id"), Constant::Player::ComponentPositionId },
@@ -35,24 +34,15 @@ Object_t Camera::GetObject(const Any_t &) const /*override*/
       { uT("id"), Constant::Player::ComponentRotationId },
       { uT("type"), uT("Data") },
       { uT("kind"), uT("Rotation") },
-      { uT("x"), 0.0f },
-      { uT("y"), -0.275f * math::Constant<float>::PI },
-      { uT("z"), -0.5f * math::Constant<float>::PI }, // На север
+      { uT("y"), Constant::Camera::Pitch },
     }),
     Component_t::Make(
     {
       { uT("id"), uT("Demo.Camera") },
       { uT("type"), uT("Camera") },
       { uT("kind"), uT("Perspective") },
-      { uT("distance"), 1.5f },
-      { uT("fov"), 60.0f },
-    }),
-    Component_t::Make(
-    {
-      { uT("id"), uT("Demo.State.Clear") },
-      { uT("type"), uT("State") },
-      { uT("kind"), uT("Clear") },
-      { uT("color"), 0xFF64801F },
+      { uT("distance"), Constant::Camera::Distance },
+      { uT("fov"), Constant::Camera::Fov * math::Constant<float>::RadianToGreed },
     }),
     Component_t::Make(
     {
@@ -96,6 +86,7 @@ Object_t Camera::GetObject(const Any_t &) const /*override*/
       { uT("kind"), uT("Direction") },
       { uT("color"), 0xFFF0F0B0 }, // ARGB
     }),
+    }
   };
 }
 

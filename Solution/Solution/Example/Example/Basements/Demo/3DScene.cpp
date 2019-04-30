@@ -29,7 +29,7 @@ void C3DScene::Render(void) /*override*/
 {
   RenderToLog(::std::chrono::seconds{ 3 });
 
-  m_pGameScene->CallForEach(nullptr, [=](const Id_t _Id)
+  m_pGameScene->Render([=](const Id_t _Id)
   {
     for (const auto & Render : m_DbRenders.GetRenders(_Id)) Render();
   });

@@ -153,9 +153,6 @@ public:
   template<>
   inline void Update<::Matrices>(void)
   {
-    Get<::Matrices>().World =
-      ::DirectX::XMMatrixTranspose(Get<::Matrices>().World);
-
     m_Matrices.Update();
   }
 
@@ -834,13 +831,26 @@ auto DirectX11::CreatePresent(const ComponentPtr_t & _pComponent) -> Render_t
   return Creators[_pComponent->Kind]();
 }
 
-auto DirectX11::CreateGeometry(const ComponentPtr_t &) -> Render_t
+auto DirectX11::CreateGeometry(const ComponentPtr_t & _pComponent) -> Render_t
 {
-  const auto PreRendersGeometry = GetPreRendersGeometry();
+  const auto GetPreRenderStaticGeometry = [&](void) -> Render_t
+  {
+    GetPreRenderGeometry(true)();
+    const auto World = m_pData->Get<::Matrices>().World;
+
+    return [=](void)
+    {
+      m_pData->Get<::Matrices>().World = World;
+      m_pData->Update<::Matrices>();
+    };
+  };
+
+  const auto PreRenderGeometry = _pComponent->GetValue(uT("static"), false) ? 
+    GetPreRenderStaticGeometry() : GetPreRenderGeometry(false);
 
   return [=](void)
   {
-    for (const auto & Render : PreRendersGeometry) Render();
+    PreRenderGeometry();
 
     ComPtr_t<ID3D11Buffer> pIndexBuffer;
     DXGI_FORMAT Format = DXGI_FORMAT_UNKNOWN;
@@ -909,7 +919,7 @@ auto DirectX11::GetDepthState(bool _IsEnabled, bool _IsClear) -> Render_t
     (_IsClear ? RenderDepthClear : RenderDepthEnabled) : RenderDepthDisabled;
 }
 
-auto DirectX11::GetPreRendersGeometry(void) -> Renders_t
+auto DirectX11::GetPreRenderGeometry(const bool _IsStatic) -> Render_t
 {
   Renders_t Result;
 
@@ -933,7 +943,7 @@ auto DirectX11::GetPreRendersGeometry(void) -> Renders_t
   {
     Result.push_back([=](void)
     {
-      const Component::Position Rotation{ _pRotation };
+      const Component::Rotation Rotation{ _pRotation };
 
       m_pData->Get<::Matrices>().World *= ::DirectX::XMMatrixRotationX(Rotation.X);
       m_pData->Get<::Matrices>().World *= ::DirectX::XMMatrixRotationY(Rotation.Y);
@@ -945,7 +955,7 @@ auto DirectX11::GetPreRendersGeometry(void) -> Renders_t
   {
     Result.push_back([=](void)
     {
-      const Component::Position Scale{ _pScale };
+      const Component::Scale Scale{ _pScale };
 
       m_pData->Get<::Matrices>().World *=
         ::DirectX::XMMatrixScaling(Scale.X, Scale.Y, Scale.Z);
@@ -959,10 +969,22 @@ auto DirectX11::GetPreRendersGeometry(void) -> Renders_t
       { uT("Scale"), CreateScale },
     });
 
-  Result.push_back([=](void)
+  Result.push_back([this](void)
   {
-    m_pData->Update<::Matrices>();
+    m_pData->Get<::Matrices>().World =
+      ::DirectX::XMMatrixTranspose(m_pData->Get<::Matrices>().World);
   });
 
-  return Result;
+  if (!_IsStatic)
+  {
+    Result.push_back([this](void)
+    {
+      m_pData->Update<::Matrices>();
+    });
+  }
+
+  return [Result](void)
+  {
+    for (const auto & Render : Result) Render();
+  };
 }

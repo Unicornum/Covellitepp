@@ -151,6 +151,27 @@ private:
   Renders_t::Creators_t m_EmptyCreators;
 };
 
+/// \cond DoxygenWarningSuppress
+
+using ::covellite::gui::VfsCore_t;
+using ::covellite::gui::VfsPtr_t;
+using ::alicorn::extension::std::Singleton;
+
+/*static*/ VfsPtr_t Singleton<VfsCore_t>::Make(void)
+{
+  using ImplPtr_t = ::std::shared_ptr<::alicorn::modules::vfs::IImplementation>;
+
+  return ::std::make_unique<VfsCore_t>(::std::vector<ImplPtr_t>
+  {
+    // Это позволяет задавать как полный путь, так и путь оносительно
+    // папки этого самого файла.
+    ::std::make_shared<::alicorn::modules::vfs::FileSystem>(""),
+    ::std::make_shared<::alicorn::modules::vfs::FileSystem>(THIS_DIRECTORY)
+  });
+}
+
+/// \endcond
+
 // Образец макроса для подстановки в класс Renderer 
 // для доступа тестовой функции к закрытым функциям класса (чтобы это сработало, 
 // нужно чтобы тестовая функция была расположена В ТОМ ЖЕ ПРОСТРАНСТВЕ ИМЕН, 

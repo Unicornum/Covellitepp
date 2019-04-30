@@ -24,12 +24,14 @@ static bool initialised = false;
 class CircularBarPlugin : public Rocket::Core::Plugin
 {
 public:
+  // cppcheck-suppress unusedFunction
 	void OnShutdown()
 	{
 		initialised = false;
 		delete this;
 	}
 
+  // cppcheck-suppress unusedFunction
 	int GetEventClasses()
 	{
 		return Rocket::Core::Plugin::EVT_BASIC;

@@ -77,7 +77,7 @@ private:
 private:
   Render_t CreateBlendState(bool);
   Render_t GetDepthState(bool, bool);
-  Renders_t GetPreRendersGeometry(void);
+  Render_t GetPreRenderGeometry(const bool);
 
 private:
   const ::std::vector<FLOAT>  m_BkColor;

@@ -11,8 +11,6 @@
 using namespace basement;
 namespace math = ::alicorn::extension::cpp::math;
 
-static const auto Begin = ::std::chrono::system_clock::now();
-
 Simple3DObject::Simple3DObject(const RendersPtr_t & _pRenders, 
   int _PolygonsCount, int _CubesCount) :
   Common(_pRenders),
@@ -58,14 +56,14 @@ Simple3DObject::Simple3DObject(const RendersPtr_t & _pRenders,
   // - DirectX11  - 4096 кубов по 1536 полигонов каждый.
 
   // Windows (новый ноутбук):
-  // - OpenGL     - ??? кубов по 96 полигонов каждый.
-  // - DirectX10  - ??? кубов по 96 полигонов каждый.
+  // - OpenGL     - ??? кубов по ??? полигонов каждый.
+  // - DirectX10  - ??? кубов по ??? полигонов каждый.
   // - DirectX11  - 16384 кубов по 3072 полигона каждый.
 
   // Samsung Duos:
   // - OpenGLES   - 256 кубов по 96 полигонов каждый.
-  // Samsung A5:
-  // - OpenGLES   - ??? кубов по ??? полигонов каждый.
+  // Samsung Galaxy A5:
+  // - OpenGLES   - 1024 куба по 768 полигонов каждый.
 }
 
 Simple3DObject::~Simple3DObject(void)
@@ -88,26 +86,27 @@ void Simple3DObject::Notify(int _Message, const ::boost::any & _Value) /*overrid
 
 void Simple3DObject::Render(void) /*override*/
 {
-  const ::std::chrono::duration<double> Time =
-    (::std::chrono::system_clock::now() - Begin) / 5.0;
-  const auto Angle = Time.count();
-
-  m_pCubeRotation->SetValue(uT("x"), static_cast<float>(
-    math::PI * (math::radian::Cos(Angle) + 1.0)));
-  m_pCubeRotation->SetValue(uT("z"), static_cast<float>(
-    math::PI * (math::radian::Sin(Angle) + 1.0)));
-
   Common::Render();
 
   // Источники света - в конце, чтобы убедиться, что порядок их добавления 
   // не влияет на результат.
   for (const auto Id : m_Lights)
   {
-    for (auto & Render : m_Objects[Id])
-    {
-      Render();
-    }
+    for (const auto & Render : m_Objects[Id]) Render();
   }
+}
+
+auto Simple3DObject::GetUpdater(void) -> Updater_t
+{
+  return [this](const float _TimeFromStartProgram)
+  {
+    const auto Angle = _TimeFromStartProgram / 5.0f;
+
+    m_pCubeRotation->SetValue(uT("x"), static_cast<float>(
+      math::PI * (math::radian::Cos(Angle) + 1.0)));
+    m_pCubeRotation->SetValue(uT("z"), static_cast<float>(
+      math::PI * (math::radian::Sin(Angle) + 1.0)));
+  };
 }
 
 auto Simple3DObject::BuildLights(int _LightsFlags) -> Id
@@ -130,6 +129,7 @@ auto Simple3DObject::BuildLights(int _LightsFlags) -> Id
 
   Object_t Components;
 
+  /// [Create lights]
   if (IsActive(Lights::Ambient))
   {
     Components += Object_t
@@ -143,7 +143,7 @@ auto Simple3DObject::BuildLights(int _LightsFlags) -> Id
       }),
     };
   }
-
+    
   if (IsActive(Lights::Directional))
   {
     Components += Object_t
@@ -165,6 +165,7 @@ auto Simple3DObject::BuildLights(int _LightsFlags) -> Id
       }),
     };
   }
+  /// [Create lights]
 
   if (IsActive(Lights::Red))
   {
@@ -267,6 +268,7 @@ auto Simple3DObject::BuildCamera(void) -> Id
 {
   const Id Id;
 
+  /// [Create camera]
   m_Objects[Id] = m_pRenders->Obtain(
     {
       Component_t::Make(
@@ -306,7 +308,14 @@ auto Simple3DObject::BuildCamera(void) -> Id
         { uT("type"), uT("State") },
         { uT("kind"), uT("Sampler") },
       }),
+      Component_t::Make(
+      {
+        { uT("id"), uT("Example.Updater.Simple3DObject.") + Id.GetStringId() },
+        { uT("type"), uT("Updater") },
+        { uT("function"), GetUpdater() },
+      }),
     });
+  /// [Create camera]
 
   return Id;
 }
@@ -315,7 +324,9 @@ auto Simple3DObject::BuildCube(int _PolygonsFactor, float _Scale,
   float _PositionX, float _PositionY) // положение относительно экранных координат
   -> Id
 {
+  /// [Vertex format]
   using Vertex_t = ::covellite::api::Vertex::Polyhedron;
+  /// [Vertex format]
 
   const Id Id;
 
@@ -369,8 +380,21 @@ auto Simple3DObject::BuildCube(int _PolygonsFactor, float _Scale,
     IndexData += IndexData;
   }
 
+  /// [Textured object]
   m_Objects[Id] = m_pRenders->Obtain(
     {
+      Component_t::Make(
+      {
+        { uT("type"), uT("Data") },
+        { uT("kind"), uT("Shader.HLSL") },
+        { uT("version"), uT("vs_4_0") },
+        { uT("entry"), uT("vsTextured") },
+      }),
+      Component_t::Make(
+      {
+        { uT("id"), uT("Example.Shader.Vertex.Cube") },
+        { uT("type"), uT("Shader") },
+      }),
       Component_t::Make(
       {
         { uT("type"), uT("Data") },
@@ -393,18 +417,6 @@ auto Simple3DObject::BuildCube(int _PolygonsFactor, float _Scale,
       Component_t::Make(
       {
         { uT("id"), uT("Example.Texture") },
-      }),
-      Component_t::Make(
-      {
-        { uT("type"), uT("Data") },
-        { uT("kind"), uT("Shader.HLSL") },
-        { uT("version"), uT("vs_4_0") },
-        { uT("entry"), uT("vsTextured") },
-      }),
-      Component_t::Make(
-      {
-        { uT("id"), uT("Example.Shader.Vertex.Cube") },
-        { uT("type"), uT("Shader") },
       }),
       Component_t::Make(
       {
@@ -445,6 +457,7 @@ auto Simple3DObject::BuildCube(int _PolygonsFactor, float _Scale,
         { uT("kind"), uT("Geometry") },
       })
     });
+  /// [Textured object]
 
   return Id;
 }

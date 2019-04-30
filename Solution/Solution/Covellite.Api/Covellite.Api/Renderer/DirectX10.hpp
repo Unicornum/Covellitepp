@@ -74,15 +74,15 @@ private:
   Render_t CreatePresent(const ComponentPtr_t &);
 
 private:
+  class Buffer;
+  class Data;
+
+private:
   Render_t CreateBlendState(bool);
   Render_t GetDepthState(bool, bool);
   Render_t CreateCamera(const ComponentPtr_t &);
   Render_t CreateGeometry(const ComponentPtr_t &);
-  Renders_t CreatePreRendersGeometry(void);
-
-private:
-  class Buffer;
-  class Data;
+  Render_t CreatePreRenderGeometry(void);
 
 private:
   const ::std::vector<FLOAT>  m_BkColor;

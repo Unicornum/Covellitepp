@@ -16,31 +16,32 @@ namespace model
 Compass::Compass(void) :
   GameObject(Type::Compass)
 {
-
+  AddTexture("demo.compass.png");
+  AddMesh<Mesh>(Mesh::Data
+    {
+      {
+        { -0.5f, -0.5f,  0.0f,   0.0f, 0.0f, 1.0f,  0.0f, 1.0f, },  // 0
+        { -0.5f,  0.5f,  0.0f,   0.0f, 0.0f, 1.0f,  0.0f, 0.0f, },  // 1
+        {  0.5f, -0.5f,  0.0f,   0.0f, 0.0f, 1.0f,  1.0f, 1.0f, },  // 2
+        {  0.5f,  0.5f,  0.0f,   0.0f, 0.0f, 1.0f,  1.0f, 0.0f, },  // 3
+      },
+      {
+         0,  2,  1,   2,  3,  1,
+      }
+    });
 }
 
-Object_t Compass::GetObject(const Any_t & _Value) const /*override*/
+auto Compass::GetObject(const Any_t & _Value) const /*override*/ -> Objects_t
 {
   auto & DbComponents = *::boost::any_cast<const IDbComponents *>(_Value);
 
-  static const ::std::vector<Vertex_t> VertexData =
-  {
-    { -0.5f, -0.5f,  0.0f,   0.0f, 0.0f, 1.0f,  0.0f, 1.0f, },  // 0
-    { -0.5f,  0.5f,  0.0f,   0.0f, 0.0f, 1.0f,  0.0f, 0.0f, },  // 1
-    {  0.5f, -0.5f,  0.0f,   0.0f, 0.0f, 1.0f,  1.0f, 1.0f, },  // 2
-    {  0.5f,  0.5f,  0.0f,   0.0f, 0.0f, 1.0f,  1.0f, 0.0f, },  // 3
-  };
-
-  static const ::std::vector<int> IndexData =
-  {
-     0,  2,  1,   2,  3,  1,
-  };
-
   using namespace ::alicorn::extension::std;
 
-  return 
-    GetCommonObject(VertexData, IndexData) +
-    LoadTexture("demo.compass.png") +
+  return
+  {
+    GetShaderObject() +
+    GetTexture(0).GetObject() +
+    GetMesh(0).GetObject() +
     Object_t
     {
       Component_t::Make(
@@ -63,7 +64,8 @@ Object_t Compass::GetObject(const Any_t & _Value) const /*override*/
         { uT("type"), uT("Present") },
         { uT("kind"), uT("Geometry") },
       })
-    };
+    }
+  };
 }
 
 } // namespace model

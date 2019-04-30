@@ -8,12 +8,11 @@
   </Options>
   <Process/>
   <Complete>
-    <Week6217>
-      <Task6 Text="Зависание цикла обработки событий Android программы в режиме непрерывной отрисовки при завершении работы приложения." Type="Bug" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="true" ParentTaskText="false"/>
-      <Task7 Text="Неверный порядок удаления объектов окон у Android программы." Type="Bug" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="true" ParentTaskText="false"/>
-    </Week6217>
-    <Week6216/>
-    <Week6215/>
-    <Week6214/>
+    <Week6225>
+      <Task6 Text="Изменение логики работы цикла сообщений." Type="Red" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="false"/>
+    </Week6225>
+    <Week6224/>
+    <Week6223/>
+    <Week6222/>
   </Complete>
 </Tasks>

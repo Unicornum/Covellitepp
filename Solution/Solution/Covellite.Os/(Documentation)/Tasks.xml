@@ -8,14 +8,13 @@
   </Options>
   <Process/>
   <Complete>
-    <Week6213>
-      <Task3 Text="Исключение при сворачивании окна." Type="Bug" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="true" ParentTaskText="false"/>
-      <Task4 Text="Изменение логики вызова события изменения размеров окна программы в Windows." Type="Red" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="true" ParentTaskText="false"/>
-      <Task5 Text="События активации/деактивации окна Windows." Type="Red" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="true" ParentTaskText="false"/>
-      <Task9 Text="Параметры минимального размера окна Windows." Type="Red" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="true" ParentTaskText="false"/>
-    </Week6213>
-    <Week6212/>
-    <Week6211/>
-    <Week6210/>
+    <Week6225>
+      <Task7 Text="Однократное сообщение нажатия кнопки клавиатуры при ее удержании." Type="Red" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="true" ParentTaskText="false"/>
+    </Week6225>
+    <Week6224/>
+    <Week6223/>
+    <Week6222>
+      <Task6 Text="Реорганизация кода." Type="Red" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="false"/>
+    </Week6222>
   </Complete>
 </Tasks>

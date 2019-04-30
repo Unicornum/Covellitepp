@@ -1152,7 +1152,7 @@ TEST_F(Renderer_test, /*DISABLED_*/Test_LoadTexture)
   using namespace ::boost::filesystem;
 
   const int TextureId = 1804101114;
-  const path PathToSourceImage = THIS_DIRECTORY / "Image.png";
+  const path PathToSourceImage = "Image.png";
   const TextureDimensions_t ExpectTextureDimensions{ 4, 3 };
   const TextureData_t TextureData =
   {

@@ -27,7 +27,7 @@ class Water final :
   public GameObject
 {
 public:
-  Object_t GetObject(const Any_t &) const override;
+  Objects_t GetObject(const Any_t &) const override;
 
 private:
   Water(void);

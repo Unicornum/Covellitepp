@@ -3661,6 +3661,268 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Present_Geometry)
     TestCallRender(Render, ExpectMatrices);
   }
 
+  // 26 Апрель 2019 12:02 (unicornum.verum@gmail.com)
+  TODO("Тест комбинирования компонентов положения/ориентации/мастабирования в различных сочетаниях.");
+  EXPECT_CALL(ConstantBuffer, Release())
+    .Times(1);
+}
+
+// ************************************************************************** //
+TEST_F(DirectX11_test, /*DISABLED_*/Test_Present_Geometry_DefaultDataValues)
+{
+  using DirectXProxy_t = ::mock::DirectX11::Proxy;
+  DirectXProxy_t DirectXProxy;
+  DirectXProxy_t::GetInstance() = &DirectXProxy;
+
+  ::mock::DirectX11::DeviceContext DeviceContext;
+
+  D3D11_BUFFER_DESC IndexBufferDesc = { 0 };
+  IndexBufferDesc.ByteWidth = 1811221344;
+
+  using namespace ::testing;
+
+  EXPECT_CALL(DirectXProxy, CreateDeviceContext())
+    .Times(1)
+    .WillOnce(Return(&DeviceContext));
+
+  const Tested_t Example{ Data_t{} };
+  const ITested_t & IExample = Example;
+
+  auto pPosition = Component_t::Make({ { uT("kind"), uT("Position") } });
+  auto pRotation = Component_t::Make({ { uT("kind"), uT("Rotation") } });
+  auto pScale = Component_t::Make({ { uT("kind"), uT("Scale") } });
+
+  auto itDataCreator = IExample.GetCreators().find(uT("Data"));
+  ASSERT_NE(IExample.GetCreators().end(), itDataCreator);
+
+  const auto TestCallRender = [&](const Component_t::ComponentPtr_t & _pComponent)
+  {
+    auto itCreator = IExample.GetCreators().find(uT("Present"));
+    ASSERT_NE(IExample.GetCreators().end(), itCreator);
+
+    auto PositionRender = itDataCreator->second(pPosition);
+    EXPECT_EQ(nullptr, PositionRender);
+
+    auto RotationRender = itDataCreator->second(pRotation);
+    EXPECT_EQ(nullptr, RotationRender);
+
+    auto ScaleRender = itDataCreator->second(pScale);
+    EXPECT_EQ(nullptr, ScaleRender);
+
+    auto Render = itCreator->second(_pComponent);
+    ASSERT_NE(nullptr, Render);
+
+    ::Matrices ExpectMatrices;
+    memset(&ExpectMatrices, 0, sizeof(ExpectMatrices));
+
+    ExpectMatrices.World = ::DirectX::XMMatrixTranspose(
+      ::DirectX::XMMatrixTranslation(0.0f, 0.0f, 0.0f) *
+      ::DirectX::XMMatrixRotationX(0.0f) *
+      ::DirectX::XMMatrixRotationY(0.0f) *
+      ::DirectX::XMMatrixRotationZ(0.0f) *
+      ::DirectX::XMMatrixScaling(1.0f, 1.0f, 1.0f));
+
+    EXPECT_CALL(DeviceContext, UpdateSubresource(_, _, _, ExpectMatrices, _, _))
+      .Times(1);
+
+    Render();
+  };
+
+  TestCallRender(Component_t::Make(
+    { 
+      { uT("kind"), uT("Geometry") } 
+    }));
+
+  TestCallRender(Component_t::Make(
+    {
+      { uT("kind"), uT("Geometry") },
+      { uT("static"), true }
+    }));
+}
+
+// ************************************************************************** //
+TEST_F(DirectX11_test, /*DISABLED_*/Test_Present_Geometry_Static)
+{
+  using DirectXProxy_t = ::mock::DirectX11::Proxy;
+  DirectXProxy_t DirectXProxy;
+  DirectXProxy_t::GetInstance() = &DirectXProxy;
+
+  ::mock::DirectX11::Device Device;
+  ::mock::DirectX11::DeviceContext DeviceContext;
+  ::mock::DirectX11::Buffer ConstantBuffer;
+  ::mock::DirectX11::Buffer IndexBuffer;
+
+  D3D11_BUFFER_DESC ConstantBufferDesc = { 0 };
+  ConstantBufferDesc.Usage = D3D11_USAGE_DEFAULT;
+  ConstantBufferDesc.ByteWidth = sizeof(::Matrices);
+  ConstantBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+
+  D3D11_BUFFER_DESC IndexBufferDesc = { 0 };
+  IndexBufferDesc.ByteWidth = 1811221344;
+
+  using namespace ::testing;
+
+  EXPECT_CALL(DirectXProxy, CreateDevice())
+    .Times(1)
+    .WillOnce(Return(&Device));
+
+  EXPECT_CALL(DirectXProxy, CreateDeviceContext())
+    .Times(1)
+    .WillOnce(Return(&DeviceContext));
+
+  EXPECT_CALL(Device, CreateBuffer(_, _))
+    .Times(AtLeast(1));
+
+  EXPECT_CALL(DeviceContext, VSSetConstantBuffers(_, _, _))
+    .Times(AtLeast(1));
+
+  EXPECT_CALL(DeviceContext, PSSetConstantBuffers(_, _, _))
+    .Times(AtLeast(1));
+
+  EXPECT_CALL(Device, CreateBuffer(ConstantBufferDesc, _))
+    .Times(1)
+    .WillOnce(Return(&ConstantBuffer));
+
+  EXPECT_CALL(DeviceContext,
+    VSSetConstantBuffers(MATRICES_BUFFER_INDEX, 1, &ConstantBuffer))
+    .Times(1);
+
+  EXPECT_CALL(DeviceContext,
+    PSSetConstantBuffers(MATRICES_BUFFER_INDEX, 1, &ConstantBuffer))
+    .Times(1);
+
+  const Tested_t Example{ Data_t{} };
+  const ITested_t & IExample = Example;
+
+  auto pPosition = Component_t::Make({ { uT("kind"), uT("Position") } });
+  auto pRotation = Component_t::Make({ { uT("kind"), uT("Rotation") } });
+  auto pScale = Component_t::Make({ { uT("kind"), uT("Scale") } });
+
+  auto itDataCreator = IExample.GetCreators().find(uT("Data"));
+  ASSERT_NE(IExample.GetCreators().end(), itDataCreator);
+
+  auto itCreator = IExample.GetCreators().find(uT("Present"));
+  ASSERT_NE(IExample.GetCreators().end(), itCreator);
+
+  InSequence Dummy;
+
+  const auto TestCallRender = [&](
+    const Render_t & _Render,
+    const ::Matrices & _Matrices)
+  {
+    EXPECT_CALL(DeviceContext, 
+      UpdateSubresource(&ConstantBuffer, 0, nullptr, _Matrices, 0, 0))
+      .Times(1);
+
+    EXPECT_CALL(DeviceContext, IAGetIndexBuffer(DXGI_FORMAT_UNKNOWN, 0))
+      .Times(1)
+      .WillOnce(Return(&IndexBuffer));
+
+    EXPECT_CALL(IndexBuffer, GetDesc())
+      .Times(1)
+      .WillOnce(Return(IndexBufferDesc));
+
+    EXPECT_CALL(DeviceContext,
+      IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST))
+      .Times(1);
+
+    EXPECT_CALL(DeviceContext,
+      DrawIndexed(IndexBufferDesc.ByteWidth / sizeof(int), 0, 0))
+      .Times(1);
+
+    EXPECT_CALL(IndexBuffer, Release())
+      .Times(1);
+
+    _Render();
+  };
+
+  {
+    const auto pComponent = Component_t::Make(
+      {
+        { uT("kind"), uT("Geometry") },
+        { uT("static"), uT("true") },
+      });
+
+    ::Matrices DefaultMatrices;
+    memset(&DefaultMatrices, 0, sizeof(DefaultMatrices));
+
+    DefaultMatrices.World = ::DirectX::XMMatrixTranspose(
+      ::DirectX::XMMatrixIdentity());
+
+    auto Render = itCreator->second(pComponent);
+    ASSERT_NE(nullptr, Render);
+
+    TestCallRender(Render, DefaultMatrices);
+  }
+
+  {
+    const auto pComponent = Component_t::Make(
+      {
+        { uT("kind"), uT("Geometry") },
+        { uT("static"), uT("true") },
+      });
+
+    ::Matrices ExpectMatrices;
+    memset(&ExpectMatrices, 0, sizeof(ExpectMatrices));
+    ExpectMatrices.World = ::DirectX::XMMatrixIdentity();
+
+    auto PositionRender = itDataCreator->second(pPosition);
+    EXPECT_EQ(nullptr, PositionRender);
+
+    const auto SetPosition = [&](float _X, float _Y, float _Z)
+    {
+      pPosition->SetValue(uT("x"), _X);
+      pPosition->SetValue(uT("y"), _Y);
+      pPosition->SetValue(uT("z"), _Z);
+
+      ExpectMatrices.World *= ::DirectX::XMMatrixTranslation(_X, _Y, _Z);
+    };
+
+    auto RotationRender = itDataCreator->second(pRotation);
+    EXPECT_EQ(nullptr, RotationRender);
+
+    const auto SetRotation = [&](float _X, float _Y, float _Z)
+    {
+      pRotation->SetValue(uT("x"), _X);
+      pRotation->SetValue(uT("y"), _Y);
+      pRotation->SetValue(uT("z"), _Z);
+
+      ExpectMatrices.World *= ::DirectX::XMMatrixRotationX(_X);
+      ExpectMatrices.World *= ::DirectX::XMMatrixRotationY(_Y);
+      ExpectMatrices.World *= ::DirectX::XMMatrixRotationZ(_Z);
+    };
+
+    auto ScaleRender = itDataCreator->second(pScale);
+    EXPECT_EQ(nullptr, ScaleRender);
+
+    const auto SetScale = [&](float _X, float _Y, float _Z)
+    {
+      pScale->SetValue(uT("x"), _X);
+      pScale->SetValue(uT("y"), _Y);
+      pScale->SetValue(uT("z"), _Z);
+
+      ExpectMatrices.World *= ::DirectX::XMMatrixScaling(_X, _Y, _Z);
+    };
+
+    SetPosition(1.0f, 2.0f, 3.0f);
+    SetRotation(4.0f, 5.0f, 6.0f);
+    SetScale(7.0f, 8.0f, 9.0f);
+    ExpectMatrices.World = ::DirectX::XMMatrixTranspose(ExpectMatrices.World);
+
+    const auto StaticMatrices = ExpectMatrices;
+
+    auto Render = itCreator->second(pComponent);
+    ASSERT_NE(nullptr, Render);
+
+    TestCallRender(Render, StaticMatrices);
+
+    SetPosition(11.0f, 22.0f, 33.0f);
+    SetRotation(44.0f, 55.0f, 66.0f);
+    SetScale(77.0f, 88.0f, 99.0f);
+
+    TestCallRender(Render, StaticMatrices);
+  }
+
   EXPECT_CALL(ConstantBuffer, Release())
     .Times(1);
 }

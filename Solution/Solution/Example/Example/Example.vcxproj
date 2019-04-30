@@ -63,9 +63,9 @@ set COVELLITEPP_DIR=$(BinaryRootDir)
 
 rem ===================================================
 echo Copy source data...
-set SOURCE="$(ProjectDir)..\Packaging\assets\data\*"
+set SOURCE="$(ProjectDir)..\Packaging\assets\*"
 
-xcopy %SOURCE% "%COVELLITEPP_DIR%"Data /Y /I /E
+xcopy %SOURCE% "%COVELLITEPP_DIR%" /Y /I /E
 </Command>
     </PostBuildEvent>
     <ProjectReference />
@@ -90,14 +90,14 @@ set COVELLITEPP_DIR=$(BinaryRootDir)
 
 rem ===================================================
 echo Copy source data...
-set SOURCE="$(ProjectDir)..\Packaging\assets\data\*"
+set SOURCE="$(ProjectDir)..\Packaging\assets\*"
 
-xcopy %SOURCE% "%COVELLITEPP_DIR%"Data /Y /I /E
+xcopy %SOURCE% "%COVELLITEPP_DIR%" /Y /I /E
 
 rem ===================================================
 echo Pack Example.zip...
 set ARCHIVER="$(SolutionDir)Solution\Solution\Externals\Utilities\Compression\7zip\7z.exe"
-set EXCLUDE=-x!Package -x!Test -x!arm -x!x86 -x!*.apk -x!*.apk.recipe* -x!*.zip -x!*.lastcodeanalysissucceeded -x!Resource.exe -x!Version.exe -x!ProcessingMetrics.exe -x!*.pdb -x!*.ilk -x!*.iobj -x!*.ipdb
+set EXCLUDE=-x!Package -x!Test -x!arm -x!x86 -x!*.apk -x!*.apk.recipe* -x!*.zip -x!*.lastcodeanalysissucceeded -x!Resource.exe -x!Version.exe -x!ProcessingMetrics.exe -x!Assets.exe -x!*.dll -x!*.pdb -x!*.ilk -x!*.iobj -x!*.ipdb
 
 %ARCHIVER% a -r -w "%COVELLITEPP_DIR%\Covellitepp.zip" "%COVELLITEPP_DIR%*" %EXCLUDE%
 </Command>
@@ -128,6 +128,7 @@ set EXCLUDE=-x!Package -x!Test -x!arm -x!x86 -x!*.apk -x!*.apk.recipe* -x!*.zip 
     <ClInclude Include="Basements\Demo\Landscape.hpp" />
     <ClInclude Include="Basements\Demo\Loader.hpp" />
     <ClInclude Include="Basements\Demo\Model.hpp" />
+    <ClInclude Include="Basements\Demo\Skybox.hpp" />
     <ClInclude Include="Basements\Demo\stdafx.h" />
     <ClInclude Include="Basements\Demo\View.hpp" />
     <ClInclude Include="Basements\Demo\Water.hpp" />
@@ -165,14 +166,20 @@ set EXCLUDE=-x!Package -x!Test -x!arm -x!x86 -x!*.apk -x!*.apk.recipe* -x!*.zip 
     <ClCompile Include="Basements\Demo\Camera.cpp" />
     <ClCompile Include="Basements\Demo\Compass.cpp" />
     <ClCompile Include="Basements\Demo\Controller.cpp" />
+    <ClCompile Include="Basements\Demo\CubeCoords.cpp" />
     <ClCompile Include="Basements\Demo\DbComponents.cpp" />
     <ClCompile Include="Basements\Demo\DbRenders.cpp" />
     <ClCompile Include="Basements\Demo\DbUpdaters.cpp" />
     <ClCompile Include="Basements\Demo\GameObject.cpp" />
+    <ClCompile Include="Basements\Demo\GameObject.Mesh.cpp" />
+    <ClCompile Include="Basements\Demo\GameObject.Texture.cpp" />
+    <ClCompile Include="Basements\Demo\GameScene.cpp" />
     <ClCompile Include="Basements\Demo\GameWorld.cpp" />
     <ClCompile Include="Basements\Demo\Landscape.cpp" />
+    <ClCompile Include="Basements\Demo\Landscape.Mesh.cpp" />
     <ClCompile Include="Basements\Demo\Loader.cpp" />
     <ClCompile Include="Basements\Demo\Model.cpp" />
+    <ClCompile Include="Basements\Demo\Skybox.cpp" />
     <ClCompile Include="Basements\Demo\View.cpp" />
     <ClCompile Include="Basements\Demo\Water.cpp" />
     <ClCompile Include="Basements\Simple2DGame.cpp" />

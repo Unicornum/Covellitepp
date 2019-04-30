@@ -38,7 +38,10 @@ public:
   class Buffer;
   class Texture;
   class Shader;
+  class Transform;
   class Position;
+  class Rotation;
+  class Scale;
 };
 
 class Component::Scissor
@@ -154,7 +157,7 @@ public:
   }
 };
 
-class Component::Position
+class Component::Transform
 {
 private:
   inline static size_t GetHashX(void)
@@ -180,11 +183,44 @@ public:
   const float Y;
   const float Z;
 
+protected:
+  Transform(const ComponentPtr_t & _pComponent, const float _DefaultValue) :
+    X(_pComponent->GetValue(GetHashX(), _DefaultValue)),
+    Y(_pComponent->GetValue(GetHashY(), _DefaultValue)),
+    Z(_pComponent->GetValue(GetHashZ(), _DefaultValue))
+  {
+
+  }
+};
+
+class Component::Position :
+  public Transform
+{
 public:
   explicit Position(const ComponentPtr_t & _pComponent) :
-    X(_pComponent->GetValue(GetHashX(), 0.0f)),
-    Y(_pComponent->GetValue(GetHashY(), 0.0f)),
-    Z(_pComponent->GetValue(GetHashZ(), 0.0f))
+    Transform(_pComponent, 0.0f)
+  {
+
+  }
+};
+
+class Component::Rotation :
+  public Transform
+{
+public:
+  explicit Rotation(const ComponentPtr_t & _pComponent) :
+    Transform(_pComponent, 0.0f)
+  {
+
+  }
+};
+
+class Component::Scale :
+  public Transform
+{
+public:
+  explicit Scale(const ComponentPtr_t & _pComponent) :
+    Transform(_pComponent, 1.0f)
   {
 
   }

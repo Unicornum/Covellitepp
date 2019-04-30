@@ -193,8 +193,8 @@ auto OpenGLCommon::CreateCamera(const ComponentPtr_t & _pComponent) -> Render_t
 
   const auto Camera = 
     (_pComponent->Kind == uT("Perspective") || Focal == uT("Enabled")) ?
-    GetCameraFocal(_pComponent) :
-    GetCameraGui(_pComponent);
+    GetCameraPerspective(_pComponent) :
+    GetCameraOrthographic(_pComponent);
 
   return [=](void)
   {
@@ -283,14 +283,25 @@ auto OpenGLCommon::CreateState(const ComponentPtr_t & _pComponent) -> Render_t
     };
   };
 
+  const auto CreateAlphaTestState = [&](void)
+  {
+    const auto Value = _pComponent->GetValue(uT("discard"), 0.0f);
+
+    return [=](void)
+    {
+      glEnable(GL_ALPHA_TEST);
+      glAlphaFunc(GL_GREATER, Value);
+    };
+  };
 
   ::std::map<String_t, ::std::function<Render_t(void)>> Creators =
   {
-    { uT("Blend"),    CreateBlendState },
-    { uT("Sampler"),  CreateSamplerState },
-    { uT("Scissor"),  CreateScissorState },
-    { uT("Depth"),    CreateDepthState },
-    { uT("Clear"),    CreateClearState   },
+    { uT("Blend"),     CreateBlendState     },
+    { uT("Sampler"),   CreateSamplerState   },
+    { uT("Scissor"),   CreateScissorState   },
+    { uT("Depth"),     CreateDepthState     },
+    { uT("Clear"),     CreateClearState     },
+    { uT("AlphaTest"), CreateAlphaTestState },
   };
 
   return Creators[_pComponent->Kind]();
@@ -581,6 +592,7 @@ auto OpenGLCommon::GetCameraCommon(void) -> Render_t
     DisableDepthRender();
 
     glDisable(GL_BLEND);
+    glDisable(GL_ALPHA_TEST);
     glDisable(GL_DITHER);
 
     glShadeModel(GL_SMOOTH);
@@ -592,7 +604,7 @@ auto OpenGLCommon::GetCameraCommon(void) -> Render_t
   };
 }
 
-auto OpenGLCommon::GetCameraGui(const ComponentPtr_t &) -> Render_t
+auto OpenGLCommon::GetCameraOrthographic(const ComponentPtr_t &) -> Render_t
 {
   const auto CommonRender = GetCameraCommon();
 
@@ -623,7 +635,7 @@ auto OpenGLCommon::GetCameraGui(const ComponentPtr_t &) -> Render_t
   };
 }
 
-auto OpenGLCommon::GetCameraFocal(const ComponentPtr_t & _pComponent) -> Render_t
+auto OpenGLCommon::GetCameraPerspective(const ComponentPtr_t & _pComponent) -> Render_t
 {
   const auto CommonRender = GetCameraCommon();
 
@@ -667,7 +679,7 @@ auto OpenGLCommon::GetCameraFocal(const ComponentPtr_t & _pComponent) -> Render_
 
       const Component::Position Rot{ ServiceComponents[1] };
 
-      ::glm::mat4 Transform = ::glm::mat4{ 1.0f };
+      ::glm::mat4 Transform = ::glm::identity<::glm::mat4>();
 
       Transform = ::glm::translate(Transform,
         ::glm::vec3{ Look.X, Look.Y, Look.Z });
@@ -712,52 +724,21 @@ auto OpenGLCommon::GetDepthRender(bool _IsEnabled, bool _IsClear) -> Render_t
   return _IsEnabled ? (_IsClear ? DepthClear : DepthEnable) : DepthDisable;
 }
 
-auto OpenGLCommon::CreateGeometry(const ComponentPtr_t &) -> Render_t
+auto OpenGLCommon::CreateGeometry(const ComponentPtr_t & _pComponent) -> Render_t
 {
-  ::std::deque<Render_t> PreRenders;
-
-  auto CreatePosition = [&](const ComponentPtr_t & _pPosition)
+  const auto GetPreRenderStaticGeometry = [&](void) -> MatrixBuilder_t
   {
-    // OpenGL требует фомирования мартиц тансформации в обратном порядке!
-    PreRenders.push_front([=](void)
+    ::glm::mat4 MatrixWorld = ::glm::identity<::glm::mat4>();
+    GetPreRenderGeometry()(MatrixWorld);
+
+    return [MatrixWorld](::glm::mat4 & _Matrix)
     {
-      const Component::Position Data{ _pPosition };
-      glTranslatef(Data.X, Data.Y, Data.Z);
-    });
+      _Matrix *= MatrixWorld;
+    };
   };
 
-  const auto RadianToGreed = static_cast<float>(
-    ::alicorn::extension::cpp::math::RadianToGreed);
-
-  auto CreateRotation = [&](const ComponentPtr_t & _pRotation)
-  {
-    // OpenGL требует фомирования мартиц тансформации в обратном порядке!
-    PreRenders.push_front([=](void)
-    {
-      const Component::Position Data{ _pRotation };
-      glRotatef(Data.Z * RadianToGreed, 0.0f, 0.0f, 1.0f);
-      glRotatef(Data.Y * RadianToGreed, 0.0f, 1.0f, 0.0f);
-      glRotatef(Data.X * RadianToGreed, 1.0f, 0.0f, 0.0f);
-    });
-  };
-
-  auto CreateScale = [&](const ComponentPtr_t & _pScale)
-  {
-    // OpenGL требует фомирования мартиц тансформации в обратном порядке!
-    PreRenders.push_front([=](void)
-    {
-      const Component::Position Data{ _pScale };
-      glScalef(Data.X, Data.Y, Data.Z);
-    });
-  };
-
-  m_ServiceComponents.Process(
-    {
-      { uT("Position"), CreatePosition },
-      { uT("Rotation"), CreateRotation },
-      { uT("Scale"), CreateScale },
-    });
-
+  const auto PreRender = _pComponent->GetValue(uT("static"), false) ?
+    GetPreRenderStaticGeometry () : GetPreRenderGeometry();
   const auto * pDrawElements = &m_DrawElements;
 
   return [=](void)
@@ -767,7 +748,12 @@ auto OpenGLCommon::CreateGeometry(const ComponentPtr_t &) -> Render_t
     // трансформации) можно было восстановить ее обратно.
     glPushMatrix();
 
-    for (auto & Render : PreRenders) Render();
+    ::glm::mat4 MatrixModelView;
+    glGetFloatv(GL_MODELVIEW_MATRIX, ::glm::value_ptr(MatrixModelView));
+
+    PreRender(MatrixModelView);
+
+    glLoadMatrixf(::glm::value_ptr(MatrixModelView));
 
     (*pDrawElements)();
 
@@ -779,6 +765,55 @@ auto OpenGLCommon::CreateGeometry(const ComponentPtr_t &) -> Render_t
 
     // Восстанавливаем матрицу вида, сформированную камерой.
     glPopMatrix();
+  };
+}
+
+auto OpenGLCommon::GetPreRenderGeometry(void) -> MatrixBuilder_t
+{
+  ::std::deque<MatrixBuilder_t> PreRenders;
+
+  auto CreatePosition = [&](const ComponentPtr_t & _pPosition)
+  {
+    // OpenGL требует фомирования мартиц тансформации в обратном порядке!
+    PreRenders.push_front([_pPosition](::glm::mat4 & _Matrix)
+    {
+      const Component::Position Data{ _pPosition };
+      _Matrix = ::glm::translate(_Matrix, ::glm::vec3{ Data.X, Data.Y, Data.Z });
+    });
+  };
+
+  auto CreateRotation = [&](const ComponentPtr_t & _pRotation)
+  {
+    // OpenGL требует фомирования мартиц тансформации в обратном порядке!
+    PreRenders.push_front([_pRotation](::glm::mat4 & _Matrix)
+    {
+      const Component::Rotation Data{ _pRotation };
+      _Matrix = ::glm::rotate(_Matrix, Data.Z, ::glm::vec3{ 0.0f, 0.0f, 1.0f });
+      _Matrix = ::glm::rotate(_Matrix, Data.Y, ::glm::vec3{ 0.0f, 1.0f, 0.0f });
+      _Matrix = ::glm::rotate(_Matrix, Data.X, ::glm::vec3{ 1.0f, 0.0f, 0.0f });
+    });
+  };
+
+  auto CreateScale = [&](const ComponentPtr_t & _pScale)
+  {
+    // OpenGL требует фомирования мартиц тансформации в обратном порядке!
+    PreRenders.push_front([_pScale](::glm::mat4 & _Matrix)
+    {
+      const Component::Scale Data{ _pScale };
+      _Matrix = ::glm::scale(_Matrix, ::glm::vec3{ Data.X, Data.Y, Data.Z });
+    });
+  };
+
+  m_ServiceComponents.Process(
+    {
+      { uT("Position"), CreatePosition },
+      { uT("Rotation"), CreateRotation },
+      { uT("Scale"), CreateScale },
+    });
+
+  return [PreRenders](::glm::mat4 & _Matrix)
+  {
+    for (auto & Render : PreRenders) Render(_Matrix);
   };
 }
 

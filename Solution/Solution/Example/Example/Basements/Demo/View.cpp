@@ -15,11 +15,13 @@ View::View(const RendersPtr_t & _pRenders) :
 
 }
 
+// cppcheck-suppress passedByValue
 void View::AddObject(const Id_t _Id, const Object_t & _Object) /*override*/
 {
   m_DbRenders.AddObject(_Id, _Object);
 }
 
+// cppcheck-suppress passedByValue
 void View::RemoveObject(const Id_t _Id, const Object_t & _Object) /*override*/
 {
   m_DbRenders.RemoveObject(_Id, _Object);

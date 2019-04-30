@@ -1,0 +1,267 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{14D39672-98C5-490C-AABB-26FA695435E9}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <RootNamespace>TestPack</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0.17134.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>$(DefaultPlatformToolset)</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>$(DefaultPlatformToolset)</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\..\..\Solution.x64.props" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\..\..\Solution.x64.props" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" />
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+    </Link>
+    <PostBuildEvent>
+      <Command>%(Command)
+
+echo Packed data file...
+set SourceDirectory=$(ProjectDir)Assets
+set PackFile=$(IntDir)Data.pack
+set TargetFile=$(ProjectDir)..\Packaging\Assets\Data\Data.pack
+
+del "%PackFile%"
+$(TargetPath) "%SourceDirectory%" "%PackFile%"
+copy %PackFile% %TargetFile% /B /V /Y
+echo ... packed end.
+</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+    <PostBuildEvent>
+      <Command>%(Command)
+
+echo Packed data file...
+set SourceDirectory=$(ProjectDir)Assets
+set PackFile=$(IntDir)Data.pack
+set TargetFile=$(ProjectDir)..\Packaging\Assets\Data\Data.pack
+
+del "%PackFile%"
+$(TargetPath) "%SourceDirectory%" "%PackFile%"
+copy %PackFile% %TargetFile% /B /V /Y
+echo ... packed end.
+</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClInclude Include="stdafx.h" />
+    <ClInclude Include="targetver.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Packer.cpp" />
+    <ClCompile Include="stdafx.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="Version.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Assets\Data\body.rcss" />
+    <None Include="Assets\Data\controls.rcss" />
+    <None Include="Assets\Data\controls.rml" />
+    <None Include="Assets\Data\demo.rcss" />
+    <None Include="Assets\Data\demo.rml" />
+    <None Include="Assets\Data\description.rcss" />
+    <None Include="Assets\Data\description.rml" />
+    <None Include="Assets\Data\draw3dobject.rcss" />
+    <None Include="Assets\Data\draw3dobject.rml" />
+    <None Include="Assets\Data\experimental.rcss" />
+    <None Include="Assets\Data\experimental.rml" />
+    <None Include="Assets\Data\fonts.rcss" />
+    <None Include="Assets\Data\layer.template.rcss" />
+    <None Include="Assets\Data\layer.template.rml" />
+    <None Include="Assets\Data\main.rcss" />
+    <None Include="Assets\Data\main.rml" />
+    <None Include="Assets\Data\scrollbar.rcss" />
+    <None Include="Assets\Data\simple2dgame.rcss" />
+    <None Include="Assets\Data\simple2dgame.rml" />
+    <None Include="Assets\Data\text.rcss" />
+    <None Include="Assets\Data\text.rml" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Assets\Data\demo.background.jpg" />
+    <None Include="Assets\Data\demo.circular.png" />
+    <None Include="Assets\Data\demo.progress.png" />
+    <Image Include="Assets\Data\demo\demo.bush.png" />
+    <Image Include="Assets\Data\demo\demo.bush1.jpg" />
+    <Image Include="Assets\Data\demo\demo.compass.png" />
+    <Image Include="Assets\Data\demo\demo.dummy.png" />
+    <Image Include="Assets\Data\demo\demo.grass.png" />
+    <Image Include="Assets\Data\demo\demo.grass2.png" />
+    <Image Include="Assets\Data\demo\demo.grass3.png" />
+    <Image Include="Assets\Data\demo\demo.none.jpg" />
+    <Image Include="Assets\Data\demo\demo.sand.jpg" />
+    <Image Include="Assets\Data\demo\demo.skybox.png" />
+    <Image Include="Assets\Data\demo\demo.stone.jpg" />
+    <Image Include="Assets\Data\demo\demo.tree.jpg" />
+    <Image Include="Assets\Data\demo\demo.tree.png" />
+    <Image Include="Assets\Data\demo\demo.water.png" />
+    <Image Include="Assets\Data\demo\demo.well.jpg" />
+    <None Include="Assets\Data\draw3dobject.title.png" />
+    <Image Include="Assets\Data\gradient.png" />
+    <Image Include="Assets\Data\simple2dgame.bricks.jpg" />
+    <Image Include="Assets\Data\simple2dgame.clock.png" />
+    <Image Include="Assets\Data\text.npc.jpg" />
+    <Image Include="Assets\Data\text.paper.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Assets\Data\demo\Boulder1.obj">
+      <FileType>Document</FileType>
+    </None>
+    <None Include="Assets\Data\demo\Boulder2.obj">
+      <FileType>Document</FileType>
+    </None>
+    <None Include="Assets\Data\demo\Boulder3.obj">
+      <FileType>Document</FileType>
+    </None>
+    <None Include="Assets\Data\demo\Bush1.obj">
+      <FileType>Document</FileType>
+    </None>
+    <None Include="Assets\Data\demo\Bush2.obj">
+      <FileType>Document</FileType>
+    </None>
+    <None Include="Assets\Data\demo\Bush3.obj">
+      <FileType>Document</FileType>
+    </None>
+    <None Include="Assets\Data\demo\Bush4.obj">
+      <FileType>Document</FileType>
+    </None>
+    <None Include="Assets\Data\demo\bush5.obj">
+      <FileType>Document</FileType>
+    </None>
+    <None Include="Assets\Data\demo\Bush6.obj">
+      <FileType>Document</FileType>
+    </None>
+    <None Include="Assets\Data\demo\Bush7.obj">
+      <FileType>Document</FileType>
+    </None>
+    <None Include="Assets\Data\demo\Flower1.obj">
+      <FileType>Document</FileType>
+    </None>
+    <None Include="Assets\Data\demo\Flower3.obj">
+      <FileType>Document</FileType>
+    </None>
+    <None Include="Assets\Data\demo\Grass1.obj">
+      <FileType>Document</FileType>
+    </None>
+    <None Include="Assets\Data\demo\Grass2.obj">
+      <FileType>Document</FileType>
+    </None>
+    <None Include="Assets\Data\demo\Grass3.obj">
+      <FileType>Document</FileType>
+    </None>
+    <None Include="Assets\Data\demo\Grass4.obj">
+      <FileType>Document</FileType>
+    </None>
+    <None Include="Assets\Data\demo\Grass5.obj">
+      <FileType>Document</FileType>
+    </None>
+    <None Include="Assets\Data\demo\Grass6.obj">
+      <FileType>Document</FileType>
+    </None>
+    <None Include="Assets\Data\demo\Grass7.obj">
+      <FileType>Document</FileType>
+    </None>
+    <None Include="Assets\Data\demo\Grass8.obj">
+      <FileType>Document</FileType>
+    </None>
+    <None Include="Assets\Data\demo\Stone1.obj">
+      <FileType>Document</FileType>
+    </None>
+    <None Include="Assets\Data\demo\Tree1.obj">
+      <FileType>Document</FileType>
+    </None>
+    <None Include="Assets\Data\demo\Tree2.obj">
+      <FileType>Document</FileType>
+    </None>
+    <None Include="Assets\Data\demo\Tree3.obj">
+      <FileType>Document</FileType>
+    </None>
+    <None Include="Assets\Data\demo\Tree5.obj">
+      <FileType>Document</FileType>
+    </None>
+    <None Include="Assets\Data\demo\Tree6.obj">
+      <FileType>Document</FileType>
+    </None>
+    <None Include="Assets\Data\demo\Tree7.obj">
+      <FileType>Document</FileType>
+    </None>
+    <None Include="Assets\Data\demo\Tree8.obj">
+      <FileType>Document</FileType>
+    </None>
+    <None Include="Assets\Data\demo\Well.obj">
+      <FileType>Document</FileType>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Assets\Data\demo\Branch1.obj">
+      <FileType>Document</FileType>
+    </None>
+    <None Include="Assets\Data\demo\Branch2.obj">
+      <FileType>Document</FileType>
+    </None>
+    <None Include="Assets\Data\demo\Branch3.obj">
+      <FileType>Document</FileType>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Assets\Data\demo\Shrooms.obj">
+      <FileType>Document</FileType>
+    </None>
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

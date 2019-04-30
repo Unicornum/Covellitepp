@@ -11,6 +11,27 @@
 #include <alicorn/settings.mock.hpp>
 #include <Platform/Android.mock.hpp>
 
+#include <Covellite/Gui/Vfs.hpp>
+
+using ::covellite::gui::VfsCore_t;
+using ::covellite::gui::VfsPtr_t;
+using ::alicorn::extension::std::Singleton;
+
+inline /*static*/ VfsPtr_t Singleton<VfsCore_t>::Make(void)
+{
+  using ::alicorn::modules::vfs::FileSystem;
+  using ImplPtr_t = ::std::shared_ptr<::alicorn::modules::vfs::IImplementation>;
+
+  return ::std::make_unique<VfsCore_t>(::std::vector<ImplPtr_t>
+  {
+    // Это позволяет задавать как полный путь, так и путь оносительно
+    // папки этого самого файла.
+    ::std::make_shared<FileSystem>(""),
+    ::std::make_shared<FileSystem>(THIS_DIRECTORY / "Test.File"),
+    ::std::make_shared<FileSystem>(THIS_DIRECTORY / "Test.Renderer")
+  });
+}
+
 // 06 Февраль 2019 13:08 (unicornum.verum@gmail.com)
 TODO("Заменить файл в Externals и вернуть ссылку на него.");
 #include "Mock/Rocket.mock.hpp"

@@ -31,7 +31,7 @@ namespace api
 */
 class Component final
 {
-  template<bool>
+  template<bool, bool>
   class Convertor;
   class ConstructorTag {};
 

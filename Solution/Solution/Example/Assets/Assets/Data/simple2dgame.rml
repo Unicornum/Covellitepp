@@ -1,0 +1,11 @@
+﻿<rml>
+  <head>
+    <link type="text/template" href="layer.template.rml"/>
+    <link type="text/rcss" href="simple2dgame.rcss"/>
+  </head>
+  <body template="layer" id="id_simple2dgame">
+    <headline/>
+    <input type="text" id="id_fps" disabled="disabled" />
+    <p id="id_game_time"/>
+  </body>
+</rml>

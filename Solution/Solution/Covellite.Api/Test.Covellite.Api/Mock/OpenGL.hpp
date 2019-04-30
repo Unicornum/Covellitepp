@@ -13,7 +13,11 @@ inline bool operator== (
   {
     for (int j = 0; j < 4; j++)
     {
-      if (abs(_Left.m[i][j] - _Right.m[i][j]) > 1e-6f) return false;
+      const auto dValue = 1.0f - _Left.m[i][j] / _Right.m[i][j];
+      if (abs(dValue) > 1e-3f)
+      {
+        return false;
+      }
     }
   }
 
@@ -55,11 +59,13 @@ inline bool operator== (
 #define GL_RGBA                           0x1908
 #define GL_SCISSOR_TEST                   0x0C11
 #define GL_VIEWPORT                       0x0BA2
+#define GL_MODELVIEW_MATRIX               0x0BA6
 #define GL_NO_ERROR                       0
 #define GL_VERSION                        0x1F02
 #define GL_FRONT_AND_BACK                 0x0408
 #define GL_DEPTH_BUFFER_BIT               0x00000100
 #define GL_NORMALIZE                      0x0BA1
+#define GL_ALPHA_TEST                     0x0BC0
 
 #define GL_LIGHT0                         0x4000
 #define GL_AMBIENT                        0x1200
@@ -72,6 +78,8 @@ inline bool operator== (
 #define GL_EMISSION                       0x1600
 #define GL_SHININESS                      0x1601
 #define GL_LIGHT_MODEL_AMBIENT            0x0B53
+
+#define GL_GREATER                        0x0204
 
 namespace mock
 {
@@ -140,6 +148,7 @@ public:
   MOCK_METHOD3(Lightf, void(GLenum, GLenum, GLfloat));
   MOCK_METHOD2(LightModelfv, void(GLenum, Floats_t));
   MOCK_METHOD1(LoadMatrixf, void(::DirectX::XMFLOAT4X4));
+  MOCK_METHOD2(AlphaFunc, void (GLenum, GLclampf));
 
 public:
   template<class T>
@@ -428,10 +437,11 @@ void glGetFloatv(GLenum _Name, GLfloat * _pParams)
 
   if (_Name == GL_VIEWPORT)
   {
-    _pParams[0] = pParams[0];
-    _pParams[1] = pParams[1];
-    _pParams[2] = pParams[2];
-    _pParams[3] = pParams[3];
+    memcpy(_pParams, pParams, 4 * sizeof(GLfloat));
+  }
+  else if (_Name == GL_MODELVIEW_MATRIX)
+  {
+    memcpy(_pParams, pParams, 16 * sizeof(float));
   }
 }
 
@@ -486,11 +496,16 @@ void glLoadMatrixf(const GLfloat * _pMatrix)
   {
     for (int j = 0; j < 4; j++)
     {
-      Matrix4x4.m[i][j] = _pMatrix[i + 4 * j];
+      Matrix4x4.m[j][i] = _pMatrix[4 * j + i];
     }
   }
 
   GLProxy::GetInstance()->LoadMatrixf(Matrix4x4);
+}
+
+void glAlphaFunc(GLenum _Function, GLclampf _Value)
+{
+  GLProxy::GetInstance()->AlphaFunc(_Function, _Value);
 }
 
 } // unnamed namespace
@@ -556,6 +571,7 @@ using ::mock::glLightfv;
 using ::mock::glLightf;
 using ::mock::glLightModelfv;
 using ::mock::glLoadMatrixf;
+using ::mock::glAlphaFunc;
 
 } // namespace api
 

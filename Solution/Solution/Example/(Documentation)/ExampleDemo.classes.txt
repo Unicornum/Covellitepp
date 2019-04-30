@@ -9,15 +9,18 @@ class GuiPanels as "layers::Demo"
 {
 }
 
-interface model_IScene as "model::IGameWorld"
+interface model_IGameWorld as "model::IGameWorld"
 {
   {abstract} + GameScene * CreateGameScene();
+  {abstract} + float GetLandscapeHeight(CubeCoords);
+  {abstract} + size_t GetGameObjectType(CubeCoords);
   ---
 }
 
 interface model_IComponents as "model::IDbComponents"
 {
   {abstract} + Components_t GetObject(Id);
+  {abstract} + ComponentPtr_t GetComponent(ComponentId_t);
   ---
   signal DoAddObject
   signal DoRemoveObject
@@ -33,8 +36,37 @@ class model_Components as "model::DbComponents"
 {
   + Id AddGameObject(Object_t);
   + void RemoveGameObject(Id);
-  + Component GetComponent(ObjectId, ComponentId);
   ---
+}
+
+interface model_IGameObject as "model::IGameObject"
+{
+  {abstract} + Type::Value GetType(void);
+  {abstract} + Object_t GetObject(Any_t);
+  ---
+}
+
+class model_GameObject as "model::GameObject"
+{
+  + static IGameObjectPtr_t Create(Type::Value, IGameWorld &);
+  ---
+  + GameObject(Type::Value);
+}
+
+class model_Loader as "model::Loader"
+{
+}
+
+class model_Camera as "model::Camera"
+{
+}
+
+class model_Landscape as "model::Landscape"
+{
+}
+
+class model_Compass as "model::Compass"
+{
 }
 
 class model_GameWorld as "model::GameWorld"
@@ -43,28 +75,47 @@ class model_GameWorld as "model::GameWorld"
   ---
 }
 
+class model_DbUpdaters as "model::DbUpdaters"
+{
+  + void AddUpdater(Id_t, Updater_t);
+  + void RemoveUpdater(Id_t);
+  + void CallUpdater(Id_t);
+  ---
+}
+
 class model_GameScene as "support::GameScene"
 {
-  + std::vector<support::Scene>
+  + void Add(SceneId, ObjectId, IsUpdater);
+  + void Complete(void);
+  + void CallForEach(Callback_t, Callback_t);
+  ---
 }
 
 class model_Scene as "support::Scene"
 {
-  + Id CameraId
   + Objects_t Objects
   + Updaters_t Updaters;
 }
 
 model_IComponents <|-.- model_Components
 model_IComponents <|-.- model_Main
-model_IScene <|-.- model_GameWorld
-model_IScene <|-.- model_Main
+model_IGameWorld <|-.- model_GameWorld
+model_IGameWorld <|-.- model_Main
 model_Main --* model_Components
 model_Main --* model_GameWorld
 model_Components o-- model_GameWorld
 
+model_GameWorld --* model_IGameObject
 model_GameWorld --o Filesystem
+model_GameWorld --* model_DbUpdaters
 model_GameWorld --* model_GameScene
+
+model_IGameObject <|-.- model_GameObject
+model_IGameWorld o-- model_GameObject
+model_GameObject <|-- model_Loader
+model_GameObject <|-- model_Camera
+model_GameObject <|-- model_Landscape
+model_GameObject <|-- model_Compass
 
 model_GameScene --* model_Scene
 
@@ -80,8 +131,8 @@ interface view_IScene as "view::I3DScene"
 
 interface view_IRenders as "view::IDbRenders"
 {
-  {abstract} + void AddObjects(std::vector<Id>);
-  {abstract} + void RemoveObjects(std::vector<Id>);
+  {abstract} + void AddObjects(Id_t, Object_t);
+  {abstract} + void RemoveObjects(Id_t, Object_t);
   ---
 }
 
@@ -114,12 +165,12 @@ view_3DScene --* model_GameScene
 
 class controller_Main as "controller::Controller"
 {
-  + Main(mode::IGameWorld &, view::I3DScene &);
   + Main(model::IDbComponents &, view::IDbRenders &);
+  + Main(mode::IGameWorld &, view::I3DScene &);
   ---
 }
 
-model_IScene --o controller_Main
+model_IGameWorld --o controller_Main
 model_IComponents --o controller_Main
 view_IScene --o controller_Main
 view_IRenders --o controller_Main

@@ -453,6 +453,61 @@ TEST_F(OpenGLCommon_test, /*DISABLED_*/Test_State_Clear)
 }
 
 // ************************************************************************** //
+TEST_F(OpenGLCommon_test, /*DISABLED_*/Test_State_AlphaTest)
+{
+  using Color_t = ::std::vector<float>;
+
+  using GLProxy_t = ::mock::GLProxy;
+  GLProxy_t GLProxy;
+  GLProxy_t::GetInstance() = &GLProxy;
+
+  Tested_t Example{ Data_t{} };
+  ITested_t & IExample = Example;
+
+  auto itCreator = IExample.GetCreators().find(uT("State"));
+  ASSERT_NE(IExample.GetCreators().end(), itCreator);
+
+  const auto TestCallRender = [&](
+    const Component_t::ComponentPtr_t & _pState,
+    const float & _ExpectedValue)
+  {
+    const auto Render = itCreator->second(_pState);
+    ASSERT_NE(nullptr, Render);
+
+    using namespace ::testing;
+
+    EXPECT_CALL(GLProxy, Enable(GL_ALPHA_TEST))
+      .Times(1);
+
+    EXPECT_CALL(GLProxy, AlphaFunc(GL_GREATER, _ExpectedValue))
+      .Times(1);
+
+    Render();
+  };
+
+  {
+    const auto pState = Component_t::Make(
+      {
+        { uT("kind"), uT("AlphaTest") },
+      });
+
+    TestCallRender(pState, 0.0f);
+  }
+
+  {
+    const auto Value = 1904271913.0f;
+
+    const auto pState = Component_t::Make(
+      {
+        { uT("kind"), uT("AlphaTest") },
+        { uT("discard"), Value },
+      });
+
+    TestCallRender(pState, Value);
+  }
+}
+
+// ************************************************************************** //
 TEST_F(OpenGLCommon_test, /*DISABLED_*/Test_Material_DefaultValue)
 {
   using GLProxy_t = ::mock::GLProxy;
@@ -1012,6 +1067,9 @@ TEST_F(OpenGLCommon_test, /*DISABLED_*/Test_Camera_Orthographic_DefaultPosition)
     EXPECT_CALL(GLProxy, Disable(GL_BLEND))
       .Times(1);
 
+    EXPECT_CALL(GLProxy, Disable(GL_ALPHA_TEST))
+      .Times(1);
+
     EXPECT_CALL(GLProxy, Disable(GL_DITHER))
       .Times(1);
 
@@ -1110,7 +1168,19 @@ TEST_F(OpenGLCommon_test, /*DISABLED_*/Test_Camera_Orthographic)
 
     InSequence Dummy;
 
+    EXPECT_CALL(GLProxy, Disable(GL_DEPTH_TEST))
+      .Times(1);
+
+    EXPECT_CALL(GLProxy, Enable(GL_DEPTH_TEST))
+      .Times(0);
+
+    EXPECT_CALL(GLProxy, Clear(GL_DEPTH_BUFFER_BIT))
+      .Times(0);
+
     EXPECT_CALL(GLProxy, Disable(GL_BLEND))
+      .Times(1);
+
+    EXPECT_CALL(GLProxy, Disable(GL_ALPHA_TEST))
       .Times(1);
 
     EXPECT_CALL(GLProxy, Disable(GL_DITHER))
@@ -1172,15 +1242,6 @@ TEST_F(OpenGLCommon_test, /*DISABLED_*/Test_Camera_Orthographic)
       { uT("kind"), uT("Orthographic") },
     }));
 
-  EXPECT_CALL(GLProxy, Disable(GL_DEPTH_TEST))
-    .Times(1);
-
-  EXPECT_CALL(GLProxy, Enable(GL_DEPTH_TEST))
-    .Times(0);
-
-  EXPECT_CALL(GLProxy, Clear(GL_DEPTH_BUFFER_BIT))
-    .Times(0);
-
   TestCallRender(Render);
 }
 
@@ -1216,9 +1277,8 @@ TEST_F(OpenGLCommon_test, /*DISABLED_*/Test_Camera_Perspective)
     };
 
     const auto ProjectionMatrix = GetMatrixLineValues(
-      ::DirectX::XMMatrixTranspose(
         ::DirectX::XMMatrixPerspectiveFovRH(
-          AngleYRadians, Width / Height, 0.01f, _zFar)));
+          AngleYRadians, Width / Height, 0.01f, _zFar));
 
     const auto Look = ::DirectX::XMVectorSet(_X, _Y, _Z, 1.0f);
 
@@ -1232,9 +1292,8 @@ TEST_F(OpenGLCommon_test, /*DISABLED_*/Test_Camera_Perspective)
       Transform);
 
     const auto ViewMatrix = GetMatrixLineValues(
-      ::DirectX::XMMatrixTranspose(
         ::DirectX::XMMatrixLookAtRH(Eye, Look,
-          ::DirectX::XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f))));
+          ::DirectX::XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f)));
 
     ASSERT_NE(nullptr, _Render);
 
@@ -1250,6 +1309,9 @@ TEST_F(OpenGLCommon_test, /*DISABLED_*/Test_Camera_Perspective)
       .Times(0);
 
     EXPECT_CALL(GLProxy, Disable(GL_BLEND))
+      .Times(1);
+
+    EXPECT_CALL(GLProxy, Disable(GL_ALPHA_TEST))
       .Times(1);
 
     EXPECT_CALL(GLProxy, Disable(GL_DITHER))
@@ -1451,6 +1513,29 @@ TEST_F(OpenGLCommon_test, /*DISABLED_*/Test_Present_Geometry)
     pScale->SetValue(uT("y"), _Sy);
     pScale->SetValue(uT("z"), _Sz);
 
+    auto GetRawMatrix = [](const ::DirectX::XMMATRIX & _Matrix)
+    {
+      ::DirectX::XMFLOAT4X4 Result;
+      ::DirectX::XMStoreFloat4x4(&Result, _Matrix);
+      return Result;
+    };
+
+    const auto ViewMatrix = ::DirectX::XMMatrixTranspose(
+      ::DirectX::XMMatrixLookAtRH(
+        ::DirectX::XMVectorSet(1.0f, 2.0f, 3.0f, 0.0f),
+        ::DirectX::XMVectorSet(4.0f, 5.0f, 6.0f, 0.0f),
+        ::DirectX::XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f)));
+
+    const auto RawViewMatrix = GetRawMatrix(ViewMatrix);
+
+    const auto RawWorldMatrix = GetRawMatrix(
+      ::DirectX::XMMatrixTranslation(_X, _Y, _Z) *
+      ::DirectX::XMMatrixRotationX(_A) *
+      ::DirectX::XMMatrixRotationY(_B) *
+      ::DirectX::XMMatrixRotationZ(_C) *
+      ::DirectX::XMMatrixScaling(_Sx, _Sy, _Sz) *
+      ViewMatrix);
+
     using namespace ::testing;
 
     InSequence Dummy;
@@ -1458,21 +1543,11 @@ TEST_F(OpenGLCommon_test, /*DISABLED_*/Test_Present_Geometry)
     EXPECT_CALL(GLProxy, PushMatrix())
       .Times(1);
 
-    EXPECT_CALL(GLProxy, Scalef(_Sx, _Sy, _Sz))
-      .Times(1);
+    EXPECT_CALL(GLProxy, GetFloatv(GL_MODELVIEW_MATRIX))
+      .Times(1)
+      .WillOnce(Return(&RawViewMatrix.m[0][0]));
 
-    using namespace ::alicorn::extension::cpp::math;
-
-    EXPECT_CALL(GLProxy, Rotatef(_C * (float)RadianToGreed, 0.0f, 0.0f, 1.0f))
-      .Times(1);
-
-    EXPECT_CALL(GLProxy, Rotatef(_B * (float)RadianToGreed, 0.0f, 1.0f, 0.0f))
-      .Times(1);
-
-    EXPECT_CALL(GLProxy, Rotatef(_A * (float)RadianToGreed, 1.0f, 0.0f, 0.0f))
-      .Times(1);
-
-    EXPECT_CALL(GLProxy, Translatef(_X, _Y, _Z))
+    EXPECT_CALL(GLProxy, LoadMatrixf(RawWorldMatrix))
       .Times(1);
 
     EXPECT_CALL(GLProxy, DrawElements(GL_TRIANGLES, (int)Indices.size(),
@@ -1544,14 +1619,14 @@ TEST_F(OpenGLCommon_test, /*DISABLED_*/Test_Present_Geometry)
     // к изменению результата рендеринга.
 
     TestCallRender(IndexBufferRender, Render,
-      1811221956.0f, 1811221957.0f, 1811221958.0f,
-      1812171204.0f, 1812171205.0f, 1812171206.0f,
-      1812181152.0f, 1812181153.0f, 1812181154.0f);
+      1956.0f, 1957.0f, 1958.0f,
+      1204.0f, 1205.0f, 1206.0f,
+      1152.0f, 1153.0f, 1154.0f);
 
     TestCallRender(IndexBufferRender, Render,
-      1811221959.0f, 1811221960.0f, 1811221961.0f,
-      1812181145.0f, 1812181146.0f, 1812181147.0f,
-      1812181155.0f, 1812181157.0f, 1812181158.0f);
+      1959.0f, 1960.0f, 1961.0f,
+      1145.0f, 1146.0f, 1147.0f,
+      1155.0f, 1157.0f, 1158.0f);
   }
 
   {
@@ -1596,15 +1671,316 @@ TEST_F(OpenGLCommon_test, /*DISABLED_*/Test_Present_Geometry)
     // к изменению результата рендеринга.
 
     TestCallRender(IndexBufferRender, Render,
-      1811221956.0f, 1811221957.0f, 1811221958.0f,
-      1812171204.0f, 1812171205.0f, 1812171206.0f,
-      1812181152.0f, 1812181153.0f, 1812181154.0f);
+      1956.0f, 1957.0f, 1958.0f,
+      1204.0f, 1205.0f, 1206.0f,
+      1152.0f, 1153.0f, 1154.0f);
 
     TestCallRender(IndexBufferRender, Render,
-      1811221959.0f, 1811221960.0f, 1811221961.0f,
-      1812181145.0f, 1812181146.0f, 1812181147.0f,
-      1812181155.0f, 1812181157.0f, 1812181158.0f);
+      1959.0f, 1960.0f, 1961.0f,
+      1145.0f, 1146.0f, 1147.0f,
+      1155.0f, 1157.0f, 1158.0f);
   }
+}
+
+// ************************************************************************** //
+TEST_F(OpenGLCommon_test, /*DISABLED_*/Test_Present_Geometry_Static)
+{
+  using GLProxy_t = ::mock::GLProxy;
+  GLProxy_t GLProxy;
+  GLProxy_t::GetInstance() = &GLProxy;
+
+  const Tested_t Example{ Data_t{} };
+  const ITested_t & IExample = Example;
+
+  const ::std::vector<int> Indices =
+  {
+    1808261927,
+    1808261928,
+    1808261929,
+    1808261930,
+    1808261931
+  };
+
+  auto itDataCreator = IExample.GetCreators().find(uT("Data"));
+  ASSERT_NE(IExample.GetCreators().end(), itDataCreator);
+
+  auto itBufferCreator = IExample.GetCreators().find(uT("Buffer"));
+  ASSERT_NE(IExample.GetCreators().end(), itBufferCreator);
+
+  auto itPresentCreator = IExample.GetCreators().find(uT("Present"));
+  ASSERT_NE(IExample.GetCreators().end(), itPresentCreator);
+
+  auto pPosition = Component_t::Make({ { uT("kind"), uT("Position") } });
+  auto pRotation = Component_t::Make({ { uT("kind"), uT("Rotation") } });
+  auto pScale = Component_t::Make({ { uT("kind"), uT("Scale") } });
+
+  Render_t Render;
+  ::DirectX::XMFLOAT4X4 LastRawWorldMatrix;
+
+  auto TestCallRender = [&](Render_t & _IndexBufferRender,
+    float _X, float _Y, float _Z,
+    float _A, float _B, float _C,
+    float _Sx, float _Sy, float _Sz,
+    const bool _IsExpectLastMatrix)
+  {
+    pPosition->SetValue(uT("x"), _X);
+    pPosition->SetValue(uT("y"), _Y);
+    pPosition->SetValue(uT("z"), _Z);
+
+    pRotation->SetValue(uT("x"), _A);
+    pRotation->SetValue(uT("y"), _B);
+    pRotation->SetValue(uT("z"), _C);
+
+    pScale->SetValue(uT("x"), _Sx);
+    pScale->SetValue(uT("y"), _Sy);
+    pScale->SetValue(uT("z"), _Sz);
+
+    if (!_IsExpectLastMatrix)
+    {
+      auto PositionRender = itDataCreator->second(pPosition);
+      EXPECT_EQ(nullptr, PositionRender);
+
+      auto RotationRender = itDataCreator->second(pRotation);
+      EXPECT_EQ(nullptr, RotationRender);
+
+      auto ScaleRender = itDataCreator->second(pScale);
+      EXPECT_EQ(nullptr, ScaleRender);
+
+      Render = itPresentCreator->second(Component_t::Make(
+        {
+          { uT("kind"), uT("Geometry") },
+          { uT("static"), true },
+        }));
+    }
+
+    ASSERT_NE(nullptr, _IndexBufferRender);
+    ASSERT_NE(nullptr, Render);
+
+    auto GetRawMatrix = [](const ::DirectX::XMMATRIX & _Matrix)
+    {
+      ::DirectX::XMFLOAT4X4 Result;
+      ::DirectX::XMStoreFloat4x4(&Result, _Matrix);
+      return Result;
+    };
+
+    const auto ViewMatrix = ::DirectX::XMMatrixTranspose(
+      ::DirectX::XMMatrixLookAtRH(
+        ::DirectX::XMVectorSet(1.0f, 2.0f, 3.0f, 0.0f),
+        ::DirectX::XMVectorSet(4.0f, 5.0f, 6.0f, 0.0f),
+        ::DirectX::XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f)));
+
+    const auto RawViewMatrix = GetRawMatrix(ViewMatrix);
+
+    if (!_IsExpectLastMatrix)
+    {
+      LastRawWorldMatrix = GetRawMatrix(
+        ::DirectX::XMMatrixTranslation(_X, _Y, _Z) *
+        ::DirectX::XMMatrixRotationX(_A) *
+        ::DirectX::XMMatrixRotationY(_B) *
+        ::DirectX::XMMatrixRotationZ(_C) *
+        ::DirectX::XMMatrixScaling(_Sx, _Sy, _Sz) *
+        ViewMatrix);
+    }
+
+    const auto RawWorldMatrix = LastRawWorldMatrix;
+
+    using namespace ::testing;
+
+    InSequence Dummy;
+
+    EXPECT_CALL(GLProxy, PushMatrix())
+      .Times(1);
+
+    EXPECT_CALL(GLProxy, GetFloatv(GL_MODELVIEW_MATRIX))
+      .Times(1)
+      .WillOnce(Return(&RawViewMatrix.m[0][0]));
+
+    EXPECT_CALL(GLProxy, LoadMatrixf(RawWorldMatrix))
+      .Times(1);
+
+    EXPECT_CALL(GLProxy, DrawElements(GL_TRIANGLES, (int)Indices.size(),
+      GL_UNSIGNED_INT, Indices))
+      .Times(1);
+
+    EXPECT_CALL(GLProxy, DisableClientState(GL_VERTEX_ARRAY))
+      .Times(1);
+
+    EXPECT_CALL(GLProxy, DisableClientState(GL_COLOR_ARRAY))
+      .Times(1);
+
+    EXPECT_CALL(GLProxy, DisableClientState(GL_NORMAL_ARRAY))
+      .Times(1);
+
+    EXPECT_CALL(GLProxy, DisableClientState(GL_TEXTURE_COORD_ARRAY))
+      .Times(1);
+
+    EXPECT_CALL(GLProxy, Disable(GL_TEXTURE_2D))
+      .Times(1);
+
+    EXPECT_CALL(GLProxy, PopMatrix())
+      .Times(1);
+
+    _IndexBufferRender();
+
+    Render();
+  };
+
+  {
+    // Индексный буфер в компоненте буфера
+
+    Render_t IndexBufferRender;
+
+    {
+      // Передача локальной копии, чтобы убедиться, что рендер копирует
+      // переданные ему данные.
+      const auto IndicesCopy = Indices;
+
+      IndexBufferRender = itBufferCreator->second(Component_t::Make(
+        {
+          { uT("kind"), uT("Index") },
+          { uT("data"), IndicesCopy.data() },
+          { uT("count"), IndicesCopy.size() },
+        }));
+    }
+
+    // Два вызова, чтобы убедиться, что изменение исходных данных не приводит 
+    // к изменению результата рендеринга.
+
+    TestCallRender(IndexBufferRender,
+      1956.0f, 1957.0f, 1958.0f,
+      1204.0f, 1205.0f, 1206.0f,
+      1152.0f, 1153.0f, 1154.0f,
+      false);
+
+    TestCallRender(IndexBufferRender,
+      1959.0f, 1960.0f, 1961.0f,
+      1145.0f, 1146.0f, 1147.0f,
+      1155.0f, 1157.0f, 1158.0f,
+      true);
+  }
+
+  {
+    // Индексный буфер через компонент Data
+
+    Render_t IndexBufferRender;
+
+    {
+      // Передача локальной копии, чтобы убедиться, что рендер копирует
+      // переданные ему данные.
+      const auto IndicesCopy = Indices;
+
+      auto IndexBufferDataRender = itDataCreator->second(Component_t::Make(
+        {
+          { uT("kind"), uT("Buffer") },
+          { uT("data"), IndicesCopy.data() },
+          { uT("count"), IndicesCopy.size() },
+        }));
+      EXPECT_EQ(nullptr, IndexBufferDataRender);
+
+      IndexBufferRender = itBufferCreator->second(Component_t::Make(
+        {
+          { uT("kind"), uT("Index") },
+        }));
+    }
+
+    // Два вызова, чтобы убедиться, что изменение исходных данных не приводит 
+    // к изменению результата рендеринга.
+
+    TestCallRender(IndexBufferRender,
+      1956.0f, 1957.0f, 1958.0f,
+      1204.0f, 1205.0f, 1206.0f,
+      1152.0f, 1153.0f, 1154.0f,
+      false);
+
+    TestCallRender(IndexBufferRender,
+      1959.0f, 1960.0f, 1961.0f,
+      1145.0f, 1146.0f, 1147.0f,
+      1155.0f, 1157.0f, 1158.0f,
+      true);
+  }
+}
+
+// ************************************************************************** //
+TEST_F(OpenGLCommon_test, /*DISABLED_*/Test_Present_Geometry_DefaultTransformValues)
+{
+  using GLProxy_t = ::mock::GLProxy;
+  GLProxy_t GLProxy;
+  GLProxy_t::GetInstance() = &GLProxy;
+
+  const Tested_t Example{ Data_t{} };
+  const ITested_t & IExample = Example;
+
+  auto itDataCreator = IExample.GetCreators().find(uT("Data"));
+  ASSERT_NE(IExample.GetCreators().end(), itDataCreator);
+
+  auto itPresentCreator = IExample.GetCreators().find(uT("Present"));
+  ASSERT_NE(IExample.GetCreators().end(), itPresentCreator);
+
+  auto pPosition = Component_t::Make({ { uT("kind"), uT("Position") } });
+  auto pRotation = Component_t::Make({ { uT("kind"), uT("Rotation") } });
+  auto pScale = Component_t::Make({ { uT("kind"), uT("Scale") } });
+
+  auto TestCallRender = [&](const Component_t::ComponentPtr_t & _pComponent)
+  {
+    auto PositionRender = itDataCreator->second(pPosition);
+    EXPECT_EQ(nullptr, PositionRender);
+
+    auto RotationRender = itDataCreator->second(pRotation);
+    EXPECT_EQ(nullptr, RotationRender);
+
+    auto ScaleRender = itDataCreator->second(pScale);
+    EXPECT_EQ(nullptr, ScaleRender);
+
+    const auto Render = itPresentCreator->second(_pComponent);
+    ASSERT_NE(nullptr, Render);
+
+    auto GetRawMatrix = [](const ::DirectX::XMMATRIX & _Matrix)
+    {
+      ::DirectX::XMFLOAT4X4 Result;
+      ::DirectX::XMStoreFloat4x4(&Result, _Matrix);
+      return Result;
+    };
+
+    const auto ViewMatrix = ::DirectX::XMMatrixTranspose(
+      ::DirectX::XMMatrixLookAtRH(
+        ::DirectX::XMVectorSet(1.0f, 2.0f, 3.0f, 0.0f),
+        ::DirectX::XMVectorSet(4.0f, 5.0f, 6.0f, 0.0f),
+        ::DirectX::XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f)));
+
+    const auto RawViewMatrix = GetRawMatrix(ViewMatrix);
+
+    const auto RawWorldMatrix = GetRawMatrix(
+      ::DirectX::XMMatrixTranslation(0.0f, 0.0f, 0.0f) *
+      ::DirectX::XMMatrixRotationX(0.0f) *
+      ::DirectX::XMMatrixRotationY(0.0f) *
+      ::DirectX::XMMatrixRotationZ(0.0f) *
+      ::DirectX::XMMatrixScaling(1.0f, 1.0f, 1.0f) *
+      ViewMatrix);
+
+    using namespace ::testing;
+
+    InSequence Dummy;
+
+    EXPECT_CALL(GLProxy, GetFloatv(GL_MODELVIEW_MATRIX))
+      .Times(1)
+      .WillOnce(Return(&RawViewMatrix.m[0][0]));
+
+    EXPECT_CALL(GLProxy, LoadMatrixf(RawWorldMatrix))
+      .Times(1);
+
+    Render();
+  };
+
+  TestCallRender(Component_t::Make(
+    {
+      { uT("kind"), uT("Geometry") },
+    }));
+
+  TestCallRender(Component_t::Make(
+    {
+      { uT("kind"), uT("Geometry") },
+      { uT("static"), true },
+    }));
 }
 
 // ************************************************************************** //
@@ -2138,6 +2514,9 @@ TEST_F(OpenGLCommon_test, /*DISABLED_*/Test_Present_Camera_deprecated)
     EXPECT_CALL(GLProxy, Disable(GL_BLEND))
       .Times(1);
 
+    EXPECT_CALL(GLProxy, Disable(GL_ALPHA_TEST))
+      .Times(1);
+
     EXPECT_CALL(GLProxy, Disable(GL_DITHER))
       .Times(1);
 
@@ -2236,9 +2615,8 @@ TEST_F(OpenGLCommon_test, /*DISABLED_*/Test_Present_FocalCamera_deprecated)
     };
 
     const auto ProjectionMatrix = GetMatrixLineValues(
-      ::DirectX::XMMatrixTranspose(
         ::DirectX::XMMatrixPerspectiveFovRH(
-          AngleYRadians, Width / Height, 0.01f, _zFar)));
+          AngleYRadians, Width / Height, 0.01f, _zFar));
 
     const auto Look = ::DirectX::XMVectorSet(_X, _Y, _Z, 1.0f);
 
@@ -2252,9 +2630,8 @@ TEST_F(OpenGLCommon_test, /*DISABLED_*/Test_Present_FocalCamera_deprecated)
       Transform);
 
     const auto ViewMatrix = GetMatrixLineValues(
-      ::DirectX::XMMatrixTranspose(
         ::DirectX::XMMatrixLookAtRH(Eye, Look,
-          ::DirectX::XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f))));
+          ::DirectX::XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f)));
 
     ASSERT_NE(nullptr, _Render);
 
@@ -2264,6 +2641,9 @@ TEST_F(OpenGLCommon_test, /*DISABLED_*/Test_Present_FocalCamera_deprecated)
       .Times(1);
 
     EXPECT_CALL(GLProxy, Disable(GL_BLEND))
+      .Times(1);
+
+    EXPECT_CALL(GLProxy, Disable(GL_ALPHA_TEST))
       .Times(1);
 
     EXPECT_CALL(GLProxy, Disable(GL_DITHER))

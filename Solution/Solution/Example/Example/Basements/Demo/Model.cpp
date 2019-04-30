@@ -22,6 +22,7 @@ Model::Model(const Events_t & _Events) :
   });
 }
 
+// cppcheck-suppress passedByValue
 const Object_t & Model::GetObject(const Id_t _Id) const /*override*/
 {
   return m_DbComponents.GetObject(_Id);

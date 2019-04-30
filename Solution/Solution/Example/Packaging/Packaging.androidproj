@@ -65,64 +65,28 @@
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">
     <AntPackage>
-      <AndroidAppLibName />
       <ApplicationName>UnicornumVerum.$(RootNamespace).$(Configuration)</ApplicationName>
     </AntPackage>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug.Product|ARM'">
     <AntPackage>
-      <AndroidAppLibName>
-      </AndroidAppLibName>
       <ApplicationName>UnicornumVerum.$(RootNamespace).$(Configuration)</ApplicationName>
     </AntPackage>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">
     <AntPackage>
-      <AndroidAppLibName />
       <ApplicationName>UnicornumVerum.$(RootNamespace).$(Configuration)</ApplicationName>
     </AntPackage>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release.Product|ARM'">
     <AntPackage>
-      <AndroidAppLibName>
-      </AndroidAppLibName>
       <ApplicationName>UnicornumVerum.$(RootNamespace).$(Configuration)</ApplicationName>
     </AntPackage>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <Content Include="assets\data\body.rcss" />
-    <Content Include="assets\data\controls.rcss" />
-    <Content Include="assets\data\controls.rml">
-      <SubType>Designer</SubType>
+    <Content Include="assets\data\Data.pack">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="assets\data\demo.background.jpg" />
-    <Content Include="assets\data\demo.circular.png" />
-    <Content Include="assets\data\demo.progress.png" />
-    <Content Include="assets\data\demo.rcss" />
-    <Content Include="assets\data\demo.rml">
-      <SubType>Designer</SubType>
-    </Content>
-    <Content Include="assets\data\demo\demo.bush.png" />
-    <Content Include="assets\data\demo\demo.compass.png" />
-    <Content Include="assets\data\demo\demo.dummy.png" />
-    <Content Include="assets\data\demo\demo.grass.png" />
-    <Content Include="assets\data\demo\demo.none.png" />
-    <Content Include="assets\data\demo\demo.rock.png" />
-    <Content Include="assets\data\demo\demo.sand.png" />
-    <Content Include="assets\data\demo\demo.tree.png" />
-    <Content Include="assets\data\demo\demo.water.png" />
-    <Content Include="assets\data\description.rcss" />
-    <Content Include="assets\data\description.rml">
-      <SubType>Designer</SubType>
-    </Content>
-    <Content Include="assets\data\draw3dobject.rcss" />
-    <Content Include="assets\data\draw3dobject.rml">
-      <SubType>Designer</SubType>
-    </Content>
-    <Content Include="assets\data\draw3dobject.title.png" />
-    <Content Include="assets\data\experimental.rcss" />
-    <Content Include="assets\data\experimental.rml" />
-    <Content Include="assets\data\fonts.rcss" />
     <Content Include="assets\data\fonts\CountryWestern.ttf" />
     <Content Include="assets\data\fonts\fa-brands-400.ttf" />
     <Content Include="assets\data\fonts\fa-regular-400.ttf" />
@@ -136,28 +100,6 @@
     <Content Include="assets\data\fonts\Vollkorn-Italic.ttf" />
     <Content Include="assets\data\fonts\Vollkorn-Regular.ttf" />
     <Content Include="assets\data\fonts\Vollkorn-SemiBold.ttf" />
-    <Content Include="assets\data\gradient.png" />
-    <Content Include="assets\data\layer.template.rcss" />
-    <Content Include="assets\data\layer.template.rml">
-      <SubType>Designer</SubType>
-    </Content>
-    <Content Include="assets\data\main.rcss" />
-    <Content Include="assets\data\main.rml">
-      <SubType>Designer</SubType>
-    </Content>
-    <Content Include="assets\data\scrollbar.rcss" />
-    <Content Include="assets\data\simple2dgame.bricks.jpg" />
-    <Content Include="assets\data\simple2dgame.clock.png" />
-    <Content Include="assets\data\simple2dgame.rcss" />
-    <Content Include="assets\data\simple2dgame.rml">
-      <SubType>Designer</SubType>
-    </Content>
-    <Content Include="assets\data\text.npc.jpg" />
-    <Content Include="assets\data\text.paper.png" />
-    <Content Include="assets\data\text.rcss" />
-    <Content Include="assets\data\text.rml">
-      <SubType>Designer</SubType>
-    </Content>
     <Content Include="res\drawable\icon.png" />
     <Content Include="res\values\strings.xml" />
     <AntBuildXml Include="build.xml" />

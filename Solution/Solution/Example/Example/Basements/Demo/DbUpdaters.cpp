@@ -25,11 +25,13 @@ void DbUpdaters::AddUpdater(const Id_t & _Id, const Updater_t & _Updater)
   m_Objects[_Id] = _Updater;
 }
 
+// cppcheck-suppress passedByValue
 void DbUpdaters::RemoveUpdater(const Id_t _Id)
 {
   m_Objects.erase(_Id);
 }
 
+// cppcheck-suppress passedByValue
 void DbUpdaters::CallUpdater(const Id_t _Id) const
 {
   const auto itUpdater = m_Objects.find(_Id);

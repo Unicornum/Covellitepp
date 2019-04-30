@@ -407,7 +407,7 @@ TEST_F(Application_test, /*DISABLED_*/Test_Run_DrawingMode_Continuous)
   EXPECT_CALL(Example, DoStart())
     .Times(1);
 
-  // 1 итерация цикла
+  // 1 итерация цикла - нет сообщения
   {
     EXPECT_CALL(Proxy, PeekMessage(0, 0, 0, PM_REMOVE))
       .Times(1)
@@ -420,7 +420,7 @@ TEST_F(Application_test, /*DISABLED_*/Test_Run_DrawingMode_Continuous)
       .Times(1);
   }
 
-  // 2 итерация цикла
+  // 2 итерация цикла - сообщение, которое пересылается фреймворку
   {
     EXPECT_CALL(Proxy, PeekMessage(0, 0, 0, PM_REMOVE))
       .Times(1)
@@ -445,10 +445,10 @@ TEST_F(Application_test, /*DISABLED_*/Test_Run_DrawingMode_Continuous)
       .Times(1);
 
     EXPECT_CALL(Example, DoUpdate())
-      .Times(1);
+      .Times(0);
 
     EXPECT_CALL(Proxy, Sleep(0))
-      .Times(1);
+      .Times(0);
   }
 
   // 3 итерация цикла - потеря фокуса ввода
@@ -471,13 +471,13 @@ TEST_F(Application_test, /*DISABLED_*/Test_Run_DrawingMode_Continuous)
       .Times(1);
 
     EXPECT_CALL(Example, DoUpdate())
-      .Times(1);
+      .Times(0);
 
     EXPECT_CALL(Proxy, Sleep(0))
-      .Times(1);
+      .Times(0);
   }
 
-  // 4 итерация цикла
+  // 4 итерация цикла - ожидание любого сообщения
   {
     EXPECT_CALL(Proxy, GetMessageW(0, 0, 0))
       .Times(1)
@@ -502,10 +502,10 @@ TEST_F(Application_test, /*DISABLED_*/Test_Run_DrawingMode_Continuous)
       .Times(1);
 
     EXPECT_CALL(Example, DoUpdate())
-      .Times(1);
+      .Times(0);
 
     EXPECT_CALL(Proxy, Sleep(0))
-      .Times(1);
+      .Times(0);
   }
 
   // 5 итерация цикла - возврат фокуса ввода
@@ -528,13 +528,27 @@ TEST_F(Application_test, /*DISABLED_*/Test_Run_DrawingMode_Continuous)
       .Times(1);
 
     EXPECT_CALL(Example, DoUpdate())
+      .Times(0);
+
+    EXPECT_CALL(Proxy, Sleep(0))
+      .Times(0);
+  }
+
+  // 6 итерация цикла - нет сообщений
+  for (int i = 0; i < 5; i++)
+  {
+    EXPECT_CALL(Proxy, PeekMessage(0, 0, 0, PM_REMOVE))
+      .Times(1)
+      .WillOnce(Return(FALSE));
+
+    EXPECT_CALL(Example, DoUpdate())
       .Times(1);
 
     EXPECT_CALL(Proxy, Sleep(0))
       .Times(1);
   }
 
-  // 6 итерация цикла
+  // 7 итерация цикла - завершение работы
   {
     EXPECT_CALL(Proxy, PeekMessage(0, 0, 0, PM_REMOVE))
       .Times(1)

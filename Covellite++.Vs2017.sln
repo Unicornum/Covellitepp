@@ -128,6 +128,7 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Prebuild", "Solution\Build\Prebuild\Prebuild.vcxproj", "{9358EB6C-1DEA-4C9C-B045-0EEB1AAF3644}"
 	ProjectSection(ProjectDependencies) = postProject
 		{5200C065-9E58-4933-99FF-A64E20F6AB5E} = {5200C065-9E58-4933-99FF-A64E20F6AB5E}
+		{14D39672-98C5-490C-AABB-26FA695435E9} = {14D39672-98C5-490C-AABB-26FA695435E9}
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Test.Covellite.Rocket", "Solution\Solution\Covellite.Rocket\Test.Covellite.Rocket\Test.Covellite.Rocket.vcxproj", "{D1ADAD19-3E80-4BDD-B6DC-9E8E69055C0B}"
@@ -605,6 +606,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Manual", "Manual", "{22D2BC
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Test.EventListener", "Solution\Solution\Covellite.Gui\Test.Covellite.Gui\Test.EventListener\Test.EventListener.vcxproj", "{AFA055CB-4667-4848-9FF4-CA94F925AB8C}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Assets", "Solution\Solution\Example\Assets\Assets.vcxproj", "{14D39672-98C5-490C-AABB-26FA695435E9}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -2273,6 +2276,28 @@ Global
 		{AFA055CB-4667-4848-9FF4-CA94F925AB8C}.Release|Win32.ActiveCfg = Release|x64
 		{AFA055CB-4667-4848-9FF4-CA94F925AB8C}.Release|x64.ActiveCfg = Release|x64
 		{AFA055CB-4667-4848-9FF4-CA94F925AB8C}.Release|x64.Build.0 = Release|x64
+		{14D39672-98C5-490C-AABB-26FA695435E9}.Debug.Product|ARM.ActiveCfg = Debug|x64
+		{14D39672-98C5-490C-AABB-26FA695435E9}.Debug.Product|ARM.Build.0 = Debug|x64
+		{14D39672-98C5-490C-AABB-26FA695435E9}.Debug.Product|Win32.ActiveCfg = Release|x64
+		{14D39672-98C5-490C-AABB-26FA695435E9}.Debug.Product|Win32.Build.0 = Release|x64
+		{14D39672-98C5-490C-AABB-26FA695435E9}.Debug.Product|x64.ActiveCfg = Debug|x64
+		{14D39672-98C5-490C-AABB-26FA695435E9}.Debug.Product|x64.Build.0 = Debug|x64
+		{14D39672-98C5-490C-AABB-26FA695435E9}.Debug|ARM.ActiveCfg = Debug|x64
+		{14D39672-98C5-490C-AABB-26FA695435E9}.Debug|ARM.Build.0 = Debug|x64
+		{14D39672-98C5-490C-AABB-26FA695435E9}.Debug|Win32.ActiveCfg = Debug|x64
+		{14D39672-98C5-490C-AABB-26FA695435E9}.Debug|x64.ActiveCfg = Debug|x64
+		{14D39672-98C5-490C-AABB-26FA695435E9}.Debug|x64.Build.0 = Debug|x64
+		{14D39672-98C5-490C-AABB-26FA695435E9}.Release.Product|ARM.ActiveCfg = Release|x64
+		{14D39672-98C5-490C-AABB-26FA695435E9}.Release.Product|ARM.Build.0 = Release|x64
+		{14D39672-98C5-490C-AABB-26FA695435E9}.Release.Product|Win32.ActiveCfg = Release|x64
+		{14D39672-98C5-490C-AABB-26FA695435E9}.Release.Product|Win32.Build.0 = Release|x64
+		{14D39672-98C5-490C-AABB-26FA695435E9}.Release.Product|x64.ActiveCfg = Release|x64
+		{14D39672-98C5-490C-AABB-26FA695435E9}.Release.Product|x64.Build.0 = Release|x64
+		{14D39672-98C5-490C-AABB-26FA695435E9}.Release|ARM.ActiveCfg = Release|x64
+		{14D39672-98C5-490C-AABB-26FA695435E9}.Release|ARM.Build.0 = Release|x64
+		{14D39672-98C5-490C-AABB-26FA695435E9}.Release|Win32.ActiveCfg = Release|x64
+		{14D39672-98C5-490C-AABB-26FA695435E9}.Release|x64.ActiveCfg = Release|x64
+		{14D39672-98C5-490C-AABB-26FA695435E9}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -2405,6 +2430,7 @@ Global
 		{745D5D7F-1DE3-4AF0-8FC2-08364A0DDF92} = {A0DCE822-E808-4D68-823E-3A186DB4D134}
 		{22D2BC7E-7500-4CA2-BFF9-EB4C5ECE667A} = {99A8DB18-AF88-4112-AAF4-D2AEEE09D803}
 		{AFA055CB-4667-4848-9FF4-CA94F925AB8C} = {A0DCE822-E808-4D68-823E-3A186DB4D134}
+		{14D39672-98C5-490C-AABB-26FA695435E9} = {E3477710-C400-4202-8B7B-B4B3860F4854}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {C1363F25-17E1-4DB1-AE71-7921BFCA0645}

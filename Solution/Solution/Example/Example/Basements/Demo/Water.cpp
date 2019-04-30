@@ -16,25 +16,57 @@ namespace model
 Water::Water(void) :
   GameObject(Type::Water)
 {
+  // Изменение размеров треугольника не влияет на fps!
 
+  AddTexture("demo.water.png");
+  AddMesh<Mesh>(Mesh::Data
+    {
+      {
+        { -570.0f, -330.0f,  0.0f,   0.0f, 0.0f, 1.0f,    0.0f, 200.0f, },  // 0
+        {    0.0f,  660.0f,  0.0f,   0.0f, 0.0f, 1.0f,  100.0f,   0.0f, },  // 1
+        {  570.0f, -330.0f,  0.0f,   0.0f, 0.0f, 1.0f,  200.0f, 200.0f, },  // 2
+      },
+      { 
+        0,  2,  1
+      }
+    });
 }
 
-Object_t Water::GetObject(const Any_t &) const /*override*/
+auto Water::GetObject(const Any_t &) const /*override*/ -> Objects_t
 {
-  static const ::std::vector<Vertex_t> VertexData =
-  {
-    { -57.0f, -33.0f,  0.0f,   0.0f, 0.0f, 1.0f,  0.0f, 20.0f, },  // 0
-    {    0.0f, 66.0f,  0.0f,   0.0f, 0.0f, 1.0f,  10.0f, 0.0f, },  // 1
-    {  57.0f, -33.0f,  0.0f,   0.0f, 0.0f, 1.0f,  20.0f, 20.0f, },  // 2
-  };
-
-  static const ::std::vector<int> IndexData = { 0,  2,  1 };
-
   using namespace ::alicorn::extension::std;
 
-  return 
-    GetCommonObject(VertexData, IndexData) +
-    LoadTexture("demo.water.png") +
+  return
+  {
+    Object_t
+    {
+      Component_t::Make(
+      {
+        { uT("type"), uT("Data") },
+        { uT("kind"), uT("Shader.HLSL") },
+        { uT("version"), uT("ps_4_0") },
+        { uT("entry"), uT("psTextured") },
+      }),
+      Component_t::Make(
+      {
+        { uT("id"), uT("Demo.Shader.Pixel.Water") },
+        { uT("type"), uT("Shader") },
+      }),
+      Component_t::Make(
+      {
+        { uT("type"), uT("Data") },
+        { uT("kind"), uT("Shader.HLSL") },
+        { uT("version"), uT("vs_4_0") },
+        { uT("entry"), uT("vsTextured") },
+      }),
+      Component_t::Make(
+      {
+        { uT("id"), uT("Demo.Shader.Vertex") },
+        { uT("type"), uT("Shader") },
+      }),
+    } +
+    GetTexture(0).GetObject() +
+    GetMesh(0).GetObject() +
     Object_t
     {
       Component_t::Make(
@@ -50,7 +82,8 @@ Object_t Water::GetObject(const Any_t &) const /*override*/
         { uT("type"), uT("Present") },
         { uT("kind"), uT("Geometry") },
       })
-    };
+    }
+  };
 }
 
 } // namespace model

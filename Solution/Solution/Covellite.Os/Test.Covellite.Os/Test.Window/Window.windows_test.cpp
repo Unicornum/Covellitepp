@@ -1010,39 +1010,55 @@ TEST_F(Window_test, /*DISABLED_*/Test_Pressed_Controls)
 }
 
 // ************************************************************************** //
-TEST_F(Window_test, /*DISABLED_*/Test_Down)
+TEST_F(Window_test, /*DISABLED_*/Test_KeyDown_KeyUp)
 {
-  const UINT Message = WM_KEYDOWN;
-  const int32_t KeyCode = 1807071428;
+  const int32_t KeyCode1 = 1807071428;
+  const int32_t KeyCode2 = 1904281306;
 
   Application Application;
   const Tested_t Example{ Application };
 
-  using namespace ::testing;
-
-  EXPECT_CALL(Application, OnDown(KeyCode))
-    .Times(1);
-
   ::covellite::events::Events Events = Application;
-  Events[Message](::std::pair<WPARAM, LPARAM>{ KeyCode, 1807071426 });
-}
-
-// ************************************************************************** //
-TEST_F(Window_test, /*DISABLED_*/Test_Up)
-{
-  const UINT Message = WM_KEYUP;
-  const int32_t KeyCode = 1807071429;
-
-  Application Application;
-  const Tested_t Example{ Application };
 
   using namespace ::testing;
 
-  EXPECT_CALL(Application, OnUp(KeyCode))
+  InSequence Dummy;
+
+  EXPECT_CALL(Application, OnDown(KeyCode1))
     .Times(1);
 
-  ::covellite::events::Events Events = Application;
-  Events[Message](::std::pair<WPARAM, LPARAM>{ KeyCode, 1807071430 });
+  EXPECT_CALL(Application, OnDown(KeyCode2))
+    .Times(1);
+
+  EXPECT_CALL(Application, OnUp(KeyCode1))
+    .Times(1);
+
+  EXPECT_CALL(Application, OnUp(KeyCode2))
+    .Times(1);
+
+  EXPECT_CALL(Application, OnDown(KeyCode1))
+    .Times(1);
+
+  EXPECT_CALL(Application, OnDown(KeyCode2))
+    .Times(1);
+
+  Events[(UINT)WM_KEYDOWN](::std::pair<WPARAM, LPARAM>{ KeyCode1, 1807071426 });
+  Events[(UINT)WM_KEYDOWN](::std::pair<WPARAM, LPARAM>{ KeyCode1, 1904281304 });
+  Events[(UINT)WM_KEYDOWN](::std::pair<WPARAM, LPARAM>{ KeyCode1, 1904281304 });
+  Events[(UINT)WM_KEYDOWN](::std::pair<WPARAM, LPARAM>{ KeyCode1, 1904281304 });
+  Events[(UINT)WM_KEYDOWN](::std::pair<WPARAM, LPARAM>{ KeyCode1, 1904281304 });
+
+  Events[(UINT)WM_KEYDOWN](::std::pair<WPARAM, LPARAM>{ KeyCode2, 1807071426 });
+  Events[(UINT)WM_KEYDOWN](::std::pair<WPARAM, LPARAM>{ KeyCode2, 1904281304 });
+
+  Events[(UINT)WM_KEYDOWN](::std::pair<WPARAM, LPARAM>{ KeyCode1, 1904281304 });
+  Events[(UINT)WM_KEYDOWN](::std::pair<WPARAM, LPARAM>{ KeyCode1, 1904281304 });
+
+  Events[(UINT)WM_KEYUP](::std::pair<WPARAM, LPARAM>{ KeyCode1, 1807071430 });
+  Events[(UINT)WM_KEYUP](::std::pair<WPARAM, LPARAM>{ KeyCode2, 1807071430 });
+
+  Events[(UINT)WM_KEYDOWN](::std::pair<WPARAM, LPARAM>{ KeyCode1, 1904281305 });
+  Events[(UINT)WM_KEYDOWN](::std::pair<WPARAM, LPARAM>{ KeyCode2, 1904281305 });
 }
 
 // ************************************************************************** //

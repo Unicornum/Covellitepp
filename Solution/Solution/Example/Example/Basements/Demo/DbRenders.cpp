@@ -20,6 +20,7 @@ DbRenders::~DbRenders(void)
   LOGGER(Trace) << "Destroy DbRenders.";
 }
 
+// cppcheck-suppress passedByValue
 void DbRenders::AddObject(const Id_t _Id, const Object_t & _Object) /*override*/
 {
   LOGGER(Trace) << "Create renders for object: id = " << _Id;
@@ -33,6 +34,7 @@ void DbRenders::AddObject(const Id_t _Id, const Object_t & _Object) /*override*/
   m_Renders[_Id] = m_pRenders->Obtain(_Object);
 }
 
+// cppcheck-suppress passedByValue
 void DbRenders::RemoveObject(const Id_t _Id, const Object_t & _Object) /*override*/
 {
   LOGGER(Trace) << "Remove renders for object: id = " << _Id;
@@ -48,6 +50,7 @@ void DbRenders::RemoveObject(const Id_t _Id, const Object_t & _Object) /*overrid
   };
 }
 
+// cppcheck-suppress passedByValue
 const Renders_t & DbRenders::GetRenders(const Id_t _Id) const
 {
   if (_Id >= m_Renders.size())

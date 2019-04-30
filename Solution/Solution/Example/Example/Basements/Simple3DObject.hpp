@@ -53,9 +53,14 @@ public:
 class Simple3DObject final :
   public Common
 {
+  using Updater_t = ::std::function<void(const float)>;
+
 public:
   void Notify(int, const ::boost::any &) override;
   void Render(void) override;
+
+private:
+  Updater_t GetUpdater(void);
 
 private:
   Id BuildCamera(void);

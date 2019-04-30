@@ -29,7 +29,7 @@ const auto LayerDescription =
   uT("внутриигрового меню.<br/>");
 
 Demo::Demo(IWindowGui_t & _Window) :
-  Layer(_Window, "data/demo.rml")
+  Layer(_Window, "Data/demo.rml")
 {
   GetElement("id_back_to_main_menu").SetMeaning(uT("\uF060"));
 
@@ -127,42 +127,53 @@ void Demo::ActivateProcessUserActionEvents(void)
   using namespace ::covellite::events;
 
   const auto pIsTouch = ::std::make_shared<bool>(false);
-  const auto pIsMoveForward = ::std::make_shared<bool>(false);
   const auto pCursorCurrentPosition = ::std::make_shared<Coord>();
   const auto pCursorTouchPosition = ::std::make_shared<Coord>();
-  const auto pTime = ::std::make_shared<float>(0.0f);
+  const auto pAction = 
+    ::std::make_shared<::events::Demo_t::Id>(::events::Demo.None);
 
   m_Events[Cursor.Motion].Connect([=](const Cursor_t::Position & _Position)
   {
     *pCursorCurrentPosition = { _Position.X, _Position.Y };
 
-    if (!*pIsTouch || *pIsMoveForward) return;
+    if (!*pIsTouch) return;
 
+    const auto HalfScreenX = GetWidth() / 2.0f;
     const auto dX = pCursorCurrentPosition->X - pCursorTouchPosition->X;
     const auto dY = pCursorCurrentPosition->Y - pCursorTouchPosition->Y;
 
-    if (abs(dY) > 25 &&
-      abs(dY) > 3 * abs(dX) && // Вертикальное движение мышью
-      dY < 0)
+    if (abs(dX) < 25 && abs(dY) < 25) return;
+
+    if (abs(dX) > 3 * abs(dY)) // Горизонтальное движение мышью
     {
-      *pIsMoveForward = true;
-      *pTime = 0.0f;
+      *pAction = (dX > 0) ?
+        ::events::Demo.TurnRight : ::events::Demo.TurnLeft;
     }
-  });
-
-  m_Events[Drawing.Do].Connect([=](void)
-  {
-    using namespace ::std::chrono;
-
-    static const auto BeginTime = system_clock::now();
-
-    const duration<float> Time = system_clock::now() - BeginTime;
-
-    if (*pIsMoveForward && 
-      (Time.count() - *pTime) >= 0.5f)
+    else if (abs(dY) > 3 * abs(dX)) // Вертикальное движение мышью
     {
-      *pTime = Time.count();
-      m_Events[::events::Demo.MoveForward]();
+      if (pCursorTouchPosition->X > HalfScreenX)
+      {
+        *pAction = (dY > 0) ?
+          ::events::Demo.MoveBackward : ::events::Demo.MoveForward;
+      }
+      else
+      {
+        *pAction = (dY > 0) ?
+          ::events::Demo.TurnDown : ::events::Demo.TurnUp;
+      }
+    }
+    else // Диагональное движение мышью
+    {
+      if (dY < 0)
+      {
+        *pAction = (dX > 0) ?
+          ::events::Demo.MoveRightForward : ::events::Demo.MoveLeftForward;
+      }
+      else
+      {
+        *pAction = (dX > 0) ?
+          ::events::Demo.MoveRightBackward : ::events::Demo.MoveLeftBackward;
+      }
     }
   });
 
@@ -172,49 +183,43 @@ void Demo::ActivateProcessUserActionEvents(void)
     *pCursorTouchPosition = *pCursorCurrentPosition;
   });
 
-  m_Events[Cursor.Release].Connect([=](void) 
+  m_Events[Cursor.Release].Connect([=](void)
   {
     *pIsTouch = false;
-    *pIsMoveForward = false;
+    *pAction = ::events::Demo.None;
+  });
 
-    const auto dX = pCursorCurrentPosition->X - pCursorTouchPosition->X;
-    const auto dY = pCursorCurrentPosition->Y - pCursorTouchPosition->Y;
-
-    if (abs(dX) < 25 && abs(dY) < 25) return;
-
-    ::events::Demo_t::Id Action;
-
-    if (abs(dX) > 3 * abs(dY)) // Горизонтальное движение мышью
+  m_Events[::covellite::events::Key.Down].Connect(
+    [=](const ::covellite::events::Key_t::Code & _KeyCode)
+  {
+    static const ::std::map<::covellite::events::Key_t::Code, ::events::Demo_t::Id> MapCodes =
     {
-      if (dX > 0) Action = ::events::Demo.TurnRight;
-      else Action = ::events::Demo.TurnLeft;
-    }
-    else if (abs(dY) > 3 * abs(dX)) // Вертикальное движение мышью
-    {
-      if (dY > 0)
-      {
-        Action = ::events::Demo.MoveBackward;
-      }
-      else
-      {
-        return;
-      }
-    }
-    else // Диагональное движение мышью
-    {
-      if (dY < 0)
-      {
-        if (dX > 0) Action = ::events::Demo.MoveRightForward;
-        else Action = ::events::Demo.MoveLeftForward;
-      }
-      else
-      {
-        if (dX > 0) Action = ::events::Demo.MoveRightBackward;
-        else Action = ::events::Demo.MoveLeftBackward;
-      }
-    }
+      { 0x57, ::events::Demo.MoveForward },
+      { 0x53, ::events::Demo.MoveForward },
+      { 0x58, ::events::Demo.MoveBackward },
+      { 0x51, ::events::Demo.MoveLeftForward },
+      { 0x5A, ::events::Demo.MoveLeftBackward },
+      { 0x45, ::events::Demo.MoveRightForward },
+      { 0x43, ::events::Demo.MoveRightBackward },
+      { 0x41, ::events::Demo.TurnLeft },
+      { 0x44, ::events::Demo.TurnRight },
+    };
 
-    m_Events[Action]();
+    const auto itAction = MapCodes.find(_KeyCode);
+    if (itAction != MapCodes.end())
+    {
+      *pAction = itAction->second;
+    }
+  });
+
+  m_Events[::covellite::events::Key.Up].Connect([=](void)
+  {
+    *pAction = ::events::Demo.None;
+  });
+
+  m_Events[::covellite::events::Application.Update].Connect([=](void)
+  {
+    if (*pAction != ::events::Demo.None) m_Events[*pAction]();
   });
 }
 

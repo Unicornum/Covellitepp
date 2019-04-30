@@ -128,105 +128,10 @@ Window::Window(const ::covellite::app::IApplication & _Application) :
   USING_MOCK ::SetWindowLongPtrW(m_Handle, GWLP_USERDATA,
     reinterpret_cast<LONG_PTR>(&m_Events));
 
-  using RawParams_t = ::std::pair<WPARAM, LPARAM>;
-  using Position_t = events::Cursor_t::Position;
-
-  m_Events[(UINT)WM_CLOSE].Connect([&]()
-  { 
-    m_Events[events::Application.Exit]();
-  });
-  m_Events[(UINT)WM_ACTIVATEAPP].Connect([&](const RawParams_t & _Params)
-  {
-    if (_Params.first == TRUE)
-    {
-      m_Events[events::Window.Activate]();
-    }
-    else if (_Params.first == FALSE)
-    {
-      m_Events[events::Window.Deactivate]();
-    }
-  });
-  m_Events[(UINT)WM_EXITSIZEMOVE].Connect([&]()
-  {
-    // Это событие вызывается также и в конце перетаскивания окна за заголовок 
-    // (без изменения размера), но задержки перерисовки окна это не вызывает.
-    m_Events[events::Window.Resize]();
-  });
-  m_Events[(UINT)WM_SIZE].Connect([&](const RawParams_t & _Params)
-  {
-    // SIZE_MAXIMIZED - развернуто на весь экран.
-    // SIZE_MINIMIZED - свернуто в панель задач (при этом размеры окна 
-    //                  устанавливаются в 0 и это вызывает проблемы рисования).
-    // SIZE_RESTORED  - вернулось в обычный размер из панели задач или 
-    //                  всего экрана и при изменении размеров окна мышью.
-    const auto Type = _Params.first;
-
-    if (Type == SIZE_MAXIMIZED || 
-      (Type == SIZE_RESTORED && m_LastTypeSizeMessage != SIZE_RESTORED))
-    {
-      m_Events[events::Window.Resize]();
-    }
-
-    if (Type == SIZE_MAXIMIZED || 
-      Type == SIZE_MINIMIZED || 
-      Type == SIZE_RESTORED)
-    {
-      m_LastTypeSizeMessage = Type;
-    }
-  });
-  m_Events[(UINT)WM_GETMINMAXINFO].Connect([&](const RawParams_t & _Params)
-  {
-    auto * const pInfo = reinterpret_cast<MINMAXINFO *>(_Params.second);
-    pInfo->ptMinTrackSize.x = m_MinWindowWidth;
-    pInfo->ptMinTrackSize.y = m_MinWindowHeight;
-  });
-  m_Events[(UINT)WM_MOUSEMOVE].Connect([&](const RawParams_t & _Params)
-  {
-    const auto X = GET_X_LPARAM(_Params.second);
-    const auto Y = GET_Y_LPARAM(_Params.second);
-    m_Events[events::Cursor.Motion](Position_t{ X, Y });
-  });
-  m_Events[(UINT)WM_LBUTTONDOWN].Connect([&]()
-  { 
-    m_Events[events::Cursor.Touch]();
-  });
-  m_Events[(UINT)WM_LBUTTONUP].Connect([&]()
-  { 
-    m_Events[events::Cursor.Release]();
-  });
-  m_Events[(UINT)WM_CHAR].Connect([&](const RawParams_t & _Params)
-  {
-    auto KeyCode = static_cast<int32_t>(_Params.first);
-
-    // Управляющие символы (кроме перевода строки) должны передавать через 
-    // сигнал KeyUp.
-    if (KeyCode < VK_SPACE && KeyCode != VK_RETURN) return;
-
-    // Это преобразование виртуального кода кнопки ENTER в Unicode код символа 
-    // переноса строки.
-    if (KeyCode == VK_RETURN) KeyCode = 0x0A;
-
-    m_Events[events::Key.Pressed](KeyCode);
-  });
-  m_Events[(UINT)WM_KEYDOWN].Connect([&](const RawParams_t & _Params)
-  {
-    m_Events[events::Key.Down](static_cast<int32_t>(_Params.first));
-  });
-  m_Events[(UINT)WM_KEYUP].Connect([&](const RawParams_t & _Params)
-  {
-    m_Events[events::Key.Up](static_cast<int32_t>(_Params.first));
-  });
-  m_Events[(UINT)WM_SYSKEYUP].Connect([&](const RawParams_t & _Params)
-  {
-    if (_Params.first == VK_LEFT)
-    {
-      m_Events[events::Key.Back]();
-    }
-    else if (_Params.first == VK_SPACE)
-    {
-      m_Events[events::Key.Menu]();
-    }
-  });
+  ActivateApplicationEvents();
+  ActivateResizeEvents();
+  ActivateMouseEvents();
+  ActivateKeyEvents();
 }
 
 Window::~Window(void) noexcept
@@ -240,6 +145,145 @@ Window::Rect Window::GetClientRect(void) const /*override*/
   WINAPI_CHECK USING_MOCK ::GetClientRect(m_Handle, &ClientRect);
   return { 0, 0,
     ClientRect.right - ClientRect.left, ClientRect.bottom - ClientRect.top };
+}
+
+void Window::ActivateApplicationEvents(void)
+{
+  using RawParams_t = ::std::pair<WPARAM, LPARAM>;
+
+  m_Events[(UINT)WM_CLOSE].Connect([=](void)
+  {
+    m_Events[events::Application.Exit]();
+  });
+
+  m_Events[(UINT)WM_ACTIVATEAPP].Connect([=](const RawParams_t & _Params)
+  {
+    if (_Params.first == TRUE)
+    {
+      m_Events[events::Window.Activate]();
+    }
+    else if (_Params.first == FALSE)
+    {
+      m_Events[events::Window.Deactivate]();
+    }
+  });
+}
+
+void Window::ActivateResizeEvents(void)
+{
+  using RawParams_t = ::std::pair<WPARAM, LPARAM>;
+
+  m_Events[(UINT)WM_EXITSIZEMOVE].Connect([=](void)
+  {
+    // Это событие вызывается также и в конце перетаскивания окна за заголовок 
+    // (без изменения размера), но задержки перерисовки окна это не вызывает.
+    m_Events[events::Window.Resize]();
+  });
+
+  m_Events[(UINT)WM_SIZE].Connect([=](const RawParams_t & _Params)
+  {
+    // SIZE_MAXIMIZED - развернуто на весь экран.
+    // SIZE_MINIMIZED - свернуто в панель задач (при этом размеры окна 
+    //                  устанавливаются в 0 и это вызывает проблемы рисования).
+    // SIZE_RESTORED  - вернулось в обычный размер из панели задач или 
+    //                  всего экрана и при изменении размеров окна мышью.
+    const auto Type = _Params.first;
+
+    if (Type == SIZE_MAXIMIZED ||
+      (Type == SIZE_RESTORED && m_LastTypeSizeMessage != SIZE_RESTORED))
+    {
+      m_Events[events::Window.Resize]();
+    }
+
+    if (Type == SIZE_MAXIMIZED ||
+      Type == SIZE_MINIMIZED ||
+      Type == SIZE_RESTORED)
+    {
+      m_LastTypeSizeMessage = Type;
+    }
+  });
+
+  m_Events[(UINT)WM_GETMINMAXINFO].Connect([=](const RawParams_t & _Params)
+  {
+    auto * const pInfo = reinterpret_cast<MINMAXINFO *>(_Params.second);
+    pInfo->ptMinTrackSize.x = m_MinWindowWidth;
+    pInfo->ptMinTrackSize.y = m_MinWindowHeight;
+  });
+}
+
+void Window::ActivateMouseEvents(void)
+{
+  using RawParams_t = ::std::pair<WPARAM, LPARAM>;
+  using Position_t = events::Cursor_t::Position;
+
+  m_Events[(UINT)WM_MOUSEMOVE].Connect([&](const RawParams_t & _Params)
+  {
+    const auto X = GET_X_LPARAM(_Params.second);
+    const auto Y = GET_Y_LPARAM(_Params.second);
+    m_Events[events::Cursor.Motion](Position_t{ X, Y });
+  });
+
+  m_Events[(UINT)WM_LBUTTONDOWN].Connect([=](void)
+  {
+    m_Events[events::Cursor.Touch]();
+  });
+
+  m_Events[(UINT)WM_LBUTTONUP].Connect([=](void)
+  {
+    m_Events[events::Cursor.Release]();
+  });
+}
+
+void Window::ActivateKeyEvents(void)
+{
+  using RawParams_t = ::std::pair<WPARAM, LPARAM>;
+
+  m_Events[(UINT)WM_CHAR].Connect([=](const RawParams_t & _Params)
+  {
+    auto KeyCode = static_cast<int32_t>(_Params.first);
+
+    // Управляющие символы (кроме перевода строки) должны передавать через 
+    // сигнал KeyUp.
+    if (KeyCode < VK_SPACE && KeyCode != VK_RETURN) return;
+
+    // Это преобразование виртуального кода кнопки ENTER в Unicode код символа 
+    // переноса строки.
+    if (KeyCode == VK_RETURN) KeyCode = 0x0A;
+
+    m_Events[events::Key.Pressed](KeyCode);
+  });
+
+  const auto pKeyMap = ::std::make_shared<::std::map<int32_t, bool>>();
+
+  m_Events[(UINT)WM_KEYDOWN].Connect([=](const RawParams_t & _Params)
+  {
+    const auto KeyCode = static_cast<int32_t>(_Params.first);
+
+    if ((*pKeyMap)[KeyCode]) return;
+
+    (*pKeyMap)[KeyCode] = true;
+    m_Events[events::Key.Down](KeyCode);
+  });
+
+  m_Events[(UINT)WM_KEYUP].Connect([=](const RawParams_t & _Params)
+  {
+    const auto KeyCode = static_cast<int32_t>(_Params.first);
+
+    (*pKeyMap)[KeyCode] = false;
+    m_Events[events::Key.Up](KeyCode);
+  });
+
+  m_Events[(UINT)WM_SYSKEYUP].Connect([=](const RawParams_t & _Params)
+  {
+    if (_Params.first == VK_LEFT)
+    {
+      m_Events[events::Key.Back]();
+    }
+    else if (_Params.first == VK_SPACE)
+    {
+      m_Events[events::Key.Menu]();
+    }
+  });
 }
 
 } // namespace os

@@ -4,6 +4,7 @@
     <Import Project="Solution\Externals.doxygen.ignore\GLm\GLm.props" />
     <Import Project="Solution\Externals.doxygen.ignore\ProgressBar\ProgressBar.props" />
     <Import Project="Solution\Externals.doxygen.ignore\CircularBar\CircularBar.props" />
+    <Import Project="Solution\Externals.doxygen.ignore\TinyObjLoader\TinyObjLoader.props" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup />

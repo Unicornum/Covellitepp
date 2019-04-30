@@ -116,21 +116,22 @@ T Component::GetValue(const Name_t & _Name, const T & _DefaultValue) const
   return GetValue(m_Hasher(_Name), _DefaultValue);
 }
 
-template<>
-class Component::Convertor<true>
+template<bool, bool>
+class Component::Convertor
 {
 public:
   template<class T>
   inline static T To(const String_t &)
   {
     // Функция никогда не вызывается, потребовалась исключительно из-за того,
-    // что ::boost::lexical_cast<T>() не компилируется для указателей.
+    // что ::boost::lexical_cast<T>() не компилируется для указателей
+    // и функторов.
     return nullptr;
   }
 };
 
 template<>
-class Component::Convertor<false>
+class Component::Convertor<false, false>
 {
 public:
   template<class T>
@@ -174,7 +175,10 @@ T Component::GetValue(size_t _Hash, const T & _DefaultValue) const
 
   if (itValue->second.type() == typeid(String_t))
   {
-    return Convertor<::std::is_pointer<T>::value>::template To<T>(
+    using Updater_t = ::std::function<void(const float)>;
+
+    return Convertor<::std::is_pointer<T>::value, 
+      ::std::is_same<T, Updater_t>::value>::template To<T>(
       ::covellite::any_cast<String_t>(itValue->second));
   }
 

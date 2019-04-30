@@ -1,0 +1,274 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClInclude Include="stdafx.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="targetver.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Common">
+      <UniqueIdentifier>{b1138b03-be2e-43e5-884b-0f32c96246e2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Assets">
+      <UniqueIdentifier>{e0d4e56f-f66d-4aca-b7d2-5b8e583ca099}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Assets\Data">
+      <UniqueIdentifier>{0525f655-61b6-4afb-b01c-0669512a9850}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Assets\Data\Demo">
+      <UniqueIdentifier>{02d6e34b-1141-4855-8622-4a4cd636dc2b}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="stdafx.cpp">
+      <Filter>Common</Filter>
+    </ClCompile>
+    <ClCompile Include="Packer.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="Version.rc">
+      <Filter>Common</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Assets\Data\body.rcss">
+      <Filter>Assets\Data</Filter>
+    </None>
+    <None Include="Assets\Data\controls.rcss">
+      <Filter>Assets\Data</Filter>
+    </None>
+    <None Include="Assets\Data\controls.rml">
+      <Filter>Assets\Data</Filter>
+    </None>
+    <None Include="Assets\Data\demo.rcss">
+      <Filter>Assets\Data</Filter>
+    </None>
+    <None Include="Assets\Data\demo.rml">
+      <Filter>Assets\Data</Filter>
+    </None>
+    <None Include="Assets\Data\description.rcss">
+      <Filter>Assets\Data</Filter>
+    </None>
+    <None Include="Assets\Data\description.rml">
+      <Filter>Assets\Data</Filter>
+    </None>
+    <None Include="Assets\Data\draw3dobject.rcss">
+      <Filter>Assets\Data</Filter>
+    </None>
+    <None Include="Assets\Data\draw3dobject.rml">
+      <Filter>Assets\Data</Filter>
+    </None>
+    <None Include="Assets\Data\experimental.rcss">
+      <Filter>Assets\Data</Filter>
+    </None>
+    <None Include="Assets\Data\experimental.rml">
+      <Filter>Assets\Data</Filter>
+    </None>
+    <None Include="Assets\Data\fonts.rcss">
+      <Filter>Assets\Data</Filter>
+    </None>
+    <None Include="Assets\Data\layer.template.rcss">
+      <Filter>Assets\Data</Filter>
+    </None>
+    <None Include="Assets\Data\layer.template.rml">
+      <Filter>Assets\Data</Filter>
+    </None>
+    <None Include="Assets\Data\main.rcss">
+      <Filter>Assets\Data</Filter>
+    </None>
+    <None Include="Assets\Data\main.rml">
+      <Filter>Assets\Data</Filter>
+    </None>
+    <None Include="Assets\Data\scrollbar.rcss">
+      <Filter>Assets\Data</Filter>
+    </None>
+    <None Include="Assets\Data\simple2dgame.rcss">
+      <Filter>Assets\Data</Filter>
+    </None>
+    <None Include="Assets\Data\simple2dgame.rml">
+      <Filter>Assets\Data</Filter>
+    </None>
+    <None Include="Assets\Data\text.rcss">
+      <Filter>Assets\Data</Filter>
+    </None>
+    <None Include="Assets\Data\text.rml">
+      <Filter>Assets\Data</Filter>
+    </None>
+    <None Include="Assets\Data\demo\Boulder1.obj">
+      <Filter>Assets\Data\Demo</Filter>
+    </None>
+    <None Include="Assets\Data\demo\Boulder2.obj">
+      <Filter>Assets\Data\Demo</Filter>
+    </None>
+    <None Include="Assets\Data\demo\Boulder3.obj">
+      <Filter>Assets\Data\Demo</Filter>
+    </None>
+    <None Include="Assets\Data\demo\Branch1.obj">
+      <Filter>Assets\Data\Demo</Filter>
+    </None>
+    <None Include="Assets\Data\demo\Branch2.obj">
+      <Filter>Assets\Data\Demo</Filter>
+    </None>
+    <None Include="Assets\Data\demo\Branch3.obj">
+      <Filter>Assets\Data\Demo</Filter>
+    </None>
+    <None Include="Assets\Data\demo\Bush1.obj">
+      <Filter>Assets\Data\Demo</Filter>
+    </None>
+    <None Include="Assets\Data\demo\Bush2.obj">
+      <Filter>Assets\Data\Demo</Filter>
+    </None>
+    <None Include="Assets\Data\demo\Bush3.obj">
+      <Filter>Assets\Data\Demo</Filter>
+    </None>
+    <None Include="Assets\Data\demo\Bush4.obj">
+      <Filter>Assets\Data\Demo</Filter>
+    </None>
+    <None Include="Assets\Data\demo\bush5.obj">
+      <Filter>Assets\Data\Demo</Filter>
+    </None>
+    <None Include="Assets\Data\demo\Bush6.obj">
+      <Filter>Assets\Data\Demo</Filter>
+    </None>
+    <None Include="Assets\Data\demo\Bush7.obj">
+      <Filter>Assets\Data\Demo</Filter>
+    </None>
+    <None Include="Assets\Data\demo.background.jpg">
+      <Filter>Assets\Data\Demo</Filter>
+    </None>
+    <None Include="Assets\Data\demo.circular.png">
+      <Filter>Assets\Data\Demo</Filter>
+    </None>
+    <None Include="Assets\Data\demo.progress.png">
+      <Filter>Assets\Data\Demo</Filter>
+    </None>
+    <None Include="Assets\Data\draw3dobject.title.png">
+      <Filter>Assets\Data\Demo</Filter>
+    </None>
+    <None Include="Assets\Data\demo\Flower1.obj">
+      <Filter>Assets\Data\Demo</Filter>
+    </None>
+    <None Include="Assets\Data\demo\Flower3.obj">
+      <Filter>Assets\Data\Demo</Filter>
+    </None>
+    <None Include="Assets\Data\demo\Grass1.obj">
+      <Filter>Assets\Data\Demo</Filter>
+    </None>
+    <None Include="Assets\Data\demo\Grass2.obj">
+      <Filter>Assets\Data\Demo</Filter>
+    </None>
+    <None Include="Assets\Data\demo\Grass3.obj">
+      <Filter>Assets\Data\Demo</Filter>
+    </None>
+    <None Include="Assets\Data\demo\Grass4.obj">
+      <Filter>Assets\Data\Demo</Filter>
+    </None>
+    <None Include="Assets\Data\demo\Grass5.obj">
+      <Filter>Assets\Data\Demo</Filter>
+    </None>
+    <None Include="Assets\Data\demo\Grass6.obj">
+      <Filter>Assets\Data\Demo</Filter>
+    </None>
+    <None Include="Assets\Data\demo\Grass7.obj">
+      <Filter>Assets\Data\Demo</Filter>
+    </None>
+    <None Include="Assets\Data\demo\Grass8.obj">
+      <Filter>Assets\Data\Demo</Filter>
+    </None>
+    <None Include="Assets\Data\demo\Stone1.obj">
+      <Filter>Assets\Data\Demo</Filter>
+    </None>
+    <None Include="Assets\Data\demo\Tree1.obj">
+      <Filter>Assets\Data\Demo</Filter>
+    </None>
+    <None Include="Assets\Data\demo\Tree2.obj">
+      <Filter>Assets\Data\Demo</Filter>
+    </None>
+    <None Include="Assets\Data\demo\Tree3.obj">
+      <Filter>Assets\Data\Demo</Filter>
+    </None>
+    <None Include="Assets\Data\demo\Tree5.obj">
+      <Filter>Assets\Data\Demo</Filter>
+    </None>
+    <None Include="Assets\Data\demo\Tree6.obj">
+      <Filter>Assets\Data\Demo</Filter>
+    </None>
+    <None Include="Assets\Data\demo\Tree7.obj">
+      <Filter>Assets\Data\Demo</Filter>
+    </None>
+    <None Include="Assets\Data\demo\Tree8.obj">
+      <Filter>Assets\Data\Demo</Filter>
+    </None>
+    <None Include="Assets\Data\demo\Well.obj">
+      <Filter>Assets\Data\Demo</Filter>
+    </None>
+    <None Include="Assets\Data\demo\Shrooms.obj">
+      <Filter>Assets\Data\Demo</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="Assets\Data\gradient.png">
+      <Filter>Assets\Data</Filter>
+    </Image>
+    <Image Include="Assets\Data\simple2dgame.bricks.jpg">
+      <Filter>Assets\Data</Filter>
+    </Image>
+    <Image Include="Assets\Data\simple2dgame.clock.png">
+      <Filter>Assets\Data</Filter>
+    </Image>
+    <Image Include="Assets\Data\text.npc.jpg">
+      <Filter>Assets\Data</Filter>
+    </Image>
+    <Image Include="Assets\Data\text.paper.png">
+      <Filter>Assets\Data</Filter>
+    </Image>
+    <Image Include="Assets\Data\demo\demo.bush.png">
+      <Filter>Assets\Data\Demo</Filter>
+    </Image>
+    <Image Include="Assets\Data\demo\demo.bush1.jpg">
+      <Filter>Assets\Data\Demo</Filter>
+    </Image>
+    <Image Include="Assets\Data\demo\demo.compass.png">
+      <Filter>Assets\Data\Demo</Filter>
+    </Image>
+    <Image Include="Assets\Data\demo\demo.dummy.png">
+      <Filter>Assets\Data\Demo</Filter>
+    </Image>
+    <Image Include="Assets\Data\demo\demo.grass.png">
+      <Filter>Assets\Data\Demo</Filter>
+    </Image>
+    <Image Include="Assets\Data\demo\demo.none.jpg">
+      <Filter>Assets\Data\Demo</Filter>
+    </Image>
+    <Image Include="Assets\Data\demo\demo.sand.jpg">
+      <Filter>Assets\Data\Demo</Filter>
+    </Image>
+    <Image Include="Assets\Data\demo\demo.stone.jpg">
+      <Filter>Assets\Data\Demo</Filter>
+    </Image>
+    <Image Include="Assets\Data\demo\demo.tree.jpg">
+      <Filter>Assets\Data\Demo</Filter>
+    </Image>
+    <Image Include="Assets\Data\demo\demo.tree.png">
+      <Filter>Assets\Data\Demo</Filter>
+    </Image>
+    <Image Include="Assets\Data\demo\demo.water.png">
+      <Filter>Assets\Data\Demo</Filter>
+    </Image>
+    <Image Include="Assets\Data\demo\demo.well.jpg">
+      <Filter>Assets\Data\Demo</Filter>
+    </Image>
+    <Image Include="Assets\Data\demo\demo.skybox.png">
+      <Filter>Assets\Data\Demo</Filter>
+    </Image>
+    <Image Include="Assets\Data\demo\demo.grass2.png">
+      <Filter>Assets\Data\Demo</Filter>
+    </Image>
+    <Image Include="Assets\Data\demo\demo.grass3.png">
+      <Filter>Assets\Data\Demo</Filter>
+    </Image>
+  </ItemGroup>
+</Project>
