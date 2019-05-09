@@ -3,79 +3,74 @@
 
 note "This is a class real program." as NRealClasses
 
-core_Events : + OnSystem
-core_Events : + OnWindow
-core_Events : + OnInput
-core_Events : + OnError
 
-core_Application : + MakeWindow()
-core_Application : + Run()
+class events_Events as "events::Events"
+{
+  + Signal operator[](Type);
+  ---
+  Events();
+  Events(Events &);
+}
 
-core_Events --* core_Application
+class app_Application as "app::Application"
+{
+  + static Main();
+  + GetCommandLine();
+  + Run()
+  ---
+  # MakeWindow<TWindow>()
+}
 
-core_IWindow : + Subscribe(Events &)
+events_Events --* app_Application
 
-core_IWindow --* core_Application
+class os_Window as "os::Window"
+{
+  + GetHandle()
+  + GetClientRect()
+  + GetConfiguration()
+  ---
+}
 
-os_ILayer : + Show()
-os_ILayer : + Hide()
+events_Events --* os_Window
 
-os_Layers : + Push()
-os_Layers : + Pop()
-
-os_ILayer --* os_Layers
-os_Layers --* os_Window
-
-os_Window : + GetHandle()
-os_Window : + GetConfiguration()
-os_Window : + Exit()
-os_Window : ---
-os_Window : + AddLayer(ILayer *)
-os_Window : + Back()
-
-core_IWindow <|-.- os_Window
-core_Events --o os_Window
-
-api_IWindow : + GetWidth()
-api_IWindow : + GetHeight()
-api_IWindow : ---
-api_IWindow : + MakeRenderInterface()
-
-core_IWindow <|-.- api_Window
-api_IWindow <|-.- api_Window
+class api_Window as "api::Window"
+{
+  + GetClientRect();
+  + GetRenders();
+}
 
 os_Window --o api_Window
-core_Events --o api_Window
+events_Events --* api_Window
 
-rocket_Window : # LoadFontFace(PathToFile)
-rocket_Window : # AddLayer<TLayer>(PathToFile)
+class gui_Window as "gui::Window"
+{
+  + LoadDocument(PathToFile_t);
+  ---
+  + Set(const StringBank_t &);
+  ---
+  + PushLayer<TLayer>()
+  + Back()
+}
 
-core_IWindow <|-.- rocket_Window
-os_Window --o rocket_Window
-api_IWindow --o rocket_Window
-core_Events --o rocket_Window
+api_Window --o gui_Window
+events_Events --* gui_Window
 
-rocket_ElementEvents : + OnClick
+gui_Layers : + Push(LayerPtr_t)
+gui_Layers : + Pop()
 
-rocket_IStringTranslator : + Utf8String_t Translate(const Utf8String_t &)
+gui_Layers --* gui_Window
+gui_Layer --* gui_Layers
 
-rocket_ElementEvents <|-- rocket_Layer
-os_ILayer <|-.- rocket_Layer
-
-rocket_ElementEvents <|-- rocket_Window
-rocket_IStringTranslator <|-.- rocket_Window
-
-ExampleLayer -right- ExampleWindow
-
-rocket_Layer <|-- ExampleLayer
+gui_Layer <|-- ExampleLayer
 ExampleLayer .. NRealClasses
 
-rocket_Window <|-- ExampleWindow
+gui_Window --o ExampleWindow
 ExampleWindow .. NRealClasses
 
-core_Application <|-- ExampleApp
-ExampleApp .. NRealClasses
+app_Application <|-- ExampleApp
+ExampleApp .right. NRealClasses
 
-ExampleWindow -right- ExampleApp
+ExampleWindow -up- ExampleLayer
+ExampleApp -up- ExampleWindow
 
 @enduml

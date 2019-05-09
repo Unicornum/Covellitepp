@@ -13,7 +13,7 @@ namespace model
 {
 
 Skybox::Skybox(void) :
-  GameObject(Type::Skybox)
+  GameObject(Support::Skybox)
 {
   AddTexture("demo.skybox.png");
   AddMesh<Mesh>(Mesh::Data

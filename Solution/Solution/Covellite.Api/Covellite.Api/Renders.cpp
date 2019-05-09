@@ -115,19 +115,11 @@ auto Component::Renders::Create(const ComponentPtr_t & _pComponent) -> Render_t
     LOGGER(Error) << "Create render fail: " << _Ex.what() << " ["
       << "id: " << _pComponent->Id << ", "
       << "type: " << _pComponent->Type << "].";
-    return nullptr;
   }
 
-  if (Result != nullptr)
-  {
-    m_AllExistingRenders[_pComponent->Id] = { 1, Result };
-  }
-  else
-  {
-    // 10 Декабрь 2018 19:11 (unicornum.verum@gmail.com)
-    TODO("Писать в лог??? А если он и должен игнорироваться, как шейдер для OpenGL?");
-  }
+  if (Result == nullptr) return nullptr;
 
+  m_AllExistingRenders[_pComponent->Id] = { 1, Result };
   return Result;
 }
 

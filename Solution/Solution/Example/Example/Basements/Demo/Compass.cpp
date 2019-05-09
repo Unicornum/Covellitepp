@@ -14,7 +14,7 @@ namespace model
 
 
 Compass::Compass(void) :
-  GameObject(Type::Compass)
+  GameObject(Extra::Compass)
 {
   AddTexture("demo.compass.png");
   AddMesh<Mesh>(Mesh::Data

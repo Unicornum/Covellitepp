@@ -1,7 +1,6 @@
 
 #pragma once
 #include <memory>
-#include <Covellite/Core/IWindow.hpp>
 #include <Covellite/Events/Events.hpp>
 #include <Covellite/App/IWindow.hpp>
 #include <Covellite/Api/IWindow.hpp>
@@ -14,7 +13,8 @@ namespace os { class IWindow; }
 namespace api
 {
 
-namespace renderer { class Renderer; }
+namespace renderer { class IGraphicApi; }
+namespace renderer { class SettingsData; }
 
 /**
 * \ingroup CovelliteApiGroup
@@ -38,14 +38,13 @@ namespace renderer { class Renderer; }
 *  © CTAPOBEP 2017 - 2018
 */
 class Window final :
-  public ::covellite::core::IWindow,
   public ::covellite::app::IWindow,
   public ::covellite::api::IWindow
 {
+  using String_t = ::alicorn::extension::std::String;
   using WindowOs_t = ::covellite::os::IWindow;
-  using WindowOsPtr_t = ::std::shared_ptr<WindowOs_t>;
-  using Renderer_t = covellite::api::renderer::Renderer;
-  using RendererPtr_t = ::std::shared_ptr<Renderer_t>;
+  using IGraphicApiPtr_t = 
+    ::alicorn::extension::std::unique_ptr<renderer::IGraphicApi>;
 
 public:
   // Èםעונפויס events::IEvents:
@@ -55,26 +54,19 @@ public:
   // Èםעונפויס api::IWindow:
   Rect_t GetClientRect(void) const override;
   RendersPtr_t GetRenders(void) const override;
-  RenderInterfacePtr_t GetRenderInterface(void) const override;
-  int32_t GetWidth(void) const override;
-  int32_t GetHeight(void) const override;
-  RenderInterfacePtr_t MakeRenderInterface(void) const override;
-
-public:
-  // Èםעונפויס core::IWindow:
-  void Subscribe(const EventHandlerPtr_t &) override;
 
 private:
-  static RendererPtr_t MakeRender(const WindowOs_t &);
+  static IGraphicApiPtr_t MakeImpl(const WindowOs_t &);
+  static IGraphicApiPtr_t MakeImpl(const String_t &, const renderer::SettingsData &);
+  static ::std::vector<String_t> GetRenderers(void);
 
 private:
-  const WindowOs_t &  m_WindowOs;
-  Events_t            m_Events;
-  const RendererPtr_t m_pImpl;
+  const WindowOs_t &      m_WindowOs;
+  Events_t                m_Events;
+  const IGraphicApiPtr_t  m_pImpl;
 
 public:
   explicit Window(const WindowOs_t &);
-  explicit Window(const WindowOsPtr_t &);
   ~Window(void);
 };
 

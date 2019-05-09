@@ -1,76 +1,54 @@
 ﻿
 @startuml
 
-core_EventHandler : + operator[] (EventType)
-core_EventHandler : + operator[] (Event::Rocket)
-core_EventHandler : + PostCommandDrawWindow()
-core_EventHandler : ---
-core_EventHandler : + Subscribe(TSource *)
-core_EventHandler : + Unsubscribe(TSource *)
-core_EventHandler : ---
-core_EventHandler : + EventHandler()
-core_EventHandler : + EventHandler(Dummy)
+class events_IEvents as "events::IEvents"
+{
+  {abstract} + operator Events (void);
+}
 
-core_Application : + MakeWindow<TWindow>()
-core_Application : + Run()
-core_Application : ---
+events_IEvents <|-- app_IApplication
 
-core_EventHandler -left-* core_Application
+class app_Application as "app::Application"
+{
+  + MakeWindow<TWindow>(...)
+  + Run()
+  ---
+}
 
-core_IWindow : {abstract} + Subscribe(EventHandler &)
-core_IWindow : ---
+app_IApplication <|-.- app_Application
 
-os_IWindow : {abstract} + GetHandle()
-os_IWindow : {abstract} + GetConfiguration()
-os_IWindow : ---
+app_IWindow --* app_Application
 
-core_IWindow --* core_Application
-core_EventHandler --o core_IWindow
+app_IWindow <|-.- os_Window
+app_IWindow <|-.- api_Window
+app_IWindow <|-.- gui_Window
+app_IWindow <|-.- ExampleWindow
 
-core_IWindow <|-.-.- os_Window
+events_IEvents <|-- os_IWindow
 os_IWindow <|-.- os_Window
 
-api_IWindow : {abstract} + GetUsingApi()
-api_IWindow : {abstract} + GetWidth()
-api_IWindow : {abstract} + GetHeight()
-api_IWindow : {abstract} + MakeRenderInterface()
-api_IWindow : ---
+app_IApplication --o os_Window
 
-api_Window : + Window(os_IWindow *)
-
-core_IWindow <|-.- api_Window
+events_IEvents <|-- api_IWindow
 api_IWindow <|-.- api_Window
 
 os_IWindow --o api_Window
 
-rocket_Window : + LoadFontFace(PathToFile)
-rocket_Window : + AddLayer<TLayer>()
-rocket_Window : + Back()
-rocket_Window : ---
-rocket_Window : + Window(api_IWindow *)
+events_IEvents <|-- gui_IWindow
+gui_IWindow <|-.- gui_Window
 
-core_IWindow <|-.- rocket_Window
-api_IWindow --o rocket_Window
+api_IWindow --o gui_Window
 
-ExampleWindow : + Window(rocket_Window *)
+gui_Window -left--o ExampleWindow
 
-core_IWindow <|-.- ExampleWindow
-rocket_Window -left--o ExampleWindow
-
-core_Window : + Exit()
-core_Window : ---
-
-core_Window <|---- rocket_Window
-core_Window <|-- ExampleWindow
-
-core_Application <|-- ExampleApp
+app_Application <|-- ExampleApp
 
 os_Window -right- api_Window
-api_Window -right- rocket_Window
+api_Window -right- gui_Window
 
 os_Window --o ExampleApp
 api_Window --o ExampleApp
-rocket_Window --o ExampleApp
+gui_Window --o ExampleApp
 ExampleWindow --o ExampleApp
 
 @enduml

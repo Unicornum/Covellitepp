@@ -42,14 +42,16 @@ protected:
 
 public:
   // Интерфейс IGameObject:
-  Type::Value GetType(void) const final;
+  size_t GetType(void) const final;
 
 public:
   /**
   * \brief
   *  Функция создания объекта игрового объекта указанного типа.
   */
-  static IGameObjectPtr_t Create(const Type::Value, const IGameWorld * = nullptr);
+  static IGameObjectPtr_t Create(const Support::Value);
+  static IGameObjectPtr_t Create(const Extra::Value);
+  static IGameObjectPtr_t Create(const Landscape::Value, const IGameWorld *);
 
 protected:
   class Mesh
@@ -108,12 +110,12 @@ protected:
   const Mesh & GetMesh(const size_t) const;
 
 private:
-  const Type::Value m_Type;
+  const size_t m_Type;
   mutable ::std::vector<::std::unique_ptr<Texture>> m_Textures;
   mutable ::std::vector<::std::unique_ptr<Mesh>> m_Meshes;
 
 protected:
-  explicit GameObject(const Type::Value);
+  explicit GameObject(const size_t);
 };
 
 template<class TMesh, class TData>

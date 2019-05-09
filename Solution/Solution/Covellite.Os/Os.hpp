@@ -11,5 +11,7 @@
 */
 
 #include "Os\Events.hpp"
+#include "Os\Configuration.hpp"
+#include "Os\IWindow.hpp"
 #include "Os\Window.hpp"
 #include "Covellite.Os.lib.hpp"

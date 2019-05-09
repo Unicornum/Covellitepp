@@ -1,5 +1,6 @@
 
 #pragma once
+#define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 #include "OpenGLCommon.hpp"
 
@@ -42,7 +43,7 @@ private:
   HGLRC       m_hRenderContex;
 
 public:
-  explicit OpenGL(const Renderer::Data &);
+  explicit OpenGL(const Data_t &);
   ~OpenGL(void);
 };
 

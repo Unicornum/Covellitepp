@@ -18,42 +18,53 @@ namespace model
 
 namespace math = ::alicorn::extension::cpp::math;
 
-GameObject::GameObject(const Type::Value _Type) :
+GameObject::GameObject(const size_t _Type) :
   m_Type(_Type)
 {
 
 }
 
-auto GameObject::GetType(void) const /*final*/ -> Type::Value
+size_t GameObject::GetType(void) const /*final*/
 {
   return m_Type;
 }
 
-/*static*/ auto GameObject::Create(const Type::Value _Type,
-  const IGameWorld * _pGameWorld) -> IGameObjectPtr_t
+/*static*/ auto GameObject::Create(const Support::Value _Type) -> IGameObjectPtr_t
 {
-  if (_Type == Type::Skybox)
+  if (_Type == Support::Skybox)
   {
     return IGameObjectPtr_t{ new Skybox };
   }
-  else if (_Type == Type::Camera)
+  else if (_Type == Support::Camera)
   {
     return IGameObjectPtr_t{ new Camera };
   }
-  else if (_Type == Type::Loader)
-  {
-    return IGameObjectPtr_t{ new Loader };
-  }
-  else if (_Type == Type::Water)
+
+  throw STD_EXCEPTION << "Unknown type object: Supoport::" << _Type;
+}
+
+/*static*/ auto GameObject::Create(const Extra::Value _Type) -> IGameObjectPtr_t
+{
+  if (_Type == Extra::Water)
   {
     return IGameObjectPtr_t{ new Water };
   }
-  else if (_Type == Type::Compass)
+  else if (_Type == Extra::Compass)
   {
     return IGameObjectPtr_t{ new Compass };
   }
+  else if (_Type == Extra::Loader)
+  {
+    return IGameObjectPtr_t{ new Loader };
+  }
 
-  return IGameObjectPtr_t{ new Landscape{ _Type, *_pGameWorld } };
+  throw STD_EXCEPTION << "Unknown type object: Extra::" << _Type;
+}
+
+/*static*/ auto GameObject::Create(const Landscape::Value _Type,
+  const IGameWorld * _pGameWorld) -> IGameObjectPtr_t
+{
+  return IGameObjectPtr_t{ new model::Landscape{ _Type, *_pGameWorld } };
 }
 
 /*static*/ Object_t GameObject::GetShaderObject(void)

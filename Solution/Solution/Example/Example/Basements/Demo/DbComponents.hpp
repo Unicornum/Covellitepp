@@ -36,7 +36,6 @@ public:
 public:
   Id_t AddGameObject(const Object_t &);
   void RemoveGameObject(const Id_t);
-  ComponentPtr_t GetComponent(const Id_t, const String_t &, const String_t &) const;
 
 private:
   class Id;

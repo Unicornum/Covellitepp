@@ -18,6 +18,8 @@ class IStringTranslator;
 * \brief
 *  Класс входит в проект \ref CovelliteGuiPage \n
 *  Класс, инкапсулирующий инициализацию/разрушение библиотеки libRocket.
+* \todo
+*  Класс используется для внутренней реализации и не должен попадать в Externals.
 *
 * \version
 *  1.0.0.0        \n
@@ -53,7 +55,7 @@ public:
 private:
   covellite::gui::File   m_File;
   covellite::gui::System m_System;
-  RenderInterfacePtr_t      m_pRenderInterface;
+  RenderInterfacePtr_t   m_pRenderInterface;
 
 public:
   explicit Initializer(const Data &);

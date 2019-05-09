@@ -11,6 +11,8 @@
 */
 
 #include "App\Events.hpp"
+#include "App\IWindow.hpp"
+#include "App\IApplication.hpp"
 #include "App\Application.hpp"
 #include "App\ApplicationEntryPoint.hpp"
 #include "App\Settings.hpp"

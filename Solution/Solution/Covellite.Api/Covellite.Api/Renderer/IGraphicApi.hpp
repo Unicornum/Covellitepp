@@ -2,6 +2,7 @@
 #pragma once
 #include <functional>
 #include <alicorn/std/string.forward.hpp>
+#include <Covellite/Predefined.hpp>
 
 /**
 * \defgroup CovelliteApiRendererGroup Renderer
@@ -53,11 +54,16 @@ public:
   virtual const Creators_t & GetCreators(void) const = 0;
 
 public:
-  // deprecated
-  virtual void ClearFrame(void) = 0;
-
-public:
   virtual ~IGraphicApi(void) = default;
+};
+
+/// Класс для передачи значений настроек программы реализации рендера.
+class SettingsData final
+{
+public:
+  Any_t Handle;       ///< Хэнд окна операционной системы.
+  int   Top;          ///< Смещение верхнего края клиентской части окна.
+  bool  IsFullScreen; ///< Признак работы программы в полноэкранном режиме.
 };
 
 } // namespace renderer

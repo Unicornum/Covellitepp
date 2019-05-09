@@ -31,9 +31,6 @@
     <Filter Include="Tests\DxCheck">
       <UniqueIdentifier>{736ba1c0-6b15-4629-80dc-5dc6f4db670c}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Tests\Renderer">
-      <UniqueIdentifier>{055fb21a-65f4-487c-b637-dd1da7f72d2c}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Tests\Component">
       <UniqueIdentifier>{f725e3ab-9291-4e5b-83a5-095ec9cb5b56}</UniqueIdentifier>
     </Filter>
@@ -74,20 +71,11 @@
     <ClCompile Include="Test.DxCheck\DxCheck_test.cpp">
       <Filter>Tests\DxCheck</Filter>
     </ClCompile>
-    <ClCompile Include="Test.Renderer\Renderer_test.android.cpp">
-      <Filter>Tests\Renderer</Filter>
-    </ClCompile>
-    <ClCompile Include="Test.Renderer\Renderer_test.windows.cpp">
-      <Filter>Tests\Renderer</Filter>
-    </ClCompile>
     <ClCompile Include="..\Covellite.Api\Renderer\DxCheck.cpp">
       <Filter>Tests\DxCheck</Filter>
     </ClCompile>
     <ClCompile Include="Test.Component\Component_test.cpp">
       <Filter>Tests\Component</Filter>
-    </ClCompile>
-    <ClCompile Include="Test.Renderer\Renderer_test.cpp">
-      <Filter>Tests\Renderer</Filter>
     </ClCompile>
     <ClCompile Include="Test.Renders\Renders_test.cpp">
       <Filter>Tests\Renders</Filter>

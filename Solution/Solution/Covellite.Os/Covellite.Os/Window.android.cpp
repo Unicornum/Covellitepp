@@ -10,17 +10,6 @@ using AppInfo_t = ::alicorn::system::platform::AppInfo;
 
 using namespace covellite::os;
 
-/**
-* \deprecated
-*  Устаревший конструктор, используемый совместно с классами из проекта
-*  Covellite.Core, вместо них использовать классы из Covellite.App.
-*/
-Window::Window(void) :
-  m_Handle(AppInfo_t::Get<ANativeWindow *>()),
-  m_LastTypeSizeMessage(0)
-{
-}
-
 Window::Window(const ::covellite::app::IApplication & _Application) :
   m_Events(_Application),
   m_Handle(AppInfo_t::Get<ANativeWindow *>()),
@@ -59,8 +48,8 @@ Window::Rect Window::GetClientRect(void) const /*override*/
   {
     0,
     ::alicorn::system::platform::Environment{}.GetStatusBarHeight(),
-    ANativeWindow_getWidth(m_Handle),
-    ANativeWindow_getHeight(m_Handle)
+    ANativeWindow_getWidth(::covellite::any_cast<ANativeWindow *>(m_Handle)),
+    ANativeWindow_getHeight(::covellite::any_cast<ANativeWindow *>(m_Handle))
   };
 }
 

@@ -92,14 +92,8 @@
     <ClCompile Include="Test.IWindow\IWindow_test.cpp">
       <Filter>Tests\IWindow</Filter>
     </ClCompile>
-    <ClCompile Include="Test.Window\Window_test.deprecated.cpp">
-      <Filter>Tests\Window</Filter>
-    </ClCompile>
     <ClCompile Include="Test.SystemToRocketKeyCode\SystemToRocketKeyCode_test.cpp">
       <Filter>Tests\SystemToRocketKeyCode</Filter>
-    </ClCompile>
-    <ClCompile Include="Test.Layer\Layer_test.deprecated.cpp">
-      <Filter>Tests\Layer</Filter>
     </ClCompile>
     <ClCompile Include="..\Covellite.Gui\File.cpp">
       <Filter>Tests\File</Filter>

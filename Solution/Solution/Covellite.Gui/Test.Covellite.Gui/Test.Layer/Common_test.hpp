@@ -37,9 +37,6 @@ protected:
     MOCK_METHOD0(DoMessage2, void(void));
 
   public:
-    void Subscribe(const EventHandlerPtr_t &) override {}
-
-  public:
     Tested(::covellite::gui::IWindow & _Window, const Path_t & _Path) :
       Tested_t(_Window, _Path)
     {
@@ -51,17 +48,6 @@ protected:
       Tested_t(_Window, _Path, _TitleId)
     {
       m_Events[Message2].Connect([&]() { DoMessage2(); });
-    }
-    Tested(Context_t * _pContext, const Path_t & _Path) :
-      Tested_t(_pContext, _Path)
-    {
-
-    }
-    Tested(Context_t * _pContext, const Path_t & _Path,
-      const ::std::string & _TitleId) :
-      Tested_t(_pContext, _Path, _TitleId)
-    {
-
     }
   };
 

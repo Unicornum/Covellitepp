@@ -1,8 +1,8 @@
 
 #include "stdafx.h"
-#include <Covellite\Gui\Layers.hpp>
-#include <Covellite\Gui\ILayer.hpp>
-#include <alicorn\std\exception.hpp>
+#include <Covellite/Gui/Layers.hpp>
+#include <Covellite/Gui/ILayer.hpp>
+#include <alicorn/std/exception.hpp>
 #include <alicorn/std/class-info.hpp>
 
 using namespace covellite::gui;

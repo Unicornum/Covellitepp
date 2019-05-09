@@ -6,7 +6,7 @@
 *  (\ref MainModuleWindowsUsingFrameworkAnchor "Windows"/
 *  \ref MainModuleAndroidUsingFrameworkAnchor "Android").
 *  - Создать \ref MainApplicationClassUsingFrameworkAnchor "класс" программы.
-*  - Добавить рализация функции установки
+*  - Добавить рализациию функции установки
 *  \ref SettingsUsingFrameworkAnchor "параметров" фреймворка по умолчанию.
 *  - Добавить реализацию функции создания
 *  \ref ReadFileDataUsingFrameworkAnchor "объекта виртуальной файловой системы",

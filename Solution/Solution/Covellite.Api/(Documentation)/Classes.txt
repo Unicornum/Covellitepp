@@ -4,7 +4,7 @@
 interface IWindow
 {
   {abstract} + Rect GetClientRect()
-  {abstract} + RenderInterface * GetRenderInterface()
+  {abstract} + GetRenders()
   ---
 }
 
@@ -12,59 +12,32 @@ class Window
 {
   + IWindow:: ...
   ---
-  + Window(os::Window &)
+  + Window(os::IWindow &)
 }
 
 IWindow <|-.- Window
-
-class Renderer as "renderer::Renderer"
-{
-  + void StartDrawingFrame()
-  + void PresentFrame()
-  + void ResizeWindow(int, int)
-  ---
-  + RenderInterface:: ...
-  ---
-  + Renderer(String _ApiName, Data)
-}
-
-Window ---* Renderer
-
-interface Rocket_Core_RenderInterface as "Rocket::Core::RenderInterface"
-{
-  {abstract} + ... functions
-  ---
-}
-
-interface RenderInterface
-{
-  {abstract} + RendersPtr_t GetRenders()
-  ---
-}
-
-Rocket_Core_RenderInterface <|-.- RenderInterface
-RenderInterface <|-.- Renderer
 
 interface IGraphicApi as "renderer::IGraphicApi"
 {
   {abstract} + String GetUsingApi()
   ---
-  {abstract} + void StartDrawingFrame()
   {abstract} + void PresentFrame()
   {abstract} + void ResizeWindow(int, int)
   {abstract} + Creators_t GetCreators(void)
 }
 
-Renderer ---* IGraphicApi
-
+IGraphicApi --* Window
 IGraphicApi <|-.- "renderer::OpenGLES\nrenderer::OpenGL\nrenderer::DirectX9\nrenderer::DirectX10\nrenderer::DirectX11"
 
 class Component
 {
-  + T GetValue(Name, DefaultValue)
-  + void SetValue(Name, T Value)
+  + static Make(...);
   ---
-  + Component(map<String, Any_t>)
+  + bool IsType(Name);
+  + T GetValue(Name, DefaultValue);
+  + void SetValue(Name, T Value);
+  ---
+  + Component(map<String, Any_t>);
 }
 
 class Renders as "Component::Renders"
@@ -75,7 +48,7 @@ class Renders as "Component::Renders"
   + Renders(Creators_t)
 }
 
-Renderer ---* Renders
-Renders ---o Component
+Renders --o Window
+Component --o Renders
 
 @enduml

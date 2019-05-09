@@ -1,7 +1,8 @@
 
 #pragma once
+#include <vector>
 #include <unordered_map>
-#include <alicorn/std/vector.hpp>
+//#include <alicorn/std/vector.hpp>
 #include "Defines.hpp"
 #include "CubeCoords.hpp"
 #include "Constants.hpp"
@@ -61,19 +62,16 @@ private:
   {
   public:
     SceneObjects_t Objects;
-    Objects_t Updaters;
   };
 
 public:
   void SetCameraInfo(const Camera &);
-  void Update(const Callback_t &);
   void Render(const Callback_t &);
   void ProcessAll(const Callback_t &);
 
 public:
   void Add(const size_t, const ::std::vector<Id_t>);
   void Add(const size_t, const ::std::vector<Id_t>, const model::CubeCoords &);
-  void Add(const size_t, ::std::vector<Id_t>, const bool);
   ::std::vector<Id_t> Remove(const model::CubeCoords &);
   void CompleteReplace(void);
   void CompleteUpdate(void);
@@ -86,7 +84,9 @@ private:
   ::std::vector<Scene>          m_Scenes;
   ::std::vector<Scene>          m_BkScenes;
   Camera                        m_Camera;
-  ::std::vector<RenderObject_t> m_RenderObjects;
+  ::std::vector<RenderObject_t> m_PrepareRenderObjects;
+  ::std::vector<RenderObject_t> m_CompleteRenderObjects;
+  bool                          m_IsUpdateRenderObjects = false;
 };
 
 // cppcheck-suppress passedByValue
@@ -103,20 +103,6 @@ inline void GameScene::Add(
   const model::CubeCoords & _Position)
 {
   Add(_SceneId, _ObjectIds, _Position.GetHash());
-}
-
-// cppcheck-suppress passedByValue
-inline void GameScene::Add(
-  const size_t _SceneId, 
-  const ::std::vector<Id_t> _ObjectIds,
-  const bool /*_IsUsingUpdater*/)
-{
-  Add(_SceneId, _ObjectIds, static_cast<uint64_t>(0));
-
-  for (const auto & Id : _ObjectIds)
-  {
-    m_BkScenes[_SceneId].Updaters.push_back(Id);
-  }
 }
 
 inline void GameScene::Add(

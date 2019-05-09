@@ -16,13 +16,10 @@ namespace basement
 using Id_t = size_t;
 using Objects_t = ::std::vector<Id_t>;
 using Component_t = ::covellite::api::Component;
-using ComponentPtr_t = ::std::shared_ptr<Component_t>;
+using ComponentPtr_t = Component_t::ComponentPtr_t;
+using Object_t = ::std::vector<Component_t::ComponentPtr_t>;
+using Renders_t = Component_t::Renders::Renders_t;
 using RendersPtr_t = ::std::shared_ptr<Component_t::Renders>;
-using Object_t = ::std::vector<ComponentPtr_t>;
-using Render_t = ::std::function<void(void)>;
-using Renders_t = ::std::vector<Render_t>;
-using Updater_t = ::std::function<void(void)>;
-using Updaters_t = ::std::vector<Updater_t>;
 using Any_t = ::boost::any;
 
 namespace support { class GameScene; }

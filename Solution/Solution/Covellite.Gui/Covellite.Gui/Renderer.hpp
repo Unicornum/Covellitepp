@@ -5,7 +5,6 @@
 #include <alicorn/std/string.forward.hpp>
 #include <alicorn/std/memory/unique-ptr.hpp>
 #include <Covellite/Predefined.hpp>
-#include <Covellite/Os/Predefined.hpp>
 #include <Covellite/Api/Component.hpp>
 
 namespace covellite
@@ -24,6 +23,8 @@ namespace gui
 * \details
 *  - Задача класса - скрыть от клиентского кода ссылку на libRocket 
 *  (в разделе используется Rocket::Core::RenderererInterface).
+* \todo
+*  Класс используется для внутренней реализации и не должен попадать в Externals.
 *  
 * \version
 *  1.0.0.0        \n

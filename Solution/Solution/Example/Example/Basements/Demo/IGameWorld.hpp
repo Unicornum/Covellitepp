@@ -1,6 +1,7 @@
 
 #pragma once
 #include "Defines.hpp"
+#include "IGameObject.hpp"
 
 namespace basement
 {
@@ -30,7 +31,7 @@ class IGameWorld
 public:
   virtual GameScenePtr_t CreateGameScene(void) = 0;
   virtual float GetLandscapeHeight(const CubeCoords &) const = 0;
-  virtual size_t GetGameObjectType(const CubeCoords &) const = 0;
+  virtual IGameObject::Landscape::Value GetGameObjectType(const CubeCoords &) const = 0;
 
 public:
   virtual ~IGameWorld(void) = default;

@@ -5,14 +5,11 @@
 #include <alicorn/std/class-info.hpp>
 #include <alicorn/std/string.hpp>
 #include <alicorn/boost/string-cast.hpp>
-#include <Covellite/Core/Event.hpp>
-#include <Covellite/Core/EventHandler.hpp>
-#include <Covellite/Core/ClickEventListener.hpp>
 #include <Covellite/Events.hpp>
+#include <Covellite/App/Events.hpp>
 #include <Covellite/App/Settings.hpp>
 #include <Covellite/Os/Events.hpp>
 #include <Covellite/Api/IWindow.hpp>
-#include <Covellite/Api/RenderInterface.hpp>
 #include <Covellite/Api/Events.hpp>
 #include <Covellite/Gui/Renderer.hpp>
 #include <Covellite/Gui/Initializer.hpp>
@@ -35,7 +32,6 @@ Window::Window(const WindowApi_t & _Window) :
   m_Events(_Window),
   m_pRenderer(::std::make_shared<covellite::gui::Renderer>(_Window.GetRenders())),
   m_pEventListener(EventListener::Make(_Window)),
-  m_pEvents(::std::make_shared<EventHandler_t>(EventHandler_t::Dummy{})),
   m_pStringTranslator(::std::make_unique<covellite::gui::StringTranslator>()),
   m_pInitializer(::std::make_unique<Initializer_t>(Initializer_t::Data
     {
@@ -106,74 +102,14 @@ Window::Window(const WindowApi_t & _Window) :
     .Connect([&]() { DoDrawWindow(); });
 }
 
-/**
-* \deprecated
-*  Устаревший конструктор, используемый совместно с кодом из проекта
-*  \ref CovelliteCorePage; будет удален в следующей стабильной версии. \n
-*  Использовать второй конструктор совместно с кодом проекта 
-*  \ref CovelliteAppPage.
-*/
-Window::Window(const WindowApiPtr_t & _pWindowsApi) :
-  Window(*_pWindowsApi)
-{
-}
-
 Window::~Window(void) noexcept
 {
-  m_pEvents->Unsubscribe(m_pContext.get());
   m_pContext->RemoveEventListener(::covellite::events::Click.m_EventType.c_str(), 
     m_pEventListener.get(), false);
   m_pContext->RemoveEventListener(::covellite::events::Press.m_EventType.c_str(),
     m_pEventListener.get(), false);
   m_pContext->RemoveEventListener(::covellite::events::Change.m_EventType.c_str(),
     m_pEventListener.get(), false);
-}
-
-/**
-* \brief
-*  Функция подписки на события приложения.
-* \details
-*  - Класс-наследник (если он переопределяет функцию) должен вызвать функцию
-*  базового класса.
-*/
-void Window::Subscribe(const EventHandlerPtr_t & _pEvents) /*override*/
-{
-  m_pEvents = _pEvents;
-  m_pEvents->Subscribe(m_pContext.get());
-
-#if BOOST_COMP_MSVC
-# pragma warning(push)
-# pragma warning(disable: 4996)
-# pragma warning(disable: 26444)
-#endif
-
-  using namespace ::covellite::core;
-
-  (*m_pEvents)[Event::Drawing]
-    .connect(::std::bind(&Window::DoDrawWindow, this));
-  (*m_pEvents)[Event::Back]
-    .connect(::std::bind(&Window::Back, this));
-
-  (*m_pEvents)[Event::Resize]
-    .connect([&](const Params &) { m_pContext->SetDimensions(GetContextSize()); });
-  (*m_pEvents)[Event::Touch]
-    .connect([&](const Params &) { m_pContext->ProcessMouseButtonDown(0, 0); });
-  (*m_pEvents)[Event::Release]
-    .connect([&](const Params &) { m_pContext->ProcessMouseButtonUp(0, 0); });
-
-  (*m_pEvents)[Event::Motion]
-    .connect([&](const params::Motion & _Params)
-      { m_pContext->ProcessMouseMove(_Params.X, _Params.Y - m_WindowApi.GetClientRect().Top, 0); });
-  (*m_pEvents)[Event::KeyPressed]
-    .connect([&](const params::KeyPressed & _KeyCode)
-      { m_pContext->ProcessTextInput(static_cast<Rocket::Core::word>(_KeyCode.UnicodeKeyCode)); });
-  (*m_pEvents)[Event::KeyDown]
-    .connect([&](const params::KeyCode & _KeyCode)
-      { m_pContext->ProcessKeyDown(_KeyCode.ToRocketKeyCode(), 0); });
-
-#if BOOST_COMP_MSVC
-# pragma warning(pop)
-#endif
 }
 
 /**
@@ -221,7 +157,10 @@ void Window::Back(void)
   LOGGER(Info) << "Pop layer";
 
   const auto IsExistsLayer = m_Layers.Pop();
-  if (!IsExistsLayer) Exit();
+  if (!IsExistsLayer)
+  {
+    m_Events[::covellite::events::Application.Exit]();
+  }
 }
 
 /**
@@ -250,7 +189,7 @@ Window::Vector_t Window::GetContextSize(void) const
 
 /**
 * \brief
-*  Функция добработки события covellite::core::Event::Draw.
+*  Функция добработки события covellite::events::Drawing.Do.
 */
 void Window::DoDrawWindow(void)
 {

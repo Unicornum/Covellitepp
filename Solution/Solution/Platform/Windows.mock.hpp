@@ -3,6 +3,7 @@
 
 #if BOOST_OS_WINDOWS
 
+#define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 
 inline bool operator== (const MSG & _Left, const MSG & _Right)
@@ -258,26 +259,6 @@ inline int GetSystemMetrics(int _Index)
 
 namespace covellite
 {
-
-namespace core
-{
-
-using ::mock::MessageBoxA;
-using ::mock::PostQuitMessage;
-using ::mock::GetModuleHandleW;
-using ::mock::RegisterClassExW;
-using ::mock::UnregisterClassW;
-using ::mock::DefWindowProcW;
-using ::mock::PeekMessageW;
-using ::mock::GetMessageW;
-using ::mock::Sleep;
-using ::mock::TranslateMessage;
-using ::mock::DispatchMessage;
-using ::mock::LoadCursorW;
-using ::mock::LoadIconW;
-using ::mock::GetCommandLineA;
-
-} // namespace core
 
 namespace app
 {

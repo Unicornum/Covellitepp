@@ -172,13 +172,13 @@ public:
   T & Get(void) = delete; // not implement
 
   template<class T>
-  void Update(void) = delete; // not implement
+  void Update(void) const = delete; // not implement
 
   template<>
   inline ::Matrices & Get(void) { return m_WorldViewProjection.Data; }
 
   template<>
-  inline void Update<::Matrices>(void)
+  inline void Update<::Matrices>(void) const
   {
     // View и Projection здесь транспонировать нельзя, т.к. они должны быть
     // транспонированы один раз для каждой камеры, а эта функция вызывается для
@@ -199,8 +199,7 @@ public:
   inline ::Lights & Get(void) { return m_Lights[m_CurrentCameraId]; }
 
   template<>
-  // cppcheck-suppress functionConst
-  inline void Update<::Lights>(void) { m_CurrentLights.Update(); }
+  inline void Update<::Lights>(void) const { m_CurrentLights.Update(); }
 
 private:
   ConstantBuffer<::Matrices>        m_WorldViewProjection;
@@ -217,8 +216,7 @@ public:
   }
 };
 
-DirectX10::DirectX10(const Renderer::Data & _Data) :
-  m_BkColor{ _Data.BkColor.R, _Data.BkColor.G, _Data.BkColor.B, _Data.BkColor.A },
+DirectX10::DirectX10(const Data_t & _Data) :
   m_Creators{ GetCreators(this) }
 {
   using ::alicorn::extension::cpp::IS_RELEASE_CONFIGURATION;
@@ -228,7 +226,7 @@ DirectX10::DirectX10(const Renderer::Data & _Data) :
 
   DXGI_SWAP_CHAIN_DESC sd = { 0 };
   sd.BufferCount = 2;
-  sd.OutputWindow = _Data.Handle;
+  sd.OutputWindow = ::covellite::any_cast<HWND>(_Data.Handle);
   sd.Windowed = _Data.IsFullScreen ? FALSE : TRUE;
   sd.SampleDesc.Count = 1;
   sd.SampleDesc.Quality = 0;
@@ -255,11 +253,6 @@ DirectX10::~DirectX10(void) = default;
 DirectX10::String_t DirectX10::GetUsingApi(void) const /*override*/
 {
   return uT("DirectX 10");
-}
-
-void DirectX10::ClearFrame(void) /*override*/
-{
-  m_pDevice->ClearRenderTargetView(m_pRenderTargetView.Get(), m_BkColor.data());
 }
 
 void DirectX10::PresentFrame(void) /*override*/
@@ -466,13 +459,19 @@ auto DirectX10::CreateState(const ComponentPtr_t & _pComponent) -> Render_t
     };
   };
 
+  const auto CreateAlphaTestState = [](void)
+  {
+    return nullptr;
+  };
+
   ::std::map<String_t, ::std::function<Render_t(void)>> Creators =
   {
-    { uT("Blend"),   [&](void) { return CreateBlendState(true); } },
-    { uT("Sampler"), CreateSamplerState },
-    { uT("Scissor"), CreateScissorState },
-    { uT("Depth"),   CreateDepthState   },
-    { uT("Clear"),   CreateClearState   },
+    { uT("Blend"),      [this](void) { return CreateBlendState(true); } },
+    { uT("Sampler"),    CreateSamplerState    },
+    { uT("Scissor"),    CreateScissorState    },
+    { uT("Depth"),      CreateDepthState      },
+    { uT("Clear"),      CreateClearState      },
+    { uT("AlphaTest"),  CreateAlphaTestState  },
   };
 
   return Creators[_pComponent->Kind]();
@@ -733,7 +732,6 @@ auto DirectX10::CreatePresent(const ComponentPtr_t & _pComponent) -> Render_t
 {
   ::std::map<String_t, ::std::function<Render_t(void)>> Creators =
   {
-    { uT("Camera"), [&](void) { return CreateCamera(_pComponent); } },
     { uT("Geometry"), [&](void) { return CreateGeometry(_pComponent); } },
   };
 
@@ -834,7 +832,7 @@ auto DirectX10::CreateCamera(const ComponentPtr_t & _pComponent) -> Render_t
 
     // Точка, где расположена камера - вычисляется на основе Look, Distance и
     // компонента Transform.Rotation.
-    const Component::Position Rot{ ServiceComponents[1] };
+    const Component::Rotation Rot{ ServiceComponents[1] };
 
     auto Transform =
       ::DirectX::XMMatrixRotationX(Rot.X) *
@@ -850,9 +848,7 @@ auto DirectX10::CreateCamera(const ComponentPtr_t & _pComponent) -> Render_t
         ::DirectX::XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f)));
   };
 
-  const auto Focal = _pComponent->GetValue(uT("focal"), uT("Disabled"));
-
-  return (_pComponent->Kind == uT("Perspective") || Focal == uT("Enabled")) ? 
+  return (_pComponent->Kind == uT("Perspective")) ? 
     CameraPerspective : CameraOrthographic;
 }
 
@@ -936,7 +932,7 @@ auto DirectX10::CreatePreRenderGeometry(void) -> Render_t
   {
     Result.push_back([=](void)
     {
-      const Component::Position Rotation{ _pRotation };
+      const Component::Rotation Rotation{ _pRotation };
 
       m_pData->Get<::Matrices>().World *= 
         ::DirectX::XMMatrixRotationX(Rotation.X);
@@ -951,7 +947,7 @@ auto DirectX10::CreatePreRenderGeometry(void) -> Render_t
   {
     Result.push_back([=](void)
     {
-      const Component::Position Scale{ _pScale };
+      const Component::Scale Scale{ _pScale };
 
       m_pData->Get<::Matrices>().World *=
         ::DirectX::XMMatrixScaling(Scale.X, Scale.Y, Scale.Z);

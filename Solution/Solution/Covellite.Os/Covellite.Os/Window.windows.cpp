@@ -6,13 +6,12 @@
 #include <alicorn/std/string-cast.hpp>
 #include <alicorn/platform/winapi-check.hpp>
 #include <alicorn/version.hpp>
-#include <Covellite/Core/ClassName.windows.hpp>
 #include <Covellite/Events.hpp>
 #include <Covellite/App/IApplication.hpp>
-#include <Covellite/App/ClassName.windows.hpp>
 #include <Covellite/App/Settings.hpp>
 #include <Covellite/App/Events.hpp>
 #include <Covellite/Os/Events.hpp>
+#include <Covellite.App/Covellite.App/ClassName.windows.hpp>
 
 #undef CreateWindow
 
@@ -22,7 +21,7 @@ namespace covellite
 namespace os
 {
 
-static Handle_t CreateWindow(const wchar_t * _ClassName,
+static HWND CreateWindow(const wchar_t * _ClassName,
   const alicorn::modules::settings::Section & _WindowSettings,
   long & _MinWindowWidth, long & _MinWindowHeight)
 {
@@ -105,19 +104,6 @@ static Handle_t CreateWindow(const wchar_t * _ClassName,
   return hWnd;
 }
 
-/**
-* \deprecated
-*  Устаревший конструктор, используемый совместно с классами из проекта
-*  Covellite.Core, вместо них использовать классы из Covellite.App.
-*/
-Window::Window(void) :
-  m_Handle(::covellite::os::CreateWindow(::covellite::core::ClassName,
-    ::covellite::app::Settings_t::GetInstance()[uT("Window")],
-    m_MinWindowWidth, m_MinWindowHeight)),
-  m_LastTypeSizeMessage(SIZE_RESTORED)
-{
-}
-
 Window::Window(const ::covellite::app::IApplication & _Application) :
   m_Events(_Application),
   m_Handle(::covellite::os::CreateWindow(::covellite::app::ClassName,
@@ -125,8 +111,8 @@ Window::Window(const ::covellite::app::IApplication & _Application) :
     m_MinWindowWidth, m_MinWindowHeight)),
   m_LastTypeSizeMessage(SIZE_RESTORED)
 {
-  USING_MOCK ::SetWindowLongPtrW(m_Handle, GWLP_USERDATA,
-    reinterpret_cast<LONG_PTR>(&m_Events));
+  USING_MOCK ::SetWindowLongPtrW(::covellite::any_cast<HWND>(m_Handle), 
+    GWLP_USERDATA, reinterpret_cast<LONG_PTR>(&m_Events));
 
   ActivateApplicationEvents();
   ActivateResizeEvents();
@@ -136,13 +122,14 @@ Window::Window(const ::covellite::app::IApplication & _Application) :
 
 Window::~Window(void) noexcept
 {
-  USING_MOCK ::DestroyWindow(m_Handle);
+  USING_MOCK ::DestroyWindow(::covellite::any_cast<HWND>(m_Handle));
 }
 
 Window::Rect Window::GetClientRect(void) const /*override*/
 {
   RECT ClientRect;
-  WINAPI_CHECK USING_MOCK ::GetClientRect(m_Handle, &ClientRect);
+  WINAPI_CHECK USING_MOCK ::GetClientRect(
+    ::covellite::any_cast<HWND>(m_Handle), &ClientRect);
   return { 0, 0,
     ClientRect.right - ClientRect.left, ClientRect.bottom - ClientRect.top };
 }

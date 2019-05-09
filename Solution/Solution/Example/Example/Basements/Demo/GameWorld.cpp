@@ -2,16 +2,11 @@
 #include "stdafx.h"
 #include "GameWorld.hpp"
 #include <random>
-#include <alicorn/boost/filesystem.hpp>
 #include <alicorn/std/vector.hpp>
-#include <alicorn/image.hpp>
 #include <alicorn/logger.hpp>
-#include <Covellite/Api/Vertex.hpp>
 #include <Covellite/Api/Component.inl>
-#include <Covellite/App/Settings.hpp>
 #include "DbComponents.hpp"
 #include "GameScene.hpp"
-#include "Constants.hpp"
 
 // 17 Март 2019 11:45 (unicornum.verum@gmail.com)
 TODO("Недопустимая ссылка на заголовочный файл!");
@@ -40,7 +35,7 @@ GameWorld::GameWorld(const Events_t & _Events, DbComponents & _DbComponents) :
 
   m_Events[::covellite::events::Application.Update].Connect([this](void)
   {
-    m_ProcessingMode();
+    m_ProcessingMode(0.0f);
   });
 
   m_Events[::events::Demo.Auto].Connect([this](const IntPtr_t & _pLoadingPercent)
@@ -58,14 +53,6 @@ GameWorld::GameWorld(const Events_t & _Events, DbComponents & _DbComponents) :
   m_Events[::events::Demo.Exit].Connect([this](void) 
   { 
     RemoveAllObjects(); 
-  });
-
-  m_Events[::covellite::events::Application.Update].Connect([this](void) 
-  { 
-    m_pGameScene->Update([this](const Id_t _Id) 
-    { 
-      m_DbUpdaters.CallUpdater(_Id);
-    });
   });
 }
 
@@ -90,26 +77,27 @@ float GameWorld::GetLandscapeHeight(const CubeCoords & _CellPosition) const /*ov
   return GetHeight(Position.first, Position.second);
 }
 
-size_t GameWorld::GetGameObjectType(const CubeCoords & _CellPosition) const /*override*/
+auto GameWorld::GetGameObjectType(const CubeCoords & _CellPosition) const /*override*/
+  -> IGameObject::Landscape::Value
 {
   if (_CellPosition.GetX() == -3 &&
     _CellPosition.GetY() == -3)
   {
-    return GameObject::Type::Well;
+    return GameObject::Landscape::Well;
   }
 
   if (GetLandscapeHeight(_CellPosition) < 0.05f)
   {
-    return GameObject::Type::Sand;
+    return GameObject::Landscape::Sand;
   }
 
   const auto Type = Random(0, 100);
 
-  if (Type > 27) return GameObject::Type::Grass;
-  if (Type > 25) return GameObject::Type::Rock;
-  if (Type > 10) return GameObject::Type::Bush;
-  if (Type > 2) return GameObject::Type::Tree;
-  return GameObject::Type::None;
+  if (Type > 27) return GameObject::Landscape::Grass;
+  if (Type > 25) return GameObject::Landscape::Rock;
+  if (Type > 10) return GameObject::Landscape::Bush;
+  if (Type > 2) return GameObject::Landscape::Tree;
+  return GameObject::Landscape::None;
 }
 
 void GameWorld::PrepareScene(const IntPtr_t & _pLoadingPercent)
@@ -126,33 +114,28 @@ void GameWorld::PrepareScene(const IntPtr_t & _pLoadingPercent)
   PrepareCamera();
   PreparePlane();
 
-  m_LoadingQueue.push([this](void)
+  m_LoadingQueue.push([this](const float)
   {
     // Скайбокс должен быть добавлен после камеры, т.к. он извлекает
     // компонент положения камеры.
-    LoadObject(GameObject::Create(GameObject::Type::Skybox),
+    LoadObject(GameObject::Create(GameObject::Support::Skybox),
       static_cast<const IDbComponents *>(&m_DbComponents));
   });
 
-  m_LoadingQueue.push([this](void)
+  m_LoadingQueue.push([this](const float)
   {
-    LoadObject(GameObject::Create(GameObject::Type::Water));
+    LoadObject(GameObject::Create(GameObject::Extra::Water));
   });
 
   //m_LoadingQueue.push([this](void)
   //{
-  //  LoadObject(GameObject::Create(GameObject::Type::Compass), 
+  //  LoadObject(GameObject::Create(GameObject::Extra::Compass), 
   //    static_cast<const IDbComponents *>(&m_DbComponents));
   //});
 }
 
 void GameWorld::RemoveAllObjects(void)
 {
-  m_pGameScene->Update([this](const Id_t _Id)
-    {
-      m_DbUpdaters.RemoveUpdater(_Id);
-    });
-
   m_pGameScene->ProcessAll([this](const Id_t _Id)
     {
       m_DbComponents.RemoveGameObject(_Id);
@@ -160,7 +143,7 @@ void GameWorld::RemoveAllObjects(void)
 
   m_pGameScene->CompleteReplace();
   m_LandscapeObjects.clear();
-  m_ProcessingMode = [](void) {};
+  m_ProcessingMode = [](const float) {};
 
   {
     ::std::queue<Updater_t> Empty;
@@ -168,7 +151,7 @@ void GameWorld::RemoveAllObjects(void)
   }
 }
 
-Updater_t GameWorld::GetAutoProcessMoving(void)
+auto GameWorld::GetAutoProcessMoving(void) -> Updater_t
 {
   const auto PushStep =
     [this](const CubeCoords & _Position, const CubeCoords & _Orientation)
@@ -188,7 +171,7 @@ Updater_t GameWorld::GetAutoProcessMoving(void)
 
   namespace events = ::covellite::events;
 
-  return [this, PushStep](void)
+  return [this, PushStep](const float)
   {
     if (m_Steps.empty())
     {
@@ -219,7 +202,7 @@ Updater_t GameWorld::GetAutoProcessMoving(void)
   };
 }
 
-Updater_t GameWorld::GetManualProcessMoving(void)
+auto GameWorld::GetManualProcessMoving(void) -> Updater_t
 {
   const auto PushStep = [this](
     const CubeCoords & _ChangePosition,
@@ -292,7 +275,7 @@ Updater_t GameWorld::GetManualProcessMoving(void)
     PushStep(CubeCoords{}, m_Orientation, Constant::Camera::Pitch);
   });
 
-  return [](void) {};
+  return [](const float) {};
 }
 
 void GameWorld::LoadObject(
@@ -310,16 +293,30 @@ void GameWorld::LoadObject(
   m_pGameScene->Add(_pObject->GetType(), ObjectIds);
 }
 
-Id_t GameWorld::LoadObject(
+void GameWorld::LoadObject(
   const GameObject::IGameObjectPtr_t & _pObject,
   const Updater_t & _Updater)
 {
-  const auto Id = m_DbComponents.AddGameObject(_pObject->GetObject()[0]);
+  static size_t Index = 0;
+  Index++;
 
-  m_pGameScene->Add(_pObject->GetType(), { Id }, true);
-  m_DbUpdaters.AddUpdater(Id, _Updater);
+  using namespace ::alicorn::extension::std;
 
-  return Id;
+  const auto Object = 
+    Object_t
+    {
+      Component_t::Make(
+      {
+        { uT("id"), uT("Demo.Updater.%ID%").Replace(uT("%ID%"), Index) },
+        { uT("type"), uT("Updater") },
+        { uT("function"), _Updater },
+      })
+    } +
+    _pObject->GetObject()[0];
+
+  const auto Id = m_DbComponents.AddGameObject(Object);
+
+  m_pGameScene->Add(_pObject->GetType(), { Id });
 }
 
 void GameWorld::LoadObject(
@@ -340,15 +337,13 @@ void GameWorld::LoadObject(
 void GameWorld::PrepareLoader(const IntPtr_t & _pLoadingPercent)
 {
   const auto pLoadedObjects = ::std::make_shared<size_t>(0);
-  const auto pIdLoader = ::std::make_shared<Id_t>(0);
 
-  const Updater_t LoaderUpdater = [=](void)
+  const Updater_t LoaderUpdater = [=](const float)
   {
     if (m_LoadingQueue.empty())
     {
       *_pLoadingPercent = 101; // 101 для того, чтобы отрисовалось 100%
       m_pGameScene->CompleteReplace();
-      m_DbUpdaters.RemoveUpdater(*pIdLoader);
       return;
     }
 
@@ -363,7 +358,7 @@ void GameWorld::PrepareLoader(const IntPtr_t & _pLoadingPercent)
     {
       try
       {
-        m_LoadingQueue.front()();
+        m_LoadingQueue.front()(0.0f);
       }
       catch (const ::std::exception & _Ex)
       {
@@ -378,13 +373,12 @@ void GameWorld::PrepareLoader(const IntPtr_t & _pLoadingPercent)
       (*pLoadedObjects + m_LoadingQueue.size()));
   };
 
-  *pIdLoader =
-    LoadObject(GameObject::Create(GameObject::Type::Loader), LoaderUpdater);
+  LoadObject(GameObject::Create(GameObject::Extra::Loader), LoaderUpdater);
 }
 
 void GameWorld::PrepareLoader(void)
 {
-  const Updater_t LoaderUpdater = [this](void)
+  const Updater_t LoaderUpdater = [this](const float)
   {
     if (m_LoadingQueue.empty()) return;
 
@@ -399,7 +393,7 @@ void GameWorld::PrepareLoader(void)
     {
       try
       {
-        m_LoadingQueue.front()();
+        m_LoadingQueue.front()(0.0f);
       }
       catch (const ::std::exception & _Ex)
       {
@@ -412,7 +406,10 @@ void GameWorld::PrepareLoader(void)
     m_pGameScene->CompleteUpdate();
   };
 
-  LoadObject(GameObject::Create(GameObject::Type::Loader), LoaderUpdater);
+  m_LoadingQueue.push([=](const float)
+  {
+    LoadObject(GameObject::Create(GameObject::Extra::Loader), LoaderUpdater);
+  });
 }
 
 void GameWorld::PrepareCamera(void)
@@ -420,18 +417,13 @@ void GameWorld::PrepareCamera(void)
   m_Position = CubeCoords{};
   m_Orientation = CubeCoords{ 0, 1 };
 
-  {
-    ::std::queue<Step> Empty;
-    m_Steps.swap(Empty);
-  }
-
   Step Step;
   Step.m_ChangePosition = CubeCoords{};
   Step.m_Orientation = m_Orientation;
   Step.m_Pitch = Constant::Camera::Pitch;
-  m_Steps.push(Step);
+  m_Steps = ::std::queue<GameWorld::Step>{ { Step } };
 
-  const Updater_t CameraUpdater = [=](void)
+  const Updater_t CameraUpdater = [=](const float)
   {
     if (m_Steps.empty()) return;
 
@@ -509,9 +501,9 @@ void GameWorld::PrepareCamera(void)
       support::GameScene::Camera{ X, Y, CameraDirection });
   };
 
-  m_LoadingQueue.push([=](void)
+  m_LoadingQueue.push([=](const float)
   {
-    LoadObject(GameObject::Create(GameObject::Type::Camera), CameraUpdater);
+    LoadObject(GameObject::Create(GameObject::Support::Camera), CameraUpdater);
   });
 }
 
@@ -576,18 +568,17 @@ void GameWorld::PrepareCompressionPlane(const CubeCoords & _Offset)
   }
 }
 
-Updater_t GameWorld::GetCellLoader(const CubeCoords & _CellPosition)
+auto GameWorld::GetCellLoader(const CubeCoords & _CellPosition) -> Updater_t
 {
-  return [=](void)
+  return [=](const float)
   {
-    LOGGER(Trace) << "Load cell [" <<
+    LOGGER_DEBUG(Trace) << "Load cell [" <<
       _CellPosition.GetX() << ", " << _CellPosition.GetY() << "].";
 
     const auto ObjectType = GetGameObjectType(_CellPosition);
     if (m_LandscapeObjects.find(ObjectType) == m_LandscapeObjects.end())
     {
-      const auto pPrototype =
-        GameObject::Create(static_cast<Type_t::Value>(ObjectType), this);
+      const auto pPrototype = GameObject::Create(ObjectType, this);
 
       LoadObject(pPrototype);
       m_LandscapeObjects[ObjectType] = pPrototype;
@@ -597,11 +588,11 @@ Updater_t GameWorld::GetCellLoader(const CubeCoords & _CellPosition)
   };
 }
 
-Updater_t GameWorld::GetCellRemover(const CubeCoords & _CellPosition)
+auto GameWorld::GetCellRemover(const CubeCoords & _CellPosition) -> Updater_t
 {
-  return [=](void)
+  return [=](const float)
   {
-    LOGGER(Trace) << "Remove cell [" << 
+    LOGGER_DEBUG(Trace) << "Remove cell [" <<
       _CellPosition.GetX() << ", " << _CellPosition.GetY() << "].";
 
     const auto Objects = m_pGameScene->Remove(_CellPosition);

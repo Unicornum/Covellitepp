@@ -1,7 +1,6 @@
 
 #pragma once
 #include <Covellite/Covellite.hpp>
-#include <Covellite/Api/Vertex.hpp>
 #include "Common.hpp"
 
 namespace events

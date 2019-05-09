@@ -3,7 +3,6 @@
 #include <Rocket/ProgressBar/ElementProgressBar.h>
 #include <Rocket/Core/GeometryUtilities.h>
 #include <Rocket/Core/ElementDocument.h>
-#include <Rocket/Core/ContainerWrapper.h>
 
 using namespace Rocket::ProgressBar;
 

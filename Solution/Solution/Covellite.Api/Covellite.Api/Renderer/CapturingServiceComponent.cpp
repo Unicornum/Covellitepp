@@ -38,7 +38,8 @@ void CapturingServiceComponent::Add(const ComponentPtr_t & _pComponent)
 *  - Компоненты расположены в том порядке значений \b kind, что и во входном
 *  наборе.
 */
-auto CapturingServiceComponent::Get(const ::std::vector<Expected_t> & _Expected) -> ::std::vector<ComponentPtr_t>
+auto CapturingServiceComponent::Get(
+  const Expected_t & _Expected) -> ::std::vector<ComponentPtr_t>
 {
   ::std::vector<ComponentPtr_t> Result;
 

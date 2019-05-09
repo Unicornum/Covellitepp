@@ -2,7 +2,7 @@
 #pragma once
 #include <vector>
 #include <alicorn/std/string.forward.hpp>
-#include <alicorn/boost/filesystem.hpp>
+#include <alicorn/boost/filesystem.forward.hpp>
 #include <Covellite/Api/Renders.hpp>
 #include "IBasement.hpp"
 

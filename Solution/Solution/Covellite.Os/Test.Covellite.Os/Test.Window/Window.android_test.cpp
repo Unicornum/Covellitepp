@@ -115,7 +115,7 @@ TEST_F(Window_test, /*DISABLED_*/Test_GetHandle)
   const ITested_t & IExample = Example;
 
   const auto Result = IExample.GetHandle();
-  EXPECT_EQ(&Window, Result);
+  EXPECT_EQ(&Window, ::covellite::any_cast<ANativeWindow *>(Result));
 }
 
 // ************************************************************************** //

@@ -4,9 +4,6 @@
 #include <memory>
 #include <alicorn\boost\filesystem.forward.hpp>
 #include <Covellite\Events\Events.hpp>
-#include <Covellite\Core\IWindow.hpp>
-#include <Covellite\Core\Window.hpp>
-#include <Covellite\Core\Params.hpp>
 #include <Covellite\App\IWindow.hpp>
 #include <Covellite\Gui\IWindow.hpp>
 #include <Covellite\Gui\Layers.hpp>
@@ -49,9 +46,7 @@ class Renderer;
 */
 class Window final :
   public ::covellite::gui::IWindow,
-  public ::covellite::core::IWindow,
-  public ::covellite::app::IWindow,
-  public covellite::core::Window
+  public ::covellite::app::IWindow
 {
   using WindowApi_t = ::covellite::api::IWindow;
   using WindowApiPtr_t = ::std::shared_ptr<WindowApi_t>;
@@ -74,10 +69,6 @@ public:
   using EventListenerPtr_t = ::std::shared_ptr<EventListener>;
 
 public:
-  // Интерфейс core::IWindow:
-  void Subscribe(const EventHandlerPtr_t & _Events) override;
-
-public:
   // Интерфейс events::IEvents:
   operator Events_t (void) const override;
 
@@ -97,11 +88,6 @@ public:
 private:
   void PushLayer(const LayerPtr_t &);
 
-public:
-  // deprecated
-  template<class TLayer>
-  ::std::shared_ptr<TLayer> AddLayer(void);
-
 private:
   Vector_t GetContextSize(void) const;
   void DoDrawWindow(void);
@@ -112,7 +98,6 @@ private:
   Events_t              m_Events;
   RendererPtr_t         m_pRenderer;
   EventListenerPtr_t    m_pEventListener;
-  EventHandlerPtr_t     m_pEvents;
   StringTranslatorPtr_t m_pStringTranslator;
   InitializerPtr_t      m_pInitializer;
   ContextPtr_t          m_pContext;
@@ -120,7 +105,6 @@ private:
 
 public:
   explicit Window(const WindowApi_t &);
-  explicit Window(const WindowApiPtr_t &);
   ~Window(void) noexcept;
 };
 

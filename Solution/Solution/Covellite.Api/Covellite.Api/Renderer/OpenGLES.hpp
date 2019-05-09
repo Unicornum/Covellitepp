@@ -57,7 +57,7 @@ private:
   EglPtr_t<covellite::egl::Context> m_pContext;
 
 public:
-  explicit OpenGLES(const Renderer::Data &);
+  explicit OpenGLES(const Data_t &);
   ~OpenGLES(void);
 };
 

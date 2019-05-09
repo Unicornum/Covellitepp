@@ -1,9 +1,7 @@
 
 #include "stdafx.h"
 #include <Rocket/CircularBar/ElementCircularBar.h>
-#include <Rocket/Core/GeometryUtilities.h>
 #include <Rocket/Core/ElementDocument.h>
-#include <Rocket/Core.h>
 
 namespace Rocket {
 namespace CircularBar {
@@ -90,7 +88,7 @@ void ElementCircularBar::OnPropertyChange(const Core::PropertyNameList& changed_
 // Called when gauge has been filled.
 void ElementCircularBar::GenerateGeometry()
 {
-	int current_vertex_count;
+	size_t current_vertex_count;
 	float filled_angle;
 	float progression;
 	float tangent;
@@ -280,7 +278,7 @@ void ElementCircularBar::GenerateGeometry()
 	}
 
 	indices.resize(current_vertex_count * 3);
-	for(int vertex_index = 0; vertex_index < current_vertex_count; vertex_index++)
+	for(size_t vertex_index = 0; vertex_index < current_vertex_count; vertex_index++)
 	{
 		indices[vertex_index * 3] = 0;
 		indices[vertex_index * 3 + 1] = vertex_index + 1;

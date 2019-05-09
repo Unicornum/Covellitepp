@@ -16,6 +16,8 @@ namespace controller
 * \brief
 *  Класс входит в проект \ref ExamplePage \n
 *  Класс реализации \b контроллера паттерна MVC.
+* \details
+*  Связывает между собой модель и представление.
 *
 * \version
 *  1.0.0.0        \n

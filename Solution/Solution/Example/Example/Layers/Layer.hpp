@@ -43,10 +43,6 @@ class Layer :
 {
   using String_t = ::alicorn::extension::std::String;
 
-public:
-  // Èםעונפויס IWindow:
-  void Subscribe(const EventHandlerPtr_t &) override {}
-
 protected:
   const float m_FontSize;
   const bool  m_IsStopBasements;

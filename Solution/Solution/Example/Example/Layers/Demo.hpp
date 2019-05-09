@@ -56,9 +56,6 @@ class Demo final :
 {
   using Updater_t = ::std::function<void(void)>;
 
-public:
-  void Subscribe(const EventHandlerPtr_t &) override {}
-
 private:
   void EmployFontSize(void);
   void ActivateProcessMainMenuEvents(void);

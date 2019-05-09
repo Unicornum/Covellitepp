@@ -137,8 +137,8 @@ TEST_F(Window_test, /*DISABLED_*/Test_WindowMode_Resized)
 
   const ::mock::Id_t InfoId = 1711032335;
   const auto Title = uT("Title1711032336");
-  //const ::mock::Id_t RootSectionId = 1711091118;
-  //const ::mock::Id_t MainSectionId = 1711091120;
+  const ::mock::Id_t RootSectionId = 1711091118;
+  const ::mock::Id_t MainSectionId = 1711091120;
   const ::mock::Id_t WindowSectionId = 1711091058;
   const ::mock::Id_t SizeSectionId = 1711091059;
   const auto ClientWidth = 1711091107;
@@ -161,16 +161,14 @@ TEST_F(Window_test, /*DISABLED_*/Test_WindowMode_Resized)
 
   InSequence Dummy;
 
-  // ¬осстановить, когда будут удалены deprecated тесты 
+  EXPECT_CALL(SettingsProxy, Constructor())
+    .WillOnce(Return(RootSectionId));
 
-  //EXPECT_CALL(SettingsProxy, Constructor())
-  //  .WillOnce(Return(RootSectionId));
+  EXPECT_CALL(SettingsProxy, GetChildSectionImpl(RootSectionId, _))
+    .Times(1);
 
-  //EXPECT_CALL(SettingsProxy, GetChildSectionImpl(RootSectionId, _))
-  //  .Times(1);
-
-  //EXPECT_CALL(SettingsProxy, Constructor())
-  //  .WillOnce(Return(MainSectionId));
+  EXPECT_CALL(SettingsProxy, Constructor())
+    .WillOnce(Return(MainSectionId));
 
   EXPECT_CALL(SettingsProxy, GetChildSectionImpl(_, uT("Window")))
     .Times(1);
@@ -266,7 +264,7 @@ TEST_F(Window_test, /*DISABLED_*/Test_WindowMode_Resized)
     const Application_t Application{ Application_t::EventBased{} };
     const Tested_t Example{ Application };
     const ITested_t & IExample = Example;
-    EXPECT_EQ(hWnd, IExample.GetHandle());
+    EXPECT_EQ(hWnd, ::covellite::any_cast<HWND>(IExample.GetHandle()));
 
     EXPECT_CALL(WindowsProxy, DestroyWindow(hWnd))
       .Times(1);
@@ -393,7 +391,7 @@ TEST_F(Window_test, /*DISABLED_*/Test_WindowMode_NoResized)
     const Application_t Application{ Application_t::EventBased{} };
     const Tested_t Example{ Application };
     const ITested_t & IExample = Example;
-    EXPECT_EQ(hWnd, IExample.GetHandle());
+    EXPECT_EQ(hWnd, ::covellite::any_cast<HWND>(IExample.GetHandle()));
 
     EXPECT_CALL(WindowsProxy, DestroyWindow(hWnd))
       .Times(1);
@@ -573,7 +571,7 @@ TEST_F(Window_test, /*DISABLED_*/Test_FullScreenMode)
     const Application_t Application{ Application_t::EventBased{} };
     const Tested_t Example{ Application };
     const ITested_t & IExample = Example;
-    EXPECT_EQ(hWnd, IExample.GetHandle());
+    EXPECT_EQ(hWnd, ::covellite::any_cast<HWND>(IExample.GetHandle()));
 
     EXPECT_CALL(WindowsProxy, DestroyWindow(hWnd))
       .Times(1);

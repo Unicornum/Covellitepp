@@ -82,7 +82,7 @@ Id_t DbComponents::AddGameObject(const Object_t & _Object)
 {
   const auto Id = m_pId->GetFreeId();
 
-  LOGGER(Trace) << "Create object: id = " << Id;
+  LOGGER_DEBUG(Trace) << "Create object: id = " << Id;
 
   if(Id >= m_Objects.size()) m_Objects.resize(Id + 1);
 
@@ -98,20 +98,11 @@ void DbComponents::RemoveGameObject(const Id_t _Id)
 {
   DoRemoveObject(_Id);
 
-  LOGGER(Trace) << "Remove object: id = " << _Id;
+  LOGGER_DEBUG(Trace) << "Remove object: id = " << _Id;
 
   m_Objects[_Id].clear();
 
   m_pId->AddRemovedObjectId(_Id);
-}
-
-// cppcheck-suppress passedByValue
-ComponentPtr_t DbComponents::GetComponent(
-  const Id_t /*_ObjectId*/, 
-  const String_t & /*_ComponentType*/, 
-  const String_t & /*_ComponentKind*/) const
-{
-  throw STD_EXCEPTION << "Not released.";
 }
 
 } // namespace model

@@ -6,10 +6,7 @@
 #include <Covellite/Covellite.hpp>
 #include "IGameWorld.hpp"
 #include "GameObject.hpp"
-#include "DbUpdaters.hpp"
 #include "CubeCoords.hpp"
-
-namespace boost { class thread; }
 
 namespace basement
 {
@@ -37,15 +34,16 @@ class DbComponents;
 class GameWorld final :
   public IGameWorld
 {
+  using Updater_t = ::std::function<void(const float)>;
   using Events_t = ::covellite::events::Events;
   using IntPtr_t = int *;
-  using Type_t = GameObject::Type;
+  using Type_t = size_t;
 
 public:
   // Èםעונפויס IGameWorld
   GameScenePtr_t CreateGameScene(void) override;
   float GetLandscapeHeight(const CubeCoords &) const override;
-  size_t GetGameObjectType(const CubeCoords &) const override;
+  IGameObject::Landscape::Value GetGameObjectType(const CubeCoords &) const override;
 
 private:
   void PrepareScene(const IntPtr_t &);
@@ -55,7 +53,7 @@ private:
 
 private:
   void LoadObject(const GameObject::IGameObjectPtr_t &, const Any_t & = Any_t{});
-  Id_t LoadObject(const GameObject::IGameObjectPtr_t &, const Updater_t &);
+  void LoadObject(const GameObject::IGameObjectPtr_t &, const Updater_t &);
   void LoadObject(const GameObject::IGameObjectPtr_t &, const CubeCoords &);
   void PrepareLoader(const IntPtr_t &);
   void PrepareLoader(void);
@@ -70,10 +68,9 @@ private:
 private:
   Events_t                m_Events;
   DbComponents &          m_DbComponents;
-  DbUpdaters              m_DbUpdaters;
   GameScenePtr_t          m_pGameScene;
   ::std::queue<Updater_t> m_LoadingQueue;
-  Updater_t               m_ProcessingMode = [](void) {};
+  Updater_t               m_ProcessingMode = [](const float) {};
 
 private:
   class Step final

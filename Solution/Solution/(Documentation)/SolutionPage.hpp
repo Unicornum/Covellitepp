@@ -19,12 +19,6 @@
 *  Проекты решения
 *  ---------------
 *  
-*  ### Covellite.Rocket
-*
-* \copydoc CovelliteRocketBriefPage
-*
-*  Страница проекта \subpage CovelliteRocketPage
-*
 *  ### Covellite.Gui
 *
 * \copydoc CovelliteGuiBriefPage
@@ -48,12 +42,6 @@
 *  \copydoc CovelliteOsBriefPage
 *
 *  Страница проекта \subpage CovelliteOsPage
-*
-*  ### Covellite.Core
-*
-* \copydoc CovelliteCoreBriefPage
-*
-*  Страница проекта \subpage CovelliteCorePage
 *
 *  ### Covellite.App
 *

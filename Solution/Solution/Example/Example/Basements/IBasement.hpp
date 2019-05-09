@@ -1,6 +1,7 @@
 
 #pragma once
-#include <boost/any.hpp>
+
+namespace boost { class any; }
 
 /**
 * \defgroup ExampleBasementGroup Basement

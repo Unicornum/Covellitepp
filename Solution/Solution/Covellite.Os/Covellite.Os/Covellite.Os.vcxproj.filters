@@ -15,7 +15,6 @@
     <ClInclude Include="Configuration.hpp" />
     <ClInclude Include="Configuration.mock.hpp" />
     <ClInclude Include="IWindow.hpp" />
-    <ClInclude Include="Predefined.hpp" />
     <ClInclude Include="Window.hpp" />
     <ClInclude Include="Window.mock.hpp" />
     <ClInclude Include="Events.hpp" />

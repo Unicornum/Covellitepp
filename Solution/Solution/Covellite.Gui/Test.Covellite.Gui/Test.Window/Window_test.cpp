@@ -85,6 +85,26 @@ private:
   Context_t m_Context;
   RendersPtr_t m_pRenders = 
     ::std::make_shared<Renders_t>(Renders_t::Creators_t{});
+
+protected:
+  class SupportWindow
+  {
+  public:
+    MOCK_METHOD0(OnExit, void(void));
+
+  private:
+    Events_t m_Events;
+
+  public:
+    explicit SupportWindow(const IWindowApi_t & _WindowApi) :
+      m_Events(_WindowApi)
+    {
+      m_Events[::covellite::events::Application.Exit].Connect([&](void) 
+      { 
+        OnExit(); 
+      });
+    }
+  };
 };
 
 // Образец макроса для подстановки в класс Window 
@@ -399,47 +419,6 @@ TEST_F(Window_test, /*DISABLED_*/Test_DefaultDestructor)
 }
 
 // ************************************************************************** //
-TEST_F(Window_test, /*DISABLED_*/Test_Destructor)
-{
-  using EventHandlerProxy_t = ::mock::covellite::core::EventHandler::Proxy;
-  EventHandlerProxy_t EventHandlerProxy;
-  EventHandlerProxy_t::GetInstance() = &EventHandlerProxy;
-
-  using RocketCoreProxy_t = ::mock::Rocket::Core::Proxy;
-  RocketCoreProxy_t RocketCoreProxy;
-  RocketCoreProxy_t::GetInstance() = &RocketCoreProxy;
-
-  const ::mock::Id_t EventHandlerId = 1710121146;
-  ::mock::Rocket::Core::Context Context;
-
-  const WindowOs_t WindowOs;
-  const WindowApi_t WindowApi{ WindowOs };
-  const IWindowApi_t & IWindowApi = WindowApi;
-
-  using namespace ::testing;
-
-  EXPECT_CALL(EventHandlerProxy, DummyConstructor())
-    .Times(1)
-    .WillOnce(Return(EventHandlerId));
-
-  EXPECT_CALL(RocketCoreProxy, CreateContext(_, _, _))
-    .Times(1)
-    .WillOnce(Return(&Context));
-
-  {
-    Tested_t Example{ IWindowApi };
-
-    InSequence Dummy;
-
-    EXPECT_CALL(EventHandlerProxy, Unsubscribe(EventHandlerId, &Context))
-      .Times(1);
-
-    EXPECT_CALL(Context, RemoveReference())
-      .Times(1);
-  }
-}
-
-// ************************************************************************** //
 TEST_F(Window_test, /*DISABLED_*/Test_GetEvents)
 {
   class Proxy
@@ -572,7 +551,7 @@ TEST_F(Window_test, /*DISABLED_*/Test_PushLayer)
 
   public:
     explicit Layer(ITested_t & _Window) :
-      ::mock::covellite::gui::Layer(&_Window, GetPathToFile())
+      ::mock::covellite::gui::Layer(_Window, GetPathToFile())
     {
     }
   };
@@ -616,15 +595,13 @@ TEST_F(Window_test, /*DISABLED_*/Test_Back_ExistsLayer)
   LayersProxy_t LayersProxy;
   LayersProxy_t::GetInstance() = &LayersProxy;
 
-  using WindowCoreProxy_t = ::mock::covellite::core::Window::Proxy;
-  WindowCoreProxy_t WindowCoreProxy;
-  WindowCoreProxy_t::GetInstance() = &WindowCoreProxy;
-
-  using namespace ::testing;
-
   const WindowOs_t WindowOs;
   const WindowApi_t WindowApi{ WindowOs };
   const IWindowApi_t & IWindowApi = WindowApi;
+
+  SupportWindow Support{ IWindowApi };
+
+  using namespace ::testing;
 
   InSequence Dummy;
 
@@ -637,7 +614,7 @@ TEST_F(Window_test, /*DISABLED_*/Test_Back_ExistsLayer)
     .Times(1)
     .WillOnce(Return(true));
 
-  EXPECT_CALL(WindowCoreProxy, Exit(_))
+  EXPECT_CALL(Support, OnExit())
     .Times(0);
 
   Example.Back();
@@ -654,23 +631,14 @@ TEST_F(Window_test, /*DISABLED_*/Test_Back_NotExistsLayer)
   LayersProxy_t LayersProxy;
   LayersProxy_t::GetInstance() = &LayersProxy;
 
-  using WindowCoreProxy_t = ::mock::covellite::core::Window::Proxy;
-  WindowCoreProxy_t WindowCoreProxy;
-  WindowCoreProxy_t::GetInstance() = &WindowCoreProxy;
-
-  const ::mock::Id_t WindowOsId = 1710021307;
-
-  using namespace ::testing;
-
-  EXPECT_CALL(WindowCoreProxy, Constructor())
-    .Times(1)
-    .WillOnce(Return(WindowOsId));
-
   const WindowOs_t WindowOs;
   const WindowApi_t WindowApi{ WindowOs };
   const IWindowApi_t & IWindowApi = WindowApi;
 
+  SupportWindow Support{ IWindowApi };
   Tested_t Example{ IWindowApi };
+
+  using namespace ::testing;
 
   InSequence Dummy;
 
@@ -681,7 +649,7 @@ TEST_F(Window_test, /*DISABLED_*/Test_Back_NotExistsLayer)
     .Times(1)
     .WillOnce(Return(false));
 
-  EXPECT_CALL(WindowCoreProxy, Exit(WindowOsId))
+  EXPECT_CALL(Support, OnExit())
     .Times(1);
 
   Example.Back();
@@ -882,41 +850,26 @@ TEST_F(Window_test, /*DISABLED_*/Test_OnRelease)
 // ************************************************************************** //
 TEST_F(Window_test, /*DISABLED_*/Test_OnBack_ExistLayers)
 {
-  using RocketCoreProxy_t = ::mock::Rocket::Core::Proxy;
-  RocketCoreProxy_t RocketCoreProxy;
-  RocketCoreProxy_t::GetInstance() = &RocketCoreProxy;
-
   using LayersProxy_t = ::mock::covellite::gui::Layers::Proxy;
   LayersProxy_t LayersProxy;
   LayersProxy_t::GetInstance() = &LayersProxy;
 
-  using WindowCoreProxy_t = ::mock::covellite::core::Window::Proxy;
-  WindowCoreProxy_t WindowCoreProxy;
-  WindowCoreProxy_t::GetInstance() = &WindowCoreProxy;
-
-  ::mock::Rocket::Core::Context Context;
-
-  using namespace ::testing;
-
   const WindowOs_t WindowOs;
   const WindowApi_t WindowApi{ WindowOs };
   const IWindowApi_t & IWindowApi = WindowApi;
-
-  InSequence Dummy;
-
-  EXPECT_CALL(RocketCoreProxy, CreateContext(_, _, _))
-    .Times(1)
-    .WillOnce(Return(&Context));
+  SupportWindow Support{ IWindowApi };
 
   Tested_t Example{ IWindowApi };
 
-  using namespace ::covellite::core;
+  using namespace ::testing;
+
+  InSequence Dummy;
 
   EXPECT_CALL(LayersProxy, Pop(_))
     .Times(1)
     .WillOnce(Return(true));
 
-  EXPECT_CALL(WindowCoreProxy, Exit(_))
+  EXPECT_CALL(Support, OnExit())
     .Times(0);
 
   using namespace ::covellite::events;
@@ -928,47 +881,26 @@ TEST_F(Window_test, /*DISABLED_*/Test_OnBack_ExistLayers)
 // ************************************************************************** //
 TEST_F(Window_test, /*DISABLED_*/Test_OnBack_EmptyLayers)
 {
-  using RocketCoreProxy_t = ::mock::Rocket::Core::Proxy;
-  RocketCoreProxy_t RocketCoreProxy;
-  RocketCoreProxy_t::GetInstance() = &RocketCoreProxy;
-
   using LayersProxy_t = ::mock::covellite::gui::Layers::Proxy;
   LayersProxy_t LayersProxy;
   LayersProxy_t::GetInstance() = &LayersProxy;
 
-  using WindowCoreProxy_t = ::mock::covellite::core::Window::Proxy;
-  WindowCoreProxy_t WindowCoreProxy;
-  WindowCoreProxy_t::GetInstance() = &WindowCoreProxy;
-
-  const ::mock::Id_t WindowOsId = 1710021308;
-
-  ::mock::Rocket::Core::Context Context;
-
-  using namespace ::testing;
-
-  EXPECT_CALL(WindowCoreProxy, Constructor())
-    .Times(1)
-    .WillOnce(Return(WindowOsId));
-
   const WindowOs_t WindowOs;
   const WindowApi_t WindowApi{ WindowOs };
   const IWindowApi_t & IWindowApi = WindowApi;
-
-  InSequence Dummy;
-
-  EXPECT_CALL(RocketCoreProxy, CreateContext(_, _, _))
-    .Times(1)
-    .WillOnce(Return(&Context));
+  SupportWindow Support{ IWindowApi };
 
   Tested_t Example{ IWindowApi };
 
-  using namespace ::covellite::core;
+  using namespace ::testing;
+
+  InSequence Dummy;
 
   EXPECT_CALL(LayersProxy, Pop(_))
     .Times(1)
     .WillOnce(Return(false));
 
-  EXPECT_CALL(WindowCoreProxy, Exit(WindowOsId))
+  EXPECT_CALL(Support, OnExit())
     .Times(1);
 
   using namespace ::covellite::events;
@@ -1008,8 +940,6 @@ TEST_F(Window_test, /*DISABLED_*/Test_OnKeyDown)
 
   Tested_t Example{ IWindowApi };
 
-  using namespace ::covellite::core;
-  
   EXPECT_CALL(SystemToRocketKeyCodeProxy, Convert(KeyCode))
     .Times(1)
     .WillOnce(Return(RocketKeyCode));

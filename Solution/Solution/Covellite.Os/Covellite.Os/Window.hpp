@@ -1,6 +1,6 @@
 ﻿
 #pragma once
-#include <Covellite/Core/IWindow.hpp>
+#include <Covellite/Predefined.hpp>
 #include <Covellite/Events/Events.hpp>
 #include <Covellite/App/IWindow.hpp>
 #include <Covellite/Os/IWindow.hpp>
@@ -37,15 +37,10 @@ namespace os
 *  © CTAPOBEP 2016 - 2018
 */
 class Window final :
-  public ::covellite::core::IWindow,
   public ::covellite::app::IWindow,
   public ::covellite::os::IWindow
 {
   using Configuration_t = covellite::os::Configuration;
-
-public:
-  // Интерфейс core::IWindow:
-  void Subscribe(const EventHandlerPtr_t &) override;
 
 public:
   // Интерфейс events::IEvents:
@@ -53,7 +48,7 @@ public:
 
 public:
   // Интерфейс os::IWindow:
-  Handle_t GetHandle(void) const override;
+  Any_t GetHandle(void) const override;
   Rect GetClientRect(void) const override;
   const Configuration_t & GetConfiguration(void) const override;
 
@@ -67,12 +62,11 @@ private:
   Events_t        m_Events;
   long            m_MinWindowWidth = 0;
   long            m_MinWindowHeight = 0;
-  Handle_t        m_Handle;
+  Any_t           m_Handle;
   Configuration_t m_Configuration;
   size_t          m_LastTypeSizeMessage;
 
 public:
-  Window(void);
   explicit Window(const ::covellite::app::IApplication &);
   ~Window(void);
 

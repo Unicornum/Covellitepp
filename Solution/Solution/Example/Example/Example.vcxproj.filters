@@ -123,9 +123,6 @@
     <ClInclude Include="Basements\Demo\Defines.hpp">
       <Filter>Basements\Demo</Filter>
     </ClInclude>
-    <ClInclude Include="Basements\Demo\DbUpdaters.hpp">
-      <Filter>Basements\Demo</Filter>
-    </ClInclude>
     <ClInclude Include="Basements\Demo\IGameObject.hpp">
       <Filter>Basements\Demo</Filter>
     </ClInclude>
@@ -235,9 +232,6 @@
       <Filter>Basements\Demo</Filter>
     </ClCompile>
     <ClCompile Include="BasementWindow.cpp" />
-    <ClCompile Include="Basements\Demo\DbUpdaters.cpp">
-      <Filter>Basements\Demo</Filter>
-    </ClCompile>
     <ClCompile Include="Basements\Demo\GameObject.cpp">
       <Filter>Basements\Demo</Filter>
     </ClCompile>

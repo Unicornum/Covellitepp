@@ -13,8 +13,6 @@ namespace covellite
 namespace api
 {
 
-class RenderInterface;
-
 /**
 * \ingroup CovelliteApiGroup
 * \brief
@@ -38,7 +36,6 @@ class IWindow :
   public ::covellite::events::IEvents
 {
 protected:
-  using RenderInterfacePtr_t = ::std::shared_ptr<RenderInterface>;
   using Rect_t = ::covellite::os::IWindow::Rect;
   using RendersPtr_t = ::std::shared_ptr<Component::Renders>;
 
@@ -47,24 +44,6 @@ public:
   virtual Rect_t GetClientRect(void) const = 0;
   /// Функция получения объекта создания/удаления рендеров для компонентов.
   virtual RendersPtr_t GetRenders(void) const = 0;
-
-  /// \deprecated
-  ///  Функция устарела и будет удалена в следующей стабильной версии,
-  ///  вместо нее следует использовать компонентную систему рендеринга,
-  ///  используя объект, возвращаемый функцией GetRenders().
-  virtual RenderInterfacePtr_t GetRenderInterface(void) const = 0;
-  /// \deprecated
-  ///  Функция устарела и будет удалена в следующей стабильной версии,
-  ///  используйте вместо нее функцию GetClientRect().
-  virtual int32_t GetWidth(void) const = 0;
-  /// \deprecated
-  ///  Функция устарела и будет удалена в следующей стабильной версии,
-  ///  используйте вместо нее функцию GetClientRect().
-  virtual int32_t GetHeight(void) const = 0;
-  /// \deprecated
-  ///  Функция устарела и будет удалена в следующей стабильной версии,
-  ///  используйте вместо нее функцию GetRenderInterface().
-  virtual RenderInterfacePtr_t MakeRenderInterface(void) const = 0;
 
 public:
   virtual ~IWindow(void) = default;

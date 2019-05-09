@@ -1,6 +1,5 @@
 
-#include <alicorn\requirements.hpp>
-#include <alicorn\std\exception.hpp>
+#include "stdafx.h"
 
 using HWND = int;
 using HDC = int;

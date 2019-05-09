@@ -36,14 +36,14 @@ namespace renderer
 class CapturingServiceComponent final
 {
   using Kind_t = ::alicorn::extension::std::String;
-  using ComponentPtr_t = ::std::shared_ptr<Component>;
-  using Expected_t = ::std::pair<Kind_t, ComponentPtr_t>;
+  using ComponentPtr_t = Component::ComponentPtr_t;
+  using Expected_t = ::std::vector<::std::pair<Kind_t, ComponentPtr_t>>;
   using Hadler_t = ::std::function<void(const ComponentPtr_t &)>;
   using Handlers_t = ::std::map<Kind_t, Hadler_t>;
 
 public:
   void Add(const ComponentPtr_t &);
-  ::std::vector<ComponentPtr_t> Get(const ::std::vector<Expected_t> &);
+  ::std::vector<ComponentPtr_t> Get(const Expected_t &);
   void Process(const Handlers_t &);
 
 private:

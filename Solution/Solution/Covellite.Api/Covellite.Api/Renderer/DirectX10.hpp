@@ -51,11 +51,11 @@ class DirectX10 final :
   template<class T>
   using ComPtr_t = ::Microsoft::WRL::ComPtr<T>;
   using Renders_t = ::std::vector<Render_t>;
+  using Data_t = ::covellite::api::renderer::SettingsData;
 
 public:
   // Èםעונפויס IGraphicApi:
   String_t GetUsingApi(void) const override;
-  void ClearFrame(void) override;
   void PresentFrame(void) override;
   void ResizeWindow(int32_t, int32_t) override;
   const Creators_t & GetCreators(void) const override;
@@ -85,8 +85,7 @@ private:
   Render_t CreatePreRenderGeometry(void);
 
 private:
-  const ::std::vector<FLOAT>  m_BkColor;
-  const Creators_t            m_Creators;
+  const Creators_t m_Creators;
 
 private:
   ComPtr_t<ID3D10Device>            m_pDevice;
@@ -99,7 +98,7 @@ private:
   CapturingServiceComponent     m_ServiceComponents;
 
 public:
-  explicit DirectX10(const Renderer::Data &);
+  explicit DirectX10(const Data_t &);
   ~DirectX10(void);
 };
 

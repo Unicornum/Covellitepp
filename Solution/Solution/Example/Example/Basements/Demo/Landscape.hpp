@@ -41,8 +41,9 @@ private:
 
   private:
     void LoadMesh(const Path_t &, const Rect &);
-    void BuildMesh(const Type::Value, const int, const float, const Rect &);
+    void BuildMesh(const size_t, const int, const float, const Rect &);
     void BuildBasementObject(const float);
+    // cppcheck-suppress functionStatic
     void BuildTriplex6Object(const Point &, const float, const float, 
       const float, const Rect &);
     void BuildTriplex12Object(const Point &, const float, const float, 
@@ -50,13 +51,15 @@ private:
     static Point GetPoint(const float, const float = 0.5f);
 
   public:
-    Mesh(const Type::Value, const float, const Rect &);
+    Mesh(const size_t, const float, const Rect &);
     Mesh(const int, const float, const Rect &);
     Mesh(const Path_t &, const float, const Rect &);
   };
 
 private:
-  uint32_t GetBright(const CubeCoords &) const;
+  Object_t GetMaterial(const CubeCoords &) const;
+  Object_t GetTransform(const CubeCoords &) const;
+  static Object_t GetPresent(void);
 
 private:
   bool m_IsUsingRotate = true;
@@ -65,7 +68,7 @@ private:
   ::std::vector<::std::vector<::std::pair<size_t, size_t>>> m_Models;
 
 private:
-  Landscape(const Type::Value, const IGameWorld &);
+  Landscape(const GameObject::Landscape::Value, const IGameWorld &);
   friend GameObject;
 };
 

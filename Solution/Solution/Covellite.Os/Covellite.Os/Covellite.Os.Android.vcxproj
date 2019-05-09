@@ -63,7 +63,6 @@
     <ClInclude Include="Events.hpp" />
     <ClInclude Include="IWindow.hpp" />
     <ClInclude Include="pch.h" />
-    <ClInclude Include="Predefined.hpp" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="Window.hpp" />
     <ClInclude Include="Window.mock.hpp" />

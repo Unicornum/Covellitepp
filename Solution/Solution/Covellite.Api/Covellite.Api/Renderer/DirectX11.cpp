@@ -120,7 +120,7 @@ private:
     T Data;
 
   public:
-    void Update(void)
+    void Update(void) const
     {
       m_pImmediateContext->UpdateSubresource(
         m_pBuffer.Get(), 0, NULL, &Data, 0, 0);
@@ -145,13 +145,13 @@ public:
   T & Get(void) = delete;
 
   template<class T>
-  void Update(void) = delete;
+  void Update(void) const = delete;
 
   template<>
   inline ::Matrices & Get(void) { return m_Matrices.Data; }
 
   template<>
-  inline void Update<::Matrices>(void)
+  inline void Update<::Matrices>(void) const
   {
     m_Matrices.Update();
   }
@@ -168,7 +168,7 @@ public:
   inline ::Lights & Get(void) { return m_Lights[m_CurrentCameraId]; }
 
   template<>
-  inline void Update<::Lights>(void) { m_CurrentLights.Update(); }
+  inline void Update<::Lights>(void) const { m_CurrentLights.Update(); }
 
 private:
   ConstantBuffer<::Matrices>        m_Matrices;
@@ -185,8 +185,7 @@ public:
   }
 };
 
-DirectX11::DirectX11(const Renderer::Data & _Data) :
-  m_BkColor{ _Data.BkColor.R, _Data.BkColor.G, _Data.BkColor.B, _Data.BkColor.A }
+DirectX11::DirectX11(const Data_t & _Data)
 {
   CreateDeviceAndSwapChain(_Data);
 
@@ -227,12 +226,6 @@ DirectX11::String_t DirectX11::GetUsingApi(void) const /*override*/
   return uT("DirectX 11");
 }
 
-void DirectX11::ClearFrame(void) /*override*/
-{
-  m_pImmediateContext->ClearRenderTargetView(m_pRenderTargetView.Get(), 
-    m_BkColor.data());
-}
-
 void DirectX11::PresentFrame(void) /*override*/
 {
   m_pSwapChain->Present(0, 0);
@@ -248,7 +241,7 @@ auto DirectX11::GetCreators(void) const -> const Creators_t & /*override*/
   return m_Creators;
 }
 
-void DirectX11::CreateDeviceAndSwapChain(const Renderer::Data & _Data)
+void DirectX11::CreateDeviceAndSwapChain(const Data_t & _Data)
 {
   const D3D_FEATURE_LEVEL FeatureLevels[] =
   {
@@ -257,7 +250,7 @@ void DirectX11::CreateDeviceAndSwapChain(const Renderer::Data & _Data)
   };
 
   DXGI_SWAP_CHAIN_DESC sd = { 0 };
-  sd.OutputWindow = _Data.Handle;
+  sd.OutputWindow = ::covellite::any_cast<HWND>(_Data.Handle);
   sd.Windowed = (_Data.IsFullScreen) ? FALSE : TRUE;
   sd.BufferCount = 2;
   sd.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
@@ -380,7 +373,7 @@ auto DirectX11::CreateCamera(const ComponentPtr_t & _pComponent) -> Render_t
       { uT("Rotation"), api::Component::Make({}) },
     });
 
-  const Render_t CameraGui = [=](void)
+  const Render_t CameraOptographic = [=](void)
   {
     const Component::Position Pos{ ServiceComponents[0] };
 
@@ -402,7 +395,7 @@ auto DirectX11::CreateCamera(const ComponentPtr_t & _pComponent) -> Render_t
       ::DirectX::XMMatrixIdentity());
   };
 
-  const Render_t CameraFocal = [=](void)
+  const Render_t CameraPerspective = [=](void)
   {
     DisabledBlendRender();
     DisableDepthRender();
@@ -447,9 +440,8 @@ auto DirectX11::CreateCamera(const ComponentPtr_t & _pComponent) -> Render_t
         ::DirectX::XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f)));
   };
 
-  const auto Focal = _pComponent->GetValue(uT("focal"), uT("Disabled"));
-  return (_pComponent->Kind == uT("Perspective") || Focal == uT("Enabled")) ? 
-    CameraFocal : CameraGui;
+  return (_pComponent->Kind == uT("Perspective")) ? 
+    CameraPerspective : CameraOptographic;
 }
 
 auto DirectX11::CreateState(const ComponentPtr_t & _pComponent) -> Render_t
@@ -540,13 +532,19 @@ auto DirectX11::CreateState(const ComponentPtr_t & _pComponent) -> Render_t
     };
   };
 
+  const auto CreateAlphaTestState = [&](void)
+  {
+    return nullptr;
+  };
+
   ::std::map<String_t, ::std::function<Render_t(void)>> Creators =
   {
     { uT("Blend"), [&](void) { return CreateBlendState(true); } },
-    { uT("Sampler"), CreateSamplerState },
-    { uT("Scissor"), CreateScissorState },
-    { uT("Depth"),   CreateDepthState },
-    { uT("Clear"),   CreateClearState   },
+    { uT("Sampler"),    CreateSamplerState   },
+    { uT("Scissor"),    CreateScissorState   },
+    { uT("Depth"),      CreateDepthState     },
+    { uT("Clear"),      CreateClearState     },
+    { uT("AlphaTest"),  CreateAlphaTestState },
   };
 
   return Creators[_pComponent->Kind]();
@@ -818,14 +816,7 @@ auto DirectX11::CreatePresent(const ComponentPtr_t & _pComponent) -> Render_t
 {
   ::std::map<String_t, ::std::function<Render_t(void)>> Creators =
   {
-    {
-      uT("Camera"),
-      [&](void) { return CreateCamera(_pComponent); }
-    },
-    {
-      uT("Geometry"),
-      [&](void) { return CreateGeometry(_pComponent); }
-    },
+    { uT("Geometry"), [&](void) { return CreateGeometry(_pComponent); } },
   };
 
   return Creators[_pComponent->Kind]();

@@ -12,7 +12,9 @@ namespace gui
 * \ingroup CovelliteGuiGroup
 * \brief
 *  Класс входит в проект \ref CovelliteGuiPage \n
-*  Реализация интерфейса libRocket для чтения файлов из assets.
+*  Реализация интерфейса libRocket для чтения файлов.
+* \todo
+*  Класс используется для внутренней реализации и не должен попадать в Externals.
 *
 * \version
 *  1.0.0.0        \n

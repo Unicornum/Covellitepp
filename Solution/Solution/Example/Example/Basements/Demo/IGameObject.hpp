@@ -29,32 +29,45 @@ protected:
   using Objects_t = ::std::vector<Object_t>;
 
 public:
-  class Type final
+  class Support final
   {
   public:
     enum Value
     {
-      Skybox = 0x00,
-      Camera = 0x08,
+      Skybox = 0, // Перед камерой основной сцены!
+      Camera,
+    };
+  };
 
+  class Landscape final
+  {
+  public:
+    enum Value
+    {
       // Объекты поверхности, не содержащие прозрачных пикселей
-      None = 0x09,
+      None = Support::Camera + 1, // После камеры!
       Sand,
       Rock,
       Well,
 
-      Water = 0x10, // Вода - особый случай - прозрачная      
-
       // Объекты поверхности, содержащие прозрачные пиксели
-      Grass = 0x11,
+      Grass,
       Bush,
       Tree,
 
-      // Маска объектов поверхности
-      LandscapeMask = 0x07,
-      
-      Compass= 0x18, // Должен рендерится гарантированно последним
-      Loader = 0x20,
+      Invalid,
+    };
+  };
+
+  class Extra final
+  {
+  public:
+    enum Value
+    {
+      Water = Landscape::Invalid, // Вода - после объектов поверхности!
+      Compass, // Должен рендерится гарантированно последним
+      Loader,  // Должен рендерится последним, т.к. его updater удаляет
+               // объекты, которые еще находятся в списке рендеринга.
     };
   };
 
@@ -63,7 +76,7 @@ public:
   * \brief
   *  Функция получения типа игрового объекта.
   */
-  virtual Type::Value GetType(void) const = 0;
+  virtual size_t GetType(void) const = 0;
 
   /**
   * \brief

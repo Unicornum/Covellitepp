@@ -32,7 +32,6 @@ class DirectX11_test :
 protected:
   using Tested_t = ::covellite::api::renderer::DirectX11;
   using ITested_t = ::covellite::api::renderer::IGraphicApi;
-  using Data_t = ::covellite::api::renderer::Renderer::Data;
   using Component_t = ::covellite::api::Component;
   using String_t = ::alicorn::extension::std::String;
   using Render_t = ::std::function<void(void)>;
@@ -80,6 +79,21 @@ protected:
     ::testing::DefaultValue<ID3D11DepthStencilView *>::Clear();
   }
 
+protected:
+  class Data :
+    public ::covellite::api::renderer::SettingsData
+  {
+  public:
+    Data(void)
+    {
+      Handle = (HWND)0;
+      Top = 0;
+      IsFullScreen = false;
+    }
+  };
+
+  using Data_t = Data;
+
 private:
   ::mock::DirectX11::Device m_DefaultDevice;
   ::mock::DirectX11::DeviceContext m_DefaultDeviceContext;
@@ -108,9 +122,10 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_RegisterIntoFactory)
 {
   using namespace ::alicorn::modules::patterns;
 
-  const Data_t oData = { 0 };
+  const Data_t oData;
+  const ::covellite::api::renderer::SettingsData & Data = oData;
 
-  auto pExample = factory::make_unique<ITested_t>(uT("DirectX11"), oData);
+  auto pExample = factory::make_unique<ITested_t>(uT("DirectX11"), Data);
   EXPECT_NO_THROW(dynamic_cast<Tested_t &>(*pExample));
 }
 
@@ -137,7 +152,7 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_CreateDeviceAndSwapChain_Windowed)
   DirectXProxy_t DirectXProxy;
   DirectXProxy_t::GetInstance() = &DirectXProxy;
 
-  Data_t oData = { 0 };
+  Data_t oData;
   oData.Handle = (HWND)1809051128;
   oData.IsFullScreen = false;
 
@@ -148,7 +163,7 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_CreateDeviceAndSwapChain_Windowed)
   Desc.Flags = (IS_RELEASE_CONFIGURATION) ? 0 : D3D11_CREATE_DEVICE_DEBUG;
   Desc.FeatureLevels = { D3D_FEATURE_LEVEL_11_1, D3D_FEATURE_LEVEL_11_0 };
   Desc.SDKVersion = D3D11_SDK_VERSION;
-  Desc.SwapChainDesc.OutputWindow = oData.Handle;
+  Desc.SwapChainDesc.OutputWindow = ::covellite::any_cast<HWND>(oData.Handle);
   Desc.SwapChainDesc.Windowed = TRUE;
   Desc.SwapChainDesc.BufferCount = 2;
   Desc.SwapChainDesc.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
@@ -170,7 +185,7 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_CreateDeviceAndSwapChain_FullScreen)
   DirectXProxy_t DirectXProxy;
   DirectXProxy_t::GetInstance() = &DirectXProxy;
 
-  Data_t oData = { 0 };
+  Data_t oData;
   oData.Handle = (HWND)1809051304;
   oData.IsFullScreen = true;
 
@@ -181,7 +196,7 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_CreateDeviceAndSwapChain_FullScreen)
   Desc.Flags = (IS_RELEASE_CONFIGURATION) ? 0 : D3D11_CREATE_DEVICE_DEBUG;
   Desc.FeatureLevels = { D3D_FEATURE_LEVEL_11_1, D3D_FEATURE_LEVEL_11_0 };
   Desc.SDKVersion = D3D11_SDK_VERSION;
-  Desc.SwapChainDesc.OutputWindow = oData.Handle;
+  Desc.SwapChainDesc.OutputWindow = ::covellite::any_cast<HWND>(oData.Handle);
   Desc.SwapChainDesc.Windowed = FALSE;
   Desc.SwapChainDesc.BufferCount = 2;
   Desc.SwapChainDesc.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
@@ -840,54 +855,6 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_GetUsingApi)
 
   const auto Result = IExample.GetUsingApi();
   EXPECT_EQ(uT("DirectX 11"), Result);
-}
-
-// ************************************************************************** //
-TEST_F(DirectX11_test, /*DISABLED_*/Test_ClearFrame)
-{
-  using DirectXProxy_t = ::mock::DirectX11::Proxy;
-  DirectXProxy_t DirectXProxy;
-  DirectXProxy_t::GetInstance() = &DirectXProxy;
-
-  ::mock::DirectX11::Device Device;
-  ::mock::DirectX11::DeviceContext DeviceContext;
-  ::mock::DirectX11::RenderTargetView RenderTargetView;
-
-  Data_t oData = { 0 };
-  oData.BkColor.R = 1809061119.0f;
-  oData.BkColor.G = 1809061120.0f;
-  oData.BkColor.B = 1809061121.0f;
-  oData.BkColor.A = 1809061122.0f;
-
-  const ::std::vector<FLOAT> Color =
-  {
-    oData.BkColor.R,
-    oData.BkColor.G,
-    oData.BkColor.B,
-    oData.BkColor.A
-  };
-
-  using namespace ::testing;
-
-  EXPECT_CALL(DirectXProxy, CreateDevice())
-    .Times(1)
-    .WillOnce(Return(&Device));
-
-  EXPECT_CALL(DirectXProxy, CreateDeviceContext())
-    .Times(1)
-    .WillOnce(Return(&DeviceContext));
-
-  EXPECT_CALL(Device, CreateRenderTargetView(_, _))
-    .Times(1)
-    .WillOnce(Return(&RenderTargetView));
-
-  Tested_t Example{ oData };
-  ITested_t & IExample = Example;
-
-  EXPECT_CALL(DeviceContext, ClearRenderTargetView(&RenderTargetView, Color))
-    .Times(1);
-
-  IExample.ClearFrame();
 }
 
 // ************************************************************************** //
@@ -2088,6 +2055,30 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_State_Clear)
 }
 
 // ************************************************************************** //
+TEST_F(DirectX11_test, /*DISABLED_*/Test_State_AlphaTest)
+{
+  using DirectXProxy_t = ::mock::DirectX11::Proxy;
+  DirectXProxy_t DirectXProxy;
+  DirectXProxy_t::GetInstance() = &DirectXProxy;
+
+  using namespace ::testing;
+
+  const Tested_t Example{ Data_t{} };
+  const ITested_t & IExample = Example;
+
+  auto itCreator = IExample.GetCreators().find(uT("State"));
+  ASSERT_NE(IExample.GetCreators().end(), itCreator);
+
+  const auto pComponent = Component_t::Make(
+    {
+      { uT("kind"), uT("AlphaTest") },
+    });
+
+  auto Render = itCreator->second(pComponent);
+  EXPECT_EQ(nullptr, Render);
+}
+
+// ************************************************************************** //
 TEST_F(DirectX11_test, /*DISABLED_*/Test_Material_StructSizeAlign16Bytes)
 {
   EXPECT_EQ(0, sizeof(::Material) % 16);
@@ -2491,6 +2482,40 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Texture_FromDataComponent)
 
   EXPECT_CALL(ShaderResourceView, Release())
     .Times(1);
+}
+
+// ************************************************************************** //
+TEST_F(DirectX11_test, /*DISABLED_*/Test_Shader_NotExistsEntryPoint)
+{
+  const ::std::string ShaderData
+  {
+    "Pixel vs(??? _Value)\r\n"
+  };
+
+  using DirectXProxy_t = ::mock::DirectX11::Proxy;
+  DirectXProxy_t DirectXProxy;
+  DirectXProxy_t::GetInstance() = &DirectXProxy;
+
+  const auto pShader = Component_t::Make(
+    {
+      { uT("data"), (const uint8_t *)ShaderData.data() },
+      { uT("count"), ShaderData.size() },
+      { uT("entry"), ::std::string{ "unknown" } }
+    });
+
+  const Tested_t Example{ Data_t{} };
+  const ITested_t & IExample = Example;
+
+  auto itCreator = IExample.GetCreators().find(uT("Shader"));
+  ASSERT_NE(IExample.GetCreators().end(), itCreator);
+
+  using namespace ::testing;
+
+  EXPECT_CALL(DirectXProxy, Compile(_))
+    .Times(0);
+
+  EXPECT_STDEXCEPTION(itCreator->second(pShader),
+    ".+\\.hpp\\([0-9]+\\): Entry point not found: unknown");
 }
 
 // ************************************************************************** //
@@ -3661,8 +3686,6 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Present_Geometry)
     TestCallRender(Render, ExpectMatrices);
   }
 
-  // 26 Апрель 2019 12:02 (unicornum.verum@gmail.com)
-  TODO("Тест комбинирования компонентов положения/ориентации/мастабирования в различных сочетаниях.");
   EXPECT_CALL(ConstantBuffer, Release())
     .Times(1);
 }
@@ -3925,6 +3948,136 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Present_Geometry_Static)
 
   EXPECT_CALL(ConstantBuffer, Release())
     .Times(1);
+}
+
+// ************************************************************************** //
+TEST_F(DirectX11_test, /*DISABLED_*/Test_Present_Geometry_CombineTransform)
+{
+  using DirectXProxy_t = ::mock::DirectX11::Proxy;
+  DirectXProxy_t DirectXProxy;
+  DirectXProxy_t::GetInstance() = &DirectXProxy;
+
+  ::mock::DirectX11::DeviceContext DeviceContext;
+
+  using namespace ::testing;
+
+  EXPECT_CALL(DirectXProxy, CreateDeviceContext())
+    .Times(1)
+    .WillOnce(Return(&DeviceContext));
+
+  const Tested_t Example{ Data_t{} };
+  const ITested_t & IExample = Example;
+
+  auto itDataCreator = IExample.GetCreators().find(uT("Data"));
+  ASSERT_NE(IExample.GetCreators().end(), itDataCreator);
+
+  auto itCreator = IExample.GetCreators().find(uT("Present"));
+  ASSERT_NE(IExample.GetCreators().end(), itCreator);
+
+  ::Matrices ExpectMatrices;
+
+  const auto SetPosition = [&](float _X, float _Y, float _Z)
+  {
+    auto pPosition = Component_t::Make(
+      { 
+        { uT("kind"), uT("Position") },
+        { uT("x"), _X },
+        { uT("y"), _Y },
+        { uT("z"), _Z },
+      });
+
+    auto PositionRender = itDataCreator->second(pPosition);
+    EXPECT_EQ(nullptr, PositionRender);
+
+    ExpectMatrices.World *= ::DirectX::XMMatrixTranslation(_X, _Y, _Z);
+  };
+
+  const auto SetRotation = [&](float _X, float _Y, float _Z)
+  {
+    auto pRotation = Component_t::Make(
+      {
+        { uT("kind"), uT("Rotation") },
+        { uT("x"), _X },
+        { uT("y"), _Y },
+        { uT("z"), _Z },
+      });
+
+    auto RotationRender = itDataCreator->second(pRotation);
+    EXPECT_EQ(nullptr, RotationRender);
+
+    ExpectMatrices.World *= ::DirectX::XMMatrixRotationX(_X);
+    ExpectMatrices.World *= ::DirectX::XMMatrixRotationY(_Y);
+    ExpectMatrices.World *= ::DirectX::XMMatrixRotationZ(_Z);
+  };
+
+  const auto SetScale = [&](float _X, float _Y, float _Z)
+  {
+    auto pScale = Component_t::Make(
+      {
+        { uT("kind"), uT("Scale") },
+        { uT("x"), _X },
+        { uT("y"), _Y },
+        { uT("z"), _Z },
+      });
+
+    auto ScaleRender = itDataCreator->second(pScale);
+    EXPECT_EQ(nullptr, ScaleRender);
+
+    ExpectMatrices.World *= ::DirectX::XMMatrixScaling(_X, _Y, _Z);
+  };
+
+  {
+    memset(&ExpectMatrices, 0, sizeof(ExpectMatrices));
+    ExpectMatrices.World = ::DirectX::XMMatrixIdentity();
+
+    SetPosition(1.0f, 2.0f, 3.0f);
+    SetRotation(4.0f, 5.0f, 6.0f);
+    SetScale(7.0f, 8.0f, 9.0f);
+
+    SetPosition(11.0f, 22.0f, 33.0f);
+    SetRotation(44.0f, 55.0f, 66.0f);
+    SetScale(77.0f, 88.0f, 99.0f);
+
+    ExpectMatrices.World = ::DirectX::XMMatrixTranspose(ExpectMatrices.World);
+
+    auto Render = itCreator->second(Component_t::Make(
+      {
+        { uT("kind"), uT("Geometry") }
+      }));
+    ASSERT_NE(nullptr, Render);
+
+    EXPECT_CALL(DeviceContext, UpdateSubresource(_, _, _, ExpectMatrices, _, _))
+      .Times(1);
+
+    Render();
+  }
+
+  {
+    memset(&ExpectMatrices, 0, sizeof(ExpectMatrices));
+    ExpectMatrices.World = ::DirectX::XMMatrixIdentity();
+
+    SetPosition(1.0f, 2.0f, 3.0f);
+    SetRotation(4.0f, 5.0f, 6.0f);
+    SetScale(7.0f, 8.0f, 9.0f);
+
+    SetPosition(11.0f, 22.0f, 33.0f);
+    SetRotation(44.0f, 55.0f, 66.0f);
+    SetScale(77.0f, 88.0f, 99.0f);
+
+    ExpectMatrices.World = ::DirectX::XMMatrixTranspose(ExpectMatrices.World);
+
+    auto Render = itCreator->second(Component_t::Make(
+      {
+        { uT("kind"), uT("Geometry") },
+        { uT("static"), true }
+      }));
+    ASSERT_NE(nullptr, Render);
+
+    EXPECT_CALL(DeviceContext, UpdateSubresource(_, _, _, ExpectMatrices, _, _))
+      .Times(1);
+
+    Render();
+  }
 }
 
 // ************************************************************************** //
@@ -5080,1051 +5233,4 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Light_Points_LimitCount)
 
   // Лишний источник света - не должно упасть.
   LightRender();
-}
-
-// ************************************************************************** //
-TEST_F(DirectX11_test, /*DISABLED_*/Test_Present_Camera_Gui_deprecated)
-{
-  using DirectXProxy_t = ::mock::DirectX11::Proxy;
-  DirectXProxy_t DirectXProxy;
-  DirectXProxy_t::GetInstance() = &DirectXProxy;
-
-  ::mock::DirectX11::DeviceContext DeviceContext;
-
-  const auto Width = 1811211754.0f;
-  const auto Height = 1811211755.0f;
-
-# pragma warning(push)
-# pragma warning(disable: 6001)
-
-  ::Matrices Matrices;
-
-  Matrices.World = ::DirectX::XMMatrixTranspose(
-    ::DirectX::XMMatrixIdentity());
-  Matrices.Projection = ::DirectX::XMMatrixTranspose(
-    ::DirectX::XMMatrixOrthographicOffCenterLH(0.0f, Width, Height, 0.0f, 1.0f, -1.0f));
-  Matrices.View = ::DirectX::XMMatrixTranspose(
-    ::DirectX::XMMatrixIdentity());
-
-# pragma warning(pop)
-
-  using namespace ::testing;
-
-  EXPECT_CALL(DirectXProxy, CreateDeviceContext())
-    .Times(1)
-    .WillOnce(Return(&DeviceContext));
-
-  const Tested_t Example{ Data_t{} };
-  const ITested_t & IExample = Example;
-
-  auto itCreator = IExample.GetCreators().find(uT("Present"));
-  ASSERT_NE(IExample.GetCreators().end(), itCreator);
-
-  // Present.Camera
-  {
-    const auto pComponent = Component_t::Make(
-      {
-        { uT("kind"), uT("Camera") },
-      });
-
-    D3D11_VIEWPORT Viewport = { 0 };
-    Viewport.Width = Width;
-    Viewport.Height = Height;
-
-    auto Render = itCreator->second(pComponent);
-    ASSERT_NE(nullptr, Render);
-
-    EXPECT_CALL(DeviceContext, RSGetViewports(1))
-      .Times(1)
-      .WillOnce(Return(Viewport));
-
-    Render();
-  }
-
-  // Present.Geometry
-  {
-    const auto pComponent = Component_t::Make(
-      {
-        { uT("kind"), uT("Geometry") },
-      });
-
-    auto Render = itCreator->second(pComponent);
-    ASSERT_NE(nullptr, Render);
-
-    EXPECT_CALL(DeviceContext, UpdateSubresource(_, _, _, Matrices, _, _))
-      .Times(1);
-
-    Render();
-  }
-}
-
-// ************************************************************************** //
-TEST_F(DirectX11_test, /*DISABLED_*/Test_Present_Camera_Focal_deprecated)
-{
-  using DirectXProxy_t = ::mock::DirectX11::Proxy;
-  DirectXProxy_t DirectXProxy;
-  DirectXProxy_t::GetInstance() = &DirectXProxy;
-
-  ::mock::DirectX11::DeviceContext DeviceContext;
-
-  using namespace ::testing;
-
-  EXPECT_CALL(DirectXProxy, CreateDeviceContext())
-    .Times(1)
-    .WillOnce(Return(&DeviceContext));
-
-  const Tested_t Example{ Data_t{} };
-  const ITested_t & IExample = Example;
-
-  auto itDataCreator = IExample.GetCreators().find(uT("Data"));
-  ASSERT_NE(IExample.GetCreators().end(), itDataCreator);
-
-  auto itCreator = IExample.GetCreators().find(uT("Present"));
-  ASSERT_NE(IExample.GetCreators().end(), itCreator);
-
-  const auto pGeometry = Component_t::Make(
-    {
-      { uT("kind"), uT("Geometry") },
-    });
-
-  auto GeometryRender = itCreator->second(pGeometry);
-  ASSERT_NE(nullptr, GeometryRender);
-
-  const auto TestCallRender = [&](Render_t & _CameraRender,
-    float _Width, float _Height, const ::Matrices & _Matrices)
-  {
-    D3D11_VIEWPORT Viewport = { 0 };
-    Viewport.Width = _Width;
-    Viewport.Height = _Height;
-
-    EXPECT_CALL(DeviceContext, RSGetViewports(1))
-      .Times(1)
-      .WillOnce(Return(Viewport));
-
-    _CameraRender();
-
-    EXPECT_CALL(DeviceContext, UpdateSubresource(_, _, _, _Matrices, _, _))
-      .Times(1);
-
-    GeometryRender();
-  };
-
-  ::Matrices Matrices;
-  Matrices.World = ::DirectX::XMMatrixTranspose(
-    ::DirectX::XMMatrixIdentity());
-
-  const auto GetProjection = [](float _AngleY, float _Width, float _Height)
-  {
-    return ::DirectX::XMMatrixPerspectiveFovRH(
-      _AngleY * (float)::alicorn::extension::cpp::math::GreedToRadian,
-      _Width / _Height, 0.01f, 200.0f);
-  };
-
-  const auto GetView = [](
-    float _X, float _Y, float _Z,
-    float _A, float _B, float _C,
-    float _Distance)
-  {
-    const auto Look = ::DirectX::XMVectorSet(_X, _Y, _Z, 1.0f);
-
-    auto Transform =
-      ::DirectX::XMMatrixRotationX(_A) *
-      ::DirectX::XMMatrixRotationY(_B) *
-      ::DirectX::XMMatrixRotationZ(_C) *
-      ::DirectX::XMMatrixTranslation(_X, _Y, _Z);
-    auto Eye = ::DirectX::XMVector3TransformCoord(
-      ::DirectX::XMVectorSet(_Distance, 0.0f, 0.0f, 1.0f),
-      Transform);
-
-    return ::DirectX::XMMatrixLookAtRH(Eye, Look,
-      ::DirectX::XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f));
-  };
-
-  const auto pCamera = Component_t::Make(
-    {
-      { uT("kind"), uT("Camera") },
-      { uT("focal"), uT("Enabled") },
-    });
-
-  // Default values
-  {
-    const auto AngleY = 90.0f;
-    const auto Width = 1901011221.0f;
-    const auto Height = 1901011222.0f;
-
-    Matrices.Projection = ::DirectX::XMMatrixTranspose(
-      GetProjection(AngleY, Width, Height));
-    Matrices.View = ::DirectX::XMMatrixTranspose(GetView(
-      0.0f, 0.0f, 0.0f,
-      0.0f, 0.0f, 0.0f,
-      0.1f));
-
-    auto CameraRender = itCreator->second(pCamera);
-    ASSERT_NE(nullptr, CameraRender);
-
-    TestCallRender(CameraRender, Width, Height, Matrices);
-  }
-
-  {
-    const auto pPosition = Component_t::Make(
-      {
-        { uT("kind"), uT("Position") },
-      });
-
-    const auto pRotation = Component_t::Make(
-      {
-        { uT("kind"), uT("Rotation") },
-      });
-
-    auto PositionRender = itDataCreator->second(pPosition);
-    EXPECT_EQ(nullptr, PositionRender);
-
-    auto RotationRender = itDataCreator->second(pRotation);
-    EXPECT_EQ(nullptr, RotationRender);
-
-    auto CameraRender = itCreator->second(pCamera);
-    ASSERT_NE(nullptr, CameraRender);
-
-    {
-      const auto AngleY = 123.0f;
-      const auto Distance = 1234.0f;
-      const auto Width = 1901011221.0f;
-      const auto Height = 1901011222.0f;
-
-      const auto X = 11327.0f;
-      const auto Y = 11328.0f;
-      const auto Z = 11329.0f;
-
-      const auto A = 11330.0f;
-      const auto B = 11331.0f;
-      const auto C = 11332.0f;
-
-      Matrices.Projection = ::DirectX::XMMatrixTranspose(
-        GetProjection(AngleY, Width, Height));
-      Matrices.View = ::DirectX::XMMatrixTranspose(GetView(
-        X, Y, Z,
-        A, B, C,
-        Distance + 0.1f));
-
-      pPosition->SetValue(uT("x"), X);
-      pPosition->SetValue(uT("y"), Y);
-      pPosition->SetValue(uT("z"), Z);
-
-      pRotation->SetValue(uT("x"), A);
-      pRotation->SetValue(uT("y"), B);
-      pRotation->SetValue(uT("z"), C);
-
-      pCamera->SetValue(uT("fov"), AngleY);
-      pCamera->SetValue(uT("distance"), Distance);
-
-      TestCallRender(CameraRender, Width, Height, Matrices);
-    }
-
-    {
-      const auto AngleY = 456.0f;
-      const auto Distance = 4567.0f;
-      const auto Width = 1901011221.0f;
-      const auto Height = 1901011222.0f;
-
-      const auto X = 11333.0f;
-      const auto Y = 11334.0f;
-      const auto Z = 11335.0f;
-
-      const auto A = 11336.0f;
-      const auto B = 11337.0f;
-      const auto C = 11338.0f;
-
-      Matrices.Projection = ::DirectX::XMMatrixTranspose(
-        GetProjection(AngleY, Width, Height));
-      Matrices.View = ::DirectX::XMMatrixTranspose(GetView(
-        X, Y, Z,
-        A, B, C,
-        Distance + 0.1f));
-
-      pPosition->SetValue(uT("x"), X);
-      pPosition->SetValue(uT("y"), Y);
-      pPosition->SetValue(uT("z"), Z);
-
-      pRotation->SetValue(uT("x"), A);
-      pRotation->SetValue(uT("y"), B);
-      pRotation->SetValue(uT("z"), C);
-
-      pCamera->SetValue(uT("fov"), AngleY);
-      pCamera->SetValue(uT("distance"), Distance);
-
-      TestCallRender(CameraRender, Width, Height, Matrices);
-    }
-  }
-}
-
-// ************************************************************************** //
-TEST_F(DirectX11_test, /*DISABLED_*/Test_Present_Camera_DisableBlend_deprecated)
-{
-  using DirectXProxy_t = ::mock::DirectX11::Proxy;
-  DirectXProxy_t DirectXProxy;
-  DirectXProxy_t::GetInstance() = &DirectXProxy;
-
-  ::mock::DirectX11::Device Device;
-  ::mock::DirectX11::DeviceContext DeviceContext;
-
-  const ::std::vector<FLOAT> Factor = { 0.0f, 0.0f, 0.0f, 0.0f };
-
-  const auto pComponent = Component_t::Make(
-    {
-      { uT("kind"), uT("Camera") },
-    });
-
-  using namespace ::testing;
-
-  EXPECT_CALL(DirectXProxy, CreateDevice())
-    .Times(1)
-    .WillOnce(Return(&Device));
-
-  EXPECT_CALL(DirectXProxy, CreateDeviceContext())
-    .Times(1)
-    .WillOnce(Return(&DeviceContext));
-
-  const Tested_t Example{ Data_t{} };
-  const ITested_t & IExample = Example;
-
-  auto itCreator = IExample.GetCreators().find(uT("Present"));
-  ASSERT_NE(IExample.GetCreators().end(), itCreator);
-
-  const auto TestCallRender = [&](void)
-  {
-    InSequence Dummy;
-
-    EXPECT_CALL(Device, CreateBlendState(_))
-      .Times(0);
-
-    auto Render = itCreator->second(pComponent);
-    ASSERT_NE(nullptr, Render);
-
-    EXPECT_CALL(DeviceContext, OMSetBlendState(nullptr, Factor, 0xFFFFFFFF))
-      .Times(1);
-
-    Render();
-  };
-
-  TestCallRender();
-
-  pComponent->SetValue(uT("focal"), uT("Enabled"));
-
-  TestCallRender();
-}
-
-// ************************************************************************** //
-TEST_F(DirectX11_test, /*DISABLED_*/Test_Present_Camera_Depth_deprecated)
-{
-  using DirectXProxy_t = ::mock::DirectX11::Proxy;
-  DirectXProxy_t DirectXProxy;
-  DirectXProxy_t::GetInstance() = &DirectXProxy;
-
-  ::mock::DirectX11::Device Device;
-  ::mock::DirectX11::DeviceContext DeviceContext;
-  ::mock::DirectX11::RenderTargetView RenderTargetView;
-  ::mock::DirectX11::DepthStencilView DepthStencilView;
-
-  using namespace ::testing;
-
-  EXPECT_CALL(DirectXProxy, CreateDevice())
-    .Times(1)
-    .WillOnce(Return(&Device));
-
-  EXPECT_CALL(DirectXProxy, CreateDeviceContext())
-    .Times(1)
-    .WillOnce(Return(&DeviceContext));
-
-  EXPECT_CALL(Device, CreateRenderTargetView(_, _))
-    .Times(1)
-    .WillOnce(Return(&RenderTargetView));
-
-  EXPECT_CALL(Device, CreateDepthStencilView(_, _))
-    .Times(1)
-    .WillOnce(Return(&DepthStencilView));
-
-  const Tested_t Example{ Data_t{} };
-  const ITested_t & IExample = Example;
-
-  auto itCreator = IExample.GetCreators().find(uT("Present"));
-  ASSERT_NE(IExample.GetCreators().end(), itCreator);
-
-  const auto TestCallRender = [&](const Component_t::ComponentPtr_t & _pComponent)
-  {
-    auto Render = itCreator->second(_pComponent);
-    ASSERT_NE(nullptr, Render);
-
-    EXPECT_CALL(DeviceContext, OMSetRenderTargets(1, &RenderTargetView, nullptr))
-      .Times(1);
-
-    Render();
-  };
-
-  const auto pCameraGui = Component_t::Make(
-    {
-      { uT("kind"), uT("Camera") },
-    });
-
-  TestCallRender(pCameraGui);
-
-  const auto pCameraFocal = Component_t::Make(
-    {
-      { uT("kind"), uT("Camera") },
-      { uT("focal"), uT("Enabled") },
-    });
-
-  TestCallRender(pCameraFocal);
-}
-
-// ************************************************************************** //
-TEST_F(DirectX11_test, /*DISABLED_*/Test_Lights_SendLightsInfoToPixelShader_deprecated)
-{
-  using DirectXProxy_t = ::mock::DirectX11::Proxy;
-  DirectXProxy_t DirectXProxy;
-  DirectXProxy_t::GetInstance() = &DirectXProxy;
-
-  ::mock::DirectX11::Device Device;
-  ::mock::DirectX11::DeviceContext DeviceContext;
-  ::mock::DirectX11::Buffer LightsBuffer;
-
-  D3D11_BUFFER_DESC LightsBufferDesc = { 0 };
-  LightsBufferDesc.Usage = D3D11_USAGE_DEFAULT;
-  LightsBufferDesc.ByteWidth = sizeof(::Lights);
-  LightsBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-
-  ::Lights EmptyLights; // = { 0 } недостаточно!
-  memset(&EmptyLights, 0, sizeof(EmptyLights));
-
-  using namespace ::testing;
-
-  const auto TestCallRender = [&](const Component_t::ComponentPtr_t & _pCamera)
-  {
-    EXPECT_CALL(DirectXProxy, CreateDevice())
-      .Times(1)
-      .WillOnce(Return(&Device));
-
-    EXPECT_CALL(DirectXProxy, CreateDeviceContext())
-      .Times(1)
-      .WillOnce(Return(&DeviceContext));
-
-    EXPECT_CALL(Device, CreateBuffer(_, _))
-      .Times(1);
-
-    EXPECT_CALL(DeviceContext, VSSetConstantBuffers(_, _, _))
-      .Times(1);
-
-    EXPECT_CALL(DeviceContext, PSSetConstantBuffers(_, _, _))
-      .Times(1);
-
-    EXPECT_CALL(Device, CreateBuffer(LightsBufferDesc, _))
-      .Times(1)
-      .WillOnce(Return(&LightsBuffer));
-
-    EXPECT_CALL(DeviceContext,
-      VSSetConstantBuffers(LIGHTS_BUFFER_INDEX, 1, &LightsBuffer))
-      .Times(1);
-
-    EXPECT_CALL(DeviceContext,
-      PSSetConstantBuffers(LIGHTS_BUFFER_INDEX, 1, &LightsBuffer))
-      .Times(1);
-
-    const Tested_t Example{ Data_t{} };
-    const ITested_t & IExample = Example;
-
-    auto itShaderCreator = IExample.GetCreators().find(uT("Shader"));
-    ASSERT_NE(IExample.GetCreators().end(), itShaderCreator);
-
-    auto itCameraCreator = IExample.GetCreators().find(uT("Present"));
-    ASSERT_NE(IExample.GetCreators().end(), itCameraCreator);
-
-    const ::std::string ShaderData{ "float4 ps(??? _Value) : SV_Target\r\n" };
-
-    auto pPixelShader = Component_t::Make(
-      {
-        { uT("data"), (const uint8_t *)ShaderData.data() },
-        { uT("count"), ShaderData.size() },
-        { uT("entry"), uT("ps") },
-      });
-
-    auto PixelShaderRender = itShaderCreator->second(pPixelShader);
-    ASSERT_NE(nullptr, PixelShaderRender);
-
-    auto CameraRender = itCameraCreator->second(_pCamera);
-    ASSERT_NE(nullptr, CameraRender);
-
-    CameraRender(); // Первый раз может быть установлен мусор, поэтому...
-    CameraRender();
-
-    EXPECT_CALL(DeviceContext,
-      UpdateSubresource(&LightsBuffer, 0, nullptr, EmptyLights, 0, 0))
-      .Times(1);
-
-    PixelShaderRender();
-  };
-
-  TestCallRender(Component_t::Make(
-    {
-      { uT("id"), uT("Camera.1") },
-      { uT("kind"), uT("Camera") },
-    }));
-
-  TestCallRender(Component_t::Make(
-    {
-      { uT("id"), uT("Camera.2") },
-      { uT("kind"), uT("Camera") },
-      { uT("focal"), uT("Enabled") },
-    }));
-}
-
-// ************************************************************************** //
-TEST_F(DirectX11_test, /*DISABLED_*/Test_Light_Ambient_deprecated)
-{
-  using DirectXProxy_t = ::mock::DirectX11::Proxy;
-  DirectXProxy_t DirectXProxy;
-  DirectXProxy_t::GetInstance() = &DirectXProxy;
-
-  ::mock::DirectX11::DeviceContext DeviceContext;
-  ::mock::DirectX11::Buffer LightsBuffer;
-
-  using namespace ::testing;
-
-  EXPECT_CALL(DirectXProxy, CreateDeviceContext())
-    .Times(1)
-    .WillOnce(Return(&DeviceContext));
-
-  const Tested_t Example{ Data_t{} };
-  const ITested_t & IExample = Example;
-
-  auto itLightCreator = IExample.GetCreators().find(uT("Light"));
-  ASSERT_NE(IExample.GetCreators().end(), itLightCreator);
-
-  auto itShaderCreator = IExample.GetCreators().find(uT("Shader"));
-  ASSERT_NE(IExample.GetCreators().end(), itShaderCreator);
-
-  auto itCameraCreator = IExample.GetCreators().find(uT("Present"));
-  ASSERT_NE(IExample.GetCreators().end(), itCameraCreator);
-
-  const ::std::string ShaderData{ "float4 ps(??? _Value) : SV_Target\r\n" };
-
-  auto pPixelShader = Component_t::Make(
-    {
-      { uT("data"), (const uint8_t *)ShaderData.data() },
-      { uT("count"), ShaderData.size() },
-      { uT("entry"), uT("ps") },
-    });
-
-  ::Lights EmptyLights; // = { 0 } недостаточно!
-  memset(&EmptyLights, 0, sizeof(EmptyLights));
-
-  ::Lights DefaultLights; // = { 0 } недостаточно!
-  memset(&DefaultLights, 0, sizeof(DefaultLights));
-  DefaultLights.Ambient.ARGBColor = 0xFF000000;
-  DefaultLights.Ambient.IsValid = 1;
-
-  const auto Ambient = 0xFF031717;
-
-  ::Lights ExpectedLights; // = { 0 } недостаточно!
-  memset(&ExpectedLights, 0, sizeof(ExpectedLights));
-  ExpectedLights.Ambient.ARGBColor = Ambient;
-  ExpectedLights.Ambient.IsValid = 1;
-
-  const auto TestCallRender = [&](
-    const Component_t::ComponentPtr_t & _pCamera1,
-    const Component_t::ComponentPtr_t & _pCamera2)
-  {
-    auto pLight = Component_t::Make(
-      {
-        { uT("kind"), uT("Ambient") },
-      });
-
-    auto LightRender = itLightCreator->second(pLight);
-    ASSERT_NE(nullptr, LightRender);
-
-    auto PixelShaderRender = itShaderCreator->second(pPixelShader);
-    ASSERT_NE(nullptr, PixelShaderRender);
-
-    auto Camera1Render = itCameraCreator->second(_pCamera1);
-    ASSERT_NE(nullptr, Camera1Render);
-
-    auto Camera2Render = itCameraCreator->second(_pCamera2);
-    ASSERT_NE(nullptr, Camera2Render);
-
-    // На случай, если при первом рендеринге будет записан мусор.
-    Camera1Render();
-    Camera2Render();
-
-    const auto TestUsingLight = [&](const Render_t & _Camera,
-      const Render_t & _Light, const ::Lights & _ExpectedLights)
-    {
-      _Camera();
-
-      _Light();
-
-      EXPECT_CALL(DeviceContext, UpdateSubresource(_, _, _, _ExpectedLights, _, _))
-        .Times(1);
-
-      PixelShaderRender();
-
-    };
-
-    InSequence Dummy;
-
-    TestUsingLight(Camera1Render, [](void) {}, EmptyLights);
-    TestUsingLight(Camera2Render, LightRender, EmptyLights);
-
-    pLight->SetValue(uT("color"), Ambient);
-
-    TestUsingLight(Camera1Render, LightRender, EmptyLights);
-    TestUsingLight(Camera2Render, [](void) {}, DefaultLights);
-
-    TestUsingLight(Camera1Render, [](void) {}, ExpectedLights);
-    TestUsingLight(Camera2Render, [](void) {}, EmptyLights);
-
-    TestUsingLight(Camera1Render, [](void) {}, EmptyLights);
-    TestUsingLight(Camera2Render, [](void) {}, EmptyLights);
-  };
-
-  auto pCamera1 = Component_t::Make(
-    {
-      { uT("id"), uT("Camera.1") },
-      { uT("kind"), uT("Camera") },
-    });
-
-  auto pCamera2 = Component_t::Make(
-    {
-      { uT("id"), uT("Camera.2") },
-      { uT("kind"), uT("Camera") },
-    });
-
-  TestCallRender(pCamera1, pCamera2);
-
-  auto pFocalCamera1 = Component_t::Make(
-    {
-      { uT("id"), uT("Camera.3") },
-      { uT("kind"), uT("Camera") },
-      { uT("focal"), uT("Enabled") },
-    });
-
-  auto pFocalCamera2 = Component_t::Make(
-    {
-      { uT("id"), uT("Camera.4") },
-      { uT("kind"), uT("Camera") },
-      { uT("focal"), uT("Enabled") },
-    });
-
-  TestCallRender(pFocalCamera1, pFocalCamera2);
-}
-
-// ************************************************************************** //
-TEST_F(DirectX11_test, /*DISABLED_*/Test_Light_Direction_deprecated)
-{
-  using DirectXProxy_t = ::mock::DirectX11::Proxy;
-  DirectXProxy_t DirectXProxy;
-  DirectXProxy_t::GetInstance() = &DirectXProxy;
-
-  ::mock::DirectX11::DeviceContext DeviceContext;
-  ::mock::DirectX11::Buffer LightsBuffer;
-
-  using namespace ::testing;
-
-  EXPECT_CALL(DirectXProxy, CreateDeviceContext())
-    .Times(1)
-    .WillOnce(Return(&DeviceContext));
-
-  const Tested_t Example{ Data_t{} };
-  const ITested_t & IExample = Example;
-
-  auto itDataCreator = IExample.GetCreators().find(uT("Data"));
-  ASSERT_NE(IExample.GetCreators().end(), itDataCreator);
-
-  auto itLightCreator = IExample.GetCreators().find(uT("Light"));
-  ASSERT_NE(IExample.GetCreators().end(), itLightCreator);
-
-  auto itShaderCreator = IExample.GetCreators().find(uT("Shader"));
-  ASSERT_NE(IExample.GetCreators().end(), itShaderCreator);
-
-  auto itCameraCreator = IExample.GetCreators().find(uT("Present"));
-  ASSERT_NE(IExample.GetCreators().end(), itCameraCreator);
-
-  const ::std::string ShaderData{ "float4 ps(??? _Value) : SV_Target\r\n" };
-
-  auto pPixelShader = Component_t::Make(
-    {
-      { uT("data"), (const uint8_t *)ShaderData.data() },
-      { uT("count"), ShaderData.size() },
-      { uT("entry"), uT("ps") },
-    });
-
-  ::Lights EmptyLights; // = { 0 } недостаточно!
-  memset(&EmptyLights, 0, sizeof(EmptyLights));
-
-  ::Lights DefaultLights; // = { 0 } недостаточно!
-  memset(&DefaultLights, 0, sizeof(DefaultLights));
-  DefaultLights.Direction.IsValid = 1;
-  DefaultLights.Direction.ARGBColor = 0xFF000000;
-  DefaultLights.Direction.Direction = { 1.0f, 0.0f, 0.0f, 0.0f };
-
-  const auto Diffuse = 0xFF031836;
-
-  const auto X = 1901031851.0f;
-  const auto Y = 1901031852.0f;
-  const auto Z = 1901031854.0f;
-
-  ::Lights ExpectedLights; // = { 0 } недостаточно!
-  memset(&ExpectedLights, 0, sizeof(ExpectedLights));
-  ExpectedLights.Direction.IsValid = 1;
-  ExpectedLights.Direction.ARGBColor = Diffuse;
-  ExpectedLights.Direction.Direction = { X, Y, Z, 0.0f };
-
-  const auto TestCallRender = [&](
-    const Component_t::ComponentPtr_t & _pCamera1,
-    const Component_t::ComponentPtr_t & _pCamera2)
-  {
-    auto pLight = Component_t::Make(
-      {
-        { uT("kind"), uT("Direction") },
-      });
-
-    auto pDirection = Component_t::Make(
-      {
-        { uT("kind"), uT("Direction") },
-      });
-
-    auto LightRender = itLightCreator->second(pLight);
-    ASSERT_NE(nullptr, LightRender);
-
-    auto DirectionRender = itDataCreator->second(pDirection);
-    EXPECT_EQ(nullptr, DirectionRender);
-
-    auto LightDataRender = itLightCreator->second(pLight);
-    ASSERT_NE(nullptr, LightDataRender);
-
-    auto PixelShaderRender = itShaderCreator->second(pPixelShader);
-    ASSERT_NE(nullptr, PixelShaderRender);
-
-    auto Camera1Render = itCameraCreator->second(_pCamera1);
-    ASSERT_NE(nullptr, Camera1Render);
-
-    auto Camera2Render = itCameraCreator->second(_pCamera2);
-    ASSERT_NE(nullptr, Camera2Render);
-
-    // На случай, если при первом рендеринге будет записан мусор.
-    Camera1Render();
-    Camera2Render();
-
-    const auto TestUsingLight = [&](const Render_t & _Camera,
-      const Render_t & _Light, const ::Lights & _ExpectedLights)
-    {
-      _Camera();
-
-      _Light();
-
-      EXPECT_CALL(DeviceContext, UpdateSubresource(_, _, _, _ExpectedLights, _, _))
-        .Times(1);
-
-      PixelShaderRender();
-
-    };
-
-    InSequence Dummy;
-
-    TestUsingLight(Camera1Render, [](void) {}, EmptyLights);
-    TestUsingLight(Camera2Render, LightRender, EmptyLights);
-
-    pDirection->SetValue(uT("x"), 1.0f);
-    pDirection->SetValue(uT("y"), 0.0f);
-    pDirection->SetValue(uT("z"), 0.0f);
-
-    TestUsingLight(Camera1Render, [](void) {}, EmptyLights);
-    TestUsingLight(Camera2Render, LightDataRender, DefaultLights);
-
-    pDirection->SetValue(uT("x"), X);
-    pDirection->SetValue(uT("y"), Y);
-    pDirection->SetValue(uT("z"), Z);
-
-    pLight->SetValue(uT("color"), Diffuse);
-
-    TestUsingLight(Camera1Render, LightDataRender, EmptyLights);
-    TestUsingLight(Camera2Render, [](void) {}, DefaultLights);
-
-    TestUsingLight(Camera1Render, [](void) {}, ExpectedLights);
-    TestUsingLight(Camera2Render, [](void) {}, EmptyLights);
-
-    TestUsingLight(Camera1Render, [](void) {}, EmptyLights);
-    TestUsingLight(Camera2Render, [](void) {}, EmptyLights);
-  };
-
-  auto pCamera1 = Component_t::Make(
-    {
-      { uT("id"), uT("Camera.1") },
-      { uT("kind"), uT("Camera") },
-    });
-
-  auto pCamera2 = Component_t::Make(
-    {
-      { uT("id"), uT("Camera.2") },
-      { uT("kind"), uT("Camera") },
-    });
-
-  TestCallRender(pCamera1, pCamera2);
-
-  auto pFocalCamera1 = Component_t::Make(
-    {
-      { uT("id"), uT("Camera.3") },
-      { uT("kind"), uT("Camera") },
-      { uT("focal"), uT("Enabled") },
-    });
-
-  auto pFocalCamera2 = Component_t::Make(
-    {
-      { uT("id"), uT("Camera.4") },
-      { uT("kind"), uT("Camera") },
-      { uT("focal"), uT("Enabled") },
-    });
-
-  TestCallRender(pFocalCamera1, pFocalCamera2);
-}
-
-// ************************************************************************** //
-TEST_F(DirectX11_test, /*DISABLED_*/Test_Light_Points_deprecated)
-{
-  using DirectXProxy_t = ::mock::DirectX11::Proxy;
-  DirectXProxy_t DirectXProxy;
-  DirectXProxy_t::GetInstance() = &DirectXProxy;
-
-  ::mock::DirectX11::DeviceContext DeviceContext;
-  ::mock::DirectX11::Buffer LightsBuffer;
-
-  using namespace ::testing;
-
-  EXPECT_CALL(DirectXProxy, CreateDeviceContext())
-    .Times(1)
-    .WillOnce(Return(&DeviceContext));
-
-  const Tested_t Example{ Data_t{} };
-  const ITested_t & IExample = Example;
-
-  auto itDataCreator = IExample.GetCreators().find(uT("Data"));
-  ASSERT_NE(IExample.GetCreators().end(), itDataCreator);
-
-  auto itLightCreator = IExample.GetCreators().find(uT("Light"));
-  ASSERT_NE(IExample.GetCreators().end(), itLightCreator);
-
-  auto itShaderCreator = IExample.GetCreators().find(uT("Shader"));
-  ASSERT_NE(IExample.GetCreators().end(), itShaderCreator);
-
-  auto itCameraCreator = IExample.GetCreators().find(uT("Present"));
-  ASSERT_NE(IExample.GetCreators().end(), itCameraCreator);
-
-  const ::std::string ShaderData{ "float4 ps(??? _Value) : SV_Target\r\n" };
-
-  auto pPixelShader = Component_t::Make(
-    {
-      { uT("data"), (const uint8_t *)ShaderData.data() },
-      { uT("count"), ShaderData.size() },
-      { uT("entry"), uT("ps") },
-    });
-
-  ::Lights EmptyLights; // = { 0 } недостаточно!
-  memset(&EmptyLights, 0, sizeof(EmptyLights));
-
-  ::Lights DefaultLight; // = { 0 } недостаточно!
-  memset(&DefaultLight, 0, sizeof(DefaultLight));
-  DefaultLight.Points.Lights[0].ARGBColor = 0xFF000000;
-  DefaultLight.Points.Lights[0].Position = { 0.0f, 0.0f, 0.0f, 1.0f };
-  DefaultLight.Points.Lights[0].Attenuation = { 1.0f, 0.0f, 0.0f, 0.0f };
-  DefaultLight.Points.UsedSlotCount = 1;
-
-  class LightData
-  {
-  public:
-    uint32_t Diffuse;
-    float X, Y, Z;
-    float Const, Linear, Exponent;
-  };
-
-  const ::std::vector<LightData> SourceData =
-  {
-    {
-      0xFF031933,
-      1901031927.0f, 1901031928.0f, 1901031929.0f,
-      1901031930.0f, 1901031931.0f, 1901031932.0f,
-    },
-    {
-      0xFF112233,
-      1901032025.0f, 1901032026.0f, 1901032027.0f,
-      1901032028.0f, 1901032029.0f, 1901032030.0f,
-    },
-    {
-      0x11111111,
-      4.0f, 5.0f, 6.0f,
-      7.0f, 8.0f, 9.0f,
-    },
-  };
-
-  ::Lights DefaultLights; // = { 0 } недостаточно!
-  memset(&DefaultLights, 0, sizeof(DefaultLights));
-  DefaultLights.Points.UsedSlotCount =
-    static_cast<uint32_t>(SourceData.size());
-
-  ::Lights ExpectedLights; // = { 0 } недостаточно!
-  memset(&ExpectedLights, 0, sizeof(ExpectedLights));
-  ExpectedLights.Points.UsedSlotCount =
-    static_cast<uint32_t>(SourceData.size());
-
-  for (size_t i = 0; i < SourceData.size(); i++)
-  {
-    DefaultLights.Points.Lights[i] = DefaultLight.Points.Lights[0];
-
-    ExpectedLights.Points.Lights[i].ARGBColor = SourceData[i].Diffuse;
-    ExpectedLights.Points.Lights[i].Position =
-    { SourceData[i].X, SourceData[i].Y, SourceData[i].Z, 1.0f };
-    ExpectedLights.Points.Lights[i].Attenuation =
-    { SourceData[i].Const, SourceData[i].Linear, SourceData[i].Exponent, 0.0f };
-  }
-
-  const auto TestCallRender = [&](
-    const Component_t::ComponentPtr_t & _pCamera1,
-    const Component_t::ComponentPtr_t & _pCamera2)
-  {
-    auto pLight = Component_t::Make(
-      {
-        { uT("kind"), uT("Point") },
-      });
-
-    auto LightRender = itLightCreator->second(pLight);
-    ASSERT_NE(nullptr, LightRender);
-
-    ::std::vector<Component_t::ComponentPtr_t> Positions;
-    ::std::vector<Component_t::ComponentPtr_t> Attenuations;
-    ::std::vector<Component_t::ComponentPtr_t> Lights;
-    ::std::vector<Render_t> LightRenders;
-
-    for (auto & Value : SourceData)
-    {
-      ::boost::ignore_unused(Value);
-
-      auto pPosition = Component_t::Make(
-        {
-          { uT("kind"), uT("Position") },
-        });
-
-      Positions.push_back(pPosition);
-
-      auto PositionRender = itDataCreator->second(pPosition);
-      EXPECT_EQ(nullptr, PositionRender);
-
-      auto pAttenuation = Component_t::Make(
-        {
-          { uT("kind"), uT("Attenuation") },
-        });
-
-      auto AttenuationRender = itDataCreator->second(pAttenuation);
-      EXPECT_EQ(nullptr, AttenuationRender);
-
-      Attenuations.push_back(pAttenuation);
-
-      auto pLocalLight = Component_t::Make(
-        {
-          { uT("kind"), uT("Point") },
-        });
-
-      auto LocalLightRender = itLightCreator->second(pLocalLight);
-      ASSERT_NE(nullptr, LocalLightRender);
-
-      Lights.push_back(pLocalLight);
-      LightRenders.push_back(LocalLightRender);
-    }
-
-    const auto LightDataRender = [&](void)
-    {
-      for (auto & Render : LightRenders) Render();
-    };
-
-    auto PixelShaderRender = itShaderCreator->second(pPixelShader);
-    ASSERT_NE(nullptr, PixelShaderRender);
-
-    auto Camera1Render = itCameraCreator->second(_pCamera1);
-    ASSERT_NE(nullptr, Camera1Render);
-
-    auto Camera2Render = itCameraCreator->second(_pCamera2);
-    ASSERT_NE(nullptr, Camera2Render);
-
-    // На случай, если при первом рендеринге будет записан мусор.
-    Camera1Render();
-    Camera2Render();
-
-    const auto TestUsingLight = [&](const Render_t & _Camera,
-      const Render_t & _Light, const ::Lights & _ExpectedLights)
-    {
-      _Camera();
-
-      _Light();
-
-      EXPECT_CALL(DeviceContext, UpdateSubresource(_, _, _, _ExpectedLights, _, _))
-        .Times(1);
-
-      PixelShaderRender();
-    };
-
-    InSequence Dummy;
-
-    TestUsingLight(Camera1Render, [](void) {}, EmptyLights);
-    TestUsingLight(Camera2Render, LightRender, EmptyLights);
-
-    TestUsingLight(Camera1Render, [](void) {}, EmptyLights);
-    TestUsingLight(Camera2Render, LightDataRender, DefaultLight);
-
-    for (size_t i = 0; i < SourceData.size(); i++)
-    {
-      Positions[i]->SetValue(uT("x"), SourceData[i].X);
-      Positions[i]->SetValue(uT("y"), SourceData[i].Y);
-      Positions[i]->SetValue(uT("z"), SourceData[i].Z);
-
-      Attenuations[i]->SetValue(uT("const"), SourceData[i].Const);
-      Attenuations[i]->SetValue(uT("linear"), SourceData[i].Linear);
-      Attenuations[i]->SetValue(uT("exponent"), SourceData[i].Exponent);
-
-      Lights[i]->SetValue(uT("color"), SourceData[i].Diffuse);
-    }
-
-    TestUsingLight(Camera1Render, LightDataRender, EmptyLights);
-    TestUsingLight(Camera2Render, [](void) {}, DefaultLights);
-
-    TestUsingLight(Camera1Render, [](void) {}, ExpectedLights);
-    TestUsingLight(Camera2Render, [](void) {}, EmptyLights);
-
-    TestUsingLight(Camera1Render, [](void) {}, EmptyLights);
-    TestUsingLight(Camera2Render, [](void) {}, EmptyLights);
-  };
-
-  auto pCamera1 = Component_t::Make(
-    {
-      { uT("id"), uT("Camera.1") },
-      { uT("kind"), uT("Camera") },
-    });
-
-  auto pCamera2 = Component_t::Make(
-    {
-      { uT("id"), uT("Camera.2") },
-      { uT("kind"), uT("Camera") },
-    });
-
-  TestCallRender(pCamera1, pCamera2);
-
-  auto pFocalCamera1 = Component_t::Make(
-    {
-      { uT("id"), uT("Camera.3") },
-      { uT("kind"), uT("Camera") },
-      { uT("focal"), uT("Enabled") },
-    });
-
-  auto pFocalCamera2 = Component_t::Make(
-    {
-      { uT("id"), uT("Camera.4") },
-      { uT("kind"), uT("Camera") },
-      { uT("focal"), uT("Enabled") },
-    });
-
-  TestCallRender(pFocalCamera1, pFocalCamera2);
 }

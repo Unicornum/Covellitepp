@@ -1,7 +1,7 @@
 
 #pragma once
-#include "DbComponents.hpp"
 #include "GameWorld.hpp"
+#include "DbComponents.hpp"
 
 namespace basement
 {
@@ -39,7 +39,7 @@ public:
   // Èםעונפויס IGameWorld
   GameScenePtr_t CreateGameScene(void) override;
   float GetLandscapeHeight(const CubeCoords &) const override;
-  size_t GetGameObjectType(const CubeCoords &) const override;
+  IGameObject::Landscape::Value GetGameObjectType(const CubeCoords &) const override;
 
 private:
   DbComponents  m_DbComponents;

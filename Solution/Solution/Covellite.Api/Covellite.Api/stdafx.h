@@ -1,7 +1,10 @@
 
 #pragma once
 #include "targetver.h"
+#include <memory>
 #include <alicorn/requirements.hpp>
+#include <alicorn/std/string.hpp>
+#include <alicorn/cpp/math.hpp>
 #include <Rocket/Rocket.hpp>
 #include "Renderer/GL.hpp"
 

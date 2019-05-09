@@ -93,9 +93,6 @@
     <ClCompile Include="Test.IWindow\IWindow_test.cpp" />
     <ClCompile Include="Test.OpenGLES\OpenGLES_test.cpp" />
     <ClCompile Include="Test.OpenGL\OpenGL_test.cpp" />
-    <ClCompile Include="Test.Renderer\Renderer_test.android.cpp" />
-    <ClCompile Include="Test.Renderer\Renderer_test.cpp" />
-    <ClCompile Include="Test.Renderer\Renderer_test.windows.cpp" />
     <ClCompile Include="Test.Renders\Renders_test.cpp" />
     <ClCompile Include="Test.Window\Window_test.cpp" />
   </ItemGroup>

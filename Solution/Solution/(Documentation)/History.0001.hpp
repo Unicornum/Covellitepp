@@ -363,19 +363,19 @@
 *  
 *  Версия: 2.1.1.575
 *  -----
-*  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект \ref CovelliteRocketPage : </td></tr></table>
+*  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект Covellite::Rocket : </td></tr></table>
 *  <table frame=void border=1 bordercolor=#FFFFFF cellpadding=5 cellspacing=0 width=98%><tr>
 *    <td width=10px></td>
 *    <td bgcolor=#B8CCE4 width=125px align=center> 24.02.2018 10:21 </td>
 *    <td bgcolor=#C0FFC0> Изменение способа доступа к файлам. </td>
 *  </tr></table>
-*  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект \ref CovelliteCorePage : </td></tr></table>
+*  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект Covellite::Core : </td></tr></table>
 *  <table frame=void border=1 bordercolor=#FFFFFF cellpadding=5 cellspacing=0 width=98%><tr>
 *    <td width=10px></td>
 *    <td bgcolor=#B8CCE4 width=125px align=center> 23.02.2018 13:32 </td>
 *    <td bgcolor=#C0FFC0> Изменен способ доступа к настройкам программы. </td>
 *  </tr></table>
-*  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект \ref CovelliteRocketPage : </td></tr></table>
+*  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект Covellite::Rocket : </td></tr></table>
 *  <table frame=void border=1 bordercolor=#FFFFFF cellpadding=5 cellspacing=0 width=98%><tr>
 *    <td width=10px></td>
 *    <td bgcolor=#B8CCE4 width=125px align=center> 22.02.2018 13:38 </td>
@@ -387,7 +387,7 @@
 *    <td bgcolor=#C0FFC0> Реорганизация ссылок на подставные классы. </td>
 *  </tr></table>
 *  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект \ref ExamplePage : </td></tr></table>
-*  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект \ref CovelliteCorePage : </td></tr></table>
+*  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект Covellite::Core : </td></tr></table>
 *  <table frame=void border=1 bordercolor=#FFFFFF cellpadding=5 cellspacing=0 width=98%><tr>
 *    <td width=10px></td>
 *    <td bgcolor=#B8CCE4 width=125px align=center> 21.02.2018 13:35 </td>
@@ -404,7 +404,7 @@
 *    <td bgcolor=#B8CCE4 width=125px align=center> 26.11.2017 21:18 </td>
 *    <td bgcolor=#C0FFC0> Удаление инициализации логгера из дочернего потока. </td>
 *  </tr></table>
-*  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект \ref CovelliteCorePage : </td></tr></table>
+*  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект Covellite::Core : </td></tr></table>
 *  <table frame=void border=1 bordercolor=#FFFFFF cellpadding=5 cellspacing=0 width=98%><tr>
 *    <td width=10px></td>
 *    <td bgcolor=#B8CCE4 width=125px align=center> 26.11.2017 13:02 </td>
@@ -441,13 +441,13 @@
 *    <td bgcolor=#B8CCE4 width=125px align=center> 09.11.2017 11:55 </td>
 *    <td bgcolor=#C0FFC0> Размеры окна Windows - из настроек. </td>
 *  </tr></table>
-*  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект \ref CovelliteCorePage : </td></tr></table>
+*  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект Covellite::Core : </td></tr></table>
 *  <table frame=void border=1 bordercolor=#FFFFFF cellpadding=5 cellspacing=0 width=98%><tr>
 *    <td width=10px></td>
 *    <td bgcolor=#B8CCE4 width=125px align=center> 08.11.2017 11:28 </td>
 *    <td bgcolor=#C0FFC0> Класс доступа к настройкам фреймворка. </td>
 *  </tr></table>
-*  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект \ref CovelliteRocketPage : </td></tr></table>
+*  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект Covellite::Rocket : </td></tr></table>
 *  <table frame=void border=1 bordercolor=#FFFFFF cellpadding=5 cellspacing=0 width=98%><tr>
 *    <td width=10px></td>
 *    <td bgcolor=#B8CCE4 width=125px align=center> 07.11.2017 12:04 </td>
@@ -459,7 +459,7 @@
 *    <td bgcolor=#B8CCE4 width=125px align=center> 06.11.2017 12:54 </td>
 *    <td bgcolor=#C0FFC0> Получение цвета фона окна программы из настроек. </td>
 *  </tr></table>
-*  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект \ref CovelliteCorePage : </td></tr></table>
+*  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект Covellite::Core : </td></tr></table>
 *  <table frame=void border=1 bordercolor=#FFFFFF cellpadding=5 cellspacing=0 width=98%><tr>
 *    <td width=10px></td>
 *    <td bgcolor=#B8CCE4 width=125px align=center> 04.11.2017 13:26 </td>
@@ -485,7 +485,7 @@
 *  
 *  Версия: 2.0.5.505
 *  -----
-*  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект \ref CovelliteCorePage : </td></tr></table>
+*  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект Covellite::Core : </td></tr></table>
 *  <table frame=void border=1 bordercolor=#FFFFFF cellpadding=5 cellspacing=0 width=98%><tr>
 *    <td width=10px></td>
 *    <td bgcolor=#B8CCE4 width=125px align=center> 02.11.2017 13:02 </td>
@@ -512,13 +512,13 @@
 *    <td bgcolor=#B8CCE4 width=125px align=center> 31.10.2017 11:49 </td>
 *    <td bgcolor=#C0FFC0> Вывод в лог типа и версии используемого графического API. </td>
 *  </tr></table>
-*  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект \ref CovelliteCorePage : </td></tr></table>
+*  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект Covellite::Core : </td></tr></table>
 *  <table frame=void border=1 bordercolor=#FFFFFF cellpadding=5 cellspacing=0 width=98%><tr>
 *    <td width=10px></td>
 *    <td bgcolor=#B8CCE4 width=125px align=center> 30.10.2017 20:54 </td>
 *    <td bgcolor=#C0FFC0> Разрушение объектов окон в порядке, обратном их созданию. </td>
 *  </tr></table>
-*  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект \ref CovelliteRocketPage : </td></tr></table>
+*  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект Covellite::Rocket : </td></tr></table>
 *  <table frame=void border=1 bordercolor=#FFFFFF cellpadding=5 cellspacing=0 width=98%><tr>
 *    <td width=10px></td>
 *    <td bgcolor=#B8CCE4 width=125px align=center> 30.10.2017 13:10 </td>
@@ -530,7 +530,7 @@
 *    <td bgcolor=#B8CCE4 width=125px align=center> 29.10.2017 12:23 </td>
 *    <td bgcolor=#C0FFC0> Реализация окна графического API для Windows/OpenGL. </td>
 *  </tr></table>
-*  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект \ref CovelliteCorePage : </td></tr></table>
+*  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект Covellite::Core : </td></tr></table>
 *  <table frame=void border=1 bordercolor=#FFFFFF cellpadding=5 cellspacing=0 width=98%><tr>
 *    <td width=10px></td>
 *    <td bgcolor=#B8CCE4 width=125px align=center> 28.10.2017 11:31 </td>
@@ -547,7 +547,7 @@
 *    <td bgcolor=#B8CCE4 width=125px align=center> 24.10.2017 11:12 </td>
 *    <td bgcolor=#C0FFC0> Реализация для Windows: класс Window. </td>
 *  </tr></table>
-*  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект \ref CovelliteCorePage : </td></tr></table>
+*  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект Covellite::Core : </td></tr></table>
 *  <table frame=void border=1 bordercolor=#FFFFFF cellpadding=5 cellspacing=0 width=98%><tr>
 *    <td width=10px></td>
 *    <td bgcolor=#B8CCE4 width=125px align=center> 23.10.2017 14:30 </td>
@@ -574,7 +574,7 @@
 *    <td bgcolor=#B8CCE4 width=125px align=center> 16.10.2017 13:58 </td>
 *    <td bgcolor=#C0FFC0> Класс фасада для скрытия реализаций окон конкретного графического API. </td>
 *  </tr></table>
-*  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект \ref CovelliteCorePage : </td></tr></table>
+*  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект Covellite::Core : </td></tr></table>
 *  <table frame=void border=1 bordercolor=#FFFFFF cellpadding=5 cellspacing=0 width=98%><tr>
 *    <td width=10px></td>
 *    <td bgcolor=#B8CCE4 width=125px align=center> 15.10.2017 15:10 </td>
@@ -594,7 +594,7 @@
 *  
 *  Версия: 2.0.4.435
 *  -----
-*  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект \ref CovelliteRocketPage : </td></tr></table>
+*  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект Covellite::Rocket : </td></tr></table>
 *  <table frame=void border=1 bordercolor=#FFFFFF cellpadding=5 cellspacing=0 width=98%><tr>
 *    <td width=10px></td>
 *    <td bgcolor=#B8CCE4 width=125px align=center> 12.10.2017 23:26 </td>
@@ -605,7 +605,7 @@
 *    <td bgcolor=#B8CCE4 width=125px align=center> 12.10.2017 13:35 </td>
 *    <td bgcolor=#C0FFC0> Подписка на события выбора элемента управления. </td>
 *  </tr></table>
-*  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект \ref CovelliteCorePage : </td></tr></table>
+*  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект Covellite::Core : </td></tr></table>
 *  <table frame=void border=1 bordercolor=#FFFFFF cellpadding=5 cellspacing=0 width=98%><tr>
 *    <td width=10px></td>
 *    <td bgcolor=#B8CCE4 width=125px align=center> 10.10.2017 13:05 </td>
@@ -630,7 +630,7 @@
 *  
 *  Версия: 2.0.3.404
 *  -----
-*  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект \ref CovelliteRocketPage : </td></tr></table>
+*  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект Covellite::Rocket : </td></tr></table>
 *  <table frame=void border=1 bordercolor=#FFFFFF cellpadding=5 cellspacing=0 width=98%><tr>
 *    <td width=10px></td>
 *    <td bgcolor=#B8CCE4 width=125px align=center> 08.10.2017 14:31 </td>
@@ -667,7 +667,7 @@
 *    <td bgcolor=#B8CCE4 width=125px align=center> 04.10.2017 01:25 </td>
 *    <td bgcolor=#C0FFC0> Изменение способа передачи пути к файлу описания слоев. </td>
 *  </tr></table>
-*  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект \ref CovelliteCorePage : </td></tr></table>
+*  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект Covellite::Core : </td></tr></table>
 *  <table frame=void border=1 bordercolor=#FFFFFF cellpadding=5 cellspacing=0 width=98%><tr>
 *    <td width=10px></td>
 *    <td bgcolor=#B8CCE4 width=125px align=center> 03.10.2017 19:35 </td>
@@ -679,13 +679,13 @@
 *    <td bgcolor=#B8CCE4 width=125px align=center> 02.10.2017 15:01 </td>
 *    <td bgcolor=#C0FFC0> Работа через интерфейс окна операционной системы. </td>
 *  </tr></table>
-*  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект \ref CovelliteRocketPage : </td></tr></table>
+*  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект Covellite::Rocket : </td></tr></table>
 *  <table frame=void border=1 bordercolor=#FFFFFF cellpadding=5 cellspacing=0 width=98%><tr>
 *    <td width=10px></td>
 *    <td bgcolor=#B8CCE4 width=125px align=center> 02.10.2017 13:42 </td>
 *    <td bgcolor=#C0FFC0> Перенос кода работы со слоями. </td>
 *  </tr></table>
-*  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект \ref CovelliteCorePage : </td></tr></table>
+*  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект Covellite::Core : </td></tr></table>
 *  <table frame=void border=1 bordercolor=#FFFFFF cellpadding=5 cellspacing=0 width=98%><tr>
 *    <td width=10px></td>
 *    <td bgcolor=#B8CCE4 width=125px align=center> 01.10.2017 13:48 </td>
@@ -695,13 +695,13 @@
 *  
 *  Версия: 2.0.2.368
 *  -----
-*  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект \ref CovelliteRocketPage : </td></tr></table>
+*  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект Covellite::Rocket : </td></tr></table>
 *  <table frame=void border=1 bordercolor=#FFFFFF cellpadding=5 cellspacing=0 width=98%><tr>
 *    <td width=10px></td>
 *    <td bgcolor=#B8CCE4 width=125px align=center> 29.09.2017 14:13 </td>
 *    <td bgcolor=#C0FFC0> Получение объекта Rocket::Core::RenderInterface через функцию окна графического Api. </td>
 *  </tr></table>
-*  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект \ref CovelliteCorePage : </td></tr></table>
+*  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект Covellite::Core : </td></tr></table>
 *  <table frame=void border=1 bordercolor=#FFFFFF cellpadding=5 cellspacing=0 width=98%><tr>
 *    <td width=10px></td>
 *    <td bgcolor=#B8CCE4 width=125px align=center> 28.09.2017 14:29 </td>
@@ -712,7 +712,7 @@
 *    <td bgcolor=#B8CCE4 width=125px align=center> 28.09.2017 13:22 </td>
 *    <td bgcolor=#C0FFC0> Переименование общих хидеров проектов. </td>
 *  </tr></table>
-*  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект \ref CovelliteRocketPage : </td></tr></table>
+*  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект Covellite::Rocket : </td></tr></table>
 *  <table frame=void border=1 bordercolor=#FFFFFF cellpadding=5 cellspacing=0 width=98%><tr>
 *    <td width=10px></td>
 *    <td bgcolor=#B8CCE4 width=125px align=center> 28.09.2017 13:04 </td>
@@ -724,7 +724,7 @@
 *    <td bgcolor=#B8CCE4 width=125px align=center> 27.09.2017 22:46 </td>
 *    <td bgcolor=#C0FFC0> Закраска синим цветом окна программы при начале отрисовки. </td>
 *  </tr></table>
-*  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект \ref CovelliteRocketPage : </td></tr></table>
+*  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект Covellite::Rocket : </td></tr></table>
 *  <table frame=void border=1 bordercolor=#FFFFFF cellpadding=5 cellspacing=0 width=98%><tr>
 *    <td width=10px></td>
 *    <td bgcolor=#B8CCE4 width=125px align=center> 27.09.2017 14:04 </td>
@@ -742,7 +742,7 @@
 *    <td bgcolor=#B8CCE4 width=125px align=center> 27.09.2017 13:31 </td>
 *    <td bgcolor=#C0FFC0> Добавление пространства имен проекта. </td>
 *  </tr></table>
-*  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект \ref CovelliteCorePage : </td></tr></table>
+*  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект Covellite::Core : </td></tr></table>
 *  <table frame=void border=1 bordercolor=#FFFFFF cellpadding=5 cellspacing=0 width=98%><tr>
 *    <td width=10px></td>
 *    <td bgcolor=#B8CCE4 width=125px align=center> 27.09.2017 13:07 </td>
@@ -779,7 +779,7 @@
 *    <td bgcolor=#B8CCE4 width=125px align=center> 26.09.2017 00:03 </td>
 *    <td bgcolor=#FFC0C0> fix: Ошибки при сборке проекта. </td>
 *  </tr></table>
-*  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект \ref CovelliteCorePage : </td></tr></table>
+*  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект Covellite::Core : </td></tr></table>
 *  <table frame=void border=1 bordercolor=#FFFFFF cellpadding=5 cellspacing=0 width=98%><tr>
 *    <td width=10px></td>
 *    <td bgcolor=#B8CCE4 width=125px align=center> 25.09.2017 00:00 </td>
@@ -809,7 +809,7 @@
 *  
 *  Версия: 2.0.1.321
 *  -----
-*  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект \ref CovelliteCorePage : </td></tr></table>
+*  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект Covellite::Core : </td></tr></table>
 *  <table frame=void border=1 bordercolor=#FFFFFF cellpadding=5 cellspacing=0 width=98%><tr>
 *    <td width=10px></td>
 *    <td bgcolor=#B8CCE4 width=125px align=center> 22.09.2017 12:00 </td>
@@ -835,7 +835,7 @@
 *    <td bgcolor=#B8CCE4 width=125px align=center> 11.09.2017 14:15 </td>
 *    <td bgcolor=#FFC0C0> fix: Ошибка при запуске программы на устройстве. </td>
 *  </tr></table>
-*  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект \ref CovelliteCorePage : </td></tr></table>
+*  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект Covellite::Core : </td></tr></table>
 *  <table frame=void border=1 bordercolor=#FFFFFF cellpadding=5 cellspacing=0 width=98%><tr>
 *    <td width=10px></td>
 *    <td bgcolor=#B8CCE4 width=125px align=center> 11.09.2017 13:48 </td>
@@ -861,19 +861,19 @@
 *    <td bgcolor=#B8CCE4 width=125px align=center> 24.06.2017 14:18 </td>
 *    <td bgcolor=#FFC0C0> fix: Черное поле ввода текста. </td>
 *  </tr></table>
-*  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект \ref CovelliteRocketPage : </td></tr></table>
+*  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект Covellite::Rocket : </td></tr></table>
 *  <table frame=void border=1 bordercolor=#FFFFFF cellpadding=5 cellspacing=0 width=98%><tr>
 *    <td width=10px></td>
 *    <td bgcolor=#B8CCE4 width=125px align=center> 23.06.2017 16:40 </td>
 *    <td bgcolor=#C0FFC0> Поддержка использования .bmp, .ico, .png, .jpeg файлов. </td>
 *  </tr></table>
-*  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект \ref CovelliteCorePage : </td></tr></table>
+*  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект Covellite::Core : </td></tr></table>
 *  <table frame=void border=1 bordercolor=#FFFFFF cellpadding=5 cellspacing=0 width=98%><tr>
 *    <td width=10px></td>
 *    <td bgcolor=#B8CCE4 width=125px align=center> 27.05.2017 13:50 </td>
 *    <td bgcolor=#C0FFC0> Функция получения текущего языка системы. </td>
 *  </tr></table>
-*  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект \ref CovelliteRocketPage : </td></tr></table>
+*  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект Covellite::Rocket : </td></tr></table>
 *  <table frame=void border=1 bordercolor=#FFFFFF cellpadding=5 cellspacing=0 width=98%><tr>
 *    <td width=10px></td>
 *    <td bgcolor=#B8CCE4 width=125px align=center> 25.05.2017 21:16 </td>
@@ -883,13 +883,13 @@
 *  
 *  Версия: 1.0.2.244
 *  -----
-*  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект \ref CovelliteCorePage : </td></tr></table>
+*  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект Covellite::Core : </td></tr></table>
 *  <table frame=void border=1 bordercolor=#FFFFFF cellpadding=5 cellspacing=0 width=98%><tr>
 *    <td width=10px></td>
 *    <td bgcolor=#B8CCE4 width=125px align=center> 09.02.2017 17:50 </td>
 *    <td bgcolor=#C0FFC0> Класс Window: скрытие экранной клавиатуры при переключениях между слоями. </td>
 *  </tr></table>
-*  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект \ref CovelliteRocketPage : </td></tr></table>
+*  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект Covellite::Rocket : </td></tr></table>
 *  <table frame=void border=1 bordercolor=#FFFFFF cellpadding=5 cellspacing=0 width=98%><tr>
 *    <td width=10px></td>
 *    <td bgcolor=#B8CCE4 width=125px align=center> 09.02.2017 13:13 </td>
@@ -901,7 +901,7 @@
 *    <td bgcolor=#B8CCE4 width=125px align=center> 09.02.2017 11:20 </td>
 *    <td bgcolor=#C0FFC0> Класс Environment: наследование от класса из Alicorn. </td>
 *  </tr></table>
-*  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект \ref CovelliteCorePage : </td></tr></table>
+*  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект Covellite::Core : </td></tr></table>
 *  <table frame=void border=1 bordercolor=#FFFFFF cellpadding=5 cellspacing=0 width=98%><tr>
 *    <td width=10px></td>
 *    <td bgcolor=#B8CCE4 width=125px align=center> 09.02.2017 10:21 </td>
@@ -917,7 +917,7 @@
 *    <td bgcolor=#B8CCE4 width=125px align=center> 13.01.2017 12:16 </td>
 *    <td bgcolor=#C0FFC0> Пример GUI на стилях CSS: пример окна с прокруткой всего слоя при необходимости. </td>
 *  </tr></table>
-*  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект \ref CovelliteRocketPage : </td></tr></table>
+*  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект Covellite::Rocket : </td></tr></table>
 *  <table frame=void border=1 bordercolor=#FFFFFF cellpadding=5 cellspacing=0 width=98%><tr>
 *    <td width=10px></td>
 *    <td bgcolor=#B8CCE4 width=125px align=center> 13.01.2017 12:14 </td>
@@ -939,7 +939,7 @@
 *    <td bgcolor=#B8CCE4 width=125px align=center> 12.01.2017 22:53 </td>
 *    <td bgcolor=#C0FFC0> Пример GUI на стилях CSS: слой для тестирования прокрутки всего окна. </td>
 *  </tr></table>
-*  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект \ref CovelliteRocketPage : </td></tr></table>
+*  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект Covellite::Rocket : </td></tr></table>
 *  <table frame=void border=1 bordercolor=#FFFFFF cellpadding=5 cellspacing=0 width=98%><tr>
 *    <td width=10px></td>
 *    <td bgcolor=#B8CCE4 width=125px align=center> 12.01.2017 14:19 </td>
@@ -955,7 +955,7 @@
 *    <td bgcolor=#B8CCE4 width=125px align=center> 12.01.2017 12:47 </td>
 *    <td bgcolor=#FFC0C0> fix: Класс File: падение программы при попытке открытия несуществующего файла. </td>
 *  </tr></table>
-*  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект \ref CovelliteCorePage : </td></tr></table>
+*  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект Covellite::Core : </td></tr></table>
 *  <table frame=void border=1 bordercolor=#FFFFFF cellpadding=5 cellspacing=0 width=98%><tr>
 *    <td width=10px></td>
 *    <td bgcolor=#B8CCE4 width=125px align=center> 12.01.2017 12:25 </td>
@@ -1002,19 +1002,19 @@
 *    <td bgcolor=#B8CCE4 width=125px align=center> 08.01.2017 13:47 </td>
 *    <td bgcolor=#C0FFC0> Пример размещения элементов в заданных местах экрана. </td>
 *  </tr></table>
-*  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект \ref CovelliteRocketPage : </td></tr></table>
+*  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект Covellite::Rocket : </td></tr></table>
 *  <table frame=void border=1 bordercolor=#FFFFFF cellpadding=5 cellspacing=0 width=98%><tr>
 *    <td width=10px></td>
 *    <td bgcolor=#B8CCE4 width=125px align=center> 04.01.2017 13:00 </td>
 *    <td bgcolor=#C0FFC0> Класс Window: получение пути к файлу при создании слоя через статическую функцию класса создаваемого слоя. </td>
 *  </tr></table>
-*  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект \ref CovelliteCorePage : </td></tr></table>
+*  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект Covellite::Core : </td></tr></table>
 *  <table frame=void border=1 bordercolor=#FFFFFF cellpadding=5 cellspacing=0 width=98%><tr>
 *    <td width=10px></td>
 *    <td bgcolor=#B8CCE4 width=125px align=center> 03.01.2017 12:41 </td>
 *    <td bgcolor=#C0FFC0> Подставные макросы для объявления функции точки входа модуля. </td>
 *  </tr></table>
-*  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект \ref CovelliteRocketPage : </td></tr></table>
+*  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект Covellite::Rocket : </td></tr></table>
 *  <table frame=void border=1 bordercolor=#FFFFFF cellpadding=5 cellspacing=0 width=98%><tr>
 *    <td width=10px></td>
 *    <td bgcolor=#B8CCE4 width=125px align=center> 03.01.2017 12:24 </td>
@@ -1030,7 +1030,7 @@
 *    <td bgcolor=#B8CCE4 width=125px align=center> 03.01.2017 12:12 </td>
 *    <td bgcolor=#C0FFC0> Класс Layer: функция GetElement(). </td>
 *  </tr></table>
-*  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект \ref CovelliteCorePage : </td></tr></table>
+*  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект Covellite::Core : </td></tr></table>
 *  <table frame=void border=1 bordercolor=#FFFFFF cellpadding=5 cellspacing=0 width=98%><tr>
 *    <td width=10px></td>
 *    <td bgcolor=#B8CCE4 width=125px align=center> 02.01.2017 22:32 </td>
@@ -1040,7 +1040,7 @@
 *  
 *  Версия: 1.0.0.178
 *  =====
-*  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект \ref CovelliteRocketPage : </td></tr></table>
+*  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект Covellite::Rocket : </td></tr></table>
 *  <table frame=void border=1 bordercolor=#FFFFFF cellpadding=5 cellspacing=0 width=98%><tr>
 *    <td width=10px></td>
 *    <td bgcolor=#B8CCE4 width=125px align=center> 29.12.2016 15:14 </td>
@@ -1071,13 +1071,13 @@
 *    <td bgcolor=#B8CCE4 width=125px align=center> 29.12.2016 13:57 </td>
 *    <td bgcolor=#C0FFC0> Класс Layer: отписка от события "click" в деструкторе. </td>
 *  </tr></table>
-*  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект \ref CovelliteCorePage : </td></tr></table>
+*  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект Covellite::Core : </td></tr></table>
 *  <table frame=void border=1 bordercolor=#FFFFFF cellpadding=5 cellspacing=0 width=98%><tr>
 *    <td width=10px></td>
 *    <td bgcolor=#B8CCE4 width=125px align=center> 28.12.2016 13:41 </td>
 *    <td bgcolor=#C0FFC0> Исправление/дополнение описания решения. </td>
 *  </tr></table>
-*  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект \ref CovelliteRocketPage : </td></tr></table>
+*  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект Covellite::Rocket : </td></tr></table>
 *  <table frame=void border=1 bordercolor=#FFFFFF cellpadding=5 cellspacing=0 width=98%><tr>
 *    <td width=10px></td>
 *    <td bgcolor=#B8CCE4 width=125px align=center> 28.12.2016 12:25 </td>
@@ -1088,7 +1088,7 @@
 *    <td bgcolor=#B8CCE4 width=125px align=center> 28.12.2016 11:56 </td>
 *    <td bgcolor=#C0FFC0> Класс Window: логика подписки на события libRocket вынесена в отдельный класс. </td>
 *  </tr></table>
-*  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект \ref CovelliteCorePage : </td></tr></table>
+*  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект Covellite::Core : </td></tr></table>
 *  <table frame=void border=1 bordercolor=#FFFFFF cellpadding=5 cellspacing=0 width=98%><tr>
 *    <td width=10px></td>
 *    <td bgcolor=#B8CCE4 width=125px align=center> 28.12.2016 00:25 </td>
@@ -1105,13 +1105,13 @@
 *    <td bgcolor=#B8CCE4 width=125px align=center> 27.12.2016 13:15 </td>
 *    <td bgcolor=#C0FFC0> Пример использования слоя без заголовка. </td>
 *  </tr></table>
-*  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект \ref CovelliteCorePage : </td></tr></table>
+*  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект Covellite::Core : </td></tr></table>
 *  <table frame=void border=1 bordercolor=#FFFFFF cellpadding=5 cellspacing=0 width=98%><tr>
 *    <td width=10px></td>
 *    <td bgcolor=#B8CCE4 width=125px align=center> 27.12.2016 12:43 </td>
 *    <td bgcolor=#C0FFC0> Подставные классы для внешних классов фреймворка. </td>
 *  </tr></table>
-*  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект \ref CovelliteRocketPage : </td></tr></table>
+*  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект Covellite::Rocket : </td></tr></table>
 *  <table frame=void border=1 bordercolor=#FFFFFF cellpadding=5 cellspacing=0 width=98%><tr>
 *    <td width=10px></td>
 *    <td bgcolor=#B8CCE4 width=125px align=center> 27.12.2016 12:12 </td>
@@ -1128,7 +1128,7 @@
 *    <td bgcolor=#B8CCE4 width=125px align=center> 27.12.2016 11:51 </td>
 *    <td bgcolor=#C0FFC0> Перенос проекта сборки .apk файла в папку проекта. </td>
 *  </tr></table>
-*  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект \ref CovelliteCorePage : </td></tr></table>
+*  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект Covellite::Core : </td></tr></table>
 *  <table frame=void border=1 bordercolor=#FFFFFF cellpadding=5 cellspacing=0 width=98%><tr>
 *    <td width=10px></td>
 *    <td bgcolor=#B8CCE4 width=125px align=center> 27.12.2016 11:33 </td>
@@ -1154,7 +1154,7 @@
 *    <td bgcolor=#B8CCE4 width=125px align=center> 26.12.2016 12:47 </td>
 *    <td bgcolor=#C0FFC0> Класс Application: изменение логики вызова сигналов событий. </td>
 *  </tr></table>
-*  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект \ref CovelliteRocketPage : </td></tr></table>
+*  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект Covellite::Rocket : </td></tr></table>
 *  <table frame=void border=1 bordercolor=#FFFFFF cellpadding=5 cellspacing=0 width=98%><tr>
 *    <td width=10px></td>
 *    <td bgcolor=#B8CCE4 width=125px align=center> 26.12.2016 12:13 </td>
@@ -1170,7 +1170,7 @@
 *    <td bgcolor=#B8CCE4 width=125px align=center> 26.12.2016 11:53 </td>
 *    <td bgcolor=#C0FFC0> Класс Initializer: изменена логика инициализации libRocket. </td>
 *  </tr></table>
-*  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект \ref CovelliteCorePage : </td></tr></table>
+*  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект Covellite::Core : </td></tr></table>
 *  <table frame=void border=1 bordercolor=#FFFFFF cellpadding=5 cellspacing=0 width=98%><tr>
 *    <td width=10px></td>
 *    <td bgcolor=#B8CCE4 width=125px align=center> 25.12.2016 11:45 </td>
@@ -1195,13 +1195,13 @@
 *  
 *  Версия: 0.1.0.139
 *  =====
-*  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект \ref CovelliteCorePage : </td></tr></table>
+*  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект Covellite::Core : </td></tr></table>
 *  <table frame=void border=1 bordercolor=#FFFFFF cellpadding=5 cellspacing=0 width=98%><tr>
 *    <td width=10px></td>
 *    <td bgcolor=#B8CCE4 width=125px align=center> 23.12.2016 13:04 </td>
 *    <td bgcolor=#C0FFC0> Скриншоты примера для документации. </td>
 *  </tr></table>
-*  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект \ref CovelliteRocketPage : </td></tr></table>
+*  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект Covellite::Rocket : </td></tr></table>
 *  <table frame=void border=1 bordercolor=#FFFFFF cellpadding=5 cellspacing=0 width=98%><tr>
 *    <td width=10px></td>
 *    <td bgcolor=#B8CCE4 width=125px align=center> 23.12.2016 12:29 </td>
@@ -1212,7 +1212,7 @@
 *    <td bgcolor=#B8CCE4 width=125px align=center> 23.12.2016 12:10 </td>
 *    <td bgcolor=#C0FFC0> КлассWindow: удалена очистка всех документов в деструкторе. </td>
 *  </tr></table>
-*  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект \ref CovelliteCorePage : </td></tr></table>
+*  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект Covellite::Core : </td></tr></table>
 *  <table frame=void border=1 bordercolor=#FFFFFF cellpadding=5 cellspacing=0 width=98%><tr>
 *    <td width=10px></td>
 *    <td bgcolor=#B8CCE4 width=125px align=center> 22.12.2016 21:35 </td>
@@ -1223,7 +1223,7 @@
 *    <td bgcolor=#B8CCE4 width=125px align=center> 22.12.2016 21:11 </td>
 *    <td bgcolor=#C0FFC0> Класс EventHandler: обнуление используемых указателей. </td>
 *  </tr></table>
-*  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект \ref CovelliteRocketPage : </td></tr></table>
+*  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект Covellite::Rocket : </td></tr></table>
 *  <table frame=void border=1 bordercolor=#FFFFFF cellpadding=5 cellspacing=0 width=98%><tr>
 *    <td width=10px></td>
 *    <td bgcolor=#B8CCE4 width=125px align=center> 22.12.2016 11:31 </td>
@@ -1260,19 +1260,19 @@
 *    <td bgcolor=#B8CCE4 width=125px align=center> 21.12.2016 12:36 </td>
 *    <td bgcolor=#FFC0C0> fix: Класс Config: отрисовка нового слоя поверх предыдущего. </td>
 *  </tr></table>
-*  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект \ref CovelliteRocketPage : </td></tr></table>
+*  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект Covellite::Rocket : </td></tr></table>
 *  <table frame=void border=1 bordercolor=#FFFFFF cellpadding=5 cellspacing=0 width=98%><tr>
 *    <td width=10px></td>
 *    <td bgcolor=#B8CCE4 width=125px align=center> 21.12.2016 12:25 </td>
 *    <td bgcolor=#C0FFC0> Класс Window. </td>
 *  </tr></table>
-*  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект \ref CovelliteCorePage : </td></tr></table>
+*  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект Covellite::Core : </td></tr></table>
 *  <table frame=void border=1 bordercolor=#FFFFFF cellpadding=5 cellspacing=0 width=98%><tr>
 *    <td width=10px></td>
 *    <td bgcolor=#B8CCE4 width=125px align=center> 20.12.2016 22:00 </td>
 *    <td bgcolor=#C0FFC0> Класс Window: переключение буферов перенесено в обработчик события отрисовки окна. </td>
 *  </tr></table>
-*  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект \ref CovelliteRocketPage : </td></tr></table>
+*  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект Covellite::Rocket : </td></tr></table>
 *  <table frame=void border=1 bordercolor=#FFFFFF cellpadding=5 cellspacing=0 width=98%><tr>
 *    <td width=10px></td>
 *    <td bgcolor=#B8CCE4 width=125px align=center> 20.12.2016 11:32 </td>
@@ -1309,13 +1309,13 @@
 *    <td bgcolor=#B8CCE4 width=125px align=center> 18.12.2016 11:13 </td>
 *    <td bgcolor=#C0FFC0> Класс Environment. </td>
 *  </tr></table>
-*  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект \ref CovelliteCorePage : </td></tr></table>
+*  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект Covellite::Core : </td></tr></table>
 *  <table frame=void border=1 bordercolor=#FFFFFF cellpadding=5 cellspacing=0 width=98%><tr>
 *    <td width=10px></td>
 *    <td bgcolor=#B8CCE4 width=125px align=center> 17.12.2016 21:40 </td>
 *    <td bgcolor=#C0FFC0> Класс Application: функция Run() - завершение работы программы при выходе из функции. </td>
 *  </tr></table>
-*  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект \ref CovelliteRocketPage : </td></tr></table>
+*  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект Covellite::Rocket : </td></tr></table>
 *  <table frame=void border=1 bordercolor=#FFFFFF cellpadding=5 cellspacing=0 width=98%><tr>
 *    <td width=10px></td>
 *    <td bgcolor=#B8CCE4 width=125px align=center> 17.12.2016 12:38 </td>
@@ -1326,7 +1326,7 @@
 *    <td bgcolor=#B8CCE4 width=125px align=center> 17.12.2016 12:00 </td>
 *    <td bgcolor=#C0FFC0> Реализация для libRocket убрана "под капот". </td>
 *  </tr></table>
-*  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект \ref CovelliteCorePage : </td></tr></table>
+*  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект Covellite::Core : </td></tr></table>
 *  <table frame=void border=1 bordercolor=#FFFFFF cellpadding=5 cellspacing=0 width=98%><tr>
 *    <td width=10px></td>
 *    <td bgcolor=#B8CCE4 width=125px align=center> 17.12.2016 11:43 </td>
@@ -1351,13 +1351,13 @@
 *  
 *  Версия: 0.0.1.72
 *  -----
-*  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект \ref CovelliteRocketPage : </td></tr></table>
+*  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект Covellite::Rocket : </td></tr></table>
 *  <table frame=void border=1 bordercolor=#FFFFFF cellpadding=5 cellspacing=0 width=98%><tr>
 *    <td width=10px></td>
 *    <td bgcolor=#B8CCE4 width=125px align=center> 16.12.2016 23:18 </td>
 *    <td bgcolor=#C0FFC0> Перенос заголовочных файлов в папку экспорта. </td>
 *  </tr></table>
-*  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект \ref CovelliteCorePage : </td></tr></table>
+*  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект Covellite::Core : </td></tr></table>
 *  <table frame=void border=1 bordercolor=#FFFFFF cellpadding=5 cellspacing=0 width=98%><tr>
 *    <td width=10px></td>
 *    <td bgcolor=#B8CCE4 width=125px align=center> 16.12.2016 23:00 </td>
@@ -1378,7 +1378,7 @@
 *    <td bgcolor=#B8CCE4 width=125px align=center> 16.12.2016 13:34 </td>
 *    <td bgcolor=#C0FFC0> Включение всех файлов фреймворка в тестовые проекты. </td>
 *  </tr></table>
-*  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект \ref CovelliteRocketPage : </td></tr></table>
+*  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект Covellite::Rocket : </td></tr></table>
 *  <table frame=void border=1 bordercolor=#FFFFFF cellpadding=5 cellspacing=0 width=98%><tr>
 *    <td width=10px></td>
 *    <td bgcolor=#B8CCE4 width=125px align=center> 15.12.2016 23:45 </td>
@@ -1390,7 +1390,7 @@
 *    <td bgcolor=#B8CCE4 width=125px align=center> 15.12.2016 23:19 </td>
 *    <td bgcolor=#C0FFC0> Общий проект тестирования. </td>
 *  </tr></table>
-*  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект \ref CovelliteCorePage : </td></tr></table>
+*  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект Covellite::Core : </td></tr></table>
 *  <table frame=void border=1 bordercolor=#FFFFFF cellpadding=5 cellspacing=0 width=98%><tr>
 *    <td width=10px></td>
 *    <td bgcolor=#B8CCE4 width=125px align=center> 15.12.2016 23:17 </td>
@@ -1406,7 +1406,7 @@
 *    <td bgcolor=#B8CCE4 width=125px align=center> 15.12.2016 22:16 </td>
 *    <td bgcolor=#C0FFC0> Класс Window: изменение логики работы функции Exit(). </td>
 *  </tr></table>
-*  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект \ref CovelliteRocketPage : </td></tr></table>
+*  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект Covellite::Rocket : </td></tr></table>
 *  <table frame=void border=1 bordercolor=#FFFFFF cellpadding=5 cellspacing=0 width=98%><tr>
 *    <td width=10px></td>
 *    <td bgcolor=#B8CCE4 width=125px align=center> 15.12.2016 22:10 </td>
@@ -1418,7 +1418,7 @@
 *    <td bgcolor=#B8CCE4 width=125px align=center> 15.12.2016 12:39 </td>
 *    <td bgcolor=#C0FFC0> Правки для ускорения компиляции проектов решения. </td>
 *  </tr></table>
-*  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект \ref CovelliteRocketPage : </td></tr></table>
+*  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект Covellite::Rocket : </td></tr></table>
 *  <table frame=void border=1 bordercolor=#FFFFFF cellpadding=5 cellspacing=0 width=98%><tr>
 *    <td width=10px></td>
 *    <td bgcolor=#B8CCE4 width=125px align=center> 15.12.2016 12:13 </td>
@@ -1455,7 +1455,7 @@
 *    <td bgcolor=#B8CCE4 width=125px align=center> 15.12.2016 10:42 </td>
 *    <td bgcolor=#C0FFC0> Проект для классов-оберток EGL. </td>
 *  </tr></table>
-*  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект \ref CovelliteCorePage : </td></tr></table>
+*  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект Covellite::Core : </td></tr></table>
 *  <table frame=void border=1 bordercolor=#FFFFFF cellpadding=5 cellspacing=0 width=98%><tr>
 *    <td width=10px></td>
 *    <td bgcolor=#B8CCE4 width=125px align=center> 15.12.2016 00:07 </td>
@@ -1502,7 +1502,7 @@
 *    <td bgcolor=#B8CCE4 width=125px align=center> 14.12.2016 11:36 </td>
 *    <td bgcolor=#C0FFC0> Класс Environment перенесен в пространство имен covellite. </td>
 *  </tr></table>
-*  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект \ref CovelliteCorePage : </td></tr></table>
+*  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект Covellite::Core : </td></tr></table>
 *  <table frame=void border=1 bordercolor=#FFFFFF cellpadding=5 cellspacing=0 width=98%><tr>
 *    <td width=10px></td>
 *    <td bgcolor=#B8CCE4 width=125px align=center> 14.12.2016 00:18 </td>
@@ -1544,7 +1544,7 @@
 *    <td bgcolor=#B8CCE4 width=125px align=center> 13.12.2016 12:25 </td>
 *    <td bgcolor=#C0FFC0> Изменение иконки/названия тестовой программы. </td>
 *  </tr></table>
-*  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект \ref CovelliteCorePage : </td></tr></table>
+*  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект Covellite::Core : </td></tr></table>
 *  <table frame=void border=1 bordercolor=#FFFFFF cellpadding=5 cellspacing=0 width=98%><tr>
 *    <td width=10px></td>
 *    <td bgcolor=#B8CCE4 width=125px align=center> 13.12.2016 12:01 </td>
@@ -1588,7 +1588,7 @@
 *    <td bgcolor=#B8CCE4 width=125px align=center> 12.12.2016 12:06 </td>
 *    <td bgcolor=#C0FFC0> Переименование проекта. </td>
 *  </tr></table>
-*  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект \ref CovelliteCorePage : </td></tr></table>
+*  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект Covellite::Core : </td></tr></table>
 *  <table frame=void border=1 bordercolor=#FFFFFF cellpadding=5 cellspacing=0 width=98%><tr>
 *    <td width=10px></td>
 *    <td bgcolor=#B8CCE4 width=125px align=center> 12.12.2016 11:55 </td>

@@ -12,6 +12,8 @@ namespace gui
 * \brief
 *  Класс входит в проект \ref CovelliteGuiPage \n
 *  Интерфейсный класс преобразователя строк libRocket.
+* \todo
+*  Класс используется для внутренней реализации и не должен попадать в Externals.
 *  
 * \version
 *  1.0.0.0        \n

@@ -36,24 +36,27 @@ class model_Components as "model::DbComponents"
 {
   + Id AddGameObject(Object_t);
   + void RemoveGameObject(Id);
+  + ... GetComponent(...);
   ---
 }
 
 interface model_IGameObject as "model::IGameObject"
 {
-  {abstract} + Type::Value GetType(void);
-  {abstract} + Object_t GetObject(Any_t);
+  {abstract} + size_t GetType(void);
+  {abstract} + Object_t[] GetObject(Any_t);
   ---
 }
 
 class model_GameObject as "model::GameObject"
 {
-  + static IGameObjectPtr_t Create(Type::Value, IGameWorld &);
+  + static IGameObjectPtr_t Create(Support::Value);
+  + static IGameObjectPtr_t Create(Extra::Value);
+  + static IGameObjectPtr_t Create(Landscape::Value, IGameWorld &);
   ---
-  + GameObject(Type::Value);
+  + GameObject(size_t);
 }
 
-class model_Loader as "model::Loader"
+class model_Skybox as "model::Skybox"
 {
 }
 
@@ -65,7 +68,15 @@ class model_Landscape as "model::Landscape"
 {
 }
 
+class model_Water as "model::Water"
+{
+}
+
 class model_Compass as "model::Compass"
+{
+}
+
+class model_Loader as "model::Loader"
 {
 }
 
@@ -75,52 +86,51 @@ class model_GameWorld as "model::GameWorld"
   ---
 }
 
-class model_DbUpdaters as "model::DbUpdaters"
-{
-  + void AddUpdater(Id_t, Updater_t);
-  + void RemoveUpdater(Id_t);
-  + void CallUpdater(Id_t);
-  ---
-}
-
 class model_GameScene as "support::GameScene"
 {
-  + void Add(SceneId, ObjectId, IsUpdater);
-  + void Complete(void);
-  + void CallForEach(Callback_t, Callback_t);
+  + void SetCameraInfo(CameraInfo);
+  + void Render(Callback_t);
+  + void ProcessAll(Callback_t);
+  ---
+  + void Add(SceneId, Ids);
+  + void Add(SceneId, Ids, CubeCoords);
+  + Ids Remove(CubeCoords);
+  + void CompleteReplace(void);
+  + void CompleteUpdate(void);
   ---
 }
 
 class model_Scene as "support::Scene"
 {
-  + Objects_t Objects
-  + Updaters_t Updaters;
+  + SceneObjects_t Objects
 }
 
 model_IComponents <|-.- model_Components
 model_IComponents <|-.- model_Main
 model_IGameWorld <|-.- model_GameWorld
 model_IGameWorld <|-.- model_Main
-model_Main --* model_Components
-model_Main --* model_GameWorld
-model_Components o-- model_GameWorld
+model_Main *-- model_Components
+model_Main *-- model_GameWorld
+model_GameWorld o-- model_Components
 
-model_GameWorld --* model_IGameObject
-model_GameWorld --o Filesystem
-model_GameWorld --* model_DbUpdaters
-model_GameWorld --* model_GameScene
+model_GameWorld *-- model_IGameObject
+model_GameWorld *-- model_GameScene
 
 model_IGameObject <|-.- model_GameObject
-model_IGameWorld o-- model_GameObject
-model_GameObject <|-- model_Loader
+model_IGameWorld --o model_GameObject
+
+model_GameObject o---left--- Filesystem
+model_GameObject <|-- model_Skybox
 model_GameObject <|-- model_Camera
 model_GameObject <|-- model_Landscape
+model_GameObject <|-- model_Water
 model_GameObject <|-- model_Compass
+model_GameObject <|-- model_Loader
 
-model_GameScene --* model_Scene
+model_GameScene *-- model_Scene
 
-Events o-- model_GameWorld
-Events o-- GuiPanels
+model_GameWorld o-left- Events
+GuiPanels o-- Events
 
 interface view_IScene as "view::I3DScene"
 {
@@ -131,8 +141,8 @@ interface view_IScene as "view::I3DScene"
 
 interface view_IRenders as "view::IDbRenders"
 {
-  {abstract} + void AddObjects(Id_t, Object_t);
-  {abstract} + void RemoveObjects(Id_t, Object_t);
+  {abstract} + void AddObject(Id_t, Object_t);
+  {abstract} + void RemoveObject(Id_t, Object_t);
   ---
 }
 
@@ -158,10 +168,10 @@ view_IRenders <|-.- view_Renders
 view_IRenders <|-.- view_Main
 view_IScene <|-.- view_3DScene
 view_IScene <|-.- view_Main
-view_Main --* view_Renders
-view_Main --* view_3DScene
-view_Renders o-- view_3DScene
-view_3DScene --* model_GameScene
+view_Main *-- view_Renders
+view_Main *-- view_3DScene
+view_3DScene o-- view_Renders
+view_3DScene *-- model_GameScene
 
 class controller_Main as "controller::Controller"
 {
@@ -170,9 +180,9 @@ class controller_Main as "controller::Controller"
   ---
 }
 
-model_IGameWorld --o controller_Main
-model_IComponents --o controller_Main
-view_IScene --o controller_Main
-view_IRenders --o controller_Main
+controller_Main o-- model_IGameWorld
+controller_Main o-- model_IComponents
+controller_Main o-- view_IScene
+controller_Main o-- view_IRenders
 
 @enduml

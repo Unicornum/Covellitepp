@@ -35,12 +35,6 @@
     <ClCompile Include="Test.Window\Window_test.cpp">
       <Filter>Tests\Window</Filter>
     </ClCompile>
-    <ClCompile Include="Test.Window\Window.windows.deprecated_test.cpp">
-      <Filter>Tests\Window</Filter>
-    </ClCompile>
-    <ClCompile Include="Test.Window\Window.android.deprecated_test.cpp">
-      <Filter>Tests\Window</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">

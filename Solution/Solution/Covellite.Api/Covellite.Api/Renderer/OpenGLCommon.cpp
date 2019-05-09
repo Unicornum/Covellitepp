@@ -125,8 +125,7 @@ void OpenGLCommon::Data::SetCameraId(const CameraId_t & _Id)
   }
 }
 
-OpenGLCommon::OpenGLCommon(const Renderer::Data & _Data, const String_t & _PreVersion) :
-  m_BackgroundColor(_Data.BkColor),
+OpenGLCommon::OpenGLCommon(const Data_t & _Data, const String_t & _PreVersion) :
   m_Top{ _Data.Top },
   m_PreVersion{ _PreVersion },
   m_pData{ ::std::make_shared<Data>() }
@@ -165,16 +164,6 @@ OpenGLCommon::String_t OpenGLCommon::GetUsingApi(void) const /*final*/
     string_cast<String, Locale::Default>(::std::string{ Version });
 }
 
-void OpenGLCommon::ClearFrame(void) /*final*/
-{
-  glClearColor(
-    m_BackgroundColor.R,
-    m_BackgroundColor.G,
-    m_BackgroundColor.B,
-    m_BackgroundColor.A);
-  glClear(GL_COLOR_BUFFER_BIT);
-}
-
 void OpenGLCommon::ResizeWindow(int32_t _Width, int32_t _Height) /*final*/
 {
   // (x, y) - левый нижний угол!
@@ -189,10 +178,8 @@ auto OpenGLCommon::GetCreators(void) const -> const Creators_t & /*override*/
 auto OpenGLCommon::CreateCamera(const ComponentPtr_t & _pComponent) -> Render_t
 {
   const auto CameraId = _pComponent->Id;
-  const auto Focal = _pComponent->GetValue(uT("focal"), uT("Disabled"));
 
-  const auto Camera = 
-    (_pComponent->Kind == uT("Perspective") || Focal == uT("Enabled")) ?
+  const auto Camera = (_pComponent->Kind == uT("Perspective")) ?
     GetCameraPerspective(_pComponent) :
     GetCameraOrthographic(_pComponent);
 
@@ -477,7 +464,7 @@ auto OpenGLCommon::CreateBuffer(const ComponentPtr_t & _pBuffer) -> Render_t
   const auto pBufferData = 
     m_ServiceComponents.Get({ { uT("Buffer"), _pBuffer } })[0];
 
-  auto CreateIndexBuffer = [&](void)
+  auto CreateIndexBuffer = [&](void) -> Render_t
   {
     auto * pDrawElements = &m_DrawElements;
 
@@ -576,7 +563,6 @@ auto OpenGLCommon::CreatePresent(const ComponentPtr_t & _pComponent) -> Render_t
 {
   ::std::map<String_t, ::std::function<Render_t(void)>> Creators =
   {
-    { uT("Camera"), [&](void) { return CreateCamera(_pComponent); } },
     { uT("Geometry"), [&](void) { return CreateGeometry(_pComponent); } },
   };
 

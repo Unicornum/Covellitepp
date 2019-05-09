@@ -18,6 +18,11 @@
       <Filter>Common</Filter>
     </ClCompile>
     <ClCompile Include="Window_test.cpp" />
+    <ClCompile Include="Window_test.android.cpp" />
+    <ClCompile Include="Window_test.windows.cpp" />
+    <ClCompile Include="..\..\Covellite.Api\Renders.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">

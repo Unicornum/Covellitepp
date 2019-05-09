@@ -8,8 +8,12 @@
   <PropertyGroup Label="UserMacros">
     <PlatformToolsetVersion>0</PlatformToolsetVersion>
   </PropertyGroup>
-  <PropertyGroup />
-  <ItemDefinitionGroup />
+  <PropertyGroup>
+    <UseMultiToolTask>true</UseMultiToolTask>
+  </PropertyGroup>
+  <ItemDefinitionGroup>
+    <ClCompile />
+  </ItemDefinitionGroup>
   <ItemGroup>
     <BuildMacro Include="PlatformToolsetVersion">
       <Value>$(PlatformToolsetVersion)</Value>

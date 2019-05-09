@@ -164,9 +164,6 @@ Application::Application(EventBased) :
   {
     auto * pApp = reinterpret_cast<android_app *>(_pParams);
 
-    // 01 Июль 2018 13:13 (unicornum.verum@gmail.com)
-    TODO("Убрать инициализацию объектов ,которые уже не нужны.");
-
     const AppInfo_t Info
     {
       pApp, 

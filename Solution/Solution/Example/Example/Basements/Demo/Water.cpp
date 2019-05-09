@@ -14,7 +14,7 @@ namespace model
 
 
 Water::Water(void) :
-  GameObject(Type::Water)
+  GameObject(Extra::Water)
 {
   // Изменение размеров треугольника не влияет на fps!
 

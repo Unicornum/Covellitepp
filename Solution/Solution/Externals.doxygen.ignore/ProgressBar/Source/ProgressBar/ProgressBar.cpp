@@ -4,9 +4,6 @@
 #include <Rocket/ProgressBar/ElementProgressBar.h>
 #include <Rocket/Core/ElementInstancerGeneric.h>
 #include <Rocket/Core/Factory.h>
-#include <Rocket/Core/StyleSheetSpecification.h>
-#include <Rocket/Core/XMLParser.h>
-#include <Rocket/Core/Plugin.h>
 #include <Rocket/Core/Core.h>
 
 namespace Rocket {

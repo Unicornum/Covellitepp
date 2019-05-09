@@ -40,10 +40,12 @@ class OpenGLCommon :
   using Color_t = ::std::vector<GLfloat>;
   using MatrixBuilder_t = ::std::function<void(::glm::mat4 &)>;
 
+protected:
+  using Data_t = ::covellite::api::renderer::SettingsData;
+
 public:
   // Èםעונפויס IGraphicApi:
   String_t GetUsingApi(void) const final;
-  void ClearFrame(void) final;
   void ResizeWindow(int32_t, int32_t) final;
   const Creators_t & GetCreators(void) const final;
 
@@ -66,12 +68,11 @@ private:
   static Color_t ARGBtoFloat4(uint32_t);
 
 private:
-  const Renderer::Data::Color m_BackgroundColor;
-  const int                   m_Top;
-  const String_t              m_PreVersion;
-  Creators_t                  m_Creators;
-  Render_t                    m_DrawElements = [](void) {};
-  Render_t                    m_SampleState = [](void) {};
+  const int       m_Top;
+  const String_t  m_PreVersion;
+  Creators_t      m_Creators;
+  Render_t        m_DrawElements = [](void) {};
+  Render_t        m_SampleState = [](void) {};
 
 private:
   class Data;
@@ -82,7 +83,7 @@ private:
   CapturingServiceComponent m_ServiceComponents;
 
 public:
-  OpenGLCommon(const Renderer::Data &, const String_t &);
+  OpenGLCommon(const Data_t &, const String_t &);
 };
 
 } // namespace renderer

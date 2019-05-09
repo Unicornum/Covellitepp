@@ -1,8 +1,8 @@
 Android compiler:        arm-linux-androideabi-gcc.exe (GCC) 4.9
 Android stl library:     gnustl_static
 Android API Level:       android-19
-Android SDK build tools: 27.0.3
-Android SDK platform:    android-27
+Android SDK build tools: 28.0.3
+Android SDK platform:    android-28
 Android NDK:             crystax-ndk-10.3.2
 JDK:                     1.8.0_144
-Apache Ant:              1.10.2
+Apache Ant:              1.10.6

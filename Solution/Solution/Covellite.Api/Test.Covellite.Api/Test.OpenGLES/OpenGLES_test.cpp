@@ -59,13 +59,14 @@ protected:
   static const int m_Top = 1812271210;
 
   class Data :
-    public ::covellite::api::renderer::Renderer::Data
+    public ::covellite::api::renderer::SettingsData
   {
   public:
     Data(void)
     {
-      memset(this, 0, sizeof(Data));
+      Handle = (ANativeWindow *)nullptr;
       Top = m_Top;
+      IsFullScreen = false;
     }
   };
 

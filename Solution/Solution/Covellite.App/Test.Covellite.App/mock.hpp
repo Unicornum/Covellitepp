@@ -6,6 +6,7 @@
 *  ќбъ€влени€ подставных классов.
 */
 
+#include <memory>
 #include <alicorn\platform\app-info.hpp>
 #include <alicorn\settings.mock.hpp>
 #include <Platform\Windows.mock.hpp>

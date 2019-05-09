@@ -5,7 +5,6 @@
 #include <alicorn/std/string.hpp>
 #include <alicorn/std/string-cast.hpp>
 #include <alicorn/boost/lexical-cast.hpp>
-#include <Covellite/Core/EventHandler.hpp>
 #include <Rocket/ProgressBar/ElementProgressBar.h>
 
 #ifdef max
@@ -140,91 +139,9 @@ void Layer::Element::SetClassStyle(const String_t & _Class)
     string_cast<::std::string, Locale::UTF8>(_Class).c_str());
 }
 
-/**
-* \deprecated
-*  Функция устарела и будет удалена в следующей стабильной версии, вместо нее
-*  следует использовать функцию SetMeaning().
-* \brief
-*  Функция изменения текста дочернего элемента управления слоя.
-* \details
-*  - Для текстовых полей ввода функция заменяет текст, который эти элементы
-*  содержат, для всех остальных элементов - дочерний раздел .rml файла
-*  (таким образом можно динамически менять содержимое окна).
-*  - Нужно учиывать, что изменение текста внутри тегов (даже \<p\>...\</p\>)
-*  приведет к пересозданию всего или части документа, что обычно сопровождается
-*  заметным пользователю подвисанием работы программы на доли секунды, поэтому
-*  для вывода динамически меняющегося текста следует использовать текстовое
-*  поле ввода с установленным ему атрибутом \b disabled.
-*  
-* \param [in] _Text
-*  Новое значение текста.
-*/
-void Layer::Element::SetText(const Utf8String_t & _Text)
-{
-  const auto Tag =
-    m_pElement->GetTagName();
-  const auto Type =
-    m_pElement->GetAttribute("type", Rocket::Core::String{ "unknown" });
-
-  if (Tag == "textarea" ||
-    (Tag == "input" && Type == "text"))
-  {
-    m_pElement->SetAttribute("value", _Text.c_str());
-    return;
-  }
-
-  m_pElement->SetInnerRML(_Text.c_str());
-}
-
-/**
-* \deprecated
-*  Функция устарела и будет удалена в следующей стабильной версии, вместо нее
-*  следует использовать функцию GetMeaning().
-* \brief
-*  Функция получения текста дочернего элемента управления слоя.
-* \details
-*  - Для текстовых полей ввода функция возвращает текст, который эти элементы
-*  содержат, для всех остальных элементов - дочерний раздел .rml файла.
-*  
-* \return
-*  Текст элемента, заданный в .rml файле как атрибут 'value'.
-*/
-Layer::Utf8String_t Layer::Element::GetText(void) const
-{
-  const Rocket::Core::String Unknown = "unknown";
-
-  const auto Tag = m_pElement->GetTagName();
-  const auto Type = m_pElement->GetAttribute("type", Unknown);
-
-  if (Tag == "textarea" ||
-    (Tag == "input" && Type == "text"))
-  {
-    return m_pElement->GetAttribute("value", Unknown).CString();
-  }
-
-  return m_pElement->GetInnerRML().CString();
-}
-
-/**
-* \deprecated
-*  Функция устарела и будет удалена в следующей стабильной версии, вместо нее
-*  следует использовать функцию SetClassStyle().
-* \brief
-*  Функция установки стиля элемента.
-* \details
-*  - Устанавливается атрибут style, заменяя существующее значение из файла .rml.
-*  - Установленные таким образом параметры стиля заменят собой параметры,
-*  заданные в файле для этого элемента в файле .rcss.
-*  
-* \param [in] _Text
-*  Строка стиля.
-*/
-void Layer::Element::SetStyle(const Utf8String_t & _Text)
-{
-  m_pElement->SetAttribute("style", _Text.c_str());
-}
-
 // ************************************************************************** //
+
+//! @cond Doxygen_Suppress
 
 /**
 * \brief
@@ -297,81 +214,7 @@ Layer::Layer(::covellite::gui::IWindow & _Window, const Path_t & _PathToFile,
   pTitle->SetInnerRML(m_pDocument->GetTitle());
 }
 
-/**
-* \deprecated
-*  Конструктор устарел и будет удален в следующей стабильной версии, следует
-*  использовать функцию PushLayer() для создания слоев и конструкторы, 
-*  получающие интерфейс окна Rocket.
-* \brief
-*  Конструктор создания простого слоя.
-*  
-* \param [in] _pContext
-*  Объект контекста окна libRocket.
-* \param [in] _PathToFile
-*  Путь к rml файлу, из которого должен загружаться слой (рекомендуется
-*  из класса-наследника конкретного слоя передавать конкретный путь, содержащий
-*  описание этого слоя).
-* \note
-*  В силу специфики работы libRocket в пути к корневой папке программы 
-*  допустимы символы системного языка операционной системы, в путях же внутри 
-*  этой папки следует использовать исключительно латиницу.
-*  
-* \exception std::exception
-*  - Действие невозможно (подробнее см. описание исключения).
-*/
-Layer::Layer(Context_t * _pContext, const Path_t & _PathToFile) :
-  m_pDocument(_pContext->LoadDocument(Convert(_PathToFile).c_str()))
-{
-  if (m_pDocument == nullptr)
-  {
-    throw STD_EXCEPTION << "Document null pointer: " << _PathToFile;
-  }
-}
-
-/**
-* \deprecated
-*  Конструктор устарел и будет удален в следующей стабильной версии, следует
-*  использовать функцию PushLayer() для создания слоев и конструкторы,
-*  получающие интерфейс окна Rocket.
-* \brief
-*  Конструктор создания слоя с заголовком.
-* \details
-*  - Документ libRocket может содержать заголовок окна, для примера объявления
-*  заголовка ниже в качестве _TitleId следует передать "title", тогда
-*  в качестве текста заголовка будет выведено "Layer example".
-*
-* \code
-
-<rml>
-<head>
-<title>Layer example</title>
-...
-
-* \endcode
-*
-* \param [in] _pContext
-*  Объект контекста окна libRocket.
-* \param [in] _PathToFile
-*  Путь к rml файлу, из которого должен загружаться слой.
-* \param [in] _TitleId
-*  Идентификатор заголовка, указанного в .rml файле.
-*
-* \exception std::exception
-*  - Заголовок с указанным идентификатором не найден.
-*  - Действие невозможно (подробнее см. описание исключения).
-*/
-Layer::Layer(Context_t * _pContext, const Path_t & _PathToFile, 
-  const ::std::string & _TitleId) :
-  Layer(_pContext, _PathToFile)
-{
-  auto * pTitle = m_pDocument->GetElementById(_TitleId.c_str());
-  if (pTitle == nullptr)
-  {
-    throw STD_EXCEPTION << "Unexpected title id: " << _TitleId;
-  }
-
-  pTitle->SetInnerRML(m_pDocument->GetTitle());
-}
+//! @endcond
 
 Layer::~Layer(void) noexcept
 {
@@ -477,30 +320,4 @@ float Layer::EmployFontSize(float _PercentFromMaxScreenSize)
   m_pDocument->SetAttribute("style", 
     (::boost::format("font-size: %1%px;") % FontSize).str().c_str());
   return FontSize;
-}
-
-/**
-* \deprecated
-*  Функция устарела и будет удалена в следующей стабильной версии, вместо нее
-*  следует использовать функцию EmployFontSize().
-* \brief
-*  Функция установки базового размера шрифта всего документа.
-* \details
-*  - Функция устанавливает элементу 'body' документа значение размера шрифта
-*  в процентах от длинной строны экрана (это можно использовать для создания
-*  квадратных элементов, размеры которых будут меняться при изменении размеров
-*  экрана устройства (размер задавать как 10em, например) пропорционально
-*  рамерам экрана).
-*  - Это значение перекроет собой значение, заданное в файле .rcss для элемента
-*  'body'.
-*
-* \param [in] _PercentFromMaxScreenSize
-*  Размер шрифта в процентах от длинной стороны экрана.
-*
-* \exception std::exception
-*  - Действие невозможно (подробнее см. описание исключения).
-*/
-void Layer::SetFontSize(double _PercentFromMaxScreenSize)
-{
-  EmployFontSize(static_cast<float>(_PercentFromMaxScreenSize));
 }

@@ -1,37 +1,43 @@
 ﻿
 @startuml
 
-rocket_ILayer : {abstract} + Show()
-rocket_ILayer : {abstract} + Hide()
-rocket_ILayer : ---
+class gui_ILayer as "gui::ILayer"
+{
+  {abstract} + Show()
+  {abstract} + Hide()
+  ---
+}
 
-core_IWindow : {abstract} + Subscribe(Events)
-core_IWindow : ---
+class gui_Layers as "gui::Layers"
+{
+  + Push(LayerPtr_t)
+  + Pop()
+  ---
+}
 
-rocket_Layers : + Push()
-rocket_Layers : + Pop()
-rocket_Layers : ---
+gui_ILayer --* gui_Layers
+gui_Layers --* gui_Window
 
-rocket_ILayer --* rocket_Layers
-rocket_Layers --* rocket_Window
+class gui_Window as "gui::Window"
+{
+  + PushLayer<TLayer>()
+  + Back()
+  ---
+}
 
-rocket_Window : # AddLayer<TLayer>()
-rocket_Window : ---
+class gui_Layer as "gui::Layer"
+{
+  ---
+  + Layer(Contex, PathToFile);
+  + Layer(Contex, PathToFile, TitleName);
+}
 
-rocket_Layer : ---
-rocket_Layer : + Layer(Contex, PathToFile);
-rocket_Layer : + Layer(Contex, PathToFile, TitleName);
-
-core_IWindow <|-.- rocket_Layer
-rocket_ILayer <|-.- rocket_Layer
+gui_ILayer <|-.- gui_Layer
 
 ExampleLayer --o ExampleWindow
 
-ExampleLayer : + Subscribe(Events)
-ExampleLayer : ---
+gui_Layer <|-- ExampleLayer
 
-rocket_Layer <|-- ExampleLayer
-
-rocket_Window --o ExampleWindow
+gui_Window --o ExampleWindow
 
 @enduml

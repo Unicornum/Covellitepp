@@ -4,7 +4,6 @@
 #include <alicorn/std/string.hpp>
 #include "IGraphicApi.hpp"
 #include "Api.forward.hpp"
-#include "Renderer.hpp"
 
 struct IDirect3D9;
 struct IDirect3DDevice9;
@@ -43,10 +42,11 @@ class DirectX9 final :
 {
   template<class T>
   using ComPtr_t = ::Microsoft::WRL::ComPtr<T>;
+  using Data_t = ::covellite::api::renderer::SettingsData;
 
+public:
   // Èםעונפויס IGraphicApi:
   String_t GetUsingApi(void) const override;
-  void ClearFrame(void) override;
   void PresentFrame(void) override;
   void ResizeWindow(int32_t, int32_t) override;
   const Creators_t & GetCreators(void) const override;
@@ -60,7 +60,6 @@ private:
   Render_t CreateTexture(const ComponentPtr_t &) const;
 
 private:
-  const DWORD m_BackgroundColor;
   Creators_t m_Creators;
   FLOAT m_FrameWidth = 0.0f;
   FLOAT m_FrameHeight = 0.0f;
@@ -70,7 +69,7 @@ private:
   ComPtr_t<IDirect3DDevice9> m_pDevice;
 
 public:
-  explicit DirectX9(const Renderer::Data &);
+  explicit DirectX9(const Data_t &);
   ~DirectX9(void);
 };
 

@@ -61,13 +61,14 @@ protected:
   static const int m_Top = 0;
 
   class Data :
-    public ::covellite::api::renderer::Renderer::Data
+    public ::covellite::api::renderer::SettingsData
   {
   public:
     Data(void)
     {
-      memset(this, 0, sizeof(Data));
+      Handle = (HWND)0;
       Top = m_Top;
+      IsFullScreen = false;
     }
   };
 
@@ -132,13 +133,13 @@ TEST_F(OpenGL_test, /*DISABLED_*/Test_DeviceContex)
   using namespace ::testing;
 
   {
-    EXPECT_CALL(WindowsProxy, GetDC(Data.Handle))
+    EXPECT_CALL(WindowsProxy, GetDC(::covellite::any_cast<HWND>(Data.Handle)))
       .Times(1)
       .WillOnce(Return(hDC));
 
     const Tested_t Example{ Data };
 
-    EXPECT_CALL(WindowsProxy, ReleaseDC(Data.Handle, hDC))
+    EXPECT_CALL(WindowsProxy, ReleaseDC(::covellite::any_cast<HWND>(Data.Handle), hDC))
       .Times(1);
   }
 }
@@ -328,7 +329,7 @@ TEST_F(OpenGL_test, /*DISABLED_*/Test_Constructor_UpdateScreen)
   EXPECT_CALL(WindowsProxy, BuildRect())
     .WillRepeatedly(Return(ClientRect));
 
-  EXPECT_CALL(WindowsProxy, GetClientRect(Data.Handle))
+  EXPECT_CALL(WindowsProxy, GetClientRect(::covellite::any_cast<HWND>(Data.Handle)))
     .WillRepeatedly(Return(TRUE));
 
   InSequence Dummy;

@@ -39,7 +39,7 @@ public:
 
   /**
   * \brief
-  *  Функция получения объекта компонента по его иденитфикатору.
+  *  Функция получения объекта компонента по его идентификатору.
   */
   virtual ComponentPtr_t GetComponent(const ComponentId_t &) const = 0;
 

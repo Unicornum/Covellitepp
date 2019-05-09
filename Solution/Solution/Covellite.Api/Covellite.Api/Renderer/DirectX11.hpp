@@ -48,17 +48,17 @@ class DirectX11 final :
   template<class T>
   using ComPtr_t = ::Microsoft::WRL::ComPtr<T>;
   using Renders_t = ::std::vector<Render_t>;
+  using Data_t = ::covellite::api::renderer::SettingsData;
 
 public:
   // Èםעונפויס IGraphicApi:
   String_t GetUsingApi(void) const override;
-  void ClearFrame(void) override;
   void PresentFrame(void) override;
   void ResizeWindow(int32_t, int32_t) override;
   const Creators_t & GetCreators(void) const override;
 
 private:
-  void CreateDeviceAndSwapChain(const Renderer::Data &);
+  void CreateDeviceAndSwapChain(const Data_t &);
   void SetViewport(int, int);
   void CreateRenderTargetView(int, int);
   void CreateDepthStencilView(int, int);
@@ -80,8 +80,7 @@ private:
   Render_t GetPreRenderGeometry(const bool);
 
 private:
-  const ::std::vector<FLOAT>  m_BkColor;
-  Creators_t                  m_Creators;
+  Creators_t m_Creators;
 
 private:
   ComPtr_t<ID3D11Device>            m_pDevice;
@@ -99,7 +98,7 @@ private:
   CapturingServiceComponent   m_ServiceComponents;
 
 public:
-  explicit DirectX11(const Renderer::Data &);
+  explicit DirectX11(const Data_t &);
   ~DirectX11(void);
 };
 

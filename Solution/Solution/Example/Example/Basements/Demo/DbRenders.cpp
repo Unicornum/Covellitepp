@@ -23,7 +23,7 @@ DbRenders::~DbRenders(void)
 // cppcheck-suppress passedByValue
 void DbRenders::AddObject(const Id_t _Id, const Object_t & _Object) /*override*/
 {
-  LOGGER(Trace) << "Create renders for object: id = " << _Id;
+  LOGGER_DEBUG(Trace) << "Create renders for object: id = " << _Id;
 
   if (_Id >= m_Renders.size())
   {
@@ -37,7 +37,7 @@ void DbRenders::AddObject(const Id_t _Id, const Object_t & _Object) /*override*/
 // cppcheck-suppress passedByValue
 void DbRenders::RemoveObject(const Id_t _Id, const Object_t & _Object) /*override*/
 {
-  LOGGER(Trace) << "Remove renders for object: id = " << _Id;
+  LOGGER_DEBUG(Trace) << "Remove renders for object: id = " << _Id;
 
   m_pRenders->Remove(_Object);
 

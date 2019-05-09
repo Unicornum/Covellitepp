@@ -20,8 +20,6 @@
     <ClCompile Include="Window.android_test.cpp" />
     <ClCompile Include="Window.windows_test.cpp" />
     <ClCompile Include="Window_test.cpp" />
-    <ClCompile Include="Window.windows.deprecated_test.cpp" />
-    <ClCompile Include="Window.android.deprecated_test.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">

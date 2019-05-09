@@ -1,6 +1,6 @@
 
 #pragma once
-#include <boost/thread/mutex.hpp>
+//#include <boost/thread/mutex.hpp>
 #include <Covellite/Api/Component.hpp>
 
 namespace covellite
@@ -44,7 +44,7 @@ private:
 private:
   const Creators_t m_Creators;
   ::std::map<Id_t, ::std::pair<size_t, Render_t>> m_AllExistingRenders;
-  ::boost::mutex m_Mutex;
+  //::boost::mutex m_Mutex;
 
 public:
   explicit Renders(const Creators_t &);

@@ -1,10 +1,10 @@
 ﻿
 #include "stdafx.h"
 #include <Covellite/Events/Signal.hpp>
-#include <Covellite/Events/Signals.hpp>
 #include <Covellite/Events/Params.hpp>
 #include <Covellite/Events/Error.hpp>
 #include <Covellite/Events/Events.inl>
+#include "Signals.hpp"
 
 using namespace covellite::events;
 

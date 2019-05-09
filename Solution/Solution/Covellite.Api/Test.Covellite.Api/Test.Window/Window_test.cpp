@@ -1,5 +1,6 @@
 
 #include "stdafx.h"
+#include <alicorn/patterns/factory.hpp>
 
 // Примеры макросов библиотеки Google Test
 #include <alicorn\google\test\example.hpp>
@@ -16,11 +17,48 @@
 #include <Covellite/App/Events.hpp>
 #include <Covellite/Os/Events.hpp>
 #include <Covellite/Api/Events.hpp>
-
-#include "../Mock/Renderer.hpp"
+#include <Covellite/Api/Component.inl>
 
 // Расположение класса Window
 #include "../../Covellite.Api/Window.cpp"
+
+namespace covellite
+{
+
+namespace api
+{
+
+/*static*/ auto Window::GetRenderers(void) -> ::std::vector<String_t>
+{
+  return {};
+}
+
+/*static*/ auto Window::MakeImpl(const String_t & _Api,
+  const renderer::SettingsData & _Data) -> IGraphicApiPtr_t
+{
+  using namespace ::alicorn::modules::patterns;
+
+  return factory::make_unique<renderer::IGraphicApi>(_Api, _Data);
+}
+
+} // namespace api
+
+} // namespace covellite
+
+#include "../Mock/Equal.hpp"
+#include "../Mock/RendererImpl.hpp"
+
+namespace mock
+{
+
+namespace common
+{
+
+DEFINE_RENDER_IMPL(Dummy);
+
+} // namespace common
+
+} // namespace mock
 
 // Общий тестовый класс класса Window
 class Window_test :
@@ -29,23 +67,25 @@ class Window_test :
 protected:
   using Tested_t = ::covellite::api::Window;
   using String_t = ::alicorn::extension::std::String;
-  using Renderer_t = ::mock::covellite::api::renderer::Renderer;
-  using RenderInterfacePtr_t = ::std::shared_ptr<::covellite::api::RenderInterface>;
   using IWindowApi_t = ::covellite::api::IWindow;
-  using IWindowCore_t = ::covellite::core::IWindow;
   using WindowOs_t = ::mock::covellite::os::Window;
   using Rect_t = ::covellite::os::IWindow::Rect;
+  using Data_t = ::covellite::api::renderer::SettingsData;
 
   // Вызывается ПЕРЕД запуском каждого теста
   void SetUp(void) override
   {
+    ::testing::DefaultValue<String_t>::Set(uT("DefaultString"));
     ::testing::DefaultValue<Rect_t>::Set(Rect_t{ 0, 0, 0, 0 });
+    ::testing::DefaultValue<::covellite::Any_t>::Set((HWND)0);
   }
 
   // Вызывается ПОСЛЕ запуска каждого теста
   void TearDown(void) override
   {
+    ::testing::DefaultValue<String_t>::Clear();
     ::testing::DefaultValue<Rect_t>::Clear();
+    ::testing::DefaultValue<::covellite::Any_t>::Clear();
   }
 };
 
@@ -82,7 +122,7 @@ TEST_F(Window_test, /*DISABLED_*/Test_Dummy)
 
   EXPECT_CALL(SettingsProxy, GetValue(_, _))
     .WillOnce(Return(uT("false")))
-    .WillRepeatedly(Return(uT("0")));
+    .WillRepeatedly(Return(uT("Dummy")));
 
   WindowOs_t WindowOs;
   Tested_t Example{ WindowOs };
@@ -99,21 +139,19 @@ TEST_F(Window_test, /*DISABLED_*/Test_Constructor)
   SettingsProxy_t SettingsProxy;
   SettingsProxy_t::GetInstance() = &SettingsProxy;
 
-  using RendererProxy_t = Renderer_t::Proxy;
-  RendererProxy_t RendererProxy;
-  RendererProxy_t::GetInstance() = &RendererProxy;
+  using RendererImplProxy_t = ::mock::RendererImpl::Proxy;
+  RendererImplProxy_t RendererImplProxy;
+  RendererImplProxy_t::GetInstance() = &RendererImplProxy;
 
   const ::mock::Id_t WindowOsId = 1710311123;
   const ::mock::Id_t WindowSectionId = 1806101824;
   const ::mock::Id_t BackgroundColorSectionId = 1808231108;
-  const auto ApiName = uT("Api1808211209");
 
   for (const auto IsFullScreen : { true, false })
   {
-    Renderer_t::Data Data;
+    Data_t Data;
     Data.Handle = (HWND)1808221257;
     Data.Top = 1808271300;
-    Data.BkColor = { 0.1f, 0.2f, 0.3f, 0.4f };
     Data.IsFullScreen = IsFullScreen;
 
     using namespace ::testing;
@@ -145,35 +183,11 @@ TEST_F(Window_test, /*DISABLED_*/Test_Constructor)
       .Times(1)
       .WillOnce(Return(IsFullScreen ? uT("true") : uT("false")));
 
-    EXPECT_CALL(SettingsProxy,
-      GetChildSectionImpl(WindowSectionId, uT("BackgroundColor")))
-      .Times(1);
-
-    EXPECT_CALL(SettingsProxy, Constructor())
-      .Times(1)
-      .WillOnce(Return(BackgroundColorSectionId));
-
-    EXPECT_CALL(SettingsProxy, GetValue(BackgroundColorSectionId, uT("R")))
-      .Times(1)
-      .WillOnce(Return(uT("25.5")));
-
-    EXPECT_CALL(SettingsProxy, GetValue(BackgroundColorSectionId, uT("G")))
-      .Times(1)
-      .WillOnce(Return(uT("51")));
-
-    EXPECT_CALL(SettingsProxy, GetValue(BackgroundColorSectionId, uT("B")))
-      .Times(1)
-      .WillOnce(Return(uT("76.5")));
-
-    EXPECT_CALL(SettingsProxy, GetValue(BackgroundColorSectionId, uT("A")))
-      .Times(1)
-      .WillOnce(Return(uT("102")));
-
     EXPECT_CALL(SettingsProxy, GetValue(WindowSectionId, uT("GraphicsApi")))
       .Times(1)
-      .WillOnce(Return(ApiName));
+      .WillOnce(Return(uT("Dummy")));
 
-    EXPECT_CALL(RendererProxy, Constructor(ApiName, Eq(Data)))
+    EXPECT_CALL(RendererImplProxy, Constructor(Eq(Data)))
       .Times(1);
 
     const Tested_t Example{ WindowOs };
@@ -197,9 +211,9 @@ TEST_F(Window_test, /*DISABLED_*/Test_DoApplicationUpdate)
   SettingsProxy_t SettingsProxy;
   SettingsProxy_t::GetInstance() = &SettingsProxy;
 
-  using RendererProxy_t = Renderer_t::Proxy;
-  RendererProxy_t RendererProxy;
-  RendererProxy_t::GetInstance() = &RendererProxy;
+  using RendererImplProxy_t = ::mock::RendererImpl::Proxy;
+  RendererImplProxy_t RendererImplProxy;
+  RendererImplProxy_t::GetInstance() = &RendererImplProxy;
 
   const ::mock::Id_t RenderId = 1808221312;
   WindowOs_t WindowOs;
@@ -214,9 +228,9 @@ TEST_F(Window_test, /*DISABLED_*/Test_DoApplicationUpdate)
 
   EXPECT_CALL(SettingsProxy, GetValue(_, _))
     .WillOnce(Return(uT("false")))
-    .WillRepeatedly(Return(uT("0")));
+    .WillRepeatedly(Return(uT("Dummy")));
 
-  EXPECT_CALL(RendererProxy, Constructor(_, _))
+  EXPECT_CALL(RendererImplProxy, Constructor(_))
     .Times(1)
     .WillOnce(Return(RenderId));
 
@@ -224,13 +238,10 @@ TEST_F(Window_test, /*DISABLED_*/Test_DoApplicationUpdate)
 
   InSequence Dummy;
 
-  EXPECT_CALL(RendererProxy, StartDrawingFrame(RenderId))
-    .Times(1);
-
   EXPECT_CALL(Proxy, DoDrawing())
     .Times(1);
 
-  EXPECT_CALL(RendererProxy, PresentFrame(RenderId))
+  EXPECT_CALL(RendererImplProxy, PresentFrame(RenderId))
     .Times(1);
 
   Events[Application.Update]();
@@ -247,9 +258,9 @@ TEST_F(Window_test, /*DISABLED_*/Test_DoWindowResize)
   SettingsProxy_t SettingsProxy;
   SettingsProxy_t::GetInstance() = &SettingsProxy;
 
-  using RendererProxy_t = Renderer_t::Proxy;
-  RendererProxy_t RendererProxy;
-  RendererProxy_t::GetInstance() = &RendererProxy;
+  using RendererImplProxy_t = ::mock::RendererImpl::Proxy;
+  RendererImplProxy_t RendererImplProxy;
+  RendererImplProxy_t::GetInstance() = &RendererImplProxy;
 
   const ::mock::Id_t RenderId = 1808221411;
   const auto Width = 1808221412;
@@ -264,9 +275,9 @@ TEST_F(Window_test, /*DISABLED_*/Test_DoWindowResize)
 
   EXPECT_CALL(SettingsProxy, GetValue(_, _))
     .WillOnce(Return(uT("false")))
-    .WillRepeatedly(Return(uT("0")));
+    .WillRepeatedly(Return(uT("Dummy")));
 
-  EXPECT_CALL(RendererProxy, Constructor(_, _))
+  EXPECT_CALL(RendererImplProxy, Constructor(_))
     .Times(1)
     .WillOnce(Return(RenderId));
 
@@ -278,7 +289,7 @@ TEST_F(Window_test, /*DISABLED_*/Test_DoWindowResize)
     .Times(1)
     .WillOnce(Return(Rect_t{ 0, 0, Width, Height }));
 
-  EXPECT_CALL(RendererProxy, ResizeWindow(RenderId, Width, Height))
+  EXPECT_CALL(RendererImplProxy, ResizeWindow(RenderId, Width, Height))
     .Times(1);
 
   Events[events::Window.Resize]();
@@ -297,7 +308,7 @@ TEST_F(Window_test, /*DISABLED_*/Test_Events)
 
   EXPECT_CALL(SettingsProxy, GetValue(_, _))
     .WillOnce(Return(uT("false")))
-    .WillRepeatedly(Return(uT("0")));
+    .WillRepeatedly(Return(uT("Dummy")));
 
   WindowOs_t WindowOs;
   ::covellite::events::Events Events = WindowOs;
@@ -333,7 +344,7 @@ TEST_F(Window_test, /*DISABLED_*/Test_GetClientRect)
 
   EXPECT_CALL(SettingsProxy, GetValue(_, _))
     .WillOnce(Return(uT("false")))
-    .WillRepeatedly(Return(uT("0")));
+    .WillRepeatedly(Return(uT("Dummy")));
 
   EXPECT_CALL(WindowOsProxy, Constructor())
     .Times(1)
@@ -355,356 +366,72 @@ TEST_F(Window_test, /*DISABLED_*/Test_GetClientRect)
 }
 
 // ************************************************************************** //
-TEST_F(Window_test, /*DISABLED_*/Test_GetRenderInterface)
+TEST_F(Window_test, /*DISABLED_*/Test_GetRenders)
 {
-  using SettingsProxy_t = ::mock::alicorn::modules::settings::SectionImplProxy;
-  SettingsProxy_t SettingsProxy;
-  SettingsProxy_t::GetInstance() = &SettingsProxy;
-
-  using RendererProxy_t = Renderer_t::Proxy;
-  RendererProxy_t RendererProxy;
-  RendererProxy_t::GetInstance() = &RendererProxy;
-
-  const ::mock::Id_t RenderId = 1808202112;
-
-  using namespace ::testing;
-
-  auto pWindow = ::std::make_shared<WindowOs_t>();
-
-  EXPECT_CALL(SettingsProxy, GetValue(_, _))
-    .WillOnce(Return(uT("false")))
-    .WillRepeatedly(Return(uT("0")));
-
-  EXPECT_CALL(RendererProxy, Constructor(_, _))
-    .Times(1)
-    .WillOnce(Return(RenderId));
-
-  WindowOs_t WindowOs;
-  const Tested_t Example{ WindowOs };
-  const IWindowApi_t & IExample = Example;
-
-  const RenderInterfacePtr_t pResult = IExample.GetRenderInterface();
-  EXPECT_EQ(RenderId, dynamic_cast<const Renderer_t &>(*pResult).m_RendererId);
-}
-
-// ************************************************************************** //
-TEST_F(Window_test, /*DISABLED_*/Test_Constructor_Deprecated)
-{
-  using WindowOsProxy_t = ::mock::covellite::os::Window::Proxy;
-  WindowOsProxy_t WindowOsProxy;
-  WindowOsProxy_t::GetInstance() = &WindowOsProxy;
+  using Render_t = ::std::function<void(void)>;
+  using ComponentPtr_t = ::std::shared_ptr<Component>;
+  using Creator_t = ::std::function<Render_t(const ComponentPtr_t &)>;
+  using Creators_t = ::std::map<String_t, Creator_t>;
 
   using SettingsProxy_t = ::mock::alicorn::modules::settings::SectionImplProxy;
   SettingsProxy_t SettingsProxy;
   SettingsProxy_t::GetInstance() = &SettingsProxy;
 
-  using RendererProxy_t = Renderer_t::Proxy;
-  RendererProxy_t RendererProxy;
-  RendererProxy_t::GetInstance() = &RendererProxy;
+  using RendererImplProxy_t = ::mock::RendererImpl::Proxy;
+  RendererImplProxy_t RendererImplProxy;
+  RendererImplProxy_t::GetInstance() = &RendererImplProxy;
 
-  const ::mock::Id_t WindowOsId = 1808211304;
-  const ::mock::Id_t WindowSectionId = 1808211305;
-  const ::mock::Id_t BackgroundColorSectionId = 1808241138;
-  const auto ApiName = uT("Api1808211306");
+  const ::mock::Id_t ImplId = 1905031704;
 
-  for (const auto IsFullScreen : { true, false })
+  const Creator_t Creator = [](const ComponentPtr_t &) { return [](void) {}; };
+
+  const Creators_t Creators1 =
   {
-    Renderer_t::Data Data;
-    Data.Handle = (HWND)1808241139;
-    Data.Top = 1808271313;
-    Data.BkColor = { 0.1f, 0.2f, 0.3f, 0.4f };
-    Data.IsFullScreen = IsFullScreen;
+    { uT("Type1"), Creator },
+  };
 
-    using namespace ::testing;
-
-    InSequence Dummy;
-
-    EXPECT_CALL(WindowOsProxy, Constructor())
-      .Times(1)
-      .WillOnce(Return(WindowOsId));
-
-    EXPECT_CALL(WindowOsProxy, GetHandle(WindowOsId))
-      .Times(1)
-      .WillOnce(Return(Data.Handle));
-
-    EXPECT_CALL(WindowOsProxy, GetClientRect(WindowOsId))
-      .Times(1)
-      .WillOnce(Return(Rect_t{ 0, Data.Top, 0, 0 }));
-
-    EXPECT_CALL(SettingsProxy, GetChildSectionImpl(_, uT("Window")))
-      .Times(1);
-
-    EXPECT_CALL(SettingsProxy, Constructor())
-      .Times(1)
-      .WillOnce(Return(WindowSectionId));
-
-    EXPECT_CALL(SettingsProxy, GetValue(WindowSectionId, uT("IsFullScreen")))
-      .Times(1)
-      .WillOnce(Return(IsFullScreen ? uT("true") : uT("false")));
-
-    EXPECT_CALL(SettingsProxy,
-      GetChildSectionImpl(WindowSectionId, uT("BackgroundColor")))
-      .Times(1);
-
-    EXPECT_CALL(SettingsProxy, Constructor())
-      .Times(1)
-      .WillOnce(Return(BackgroundColorSectionId));
-
-    EXPECT_CALL(SettingsProxy, GetValue(BackgroundColorSectionId, uT("R")))
-      .Times(1)
-      .WillOnce(Return(uT("25.5")));
-
-    EXPECT_CALL(SettingsProxy, GetValue(BackgroundColorSectionId, uT("G")))
-      .Times(1)
-      .WillOnce(Return(uT("51")));
-
-    EXPECT_CALL(SettingsProxy, GetValue(BackgroundColorSectionId, uT("B")))
-      .Times(1)
-      .WillOnce(Return(uT("76.5")));
-
-    EXPECT_CALL(SettingsProxy, GetValue(BackgroundColorSectionId, uT("A")))
-      .Times(1)
-      .WillOnce(Return(uT("102")));
-
-    EXPECT_CALL(SettingsProxy, GetValue(WindowSectionId, uT("GraphicsApi")))
-      .Times(1)
-      .WillOnce(Return(ApiName));
-
-    EXPECT_CALL(RendererProxy, Constructor(ApiName, Eq(Data)))
-      .Times(1);
-
-    const Tested_t Example{ ::std::make_shared<WindowOs_t>() };
-  }
-}
-
-// ************************************************************************** //
-TEST_F(Window_test, /*DISABLED_*/Test_GetWidth_Deprecated)
-{
-  using WindowOsProxy_t = ::mock::covellite::os::Window::Proxy;
-  WindowOsProxy_t WindowOsProxy;
-  WindowOsProxy_t::GetInstance() = &WindowOsProxy;
-
-  using SettingsProxy_t = ::mock::alicorn::modules::settings::SectionImplProxy;
-  SettingsProxy_t SettingsProxy;
-  SettingsProxy_t::GetInstance() = &SettingsProxy;
-
-  const ::mock::Id_t WindowOsId = 1808221243;
-  const Rect_t Rect = { 0, 0, 1808221242, 0 };
+  const Creators_t Creators2 =
+  {
+    { uT("Type2"), Creator },
+  };
 
   using namespace ::testing;
-
-  EXPECT_CALL(WindowOsProxy, Constructor())
-    .Times(1)
-    .WillOnce(Return(WindowOsId));
-
-  EXPECT_CALL(SettingsProxy, GetValue(_, _))
-    .WillOnce(Return(uT("false")))
-    .WillRepeatedly(Return(uT("0")));
-
-  WindowOs_t WindowOs;
-  const Tested_t Example{ WindowOs };
-  const IWindowApi_t & IExample = Example;
-
-  EXPECT_CALL(WindowOsProxy, GetClientRect(WindowOsId))
-    .Times(1)
-    .WillOnce(Return(Rect));
-
-  const auto Result = IExample.GetWidth();
-  EXPECT_EQ(Rect.Width, Result);
-}
-
-// ************************************************************************** //
-TEST_F(Window_test, /*DISABLED_*/Test_GetHeight_Deprecated)
-{
-  using WindowOsProxy_t = ::mock::covellite::os::Window::Proxy;
-  WindowOsProxy_t WindowOsProxy;
-  WindowOsProxy_t::GetInstance() = &WindowOsProxy;
-
-  using SettingsProxy_t = ::mock::alicorn::modules::settings::SectionImplProxy;
-  SettingsProxy_t SettingsProxy;
-  SettingsProxy_t::GetInstance() = &SettingsProxy;
-
-  const ::mock::Id_t WindowOsId = 1808221243;
-  const Rect_t Rect = { 0, 0, 0, 1808221244 };
-
-  using namespace ::testing;
-
-  EXPECT_CALL(WindowOsProxy, Constructor())
-    .Times(1)
-    .WillOnce(Return(WindowOsId));
-
-  EXPECT_CALL(SettingsProxy, GetValue(_, _))
-    .WillOnce(Return(uT("false")))
-    .WillRepeatedly(Return(uT("0")));
-
-  WindowOs_t WindowOs;
-  const Tested_t Example{ WindowOs };
-  const IWindowApi_t & IExample = Example;
-
-  EXPECT_CALL(WindowOsProxy, GetClientRect(WindowOsId))
-    .Times(1)
-    .WillOnce(Return(Rect));
-
-  const auto Result = IExample.GetHeight();
-  EXPECT_EQ(Rect.Height, Result);
-}
-
-// ************************************************************************** //
-TEST_F(Window_test, /*DISABLED_*/Test_MakeRenderInterface_Deprecated)
-{
-  using SettingsProxy_t = ::mock::alicorn::modules::settings::SectionImplProxy;
-  SettingsProxy_t SettingsProxy;
-  SettingsProxy_t::GetInstance() = &SettingsProxy;
-
-  using RendererProxy_t = Renderer_t::Proxy;
-  RendererProxy_t RendererProxy;
-  RendererProxy_t::GetInstance() = &RendererProxy;
-
-  const ::mock::Id_t RenderId = 1808211442;
-
-  using namespace ::testing;
-
-  auto pWindow = ::std::make_shared<WindowOs_t>();
-
-  EXPECT_CALL(SettingsProxy, GetValue(_, _))
-    .WillOnce(Return(uT("false")))
-    .WillRepeatedly(Return(uT("0")));
-
-  EXPECT_CALL(RendererProxy, Constructor(_, _))
-    .Times(1)
-    .WillOnce(Return(RenderId));
-
-  WindowOs_t WindowOs;
-  const Tested_t Example{ WindowOs };
-  const IWindowApi_t & IExample = Example;
-
-  const RenderInterfacePtr_t pResult = IExample.MakeRenderInterface();
-  EXPECT_EQ(RenderId, dynamic_cast<const Renderer_t &>(*pResult).m_RendererId);
-}
-
-// ************************************************************************** //
-TEST_F(Window_test, /*DISABLED_*/Test_DoStartDrawing_Deprecated)
-{
-  using SettingsProxy_t = ::mock::alicorn::modules::settings::SectionImplProxy;
-  SettingsProxy_t SettingsProxy;
-  SettingsProxy_t::GetInstance() = &SettingsProxy;
-
-  using RendererProxy_t = Renderer_t::Proxy;
-  RendererProxy_t RendererProxy;
-  RendererProxy_t::GetInstance() = &RendererProxy;
-
-  const ::mock::Id_t WindowSectionId = 1808231107;
-  const ::mock::Id_t RenderId = 1808221312;
-  auto pWindow = ::std::make_shared<WindowOs_t>();
-  auto pEventHandler =
-    ::std::make_shared<::mock::covellite::core::EventHandler>();
-
-  using namespace ::testing;
-
-  EXPECT_CALL(SettingsProxy, GetValue(_, _))
-    .WillOnce(Return(uT("false")))
-    .WillRepeatedly(Return(uT("0")));
-
-  EXPECT_CALL(RendererProxy, Constructor(_, _))
-    .Times(1)
-    .WillOnce(Return(RenderId));
-
-  Tested_t Example{ pWindow };
-  IWindowCore_t & IExample = Example;
-  IExample.Subscribe(pEventHandler);
-
-  EXPECT_CALL(RendererProxy, StartDrawingFrame(RenderId))
-    .Times(1);
-
-  using namespace ::covellite::core;
-
-  pEventHandler->DoCommand(Event::StartDrawing, params::Empty{});
-}
-
-// ************************************************************************** //
-TEST_F(Window_test, /*DISABLED_*/Test_DoFinishDrawing_Deprecated)
-{
-  using SettingsProxy_t = ::mock::alicorn::modules::settings::SectionImplProxy;
-  SettingsProxy_t SettingsProxy;
-  SettingsProxy_t::GetInstance() = &SettingsProxy;
-
-  using RendererProxy_t = Renderer_t::Proxy;
-  RendererProxy_t RendererProxy;
-  RendererProxy_t::GetInstance() = &RendererProxy;
-
-  const ::mock::Id_t RenderId = 1808221312;
-  auto pWindow = ::std::make_shared<WindowOs_t>();
-  auto pEventHandler =
-    ::std::make_shared<::mock::covellite::core::EventHandler>();
-
-  using namespace ::testing;
-
-  EXPECT_CALL(SettingsProxy, GetValue(_, _))
-    .WillOnce(Return(uT("false")))
-    .WillRepeatedly(Return(uT("0")));
-
-  EXPECT_CALL(RendererProxy, Constructor(_, _))
-    .Times(1)
-    .WillOnce(Return(RenderId));
-
-  Tested_t Example{ pWindow };
-  IWindowCore_t & IExample = Example;
-  IExample.Subscribe(pEventHandler);
-
-  EXPECT_CALL(RendererProxy, PresentFrame(RenderId))
-    .Times(1);
-
-  using namespace ::covellite::core;
-
-  pEventHandler->DoCommand(Event::FinishDrawing, params::Empty{});
-}
-
-// ************************************************************************** //
-TEST_F(Window_test, /*DISABLED_*/Test_DoResize_Deprecated)
-{
-  using WindowOsProxy_t = ::mock::covellite::os::Window::Proxy;
-  WindowOsProxy_t WindowOsProxy;
-  WindowOsProxy_t::GetInstance() = &WindowOsProxy;
-
-  using SettingsProxy_t = ::mock::alicorn::modules::settings::SectionImplProxy;
-  SettingsProxy_t SettingsProxy;
-  SettingsProxy_t::GetInstance() = &SettingsProxy;
-
-  using RendererProxy_t = Renderer_t::Proxy;
-  RendererProxy_t RendererProxy;
-  RendererProxy_t::GetInstance() = &RendererProxy;
-
-  const ::mock::Id_t RenderId = 1808221423;
-  const auto Width = 1808221424;
-  const auto Height = 1808221425;
-  auto pWindow = ::std::make_shared<WindowOs_t>();
-  auto pEventHandler =
-    ::std::make_shared<::mock::covellite::core::EventHandler>();
-
-  using namespace ::testing;
-
-  EXPECT_CALL(SettingsProxy, GetValue(_, _))
-    .WillOnce(Return(uT("false")))
-    .WillRepeatedly(Return(uT("0")));
-
-  EXPECT_CALL(RendererProxy, Constructor(_, _))
-    .Times(1)
-    .WillOnce(Return(RenderId));
-
-  Tested_t Example{ pWindow };
-  IWindowCore_t & IExample = Example;
-  IExample.Subscribe(pEventHandler);
 
   InSequence Dummy;
 
-  EXPECT_CALL(WindowOsProxy, GetClientRect(_))
+  EXPECT_CALL(SettingsProxy, GetValue(_, _))
+    .WillOnce(Return(uT("false")))
+    .WillRepeatedly(Return(uT("Dummy")));
+
+  EXPECT_CALL(RendererImplProxy, Constructor(_))
     .Times(1)
-    .WillOnce(Return(Rect_t{ 0, 0, Width, Height }));
+    .WillOnce(Return(ImplId));
 
-  EXPECT_CALL(RendererProxy, ResizeWindow(RenderId, Width, Height))
-    .Times(1);
+  WindowOs_t WindowOs;
+  const Tested_t Example{ WindowOs };
+  const IWindowApi_t & IExample = Example;
 
-  using namespace ::covellite::core;
+  EXPECT_CALL(RendererImplProxy, GetCreators(ImplId))
+    .Times(1)
+    .WillOnce(ReturnRef(Creators1));
 
-  pEventHandler->DoCommand(Event::Resize, params::Empty{});
+  const auto pResult1 = IExample.GetRenders();
+  const auto Result1 = pResult1->Obtain(
+    { 
+      Component::Make({ { uT("type"), uT("Type1") } }),
+    });
+
+  EXPECT_CALL(RendererImplProxy, GetCreators(ImplId))
+    .Times(1)
+    .WillOnce(ReturnRef(Creators2));
+
+  const auto pResult2 = IExample.GetRenders();
+  const auto Result2 = pResult2->Obtain(
+    { 
+      Component::Make({ { uT("type"), uT("Type2") } }),
+    });
+
+  EXPECT_NE(pResult1, pResult2);
+  EXPECT_EQ(1, Result1.size());
+  EXPECT_EQ(1, Result2.size());
 }

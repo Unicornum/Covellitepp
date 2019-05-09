@@ -94,9 +94,7 @@
     <ClInclude Include="Renderer\IGraphicApi.hpp" />
     <ClInclude Include="Renderer\OpenGL.hpp" />
     <ClInclude Include="Renderer\OpenGLCommon.hpp" />
-    <ClInclude Include="Renderer\Renderer.hpp" />
     <ClInclude Include="Renderer\stdafx.h" />
-    <ClInclude Include="RenderInterface.hpp" />
     <ClInclude Include="Renders.hpp" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
@@ -113,14 +111,13 @@
     <ClCompile Include="Renderer\DxCheck.cpp" />
     <ClCompile Include="Renderer\OpenGL.cpp" />
     <ClCompile Include="Renderer\OpenGLCommon.cpp" />
-    <ClCompile Include="Renderer\Renderer.cpp" />
-    <ClCompile Include="Renderer\Renderer.windows.cpp" />
     <ClCompile Include="Renders.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="Window.cpp" />
+    <ClCompile Include="Window.windows.cpp" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Renderer\fx\Input.fx">

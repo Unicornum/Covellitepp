@@ -1,17 +1,10 @@
 ﻿
 @startuml
 
-[Covellite.Rocket] -- [Covellite.Api]
 [Covellite.Gui] -- [Covellite.Api]
 [Covellite.Api] -- [Covellite.Os]
 [Covellite.Api] -- [Covellite.Egl]
 [Covellite.Os] -- [Covellite.App]
 [Covellite.App] -- [Covellite.Events]
-[Covellite.Os] -- [Covellite.Core]
-
-note "deprecated" as NoteCore
-
-NoteCore .. [Covellite.Core]
-[Covellite.Rocket] .. NoteCore
 
 @enduml

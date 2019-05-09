@@ -6,15 +6,15 @@
     <X>327</X>
     <Y>71</Y>
   </Options>
-  <Process>
-    <Task1 Text="Класс Window." Type="Orange" Version="None" ExternalProgram="Project" Expanded="true" Completed="false" History="true" ParentTaskText="false">
-      <Task2 Text="Завершение работы при выходе из последнего слоя - через событие (+ удалить наследование от core::Window)." Type="None" Version="None" ExternalProgram="Project" Expanded="false" Completed="false" History="false" ParentTaskText="true"/>
-      <Task3 Text="Использование api::IWindow::GetClientRect()." Type="None" Version="None" ExternalProgram="None" Expanded="false" Completed="true" History="false" ParentTaskText="false"/>
-    </Task1>
-  </Process>
+  <Process/>
   <Complete>
     <Week6225>
-      <Task9 Text="Загрузка файлов текстур через виртуальную файловую систему." Type="Red" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="true" ParentTaskText="false"/>
+      <Task6 Text="Загрузка файлов текстур через виртуальную файловую систему." Type="Red" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="true" ParentTaskText="false"/>
+      <Task7 Text="Удаление устаревшего кода." Type="Red" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="true" ParentTaskText="false"/>
+      <Task1 Text="Класс Window." Type="Red" Version="None" ExternalProgram="None" Expanded="false" Completed="true" History="false" ParentTaskText="false">
+        <Task3 Text="Использование api::IWindow::GetClientRect()." Type="None" Version="None" ExternalProgram="None" Expanded="false" Completed="true" History="false" ParentTaskText="false"/>
+        <Task2 Text="Завершение работы при выходе из последнего слоя - через событие." Type="None" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+      </Task1>
     </Week6225>
     <Week6224/>
     <Week6223/>

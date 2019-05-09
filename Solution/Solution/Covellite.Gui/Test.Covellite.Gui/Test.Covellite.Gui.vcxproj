@@ -106,7 +106,6 @@
     <ClCompile Include="Test.Layer\Layer.android_test.cpp" />
     <ClCompile Include="Test.Layer\Layer.windows_test.cpp" />
     <ClCompile Include="Test.Layer\Layer_test.cpp" />
-    <ClCompile Include="Test.Layer\Layer_test.deprecated.cpp" />
     <ClCompile Include="Test.Renderer\Renderer_test.cpp" />
     <ClCompile Include="Test.StringTranslator\StringTranslator_test.cpp" />
     <ClCompile Include="Test.SystemToRocketKeyCode\SystemToRocketKeyCode_test.cpp" />
@@ -114,7 +113,6 @@
     <ClCompile Include="Test.System\System.windows_test.cpp" />
     <ClCompile Include="Test.System\System_test.cpp" />
     <ClCompile Include="Test.Window\Window_test.cpp" />
-    <ClCompile Include="Test.Window\Window_test.deprecated.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Covellite.Gui\File.hpp" />

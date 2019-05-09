@@ -27,9 +27,6 @@ class MainScreen final :
   /// [Layer example]
 
 public:
-  void Subscribe(const EventHandlerPtr_t &) override {}
-
-public:
   explicit MainScreen(IWindowGui_t &);
 };
 

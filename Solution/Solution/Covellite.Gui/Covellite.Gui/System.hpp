@@ -16,6 +16,8 @@ namespace gui
 * \brief
 *  Класс входит в проект \ref CovelliteGuiPage \n
 *  Класс реализации системного интерфейса libRocket.
+* \todo
+*  Класс используется для внутренней реализации и не должен попадать в Externals.
 *
 * \version
 *  1.0.0.0        \n

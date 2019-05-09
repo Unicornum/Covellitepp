@@ -78,7 +78,6 @@
     <ClInclude Include="Configuration.mock.hpp" />
     <ClInclude Include="Events.hpp" />
     <ClInclude Include="IWindow.hpp" />
-    <ClInclude Include="Predefined.hpp" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="Window.hpp" />

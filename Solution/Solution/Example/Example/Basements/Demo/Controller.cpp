@@ -4,6 +4,8 @@
 
 using namespace basement::controller;
 
+//! @cond Doxygen_Suppress
+
 Controller::Controller(
   ::basement::model::IDbComponents & _DbComponents,
   ::basement::view::IDbRenders & _DbRenders)
@@ -25,3 +27,5 @@ Controller::Controller(
 {
   _3DScene.SetGameScene(_GameWorld.CreateGameScene());
 }
+
+//! @endcond

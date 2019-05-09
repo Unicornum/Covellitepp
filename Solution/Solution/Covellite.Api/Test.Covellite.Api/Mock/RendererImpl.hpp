@@ -2,13 +2,12 @@
 #pragma once
 #include <alicorn/std/string.hpp>
 #include <alicorn/patterns/factory.hpp>
-#include <Covellite.Os/Covellite.Os/Predefined.hpp>
 #include <Covellite.Api/Covellite.Api/Renderer/IGraphicApi.hpp>
 
 namespace mock
 {
 
-using Data_t = ::covellite::api::renderer::Renderer::Data;
+using Data_t = ::covellite::api::renderer::SettingsData;
 template<class T>
 using Registator_t =
   ::alicorn::modules::patterns::factory::Registrator<T, const Data_t &>;
@@ -37,11 +36,6 @@ public:
   String_t GetUsingApi(void) const override
   {
     return Proxy::GetInstance()->GetUsingApi(m_Id);
-  }
-
-  void ClearFrame(void) override
-  {
-    Proxy::GetInstance()->ClearFrame(m_Id);
   }
 
   void PresentFrame(void) override

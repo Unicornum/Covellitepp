@@ -1,6 +1,8 @@
 
 #include "stdafx.h"
 #include "GameScene.hpp"
+#include <boost/core/ignore_unused.hpp>
+#include <alicorn/std/vector.hpp>
 #include "IGameObject.hpp"
 
 namespace basement
@@ -92,7 +94,7 @@ void GameScene::SetCameraInfo(const Camera & _Camera)
 void GameScene::CompleteReplace(void)
 {
   m_Scenes = ::std::move(m_BkScenes);
-  m_RenderObjects.clear();
+  BuildRenderObjects();
 }
 
 void GameScene::CompleteUpdate(void)
@@ -112,20 +114,18 @@ void GameScene::CompleteUpdate(void)
   BuildRenderObjects();
 }
 
-void GameScene::Update(const Callback_t & _CbUpdater)
-{
-  ForEach(m_Scenes, [&_CbUpdater](const Scene & _Scene)
-  {
-    ForEach(_Scene.Updaters, [&_CbUpdater](const Id_t & _ObjectId)
-    {
-      _CbUpdater(_ObjectId);
-    });
-  });
-}
-
 void GameScene::Render(const Callback_t & _CbObject)
 {
-  ForEach(m_RenderObjects, [&_CbObject](const RenderObject_t & _Object)
+  if (m_IsUpdateRenderObjects)
+  {
+    // ƒва списка понадобились после задействовани€ updater'ов через рендеры,
+    // т.к. теперь изменение списка объектов на рендеринг происходит пр€мо
+    // во врем€ рендеринга текущего списка.
+    m_CompleteRenderObjects = ::std::move(m_PrepareRenderObjects);
+    m_IsUpdateRenderObjects = false;
+  }
+
+  ForEach(m_CompleteRenderObjects, [&_CbObject](const RenderObject_t & _Object)
   {
     _CbObject(_Object.second);
   });
@@ -153,7 +153,7 @@ void GameScene::BuildRenderObjects(void)
 
   ::std::vector<RenderObject_t> SceneRenderObjects;
 
-  const auto BildSortedFromCameraDistance = 
+  const auto BuildSortedFromCameraDistance = 
     [this, &SceneRenderObjects](const CellObject_t & _Object)
   {
     const auto InsertInSorted =
@@ -213,15 +213,14 @@ void GameScene::BuildRenderObjects(void)
     }
   };
 
-  const auto BildSimple = 
+  const auto BuildSimple = 
     [&SceneRenderObjects](const CellObject_t & _Object)
   {
     SceneRenderObjects.push_back(RenderObject_t{ 0.0f, _Object.second[0] });
   };
 
-  m_RenderObjects.clear();
 
-  using namespace ::alicorn::extension::std;
+  m_PrepareRenderObjects.clear();
 
   for (::std::size_t i = 0; i < m_Scenes.size(); i++)
   {
@@ -229,15 +228,22 @@ void GameScene::BuildRenderObjects(void)
     // ¬ Release версии в окне на весь экран fps не зависит от
     // наличи€/отсутстви€ сортировки, в маленьком окне fps также меньше 
     // в 2 раза.
-    ForEach(m_Scenes[i].Objects, BildSortedFromCameraDistance);
-    //ForEach(m_Scenes[i].Objects, BildSimple);
+    ForEach(m_Scenes[i].Objects, BuildSortedFromCameraDistance);
+    ::boost::ignore_unused(BuildSimple);
+
+    //ForEach(m_Scenes[i].Objects, BuildSimple);
+    //::boost::ignore_unused(BuildSortedFromCameraDistance);
 
     //if ((i & model::IGameObject::Type::LandscapeMask) == 0)
     {
-      m_RenderObjects += SceneRenderObjects;
+      using namespace ::alicorn::extension::std;
+
+      m_PrepareRenderObjects += SceneRenderObjects;
       SceneRenderObjects.clear();
     }
   }
+
+  m_IsUpdateRenderObjects = true;
 }
 
 } // namespace support

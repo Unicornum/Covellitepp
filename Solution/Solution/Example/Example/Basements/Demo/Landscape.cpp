@@ -3,6 +3,7 @@
 #include "Landscape.hpp"
 #include <random>
 #include <boost/any.hpp>
+#include <alicorn/boost/format.inl>
 #include <alicorn/std/exception.hpp>
 #include <alicorn/std/vector.hpp>
 #include <Covellite/Api/Component.inl>
@@ -17,11 +18,13 @@ namespace model
 
 namespace math = ::alicorn::extension::cpp::math;
 
-Landscape::Landscape(const Type::Value _Type, const IGameWorld & _GameWorld) :
+Landscape::Landscape(const GameObject::Landscape::Value _Type, 
+  const IGameWorld & _GameWorld) :
   GameObject(_Type),
   m_GameWorld(_GameWorld)
 {
-  if ((_Type & Type::LandscapeMask) == 0)
+  if (_Type < GameObject::Landscape::None ||
+    _Type >= GameObject::Landscape::Invalid)
   {
     throw STD_EXCEPTION << "Unexpected landscape type: " << _Type;
   }
@@ -39,7 +42,7 @@ Landscape::Landscape(const Type::Value _Type, const IGameWorld & _GameWorld) :
     });
   };
 
-  if (_Type == Type::Grass)
+  if (_Type == GameObject::Landscape::Grass)
   {
     const auto TextureId = AddTexture("demo.grass.png");
     const auto TextureId2 = AddTexture("demo.grass2.png");
@@ -67,7 +70,7 @@ Landscape::Landscape(const Type::Value _Type, const IGameWorld & _GameWorld) :
 
     AddGrassLodMesh(Rect{ 0.501f, 0.001f,  0.609f, 0.0366f });
   }
-  else if (_Type == Type::Rock)
+  else if (_Type == GameObject::Landscape::Rock)
   {
     const auto TextureId = AddTexture("demo.stone.jpg");
 
@@ -82,7 +85,7 @@ Landscape::Landscape(const Type::Value _Type, const IGameWorld & _GameWorld) :
 
     AddAloneMesh("Shrooms.obj", TextureId, Rect{ 0.5f, 1.0f, 1.0f, 0.75f });
   }
-  else if (_Type == Type::Bush)
+  else if (_Type == GameObject::Landscape::Bush)
   {
     const auto TextureId = AddTexture("demo.bush.png");
 
@@ -101,7 +104,7 @@ Landscape::Landscape(const Type::Value _Type, const IGameWorld & _GameWorld) :
     AddAloneMesh("Flower1.obj", TextureId2, Rect{ 0.75f, 0.165f,  1.0f, 0.04f });
     AddAloneMesh("Flower3.obj", TextureId2, Rect{ 0.5f, 0.75f,  1.0f, 0.5f });
   }
-  else if (_Type == Type::Tree)
+  else if (_Type == GameObject::Landscape::Tree)
   {
     const auto TextureId = AddTexture("demo.tree.png");
 
@@ -115,7 +118,7 @@ Landscape::Landscape(const Type::Value _Type, const IGameWorld & _GameWorld) :
     AddAloneMesh("Tree5.obj", AddTexture("demo.tree.jpg"), 
       Rect{ 0.5f, 0.25f,  1.0f, 0.0f });
   }
-  else if (_Type == Type::Well)
+  else if (_Type == GameObject::Landscape::Well)
   {
     AddAloneMesh("Well.obj", AddTexture("demo.well.jpg"),
       Rect{ 0.0f, 1.0f,  1.0f, 0.0f });
@@ -124,10 +127,10 @@ Landscape::Landscape(const Type::Value _Type, const IGameWorld & _GameWorld) :
   {
     const auto GetTexturePath = [this]()
     {
-      static const ::std::map<Type::Value, Path_t> LandscapeTextureFiles =
+      static const ::std::map<size_t, Path_t> LandscapeTextureFiles =
       {
-        { Type::None, "demo.none.jpg" },
-        { Type::Sand, "demo.sand.jpg" },
+        { GameObject::Landscape::None, "demo.none.jpg" },
+        { GameObject::Landscape::Sand, "demo.sand.jpg" },
       };
 
       const auto itPath = LandscapeTextureFiles.find(GetType());
@@ -139,15 +142,15 @@ Landscape::Landscape(const Type::Value _Type, const IGameWorld & _GameWorld) :
   }
 }
 
+static const auto Random = [](const size_t _From, const size_t _To)
+{
+  static ::std::mt19937 Generator{ ::std::random_device{}() };
+  return static_cast<size_t>(::std::uniform_int_distribution<>{
+    static_cast<int>(_From), static_cast<int>(_To) }(Generator));
+};
+
 auto Landscape::GetObject(const Any_t & _Value) const /*override*/ -> Objects_t
 {
-  const auto Random = [](const size_t _From, const size_t _To)
-  {
-    static ::std::mt19937 Generator{ ::std::random_device{}() };
-    return static_cast<size_t>(::std::uniform_int_distribution<>{ 
-      static_cast<int>(_From), static_cast<int>(_To) }(Generator));
-  };
-
   using namespace ::alicorn::extension::std;
 
   if (_Value.empty()) // Формирование единственного общего объекта.
@@ -166,77 +169,37 @@ auto Landscape::GetObject(const Any_t & _Value) const /*override*/ -> Objects_t
 
   auto & CellPosition = ::boost::any_cast<const CubeCoords &>(_Value);
 
-  const auto Bright = GetBright(CellPosition);
+  const auto Material = GetMaterial(CellPosition);
+  const auto Present = GetPresent();
 
-  const uint32_t MaterialColor = 0xFF000000
-    | (Bright << 16)
-    | (Bright << 8)
-    | (Bright << 0);
+  const auto & LodModels = m_Models[Random(0, m_Models.size() - 1)];
 
-  const auto WorldPosition = CellPosition.ToPlane();
-
-  Objects_t Result;
-
-  const auto Rotate = m_IsUsingRotate ?
-    Random(0, 5) * math::Constant<float>::Pi / 3.0f : 0.0f;
-  const auto Scale = 1.0f + (m_ScaleFactor - 1.0f) * Random(0, 100) / 100.0f;
-
-  for (const auto & Model : m_Models[Random(0, m_Models.size() - 1)])
+  Objects_t Result =
   {
-    static size_t Index = 0;
-    Index++;
+    // Формирование полного набора компонентов для каждого объекта никак
+    // не сказывается на производительности Release версии.
+    GetTexture(LodModels[0].second).GetObject() +
+    GetMesh(LodModels[0].first).GetObject() +
+    Material +
+    GetTransform(CellPosition) +
+    Present
+  };
 
+  for (::std::size_t i = 1; i < LodModels.size(); i++)
+  {
     // Формирование полного набора компонентов для каждого объекта никак
     // не сказывается на производительности Release версии.
     Result.push_back(
-      GetTexture(Model.second).GetObject() +
-      Object_t
-      {
-        Component_t::Make(
-          {
-            { uT("id"), uT("Demo.Material.Tile.%ID%").Replace(uT("%ID%"), Index) },
-            { uT("type"), uT("Material") },
-            { uT("ambient"), MaterialColor },
-            { uT("diffuse"), MaterialColor },
-          }),
-      } +
-      GetMesh(Model.first).GetObject() +
-      Object_t
-      {
-        Component_t::Make(
-          {
-            { uT("type"), uT("Data") },
-            { uT("kind"), uT("Rotation") },
-            { uT("z"), Rotate },
-          }),
-        Component_t::Make(
-          {
-            { uT("type"), uT("Data") },
-            { uT("kind"), uT("Scale") },
-            { uT("z"), Scale },
-          }),
-        Component_t::Make(
-          {
-            { uT("type"), uT("Data") },
-            { uT("kind"), uT("Position") },
-            { uT("x"), WorldPosition.first },
-            { uT("y"), WorldPosition.second },
-            { uT("z"), m_GameWorld.GetLandscapeHeight(CellPosition) },
-          }),
-        Component_t::Make(
-          {
-            { uT("id"), uT("Demo.Present.Tile.%ID%").Replace(uT("%ID%"), Index) },
-            { uT("type"), uT("Present") },
-            { uT("kind"), uT("Geometry") },
-            { uT("static"), uT("true") },
-          })
-      });
+      GetTexture(LodModels[i].second).GetObject() +
+      GetMesh(LodModels[i].first).GetObject() +
+      Material +
+      Present);
   }
 
   return Result;
 }
 
-uint32_t Landscape::GetBright(const CubeCoords & _CellPosition) const
+Object_t Landscape::GetMaterial(const CubeCoords & _CellPosition) const
 {
   const auto GetBright = [&](void)
   {
@@ -267,7 +230,87 @@ uint32_t Landscape::GetBright(const CubeCoords & _CellPosition) const
     return 1.0f;
   };
 
-  return static_cast<uint32_t>(0xFF * GetBright());
+  const auto Bright = static_cast<uint32_t>(0xFF * GetBright());
+
+  const uint32_t MaterialColor = 0xFF000000
+    | (Bright << 16)
+    | (Bright << 8)
+    | (Bright << 0);
+
+  using ::alicorn::extension::boost::Format;
+
+  // Использование здесь String::Replace() увеличивает время формирования
+  // идентификатора в 10(!) раз, что существенно сказывается
+  // на производительности.
+  const auto Id = 
+    (Format{ uT("Demo.Material.Tile.%1%") } % MaterialColor).ToString();
+
+  return 
+  {
+    Component_t::Make(
+    {
+      { uT("id"), Id },
+      { uT("type"), uT("Material") },
+      { uT("ambient"), MaterialColor },
+      { uT("diffuse"), MaterialColor },
+    })
+  };
+}
+
+Object_t Landscape::GetTransform(const CubeCoords & _CellPosition) const
+{
+  const auto WorldPosition = _CellPosition.ToPlane();
+
+  const auto Rotate = m_IsUsingRotate ?
+    Random(0, 5) * math::Constant<float>::Pi / 3.0f : 0.0f;
+  const auto Scale = 1.0f + (m_ScaleFactor - 1.0f) * Random(0, 100) / 100.0f;
+
+  return {
+    Component_t::Make(
+      {
+        { uT("type"), uT("Data") },
+        { uT("kind"), uT("Rotation") },
+        { uT("z"), Rotate },
+      }),
+    Component_t::Make(
+      {
+        { uT("type"), uT("Data") },
+        { uT("kind"), uT("Scale") },
+        { uT("z"), Scale },
+      }),
+    Component_t::Make(
+      {
+        { uT("type"), uT("Data") },
+        { uT("kind"), uT("Position") },
+        { uT("x"), WorldPosition.first },
+        { uT("y"), WorldPosition.second },
+        { uT("z"), m_GameWorld.GetLandscapeHeight(_CellPosition) },
+      }),
+  };
+}
+
+/*static*/ Object_t Landscape::GetPresent(void)
+{
+  static size_t Index = 0;
+  Index++;
+
+  using ::alicorn::extension::boost::Format;
+
+  // Использование здесь String::Replace() увеличивает время формирования
+  // идентификатора в 10(!) раз, что существенно сказывается
+  // на производительности.
+  const auto Id = (Format{ uT("Demo.Present.Tile.%1%") } % Index).ToString();
+
+  return 
+  {
+    Component_t::Make(
+    {
+      { uT("id"), Id },
+      { uT("type"), uT("Present") },
+      { uT("kind"), uT("Geometry") },
+      { uT("static"), uT("true") },
+    })
+  };
 }
 
 } // namespace model

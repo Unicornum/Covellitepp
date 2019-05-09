@@ -1,7 +1,11 @@
 
 #pragma once
 #include <memory>
+#include <vector>
+#include <map>
+#define WIN32_LEAN_AND_MEAN
 #include <windows.h>
+#include <boost/filesystem.hpp>
 #include <alicorn/std/exception.hpp>
 #include <alicorn/std/string.hpp>
 #include <alicorn/std/chrono.mock.hpp>
@@ -17,6 +21,8 @@ using ::covellite::gui::VfsCore_t;
 using ::covellite::gui::VfsPtr_t;
 using ::alicorn::extension::std::Singleton;
 
+//! @cond Doxygen_Suppress
+
 inline /*static*/ VfsPtr_t Singleton<VfsCore_t>::Make(void)
 {
   using ::alicorn::modules::vfs::FileSystem;
@@ -31,6 +37,8 @@ inline /*static*/ VfsPtr_t Singleton<VfsCore_t>::Make(void)
     ::std::make_shared<FileSystem>(THIS_DIRECTORY / "Test.Renderer")
   });
 }
+
+//! @endcond
 
 // 06 Февраль 2019 13:08 (unicornum.verum@gmail.com)
 TODO("Заменить файл в Externals и вернуть ссылку на него.");
@@ -56,8 +64,7 @@ inline void PrintTo(const ::boost::filesystem::path & p, ::std::ostream * os)
 
 #include "Mock/Namespaces.hpp"
 
-#include <Covellite/Core.mock.hpp>
-#include <Covellite/Core/Settings.mock.hpp>
+#include <Covellite/App/Settings.mock.hpp>
 #include <Covellite/Gui.inside.mock.hpp>
 
 #include "Mock/Time.hpp"

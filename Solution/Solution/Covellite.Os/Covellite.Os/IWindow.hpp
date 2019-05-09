@@ -1,8 +1,8 @@
 ﻿
 #pragma once
-#include <Covellite/Os/Predefined.hpp>
-#include <Covellite/Os/Configuration.hpp>
+#include <Covellite/Predefined.forward.hpp>
 #include <Covellite/Events/IEvents.hpp>
+#include <Covellite/Os/Configuration.hpp>
 
 namespace covellite
 {
@@ -18,12 +18,14 @@ namespace os
 *
 * \version
 *  1.0.0.0        \n
+*  1.1.0.0        \n
 * \date
 *  02 Октябрь 2017    \n
+*  02 Май 2019    \n
 * \author
 *  CTAPOBEP (unicornum.verum@gmail.com)
 * \copyright
-*  © CTAPOBEP 2017
+*  © CTAPOBEP 2017 - 2019
 */
 class IWindow :
   public ::covellite::events::IEvents
@@ -41,7 +43,7 @@ public:
   };
 
 public:
-  virtual Handle_t GetHandle(void) const = 0;
+  virtual Any_t GetHandle(void) const = 0;
   virtual Rect GetClientRect(void) const = 0;
   virtual const Configuration_t & GetConfiguration(void) const = 0;
 

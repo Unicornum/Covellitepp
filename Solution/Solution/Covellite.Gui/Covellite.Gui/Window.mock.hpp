@@ -3,7 +3,6 @@
 #include <typeinfo>
 #include <Covellite\Events\Events.hpp>
 #include <Covellite\Api\Window.mock.hpp>
-#include <Covellite\Core\Window.mock.hpp>
 
 /*
 An example of use:
@@ -42,9 +41,7 @@ namespace gui
 {
 
 class Window :
-  public ::covellite::gui::IWindow,
-  public ::covellite::core::IWindow,
-  public ::mock::covellite::core::Window
+  public ::covellite::gui::IWindow
 {
   using WindowApi_t = ::covellite::api::IWindow;
   using WindowApiPtr_t = ::std::shared_ptr<::covellite::api::IWindow>;
@@ -79,13 +76,6 @@ public:
   bool operator== (const Window & _Value) const { return (m_Id == _Value.m_Id); }
 
 public:
-  void Subscribe(const EventHandlerPtr_t & _pEvents) override
-  {
-    (*_pEvents)[::covellite::core::Event::Drawing]
-      .connect(::std::bind(&Window::DoDrawWindow, this));
-  }
-
-public:
   // Èםעונפויס events::IEvents:
   operator Events_t (void) const override
   {
@@ -96,13 +86,6 @@ public:
   void Set(const StringBank_t & _Bank)
   {
     Proxy::GetInstance()->Set(_Bank);
-  }
-
-  template<class TLayer>
-  ::std::shared_ptr<TLayer> AddLayer(void)
-  {
-    const auto Id = Proxy::GetInstance()->AddLayer(m_Id, typeid(TLayer).name());
-    return ::std::make_shared<TLayer>(Id);
   }
 
   template<class TLayer>
@@ -124,10 +107,6 @@ public:
     m_Id(Proxy::GetInstance()->Constructor(&_WindowsApi))
   {
 
-  }
-  explicit Window(const WindowApiPtr_t & _pWindowsApi) :
-    Window(*_pWindowsApi)
-  {
   }
 };
 

@@ -115,7 +115,6 @@ set EXCLUDE=-x!Package -x!Test -x!arm -x!x86 -x!*.apk -x!*.apk.recipe* -x!*.zip 
     <ClInclude Include="Basements\Demo\CubeCoords.hpp" />
     <ClInclude Include="Basements\Demo\DbComponents.hpp" />
     <ClInclude Include="Basements\Demo\DbRenders.hpp" />
-    <ClInclude Include="Basements\Demo\DbUpdaters.hpp" />
     <ClInclude Include="Basements\Demo\Defines.hpp" />
     <ClInclude Include="Basements\Demo\GameObject.hpp" />
     <ClInclude Include="Basements\Demo\GameScene.hpp" />
@@ -165,11 +164,13 @@ set EXCLUDE=-x!Package -x!Test -x!arm -x!x86 -x!*.apk -x!*.apk.recipe* -x!*.zip 
     <ClCompile Include="Basements\Demo\3DScene.cpp" />
     <ClCompile Include="Basements\Demo\Camera.cpp" />
     <ClCompile Include="Basements\Demo\Compass.cpp" />
-    <ClCompile Include="Basements\Demo\Controller.cpp" />
+    <ClCompile Include="Basements\Demo\Controller.cpp">
+      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">26444</DisableSpecificWarnings>
+      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='Release|x64'">26444</DisableSpecificWarnings>
+    </ClCompile>
     <ClCompile Include="Basements\Demo\CubeCoords.cpp" />
     <ClCompile Include="Basements\Demo\DbComponents.cpp" />
     <ClCompile Include="Basements\Demo\DbRenders.cpp" />
-    <ClCompile Include="Basements\Demo\DbUpdaters.cpp" />
     <ClCompile Include="Basements\Demo\GameObject.cpp" />
     <ClCompile Include="Basements\Demo\GameObject.Mesh.cpp" />
     <ClCompile Include="Basements\Demo\GameObject.Texture.cpp" />
@@ -178,7 +179,10 @@ set EXCLUDE=-x!Package -x!Test -x!arm -x!x86 -x!*.apk -x!*.apk.recipe* -x!*.zip 
     <ClCompile Include="Basements\Demo\Landscape.cpp" />
     <ClCompile Include="Basements\Demo\Landscape.Mesh.cpp" />
     <ClCompile Include="Basements\Demo\Loader.cpp" />
-    <ClCompile Include="Basements\Demo\Model.cpp" />
+    <ClCompile Include="Basements\Demo\Model.cpp">
+      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">26444</DisableSpecificWarnings>
+      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='Release|x64'">26444</DisableSpecificWarnings>
+    </ClCompile>
     <ClCompile Include="Basements\Demo\Skybox.cpp" />
     <ClCompile Include="Basements\Demo\View.cpp" />
     <ClCompile Include="Basements\Demo\Water.cpp" />

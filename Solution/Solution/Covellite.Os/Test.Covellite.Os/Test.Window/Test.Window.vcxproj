@@ -76,9 +76,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="Window.android.deprecated_test.cpp" />
     <ClCompile Include="Window.android_test.cpp" />
-    <ClCompile Include="Window.windows.deprecated_test.cpp" />
     <ClCompile Include="Window.windows_test.cpp" />
     <ClCompile Include="Window_test.cpp" />
   </ItemGroup>

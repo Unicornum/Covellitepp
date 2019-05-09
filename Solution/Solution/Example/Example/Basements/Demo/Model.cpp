@@ -43,7 +43,8 @@ float Model::GetLandscapeHeight(const CubeCoords & _CellPosition) const /*overri
   return m_GameWorld.GetLandscapeHeight(_CellPosition);
 }
 
-size_t Model::GetGameObjectType(const CubeCoords & _CellPosition) const /*override*/
+auto Model::GetGameObjectType(const CubeCoords & _CellPosition) const /*override*/
+  -> IGameObject::Landscape::Value
 {
   return m_GameWorld.GetGameObjectType(_CellPosition);
 }

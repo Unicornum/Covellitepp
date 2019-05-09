@@ -9,7 +9,7 @@ namespace model
 {
 
 Loader::Loader(void) :
-  GameObject(Type::Loader)
+  GameObject(Extra::Loader)
 {
 
 }

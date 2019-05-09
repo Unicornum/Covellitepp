@@ -1,6 +1,5 @@
 
 #include "stdafx.h"
-#include <alicorn/std/singleton.hpp>
 #include <alicorn/compress.hpp>
 #include <Covellite/Gui/Vfs.hpp>
 

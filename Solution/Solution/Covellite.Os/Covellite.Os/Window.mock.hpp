@@ -1,10 +1,9 @@
 
 #pragma once
-#include <Covellite\Core\IWindow.hpp>
-#include <Covellite\Os\Configuration.mock.hpp>
-#include <Covellite\Os\IWindow.hpp>
-#include <Covellite\Core\EventHandler.hpp>
-#include <Covellite\Events.hpp>
+#include <Covellite/Predefined.hpp>
+#include <Covellite/Events.hpp>
+#include <Covellite/Os/Configuration.mock.hpp>
+#include <Covellite/Os/IWindow.hpp>
 
 /*
 An example of use:
@@ -43,9 +42,9 @@ namespace os
 {
 
 class Window :
-  public ::covellite::core::IWindow,
   public ::covellite::os::IWindow
 {
+  using Any_t = ::covellite::Any_t;
   using AppInfo_t = ::alicorn::system::platform::AppInfo;
   using Configuration_t = ::mock::covellite::os::Configuration;
 
@@ -55,8 +54,7 @@ public:
   {
   public:
     MOCK_METHOD0(Constructor, Id_t(void));
-    MOCK_METHOD2(Subscribe, void(Id_t, EventHandlerPtr_t));
-    MOCK_METHOD1(GetHandle, Handle_t(Id_t));
+    MOCK_METHOD1(GetHandle, Any_t(Id_t));
     MOCK_METHOD1(GetClientRect, Rect(Id_t));
   };
 
@@ -66,12 +64,6 @@ public:
   bool operator== (const Window & _Value) const { return (m_Id == _Value.m_Id); }
 
 public:
-  void Subscribe(const EventHandlerPtr_t & _pEvents) override
-  {
-    Proxy::GetInstance()->Subscribe(m_Id, _pEvents);
-  }
-
-public:
   // Èםעונפויס events::IEvents:
   operator Events_t (void) const override
   {
@@ -79,7 +71,7 @@ public:
   }
 
 public:
-  Handle_t Window::GetHandle(void) const override
+  Any_t Window::GetHandle(void) const override
   {
     return Proxy::GetInstance()->GetHandle(m_Id);
   }

@@ -14,11 +14,11 @@ namespace api
 namespace renderer
 {
 
-static PIXELFORMATDESCRIPTOR PixelFormatDescriptor = {0};
+static PIXELFORMATDESCRIPTOR PixelFormatDescriptor = { 0 };
 
-OpenGL::OpenGL(const Renderer::Data & _Data) :
+OpenGL::OpenGL(const Data_t & _Data) :
   OpenGLCommon(_Data, uT("OpenGL ")),
-  m_hWnd(_Data.Handle),
+  m_hWnd(::covellite::any_cast<HWND>(_Data.Handle)),
   m_hDeviceContex(USING_MOCK ::GetDC(m_hWnd))
 {
   WINAPI_CHECK (m_hDeviceContex != NULL);

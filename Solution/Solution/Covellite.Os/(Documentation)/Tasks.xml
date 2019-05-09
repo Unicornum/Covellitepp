@@ -9,12 +9,14 @@
   <Process/>
   <Complete>
     <Week6225>
-      <Task7 Text="Однократное сообщение нажатия кнопки клавиатуры при ее удержании." Type="Red" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="true" ParentTaskText="false"/>
+      <Task3 Text="Однократное сообщение нажатия кнопки клавиатуры при ее удержании." Type="Red" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="true" ParentTaskText="false"/>
+      <Task4 Text="Удаление устаревшего кода." Type="Red" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="true" ParentTaskText="false"/>
+      <Task9 Text="Передача хэндла окна кроссплатформенным способом." Type="Red" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="false"/>
     </Week6225>
     <Week6224/>
     <Week6223/>
     <Week6222>
-      <Task6 Text="Реорганизация кода." Type="Red" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="false"/>
+      <Task8 Text="Реорганизация кода." Type="Red" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="false"/>
     </Week6222>
   </Complete>
 </Tasks>

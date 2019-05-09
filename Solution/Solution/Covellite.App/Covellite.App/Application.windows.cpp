@@ -1,14 +1,16 @@
 ﻿
 #include "stdafx.h"
 
+#define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 #undef GetCommandLine
 
-#include <Covellite\App\Application.hpp>
-#include <alicorn\platform\winapi-check.hpp>
-#include <Covellite\Events.hpp>
-#include <Covellite\App\ClassName.windows.hpp>
-#include <Covellite\App\Events.hpp>
+#include <boost/core/ignore_unused.hpp>
+#include <Covellite/App/Application.hpp>
+#include <alicorn/platform/winapi-check.hpp>
+#include <Covellite/Events.hpp>
+#include <Covellite/App/Events.hpp>
+#include "ClassName.windows.hpp"
 
 using namespace covellite::app;
 
@@ -90,8 +92,10 @@ Application::Application(EventBased) :
 * \param [in] _pParams
 *  Дополнительные параметры запуска программы.
 */
-/*static*/ void Application::Main(CreateApp_t _fnCreateApp, void * /*_pParams*/) noexcept
+/*static*/ void Application::Main(CreateApp_t _fnCreateApp, void * _pParams) noexcept
 {
+  ::boost::ignore_unused(_pParams);
+
   try
   {
     _fnCreateApp()->Run();

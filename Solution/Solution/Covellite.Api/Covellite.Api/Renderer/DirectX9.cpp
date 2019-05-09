@@ -13,9 +13,7 @@
 
 using namespace covellite::api::renderer;
 
-DirectX9::DirectX9(const Renderer::Data & _Data) :
-  m_BackgroundColor(D3DCOLOR_COLORVALUE(_Data.BkColor.R,
-    _Data.BkColor.G, _Data.BkColor.B, _Data.BkColor.A)),
+DirectX9::DirectX9(const Data_t & _Data) :
   m_pDirect3D(Direct3DCreate9(D3D_SDK_VERSION))
 {
   if (m_pDirect3D == NULL) throw STD_EXCEPTION << "Fail.";
@@ -28,13 +26,14 @@ DirectX9::DirectX9(const Renderer::Data & _Data) :
   DX_CHECK m_pDirect3D->CreateDevice(
     D3DADAPTER_DEFAULT,  
     D3DDEVTYPE_HAL, 
-    _Data.Handle,
+    ::covellite::any_cast<HWND>(_Data.Handle),
     D3DCREATE_HARDWARE_VERTEXPROCESSING, 
     &d3dpp, 
     &m_pDevice);
 
   RECT ClientRect;
-  WINAPI_CHECK ::GetClientRect(_Data.Handle, &ClientRect);
+  WINAPI_CHECK ::GetClientRect(
+    ::covellite::any_cast<HWND>(_Data.Handle), &ClientRect);
 
   ResizeWindow(ClientRect.right - ClientRect.left, 
     ClientRect.bottom - ClientRect.top);
@@ -61,13 +60,6 @@ DirectX9::~DirectX9(void) = default;
 DirectX9::String_t DirectX9::GetUsingApi(void) const /*override*/
 {
   return uT("DirectX 9");
-}
-
-void DirectX9::ClearFrame(void) /*override*/
-{
-  DX_CHECK m_pDevice->Clear(
-    0, NULL, D3DCLEAR_TARGET, m_BackgroundColor, 1.0f, 0);
-  DX_CHECK m_pDevice->BeginScene();
 }
 
 void DirectX9::PresentFrame(void) /*override*/

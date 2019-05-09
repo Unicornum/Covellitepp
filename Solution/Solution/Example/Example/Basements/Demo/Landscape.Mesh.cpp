@@ -2,6 +2,7 @@
 #include "stdafx.h"
 #include "Landscape.hpp"
 #include <random>
+#include <alicorn/cpp/math.hpp>
 #include <alicorn/std/vector.hpp>
 #include <alicorn/std/exception.hpp>
 #include <alicorn/boost/filesystem.hpp>
@@ -9,14 +10,27 @@
 #include <Covellite/App/Settings.hpp>
 #include <Covellite/Gui/Vfs.hpp>
 
+#if BOOST_COMP_MSVC
+# pragma warning(push)
+# pragma warning(disable: 26498)
+# pragma warning(disable: 26495)
+# pragma warning(disable: 26451)
+#endif
+
 #define TINYOBJLOADER_IMPLEMENTATION
 #include <tinyobj/tiny_obj_loader.h>
+
+#if BOOST_COMP_MSVC
+# pragma warning(pop)
+# endif
 
 namespace basement
 {
 
 namespace model
 {
+
+namespace math = ::alicorn::extension::cpp::math;
 
 class Landscape::Mesh::MeshStreamBuffer :
   public ::std::streambuf
@@ -27,7 +41,7 @@ public:
   {
     if (_Dir == ::std::ios_base::cur)
     {
-      gbump(_Offset);
+      setg(eback(), gptr() + _Offset, egptr());
     }
     else if (_Dir == ::std::ios_base::end)
     {
@@ -41,6 +55,7 @@ public:
     return gptr() - eback();
   }
 
+  // cppcheck-suppress unusedFunction
   pos_type seekpos(::std::streampos _Pos, ::std::ios_base::openmode _Mode) override
   {
     return seekoff(_Pos - pos_type(off_type(0)), ::std::ios_base::beg, _Mode);
@@ -61,7 +76,7 @@ public:
 };
 
 Landscape::Mesh::Mesh(
-  const Type::Value _Type, 
+  const size_t _Type, 
   const float _TextureRatioXY,
   const Rect & _TextureCoord)
 {
@@ -75,7 +90,7 @@ Landscape::Mesh::Mesh(
   const Rect & _TextureCoord)
 {
   BuildBasementObject(_TextureRatioXY);
-  BuildMesh(Type::Grass, _TriplexCount, _TextureRatioXY, _TextureCoord);
+  BuildMesh(GameObject::Landscape::Grass, _TriplexCount, _TextureRatioXY, _TextureCoord);
 }
 
 Landscape::Mesh::Mesh(
@@ -180,15 +195,19 @@ void Landscape::Mesh::LoadMesh(
 
     for (int i = 0; i < _Count; i++)
     {
-      Triangle[i].x = Data.Vertex[_pIndices[i].vertex_index - 1].x;
-      Triangle[i].y = Data.Vertex[_pIndices[i].vertex_index - 1].y;
-      Triangle[i].z = Data.Vertex[_pIndices[i].vertex_index - 1].z;
-      Triangle[i].nx = Data.Normal[_pIndices[i].normal_index - 1].x;
-      Triangle[i].ny = Data.Normal[_pIndices[i].normal_index - 1].y;
-      Triangle[i].nz = Data.Normal[_pIndices[i].normal_index - 1].z;
+      const size_t iVertex = _pIndices[i].vertex_index - 1;
+      Triangle[i].x = Data.Vertex[iVertex].x;
+      Triangle[i].y = Data.Vertex[iVertex].y;
+      Triangle[i].z = Data.Vertex[iVertex].z;
 
-      Triangle[i].tu = Data.TexCoord[_pIndices[i].texcoord_index - 1].x;
-      Triangle[i].tv = Data.TexCoord[_pIndices[i].texcoord_index - 1].y;
+      const size_t iNormal = _pIndices[i].normal_index - 1;
+      Triangle[i].nx = Data.Normal[iNormal].x;
+      Triangle[i].ny = Data.Normal[iNormal].y;
+      Triangle[i].nz = Data.Normal[iNormal].z;
+
+      const size_t iTexCoords = _pIndices[i].texcoord_index - 1;
+      Triangle[i].tu = Data.TexCoord[iTexCoords].x;
+      Triangle[i].tv = Data.TexCoord[iTexCoords].y;
 
       // Предполагается, что модель изначально использует текстурные координаты
       // диапазоне 0...1, а повторяется текстура в диапазонах 1...2, 2...3
@@ -260,7 +279,7 @@ void Landscape::Mesh::LoadMesh(
 }
 
 void Landscape::Mesh::BuildMesh(
-  const Type::Value _Type,
+  const size_t _Type,
   const int _TriplexCount,
   const float _TextureRatioXY,
   const Rect & _TextureCoord)
@@ -271,7 +290,7 @@ void Landscape::Mesh::BuildMesh(
     return ::std::uniform_real_distribution<float>{ _From, _To }(Generator);
   };
 
-  if (_Type == Type::Grass && _TriplexCount > 1)
+  if (_Type == GameObject::Landscape::Grass && _TriplexCount > 1)
   {
     const auto Step = -0.001f + 0.7f / (_TriplexCount - 1);
 
@@ -359,9 +378,9 @@ void Landscape::Mesh::BuildBasementObject(const float _TextureRatioXY)
   }
 
   const auto AddTriangle =
-    [this, &Points](const size_t _1, const size_t _2, const size_t _3)
+    [this, &Points](const size_t _i1, const size_t _i2, const size_t _i3)
   {
-    Add({ Points[_1], Points[_2], Points[_3] });
+    Add({ Points[_i1], Points[_i2], Points[_i3] });
   };
 
   AddTriangle(0, 1, 2);
@@ -369,13 +388,14 @@ void Landscape::Mesh::BuildBasementObject(const float _TextureRatioXY)
   AddTriangle(0, 3, 4);
   AddTriangle(0, 4, 5);
 
-  for (int i = 0; i < 6; i++)
+  for (size_t i = 0; i < 6; i++)
   {
     AddTriangle(6 + 4 * i, 7 + 4 * i, 9 + 4 * i);
     AddTriangle(9 + 4 * i, 8 + 4 * i, 6 + 4 * i);
   }
 }
 
+// cppcheck-suppress unusedFunction
 void Landscape::Mesh::BuildTriplex6Object(
   const Point & /*_PositionAndHeight*/,
   const float /*_OffsetZ*/,

@@ -1,8 +1,1 @@
-P:\projects\Covellitepp\Solution\Solution\Covellite.Api\Covellite.Api\Renderer\DirectX10.cpp(181): style (suppress_id = functionConst): Technically the member function 'Data::Update < :: Matrices >' can be const.
-P:\projects\Covellitepp\Solution\Solution\Example\Example\Basements\Demo\CubeCoords.hpp(33): error (suppress_id = shiftTooManyBitsSigned): Shifting signed 32-bit value by 31 bits is undefined behaviour
-P:\projects\Covellitepp\Solution\Solution\Example\Example\Basements\Demo\DbComponents.hpp(39): performance (suppress_id = functionStatic): Technically the member function 'basement::model::DbComponents::GetComponent' can be static.
-P:\projects\Covellitepp\Solution\Solution\Example\Example\Basements\Demo\Landscape.hpp(46): performance (suppress_id = functionStatic): Technically the member function 'basement::model::Landscape::Mesh::BuildTriplex6Object' can be static.
-P:\projects\Covellitepp\Solution\Solution\Example\Example\Basements\Demo\Landscape.Mesh.cpp(379): style (suppress_id = unusedFunction): The function 'BuildTriplex6Object' is never used.
-P:\projects\Covellitepp\Solution\Solution\Example\Example\Basements\Demo\Landscape.Mesh.cpp(44): style (suppress_id = unusedFunction): The function 'seekpos' is never used.
-P:\projects\Covellitepp\Solution\Solution\Example\Example\Basements\Demo\DbComponents.cpp(109): information (suppress_id = unmatchedSuppression): Unmatched suppression: passedByValue
-(): information (suppress_id = missingInclude): Cppcheck cannot find all the include files (use --check-config for details)
+(): information (suppress_id = missingIncludeSystem): Cppcheck cannot find all the include files (use --check-config for details)

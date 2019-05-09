@@ -3,7 +3,6 @@
 #include <alicorn\std\string.forward.hpp>
 #include <alicorn\boost\filesystem.forward.hpp>
 #include <Covellite\Gui\Rocket.forward.hpp>
-#include <Covellite\Core\IWindow.hpp>
 #include <Covellite\Events\Events.hpp>
 #include <Covellite\Gui\ILayer.hpp>
 #include <Covellite\Gui\IWindow.hpp>
@@ -24,9 +23,6 @@ namespace gui
 *  работы с отдельным экраном программы.
 *  - Класс-наследник указывается в качестве параметра шаблона функции 
 *  covellite::gui::Window::AddLayer<>(). 
-*  - Класс-наследник должен переопределить функцию 
-*  covellite::core::IWindow::Subscribe(), в которой может подписаться на
-*  нужные ему события.
 *  
 * \version
 *  1.0.0.0        \n
@@ -40,7 +36,6 @@ namespace gui
 *  © CTAPOBEP 2016 - 2018
 */
 class Layer :
-  public ::covellite::core::IWindow,
   public ::covellite::gui::ILayer
 {
   using Utf8String_t = ::std::string;
@@ -70,12 +65,6 @@ public:
     String_t GetMeaning(void) const;
     void SetClassStyle(const String_t &);
 
-  public:
-    // deprecated
-    void SetText(const Utf8String_t &);
-    Utf8String_t GetText(void) const;
-    void SetStyle(const Utf8String_t &);
-
   private:
     Element_t * const m_pElement;
 
@@ -96,10 +85,6 @@ public:
   int GetHeight(void) const;
   float EmployFontSize(float);
 
-public:
-  // deprecated
-  void SetFontSize(double = 1.0);
-
 private:
   static ::std::string Convert(const Path_t &);
 
@@ -114,8 +99,6 @@ protected:
   Layer(gui::IWindow &, const Path_t &, const ::std::string &);
 
 public:
-  Layer(Context_t *, const Path_t &);
-  Layer(Context_t *, const Path_t &, const ::std::string &);
   ~Layer(void) noexcept;
 };
 

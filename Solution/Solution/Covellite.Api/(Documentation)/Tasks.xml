@@ -8,17 +8,28 @@
   </Options>
   <Process/>
   <Complete>
+    <Week6226>
+      <Task20 Text="Тесты для не покрытого тестами кода." Type="Red" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="false"/>
+    </Week6226>
     <Week6225>
-      <Task3 Text="Флаг 'static' для компонента Present.Geometry (ускорение рендеринга объектов, положение/ориентация/масштаб которых не меняется)." Type="Red" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="true" ParentTaskText="false"/>
-      <Task4 Text="Установка в 1.0f значений по умолчанию для компонента масштабирования." Type="Red" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="true" ParentTaskText="false"/>
-      <Task5 Text="Компонент включения alpha теста для реализации OpenGL|ES." Type="Red" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="true" ParentTaskText="false"/>
-      <Task10 Text="Экспериментальная реализация компонента обновления." Type="Red" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="false"/>
-      <Task11 Text="Поломанные/не компилирующиеся тесты." Type="Bug" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="false"/>
+      <Task4 Text="Флаг 'static' для компонента Present.Geometry (ускорение рендеринга объектов, положение/ориентация/масштаб которых не меняется)." Type="Red" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="true" ParentTaskText="false"/>
+      <Task5 Text="Установка в 1.0f значений по умолчанию для компонента масштабирования." Type="Red" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="true" ParentTaskText="false"/>
+      <Task6 Text="Компонент включения alpha теста для реализации OpenGL|ES." Type="Red" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="true" ParentTaskText="false"/>
+      <Task7 Text="Экспериментальная реализация компонента обновления." Type="Red" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="false"/>
+      <Task8 Text="Поломанные/не компилирующиеся тесты." Type="Bug" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="false"/>
+      <Task9 Text="Удаление устаревшего кода." Type="Red" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="true" ParentTaskText="false"/>
+      <Task10 Text="Заглушка для компонента State.AlphaTest." Type="Red" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="false">
+        <Task11 Text="Реализация DirectX11." Type="None" Version="None" ExternalProgram="None" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+        <Task12 Text="Реализация DirectX10." Type="None" Version="None" ExternalProgram="None" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+      </Task10>
+      <Task13 Text="Удаление реализаций устаревших компонентов." Type="Red" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="false"/>
+      <Task14 Text="Тесты комбинирования компонентов трансформации." Type="Red" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="false"/>
+      <Task15 Text="Удаление устаревшего кода." Type="Red" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="false"/>
+      <Task16 Text="Создание уникальных объектов рендера при каждом запросе." Type="Red" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="true" ParentTaskText="false"/>
     </Week6225>
     <Week6224>
-      <Task7 Text="Включение для OpenGL альфа-теста." Type="Red" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="false"/>
+      <Task18 Text="Включение для OpenGL альфа-теста." Type="Red" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="false"/>
     </Week6224>
     <Week6223/>
-    <Week6222/>
   </Complete>
 </Tasks>
