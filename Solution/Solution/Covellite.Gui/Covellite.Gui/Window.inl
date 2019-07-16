@@ -29,12 +29,17 @@ namespace gui
 *  Должен наследоваться от covellite::gui::Layer.
 */
 template<class TLayer>
-void Window::PushLayer(void)
+TLayer & Window::PushLayer(void)
 {
   static_assert(::std::is_convertible<TLayer &, covellite::gui::Layer &>::value,
     "TLayer must inherit covellite::gui::Layer.");
 
-  PushLayer(::std::make_shared<TLayer>(*this));
+  const auto pLayer = ::std::make_shared<TLayer>(*this);
+  PushLayer(pLayer);
+
+  // 16 Июль 2019 14:30 (unicornum.verum@gmail.com)
+  TODO("Тест возврата ссылки на созданный объект слоя");
+  return *pLayer;
 }
 
 } // namespace gui

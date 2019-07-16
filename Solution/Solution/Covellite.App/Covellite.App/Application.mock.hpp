@@ -2,6 +2,7 @@
 #pragma once
 #include <Covellite/Events/Events.hpp>
 #include <Covellite/App/IApplication.hpp>
+#include <Covellite/App/IWindow.hpp>
 
 /*
 An example of use:
@@ -44,6 +45,7 @@ class Application :
 {
   using Events_t = ::covellite::events::Events;
   using Run_t = ::std::function<void(void)>;
+  using Windows_t = ::std::stack<::std::shared_ptr<::covellite::app::IWindow>>;
 
 public:
   class Proxy :
@@ -80,14 +82,18 @@ public:
 
 protected:
   template<class TWindow, class ... TArgs>
-  TWindow & MakeWindow(const TArgs & ... _Args)
+  TWindow & MakeWindow(TArgs && ... _Args)
   {
     Proxy::GetInstance()->MakeWindow(m_Id, typeid(TWindow).name());
-    return *::std::make_shared<TWindow>(_Args ...);
+
+    auto pWindow = ::std::make_shared<TWindow>(_Args ...);
+    m_Windows.push(pWindow);
+    return *pWindow;
   }
 
 protected:
-  Events_t m_Events;
+  Events_t  m_Events;
+  Windows_t m_Windows;
 
 public:
   explicit Application(Continuous) :

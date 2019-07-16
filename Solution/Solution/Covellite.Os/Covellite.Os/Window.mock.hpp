@@ -2,6 +2,8 @@
 #pragma once
 #include <Covellite/Predefined.hpp>
 #include <Covellite/Events.hpp>
+#include <Covellite/App/IApplication.hpp>
+#include <Covellite/App/IWindow.hpp>
 #include <Covellite/Os/Configuration.mock.hpp>
 #include <Covellite/Os/IWindow.hpp>
 
@@ -42,18 +44,19 @@ namespace os
 {
 
 class Window :
+  public ::covellite::app::IWindow,
   public ::covellite::os::IWindow
 {
   using Any_t = ::covellite::Any_t;
-  using AppInfo_t = ::alicorn::system::platform::AppInfo;
   using Configuration_t = ::mock::covellite::os::Configuration;
+  using IApplication_t = ::covellite::app::IApplication;
 
 public:
   class Proxy :
     public ::alicorn::extension::testing::Proxy<Proxy>
   {
   public:
-    MOCK_METHOD0(Constructor, Id_t(void));
+    MOCK_METHOD1(Constructor, Id_t(const IApplication_t *));
     MOCK_METHOD1(GetHandle, Any_t(Id_t));
     MOCK_METHOD1(GetClientRect, Rect(Id_t));
   };
@@ -90,8 +93,8 @@ private:
   Events_t m_Events;
 
 public:
-  Window(void) :
-    m_Id(Proxy::GetInstance()->Constructor())
+  Window(const IApplication_t & _Application) :
+    m_Id(Proxy::GetInstance()->Constructor(&_Application))
   {
   }
 };

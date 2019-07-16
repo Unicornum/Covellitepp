@@ -1,8 +1,9 @@
 
 #pragma once
 #include <typeinfo>
-#include <Covellite\Events\Events.hpp>
-#include <Covellite\Api\Window.mock.hpp>
+#include <Covellite/Events/Events.hpp>
+#include <Covellite/App/IWindow.hpp>
+#include <Covellite/Api/Window.mock.hpp>
 
 /*
 An example of use:
@@ -41,6 +42,7 @@ namespace gui
 {
 
 class Window :
+  public ::covellite::app::IWindow,
   public ::covellite::gui::IWindow
 {
   using WindowApi_t = ::covellite::api::IWindow;
@@ -48,16 +50,16 @@ class Window :
   using Path_t = ::boost::filesystem::path;
   using Utf8String_t = ::std::string;
   using StringBank_t = ::std::map<Utf8String_t, Utf8String_t>;
+  using LayerPtr_t = ::std::shared_ptr<::covellite::gui::ILayer>;
 
 public:
   class Proxy :
     public ::alicorn::extension::testing::Proxy<Proxy>
   {
   public:
-    MOCK_METHOD1(Constructor, Id_t(const void *));
+    MOCK_METHOD1(Constructor, Id_t(Id_t));
     MOCK_METHOD1(Set, void(StringBank_t));
-    MOCK_METHOD2(AddLayer, Id_t(Id_t, ::std::string));
-    MOCK_METHOD2(PushLayer, void(Id_t, ::std::string));
+    MOCK_METHOD2(PushLayer, Id_t(Id_t, ::std::string));
     MOCK_METHOD1(Back, void(Id_t));
 
   public:
@@ -83,15 +85,22 @@ public:
   }
 
 public:
+  // Èםעונפויס ::covellite::gui::IWindow
+  Document_t * LoadDocument(const PathToFile_t &) override { return nullptr; }
+
+public:
   void Set(const StringBank_t & _Bank)
   {
     Proxy::GetInstance()->Set(_Bank);
   }
 
   template<class TLayer>
-  void PushLayer(void)
+  TLayer & PushLayer(void)
   {
-    Proxy::GetInstance()->PushLayer(m_Id, typeid(TLayer).name());
+    const auto Id = Proxy::GetInstance()->PushLayer(m_Id, typeid(TLayer).name());
+    const auto pLayer = ::std::make_shared<TLayer>(Id);
+    m_Layers.push_back(pLayer);
+    return *pLayer;
   }
 
   void Back(void)
@@ -101,10 +110,12 @@ public:
 
 private:
   Events_t m_Events;
+  ::std::vector<LayerPtr_t> m_Layers;
 
 public:
   explicit Window(const WindowApi_t & _WindowsApi) :
-    m_Id(Proxy::GetInstance()->Constructor(&_WindowsApi))
+    m_Id(Proxy::GetInstance()->Constructor(
+      dynamic_cast<const ::mock::covellite::api::Window &>(_WindowsApi).m_Id))
   {
 
   }

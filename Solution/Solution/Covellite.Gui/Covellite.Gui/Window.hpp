@@ -82,7 +82,7 @@ public:
 public:
   // Функции работы со слоями (экранами) окна.
   template<class TLayer>
-  void PushLayer(void);
+  TLayer & PushLayer(void);
   void Back(void);
 
 private:

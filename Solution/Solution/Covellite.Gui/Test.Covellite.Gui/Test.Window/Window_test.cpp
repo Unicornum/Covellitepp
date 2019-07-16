@@ -20,6 +20,7 @@
 #include "../Mock/EventListener.inl"
 #include "../../Covellite.Gui/Window.cpp"
 
+#include <Covellite/App.mock.hpp>
 #include <Covellite/Os/Events.hpp>
 #include <Covellite/Api/Events.hpp>
 #include <Covellite/Covellite.Api.lib.hpp>
@@ -105,6 +106,10 @@ protected:
       });
     }
   };
+
+protected:
+  using App_t = ::mock::covellite::app::Application;
+  App_t m_App{ App_t::EventBased{} };
 };
 
 // Образец макроса для подстановки в класс Window 
@@ -127,7 +132,7 @@ TEST_F(Window_test, /*DISABLED_*/Test_Constructor_CreateContext_Fail)
   RocketProxy_t RocketProxy;
   RocketProxy_t::GetInstance() = &RocketProxy;
 
-  const WindowOs_t WindowOs;
+  const WindowOs_t WindowOs{ m_App };
   const WindowApi_t WindowApi{ WindowOs };
   const IWindowApi_t & IWindowApi = WindowApi;
 
@@ -219,7 +224,7 @@ TEST_F(Window_test, /*DISABLED_*/Test_Constructor)
     .Times(1)
     .WillOnce(Return(WindowApiId));
 
-  const WindowOs_t WindowOs;
+  const WindowOs_t WindowOs{ m_App };
   const WindowApi_t WindowApi{ WindowOs };
   const IWindowApi_t & IWindowApi = WindowApi;
 
@@ -305,7 +310,7 @@ TEST_F(Window_test, /*DISABLED_*/Test_Constructor_DebuggerInitialise)
 
   ::mock::Rocket::Core::Context Context;
 
-  const WindowOs_t WindowOs;
+  const WindowOs_t WindowOs{ m_App };
   const WindowApi_t WindowApi{ WindowOs };
   const IWindowApi_t & IWindowApi = WindowApi;
 
@@ -384,7 +389,7 @@ TEST_F(Window_test, /*DISABLED_*/Test_Constructor_LoadFontFace)
   FontDatabaseProxy_t FontDatabaseProxy;
   FontDatabaseProxy_t::GetInstance() = &FontDatabaseProxy;
 
-  const WindowOs_t WindowOs;
+  const WindowOs_t WindowOs{ m_App };
   const WindowApi_t WindowApi{ WindowOs };
   const IWindowApi_t & IWindowApi = WindowApi;
 
@@ -430,7 +435,7 @@ TEST_F(Window_test, /*DISABLED_*/Test_GetEvents)
   Proxy oProxy;
   static const int Id = 1807231902;
 
-  const WindowOs_t WindowOs;
+  const WindowOs_t WindowOs{ m_App };
   const WindowApi_t WindowApi{ WindowOs };
   const IWindowApi_t & IWindowApi = WindowApi;
 
@@ -460,7 +465,7 @@ TEST_F(Window_test, /*DISABLED_*/Test_LoadDocument)
   const char * PathToFile = "Path1807231921";
   Document_t Document;
 
-  const WindowOs_t WindowOs;
+  const WindowOs_t WindowOs{ m_App };
   const WindowApi_t WindowApi{ WindowOs };
   const IWindowApi_t & IWindowApi = WindowApi;
 
@@ -503,7 +508,7 @@ TEST_F(Window_test, /*DISABLED_*/Test_Set)
 
   const ::mock::Id_t StringTranslatorId = 1710081426;
 
-  const WindowOs_t WindowOs;
+  const WindowOs_t WindowOs{ m_App };
   const WindowApi_t WindowApi{ WindowOs };
   const IWindowApi_t & IWindowApi = WindowApi;
 
@@ -560,7 +565,7 @@ TEST_F(Window_test, /*DISABLED_*/Test_PushLayer)
 
   InSequence Dummy;
 
-  const WindowOs_t WindowOs;
+  const WindowOs_t WindowOs{ m_App };
   const WindowApi_t WindowApi{ WindowOs };
   const IWindowApi_t & IWindowApi = WindowApi;
 
@@ -595,7 +600,7 @@ TEST_F(Window_test, /*DISABLED_*/Test_Back_ExistsLayer)
   LayersProxy_t LayersProxy;
   LayersProxy_t::GetInstance() = &LayersProxy;
 
-  const WindowOs_t WindowOs;
+  const WindowOs_t WindowOs{ m_App };
   const WindowApi_t WindowApi{ WindowOs };
   const IWindowApi_t & IWindowApi = WindowApi;
 
@@ -631,7 +636,7 @@ TEST_F(Window_test, /*DISABLED_*/Test_Back_NotExistsLayer)
   LayersProxy_t LayersProxy;
   LayersProxy_t::GetInstance() = &LayersProxy;
 
-  const WindowOs_t WindowOs;
+  const WindowOs_t WindowOs{ m_App };
   const WindowApi_t WindowApi{ WindowOs };
   const IWindowApi_t & IWindowApi = WindowApi;
 
@@ -669,7 +674,7 @@ TEST_F(Window_test, /*DISABLED_*/Test_OnDrawWindow)
   ::mock::Rocket::Core::Context Context;
   const ::mock::Id_t RendererId = 1811191434;
 
-  const WindowOs_t WindowOs;
+  const WindowOs_t WindowOs{ m_App };
   const WindowApi_t WindowApi{ WindowOs };
   const IWindowApi_t & IWindowApi = WindowApi;
 
@@ -722,7 +727,7 @@ TEST_F(Window_test, /*DISABLED_*/Test_OnResize)
 
   using namespace ::testing;
 
-  const WindowOs_t WindowOs;
+  const WindowOs_t WindowOs{ m_App };
   const WindowApi_t WindowApi{ WindowOs };
   const IWindowApi_t & IWindowApi = WindowApi;
 
@@ -764,7 +769,7 @@ TEST_F(Window_test, /*DISABLED_*/Test_OnMotion)
 
   using namespace ::testing;
 
-  const WindowOs_t WindowOs;
+  const WindowOs_t WindowOs{ m_App };
   const WindowApi_t WindowApi{ WindowOs };
   const IWindowApi_t & IWindowApi = WindowApi;
 
@@ -798,7 +803,7 @@ TEST_F(Window_test, /*DISABLED_*/Test_OnTouch)
 
   using namespace ::testing;
 
-  const WindowOs_t WindowOs;
+  const WindowOs_t WindowOs{ m_App };
   const WindowApi_t WindowApi{ WindowOs };
   const IWindowApi_t & IWindowApi = WindowApi;
 
@@ -828,7 +833,7 @@ TEST_F(Window_test, /*DISABLED_*/Test_OnRelease)
 
   using namespace ::testing;
 
-  const WindowOs_t WindowOs;
+  const WindowOs_t WindowOs{ m_App };
   const WindowApi_t WindowApi{ WindowOs };
   const IWindowApi_t & IWindowApi = WindowApi;
 
@@ -854,7 +859,7 @@ TEST_F(Window_test, /*DISABLED_*/Test_OnBack_ExistLayers)
   LayersProxy_t LayersProxy;
   LayersProxy_t::GetInstance() = &LayersProxy;
 
-  const WindowOs_t WindowOs;
+  const WindowOs_t WindowOs{ m_App };
   const WindowApi_t WindowApi{ WindowOs };
   const IWindowApi_t & IWindowApi = WindowApi;
   SupportWindow Support{ IWindowApi };
@@ -885,7 +890,7 @@ TEST_F(Window_test, /*DISABLED_*/Test_OnBack_EmptyLayers)
   LayersProxy_t LayersProxy;
   LayersProxy_t::GetInstance() = &LayersProxy;
 
-  const WindowOs_t WindowOs;
+  const WindowOs_t WindowOs{ m_App };
   const WindowApi_t WindowApi{ WindowOs };
   const IWindowApi_t & IWindowApi = WindowApi;
   SupportWindow Support{ IWindowApi };
@@ -926,7 +931,7 @@ TEST_F(Window_test, /*DISABLED_*/Test_OnKeyDown)
 
   ::mock::Rocket::Core::Context Context;
 
-  const WindowOs_t WindowOs;
+  const WindowOs_t WindowOs{ m_App };
   const WindowApi_t WindowApi{ WindowOs };
   const IWindowApi_t & IWindowApi = WindowApi;
 
@@ -968,7 +973,7 @@ TEST_F(Window_test, /*DISABLED_*/Test_OnKeyPressed)
 
   InSequence Dummy;
 
-  const WindowOs_t WindowOs;
+  const WindowOs_t WindowOs{ m_App };
   const WindowApi_t WindowApi{ WindowOs };
   const IWindowApi_t & IWindowApi = WindowApi;
 

@@ -13,6 +13,7 @@
 *  Тесты класса Window.
 */
 
+#include <Covellite/App.mock.hpp>
 #include <Covellite/Os.mock.hpp>
 #include <Covellite/App/Events.hpp>
 #include <Covellite/Os/Events.hpp>
@@ -87,6 +88,10 @@ protected:
     ::testing::DefaultValue<Rect_t>::Clear();
     ::testing::DefaultValue<::covellite::Any_t>::Clear();
   }
+
+protected:
+  using App_t = ::mock::covellite::app::Application;
+  App_t m_App{ App_t::EventBased{} };
 };
 
 // Образец макроса для подстановки в класс Window 
@@ -124,7 +129,7 @@ TEST_F(Window_test, /*DISABLED_*/Test_Dummy)
     .WillOnce(Return(uT("false")))
     .WillRepeatedly(Return(uT("Dummy")));
 
-  WindowOs_t WindowOs;
+  WindowOs_t WindowOs{ m_App };
   Tested_t Example{ WindowOs };
 }
 
@@ -156,11 +161,11 @@ TEST_F(Window_test, /*DISABLED_*/Test_Constructor)
 
     using namespace ::testing;
 
-    EXPECT_CALL(WindowOsProxy, Constructor())
+    EXPECT_CALL(WindowOsProxy, Constructor(_))
       .Times(1)
       .WillOnce(Return(WindowOsId));
 
-    WindowOs_t WindowOs;
+    WindowOs_t WindowOs{ m_App };
 
     InSequence Dummy;
 
@@ -216,7 +221,7 @@ TEST_F(Window_test, /*DISABLED_*/Test_DoApplicationUpdate)
   RendererImplProxy_t::GetInstance() = &RendererImplProxy;
 
   const ::mock::Id_t RenderId = 1808221312;
-  WindowOs_t WindowOs;
+  WindowOs_t WindowOs{ m_App };
 
   using namespace ::covellite::events;
 
@@ -265,7 +270,7 @@ TEST_F(Window_test, /*DISABLED_*/Test_DoWindowResize)
   const ::mock::Id_t RenderId = 1808221411;
   const auto Width = 1808221412;
   const auto Height = 1808221413;
-  WindowOs_t WindowOs;
+  WindowOs_t WindowOs{ m_App };
 
   using namespace ::covellite;
 
@@ -310,7 +315,7 @@ TEST_F(Window_test, /*DISABLED_*/Test_Events)
     .WillOnce(Return(uT("false")))
     .WillRepeatedly(Return(uT("Dummy")));
 
-  WindowOs_t WindowOs;
+  WindowOs_t WindowOs{ m_App };
   ::covellite::events::Events Events = WindowOs;
 
   const Tested_t Example{ WindowOs };
@@ -346,11 +351,11 @@ TEST_F(Window_test, /*DISABLED_*/Test_GetClientRect)
     .WillOnce(Return(uT("false")))
     .WillRepeatedly(Return(uT("Dummy")));
 
-  EXPECT_CALL(WindowOsProxy, Constructor())
+  EXPECT_CALL(WindowOsProxy, Constructor(_))
     .Times(1)
     .WillOnce(Return(WindowOsId));
 
-  WindowOs_t WindowOs;
+  WindowOs_t WindowOs{ m_App };
   const Tested_t Example{ WindowOs };
   const IWindowApi_t & IExample = Example;
 
@@ -407,7 +412,7 @@ TEST_F(Window_test, /*DISABLED_*/Test_GetRenders)
     .Times(1)
     .WillOnce(Return(ImplId));
 
-  WindowOs_t WindowOs;
+  WindowOs_t WindowOs{ m_App };
   const Tested_t Example{ WindowOs };
   const IWindowApi_t & IExample = Example;
 
