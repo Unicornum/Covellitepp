@@ -4,6 +4,8 @@
 #include <Covellite/Api/Component.inl>
 //#include <boost/thread/lock_guard.hpp>
 
+#undef max
+
 using namespace covellite::api;
 
 /**
@@ -17,7 +19,6 @@ using namespace covellite::api;
 Component::Renders::Renders(const Creators_t & _Creators) :
   m_Creators(_Creators)
 {
-
 }
 
 /**
@@ -49,6 +50,7 @@ auto Component::Renders::Obtain(const Object_t & _Object) -> Renders_t
   //::boost::lock_guard<::boost::mutex> Lock(m_Mutex);
 
   Renders_t Result;
+  Result.reserve(m_MaxRendersCount);
 
   for (const auto & _pComponent : _Object)
   {
@@ -64,6 +66,8 @@ auto Component::Renders::Obtain(const Object_t & _Object) -> Renders_t
       Create(_pComponent) : GetExistsRender();
     if (ComponentRender) Result.push_back(ComponentRender);
   }
+
+  m_MaxRendersCount = ::std::max(m_MaxRendersCount, Result.size());
 
   return Result;
 }
@@ -105,10 +109,6 @@ auto Component::Renders::Create(const ComponentPtr_t & _pComponent) -> Render_t
     {
       Result = itCreator->second(_pComponent);
     }
-    else if (_pComponent->Type == uT("Updater"))
-    {
-      Result = CreateUpdater(_pComponent);
-    }
   }
   catch (const ::std::exception & _Ex)
   {
@@ -117,33 +117,10 @@ auto Component::Renders::Create(const ComponentPtr_t & _pComponent) -> Render_t
       << "type: " << _pComponent->Type << "].";
   }
 
-  if (Result == nullptr) return nullptr;
-
-  m_AllExistingRenders[_pComponent->Id] = { 1, Result };
-  return Result;
-}
-
-auto Component::Renders::CreateUpdater(const ComponentPtr_t & _pComponent) -> Render_t
-{
-  // Реализация компонента обновления; реализация рабочая (см. реализацию
-  // класса Simple3DObject), но есть проблемы:
-  // - Рендерятся объекты, попадающие в поле зрения камеры, а обновлять
-  // нужно объекты рядом с камерой (включая те, что позади).
-  // - Все updater'ы всех объектов в рамках рендеринга одного кадра должны
-  // получать одно и то же значение времени.
-
-  using Updater_t = ::std::function<void(const float)>;
-  const Updater_t Empty = [](const float) {};
-
-  const auto Updater = _pComponent->GetValue(uT("function"), Empty);
-
-  return [Updater](void)
+  if (Result != nullptr)
   {
-    static const auto Begin = ::std::chrono::system_clock::now();
+    m_AllExistingRenders[_pComponent->Id] = { 1, Result };
+  }
 
-    const ::std::chrono::duration<float> Time = 
-      (::std::chrono::system_clock::now() - Begin);
-
-    Updater(Time.count());
-  };
+  return Result;
 }

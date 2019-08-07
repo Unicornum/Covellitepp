@@ -35,6 +35,7 @@ using float4x4 = ::DirectX::XMMATRIX;
 #define MATRICES_BUFFER_INDEX 0
 #define MATERIAL_BUFFER_INDEX 5
 #define LIGHTS_BUFFER_INDEX 6
+#define FOG_BUFFER_INDEX 7
 
 /**
 * \ingroup CovelliteApiFxGroup
@@ -76,6 +77,7 @@ struct Matrices
   float4x4 World;
   float4x4 View;
   float4x4 Projection;
+  float4x4 ViewInverse;
 };
 
 /**
@@ -231,6 +233,29 @@ struct Lights
   ::Light::Ambient Ambient;
   ::Light::Direction Direction;
   ::Light::Points Points;
+};
+
+/**
+* \ingroup CovelliteApiFxGroup
+* \brief
+*  Класс входит в проект \ref CovelliteApiPage \n
+*  Структура для передачи шейдеру данных тумана.
+*
+* \version
+*  1.0.0.0        \n
+* \date
+*  30 Июль 2019    \n
+* \author
+*  CTAPOBEP (unicornum.verum@gmail.com)
+* \copyright
+*  © CTAPOBEP 2019
+*/
+struct Fog
+{
+  uint ARGBColor;
+  float Near;
+  float Far;
+  float Density;
 };
 
 #ifdef __cplusplus

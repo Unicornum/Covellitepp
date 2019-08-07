@@ -19,7 +19,6 @@ namespace model
 {
 
 namespace math = ::alicorn::extension::cpp::math;
-using Vertex_t = ::covellite::api::Vertex::Polyhedron;
 
 const auto Random = [](const int _From, const int _To)
 {
@@ -48,6 +47,11 @@ GameWorld::GameWorld(const Events_t & _Events, DbComponents & _DbComponents) :
   {
     PrepareScene(_pLoadingPercent);
     m_ProcessingMode = GetManualProcessMoving();
+  });
+
+  m_Events[::events::Demo.Animation].Connect([this](const IntPtr_t & _pLoadingPercent)
+  {
+    PrepareAnimationScene(_pLoadingPercent);
   });
 
   m_Events[::events::Demo.Exit].Connect([this](void) 
@@ -127,11 +131,54 @@ void GameWorld::PrepareScene(const IntPtr_t & _pLoadingPercent)
     LoadObject(GameObject::Create(GameObject::Extra::Water));
   });
 
+  m_LoadingQueue.push([this](const float)
+  {
+    LoadObject(GameObject::Create(GameObject::Another::Particles, m_pGameScene));
+  });
+
   //m_LoadingQueue.push([this](void)
   //{
   //  LoadObject(GameObject::Create(GameObject::Extra::Compass), 
   //    static_cast<const IDbComponents *>(&m_DbComponents));
   //});
+}
+
+void GameWorld::PrepareAnimationScene(const IntPtr_t & _pLoadingPercent)
+{
+  LOGGER(Trace) << "Load object...";
+
+  PrepareLoader(_pLoadingPercent);
+  m_pGameScene->CompleteReplace();
+
+  const auto pPrototype = 
+    GameObject::Create(GameObject::Another::Animated, m_pGameScene);
+
+  m_LoadingQueue.push([=](const float)
+  {
+    LoadObject(pPrototype);
+  });
+
+  const auto CellRadius = 
+    ::alicorn::extension::cpp::IS_DEBUG_CONFIGURATION ? 0 : Constant::CellRadius;
+
+  for (int y = -CellRadius; y <= CellRadius; y++)
+  {
+    for (int x = -CellRadius; x <= CellRadius; x++)
+    {
+      const CubeCoords CellPosition{ x, y };
+
+      if (CellPosition.GetZ() >= -CellRadius &&
+        CellPosition.GetZ() <= CellRadius)
+      {
+        m_LoadingQueue.push([=](const float)
+        {
+          LoadObject(pPrototype, CellPosition);
+        });
+      }
+    }
+  }
+
+  m_ProcessingMode = [](float) {};
 }
 
 void GameWorld::RemoveAllObjects(void)

@@ -3,16 +3,16 @@
 #include "DirectX11.hpp"
 #include <alicorn/std/vector.hpp>
 #include <alicorn/boost/lexical-cast.hpp>
-#include <Covellite/Api/Vertex.hpp>
 #include "DxCheck.hpp"
 #include "DirectX.hpp"
-#include "Component.hpp"
 
 #include <d3d11.h>
 #include <directxmath.h>
 #pragma comment(lib, "d3d11.lib")
 
 #include "fx/Hlsl.hpp"
+#include <Covellite/Api/Defines.hpp>
+#include "Component.hpp"
 
 using namespace covellite::api::renderer;
 
@@ -66,6 +66,22 @@ private:
   };
 
   template<>
+  class Support<::Fog>
+  {
+  public:
+    inline static UINT GetFlag(void) { return D3D11_BIND_CONSTANT_BUFFER; }
+    inline static void SetConstantBuffer(
+      const ComPtr_t<ID3D11DeviceContext> & _pImmediateContext,
+      const ComPtr_t<ID3D11Buffer> & _pBuffer)
+    {
+      _pImmediateContext->VSSetConstantBuffers(
+        FOG_BUFFER_INDEX, 1, _pBuffer.GetAddressOf());
+      _pImmediateContext->PSSetConstantBuffers(
+        FOG_BUFFER_INDEX, 1, _pBuffer.GetAddressOf());
+    }
+  };
+
+  template<>
   class Support<int>
   {
   public:
@@ -74,11 +90,15 @@ private:
 
 public:
   template<class T>
-  static ComPtr_t<ID3D11Buffer> Create(const ComPtr_t<ID3D11Device> & _pDevice,
-    const T * _pData, size_t _Count)
+  static ComPtr_t<ID3D11Buffer> Create(
+    const ComPtr_t<ID3D11Device> & _pDevice,
+    const bool _IsDynamic,
+    const T * _pData, 
+    size_t _Count)
   {
     D3D11_BUFFER_DESC Desc = { 0 };
-    Desc.Usage = D3D11_USAGE_DEFAULT;
+    Desc.Usage = _IsDynamic ? D3D11_USAGE_DYNAMIC : D3D11_USAGE_DEFAULT;
+    Desc.CPUAccessFlags = _IsDynamic ? D3D11_CPU_ACCESS_WRITE : 0;
     Desc.ByteWidth = static_cast<decltype(Desc.ByteWidth)>(sizeof(T) * _Count);
     Desc.BindFlags = Support<T>::GetFlag();
 
@@ -102,7 +122,7 @@ public:
     const ComPtr_t<ID3D11DeviceContext> & _pImmediateContext,
     const T * _pData)
   {
-    const auto pResult = Create(_pDevice, _pData, 1);
+    const auto pResult = Create(_pDevice, false, _pData, 1);
     Support<T>::SetConstantBuffer(_pImmediateContext, pResult);
     return pResult;
   }
@@ -147,15 +167,14 @@ public:
   template<class T>
   void Update(void) const = delete;
 
+public:
   template<>
   inline ::Matrices & Get(void) { return m_Matrices.Data; }
 
   template<>
-  inline void Update<::Matrices>(void) const
-  {
-    m_Matrices.Update();
-  }
+  inline void Update<::Matrices>(void) const { m_Matrices.Update(); }
 
+public:
   void SetCameraId(const CameraId_t & _CameraId)
   {
     m_CurrentCameraId = _CameraId;
@@ -170,17 +189,26 @@ public:
   template<>
   inline void Update<::Lights>(void) const { m_CurrentLights.Update(); }
 
+public:
+  template<>
+  inline ::Fog & Get(void) { return m_Fog.Data; }
+
+  template<>
+  inline void Update<::Fog>(void) const { m_Fog.Update(); }
+
 private:
   ConstantBuffer<::Matrices>        m_Matrices;
   ConstantBuffer<::Lights>          m_CurrentLights;
   ::std::map<CameraId_t, ::Lights>  m_Lights;
   CameraId_t                        m_CurrentCameraId;
+  ConstantBuffer<::Fog>             m_Fog;
 
 public:
   Data(const ComPtr_t<ID3D11Device> & _pDevice,
     const ComPtr_t<ID3D11DeviceContext> & _pImmediateContext) :
     m_Matrices{ _pDevice, _pImmediateContext },
-    m_CurrentLights{ _pDevice, _pImmediateContext }
+    m_CurrentLights{ _pDevice, _pImmediateContext },
+    m_Fog{ _pDevice, _pImmediateContext }
   {
   }
 };
@@ -194,28 +222,31 @@ DirectX11::DirectX11(const Data_t & _Data)
   m_Creators =
   {
     { 
-      uT("Data"), [&](const ComponentPtr_t & _pComponent)
+      uT("Data"), [=](const ComponentPtr_t & _pComponent)
       {     
         m_ServiceComponents.Add(_pComponent);
         return Render_t{};
       } 
     },
-    { uT("Camera"), [&](const ComponentPtr_t & _pComponent)
+    { uT("Camera"), [=](const ComponentPtr_t & _pComponent)
       { return CreateCamera(_pComponent); } },
-    { uT("State"), [&](const ComponentPtr_t & _pComponent)
+    { uT("State"), [=](const ComponentPtr_t & _pComponent)
       { return CreateState(_pComponent); } },
-    { uT("Light"), [&](const ComponentPtr_t & _pComponent)
+    { uT("Fog"), [=](const ComponentPtr_t & _pComponent)
+      { return CreateFog(_pComponent); } },
+    { uT("Light"), [=](const ComponentPtr_t & _pComponent)
       { return CreateLight(_pComponent); } },
-    { uT("Material"), [&](const ComponentPtr_t & _pComponent)
+    { uT("Material"), [=](const ComponentPtr_t & _pComponent)
       { return CreateMaterial(_pComponent); } },
-    { uT("Texture"), [&](const ComponentPtr_t & _pComponent)
+    { uT("Texture"), [=](const ComponentPtr_t & _pComponent)
       { return CreateTexture(_pComponent); } },
-    { uT("Shader"), [&](const ComponentPtr_t & _pComponent)
+    { uT("Shader"), [=](const ComponentPtr_t & _pComponent)
       { return CreateShader(_pComponent); } },
-    { uT("Buffer"), [&](const ComponentPtr_t & _pComponent)
+    { uT("Buffer"), [=](const ComponentPtr_t & _pComponent)
       { return CreateBuffer(_pComponent); } },
-    { uT("Present"), [&](const ComponentPtr_t & _pComponent)
+    { uT("Present"), [=](const ComponentPtr_t & _pComponent)
       { return CreatePresent(_pComponent); } },
+    m_Updater.GetCreator(),
   };
 }
 
@@ -229,6 +260,8 @@ DirectX11::String_t DirectX11::GetUsingApi(void) const /*override*/
 void DirectX11::PresentFrame(void) /*override*/
 {
   m_pSwapChain->Present(0, 0);
+
+  m_Updater.UpdateTime();
 }
 
 void DirectX11::ResizeWindow(int32_t _Width, int32_t _Height) /*override*/
@@ -332,21 +365,6 @@ void DirectX11::CreateDepthStencilView(int _Width, int _Height)
   ComPtr_t<ID3D11Texture2D> pDepthBuffer;
   DX_CHECK m_pDevice->CreateTexture2D(&TextureDesc, NULL, &pDepthBuffer);
 
-  D3D11_DEPTH_STENCIL_DESC DeptStencilDesc = { 0 };
-
-  // Depth test parameters
-  DeptStencilDesc.DepthEnable = true;
-  DeptStencilDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
-  DeptStencilDesc.DepthFunc = D3D11_COMPARISON_LESS;
-
-  // Stencil test parameters
-  DeptStencilDesc.StencilEnable = false;
-
-  ComPtr_t<ID3D11DepthStencilState> pDSState;
-  DX_CHECK m_pDevice->CreateDepthStencilState(&DeptStencilDesc, &pDSState);
-
-  m_pImmediateContext->OMSetDepthStencilState(pDSState.Get(), 1);
-
   D3D11_DEPTH_STENCIL_VIEW_DESC DeptStencilViewDesc = { 0 };
   DeptStencilViewDesc.Format = DeptBufferFormat;
   DeptStencilViewDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
@@ -360,7 +378,7 @@ auto DirectX11::CreateCamera(const ComponentPtr_t & _pComponent) -> Render_t
   const auto CameraId = _pComponent->Id;
 
   const auto DisabledBlendRender = CreateBlendState(false);
-  const auto DisableDepthRender = GetDepthState(false, false);
+  const auto DisableDepthRender = GetDepthState(false, false, false);
 
   const auto LightsRender = [=](void)
   {
@@ -393,6 +411,10 @@ auto DirectX11::CreateCamera(const ComponentPtr_t & _pComponent) -> Render_t
 
     m_pData->Get<::Matrices>().View = ::DirectX::XMMatrixTranspose(
       ::DirectX::XMMatrixIdentity());
+
+    ::DirectX::XMVECTOR Determinant;
+    m_pData->Get<::Matrices>().ViewInverse = ::DirectX::XMMatrixTranspose(
+      ::DirectX::XMMatrixInverse(&Determinant, ::DirectX::XMMatrixIdentity()));
   };
 
   const Render_t CameraPerspective = [=](void)
@@ -435,9 +457,14 @@ auto DirectX11::CreateCamera(const ComponentPtr_t & _pComponent) -> Render_t
       ::DirectX::XMVectorSet(Distance, 0.0f, 0.0f, 1.0f),
       Transform);
 
-    m_pData->Get<::Matrices>().View = ::DirectX::XMMatrixTranspose(
-      ::DirectX::XMMatrixLookAtRH(Eye, Look,
-        ::DirectX::XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f)));
+    const auto View = ::DirectX::XMMatrixLookAtRH(Eye, Look,
+      ::DirectX::XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f));
+
+    m_pData->Get<::Matrices>().View = ::DirectX::XMMatrixTranspose(View);
+
+    ::DirectX::XMVECTOR Determinant;
+    m_pData->Get<::Matrices>().ViewInverse = ::DirectX::XMMatrixTranspose(
+      ::DirectX::XMMatrixInverse(&Determinant, View));
   };
 
   return (_pComponent->Kind == uT("Perspective")) ? 
@@ -506,8 +533,10 @@ auto DirectX11::CreateState(const ComponentPtr_t & _pComponent) -> Render_t
 
   const auto CreateDepthState = [&](void)
   {
-    return GetDepthState(_pComponent->GetValue(uT("enabled"), false),
-      _pComponent->GetValue(uT("clear"), false));
+    return GetDepthState(
+      _pComponent->GetValue(uT("enabled"), false),
+      _pComponent->GetValue(uT("clear"), false),
+      _pComponent->GetValue(uT("overwrite"), true));
   };
 
   const auto CreateClearState = [&](void)
@@ -548,6 +577,23 @@ auto DirectX11::CreateState(const ComponentPtr_t & _pComponent) -> Render_t
   };
 
   return Creators[_pComponent->Kind]();
+}
+
+auto DirectX11::CreateFog(const ComponentPtr_t & _pComponent) -> Render_t
+{
+  const auto pFogData =
+    m_ServiceComponents.Get({ { uT("Fog"), _pComponent } })[0];
+
+  return [=](void)
+  {
+    const ::Component::Fog RawFogData{ pFogData };
+
+    auto & Fog = m_pData->Get<::Fog>();
+    Fog.ARGBColor = RawFogData.Color;
+    Fog.Near = RawFogData.Near;
+    Fog.Far = RawFogData.Far;
+    Fog.Density = RawFogData.Density;
+  };
 }
 
 auto DirectX11::CreateLight(const ComponentPtr_t & _pComponent) -> Render_t
@@ -642,7 +688,7 @@ auto DirectX11::CreateMaterial(const ComponentPtr_t & _pComponent) -> Render_t
   Material.ARGBEmission = _pComponent->GetValue(uT("emission"), 0xFF000000);
   Material.Shininess    = _pComponent->GetValue(uT("shininess"), 0.0f);
 
-  auto pBuffer = Buffer::Create(m_pDevice, &Material, 1);
+  auto pBuffer = Buffer::Create(m_pDevice, false, &Material, 1);
 
   return [=](void)
   {
@@ -655,8 +701,36 @@ auto DirectX11::CreateMaterial(const ComponentPtr_t & _pComponent) -> Render_t
 
 auto DirectX11::CreateTexture(const ComponentPtr_t & _pComponent) -> Render_t
 {
-  const Component::Texture TextureData{
-    m_ServiceComponents.Get({ { uT("Texture"), _pComponent } })[0] };
+  const auto GetDestinationIndex = [&](const String_t & _Destination)
+  {
+    static const ::std::vector<String_t> Destinations =
+    {
+      uT("albedo"),
+      uT("metalness"),
+      uT("roughness"),
+      uT("normal"),
+      uT("occlusion"),
+    };
+
+    const auto itDestination = 
+      ::std::find(Destinations.cbegin(), Destinations.cend(), _Destination);
+    if (itDestination == Destinations.cend())
+    {
+      throw STD_EXCEPTION << "Unexpected destination texture: " << _Destination
+        << " [id=" << _pComponent->Id << "].";
+    }
+
+    return static_cast<UINT>(
+      ::std::distance(Destinations.cbegin(), itDestination));
+  };
+
+  const auto pTextureData =
+    m_ServiceComponents.Get({ { uT("Texture"), _pComponent } })[0];
+
+  const auto iDestination = GetDestinationIndex(
+    pTextureData->GetValue(uT("destination"), uT("albedo")));
+
+  const Component::Texture TextureData{ pTextureData };
 
   D3D11_TEXTURE2D_DESC TextureDesc = { 0 };
   TextureDesc.Width = TextureData.Width;
@@ -688,7 +762,7 @@ auto DirectX11::CreateTexture(const ComponentPtr_t & _pComponent) -> Render_t
 
   return [=](void)
   {
-    m_pImmediateContext->PSSetShaderResources(0, 1,
+    m_pImmediateContext->PSSetShaderResources(iDestination, 1,
       pShaderResourceView.GetAddressOf());
   };
 }
@@ -762,48 +836,73 @@ auto DirectX11::CreateShader(const ComponentPtr_t & _pComponent) -> Render_t
   {
     m_pImmediateContext->PSSetShader(pPixelShader.Get(), NULL, 0);
     m_pData->Update<::Lights>();
+    m_pData->Update<::Fog>();
   };
 }
 
 auto DirectX11::CreateBuffer(const ComponentPtr_t & _pComponent) -> Render_t
 {
-  using Vertex_t = ::covellite::api::Vertex;
+  namespace vertex = ::covellite::api::vertex;
+  using BufferMapper_t = cbBufferMap_t<vertex::Polyhedron>;
 
   const auto pBufferData =
     m_ServiceComponents.Get({ { uT("Buffer"), _pComponent } })[0];
 
-  if (pBufferData->IsType<const Vertex_t::Polygon *>(uT("data")))
+  if (pBufferData->IsType<const vertex::Polygon *>(uT("data")))
   {
-    const Component::Buffer<Vertex_t::Polygon> VertexData{ pBufferData };
+    const Component::Buffer<vertex::Polygon> VertexData{ pBufferData };
 
-    auto pBuffer = Buffer::Create(m_pDevice, VertexData.pData, VertexData.Count);
+    auto pBuffer = 
+      Buffer::Create(m_pDevice, false, VertexData.pData, VertexData.Count);
 
     return [=](void)
     {
-      const UINT Stride = sizeof(Vertex_t::Polygon);
-      const UINT Offset = 0;
+      static const UINT Stride = sizeof(vertex::Polygon);
+      static const UINT Offset = 0;
       m_pImmediateContext->IASetVertexBuffers(0, 1,
         pBuffer.GetAddressOf(), &Stride, &Offset);
     };
   }
-  else if (pBufferData->IsType<const Vertex_t::Polyhedron *>(uT("data")))
+  else if (pBufferData->IsType<const vertex::Polyhedron *>(uT("data")))
   {
-    const Component::Buffer<Vertex_t::Polyhedron> VertexData{ pBufferData };
+    const Component::Buffer<vertex::Polyhedron> VertexData{ pBufferData };
 
-    auto pBuffer = Buffer::Create(m_pDevice, VertexData.pData, VertexData.Count);
+    const auto & cbBufferMapper =
+      _pComponent->GetValue<const BufferMapper_t &>(uT("mapper"), nullptr);
 
-    return [=](void)
+    auto pBuffer = Buffer::Create(m_pDevice, (cbBufferMapper != nullptr), 
+      VertexData.pData, VertexData.Count);
+
+    const Render_t StaticRender = [=](void)
     {
-      const UINT Stride = sizeof(Vertex_t::Polyhedron);
-      const UINT Offset = 0;
+      static const UINT Stride = sizeof(vertex::Polyhedron);
+      static const UINT Offset = 0;
       m_pImmediateContext->IASetVertexBuffers(0, 1,
         pBuffer.GetAddressOf(), &Stride, &Offset);
     };
+
+    const Render_t DynamicRender = [=](void)
+    {
+      const auto IsDirty = cbBufferMapper(nullptr);
+      if (IsDirty)
+      {
+        D3D11_MAPPED_SUBRESOURCE Resource = { 0 };
+        DX_CHECK m_pImmediateContext->Map(pBuffer.Get(), 0,
+          D3D11_MAP_WRITE_NO_OVERWRITE, 0, &Resource);
+        cbBufferMapper(reinterpret_cast<vertex::Polyhedron *>(Resource.pData));
+        m_pImmediateContext->Unmap(pBuffer.Get(), 0);
+      }
+
+      StaticRender();
+    };
+
+    return (cbBufferMapper == nullptr) ? StaticRender : DynamicRender;
   }
 
   const Component::Buffer<int> IndexData{ pBufferData };
 
-  auto pBuffer = Buffer::Create(m_pDevice, IndexData.pData, IndexData.Count);
+  auto pBuffer = 
+    Buffer::Create(m_pDevice, false, IndexData.pData, IndexData.Count);
 
   return [=](void)
   {
@@ -836,8 +935,14 @@ auto DirectX11::CreateGeometry(const ComponentPtr_t & _pComponent) -> Render_t
     };
   };
 
-  const auto PreRenderGeometry = _pComponent->GetValue(uT("static"), false) ? 
-    GetPreRenderStaticGeometry() : GetPreRenderGeometry(false);
+  const auto Variety = _pComponent->GetValue(uT("variety"), uT("Default"));
+
+  const auto PreRenderGeometry = 
+    (Variety == uT("Default")) ? GetPreRenderGeometry(false) :
+    (Variety == uT("Static")) ? GetPreRenderStaticGeometry() :
+    (Variety == uT("Billboard")) ? GetPreRenderBillboardGeometry() :
+      throw STD_EXCEPTION << "Unknown variety: " << Variety <<
+        " [id=" << _pComponent->Id << "].";
 
   return [=](void)
   {
@@ -885,29 +990,47 @@ auto DirectX11::CreateBlendState(bool _IsEnabled) -> Render_t
   };
 }
 
-auto DirectX11::GetDepthState(bool _IsEnabled, bool _IsClear) -> Render_t
+auto DirectX11::GetDepthState(
+  const bool _IsEnabled, 
+  const bool _IsClear, 
+  const bool _IsOverwrite) -> Render_t
 {
-  Render_t RenderDepthDisabled = [=](void)
+  if (!_IsEnabled)
   {
-    m_pImmediateContext->OMSetRenderTargets(1,
-      m_pRenderTargetView.GetAddressOf(), nullptr);
-  };
+    return [=](void)
+    {
+      m_pImmediateContext->OMSetRenderTargets(1,
+        m_pRenderTargetView.GetAddressOf(), nullptr);
+    };
+  }
+
+  D3D11_DEPTH_STENCIL_DESC DeptStencilDesc = { 0 };
+  DeptStencilDesc.DepthEnable = true;
+  DeptStencilDesc.DepthWriteMask = _IsOverwrite ? 
+    D3D11_DEPTH_WRITE_MASK_ALL : D3D11_DEPTH_WRITE_MASK_ZERO;
+  DeptStencilDesc.DepthFunc = D3D11_COMPARISON_LESS;
+  DeptStencilDesc.StencilEnable = false;
+
+  ComPtr_t<ID3D11DepthStencilState> pDSState;
+  DX_CHECK m_pDevice->CreateDepthStencilState(&DeptStencilDesc, &pDSState);
 
   Render_t RenderDepthEnabled = [=](void)
   {
+    m_pImmediateContext->OMSetDepthStencilState(pDSState.Get(), 1);
     m_pImmediateContext->OMSetRenderTargets(1, 
       m_pRenderTargetView.GetAddressOf(), m_pDepthStencilView.Get());
   };
 
   Render_t RenderDepthClear = [=](void)
   {
-    RenderDepthEnabled();
+    m_pImmediateContext->OMSetDepthStencilState(pDSState.Get(), 1);
+    m_pImmediateContext->OMSetRenderTargets(1,
+      m_pRenderTargetView.GetAddressOf(), m_pDepthStencilView.Get());
     m_pImmediateContext->ClearDepthStencilView(m_pDepthStencilView.Get(),
       D3D11_CLEAR_DEPTH, 1.0f, 0);
   };
 
-  return _IsEnabled ? 
-    (_IsClear ? RenderDepthClear : RenderDepthEnabled) : RenderDepthDisabled;
+  return _IsClear ? RenderDepthClear : RenderDepthEnabled;
 }
 
 auto DirectX11::GetPreRenderGeometry(const bool _IsStatic) -> Render_t
@@ -973,6 +1096,58 @@ auto DirectX11::GetPreRenderGeometry(const bool _IsStatic) -> Render_t
       m_pData->Update<::Matrices>();
     });
   }
+
+  return [Result](void)
+  {
+    for (const auto & Render : Result) Render();
+  };
+}
+
+auto DirectX11::GetPreRenderBillboardGeometry(void) -> Render_t
+{
+  Renders_t Result;
+
+  Result.push_back([=](void)
+  {
+    ::DirectX::XMFLOAT4X4 Matrix;
+    // Матрица View уже траспонированная!
+    XMStoreFloat4x4(&Matrix, m_pData->Get<::Matrices>().View);
+
+    Matrix._14 = 0.0f;
+    Matrix._24 = 0.0f;
+    Matrix._34 = 0.0f;
+
+    // Уже!
+    Matrix._41 = 0.0f;
+    Matrix._42 = 0.0f;
+    Matrix._43 = 0.0f;
+    Matrix._44 = 1.0f;
+
+    m_pData->Get<::Matrices>().World = XMLoadFloat4x4(&Matrix);
+  });
+
+  auto CreatePosition = [&](const ComponentPtr_t & _pPosition)
+  {
+    Result.push_back([=](void)
+    {
+      const Component::Position Position{ _pPosition };
+
+      m_pData->Get<::Matrices>().World *=
+        ::DirectX::XMMatrixTranslation(Position.X, Position.Y, Position.Z);
+    });
+  };
+
+  m_ServiceComponents.Process(
+    {
+      { uT("Position"), CreatePosition },
+    });
+
+  Result.push_back([this](void)
+  {
+    m_pData->Get<::Matrices>().World =
+      ::DirectX::XMMatrixTranspose(m_pData->Get<::Matrices>().World);
+    m_pData->Update<::Matrices>();
+  });
 
   return [Result](void)
   {

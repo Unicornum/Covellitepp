@@ -208,6 +208,21 @@
     <None Include="Assets\Data\demo\Shrooms.obj">
       <Filter>Assets\Data\Demo</Filter>
     </None>
+    <None Include="Assets\Data\demo\Human.obj">
+      <Filter>Assets\Data\Demo</Filter>
+    </None>
+    <None Include="Assets\Data\demo\Human.dae">
+      <Filter>Assets\Data\Demo</Filter>
+    </None>
+    <None Include="Assets\Data\demo\Human.fbx">
+      <Filter>Assets\Data\Demo</Filter>
+    </None>
+    <None Include="Assets\Data\demo\Human.walking.fbx">
+      <Filter>Assets\Data\Demo</Filter>
+    </None>
+    <None Include="Assets\Data\demo\Human.walking.dae">
+      <Filter>Assets\Data\Demo</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Image Include="Assets\Data\gradient.png">
@@ -268,6 +283,21 @@
       <Filter>Assets\Data\Demo</Filter>
     </Image>
     <Image Include="Assets\Data\demo\demo.grass3.png">
+      <Filter>Assets\Data\Demo</Filter>
+    </Image>
+    <Image Include="Assets\Data\demo\Human.Face.png">
+      <Filter>Assets\Data\Demo</Filter>
+    </Image>
+    <Image Include="Assets\Data\demo\Human.Hand.Foot.png">
+      <Filter>Assets\Data\Demo</Filter>
+    </Image>
+    <Image Include="Assets\Data\demo\Human.Head.png">
+      <Filter>Assets\Data\Demo</Filter>
+    </Image>
+    <Image Include="Assets\Data\demo\Human.Outerwear.png">
+      <Filter>Assets\Data\Demo</Filter>
+    </Image>
+    <Image Include="Assets\Data\demo\demo.particles.png">
       <Filter>Assets\Data\Demo</Filter>
     </Image>
   </ItemGroup>

@@ -14,6 +14,11 @@ cbuffer cbLights : register(BUFFER_INDEX(LIGHTS_BUFFER_INDEX))
   const ::Lights LightsData;
 };
 
+cbuffer cbFog : register(BUFFER_INDEX(FOG_BUFFER_INDEX))
+{
+  const ::Fog FogData;
+};
+
 /// [Input vertex shared structures]
 
 // ¬ходные данные вертексного шейдера (используетс€ совместно с форматом
@@ -41,7 +46,7 @@ struct Pixel
   float4 Color : COLOR;
   float3 Normal : NORMAL;
   float2 TexCoord : TEXCOORD0;
-  float4 WorldPos : TEXCOORD1;
+  float4 WorldPos : POSITION0;
 };
 
 /// [Input vertex shared structures]

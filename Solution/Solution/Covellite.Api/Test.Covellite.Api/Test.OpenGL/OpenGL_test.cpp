@@ -29,6 +29,7 @@ protected:
   using String_t = ::alicorn::extension::std::String;
   using Component_t = ::covellite::api::Component;
   using Render_t = ::std::function<void(void)>;
+  using Time_t = ::std::chrono::microseconds;
 
   // Вызывается ПЕРЕД запуском каждого теста
   void SetUp(void) override
@@ -41,6 +42,7 @@ protected:
     ::testing::DefaultValue<HGLRC>::Set((HGLRC)1710282204);
     ::testing::DefaultValue<RECT>::Set({ 0, 0, 1, 1 });
     ::testing::DefaultValue<String_t>::Set(uT("0"));
+    ::testing::DefaultValue<Time_t>::Set(Time_t{});
   }
 
   // Вызывается ПОСЛЕ запуска каждого теста
@@ -52,6 +54,7 @@ protected:
     ::testing::DefaultValue<RECT>::Clear();
     ::testing::DefaultValue<String_t>::Clear();
     ::testing::DefaultValue<const ::mock::GLfloat *>::Clear();
+    ::testing::DefaultValue<Time_t>::Clear();
   }
 
 protected:
@@ -411,5 +414,7 @@ TEST_F(OpenGL_test, /*DISABLED_*/Test_PresentFrame)
 }
 
 #define OpenGLCommon_test OpenGL_test
-
 #include "../OpenGLCommon_test.hpp"
+
+#define Updater_test OpenGL_test
+#include "../Updater_test.hpp"

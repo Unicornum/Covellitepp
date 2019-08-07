@@ -8,6 +8,26 @@ using AppInfo_t = ::alicorn::system::platform::AppInfo;
 
 using namespace covellite::app;
 
+class Logcat
+{
+public:
+  inline static void Error(const char * _Format, ...)
+  {
+    va_list Args;
+    va_start(Args, _Format);
+    (void)__android_log_print(ANDROID_LOG_ERROR, "Covellite++", _Format, Args);
+    va_end(Args);
+  }
+
+  inline static void Info(const char * _Format, ...)
+  {
+    va_list Args;
+    va_start(Args, _Format);
+    (void)__android_log_print(ANDROID_LOG_INFO, "Covellite++", _Format, Args);
+    va_end(Args);
+  }
+};
+
 /**
 * \brief
 *  Инициализирующий конструктор класса.
@@ -39,11 +59,11 @@ Application::Application(const Run_t & _Run) :
   };
 
   m_Events[(int32_t)APP_CMD_INIT_WINDOW]
-    .Connect([&]() { m_Events[events::Application.Start](); });
+    .Connect([=]() { m_Events[events::Application.Start](); });
   m_Events[(int32_t)APP_CMD_STOP]
-    .Connect([&]() { m_Events[events::Application.Exit](); });
+    .Connect([=]() { m_Events[events::Application.Exit](); });
   m_Events[(int32_t)APP_CMD_TERM_WINDOW]
-    .Connect([&]() 
+    .Connect([=]() 
   {
     // Простую очистку стека здесь делать нельзя, т.к. реализация std::stack
     // в CrystaX удаляет объекты стека в порядке их создания (в отличие от 
@@ -62,7 +82,7 @@ Application::Application(const Run_t & _Run) :
 *  окна программы.
 */
 Application::Application(Continuous) :
-  Application([&](void)
+  Application([=](void)
     {
       auto & DestroyRequested = AppInfo_t::Get<android_app>().destroyRequested;
 
@@ -92,9 +112,9 @@ Application::Application(Continuous) :
   // Обслуживание отключения непрерывной отрисовки экрана при потере фокуса
   // программой.
   m_Events[(int32_t)APP_CMD_LOST_FOCUS]
-    .Connect([&]() { m_IsFocused = false; });
+    .Connect([=]() { m_IsFocused = false; });
   m_Events[(int32_t)APP_CMD_GAINED_FOCUS]
-    .Connect([&]() { m_IsFocused = true; });
+    .Connect([=]() { m_IsFocused = true; });
 }
 
 /**
@@ -103,9 +123,11 @@ Application::Application(Continuous) :
 *  после события.
 */
 Application::Application(EventBased) :
-  Application([&](void)
+  Application([=](void)
     {
       auto & DestroyRequested = AppInfo_t::Get<android_app>().destroyRequested;
+
+      Logcat::Info("Application::Run(): event based circle started.");
 
       while (DestroyRequested == 0)
       {
@@ -136,26 +158,6 @@ Application::Application(EventBased) :
 */
 /*static*/ void Application::Main(CreateApp_t _fnCreateApp, void * _pParams) noexcept
 {
-  class Logcat
-  {
-  public:
-    inline static void Error(const char * _Format, ...)
-    {
-      va_list Args;
-      va_start(Args, _Format);
-      (void)__android_log_print(ANDROID_LOG_ERROR, "Covellite++", _Format, Args);
-      va_end(Args);
-    }
-
-    inline static void Info(const char * _Format, ...)
-    {
-      va_list Args;
-      va_start(Args, _Format);
-      (void)__android_log_print(ANDROID_LOG_INFO, "Covellite++", _Format, Args);
-      va_end(Args);
-    }
-  };
-
   // Использование логгера Android напрямую, т.к. логгер Alicorn здесь еще
   // не инициализирован.
   Logcat::Info("Application::Main(): start program.");
@@ -163,6 +165,8 @@ Application::Application(EventBased) :
   try
   {
     auto * pApp = reinterpret_cast<android_app *>(_pParams);
+
+    Logcat::Info("Application::Main(): init.");
 
     const AppInfo_t Info
     {
@@ -174,7 +178,13 @@ Application::Application(EventBased) :
       &pApp->config,
     };
 
-    _fnCreateApp()->Run();
+    Logcat::Info("Application::Main(): create app object.");
+
+    const auto pApplication = _fnCreateApp();
+
+    Logcat::Info("Application::Main(): run program.");
+
+    pApplication->Run();
   }
   catch (const ::std::exception & _Ex)
   {

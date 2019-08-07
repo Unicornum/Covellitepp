@@ -2,7 +2,6 @@
 #include "stdafx.h"
 #include "Landscape.hpp"
 #include <random>
-#include <boost/any.hpp>
 #include <alicorn/boost/format.inl>
 #include <alicorn/std/exception.hpp>
 #include <alicorn/std/vector.hpp>
@@ -308,7 +307,7 @@ Object_t Landscape::GetTransform(const CubeCoords & _CellPosition) const
       { uT("id"), Id },
       { uT("type"), uT("Present") },
       { uT("kind"), uT("Geometry") },
-      { uT("static"), uT("true") },
+      { uT("variety"), uT("Static") },
     })
   };
 }

@@ -9,9 +9,10 @@
 #include <memory>
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
-#include <alicorn/platform/app-info.hpp>
-#include <alicorn/std/string.hpp>
 #include <alicorn/cpp/math.hpp>
+#include <alicorn/std/string.hpp>
+#include <alicorn/platform/app-info.hpp>
+#include <alicorn/std/chrono.mock.hpp>
 #include <alicorn/logger.mock.hpp>
 #include <alicorn/platform/environment.mock.hpp>
 #include <Platform/Windows.mock.hpp>

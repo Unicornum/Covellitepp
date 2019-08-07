@@ -13,6 +13,13 @@
   </PropertyGroup>
   <ItemDefinitionGroup>
     <ClCompile />
+    <ClCompile>
+      <EnableNeonCodegen>true</EnableNeonCodegen>
+      <AdditionalOptions>-fopenmp %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
+    <Link>
+      <AdditionalOptions>-fopenmp %(AdditionalOptions)</AdditionalOptions>
+    </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
     <BuildMacro Include="PlatformToolsetVersion">

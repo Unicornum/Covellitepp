@@ -68,6 +68,18 @@ public:
       Compass, // Должен рендерится гарантированно последним
       Loader,  // Должен рендерится последним, т.к. его updater удаляет
                // объекты, которые еще находятся в списке рендеринга.
+
+       Invalid,
+    };
+  };
+
+  class Another final
+  {
+  public:
+    enum Value
+    {
+      Animated = Extra::Invalid,
+      Particles,
     };
   };
 

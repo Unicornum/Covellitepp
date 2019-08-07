@@ -20,6 +20,8 @@ auto Camera::GetObject(const Any_t &) const /*override*/ -> Objects_t
 {
   namespace math = ::alicorn::extension::cpp::math;
 
+  const auto Far = 0.5f * math::Root<2>(Constant::Camera::FarClippingPlane);
+
   return
   {
     {
@@ -66,6 +68,20 @@ auto Camera::GetObject(const Any_t &) const /*override*/ -> Objects_t
       }),
       Component_t::Make(
       {
+        { uT("id"), uT("Example.Shader.Vertex.Default") },
+        { uT("type"), uT("Shader") },
+        { uT("version"), uT("vs_4_0") },
+        { uT("entry"), uT("vsTextured") },
+      }),
+      Component_t::Make(
+      {
+        { uT("id"), uT("Example.Shader.Pixel.Default") },
+        { uT("type"), uT("Shader") },
+        { uT("version"), uT("ps_4_0") },
+        { uT("entry"), uT("psTextured") },
+      }),
+      Component_t::Make(
+      {
         { uT("id"), uT("Demo.Light.Ambient") },
         { uT("type"), uT("Light") },
         { uT("kind"), uT("Ambient") },
@@ -85,6 +101,16 @@ auto Camera::GetObject(const Any_t &) const /*override*/ -> Objects_t
         { uT("type"), uT("Light") },
         { uT("kind"), uT("Direction") },
         { uT("color"), 0xFFF0F0B0 }, // ARGB
+      }),
+      Component_t::Make(
+      {
+        { uT("id"), uT("Demo.Fog") },
+        { uT("type"), uT("Fog") },
+        { uT("style"), uT("linear") },
+        { uT("color"), 0xFF87CEFA }, // ARGB
+        { uT("near"), 0.75f * Far },
+        { uT("far"), Far },
+        { uT("density"), 0.1f },
       }),
     }
   };

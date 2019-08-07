@@ -3,12 +3,15 @@
 #include "GameObject.hpp"
 #include <alicorn/std/exception.hpp>
 #include <Covellite/Api/Component.inl>
+#include <Covellite.Api/Covellite.Api/Renderer/fx/Hlsl.hpp>
 #include "Skybox.hpp"
 #include "Camera.hpp"
 #include "Loader.hpp"
 #include "Landscape.hpp"
 #include "Water.hpp"
 #include "Compass.hpp"
+#include "Animated.hpp"
+#include "Particles.hpp"
 
 namespace basement
 {
@@ -67,17 +70,46 @@ size_t GameObject::GetType(void) const /*final*/
   return IGameObjectPtr_t{ new model::Landscape{ _Type, *_pGameWorld } };
 }
 
-/*static*/ Object_t GameObject::GetShaderObject(void)
+/*static*/ auto GameObject::Create(const Another::Value _Type,
+  const GameScenePtr_t & _pGameScene) -> IGameObjectPtr_t
 {
+  if (_Type == Another::Animated)
+  {
+    return IGameObjectPtr_t{ new Animated{ _pGameScene} };
+  }
+  else if (_Type == Another::Particles)
+  {
+    return IGameObjectPtr_t{ new Particles };
+  }
+
+  throw STD_EXCEPTION << "Unknown type object: Another::" << _Type;
+}
+
+/*static*/ Object_t GameObject::GetShaderObject(const bool _IsSimple)
+{
+  static const auto PixelShaderData = Example;
+
+  const auto pShaderData = _IsSimple ?
+    Component_t::Make(
+      {
+        { uT("type"), uT("Data") },
+        { uT("kind"), uT("Shader.HLSL") },
+        { uT("version"), uT("ps_4_0") },
+        { uT("entry"), uT("psTextured") },
+      }) :
+    Component_t::Make(
+      {
+        { uT("type"), uT("Data") },
+        { uT("kind"), uT("Shader.HLSL") },
+        { uT("version"), uT("ps_4_0") },
+        { uT("entry"), uT("psExample") },
+        { uT("data"), PixelShaderData.data() },
+        { uT("count"), PixelShaderData.size() },
+      });
+
   return Object_t
   {
-    Component_t::Make(
-    {
-      { uT("type"), uT("Data") },
-      { uT("kind"), uT("Shader.HLSL") },
-      { uT("version"), uT("ps_4_0") },
-      { uT("entry"), uT("psDiscardAlpha") },
-    }),
+    pShaderData,
     Component_t::Make(
     {
       { uT("id"), uT("Demo.Shader.Pixel") },
@@ -105,7 +137,7 @@ size_t GameObject::GetType(void) const /*final*/
   };
 }
 
-size_t GameObject::AddTexture(const Path_t & _FileName) const
+size_t GameObject::AddTexture(const Path_t & _FileName)
 {
   m_Textures.push_back(::std::make_unique<Texture>(_FileName));
   return m_Textures.size() - 1;
@@ -121,7 +153,7 @@ const GameObject::Texture & GameObject::GetTexture(const size_t _Index) const
   return *m_Textures[_Index].get();
 }
 
-const GameObject::Mesh & GameObject::GetMesh(const size_t _Index) const
+GameObject::Mesh & GameObject::GetMesh(const size_t _Index) const
 {
   if (_Index >= m_Meshes.size())
   {

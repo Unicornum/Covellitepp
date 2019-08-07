@@ -211,6 +211,18 @@ TEST_F(Application_test, /*DISABLED_*/Test_Main)
     Eq("Application::Main(): start program.")))
     .Times(1);
 
+  EXPECT_CALL(AndroidLogProxy, Print(ANDROID_LOG_INFO, Eq("Covellite++"),
+    Eq("Application::Main(): init.")))
+    .Times(1);
+
+  EXPECT_CALL(AndroidLogProxy, Print(ANDROID_LOG_INFO, Eq("Covellite++"),
+    Eq("Application::Main(): create app object.")))
+    .Times(1);
+
+  EXPECT_CALL(AndroidLogProxy, Print(ANDROID_LOG_INFO, Eq("Covellite++"),
+    Eq("Application::Main(): run program.")))
+    .Times(1);
+
   EXPECT_CALL(Proxy, Run())
     .Times(1);
 
@@ -258,9 +270,8 @@ TEST_F(Application_test, /*DISABLED_*/Test_Main_StdException)
 
   InSequence Dummy;
 
-  EXPECT_CALL(AndroidLogProxy, Print(ANDROID_LOG_INFO, Eq("Covellite++"),
-    Eq("Application::Main(): start program.")))
-    .Times(1);
+  EXPECT_CALL(AndroidLogProxy, Print(ANDROID_LOG_INFO, Eq("Covellite++"), _))
+    .Times(AtLeast(1));
 
   EXPECT_CALL(AndroidLogProxy, Print(ANDROID_LOG_ERROR, Eq("Covellite++"),
     Eq("Application::Main(): error [%s].")))
@@ -306,9 +317,8 @@ TEST_F(Application_test, /*DISABLED_*/Test_Main_UnknownException)
 
   InSequence Dummy;
 
-  EXPECT_CALL(AndroidLogProxy, Print(ANDROID_LOG_INFO, Eq("Covellite++"),
-    Eq("Application::Main(): start program.")))
-    .Times(1);
+  EXPECT_CALL(AndroidLogProxy, Print(ANDROID_LOG_INFO, Eq("Covellite++"), _))
+    .Times(AtLeast(1));
 
   EXPECT_CALL(AndroidLogProxy, Print(ANDROID_LOG_ERROR, Eq("Covellite++"),
     Eq("Application::Main(): error [unknown].")))
@@ -588,6 +598,10 @@ TEST_F(Application_test, /*DISABLED_*/Test_Run_DrawingMode_Continuous)
 // ************************************************************************** //
 TEST_F(Application_test, /*DISABLED_*/Test_Run_DrawingMode_EventBased)
 {
+  using AndroidLogProxy_t = ::mock::AndroidLogProxy;
+  AndroidLogProxy_t AndroidLogProxy;
+  AndroidLogProxy_t::GetInstance() = &AndroidLogProxy;
+
   android_app App;
   App.destroyRequested = 0;
   App.StepToDestroyRequest = 2;
@@ -599,6 +613,10 @@ TEST_F(Application_test, /*DISABLED_*/Test_Run_DrawingMode_EventBased)
   TestedRun Example{ Tested_t::EventBased{} };
 
   InSequence Dummy;
+
+  EXPECT_CALL(AndroidLogProxy, Print(ANDROID_LOG_INFO, Eq("Covellite++"),
+    Eq("Application::Run(): event based circle started.")))
+    .Times(1);
 
   for (size_t i = 0; i < App.StepToDestroyRequest; i++)
   {

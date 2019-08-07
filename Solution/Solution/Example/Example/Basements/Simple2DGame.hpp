@@ -43,7 +43,7 @@ class Simple2DGame final :
   public Common
 {
   /// [Vertex format]
-  using Vertex_t = ::covellite::api::Vertex::Polygon;
+  using Vertex_t = ::covellite::api::vertex::Polygon;
   /// [Vertex format]
   using VertexData_t = ::std::vector<Vertex_t>;
   using Object_t = ::std::vector<Component_t::ComponentPtr_t>;

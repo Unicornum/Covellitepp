@@ -28,16 +28,34 @@ namespace api
 */
 inline /*static*/ auto Component::Make(const SourceParams_t & _Params) -> ComponentPtr_t
 {
-  using Pool_t = ::alicorn::extension::std::pool<>;
-
   Params_t Params;
 
   for (const auto & Value : _Params)
   {
-    Params[Hasher_t{}(Value.first)] = Value.second;
+    const auto hType = Value.second.type().hash_code();
+
+    Params[GetHash(Value.first)] = { hType, Value.second };
   }
 
+  using Pool_t = ::alicorn::extension::std::pool<>;
+
   return Pool_t::make_unique<Component>(Params, ConstructorTag{});
+}
+
+/**
+* \brief
+*  Функция получения хеша для имени параметра.
+*  
+* \param [in] _Value
+*  Исходное значение.
+*  
+* \return \b Value
+*  Хеш входного значения.
+*/
+inline /*static*/ size_t Component::GetHash(const Name_t & _Value)
+{
+  static const Hasher_t Hasher;
+  return Hasher(_Value);
 }
 
 /**
@@ -79,10 +97,11 @@ inline Component::Component(const Params_t & _Params, ConstructorTag _Tag) :
 template<class T>
 inline bool Component::IsType(const Name_t & _Name) const
 {
-  auto itValue = m_Params.find(m_Hasher(_Name));
+  auto itValue = m_Params.find(GetHash(_Name));
   if (itValue == m_Params.end()) return false;
 
-  return (itValue->second.type() == typeid(T));
+  static const auto hType = typeid(T).hash_code();
+  return (itValue->second.hType == hType);
 }
 
 /**
@@ -111,27 +130,41 @@ inline bool Component::IsType(const Name_t & _Name) const
 *  может быть преобразовано в указанный тип.
 */
 template<class T>
-T Component::GetValue(const Name_t & _Name, const T & _DefaultValue) const
+inline T Component::GetValue(const Name_t & _Name, const T & _DefaultValue) const
 {
-  return GetValue(m_Hasher(_Name), _DefaultValue);
+  return GetValue<T>(GetHash(_Name), _DefaultValue);
 }
 
-template<bool, bool>
+template<typename S, typename T>
+class is_streamable
+{
+  template<typename SS, typename TT>
+  static auto test(int) -> decltype(
+    ::std::declval<SS&>() << ::std::declval<TT>(), ::std::true_type());
+
+  template<typename, typename>
+  static auto test(...) -> ::std::false_type;
+
+public:
+  static const bool value = decltype(test<S, T>(0))::value;
+};
+
+template<bool>
 class Component::Convertor
 {
 public:
   template<class T>
-  inline static T To(const String_t &)
+  static T To(const String_t &)
   {
     // Функция никогда не вызывается, потребовалась исключительно из-за того,
-    // что ::boost::lexical_cast<T>() не компилируется для указателей
-    // и функторов.
-    return nullptr;
+    // что ::boost::lexical_cast<T>() не компилируется для указателей и
+    // не streamable'ных типов.
+    throw 0;
   }
 };
 
 template<>
-class Component::Convertor<false, false>
+class Component::Convertor<true>
 {
 public:
   template<class T>
@@ -168,21 +201,27 @@ public:
 *  может быть преобразовано в указанный тип.
 */
 template<class T>
-T Component::GetValue(size_t _Hash, const T & _DefaultValue) const
+T Component::GetValue(const size_t _Hash, const T & _DefaultValue) const
 {
   auto itValue = m_Params.find(_Hash);
   if (itValue == m_Params.end()) return _DefaultValue;
 
-  if (itValue->second.type() == typeid(String_t))
-  {
-    using Updater_t = ::std::function<void(const float)>;
+  const auto & Data = itValue->second;
 
-    return Convertor<::std::is_pointer<T>::value, 
-      ::std::is_same<T, Updater_t>::value>::template To<T>(
-      ::covellite::any_cast<String_t>(itValue->second));
+  static const auto hTypeString = typeid(String_t).hash_code();
+
+  if (Data.hType == hTypeString)
+  {
+    constexpr auto IsConvertable = 
+      !::std::is_pointer<T>::value &
+      !::std::is_reference<T>::value & 
+      is_streamable<::std::iostream, T>::value;
+
+    return Convertor<IsConvertable>::template To<T>(
+      ::covellite::any_cast<String_t>(Data.Value));
   }
 
-  return ::covellite::any_cast<T>(itValue->second);
+  return ::covellite::any_cast<T>(Data.Value);
 }
 
 /**
@@ -202,24 +241,49 @@ T Component::GetValue(size_t _Hash, const T & _DefaultValue) const
 template<class T>
 inline void Component::SetValue(const Name_t & _Name, const T & _Value)
 {
-  m_Params[m_Hasher(_Name)] = _Value;
+  SetValue(GetHash(_Name), _Value);
+}
+
+/**
+* \brief
+*  Функция установки значения параметра.
+* \details
+*  - Одному  и тому же параметру можно устанавливать значения разных типов,
+*  но при этом следует учитывать, что функция получения значения параметра
+*  преобразует в указанный тип только строковые значения, все остальные
+*  типы не преобразуются.
+*
+* \param [in] _hName
+*  Хэш имени параметра.
+* \param [in] _Value
+*  Новое значение параметра.
+*/
+template<class T>
+inline void Component::SetValue(const size_t _hName, const T & _Value)
+{
+  static const auto hType = typeid(T).hash_code();
+
+  auto & Data = m_Params[_hName];
+
+  Data.hType = hType;
+  Data.Value = _Value;
 }
 
 inline /*static*/ size_t Component::GetHashId(void)
 {
-  static const size_t Hash = Hasher_t{}(uT("id"));
+  static const size_t Hash = GetHash(uT("id"));
   return Hash;
 }
 
 inline /*static*/ size_t Component::GetHashType(void)
 {
-  static const size_t Hash = Hasher_t{}(uT("type"));
+  static const size_t Hash = GetHash(uT("type"));
   return Hash;
 }
 
 inline /*static*/ size_t Component::GetHashKind(void)
 {
-  static const size_t Hash = Hasher_t{}(uT("kind"));
+  static const size_t Hash = GetHash(uT("kind"));
   return Hash;
 }
 

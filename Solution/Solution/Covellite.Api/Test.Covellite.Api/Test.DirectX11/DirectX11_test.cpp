@@ -25,6 +25,8 @@
 #include "../../Covellite.Api/Renderer/fx/Data.auto.hpp"
 #include "../../Covellite.Api/Renderer/fx/Input.auto.hpp"
 
+namespace vertex = ::covellite::api::vertex;
+
 // Общий тестовый класс класса DirectX11
 class DirectX11_test :
   public ::testing::Test
@@ -35,7 +37,8 @@ protected:
   using Component_t = ::covellite::api::Component;
   using String_t = ::alicorn::extension::std::String;
   using Render_t = ::std::function<void(void)>;
-  using Vertex_t = ::covellite::api::Vertex;
+  using Time_t = ::std::chrono::microseconds;
+  using BufferMapper_t = ::covellite::api::cbBufferMap_t<vertex::Polyhedron>;
 
   // Вызывается ПЕРЕД запуском каждого теста
   void SetUp(void) override
@@ -60,6 +63,8 @@ protected:
 
     static ::mock::DirectX11::DepthStencilView DefaultDepthStencilView;
     ::testing::DefaultValue<ID3D11DepthStencilView *>::Set(&DefaultDepthStencilView);
+
+    ::testing::DefaultValue<Time_t>::Set(Time_t{});
   }
 
   // Вызывается ПОСЛЕ запуска каждого теста
@@ -77,6 +82,7 @@ protected:
     ::testing::DefaultValue<ID3D11Texture2D *>::Clear();
     ::testing::DefaultValue<ID3D11DepthStencilState *>::Clear();
     ::testing::DefaultValue<ID3D11DepthStencilView *>::Clear();
+    ::testing::DefaultValue<Time_t>::Clear();
   }
 
 protected:
@@ -175,7 +181,7 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_CreateDeviceAndSwapChain_Windowed)
   EXPECT_CALL(DirectXProxy, CreateDeviceAndSwapChain(Desc))
     .Times(1);
 
-  Tested_t Example{ oData };
+  Tested_t oExample{ oData };
 }
 
 // ************************************************************************** //
@@ -208,7 +214,7 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_CreateDeviceAndSwapChain_FullScreen)
   EXPECT_CALL(DirectXProxy, CreateDeviceAndSwapChain(Desc))
     .Times(1);
 
-  Tested_t Example{ oData };
+  Tested_t oExample{ oData };
 }
 
 // ************************************************************************** //
@@ -240,7 +246,7 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_CreateDeviceAndSwapChain_Release)
     .Times(1);
 
   {
-    Tested_t Example{ Data_t{} };
+    Tested_t oExample{ Data_t{} };
 
     EXPECT_CALL(Device, Release())
       .Times(1);
@@ -445,7 +451,7 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_RenderTargetView)
     .Times(1);
 
   {
-    Tested_t Example{ Data_t{} };
+    Tested_t oExample{ Data_t{} };
 
     EXPECT_CALL(RenderTargetView, Release())
       .Times(1);
@@ -503,7 +509,7 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_RSSetViewports)
   EXPECT_CALL(DeviceContext, RSSetViewports(Viewports))
     .Times(1);
 
-  Tested_t Example{ Data_t{} };
+  Tested_t oExample{ Data_t{} };
 }
 
 // ************************************************************************** //
@@ -554,61 +560,6 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_DeptBuffer_CreateTexture2D_Fail)
 }
 
 // ************************************************************************** //
-TEST_F(DirectX11_test, /*DISABLED_*/Test_DeptBuffer_CreateDepthStencilState_Fail)
-{
-  using DirectXProxy_t = ::mock::DirectX11::Proxy;
-  DirectXProxy_t DirectXProxy;
-  DirectXProxy_t::GetInstance() = &DirectXProxy;
-
-  ::mock::DirectX11::Device Device;
-  ::mock::DirectX11::DeviceContext DeviceContext;
-  ::mock::DXGI::SwapChain SwapChain;
-  ::mock::DirectX11::Texture2D Texture2D;
-
-  using namespace ::testing;
-
-  EXPECT_CALL(DirectXProxy, CreateDevice())
-    .Times(1)
-    .WillOnce(Return(&Device));
-
-  EXPECT_CALL(DirectXProxy, CreateDeviceContext())
-    .Times(1)
-    .WillOnce(Return(&DeviceContext));
-
-  EXPECT_CALL(DirectXProxy, CreateSwapChain())
-    .Times(1)
-    .WillOnce(Return(&SwapChain));
-
-  EXPECT_CALL(Device, GetResult(_))
-    .Times(AtLeast(1));
-
-  EXPECT_CALL(Device, CreateTexture2D(_, _))
-    .Times(1)
-    .WillOnce(Return(&Texture2D));
-
-  EXPECT_CALL(Device, CreateDepthStencilState(_))
-    .Times(1);
-
-  EXPECT_CALL(Device, GetResult(Eq("CreateDepthStencilState")))
-    .Times(1)
-    .WillOnce(Return(E_FAIL));
-
-  EXPECT_CALL(Texture2D, Release())
-    .Times(1);
-
-  EXPECT_CALL(Device, Release())
-    .Times(1);
-
-  EXPECT_CALL(DeviceContext, Release())
-    .Times(1);
-
-  EXPECT_CALL(SwapChain, Release())
-    .Times(1);
-
-  EXPECT_THROW(Tested_t{ Data_t{} }, ::std::exception);
-}
-
-// ************************************************************************** //
 TEST_F(DirectX11_test, /*DISABLED_*/Test_DeptBuffer_CreateDepthStencilView_Fail)
 {
   using DirectXProxy_t = ::mock::DirectX11::Proxy;
@@ -619,7 +570,6 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_DeptBuffer_CreateDepthStencilView_Fail)
   ::mock::DirectX11::DeviceContext DeviceContext;
   ::mock::DXGI::SwapChain SwapChain;
   ::mock::DirectX11::Texture2D Texture2D;
-  ::mock::DirectX11::DepthStencilState DepthStencilState;
 
   using namespace ::testing;
 
@@ -642,10 +592,6 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_DeptBuffer_CreateDepthStencilView_Fail)
     .Times(1)
     .WillOnce(Return(&Texture2D));
 
-  EXPECT_CALL(Device, CreateDepthStencilState(_))
-    .Times(1)
-    .WillOnce(Return(&DepthStencilState));
-
   EXPECT_CALL(Device, CreateDepthStencilView(_, _))
     .Times(1);
 
@@ -654,9 +600,6 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_DeptBuffer_CreateDepthStencilView_Fail)
     .WillOnce(Return(E_FAIL));
 
   EXPECT_CALL(Texture2D, Release())
-    .Times(1);
-
-  EXPECT_CALL(DepthStencilState, Release())
     .Times(1);
 
   EXPECT_CALL(Device, Release())
@@ -682,7 +625,6 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_DeptBuffer)
   ::mock::DirectX11::DeviceContext DeviceContext;
   ::mock::DXGI::SwapChain SwapChain;
   ::mock::DirectX11::Texture2D Texture2D;
-  ::mock::DirectX11::DepthStencilState DepthStencilState;
   ::mock::DirectX11::DepthStencilView DepthStencilView;
 
   const UINT Width = 1901021400;
@@ -700,12 +642,6 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_DeptBuffer)
   TextureDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
 
   const D3D11_SUBRESOURCE_DATA ZeroData = { 0 };
-
-  D3D11_DEPTH_STENCIL_DESC DeptStencilDesc = { 0 };
-  DeptStencilDesc.DepthEnable = true;
-  DeptStencilDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
-  DeptStencilDesc.DepthFunc = D3D11_COMPARISON_LESS;
-  DeptStencilDesc.StencilEnable = false;
 
   D3D11_DEPTH_STENCIL_VIEW_DESC DeptStencilViewDesc = { 0 };
   DeptStencilViewDesc.Format = DXGI_FORMAT_D32_FLOAT;
@@ -740,26 +676,16 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_DeptBuffer)
       .Times(1)
       .WillOnce(Return(&Texture2D));
 
-    EXPECT_CALL(Device, CreateDepthStencilState(DeptStencilDesc))
-      .Times(1)
-      .WillOnce(Return(&DepthStencilState));
-
-    EXPECT_CALL(DeviceContext, OMSetDepthStencilState(&DepthStencilState, 1))
-      .Times(1);
-
     EXPECT_CALL(Device, CreateDepthStencilView(&Texture2D, DeptStencilViewDesc))
       .Times(1)
       .WillOnce(Return(&DepthStencilView));
-
-    EXPECT_CALL(DepthStencilState, Release())
-      .Times(1);
 
     EXPECT_CALL(Texture2D, Release())
       .Times(1);
 
   }
 
-  Tested_t Example{ Data_t{} };
+  Tested_t oExample{ Data_t{} };
 
   EXPECT_CALL(DepthStencilView, Release())
     .Times(1);
@@ -850,8 +776,8 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Lights_CreateBuffer_Fail)
 // ************************************************************************** //
 TEST_F(DirectX11_test, /*DISABLED_*/Test_GetUsingApi)
 {
-  const Tested_t Example{ Data_t{} };
-  const ITested_t & IExample = Example;
+  const Tested_t oExample{ Data_t{} };
+  const ITested_t & IExample = oExample;
 
   const auto Result = IExample.GetUsingApi();
   EXPECT_EQ(uT("DirectX 11"), Result);
@@ -872,8 +798,8 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_PresentFrame)
     .Times(1)
     .WillOnce(Return(&SwapChain));
 
-  Tested_t Example{ Data_t{} };
-  ITested_t & IExample = Example;
+  Tested_t oExample{ Data_t{} };
+  ITested_t & IExample = oExample;
 
   EXPECT_CALL(SwapChain, Present(0, 0))
     .Times(1);
@@ -906,8 +832,8 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_ResizeWindow_SwapChain_ResizeBuffers_Fa
     .Times(1)
     .WillOnce(Return(&RenderTargetView));
 
-  Tested_t Example{ Data_t{} };
-  ITested_t & IExample = Example;
+  Tested_t oExample{ Data_t{} };
+  ITested_t & IExample = oExample;
 
   EXPECT_CALL(SwapChain, ResizeBuffers(_, _, _, _, _))
     .Times(1)
@@ -931,8 +857,8 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_ResizeWindow_SwapChain_GetBuffer_Fail)
     .Times(1)
     .WillOnce(Return(&SwapChain));
 
-  Tested_t Example{ Data_t{} };
-  ITested_t & IExample = Example;
+  Tested_t oExample{ Data_t{} };
+  ITested_t & IExample = oExample;
 
   EXPECT_CALL(SwapChain, GetResult(Eq("GetBuffer")))
     .Times(1)
@@ -962,8 +888,8 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_ResizeWindow_SwapChain_CreateRenderTarg
     .Times(1)
     .WillOnce(Return(&SwapChain));
 
-  Tested_t Example{ Data_t{} };
-  ITested_t & IExample = Example;
+  Tested_t oExample{ Data_t{} };
+  ITested_t & IExample = oExample;
 
   InSequence Dummy;
 
@@ -999,8 +925,8 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_ResizeWindow_CreateTexture2D_Fail)
     .Times(1)
     .WillOnce(Return(&Device));
 
-  Tested_t Example{ Data_t{} };
-  ITested_t & IExample = Example;
+  Tested_t oExample{ Data_t{} };
+  ITested_t & IExample = oExample;
 
   InSequence Dummy;
 
@@ -1021,53 +947,6 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_ResizeWindow_CreateTexture2D_Fail)
 }
 
 // ************************************************************************** //
-TEST_F(DirectX11_test, /*DISABLED_*/Test_ResizeWindow_CreateDepthStencilState_Fail)
-{
-  using DirectXProxy_t = ::mock::DirectX11::Proxy;
-  DirectXProxy_t DirectXProxy;
-  DirectXProxy_t::GetInstance() = &DirectXProxy;
-
-  ::mock::DirectX11::Device Device;
-  ::mock::DirectX11::Texture2D Texture2D;
-
-  using namespace ::testing;
-
-  EXPECT_CALL(DirectXProxy, CreateDevice())
-    .Times(1)
-    .WillOnce(Return(&Device));
-
-  Tested_t Example{ Data_t{} };
-  ITested_t & IExample = Example;
-
-  InSequence Dummy;
-
-  EXPECT_CALL(Device, GetResult(_))
-    .Times(AtLeast(1));
-
-  EXPECT_CALL(Device, CreateTexture2D(_, _))
-    .Times(1)
-    .WillOnce(Return(&Texture2D));
-
-  EXPECT_CALL(Device, GetResult(_))
-    .Times(AtLeast(1));
-
-  EXPECT_CALL(Device, CreateDepthStencilState(_))
-    .Times(1);
-
-  EXPECT_CALL(Device, GetResult(Eq("CreateDepthStencilState")))
-    .Times(1)
-    .WillOnce(Return(E_FAIL));
-
-  EXPECT_CALL(Texture2D, Release())
-    .Times(1);
-
-  EXPECT_CALL(Device, Release())
-    .Times(1);
-
-  EXPECT_THROW(IExample.ResizeWindow(0, 0), ::std::exception);
-}
-
-// ************************************************************************** //
 TEST_F(DirectX11_test, /*DISABLED_*/Test_ResizeWindow_CreateDepthStencilView_Fail)
 {
   using DirectXProxy_t = ::mock::DirectX11::Proxy;
@@ -1076,7 +955,6 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_ResizeWindow_CreateDepthStencilView_Fai
 
   ::mock::DirectX11::Device Device;
   ::mock::DirectX11::Texture2D Texture2D;
-  ::mock::DirectX11::DepthStencilState DepthStencilState;
 
   using namespace ::testing;
 
@@ -1084,8 +962,8 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_ResizeWindow_CreateDepthStencilView_Fai
     .Times(1)
     .WillOnce(Return(&Device));
 
-  Tested_t Example{ Data_t{} };
-  ITested_t & IExample = Example;
+  Tested_t oExample{ Data_t{} };
+  ITested_t & IExample = oExample;
 
   InSequence Dummy;
 
@@ -1095,13 +973,6 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_ResizeWindow_CreateDepthStencilView_Fai
   EXPECT_CALL(Device, CreateTexture2D(_, _))
     .Times(1)
     .WillOnce(Return(&Texture2D));
-
-  EXPECT_CALL(Device, GetResult(_))
-    .Times(AtLeast(1));
-
-  EXPECT_CALL(Device, CreateDepthStencilState(_))
-    .Times(1)
-    .WillOnce(Return(&DepthStencilState));
 
   EXPECT_CALL(Device, GetResult(_))
     .Times(AtLeast(1));
@@ -1112,9 +983,6 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_ResizeWindow_CreateDepthStencilView_Fai
   EXPECT_CALL(Device, GetResult(Eq("CreateDepthStencilView")))
     .Times(1)
     .WillOnce(Return(E_FAIL));
-
-  EXPECT_CALL(DepthStencilState, Release())
-    .Times(1);
 
   EXPECT_CALL(Texture2D, Release())
     .Times(1);
@@ -1161,8 +1029,8 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_ResizeWindow_RenderTargetView)
     .WillOnce(Return(&RenderTargetViewBegin));
 
   {
-    Tested_t Example{ Data_t{} };
-    ITested_t & IExample = Example;
+    Tested_t oExample{ Data_t{} };
+    ITested_t & IExample = oExample;
 
     {
       InSequence Dummy;
@@ -1223,8 +1091,8 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_ResizeWindow_RSSetViewports)
     .Times(1)
     .WillOnce(Return(&DeviceContext));
 
-  Tested_t Example{ Data_t{} };
-  ITested_t & IExample = Example;
+  Tested_t oExample{ Data_t{} };
+  ITested_t & IExample = oExample;
 
   EXPECT_CALL(DeviceContext, RSSetViewports(Viewports))
     .Times(1);
@@ -1243,7 +1111,6 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_ResizeWindow_DeptBuffer)
   ::mock::DirectX11::DeviceContext DeviceContext;
   ::mock::DXGI::SwapChain SwapChain;
   ::mock::DirectX11::Texture2D Texture2D;
-  ::mock::DirectX11::DepthStencilState DepthStencilState;
   ::mock::DirectX11::DepthStencilView BeginDepthStencilView;
   ::mock::DirectX11::DepthStencilView DepthStencilView;
 
@@ -1262,12 +1129,6 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_ResizeWindow_DeptBuffer)
   TextureDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL;
 
   const D3D11_SUBRESOURCE_DATA ZeroData = { 0 };
-
-  D3D11_DEPTH_STENCIL_DESC DeptStencilDesc = { 0 };
-  DeptStencilDesc.DepthEnable = true;
-  DeptStencilDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
-  DeptStencilDesc.DepthFunc = D3D11_COMPARISON_LESS;
-  DeptStencilDesc.StencilEnable = false;
 
   D3D11_DEPTH_STENCIL_VIEW_DESC DeptStencilViewDesc = { 0 };
   DeptStencilViewDesc.Format = DXGI_FORMAT_D32_FLOAT;
@@ -1291,8 +1152,8 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_ResizeWindow_DeptBuffer)
     .Times(1)
     .WillOnce(Return(&BeginDepthStencilView));
 
-  Tested_t Example{ Data_t{} };
-  ITested_t & IExample = Example;
+  Tested_t oExample{ Data_t{} };
+  ITested_t & IExample = oExample;
 
   {
     InSequence Dummy;
@@ -1304,19 +1165,9 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_ResizeWindow_DeptBuffer)
       .Times(1)
       .WillOnce(Return(&Texture2D));
 
-    EXPECT_CALL(Device, CreateDepthStencilState(DeptStencilDesc))
-      .Times(1)
-      .WillOnce(Return(&DepthStencilState));
-
-    EXPECT_CALL(DeviceContext, OMSetDepthStencilState(&DepthStencilState, 1))
-      .Times(1);
-
     EXPECT_CALL(Device, CreateDepthStencilView(&Texture2D, DeptStencilViewDesc))
       .Times(1)
       .WillOnce(Return(&DepthStencilView));
-
-    EXPECT_CALL(DepthStencilState, Release())
-      .Times(1);
 
     EXPECT_CALL(Texture2D, Release())
       .Times(1);
@@ -1355,8 +1206,8 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_BlendState_Fail)
     .Times(1)
     .WillOnce(Return(&Device));
 
-  const Tested_t Example{ Data_t{} };
-  const ITested_t & IExample = Example;
+  const Tested_t oExample{ Data_t{} };
+  const ITested_t & IExample = oExample;
 
   auto itCreator = IExample.GetCreators().find(Type);
   ASSERT_NE(IExample.GetCreators().end(), itCreator);
@@ -1414,8 +1265,8 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_BlendState)
     .Times(1)
     .WillOnce(Return(&DeviceContext));
 
-  const Tested_t Example{ Data_t{} };
-  const ITested_t & IExample = Example;
+  const Tested_t oExample{ Data_t{} };
+  const ITested_t & IExample = oExample;
 
   auto itCreator = IExample.GetCreators().find(Type);
   ASSERT_NE(IExample.GetCreators().end(), itCreator);
@@ -1459,8 +1310,8 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_SamplerState_Fail)
     .Times(1)
     .WillOnce(Return(&Device));
 
-  const Tested_t Example{ Data_t{} };
-  const ITested_t & IExample = Example;
+  const Tested_t oExample{ Data_t{} };
+  const ITested_t & IExample = oExample;
 
   auto itCreator = IExample.GetCreators().find(Type);
   ASSERT_NE(IExample.GetCreators().end(), itCreator);
@@ -1513,8 +1364,8 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_SamplerState)
     .Times(1)
     .WillOnce(Return(&DeviceContext));
 
-  const Tested_t Example{ Data_t{} };
-  const ITested_t & IExample = Example;
+  const Tested_t oExample{ Data_t{} };
+  const ITested_t & IExample = oExample;
 
   auto itCreator = IExample.GetCreators().find(Type);
   ASSERT_NE(IExample.GetCreators().end(), itCreator);
@@ -1558,8 +1409,8 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_ScissorState_Fail)
     .Times(1)
     .WillOnce(Return(&Device));
 
-  const Tested_t Example{ Data_t{} };
-  const ITested_t & IExample = Example;
+  const Tested_t oExample{ Data_t{} };
+  const ITested_t & IExample = oExample;
 
   auto itCreator = IExample.GetCreators().find(Type);
   ASSERT_NE(IExample.GetCreators().end(), itCreator);
@@ -1609,8 +1460,8 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_ScissorState_Enabled)
     .Times(1)
     .WillOnce(Return(&DeviceContext));
 
-  const Tested_t Example{ Data_t{} };
-  const ITested_t & IExample = Example;
+  const Tested_t oExample{ Data_t{} };
+  const ITested_t & IExample = oExample;
 
   auto itCreator = IExample.GetCreators().find(uT("State"));
   ASSERT_NE(IExample.GetCreators().end(), itCreator);
@@ -1690,8 +1541,8 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_ScissorState_Enabled_FromData)
     .Times(1)
     .WillOnce(Return(&DeviceContext));
 
-  const Tested_t Example{ Data_t{} };
-  const ITested_t & IExample = Example;
+  const Tested_t oExample{ Data_t{} };
+  const ITested_t & IExample = oExample;
 
   {
     auto itDataCreator = IExample.GetCreators().find(uT("Data"));
@@ -1775,8 +1626,8 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_ScissorState_Disabled)
     .Times(1)
     .WillOnce(Return(&DeviceContext));
 
-  const Tested_t Example{ Data_t{} };
-  const ITested_t & IExample = Example;
+  const Tested_t oExample{ Data_t{} };
+  const ITested_t & IExample = oExample;
 
   auto itCreator = IExample.GetCreators().find(Type);
   ASSERT_NE(IExample.GetCreators().end(), itCreator);
@@ -1829,20 +1680,26 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_State_Depth_Disabled)
     .Times(1)
     .WillOnce(Return(&DepthStencilView));
 
-  const Tested_t Example{ Data_t{} };
-  const ITested_t & IExample = Example;
+  const Tested_t oExample{ Data_t{} };
+  const ITested_t & IExample = oExample;
 
   auto itCreator = IExample.GetCreators().find(uT("State"));
   ASSERT_NE(IExample.GetCreators().end(), itCreator);
 
   const auto TestCallRender = [&](const Component_t::ComponentPtr_t & _pState)
   {
+    EXPECT_CALL(Device, CreateDepthStencilState(_))
+      .Times(0);
+
     auto Render = itCreator->second(_pState);
     ASSERT_NE(nullptr, Render);
 
     EXPECT_CALL(DeviceContext,
       OMSetRenderTargets(1, &RenderTargetView, nullptr))
       .Times(1);
+
+    EXPECT_CALL(DeviceContext, OMSetDepthStencilState(_, _))
+      .Times(0);
 
     Render();
   };
@@ -1851,6 +1708,7 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_State_Depth_Disabled)
     {
       { uT("kind"), uT("Depth") }
     }));
+
   TestCallRender(Component_t::Make(
     {
       { uT("kind"), uT("Depth") },
@@ -1859,7 +1717,79 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_State_Depth_Disabled)
 }
 
 // ************************************************************************** //
-TEST_F(DirectX11_test, /*DISABLED_*/Test_State_Depth_Enabled)
+TEST_F(DirectX11_test, /*DISABLED_*/Test_State_Dept_CreateDepthStencilState_Fail)
+{
+  using DirectXProxy_t = ::mock::DirectX11::Proxy;
+  DirectXProxy_t DirectXProxy;
+  DirectXProxy_t::GetInstance() = &DirectXProxy;
+
+  ::mock::DirectX11::Device Device;
+  ::mock::DirectX11::DeviceContext DeviceContext;
+  ::mock::DirectX11::DepthStencilState DepthStencilState;
+
+  using namespace ::testing;
+
+  EXPECT_CALL(DirectXProxy, CreateDevice())
+    .Times(1)
+    .WillOnce(Return(&Device));
+
+  EXPECT_CALL(DirectXProxy, CreateDeviceContext())
+    .Times(1)
+    .WillOnce(Return(&DeviceContext));
+
+  const Tested_t oExample{ Data_t{} };
+  const ITested_t & IExample = oExample;
+
+  auto itCreator = IExample.GetCreators().find(uT("State"));
+  ASSERT_NE(IExample.GetCreators().end(), itCreator);
+
+  const auto TestCallRender = [&](const Component_t::ComponentPtr_t & _pState)
+  {
+    EXPECT_CALL(Device, CreateDepthStencilState(_))
+      .Times(1);
+
+    EXPECT_CALL(Device, GetResult(Eq("CreateDepthStencilState")))
+      .Times(1)
+      .WillOnce(Return(E_FAIL));
+
+    EXPECT_THROW(itCreator->second(_pState), ::std::exception);
+  };
+
+  TestCallRender(Component_t::Make(
+    {
+      { uT("kind"), uT("Depth") },
+      { uT("enabled"), true },
+      { uT("clear"), false },
+      { uT("overwrite"), false }
+    }));
+
+  TestCallRender(Component_t::Make(
+    {
+      { uT("kind"), uT("Depth") },
+      { uT("enabled"), true },
+      { uT("clear"), true },
+      { uT("overwrite"), false }
+    }));
+
+  TestCallRender(Component_t::Make(
+    {
+      { uT("kind"), uT("Depth") },
+      { uT("enabled"), true },
+      { uT("clear"), false },
+      { uT("overwrite"), true }
+    }));
+
+  TestCallRender(Component_t::Make(
+    {
+      { uT("kind"), uT("Depth") },
+      { uT("enabled"), true },
+      { uT("clear"), true },
+      { uT("overwrite"), true }
+    }));
+}
+
+// ************************************************************************** //
+TEST_F(DirectX11_test, /*DISABLED_*/Test_State_Depth_Enabled_NoClear_Overwrite)
 {
   using DirectXProxy_t = ::mock::DirectX11::Proxy;
   DirectXProxy_t DirectXProxy;
@@ -1869,6 +1799,13 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_State_Depth_Enabled)
   ::mock::DirectX11::DeviceContext DeviceContext;
   ::mock::DirectX11::RenderTargetView RenderTargetView;
   ::mock::DirectX11::DepthStencilView DepthStencilView;
+  ::mock::DirectX11::DepthStencilState DepthStencilState;
+
+  D3D11_DEPTH_STENCIL_DESC DeptStencilDesc = { 0 };
+  DeptStencilDesc.DepthEnable = true;
+  DeptStencilDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
+  DeptStencilDesc.DepthFunc = D3D11_COMPARISON_LESS;
+  DeptStencilDesc.StencilEnable = false;
 
   using namespace ::testing;
 
@@ -1888,16 +1825,23 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_State_Depth_Enabled)
     .Times(1)
     .WillOnce(Return(&DepthStencilView));
 
-  const Tested_t Example{ Data_t{} };
-  const ITested_t & IExample = Example;
+  const Tested_t oExample{ Data_t{} };
+  const ITested_t & IExample = oExample;
 
   auto itCreator = IExample.GetCreators().find(uT("State"));
   ASSERT_NE(IExample.GetCreators().end(), itCreator);
 
   const auto TestCallRender = [&](const Component_t::ComponentPtr_t & _pState)
   {
+    EXPECT_CALL(Device, CreateDepthStencilState(DeptStencilDesc))
+      .Times(1)
+      .WillOnce(Return(&DepthStencilState));
+
     auto Render = itCreator->second(_pState);
     ASSERT_NE(nullptr, Render);
+
+    EXPECT_CALL(DeviceContext, OMSetDepthStencilState(&DepthStencilState, 1))
+      .Times(1);
 
     EXPECT_CALL(DeviceContext,
       OMSetRenderTargets(1, &RenderTargetView, &DepthStencilView))
@@ -1907,18 +1851,42 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_State_Depth_Enabled)
       .Times(0);
 
     Render();
+
+    EXPECT_CALL(DepthStencilState, Release())
+      .Times(AtLeast(1));
   };
 
   TestCallRender(Component_t::Make(
     {
       { uT("kind"), uT("Depth") },
       { uT("enabled"), true },
-      { uT("clear"), false }
+    }));
+
+  TestCallRender(Component_t::Make(
+    {
+      { uT("kind"), uT("Depth") },
+      { uT("enabled"), true },
+      { uT("overwrite"), true }
+    }));
+
+  TestCallRender(Component_t::Make(
+    {
+      { uT("kind"), uT("Depth") },
+      { uT("enabled"), true },
+      { uT("clear"), false },
+    }));
+
+  TestCallRender(Component_t::Make(
+    {
+      { uT("kind"), uT("Depth") },
+      { uT("enabled"), true },
+      { uT("clear"), false },
+      { uT("overwrite"), true }
     }));
 }
 
 // ************************************************************************** //
-TEST_F(DirectX11_test, /*DISABLED_*/Test_State_Depth_Clear)
+TEST_F(DirectX11_test, /*DISABLED_*/Test_State_Depth_Enabled_Clear_Overwrite)
 {
   using DirectXProxy_t = ::mock::DirectX11::Proxy;
   DirectXProxy_t DirectXProxy;
@@ -1928,6 +1896,13 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_State_Depth_Clear)
   ::mock::DirectX11::DeviceContext DeviceContext;
   ::mock::DirectX11::RenderTargetView RenderTargetView;
   ::mock::DirectX11::DepthStencilView DepthStencilView;
+  ::mock::DirectX11::DepthStencilState DepthStencilState;
+
+  D3D11_DEPTH_STENCIL_DESC DeptStencilDesc = { 0 };
+  DeptStencilDesc.DepthEnable = true;
+  DeptStencilDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ALL;
+  DeptStencilDesc.DepthFunc = D3D11_COMPARISON_LESS;
+  DeptStencilDesc.StencilEnable = false;
 
   using namespace ::testing;
 
@@ -1947,16 +1922,23 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_State_Depth_Clear)
     .Times(1)
     .WillOnce(Return(&DepthStencilView));
 
-  const Tested_t Example{ Data_t{} };
-  const ITested_t & IExample = Example;
+  const Tested_t oExample{ Data_t{} };
+  const ITested_t & IExample = oExample;
 
   auto itCreator = IExample.GetCreators().find(uT("State"));
   ASSERT_NE(IExample.GetCreators().end(), itCreator);
 
   const auto TestCallRender = [&](const Component_t::ComponentPtr_t & _pState)
   {
+    EXPECT_CALL(Device, CreateDepthStencilState(DeptStencilDesc))
+      .Times(1)
+      .WillOnce(Return(&DepthStencilState));
+
     auto Render = itCreator->second(_pState);
     ASSERT_NE(nullptr, Render);
+
+    EXPECT_CALL(DeviceContext, OMSetDepthStencilState(&DepthStencilState, 1))
+      .Times(1);
 
     EXPECT_CALL(DeviceContext,
       OMSetRenderTargets(1, &RenderTargetView, &DepthStencilView))
@@ -1967,13 +1949,192 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_State_Depth_Clear)
       .Times(1);
 
     Render();
+
+    EXPECT_CALL(DepthStencilState, Release())
+      .Times(AtLeast(1));
   };
 
   TestCallRender(Component_t::Make(
     {
       { uT("kind"), uT("Depth") },
       { uT("enabled"), true },
-      { uT("clear"), true }
+      { uT("clear"), true },
+    }));
+
+  TestCallRender(Component_t::Make(
+    {
+      { uT("kind"), uT("Depth") },
+      { uT("enabled"), true },
+      { uT("clear"), true },
+      { uT("overwrite"), true }
+    }));
+}
+
+// ************************************************************************** //
+TEST_F(DirectX11_test, /*DISABLED_*/Test_State_Depth_Enabled_NoClear_NoOverwrite)
+{
+  using DirectXProxy_t = ::mock::DirectX11::Proxy;
+  DirectXProxy_t DirectXProxy;
+  DirectXProxy_t::GetInstance() = &DirectXProxy;
+
+  ::mock::DirectX11::Device Device;
+  ::mock::DirectX11::DeviceContext DeviceContext;
+  ::mock::DirectX11::RenderTargetView RenderTargetView;
+  ::mock::DirectX11::DepthStencilView DepthStencilView;
+  ::mock::DirectX11::DepthStencilState DepthStencilState;
+
+  D3D11_DEPTH_STENCIL_DESC DeptStencilDesc = { 0 };
+  DeptStencilDesc.DepthEnable = true;
+  DeptStencilDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ZERO;
+  DeptStencilDesc.DepthFunc = D3D11_COMPARISON_LESS;
+  DeptStencilDesc.StencilEnable = false;
+
+  using namespace ::testing;
+
+  EXPECT_CALL(DirectXProxy, CreateDevice())
+    .Times(1)
+    .WillOnce(Return(&Device));
+
+  EXPECT_CALL(DirectXProxy, CreateDeviceContext())
+    .Times(1)
+    .WillOnce(Return(&DeviceContext));
+
+  EXPECT_CALL(Device, CreateRenderTargetView(_, _))
+    .Times(1)
+    .WillOnce(Return(&RenderTargetView));
+
+  EXPECT_CALL(Device, CreateDepthStencilView(_, _))
+    .Times(1)
+    .WillOnce(Return(&DepthStencilView));
+
+  const Tested_t oExample{ Data_t{} };
+  const ITested_t & IExample = oExample;
+
+  auto itCreator = IExample.GetCreators().find(uT("State"));
+  ASSERT_NE(IExample.GetCreators().end(), itCreator);
+
+  const auto TestCallRender = [&](const Component_t::ComponentPtr_t & _pState)
+  {
+    EXPECT_CALL(Device, CreateDepthStencilState(DeptStencilDesc))
+      .Times(1)
+      .WillOnce(Return(&DepthStencilState));
+
+    auto Render = itCreator->second(_pState);
+    ASSERT_NE(nullptr, Render);
+
+    EXPECT_CALL(DeviceContext, OMSetDepthStencilState(&DepthStencilState, 1))
+      .Times(1);
+
+    EXPECT_CALL(DeviceContext,
+      OMSetRenderTargets(1, &RenderTargetView, &DepthStencilView))
+      .Times(1);
+
+    EXPECT_CALL(DeviceContext, ClearDepthStencilView(_, _, _, _))
+      .Times(0);
+
+    Render();
+
+    EXPECT_CALL(DepthStencilState, Release())
+      .Times(AtLeast(1));
+  };
+
+  TestCallRender(Component_t::Make(
+    {
+      { uT("kind"), uT("Depth") },
+      { uT("enabled"), true },
+      { uT("overwrite"), false }
+    }));
+
+  TestCallRender(Component_t::Make(
+    {
+      { uT("kind"), uT("Depth") },
+      { uT("enabled"), true },
+      { uT("clear"), false },
+      { uT("overwrite"), false }
+    }));
+}
+
+// ************************************************************************** //
+TEST_F(DirectX11_test, /*DISABLED_*/Test_State_Depth_Enabled_Clear_NoOverwrite)
+{
+  using DirectXProxy_t = ::mock::DirectX11::Proxy;
+  DirectXProxy_t DirectXProxy;
+  DirectXProxy_t::GetInstance() = &DirectXProxy;
+
+  ::mock::DirectX11::Device Device;
+  ::mock::DirectX11::DeviceContext DeviceContext;
+  ::mock::DirectX11::RenderTargetView RenderTargetView;
+  ::mock::DirectX11::DepthStencilView DepthStencilView;
+  ::mock::DirectX11::DepthStencilState DepthStencilState;
+
+  D3D11_DEPTH_STENCIL_DESC DeptStencilDesc = { 0 };
+  DeptStencilDesc.DepthEnable = true;
+  DeptStencilDesc.DepthWriteMask = D3D11_DEPTH_WRITE_MASK_ZERO;
+  DeptStencilDesc.DepthFunc = D3D11_COMPARISON_LESS;
+  DeptStencilDesc.StencilEnable = false;
+
+  using namespace ::testing;
+
+  EXPECT_CALL(DirectXProxy, CreateDevice())
+    .Times(1)
+    .WillOnce(Return(&Device));
+
+  EXPECT_CALL(DirectXProxy, CreateDeviceContext())
+    .Times(1)
+    .WillOnce(Return(&DeviceContext));
+
+  EXPECT_CALL(Device, CreateRenderTargetView(_, _))
+    .Times(1)
+    .WillOnce(Return(&RenderTargetView));
+
+  EXPECT_CALL(Device, CreateDepthStencilView(_, _))
+    .Times(1)
+    .WillOnce(Return(&DepthStencilView));
+
+  const Tested_t oExample{ Data_t{} };
+  const ITested_t & IExample = oExample;
+
+  auto itCreator = IExample.GetCreators().find(uT("State"));
+  ASSERT_NE(IExample.GetCreators().end(), itCreator);
+
+  const auto TestCallRender = [&](const Component_t::ComponentPtr_t & _pState)
+  {
+    EXPECT_CALL(Device, CreateDepthStencilState(DeptStencilDesc))
+      .Times(1)
+      .WillOnce(Return(&DepthStencilState));
+
+    auto Render = itCreator->second(_pState);
+    ASSERT_NE(nullptr, Render);
+
+    EXPECT_CALL(DeviceContext, OMSetDepthStencilState(&DepthStencilState, 1))
+      .Times(1);
+
+    EXPECT_CALL(DeviceContext,
+      OMSetRenderTargets(1, &RenderTargetView, &DepthStencilView))
+      .Times(1);
+
+    EXPECT_CALL(DeviceContext, ClearDepthStencilView(_, _, _, _))
+      .Times(0);
+
+    Render();
+
+    EXPECT_CALL(DepthStencilState, Release())
+      .Times(AtLeast(1));
+  };
+
+  TestCallRender(Component_t::Make(
+    {
+      { uT("kind"), uT("Depth") },
+      { uT("enabled"), true },
+      { uT("overwrite"), false }
+    }));
+
+  TestCallRender(Component_t::Make(
+    {
+      { uT("kind"), uT("Depth") },
+      { uT("enabled"), true },
+      { uT("clear"), false },
+      { uT("overwrite"), false }
     }));
 }
 
@@ -2002,8 +2163,8 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_State_Clear)
     .Times(1)
     .WillOnce(Return(&RenderTargetView));
 
-  const Tested_t Example{ Data_t{} };
-  const ITested_t & IExample = Example;
+  const Tested_t oExample{ Data_t{} };
+  const ITested_t & IExample = oExample;
 
   auto itCreator = IExample.GetCreators().find(uT("State"));
   ASSERT_NE(IExample.GetCreators().end(), itCreator);
@@ -2063,8 +2224,8 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_State_AlphaTest)
 
   using namespace ::testing;
 
-  const Tested_t Example{ Data_t{} };
-  const ITested_t & IExample = Example;
+  const Tested_t oExample{ Data_t{} };
+  const ITested_t & IExample = oExample;
 
   auto itCreator = IExample.GetCreators().find(uT("State"));
   ASSERT_NE(IExample.GetCreators().end(), itCreator);
@@ -2101,8 +2262,8 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Material_CreateBuffer_Fail)
     .Times(1)
     .WillOnce(Return(&Device));
 
-  const Tested_t Example{ Data_t{} };
-  const ITested_t & IExample = Example;
+  const Tested_t oExample{ Data_t{} };
+  const ITested_t & IExample = oExample;
 
   auto itCreator = IExample.GetCreators().find(uT("Material"));
   ASSERT_NE(IExample.GetCreators().end(), itCreator);
@@ -2144,8 +2305,8 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Material)
       .Times(1)
       .WillOnce(Return(&DeviceContext));
 
-    const Tested_t Example{ Data_t{} };
-    const ITested_t & IExample = Example;
+    const Tested_t oExample{ Data_t{} };
+    const ITested_t & IExample = oExample;
 
     D3D11_BUFFER_DESC ConstantBufferDesc = { 0 };
     ConstantBufferDesc.Usage = D3D11_USAGE_DEFAULT;
@@ -2233,8 +2394,8 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Texture_CreateTexture2D_Fail)
     .Times(1)
     .WillOnce(Return(&Device));
 
-  const Tested_t Example{ Data_t{} };
-  const ITested_t & IExample = Example;
+  const Tested_t oExample{ Data_t{} };
+  const ITested_t & IExample = oExample;
 
   auto itCreator = IExample.GetCreators().find(uT("Texture"));
   ASSERT_NE(IExample.GetCreators().end(), itCreator);
@@ -2269,8 +2430,8 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Texture_CreateShaderResourceView_Fail)
     .Times(1)
     .WillOnce(Return(&Device));
 
-  const Tested_t Example{ Data_t{} };
-  const ITested_t & IExample = Example;
+  const Tested_t oExample{ Data_t{} };
+  const ITested_t & IExample = oExample;
 
   auto itCreator = IExample.GetCreators().find(uT("Texture"));
   ASSERT_NE(IExample.GetCreators().end(), itCreator);
@@ -2299,52 +2460,13 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Texture_CreateShaderResourceView_Fail)
 }
 
 // ************************************************************************** //
-TEST_F(DirectX11_test, /*DISABLED_*/Test_Texture)
+TEST_F(DirectX11_test, /*DISABLED_*/Test_Texture_UnknownDestination)
 {
   using DirectXProxy_t = ::mock::DirectX11::Proxy;
   DirectXProxy_t DirectXProxy;
   DirectXProxy_t::GetInstance() = &DirectXProxy;
 
   ::mock::DirectX11::Device Device;
-  ::mock::DirectX11::DeviceContext DeviceContext;
-  ::mock::DirectX11::Texture2D Texture2D;
-  ::mock::DirectX11::ShaderResourceView ShaderResourceView;
-
-  const ::std::vector<uint8_t> BinaryData =
-  {
-    0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x88, 0x99,
-  };
-
-  const int Width = 11212026;
-  const int Height = 1811212027;
-
-  const auto pComponent = Component_t::Make(
-    {
-      { uT("width"), Width },
-      { uT("height"), Height },
-      { uT("data"), BinaryData.data() },
-    });
-
-  D3D11_TEXTURE2D_DESC TextureDesc = { 0 };
-  TextureDesc.Width = Width;
-  TextureDesc.Height = Height;
-  TextureDesc.MipLevels = 1;
-  TextureDesc.ArraySize = 1;
-  TextureDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-  TextureDesc.Usage = D3D11_USAGE_DEFAULT;
-  TextureDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
-  TextureDesc.MiscFlags = 0;
-  TextureDesc.SampleDesc.Count = 1;
-  TextureDesc.SampleDesc.Quality = 0;
-
-  D3D11_SUBRESOURCE_DATA Init = { 0 };
-  Init.pSysMem = BinaryData.data();
-  Init.SysMemPitch = (UINT)Width * 4;
-
-  D3D11_SHADER_RESOURCE_VIEW_DESC SrvDesc = { 0 };
-  SrvDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-  SrvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
-  SrvDesc.Texture2D.MipLevels = 1;
 
   using namespace ::testing;
 
@@ -2352,43 +2474,53 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Texture)
     .Times(1)
     .WillOnce(Return(&Device));
 
-  EXPECT_CALL(DirectXProxy, CreateDeviceContext())
-    .Times(1)
-    .WillOnce(Return(&DeviceContext));
+  const Tested_t oExample{ Data_t{} };
+  const ITested_t & IExample = oExample;
 
-  const Tested_t Example{ Data_t{} };
-  const ITested_t & IExample = Example;
+  auto itDataCreator = IExample.GetCreators().find(uT("Data"));
+  ASSERT_NE(IExample.GetCreators().end(), itDataCreator);
 
   auto itCreator = IExample.GetCreators().find(uT("Texture"));
   ASSERT_NE(IExample.GetCreators().end(), itCreator);
 
-  InSequence Dummy;
+  const auto TestCall = [&](const Component_t::ComponentPtr_t & _pTexture)
+  {
+    InSequence Dummy;
 
-  EXPECT_CALL(Device, CreateTexture2D(TextureDesc, Init))
-    .Times(1)
-    .WillOnce(Return(&Texture2D));
+    EXPECT_CALL(Device, CreateTexture2D(_, _))
+      .Times(0);
 
-  EXPECT_CALL(Device, CreateShaderResourceView(&Texture2D, SrvDesc))
-    .Times(1)
-    .WillOnce(Return(&ShaderResourceView));
+    EXPECT_CALL(Device, CreateShaderResourceView(_, _))
+      .Times(0);
 
-  EXPECT_CALL(Texture2D, Release())
-    .Times(1);
+    EXPECT_THROW(itCreator->second(_pTexture), ::std::exception);
+  };
 
-  auto Render = itCreator->second(pComponent);
-  ASSERT_NE(nullptr, Render);
+  {
+    const auto pComponent = Component_t::Make(
+      {
+        { uT("destination"), uT("destination1907251219") },
+      });
 
-  EXPECT_CALL(DeviceContext, PSSetShaderResources(0, 1, &ShaderResourceView))
-    .Times(1);
+    TestCall(pComponent);
+  }
 
-  Render();
+  {
+    const auto pData = Component_t::Make(
+      {
+        { uT("kind"), uT("Texture")},
+        { uT("destination"), uT("destination1907251220") },
+      });
 
-  EXPECT_CALL(ShaderResourceView, Release())
-    .Times(1);
+    auto Render = itDataCreator->second(pData);
+    EXPECT_EQ(nullptr, Render);
+
+    TestCall(Component_t::Make({}));
+  }
 }
 
 // ************************************************************************** //
-TEST_F(DirectX11_test, /*DISABLED_*/Test_Texture_FromDataComponent)
+TEST_F(DirectX11_test, /*DISABLED_*/Test_Texture_PBR)
 {
   using DirectXProxy_t = ::mock::DirectX11::Proxy;
   DirectXProxy_t DirectXProxy;
@@ -2396,44 +2528,6 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Texture_FromDataComponent)
 
   ::mock::DirectX11::Device Device;
   ::mock::DirectX11::DeviceContext DeviceContext;
-  ::mock::DirectX11::Texture2D Texture2D;
-  ::mock::DirectX11::ShaderResourceView ShaderResourceView;
-
-  const ::std::vector<uint8_t> BinaryData = { 0x18, 0x12, 0x29, 0x11, 0x57 };
-
-  const int Width = 12291159;
-  const int Height = 1812291200;
-
-  const auto pData = Component_t::Make(
-    {
-      { uT("kind"), uT("Texture")},
-      { uT("width"), Width },
-      { uT("height"), Height },
-      { uT("data"), BinaryData.data() },
-    });
-
-  const auto pComponent = Component_t::Make({});
-
-  D3D11_TEXTURE2D_DESC TextureDesc = { 0 };
-  TextureDesc.Width = Width;
-  TextureDesc.Height = Height;
-  TextureDesc.MipLevels = 1;
-  TextureDesc.ArraySize = 1;
-  TextureDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-  TextureDesc.Usage = D3D11_USAGE_DEFAULT;
-  TextureDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
-  TextureDesc.MiscFlags = 0;
-  TextureDesc.SampleDesc.Count = 1;
-  TextureDesc.SampleDesc.Quality = 0;
-
-  D3D11_SUBRESOURCE_DATA Init = { 0 };
-  Init.pSysMem = BinaryData.data();
-  Init.SysMemPitch = (UINT)Width * 4;
-
-  D3D11_SHADER_RESOURCE_VIEW_DESC SrvDesc = { 0 };
-  SrvDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-  SrvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
-  SrvDesc.Texture2D.MipLevels = 1;
 
   using namespace ::testing;
 
@@ -2445,43 +2539,150 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Texture_FromDataComponent)
     .Times(1)
     .WillOnce(Return(&DeviceContext));
 
-  const Tested_t Example{ Data_t{} };
-  const ITested_t & IExample = Example;
+  const Tested_t oExample{ Data_t{} };
+  const ITested_t & IExample = oExample;
 
-  {
-    auto itCreator = IExample.GetCreators().find(uT("Data"));
-    ASSERT_NE(IExample.GetCreators().end(), itCreator);
-
-    auto Render = itCreator->second(pData);
-    EXPECT_EQ(nullptr, Render);
-  }
+  auto itDataCreator = IExample.GetCreators().find(uT("Data"));
+  ASSERT_NE(IExample.GetCreators().end(), itDataCreator);
 
   auto itCreator = IExample.GetCreators().find(uT("Texture"));
   ASSERT_NE(IExample.GetCreators().end(), itCreator);
 
-  InSequence Dummy;
+  const auto TestCall = [&](const Component_t::ComponentPtr_t & _pTexture,
+    const ::std::vector<uint8_t> & _BinaryData,
+    const int _Width, const int _Height, const ::std::size_t _Slot)
+  {
+    ::mock::DirectX11::Texture2D Texture2D;
+    ::mock::DirectX11::ShaderResourceView ShaderResourceView;
 
-  EXPECT_CALL(Device, CreateTexture2D(TextureDesc, Init))
-    .Times(1)
-    .WillOnce(Return(&Texture2D));
+    D3D11_TEXTURE2D_DESC TextureDesc = { 0 };
+    TextureDesc.Width = _Width;
+    TextureDesc.Height = _Height;
+    TextureDesc.MipLevels = 1;
+    TextureDesc.ArraySize = 1;
+    TextureDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+    TextureDesc.Usage = D3D11_USAGE_DEFAULT;
+    TextureDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+    TextureDesc.MiscFlags = 0;
+    TextureDesc.SampleDesc.Count = 1;
+    TextureDesc.SampleDesc.Quality = 0;
 
-  EXPECT_CALL(Device, CreateShaderResourceView(&Texture2D, SrvDesc))
-    .Times(1)
-    .WillOnce(Return(&ShaderResourceView));
+    D3D11_SUBRESOURCE_DATA Init = { 0 };
+    Init.pSysMem = _BinaryData.data();
+    Init.SysMemPitch = (UINT)_Width * 4;
 
-  EXPECT_CALL(Texture2D, Release())
-    .Times(1);
+    D3D11_SHADER_RESOURCE_VIEW_DESC SrvDesc = { 0 };
+    SrvDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+    SrvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+    SrvDesc.Texture2D.MipLevels = 1;
 
-  auto Render = itCreator->second(pComponent);
-  ASSERT_NE(nullptr, Render);
+    InSequence Dummy;
 
-  EXPECT_CALL(DeviceContext, PSSetShaderResources(0, 1, &ShaderResourceView))
-    .Times(1);
+    EXPECT_CALL(Device, CreateTexture2D(TextureDesc, Init))
+      .Times(1)
+      .WillOnce(Return(&Texture2D));
 
-  Render();
+    EXPECT_CALL(Device, CreateShaderResourceView(&Texture2D, SrvDesc))
+      .Times(1)
+      .WillOnce(Return(&ShaderResourceView));
 
-  EXPECT_CALL(ShaderResourceView, Release())
-    .Times(1);
+    EXPECT_CALL(Texture2D, Release())
+      .Times(1);
+
+    auto Render = itCreator->second(_pTexture);
+    ASSERT_NE(nullptr, Render);
+
+    EXPECT_CALL(DeviceContext, 
+      PSSetShaderResources(Eq(_Slot), 1, &ShaderResourceView))
+      .Times(1);
+
+    Render();
+
+    EXPECT_CALL(ShaderResourceView, Release())
+      .Times(1);
+  };
+
+  {
+    const ::std::vector<uint8_t> BinaryData = { 0x19, 0x07, 0x25, 0x11, 0x51 };
+    const int Width = 7251149;
+    const int Height = 1907251150;
+
+    const auto pComponent = Component_t::Make(
+      {
+        { uT("width"), Width },
+        { uT("height"), Height },
+        { uT("data"), BinaryData.data() },
+      });
+
+    TestCall(pComponent, BinaryData, Width, Height, 0);
+  }
+
+  {
+    const ::std::vector<uint8_t> BinaryData = { 0x18, 0x12, 0x29, 0x11, 0x57 };
+    const int Width = 12291159;
+    const int Height = 1812291200;
+
+    const auto pData = Component_t::Make(
+      {
+        { uT("kind"), uT("Texture")},
+        { uT("width"), Width },
+        { uT("height"), Height },
+        { uT("data"), BinaryData.data() },
+      });
+
+    auto Render = itDataCreator->second(pData);
+    EXPECT_EQ(nullptr, Render);
+
+    TestCall(Component_t::Make({}), BinaryData, Width, Height, 0);
+  }
+
+  const ::std::vector<String_t> Destinations =
+  {
+    uT("albedo"),
+    uT("metalness"),
+    uT("roughness"),
+    uT("normal"),
+    uT("occlusion"),
+  };
+
+  for (::std::size_t i = 0; i < Destinations.size(); i++)
+  {
+    {
+      const ::std::vector<uint8_t> BinaryData = { 0x19, 0x07, 0x25, 0x12, 0x06 };
+      const int Width = 7251202;
+      const int Height = 1907251203;
+
+      const auto pComponent = Component_t::Make(
+        {
+          { uT("width"), Width },
+          { uT("height"), Height },
+          { uT("data"), BinaryData.data() },
+          { uT("destination"), Destinations[i] },
+        });
+
+      TestCall(pComponent, BinaryData, Width, Height, i);
+    }
+
+    {
+      const ::std::vector<uint8_t> BinaryData = { 0x19, 0x07, 0x25, 0x12, 0x07 };
+      const int Width = 7251204;
+      const int Height = 1907251205;
+
+      const auto pData = Component_t::Make(
+        {
+          { uT("kind"), uT("Texture")},
+          { uT("width"), Width },
+          { uT("height"), Height },
+          { uT("data"), BinaryData.data() },
+          { uT("destination"), Destinations[i] },
+        });
+
+      auto Render = itDataCreator->second(pData);
+      EXPECT_EQ(nullptr, Render);
+
+      TestCall(Component_t::Make({}), BinaryData, Width, Height, i);
+    }
+  }
 }
 
 // ************************************************************************** //
@@ -2503,8 +2704,8 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Shader_NotExistsEntryPoint)
       { uT("entry"), ::std::string{ "unknown" } }
     });
 
-  const Tested_t Example{ Data_t{} };
-  const ITested_t & IExample = Example;
+  const Tested_t oExample{ Data_t{} };
+  const ITested_t & IExample = oExample;
 
   auto itCreator = IExample.GetCreators().find(uT("Shader"));
   ASSERT_NE(IExample.GetCreators().end(), itCreator);
@@ -2540,8 +2741,8 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Shader_Compile_Fail)
       { uT("entry"), ::std::string{ "vs" } }
     });
 
-  const Tested_t Example{ Data_t{} };
-  const ITested_t & IExample = Example;
+  const Tested_t oExample{ Data_t{} };
+  const ITested_t & IExample = oExample;
 
   auto itCreator = IExample.GetCreators().find(uT("Shader"));
   ASSERT_NE(IExample.GetCreators().end(), itCreator);
@@ -2602,8 +2803,8 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Shader_CreateInputLayout_Fail)
       .Times(1)
       .WillOnce(Return(&Device));
 
-    const Tested_t Example{ Data_t{} };
-    const ITested_t & IExample = Example;
+    const Tested_t oExample{ Data_t{} };
+    const ITested_t & IExample = oExample;
 
     auto itCreator = IExample.GetCreators().find(uT("Shader"));
     ASSERT_NE(IExample.GetCreators().end(), itCreator);
@@ -2662,8 +2863,8 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Shader_CreateVertexShader_Fail)
       .Times(1)
       .WillOnce(Return(&Device));
 
-    const Tested_t Example{ Data_t{} };
-    const ITested_t & IExample = Example;
+    const Tested_t oExample{ Data_t{} };
+    const ITested_t & IExample = oExample;
 
     auto itCreator = IExample.GetCreators().find(uT("Shader"));
     ASSERT_NE(IExample.GetCreators().end(), itCreator);
@@ -2726,8 +2927,8 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Shader_CreatePixelShader_Fail)
       .Times(1)
       .WillOnce(Return(&Device));
 
-    const Tested_t Example{ Data_t{} };
-    const ITested_t & IExample = Example;
+    const Tested_t oExample{ Data_t{} };
+    const ITested_t & IExample = oExample;
 
     auto itCreator = IExample.GetCreators().find(uT("Shader"));
     ASSERT_NE(IExample.GetCreators().end(), itCreator);
@@ -2786,8 +2987,8 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Shader_Vertex_DefaultData)
 
     using namespace ::testing;
 
-    const Tested_t Example{ Data_t{} };
-    const ITested_t & IExample = Example;
+    const Tested_t oExample{ Data_t{} };
+    const ITested_t & IExample = oExample;
 
     if (_pData != nullptr)
     {
@@ -2905,8 +3106,8 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Shader_Vertex)
       .Times(1)
       .WillOnce(Return(&DeviceContext));
 
-    const Tested_t Example{ Data_t{} };
-    const ITested_t & IExample = Example;
+    const Tested_t oExample{ Data_t{} };
+    const ITested_t & IExample = oExample;
 
     if (_pData != nullptr)
     {
@@ -3093,8 +3294,8 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Shader_Pixel)
       .Times(1)
       .WillOnce(Return(&DeviceContext));
 
-    const Tested_t Example{ Data_t{} };
-    const ITested_t & IExample = Example;
+    const Tested_t oExample{ Data_t{} };
+    const ITested_t & IExample = oExample;
 
     if (_pData != nullptr)
     {
@@ -3184,7 +3385,9 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Shader_Pixel)
 // ************************************************************************** //
 TEST_F(DirectX11_test, /*DISABLED_*/Test_Buffer_CreateVertex_Fail)
 {
-  const auto TestCallRender = [](const auto * _pData)
+  const auto TestCallRender = [](
+    const Component_t::ComponentPtr_t _pData,
+    const Component_t::ComponentPtr_t _pBuffer)
   {
     using DirectXProxy_t = ::mock::DirectX11::Proxy;
     DirectXProxy_t DirectXProxy;
@@ -3192,19 +3395,23 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Buffer_CreateVertex_Fail)
 
     ::mock::DirectX11::Device Device;
 
-    const auto pComponent = Component_t::Make(
-      {
-        { uT("data"), _pData },
-      });
-
     using namespace ::testing;
 
     EXPECT_CALL(DirectXProxy, CreateDevice())
       .Times(1)
       .WillOnce(Return(&Device));
 
-    const Tested_t Example{ Data_t{} };
-    const ITested_t & IExample = Example;
+    const Tested_t oExample{ Data_t{} };
+    const ITested_t & IExample = oExample;
+
+    if (_pData != nullptr)
+    {
+      auto itCreator = IExample.GetCreators().find(uT("Data"));
+      ASSERT_NE(IExample.GetCreators().end(), itCreator);
+
+      const auto Render = itCreator->second(_pData);
+      EXPECT_EQ(nullptr, Render);
+    }
 
     auto itCreator = IExample.GetCreators().find(uT("Buffer"));
     ASSERT_NE(IExample.GetCreators().end(), itCreator);
@@ -3218,18 +3425,68 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Buffer_CreateVertex_Fail)
       .Times(1)
       .WillOnce(Return(E_FAIL));
 
-    EXPECT_THROW(itCreator->second(pComponent), ::std::exception);
+    EXPECT_THROW(itCreator->second(_pBuffer), ::std::exception);
   };
 
-  const Vertex_t::Polygon * pPolygon = nullptr;
-  const Vertex_t::Polyhedron * pPolyhedron = nullptr;
+  const vertex::Polygon * pPolygon = nullptr;
 
-  TestCallRender(pPolygon);
-  TestCallRender(pPolyhedron);
+  {
+    const auto pComponent = Component_t::Make(
+      {
+        { uT("data"), pPolygon },
+      });
+
+    TestCallRender(nullptr, pComponent);
+  }
+
+  {
+    const auto pData = Component_t::Make(
+      {
+        { uT("data"), pPolygon },
+      });
+
+    TestCallRender(pData, Component_t::Make({ }));
+  }
+
+  const vertex::Polyhedron * pPolyhedron = nullptr;
+
+  {
+    const auto pComponent = Component_t::Make(
+      {
+        { uT("data"), pPolyhedron },
+      });
+
+    TestCallRender(nullptr, pComponent);
+  }
+
+  {
+    const auto pData = Component_t::Make(
+      {
+        { uT("data"), pPolyhedron },
+      });
+
+    TestCallRender(pData, Component_t::Make({ }));
+  }
+
+  {
+    const BufferMapper_t Dummy = [](vertex::Polyhedron *) { return false; };
+
+    const auto pData = Component_t::Make(
+      {
+        { uT("data"), pPolyhedron },
+      });
+
+    const auto pComponent = Component_t::Make(
+      {
+        { uT("mapper"), Dummy },
+      });
+
+    TestCallRender(pData, pComponent);
+  }
 }
 
 // ************************************************************************** //
-TEST_F(DirectX11_test, /*DISABLED_*/Test_Buffer_Vertex)
+TEST_F(DirectX11_test, /*DISABLED_*/Test_Buffer_Vertex_Static)
 {
   const auto TestCallRender = [](
     const Component_t::ComponentPtr_t & _pBuffer,
@@ -3262,8 +3519,8 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Buffer_Vertex)
       .Times(1)
       .WillOnce(Return(&DeviceContext));
 
-    const Tested_t Example{ Data_t{} };
-    const ITested_t & IExample = Example;
+    const Tested_t oExample{ Data_t{} };
+    const ITested_t & IExample = oExample;
 
     if (_pData != nullptr)
     {
@@ -3296,10 +3553,8 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Buffer_Vertex)
       .Times(1);
   };
 
-  using Vertex_t = ::covellite::api::Vertex;
-
   {
-    const ::std::vector<Vertex_t::Polygon> VertexData =
+    const ::std::vector<vertex::Polygon> VertexData =
     {
       { 1.0f, 2.0f, 1809081155, 3.0f, 4.0f },
       { 5.0f, 6.0f, 1809081156, 7.0f, 8.0f },
@@ -3313,7 +3568,7 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Buffer_Vertex)
         });
 
       TestCallRender(pComponent, nullptr, 
-        VertexData.data(), VertexData.size(), sizeof(Vertex_t::Polygon));
+        VertexData.data(), VertexData.size(), sizeof(vertex::Polygon));
     }
 
     {
@@ -3327,12 +3582,12 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Buffer_Vertex)
       const auto pComponent = Component_t::Make({});
 
       TestCallRender(pComponent, pData, 
-        VertexData.data(), VertexData.size(), sizeof(Vertex_t::Polygon));
+        VertexData.data(), VertexData.size(), sizeof(vertex::Polygon));
     }
   }
 
   {
-    const ::std::vector<Vertex_t::Polyhedron> VertexData =
+    const ::std::vector<vertex::Polyhedron> VertexData =
     {
       { 
         1.0f, 2.0f, 3.0f, 
@@ -3354,7 +3609,7 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Buffer_Vertex)
         });
 
       TestCallRender(pComponent, nullptr, 
-        VertexData.data(), VertexData.size(), sizeof(Vertex_t::Polyhedron));
+        VertexData.data(), VertexData.size(), sizeof(vertex::Polyhedron));
     }
 
     {
@@ -3368,8 +3623,205 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Buffer_Vertex)
       const auto pComponent = Component_t::Make({});
 
       TestCallRender(pComponent, pData, 
-        VertexData.data(), VertexData.size(), sizeof(Vertex_t::Polyhedron));
+        VertexData.data(), VertexData.size(), sizeof(vertex::Polyhedron));
     }
+  }
+}
+
+// ************************************************************************** //
+TEST_F(DirectX11_test, /*DISABLED_*/Test_Buffer_Vertex_Dynamic)
+{
+  class Proxy :
+    public ::alicorn::extension::testing::Proxy<Proxy>
+  {
+  public:
+    MOCK_METHOD1(Mapper, bool(vertex::Polyhedron *));
+  };
+
+  const auto TestCallRender = [](
+    const Component_t::ComponentPtr_t & _pBuffer,
+    const Component_t::ComponentPtr_t & _pData,
+    const void * _pRawData, size_t _RawDataSize, size_t _VertexSize)
+  {
+    using DirectXProxy_t = ::mock::DirectX11::Proxy;
+    DirectXProxy_t DirectXProxy;
+    DirectXProxy_t::GetInstance() = &DirectXProxy;
+
+    Proxy oProxy;
+    Proxy::GetInstance() = &oProxy;
+
+    ::mock::DirectX11::Device Device;
+    ::mock::DirectX11::DeviceContext DeviceContext;
+    ::mock::DirectX11::Buffer Buffer;
+
+    D3D11_SUBRESOURCE_DATA InitData = { 0 };
+    InitData.pSysMem = _pRawData;
+
+    D3D11_BUFFER_DESC Desc = { 0 };
+    Desc.Usage = D3D11_USAGE_DYNAMIC;
+    Desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+    Desc.ByteWidth = static_cast<UINT>(_RawDataSize * _VertexSize);
+    Desc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+
+    const BufferMapper_t Mapper = [&](vertex::Polyhedron * _pData)
+    {
+      return oProxy.Mapper(_pData);
+    };
+
+    _pBuffer->SetValue(uT("mapper"), Mapper);
+
+    using namespace ::testing;
+
+    EXPECT_CALL(DirectXProxy, CreateDevice())
+      .Times(1)
+      .WillOnce(Return(&Device));
+
+    EXPECT_CALL(DirectXProxy, CreateDeviceContext())
+      .Times(1)
+      .WillOnce(Return(&DeviceContext));
+
+    const Tested_t oExample{ Data_t{} };
+    const ITested_t & IExample = oExample;
+
+    if (_pData != nullptr)
+    {
+      auto itCreator = IExample.GetCreators().find(uT("Data"));
+      ASSERT_NE(IExample.GetCreators().end(), itCreator);
+
+      auto Render = itCreator->second(_pData);
+      EXPECT_EQ(nullptr, Render);
+    }
+
+    auto itCreator = IExample.GetCreators().find(uT("Buffer"));
+    ASSERT_NE(IExample.GetCreators().end(), itCreator);
+
+    InSequence Dummy;
+
+    EXPECT_CALL(Device, CreateBuffer(Desc, InitData))
+      .Times(1)
+      .WillOnce(Return(&Buffer));
+
+    auto Render = itCreator->second(_pBuffer);
+    ASSERT_NE(nullptr, Render);
+
+    {
+      EXPECT_CALL(oProxy, Mapper(nullptr))
+        .Times(1)
+        .WillOnce(Return(false));
+
+      EXPECT_CALL(DeviceContext, Map(_, _))
+        .Times(0);
+
+      EXPECT_CALL(oProxy, Mapper(_))
+        .Times(0);
+
+      EXPECT_CALL(DeviceContext, Unmap(_, _))
+        .Times(0);
+
+      EXPECT_CALL(DeviceContext, IASetVertexBuffers(0, 1, &Buffer,
+        static_cast<UINT>(_VertexSize), 0))
+        .Times(1);
+
+      Render();
+    }
+
+    {
+      D3D11_MAPPED_SUBRESOURCE Resource = { 0 };
+
+      EXPECT_CALL(oProxy, Mapper(nullptr))
+        .Times(1)
+        .WillOnce(Return(true));
+
+      EXPECT_CALL(DeviceContext, Mapped(_, _))
+        .Times(1)
+        .WillOnce(Return(Resource));
+
+      EXPECT_CALL(DeviceContext, Map(_, _))
+        .Times(1)
+        .WillOnce(Return(E_FAIL));
+
+      EXPECT_CALL(oProxy, Mapper(_))
+        .Times(0);
+
+      EXPECT_CALL(DeviceContext, Unmap(_, _))
+        .Times(0);
+
+      EXPECT_CALL(DeviceContext, IASetVertexBuffers(_, _, _, _, _))
+        .Times(0);
+
+      EXPECT_THROW(Render(), ::std::exception);
+    }
+
+    {
+      D3D11_MAPPED_SUBRESOURCE Resource = { 0 };
+      Resource.pData = (void *)1908011249;
+
+      EXPECT_CALL(oProxy, Mapper(nullptr))
+        .Times(1)
+        .WillOnce(Return(true));
+
+      EXPECT_CALL(DeviceContext, Mapped(&Buffer, D3D11_MAP_WRITE_NO_OVERWRITE))
+        .Times(1)
+        .WillOnce(Return(Resource));
+
+      EXPECT_CALL(DeviceContext, Map(0, 0))
+        .Times(1)
+        .WillOnce(Return(S_OK));
+
+      EXPECT_CALL(oProxy, Mapper(reinterpret_cast<vertex::Polyhedron *>(Resource.pData)))
+        .Times(1);
+
+      EXPECT_CALL(DeviceContext, Unmap(&Buffer, 0))
+        .Times(1);
+
+      EXPECT_CALL(DeviceContext, IASetVertexBuffers(0, 1, &Buffer,
+        static_cast<UINT>(_VertexSize), 0))
+        .Times(1);
+
+      Render();
+    }
+
+    EXPECT_CALL(Buffer, Release())
+      .Times(AtLeast(1));
+  };
+
+  const ::std::vector<vertex::Polyhedron> VertexData =
+  {
+    {
+      1.0f, 2.0f, 3.0f,
+      4.0f, 5.0f, 6.0f,
+      7.0f, 8.0f
+    },
+    {
+      9.0f, 10.0f, 11.0f,
+      12.0f, 13.0f, 14.0f,
+      15.0f, 16.0f
+    },
+  };
+
+  {
+    const auto pComponent = Component_t::Make(
+      {
+        { uT("data"), VertexData.data() },
+        { uT("count"), VertexData.size() },
+      });
+
+    TestCallRender(pComponent, nullptr,
+      VertexData.data(), VertexData.size(), sizeof(vertex::Polyhedron));
+  }
+
+  {
+    const auto pData = Component_t::Make(
+      {
+        { uT("kind"), uT("Buffer") },
+        { uT("data"), VertexData.data() },
+        { uT("count"), VertexData.size() },
+      });
+
+    const auto pComponent = Component_t::Make({ });
+
+    TestCallRender(pComponent, pData,
+      VertexData.data(), VertexData.size(), sizeof(vertex::Polyhedron));
   }
 }
 
@@ -3394,8 +3846,8 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Buffer_CreateIndex_Fail)
     .Times(1)
     .WillOnce(Return(&Device));
 
-  const Tested_t Example{ Data_t{} };
-  const ITested_t & IExample = Example;
+  const Tested_t oExample{ Data_t{} };
+  const ITested_t & IExample = oExample;
 
   auto itCreator = IExample.GetCreators().find(Type);
   ASSERT_NE(IExample.GetCreators().end(), itCreator);
@@ -3447,8 +3899,8 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Buffer_Index)
       .Times(1)
       .WillOnce(Return(&DeviceContext));
 
-    const Tested_t Example{ Data_t{} };
-    const ITested_t & IExample = Example;
+    const Tested_t oExample{ Data_t{} };
+    const ITested_t & IExample = oExample;
 
     if (_pData != nullptr)
     {
@@ -3515,6 +3967,24 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Matrices_StructSizeAlign16Bytes)
 }
 
 // ************************************************************************** //
+TEST_F(DirectX11_test, /*DISABLED_*/Test_Present_Geometry_UnknownVariety)
+{
+  const Tested_t oExample{ Data_t{} };
+  const ITested_t & IExample = oExample;
+
+  auto itCreator = IExample.GetCreators().find(uT("Present"));
+  ASSERT_NE(IExample.GetCreators().end(), itCreator);
+
+  const auto pComponent = Component_t::Make(
+    {
+      { uT("kind"), uT("Geometry") },
+      { uT("variety"), uT("Unknow1908061947") },
+   });
+
+  EXPECT_THROW(itCreator->second(pComponent), ::std::exception);
+}
+
+// ************************************************************************** //
 TEST_F(DirectX11_test, /*DISABLED_*/Test_Present_Geometry)
 {
   using DirectXProxy_t = ::mock::DirectX11::Proxy;
@@ -3565,8 +4035,8 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Present_Geometry)
     PSSetConstantBuffers(MATRICES_BUFFER_INDEX, 1, &ConstantBuffer))
     .Times(1);
 
-  const Tested_t Example{ Data_t{} };
-  const ITested_t & IExample = Example;
+  const Tested_t oExample{ Data_t{} };
+  const ITested_t & IExample = oExample;
 
   auto pPosition = Component_t::Make({ { uT("kind"), uT("Position") } });
   auto pRotation = Component_t::Make({ { uT("kind"), uT("Rotation") } });
@@ -3691,79 +4161,6 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Present_Geometry)
 }
 
 // ************************************************************************** //
-TEST_F(DirectX11_test, /*DISABLED_*/Test_Present_Geometry_DefaultDataValues)
-{
-  using DirectXProxy_t = ::mock::DirectX11::Proxy;
-  DirectXProxy_t DirectXProxy;
-  DirectXProxy_t::GetInstance() = &DirectXProxy;
-
-  ::mock::DirectX11::DeviceContext DeviceContext;
-
-  D3D11_BUFFER_DESC IndexBufferDesc = { 0 };
-  IndexBufferDesc.ByteWidth = 1811221344;
-
-  using namespace ::testing;
-
-  EXPECT_CALL(DirectXProxy, CreateDeviceContext())
-    .Times(1)
-    .WillOnce(Return(&DeviceContext));
-
-  const Tested_t Example{ Data_t{} };
-  const ITested_t & IExample = Example;
-
-  auto pPosition = Component_t::Make({ { uT("kind"), uT("Position") } });
-  auto pRotation = Component_t::Make({ { uT("kind"), uT("Rotation") } });
-  auto pScale = Component_t::Make({ { uT("kind"), uT("Scale") } });
-
-  auto itDataCreator = IExample.GetCreators().find(uT("Data"));
-  ASSERT_NE(IExample.GetCreators().end(), itDataCreator);
-
-  const auto TestCallRender = [&](const Component_t::ComponentPtr_t & _pComponent)
-  {
-    auto itCreator = IExample.GetCreators().find(uT("Present"));
-    ASSERT_NE(IExample.GetCreators().end(), itCreator);
-
-    auto PositionRender = itDataCreator->second(pPosition);
-    EXPECT_EQ(nullptr, PositionRender);
-
-    auto RotationRender = itDataCreator->second(pRotation);
-    EXPECT_EQ(nullptr, RotationRender);
-
-    auto ScaleRender = itDataCreator->second(pScale);
-    EXPECT_EQ(nullptr, ScaleRender);
-
-    auto Render = itCreator->second(_pComponent);
-    ASSERT_NE(nullptr, Render);
-
-    ::Matrices ExpectMatrices;
-    memset(&ExpectMatrices, 0, sizeof(ExpectMatrices));
-
-    ExpectMatrices.World = ::DirectX::XMMatrixTranspose(
-      ::DirectX::XMMatrixTranslation(0.0f, 0.0f, 0.0f) *
-      ::DirectX::XMMatrixRotationX(0.0f) *
-      ::DirectX::XMMatrixRotationY(0.0f) *
-      ::DirectX::XMMatrixRotationZ(0.0f) *
-      ::DirectX::XMMatrixScaling(1.0f, 1.0f, 1.0f));
-
-    EXPECT_CALL(DeviceContext, UpdateSubresource(_, _, _, ExpectMatrices, _, _))
-      .Times(1);
-
-    Render();
-  };
-
-  TestCallRender(Component_t::Make(
-    { 
-      { uT("kind"), uT("Geometry") } 
-    }));
-
-  TestCallRender(Component_t::Make(
-    {
-      { uT("kind"), uT("Geometry") },
-      { uT("static"), true }
-    }));
-}
-
-// ************************************************************************** //
 TEST_F(DirectX11_test, /*DISABLED_*/Test_Present_Geometry_Static)
 {
   using DirectXProxy_t = ::mock::DirectX11::Proxy;
@@ -3814,8 +4211,8 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Present_Geometry_Static)
     PSSetConstantBuffers(MATRICES_BUFFER_INDEX, 1, &ConstantBuffer))
     .Times(1);
 
-  const Tested_t Example{ Data_t{} };
-  const ITested_t & IExample = Example;
+  const Tested_t oExample{ Data_t{} };
+  const ITested_t & IExample = oExample;
 
   auto pPosition = Component_t::Make({ { uT("kind"), uT("Position") } });
   auto pRotation = Component_t::Make({ { uT("kind"), uT("Rotation") } });
@@ -3863,7 +4260,7 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Present_Geometry_Static)
     const auto pComponent = Component_t::Make(
       {
         { uT("kind"), uT("Geometry") },
-        { uT("static"), uT("true") },
+        { uT("variety"), uT("Static") },
       });
 
     ::Matrices DefaultMatrices;
@@ -3882,7 +4279,7 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Present_Geometry_Static)
     const auto pComponent = Component_t::Make(
       {
         { uT("kind"), uT("Geometry") },
-        { uT("static"), uT("true") },
+        { uT("variety"), uT("Static") },
       });
 
     ::Matrices ExpectMatrices;
@@ -3950,6 +4347,243 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Present_Geometry_Static)
     .Times(1);
 }
 
+namespace covellite
+{
+
+namespace api
+{
+
+namespace renderer
+{
+
+// ************************************************************************** //
+TEST_F(DirectX11_test, /*DISABLED_*/Test_Present_Geometry_Billboard)
+{
+  using DirectXProxy_t = ::mock::DirectX11::Proxy;
+  DirectXProxy_t DirectXProxy;
+  DirectXProxy_t::GetInstance() = &DirectXProxy;
+
+  ::mock::DirectX11::Device Device;
+  ::mock::DirectX11::DeviceContext DeviceContext;
+  ::mock::DirectX11::Buffer ConstantBuffer;
+  ::mock::DirectX11::Buffer IndexBuffer;
+
+  D3D11_BUFFER_DESC ConstantBufferDesc = { 0 };
+  ConstantBufferDesc.Usage = D3D11_USAGE_DEFAULT;
+  ConstantBufferDesc.ByteWidth = sizeof(::Matrices);
+  ConstantBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+
+  D3D11_BUFFER_DESC IndexBufferDesc = { 0 };
+  IndexBufferDesc.ByteWidth = 1908062000;
+
+  using namespace ::testing;
+
+  EXPECT_CALL(DirectXProxy, CreateDevice())
+    .Times(1)
+    .WillOnce(Return(&Device));
+
+  EXPECT_CALL(DirectXProxy, CreateDeviceContext())
+    .Times(1)
+    .WillOnce(Return(&DeviceContext));
+
+  EXPECT_CALL(Device, CreateBuffer(_, _))
+    .Times(AtLeast(1));
+
+  EXPECT_CALL(DeviceContext, VSSetConstantBuffers(_, _, _))
+    .Times(AtLeast(1));
+
+  EXPECT_CALL(DeviceContext, PSSetConstantBuffers(_, _, _))
+    .Times(AtLeast(1));
+
+  EXPECT_CALL(Device, CreateBuffer(ConstantBufferDesc, _))
+    .Times(1)
+    .WillOnce(Return(&ConstantBuffer));
+
+  EXPECT_CALL(DeviceContext,
+    VSSetConstantBuffers(MATRICES_BUFFER_INDEX, 1, &ConstantBuffer))
+    .Times(1);
+
+  EXPECT_CALL(DeviceContext,
+    PSSetConstantBuffers(MATRICES_BUFFER_INDEX, 1, &ConstantBuffer))
+    .Times(1);
+
+  const Tested_t oExample{ Data_t{} };
+  const ITested_t & IExample = oExample;
+
+  auto pPosition = Component_t::Make({ { uT("kind"), uT("Position") } });
+
+  auto itDataCreator = IExample.GetCreators().find(uT("Data"));
+  ASSERT_NE(IExample.GetCreators().end(), itDataCreator);
+
+  auto itCreator = IExample.GetCreators().find(uT("Present"));
+  ASSERT_NE(IExample.GetCreators().end(), itCreator);
+
+  InSequence Dummy;
+
+  const auto TestCallRender = [&](
+    const Render_t & _Render,
+    const ::Matrices & _Matrices)
+  {
+    oExample.m_pData->Get<::Matrices>().View = _Matrices.View;
+
+    EXPECT_CALL(DeviceContext,
+      UpdateSubresource(&ConstantBuffer, 0, nullptr, _Matrices, 0, 0))
+      .Times(1);
+
+    EXPECT_CALL(DeviceContext, IAGetIndexBuffer(DXGI_FORMAT_UNKNOWN, 0))
+      .Times(1)
+      .WillOnce(Return(&IndexBuffer));
+
+    EXPECT_CALL(IndexBuffer, GetDesc())
+      .Times(1)
+      .WillOnce(Return(IndexBufferDesc));
+
+    EXPECT_CALL(DeviceContext,
+      IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST))
+      .Times(1);
+
+    EXPECT_CALL(DeviceContext,
+      DrawIndexed(IndexBufferDesc.ByteWidth / sizeof(int), 0, 0))
+      .Times(1);
+
+    EXPECT_CALL(IndexBuffer, Release())
+      .Times(1);
+
+    _Render();
+  };
+
+  const auto GetView = [](
+    float _X, float _Y, float _Z,
+    float _A, float _B, float _C,
+    float _Distance)
+  {
+    const auto Look = ::DirectX::XMVectorSet(_X, _Y, _Z, 1.0f);
+
+    auto Transform =
+      ::DirectX::XMMatrixRotationX(_A) *
+      ::DirectX::XMMatrixRotationY(_B) *
+      ::DirectX::XMMatrixRotationZ(_C) *
+      ::DirectX::XMMatrixTranslation(_X, _Y, _Z);
+    auto Eye = ::DirectX::XMVector3TransformCoord(
+      ::DirectX::XMVectorSet(_Distance, 0.0f, 0.0f, 1.0f),
+      Transform);
+
+    return ::DirectX::XMMatrixLookAtRH(Eye, Look,
+      ::DirectX::XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f));
+  };
+
+  {
+    const auto pComponent = Component_t::Make(
+      {
+        { uT("kind"), uT("Geometry") },
+        { uT("variety"), uT("Billboard") },
+      });
+
+    auto Render = itCreator->second(pComponent);
+    ASSERT_NE(nullptr, Render);
+
+    ::Matrices DefaultMatrices;
+    memset(&DefaultMatrices, 0, sizeof(DefaultMatrices));
+
+    const auto Distance = 62028.0f;
+
+    const auto X = 62029.0f;
+    const auto Y = 62030.0f;
+    const auto Z = 62031.0f;
+
+    const auto A = 62032.0f;
+    const auto B = 62033.0f;
+    const auto C = 62034.0f;
+
+    DefaultMatrices.View = GetView(
+      X, Y, Z,
+      A, B, C,
+      Distance + 0.1f);
+
+    ::DirectX::XMFLOAT4X4 Matrix;
+    XMStoreFloat4x4(&Matrix, DefaultMatrices.View);
+    Matrix._14 = 0.0f;
+    Matrix._24 = 0.0f;
+    Matrix._34 = 0.0f;
+    Matrix._41 = 0.0f;
+    Matrix._42 = 0.0f;
+    Matrix._43 = 0.0f;
+    Matrix._44 = 1.0f;
+    DefaultMatrices.World = XMLoadFloat4x4(&Matrix);
+    DefaultMatrices.World = ::DirectX::XMMatrixTranspose(DefaultMatrices.World);
+
+    TestCallRender(Render, DefaultMatrices);
+  }
+
+  {
+    const auto pComponent = Component_t::Make(
+      {
+        { uT("kind"), uT("Geometry") },
+        { uT("variety"), uT("Billboard") },
+      });
+
+    auto PositionRender = itDataCreator->second(pPosition);
+    EXPECT_EQ(nullptr, PositionRender);
+
+    auto Render = itCreator->second(pComponent);
+    ASSERT_NE(nullptr, Render);
+
+    ::Matrices ExpectMatrices;
+    memset(&ExpectMatrices, 0, sizeof(ExpectMatrices));
+
+    const auto Distance = 62021.0f;
+
+    const auto X = 62022.0f;
+    const auto Y = 62023.0f;
+    const auto Z = 62024.0f;
+
+    const auto A = 62025.0f;
+    const auto B = 62026.0f;
+    const auto C = 62027.0f;
+
+    ExpectMatrices.View = GetView(
+      X, Y, Z,
+      A, B, C,
+      Distance + 0.1f);
+
+    ::DirectX::XMFLOAT4X4 Matrix;
+    XMStoreFloat4x4(&Matrix, ExpectMatrices.View);
+    Matrix._14 = 0.0f;
+    Matrix._24 = 0.0f;
+    Matrix._34 = 0.0f;
+    Matrix._41 = 0.0f;
+    Matrix._42 = 0.0f;
+    Matrix._43 = 0.0f;
+    Matrix._44 = 1.0f;
+
+    const auto BillboardMatrix = XMLoadFloat4x4(&Matrix);
+
+    const auto SetPosition = [&](float _X, float _Y, float _Z)
+    {
+      pPosition->SetValue(uT("x"), _X);
+      pPosition->SetValue(uT("y"), _Y);
+      pPosition->SetValue(uT("z"), _Z);
+
+      ExpectMatrices.World *= ::DirectX::XMMatrixTranslation(_X, _Y, _Z);
+    };
+
+    ExpectMatrices.World = BillboardMatrix;
+    SetPosition(1.0f, 2.0f, 3.0f);
+    ExpectMatrices.World = ::DirectX::XMMatrixTranspose(ExpectMatrices.World);
+
+    TestCallRender(Render, ExpectMatrices);
+
+    ExpectMatrices.World = BillboardMatrix;
+    SetPosition(11.0f, 22.0f, 33.0f);
+    ExpectMatrices.World = ::DirectX::XMMatrixTranspose(ExpectMatrices.World);
+
+    TestCallRender(Render, ExpectMatrices);
+  }
+
+  EXPECT_CALL(ConstantBuffer, Release())
+    .Times(1);
+}
+
 // ************************************************************************** //
 TEST_F(DirectX11_test, /*DISABLED_*/Test_Present_Geometry_CombineTransform)
 {
@@ -3965,8 +4599,8 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Present_Geometry_CombineTransform)
     .Times(1)
     .WillOnce(Return(&DeviceContext));
 
-  const Tested_t Example{ Data_t{} };
-  const ITested_t & IExample = Example;
+  const Tested_t oExample{ Data_t{} };
+  const ITested_t & IExample = oExample;
 
   auto itDataCreator = IExample.GetCreators().find(uT("Data"));
   ASSERT_NE(IExample.GetCreators().end(), itDataCreator);
@@ -4069,7 +4703,7 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Present_Geometry_CombineTransform)
     auto Render = itCreator->second(Component_t::Make(
       {
         { uT("kind"), uT("Geometry") },
-        { uT("static"), true }
+        { uT("variety"), uT("Static") },
       }));
     ASSERT_NE(nullptr, Render);
 
@@ -4078,6 +4712,142 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Present_Geometry_CombineTransform)
 
     Render();
   }
+
+  {
+    memset(&ExpectMatrices, 0, sizeof(ExpectMatrices));
+
+    ::DirectX::XMFLOAT4X4 Matrix;
+    XMStoreFloat4x4(&Matrix, ExpectMatrices.View);
+    Matrix._14 = 0.0f;
+    Matrix._24 = 0.0f;
+    Matrix._34 = 0.0f;
+    Matrix._41 = 0.0f;
+    Matrix._42 = 0.0f;
+    Matrix._43 = 0.0f;
+    Matrix._44 = 1.0f;
+
+    ExpectMatrices.World = XMLoadFloat4x4(&Matrix);
+
+    SetPosition(1.0f, 2.0f, 3.0f);
+    SetPosition(11.0f, 22.0f, 33.0f);
+
+    ExpectMatrices.World = ::DirectX::XMMatrixTranspose(ExpectMatrices.World);
+
+    auto Render = itCreator->second(Component_t::Make(
+      {
+        { uT("kind"), uT("Geometry") },
+        { uT("variety"), uT("Billboard") },
+      }));
+    ASSERT_NE(nullptr, Render);
+
+    EXPECT_CALL(DeviceContext, UpdateSubresource(_, _, _, ExpectMatrices, _, _))
+      .Times(1);
+
+    Render();
+  }
+}
+
+} // namespace renderer
+
+} // namespace api
+
+} // namespace covellite
+
+// ************************************************************************** //
+TEST_F(DirectX11_test, /*DISABLED_*/Test_Present_Geometry_DefaultDataValues)
+{
+  using DirectXProxy_t = ::mock::DirectX11::Proxy;
+  DirectXProxy_t DirectXProxy;
+  DirectXProxy_t::GetInstance() = &DirectXProxy;
+
+  ::mock::DirectX11::DeviceContext DeviceContext;
+
+  D3D11_BUFFER_DESC IndexBufferDesc = { 0 };
+  IndexBufferDesc.ByteWidth = 1811221344;
+
+  using namespace ::testing;
+
+  EXPECT_CALL(DirectXProxy, CreateDeviceContext())
+    .Times(1)
+    .WillOnce(Return(&DeviceContext));
+
+  const Tested_t oExample{ Data_t{} };
+  const ITested_t & IExample = oExample;
+
+  auto pPosition = Component_t::Make({ { uT("kind"), uT("Position") } });
+  auto pRotation = Component_t::Make({ { uT("kind"), uT("Rotation") } });
+  auto pScale = Component_t::Make({ { uT("kind"), uT("Scale") } });
+
+  auto itDataCreator = IExample.GetCreators().find(uT("Data"));
+  ASSERT_NE(IExample.GetCreators().end(), itDataCreator);
+
+  const auto TestCallRender = [&](
+    const bool _IsPositionOnly, ::Matrices & _ExpectMatrices,
+    const Component_t::ComponentPtr_t & _pComponent)
+  {
+    auto itCreator = IExample.GetCreators().find(uT("Present"));
+    ASSERT_NE(IExample.GetCreators().end(), itCreator);
+
+    auto PositionRender = itDataCreator->second(pPosition);
+    EXPECT_EQ(nullptr, PositionRender);
+
+    auto RotationRender = itDataCreator->second(pRotation);
+    EXPECT_EQ(nullptr, RotationRender);
+
+    auto ScaleRender = itDataCreator->second(pScale);
+    EXPECT_EQ(nullptr, ScaleRender);
+
+    auto Render = itCreator->second(_pComponent);
+    ASSERT_NE(nullptr, Render);
+
+    _ExpectMatrices.World *= ::DirectX::XMMatrixTranslation(0.0f, 0.0f, 0.0f);
+
+    if (!_IsPositionOnly)
+    {
+      _ExpectMatrices.World = 
+        _ExpectMatrices.World *
+        ::DirectX::XMMatrixRotationX(0.0f) *
+        ::DirectX::XMMatrixRotationY(0.0f) *
+        ::DirectX::XMMatrixRotationZ(0.0f) *
+        ::DirectX::XMMatrixScaling(1.0f, 1.0f, 1.0f);
+    }
+
+    _ExpectMatrices.World = ::DirectX::XMMatrixTranspose(_ExpectMatrices.World);
+
+    EXPECT_CALL(DeviceContext, UpdateSubresource(_, _, _, _ExpectMatrices, _, _))
+      .Times(1);
+
+    Render();
+  };
+
+  ::Matrices ExpectMatrices;
+  memset(&ExpectMatrices, 0, sizeof(ExpectMatrices));
+
+  ExpectMatrices.World = ::DirectX::XMMatrixIdentity();
+
+  TestCallRender(false, ExpectMatrices, Component_t::Make(
+    {
+      { uT("kind"), uT("Geometry") }
+    }));
+
+  ExpectMatrices.World = ::DirectX::XMMatrixIdentity();
+
+  TestCallRender(false, ExpectMatrices, Component_t::Make(
+    {
+      { uT("kind"), uT("Geometry") },
+      { uT("variety"), uT("Static") },
+    }));
+
+  ::DirectX::XMFLOAT4X4 Matrix;
+  XMStoreFloat4x4(&Matrix, ExpectMatrices.View);
+  Matrix._44 = 1.0f;
+  ExpectMatrices.World = XMLoadFloat4x4(&Matrix);
+
+  TestCallRender(true, ExpectMatrices, Component_t::Make(
+    {
+      { uT("kind"), uT("Geometry") },
+      { uT("variety"), uT("Billboard") },
+    }));
 }
 
 // ************************************************************************** //
@@ -4104,6 +4874,10 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Camera_Orthographic_DefaultPosition)
   Matrices.View = ::DirectX::XMMatrixTranspose(
     ::DirectX::XMMatrixIdentity());
 
+  ::DirectX::XMVECTOR Determinant;
+  Matrices.ViewInverse = ::DirectX::XMMatrixTranspose(
+    ::DirectX::XMMatrixInverse(&Determinant, ::DirectX::XMMatrixIdentity()));
+
 # pragma warning(pop)
 
   using namespace ::testing;
@@ -4112,8 +4886,8 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Camera_Orthographic_DefaultPosition)
     .Times(1)
     .WillOnce(Return(&DeviceContext));
 
-  const Tested_t Example{ Data_t{} };
-  const ITested_t & IExample = Example;
+  const Tested_t oExample{ Data_t{} };
+  const ITested_t & IExample = oExample;
 
   auto itCameraCreator = IExample.GetCreators().find(uT("Camera"));
   ASSERT_NE(IExample.GetCreators().end(), itCameraCreator);
@@ -4188,6 +4962,10 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Camera_Orthographic)
   Matrices.View = ::DirectX::XMMatrixTranspose(
     ::DirectX::XMMatrixIdentity());
 
+  ::DirectX::XMVECTOR Determinant;
+  Matrices.ViewInverse = ::DirectX::XMMatrixTranspose(
+    ::DirectX::XMMatrixInverse(&Determinant, ::DirectX::XMMatrixIdentity()));
+
 # pragma warning(pop)
 
   using namespace ::testing;
@@ -4196,8 +4974,8 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Camera_Orthographic)
     .Times(1)
     .WillOnce(Return(&DeviceContext));
 
-  const Tested_t Example{ Data_t{} };
-  const ITested_t & IExample = Example;
+  const Tested_t oExample{ Data_t{} };
+  const ITested_t & IExample = oExample;
 
   auto itDataCreator = IExample.GetCreators().find(uT("Data"));
   ASSERT_NE(IExample.GetCreators().end(), itDataCreator);
@@ -4271,8 +5049,8 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Camera_Perspective)
     .Times(1)
     .WillOnce(Return(&DeviceContext));
 
-  const Tested_t Example{ Data_t{} };
-  const ITested_t & IExample = Example;
+  const Tested_t oExample{ Data_t{} };
+  const ITested_t & IExample = oExample;
 
   auto itDataCreator = IExample.GetCreators().find(uT("Data"));
   ASSERT_NE(IExample.GetCreators().end(), itDataCreator);
@@ -4354,10 +5132,16 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Camera_Perspective)
 
     Matrices.Projection = ::DirectX::XMMatrixTranspose(
       GetProjection(AngleY, Width, Height));
-    Matrices.View = ::DirectX::XMMatrixTranspose(GetView(
+
+    const auto View = GetView(
       0.0f, 0.0f, 0.0f,
       0.0f, 0.0f, 0.0f,
-      0.1f));
+      0.1f);
+    Matrices.View = ::DirectX::XMMatrixTranspose(View);
+
+    ::DirectX::XMVECTOR Determinant;
+    Matrices.ViewInverse = ::DirectX::XMMatrixTranspose(
+      ::DirectX::XMMatrixInverse(&Determinant, View));
 
     auto CameraRender = itCameraCreator->second(pCamera);
     ASSERT_NE(nullptr, CameraRender);
@@ -4401,10 +5185,17 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Camera_Perspective)
 
       Matrices.Projection = ::DirectX::XMMatrixTranspose(
         GetProjection(AngleY, Width, Height));
-      Matrices.View = ::DirectX::XMMatrixTranspose(GetView(
+
+      const auto View = GetView(
         X, Y, Z,
         A, B, C,
-        Distance + 0.1f));
+        Distance + 0.1f);
+
+      Matrices.View = ::DirectX::XMMatrixTranspose(View);
+
+      ::DirectX::XMVECTOR Determinant;
+      Matrices.ViewInverse = ::DirectX::XMMatrixTranspose(
+        ::DirectX::XMMatrixInverse(&Determinant, View));
 
       pPosition->SetValue(uT("x"), X);
       pPosition->SetValue(uT("y"), Y);
@@ -4436,10 +5227,17 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Camera_Perspective)
 
       Matrices.Projection = ::DirectX::XMMatrixTranspose(
         GetProjection(AngleY, Width, Height));
-      Matrices.View = ::DirectX::XMMatrixTranspose(GetView(
+
+      const auto View = GetView(
         X, Y, Z,
         A, B, C,
-        Distance + 0.1f));
+        Distance + 0.1f);
+
+      Matrices.View = ::DirectX::XMMatrixTranspose(View);
+
+      ::DirectX::XMVECTOR Determinant;
+      Matrices.ViewInverse = ::DirectX::XMMatrixTranspose(
+        ::DirectX::XMMatrixInverse(&Determinant, View));
 
       pPosition->SetValue(uT("x"), X);
       pPosition->SetValue(uT("y"), Y);
@@ -4477,8 +5275,8 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Camera_DisableBlend)
     .Times(1)
     .WillOnce(Return(&DeviceContext));
 
-  const Tested_t Example{ Data_t{} };
-  const ITested_t & IExample = Example;
+  const Tested_t oExample{ Data_t{} };
+  const ITested_t & IExample = oExample;
 
   auto itCreator = IExample.GetCreators().find(uT("Camera"));
   ASSERT_NE(IExample.GetCreators().end(), itCreator);
@@ -4535,8 +5333,8 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Camera_Depth_Disabled)
     .Times(1)
     .WillOnce(Return(&DepthStencilView));
 
-  const Tested_t Example{ Data_t{} };
-  const ITested_t & IExample = Example;
+  const Tested_t oExample{ Data_t{} };
+  const ITested_t & IExample = oExample;
 
   auto itCreator = IExample.GetCreators().find(uT("Camera"));
   ASSERT_NE(IExample.GetCreators().end(), itCreator);
@@ -4564,7 +5362,7 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Lights_StructSizeAlign16Bytes)
 }
 
 // ************************************************************************** //
-TEST_F(DirectX11_test, /*DISABLED_*/Test_Lights_SendLightsInfoToPixelShader)
+TEST_F(DirectX11_test, /*DISABLED_*/Test_Lights_SendInfoToPixelShader)
 {
   using DirectXProxy_t = ::mock::DirectX11::Proxy;
   DirectXProxy_t DirectXProxy;
@@ -4572,7 +5370,7 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Lights_SendLightsInfoToPixelShader)
 
   ::mock::DirectX11::Device Device;
   ::mock::DirectX11::DeviceContext DeviceContext;
-  ::mock::DirectX11::Buffer LightsBuffer;
+  ::mock::DirectX11::LightsBuffer LightsBuffer;
 
   D3D11_BUFFER_DESC LightsBufferDesc = { 0 };
   LightsBufferDesc.Usage = D3D11_USAGE_DEFAULT;
@@ -4595,13 +5393,13 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Lights_SendLightsInfoToPixelShader)
       .WillOnce(Return(&DeviceContext));
 
     EXPECT_CALL(Device, CreateBuffer(_, _))
-      .Times(1);
+      .Times(AtLeast(1));
 
     EXPECT_CALL(DeviceContext, VSSetConstantBuffers(_, _, _))
-      .Times(1);
+      .Times(AtLeast(1));
 
     EXPECT_CALL(DeviceContext, PSSetConstantBuffers(_, _, _))
-      .Times(1);
+      .Times(AtLeast(1));
 
     EXPECT_CALL(Device, CreateBuffer(LightsBufferDesc, _))
       .Times(1)
@@ -4615,8 +5413,8 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Lights_SendLightsInfoToPixelShader)
       PSSetConstantBuffers(LIGHTS_BUFFER_INDEX, 1, &LightsBuffer))
       .Times(1);
 
-    const Tested_t Example{ Data_t{} };
-    const ITested_t & IExample = Example;
+    const Tested_t oExample{ Data_t{} };
+    const ITested_t & IExample = oExample;
 
     auto itShaderCreator = IExample.GetCreators().find(uT("Shader"));
     ASSERT_NE(IExample.GetCreators().end(), itShaderCreator);
@@ -4669,17 +5467,34 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Light_Ambient)
   DirectXProxy_t DirectXProxy;
   DirectXProxy_t::GetInstance() = &DirectXProxy;
 
+  D3D11_BUFFER_DESC LightsBufferDesc = { 0 };
+  LightsBufferDesc.Usage = D3D11_USAGE_DEFAULT;
+  LightsBufferDesc.ByteWidth = sizeof(::Lights);
+  LightsBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+
+  ::mock::DirectX11::Device Device;
   ::mock::DirectX11::DeviceContext DeviceContext;
-  ::mock::DirectX11::Buffer LightsBuffer;
+  ::mock::DirectX11::LightsBuffer LightsBuffer;
 
   using namespace ::testing;
+
+  EXPECT_CALL(DirectXProxy, CreateDevice())
+    .Times(1)
+    .WillOnce(Return(&Device));
 
   EXPECT_CALL(DirectXProxy, CreateDeviceContext())
     .Times(1)
     .WillOnce(Return(&DeviceContext));
 
-  const Tested_t Example{ Data_t{} };
-  const ITested_t & IExample = Example;
+  EXPECT_CALL(Device, CreateBuffer(_, _))
+    .Times(AtLeast(1));
+
+  EXPECT_CALL(Device, CreateBuffer(LightsBufferDesc, _))
+    .Times(1)
+    .WillOnce(Return(&LightsBuffer));
+
+  const Tested_t oExample{ Data_t{} };
+  const ITested_t & IExample = oExample;
 
   auto itLightCreator = IExample.GetCreators().find(uT("Light"));
   ASSERT_NE(IExample.GetCreators().end(), itLightCreator);
@@ -4750,7 +5565,6 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Light_Ambient)
         .Times(1);
 
       PixelShaderRender();
-
     };
 
     InSequence Dummy;
@@ -4806,17 +5620,34 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Light_Direction)
   DirectXProxy_t DirectXProxy;
   DirectXProxy_t::GetInstance() = &DirectXProxy;
 
+  D3D11_BUFFER_DESC LightsBufferDesc = { 0 };
+  LightsBufferDesc.Usage = D3D11_USAGE_DEFAULT;
+  LightsBufferDesc.ByteWidth = sizeof(::Lights);
+  LightsBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+
+  ::mock::DirectX11::Device Device;
   ::mock::DirectX11::DeviceContext DeviceContext;
-  ::mock::DirectX11::Buffer LightsBuffer;
+  ::mock::DirectX11::LightsBuffer LightsBuffer;
 
   using namespace ::testing;
+
+  EXPECT_CALL(DirectXProxy, CreateDevice())
+    .Times(1)
+    .WillOnce(Return(&Device));
 
   EXPECT_CALL(DirectXProxy, CreateDeviceContext())
     .Times(1)
     .WillOnce(Return(&DeviceContext));
 
-  const Tested_t Example{ Data_t{} };
-  const ITested_t & IExample = Example;
+  EXPECT_CALL(Device, CreateBuffer(_, _))
+    .Times(AtLeast(1));
+
+  EXPECT_CALL(Device, CreateBuffer(LightsBufferDesc, _))
+    .Times(1)
+    .WillOnce(Return(&LightsBuffer));
+
+  const Tested_t oExample{ Data_t{} };
+  const ITested_t & IExample = oExample;
 
   auto itDataCreator = IExample.GetCreators().find(uT("Data"));
   ASSERT_NE(IExample.GetCreators().end(), itDataCreator);
@@ -4974,17 +5805,34 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Light_Points)
   DirectXProxy_t DirectXProxy;
   DirectXProxy_t::GetInstance() = &DirectXProxy;
 
+  D3D11_BUFFER_DESC LightsBufferDesc = { 0 };
+  LightsBufferDesc.Usage = D3D11_USAGE_DEFAULT;
+  LightsBufferDesc.ByteWidth = sizeof(::Lights);
+  LightsBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+
+  ::mock::DirectX11::Device Device;
   ::mock::DirectX11::DeviceContext DeviceContext;
-  ::mock::DirectX11::Buffer LightsBuffer;
+  ::mock::DirectX11::LightsBuffer LightsBuffer;
 
   using namespace ::testing;
+
+  EXPECT_CALL(DirectXProxy, CreateDevice())
+    .Times(1)
+    .WillOnce(Return(&Device));
 
   EXPECT_CALL(DirectXProxy, CreateDeviceContext())
     .Times(1)
     .WillOnce(Return(&DeviceContext));
 
-  const Tested_t Example{ Data_t{} };
-  const ITested_t & IExample = Example;
+  EXPECT_CALL(Device, CreateBuffer(_, _))
+    .Times(AtLeast(1));
+
+  EXPECT_CALL(Device, CreateBuffer(LightsBufferDesc, _))
+    .Times(1)
+    .WillOnce(Return(&LightsBuffer));
+
+  const Tested_t oExample{ Data_t{} };
+  const ITested_t & IExample = oExample;
 
   auto itDataCreator = IExample.GetCreators().find(uT("Data"));
   ASSERT_NE(IExample.GetCreators().end(), itDataCreator);
@@ -5212,8 +6060,8 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Light_Points)
 // ************************************************************************** //
 TEST_F(DirectX11_test, /*DISABLED_*/Test_Light_Points_LimitCount)
 {
-  const Tested_t Example{ Data_t{} };
-  const ITested_t & IExample = Example;
+  const Tested_t oExample{ Data_t{} };
+  const ITested_t & IExample = oExample;
 
   auto itLightCreator = IExample.GetCreators().find(uT("Light"));
   ASSERT_NE(IExample.GetCreators().end(), itLightCreator);
@@ -5234,3 +6082,183 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Light_Points_LimitCount)
   // Лишний источник света - не должно упасть.
   LightRender();
 }
+
+// ************************************************************************** //
+TEST_F(DirectX11_test, /*DISABLED_*/Test_Fog_StructSizeAlign16Bytes)
+{
+  EXPECT_EQ(0, sizeof(::Fog) % 16);
+}
+
+// ************************************************************************** //
+TEST_F(DirectX11_test, /*DISABLED_*/Test_Fog_SendInfoToPixelShader)
+{
+  using DirectXProxy_t = ::mock::DirectX11::Proxy;
+  DirectXProxy_t DirectXProxy;
+  DirectXProxy_t::GetInstance() = &DirectXProxy;
+
+  ::mock::DirectX11::Device Device;
+  ::mock::DirectX11::DeviceContext DeviceContext;
+  ::mock::DirectX11::FogBuffer Buffer;
+
+  D3D11_BUFFER_DESC BufferDesc = { 0 };
+  BufferDesc.Usage = D3D11_USAGE_DEFAULT;
+  BufferDesc.ByteWidth = sizeof(::Fog);
+  BufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
+
+  using namespace ::testing;
+
+  const auto TestCallRender = [&](
+    const Component_t::ComponentPtr_t & _pData,
+    const Component_t::ComponentPtr_t & _pFog,
+    const ::Fog & _Expected)
+  {
+    EXPECT_CALL(DirectXProxy, CreateDevice())
+      .Times(1)
+      .WillOnce(Return(&Device));
+
+    EXPECT_CALL(DirectXProxy, CreateDeviceContext())
+      .Times(1)
+      .WillOnce(Return(&DeviceContext));
+
+    EXPECT_CALL(Device, CreateBuffer(_, _))
+      .Times(AtLeast(1));
+
+    EXPECT_CALL(DeviceContext, VSSetConstantBuffers(_, _, _))
+      .Times(AtLeast(1));
+
+    EXPECT_CALL(DeviceContext, PSSetConstantBuffers(_, _, _))
+      .Times(AtLeast(1));
+
+    EXPECT_CALL(Device, CreateBuffer(BufferDesc, _))
+      .Times(1)
+      .WillOnce(Return(&Buffer));
+
+    EXPECT_CALL(DeviceContext,
+      VSSetConstantBuffers(FOG_BUFFER_INDEX, 1, &Buffer))
+      .Times(1);
+
+    EXPECT_CALL(DeviceContext,
+      PSSetConstantBuffers(FOG_BUFFER_INDEX, 1, &Buffer))
+      .Times(1);
+
+    const Tested_t oExample{ Data_t{} };
+    const ITested_t & IExample = oExample;
+
+    auto itShaderCreator = IExample.GetCreators().find(uT("Shader"));
+    ASSERT_NE(IExample.GetCreators().end(), itShaderCreator);
+
+    const ::std::string ShaderData{ "float4 ps(??? _Value) : SV_Target\r\n" };
+
+    auto pPixelShader = Component_t::Make(
+      {
+        { uT("data"), (const uint8_t *)ShaderData.data() },
+        { uT("count"), ShaderData.size() },
+        { uT("entry"), uT("ps") },
+      });
+
+    auto PixelShaderRender = itShaderCreator->second(pPixelShader);
+    ASSERT_NE(nullptr, PixelShaderRender);
+
+    if (_pData != nullptr)
+    {
+      auto itDataCreator = IExample.GetCreators().find(uT("Data"));
+      ASSERT_NE(IExample.GetCreators().end(), itDataCreator);
+
+      auto Render = itDataCreator->second(_pData);
+      EXPECT_EQ(nullptr, Render);
+    }
+
+    auto itFogCreator = IExample.GetCreators().find(uT("Fog"));
+    ASSERT_NE(IExample.GetCreators().end(), itFogCreator);
+
+    auto FogRender = itFogCreator->second(_pFog);
+    ASSERT_NE(nullptr, FogRender);
+
+    FogRender();
+
+    EXPECT_CALL(DeviceContext,
+      UpdateSubresource(&Buffer, 0, nullptr, _Expected, 0, 0))
+      .Times(1);
+
+    PixelShaderRender();
+
+    if (_pData != nullptr)
+    {
+      ::Fog Expected = _Expected;
+      Expected.ARGBColor += 1;
+      Expected.Near += 2.0f;
+      Expected.Far += 3.0f;
+      Expected.Density += 4.0f;
+
+      _pData->SetValue(uT("color"), Expected.ARGBColor);
+      _pData->SetValue(uT("near"), Expected.Near);
+      _pData->SetValue(uT("far"), Expected.Far);
+      _pData->SetValue(uT("density"), Expected.Density);
+
+      FogRender();
+
+      EXPECT_CALL(DeviceContext,
+        UpdateSubresource(&Buffer, 0, nullptr, Expected, 0, 0))
+        .Times(1);
+
+      PixelShaderRender();
+    }
+  };
+
+  ::Fog FogData = { 0 };
+  FogData.ARGBColor = 0xFFFFFFFF;
+  FogData.Near = 10.0f;
+  FogData.Far = 100.0f;
+  FogData.Density = 1.0f;
+
+  const auto pDefaultFog = Component_t::Make({ });
+  TestCallRender(nullptr, pDefaultFog, FogData);
+
+  const auto Styles = { uT("linear"), uT("exp"), uT("exp2") };
+
+  for (const auto & Style : Styles)
+  {
+    FogData.ARGBColor -= 10;
+    FogData.Near += 11.0f;
+    FogData.Far += 12.0f;
+    FogData.Density += 13.0f;
+
+    const auto pFog = Component_t::Make(
+      {
+        { uT("style"), Style },
+        { uT("color"), FogData.ARGBColor },
+        { uT("near"), FogData.Near },
+        { uT("far"), FogData.Far },
+        { uT("density"), FogData.Density },
+      });
+
+    TestCallRender(nullptr, pFog, FogData);
+  }
+
+  for (const auto & Style : Styles)
+  {
+    FogData.ARGBColor -= 10;
+    FogData.Near += 11.0f;
+    FogData.Far += 12.0f;
+    FogData.Density += 13.0f;
+
+    const auto pData = Component_t::Make(
+      {
+        { uT("kind"), uT("Fog") },
+        { uT("color"), FogData.ARGBColor },
+        { uT("near"), FogData.Near },
+        { uT("far"), FogData.Far },
+        { uT("density"), FogData.Density },
+      });
+
+    const auto pFog = Component_t::Make(
+      {
+        { uT("style"), Style },
+      });
+
+    TestCallRender(pData, pFog, FogData);
+  }
+}
+
+#define Updater_test DirectX11_test
+#include "../Updater_test.hpp"

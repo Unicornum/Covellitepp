@@ -13,4 +13,7 @@
   <ItemGroup>
     <None Include="DateTime.cmd" />
   </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Time.cpp" />
+  </ItemGroup>
 </Project>

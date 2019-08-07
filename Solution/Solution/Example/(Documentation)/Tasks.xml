@@ -7,60 +7,35 @@
     <Y>68</Y>
   </Options>
   <Process>
-    <Task1 Text="Вспомогательные." Type="Info" Version="None" ExternalProgram="Solution" Expanded="true" Completed="false" History="false" ParentTaskText="false">
-      <Task2 Text="Завершение спринта." Type="None" Version="Younger" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="false"/>
-      <Task46 Text="Стабильная версия." Type="None" Version="Secondary" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="false"/>
-    </Task1>
+    <Task11 Text="Вспомогательные." Type="Info" Version="None" ExternalProgram="Solution" Expanded="true" Completed="false" History="false" ParentTaskText="false">
+      <Task13 Text="Стабильная версия." Type="None" Version="Secondary" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="false"/>
+      <Task12 Text="Завершение спринта." Type="None" Version="Younger" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="false"/>
+    </Task11>
   </Process>
   <Complete>
-    <Week6226>
-      <Task5 Text="Использование общего Present.Geometry для объектов, имеющих несколько уровней LOD." Type="Red" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="false"/>
-      <Task6 Text="Разделение идентификаторов типов объектов на ландшафт и остальные, а при добавлении объекта в игровую сцену в качестве типа использовать простой целочисленный тип." Type="Red" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="false"/>
-      <Task7 Text="Использование updater'ов через компонентную систему." Type="Red" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="false"/>
-      <Task8 Text="Ошибки при рендеринге во время удаления объектов." Type="Bug" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="false"/>
-      <Task9 Text="Оптимизация скорости работы демонстрационного режима." Type="Red" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="false"/>
-    </Week6226>
-    <Week6225>
-      <Task11 Text="Использование статических объектов и альфа-теста." Type="Red" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="false"/>
-      <Task12 Text="Разворот камеры по вертикали мышью в левой части экрана." Type="Red" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="false"/>
-      <Task13 Text="Ошибки при сборке проекта Packaging." Type="Bug" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="false"/>
-      <Task14 Text="Скайбокс." Type="Red" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="false"/>
-      <Task15 Text="Раздельное задание коэффициента масштабирования для каждого типа объекта." Type="Red" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="false"/>
-      <Task16 Text="Несколько мешей (под разный уровень LOD) для каждого объекта." Type="Red" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="false"/>
-      <Task17 Text="Рендеринг травы, используя несколько уровней LOD." Type="Red" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="false"/>
-      <Task18 Text="Добавлены модели, реорганизация кода." Type="Red" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="false"/>
-      <Task19 Text="Реорганизация кода." Type="Red" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="false"/>
-    </Week6225>
-    <Week6224>
-      <Task21 Text="Демонстрационная версия (третий этап)." Type="Red" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="true" ParentTaskText="false">
-        <Task22 Text="Класс меша объекта." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
-        <Task23 Text="Загрузка полноценных 3D моделей." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
-        <Task24 Text="Загрузка .obj файла из данных в памяти." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
-        <Task25 Text="Использование нескольких 3D моделей для одного типа объектов." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
-        <Task26 Text="Использование отдельной текстуры для каждой модели объекта." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
-        <Task27 Text="Установка 3D объекта на шестигранник." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
-        <Task28 Text="Замена триплексов 3D моделями." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
-        <Task29 Text="Не удаляются все объекты при выходе в главное меню; быстрое перемещение при повторном входе в автоматический режим; игровая сцена запоминает состояние камеры." Type="Bug" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
-        <Task30 Text="Добавление объектов ландшафта." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
-        <Task31 Text="Реорганизация кода." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
-        <Task32 Text="Изменение способа формирования ландшафта." Type="None" Version="None" ExternalProgram="None" Expanded="false" Completed="true" History="false" ParentTaskText="false">
-          <Task33 Text="Замена способа формирования мешей." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
-          <Task34 Text="Отдельный класс текстуры." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
-          <Task35 Text="Объединение текстур по типам объектов." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
-        </Task32>
-        <Task36 Text="Отсечение полупрозрачных пикселей." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
-        <Task37 Text="Объект размером больше одной ячейки." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
-        <Task38 Text="Упаковка данных программы в .pack." Type="None" Version="None" ExternalProgram="None" Expanded="false" Completed="true" History="false" ParentTaskText="true">
-          <Task39 Text="Версия для Windows." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
-          <Task40 Text="Версия для Android." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true">
-            <Task41 Text="Переименования проекта упаковщика." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
-          </Task40>
-        </Task38>
-        <Task42 Text="Модели бревен." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
-        <Task43 Text="Перемещение при помощи кнопок клавиатуры." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
-      </Task21>
-      <Task44 Text="Изменение способа формирования текстурных координат моделей, загруженных из obj файлов." Type="Red" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="false"/>
-    </Week6224>
-    <Week6223/>
+    <Week6239>
+      <Task1 Text="Частицы." Type="Red" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="true" ParentTaskText="false">
+        <Task2 Text="Заготовка класса." Type="None" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+        <Task3 Text="Простой билбоард." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+        <Task4 Text="Формирование вертексного буфера во время рендеринга кадра." Type="None" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+        <Task5 Text="Обновление списка частиц с учетом времени." Type="None" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+        <Task6 Text="Рендеринг группами." Type="None" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+        <Task7 Text="Отрисовка без перезаписи буфера глубины." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+        <Task8 Text="Реорганизация кода." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+        <Task9 Text="Прототип реализации в расчете на шейдеры." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+        <Task10 Text="Оптимизация скорости рендеринга и описание факторов, которые на это влияют." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+      </Task1>
+    </Week6239>
+    <Week6238>
+      <Task17 Text="Включение/отключение PBR-режима." Type="Red" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="false"/>
+      <Task18 Text="Формирование куба из большого числа треугольников." Type="Red" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="false">
+        <Task19 Text="Простая реализация." Type="None" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+      </Task18>
+      <Task20 Text="Анимация." Type="Red" Version="None" ExternalProgram="None" Expanded="false" Completed="true" History="false" ParentTaskText="false">
+        <Task21 Text="Реорганизация кода." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+      </Task20>
+    </Week6238>
+    <Week6237/>
+    <Week6236/>
   </Complete>
 </Tasks>

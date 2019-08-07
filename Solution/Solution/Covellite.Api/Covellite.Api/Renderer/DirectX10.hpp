@@ -4,6 +4,7 @@
 #include "IGraphicApi.hpp"
 #include "Api.forward.hpp"
 #include "CapturingServiceComponent.hpp"
+#include "Updater.hpp"
 
 struct ID3D10Device;
 struct IDXGISwapChain;
@@ -68,6 +69,7 @@ private:
   Render_t CreateState(const ComponentPtr_t &);
   Render_t CreateLight(const ComponentPtr_t &);
   Render_t CreateMaterial(const ComponentPtr_t &);
+  Render_t CreateFog(const ComponentPtr_t &);
   Render_t CreateTexture(const ComponentPtr_t &);
   Render_t CreateShader(const ComponentPtr_t &);
   Render_t CreateBuffer(const ComponentPtr_t &);
@@ -79,10 +81,11 @@ private:
 
 private:
   Render_t CreateBlendState(bool);
-  Render_t GetDepthState(bool, bool);
+  Render_t GetDepthState(bool, bool, bool);
   Render_t CreateCamera(const ComponentPtr_t &);
   Render_t CreateGeometry(const ComponentPtr_t &);
-  Render_t CreatePreRenderGeometry(void);
+  Render_t CreateBasePreRenderGeometry(void);
+  Render_t CreateBillboardPreRenderGeometry(void);
 
 private:
   const Creators_t m_Creators;
@@ -94,8 +97,9 @@ private:
   ComPtr_t<ID3D10DepthStencilView>  m_pDepthStencilView;
 
 private:
-  ::std::shared_ptr<Data>       m_pData;
-  CapturingServiceComponent     m_ServiceComponents;
+  ::std::shared_ptr<Data>   m_pData;
+  CapturingServiceComponent m_ServiceComponents;
+  Updater                   m_Updater;
 
 public:
   explicit DirectX10(const Data_t &);

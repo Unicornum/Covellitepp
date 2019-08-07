@@ -27,6 +27,8 @@ OpenGLES::~OpenGLES(void) = default;
 void OpenGLES::PresentFrame(void) /*override*/
 {
   m_pSurface->SwapBuffers();
+
+  m_Updater.UpdateTime();
 }
 
 } // namespace renderer

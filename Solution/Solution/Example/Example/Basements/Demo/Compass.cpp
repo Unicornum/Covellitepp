@@ -17,18 +17,24 @@ Compass::Compass(void) :
   GameObject(Extra::Compass)
 {
   AddTexture("demo.compass.png");
-  AddMesh<Mesh>(Mesh::Data
-    {
-      {
-        { -0.5f, -0.5f,  0.0f,   0.0f, 0.0f, 1.0f,  0.0f, 1.0f, },  // 0
-        { -0.5f,  0.5f,  0.0f,   0.0f, 0.0f, 1.0f,  0.0f, 0.0f, },  // 1
-        {  0.5f, -0.5f,  0.0f,   0.0f, 0.0f, 1.0f,  1.0f, 1.0f, },  // 2
-        {  0.5f,  0.5f,  0.0f,   0.0f, 0.0f, 1.0f,  1.0f, 0.0f, },  // 3
-      },
-      {
-         0,  2,  1,   2,  3,  1,
-      }
-    });
+
+  Mesh::Triangle_t Triangle1;
+  Triangle1.Vertexes[0].m_Vertex =
+    { -0.5f, -0.5f,  0.0f,   0.0f, 0.0f, 1.0f,  0.0f, 1.0f, };  // 0
+  Triangle1.Vertexes[1].m_Vertex =
+    {  0.5f, -0.5f,  0.0f,   0.0f, 0.0f, 1.0f,  1.0f, 1.0f, };  // 2
+  Triangle1.Vertexes[2].m_Vertex =
+    { -0.5f,  0.5f,  0.0f,   0.0f, 0.0f, 1.0f,  0.0f, 0.0f, };  // 1
+
+  Mesh::Triangle_t Triangle2;
+  Triangle2.Vertexes[0].m_Vertex =
+    {  0.5f, -0.5f,  0.0f,   0.0f, 0.0f, 1.0f,  1.0f, 1.0f, };  // 2
+  Triangle2.Vertexes[1].m_Vertex =
+    {  0.5f,  0.5f,  0.0f,   0.0f, 0.0f, 1.0f,  1.0f, 0.0f, };  // 3
+  Triangle2.Vertexes[2].m_Vertex =
+    { -0.5f,  0.5f,  0.0f,   0.0f, 0.0f, 1.0f,  0.0f, 0.0f, };  // 1
+
+  AddMesh<Mesh>(::std::vector<Mesh::Triangle_t>{ Triangle1, Triangle2 });
 }
 
 auto Compass::GetObject(const Any_t & _Value) const /*override*/ -> Objects_t

@@ -1,9 +1,10 @@
 
 #pragma once
+#include <GLMath.hpp>
 #include "IGraphicApi.hpp"
 #include "Api.forward.hpp"
 #include "CapturingServiceComponent.hpp"
-#include "GLMath.hpp"
+#include "Updater.hpp"
 
 namespace covellite
 {
@@ -52,6 +53,7 @@ public:
 private:
   Render_t CreateCamera(const ComponentPtr_t &);
   Render_t CreateState(const ComponentPtr_t &);
+  Render_t CreateFog(const ComponentPtr_t &);
   Render_t CreateLight(const ComponentPtr_t &);
   Render_t CreateMaterial(const ComponentPtr_t &);
   Render_t CreateTexture(const ComponentPtr_t &);
@@ -59,12 +61,13 @@ private:
   Render_t CreatePresent(const ComponentPtr_t &);
 
 private:
-  Render_t GetDepthRender(bool, bool);
+  Render_t GetDepthRender(const bool, const bool, const bool);
   Render_t GetCameraCommon(void);
   Render_t GetCameraOrthographic(const ComponentPtr_t &);
   Render_t GetCameraPerspective(const ComponentPtr_t &);
   Render_t CreateGeometry(const ComponentPtr_t &);
   MatrixBuilder_t GetPreRenderGeometry(void);
+  MatrixBuilder_t GetPreRenderBillboardGeometry(void);
   static Color_t ARGBtoFloat4(uint32_t);
 
 private:
@@ -81,6 +84,9 @@ private:
 private:
   ::std::shared_ptr<Data>   m_pData;
   CapturingServiceComponent m_ServiceComponents;
+
+protected:
+  Updater                   m_Updater;
 
 public:
   OpenGLCommon(const Data_t &, const String_t &);

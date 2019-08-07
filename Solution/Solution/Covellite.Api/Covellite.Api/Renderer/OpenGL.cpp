@@ -70,6 +70,8 @@ OpenGL::~OpenGL(void)
 void OpenGL::PresentFrame(void) /*override*/
 {
   WINAPI_CHECK USING_MOCK ::SwapBuffers(m_hDeviceContex);
+
+  m_Updater.UpdateTime();
 }
 
 } // namespace renderer

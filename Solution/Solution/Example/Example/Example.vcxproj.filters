@@ -153,6 +153,21 @@
     <ClInclude Include="Basements\Demo\Skybox.hpp">
       <Filter>Basements\Demo</Filter>
     </ClInclude>
+    <ClInclude Include="Basements\Demo\Animated.hpp">
+      <Filter>Basements\Demo</Filter>
+    </ClInclude>
+    <ClInclude Include="Basements\Demo\Assimp.hpp">
+      <Filter>Basements\Demo</Filter>
+    </ClInclude>
+    <ClInclude Include="Basements\Demo\Animations.hpp">
+      <Filter>Basements\Demo</Filter>
+    </ClInclude>
+    <ClInclude Include="Basements\Demo\Animation.hpp">
+      <Filter>Basements\Demo</Filter>
+    </ClInclude>
+    <ClInclude Include="Basements\Demo\Particles.hpp">
+      <Filter>Basements\Demo</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -266,6 +281,24 @@
       <Filter>Basements\Demo</Filter>
     </ClCompile>
     <ClCompile Include="Basements\Demo\Skybox.cpp">
+      <Filter>Basements\Demo</Filter>
+    </ClCompile>
+    <ClCompile Include="Basements\Demo\Assimp.cpp">
+      <Filter>Basements\Demo</Filter>
+    </ClCompile>
+    <ClCompile Include="Basements\Demo\Animated.cpp">
+      <Filter>Basements\Demo</Filter>
+    </ClCompile>
+    <ClCompile Include="Basements\Demo\Animated.Mesh.cpp">
+      <Filter>Basements\Demo</Filter>
+    </ClCompile>
+    <ClCompile Include="Basements\Demo\Animation.cpp">
+      <Filter>Basements\Demo</Filter>
+    </ClCompile>
+    <ClCompile Include="Basements\Demo\Animated.Animations.cpp">
+      <Filter>Basements\Demo</Filter>
+    </ClCompile>
+    <ClCompile Include="Basements\Demo\Particles.cpp">
       <Filter>Basements\Demo</Filter>
     </ClCompile>
   </ItemGroup>

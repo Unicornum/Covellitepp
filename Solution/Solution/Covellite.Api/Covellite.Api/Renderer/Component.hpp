@@ -42,6 +42,7 @@ public:
   class Position;
   class Rotation;
   class Scale;
+  class Fog;
 };
 
 class Component::Scissor
@@ -221,6 +222,25 @@ class Component::Scale :
 public:
   explicit Scale(const ComponentPtr_t & _pComponent) :
     Transform(_pComponent, 1.0f)
+  {
+
+  }
+};
+
+class Component::Fog
+{
+public:
+  const uint32_t Color;
+  const float Near;
+  const float Far;
+  const float Density;
+
+public:
+  explicit Fog(const ComponentPtr_t & _pComponent) :
+    Color(_pComponent->GetValue(uT("color"), 0xFFFFFFFF)),
+    Near(_pComponent->GetValue(uT("near"), 10.0f)),
+    Far(_pComponent->GetValue(uT("far"), 100.0f)),
+    Density(_pComponent->GetValue(uT("density"), 1.0f))
   {
 
   }

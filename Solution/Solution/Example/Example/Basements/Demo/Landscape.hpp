@@ -42,13 +42,11 @@ private:
   private:
     void LoadMesh(const Path_t &, const Rect &);
     void BuildMesh(const size_t, const int, const float, const Rect &);
-    void BuildBasementObject(const float);
     // cppcheck-suppress functionStatic
     void BuildTriplex6Object(const Point &, const float, const float, 
       const float, const Rect &);
     void BuildTriplex12Object(const Point &, const float, const float, 
       const float, const Rect &);
-    static Point GetPoint(const float, const float = 0.5f);
 
   public:
     Mesh(const size_t, const float, const Rect &);

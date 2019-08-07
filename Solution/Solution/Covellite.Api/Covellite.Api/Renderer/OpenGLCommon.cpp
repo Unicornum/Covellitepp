@@ -2,9 +2,8 @@
 #include "stdafx.h"
 #include "OpenGLCommon.hpp"
 #include <alicorn/cpp/math.hpp>
-#include <Covellite/Api/Vertex.hpp>
+#include <Covellite/Api/Defines.hpp>
 #include "Component.hpp"
-#include "GLMath.hpp"
 #include "fx/Data.h"
 
 namespace covellite
@@ -50,9 +49,9 @@ private:
 };
 
 template<>
-inline ::Lights & OpenGLCommon::Data::Get(void) 
-{ 
-  return m_Lights[m_CurrentCameraId].m_Lights; 
+inline ::Lights & OpenGLCommon::Data::Get(void)
+{
+  return m_Lights[m_CurrentCameraId].m_Lights;
 }
 
 void OpenGLCommon::Data::SetCameraId(const CameraId_t & _Id)
@@ -132,25 +131,28 @@ OpenGLCommon::OpenGLCommon(const Data_t & _Data, const String_t & _PreVersion) :
 {
   m_Creators =
   {
-    { uT("Data"), [&](const ComponentPtr_t & _pComponent)
+    { uT("Data"), [=](const ComponentPtr_t & _pComponent)
       {
         m_ServiceComponents.Add(_pComponent);
         return Render_t{};
       } },
-    { uT("Camera"), [&](const ComponentPtr_t & _pComponent)
+    { uT("Camera"), [=](const ComponentPtr_t & _pComponent)
       { return CreateCamera(_pComponent); } },
-    { uT("State"), [&](const ComponentPtr_t & _pComponent)
+    { uT("State"), [=](const ComponentPtr_t & _pComponent)
       { return CreateState(_pComponent); } },
-    { uT("Light"), [&](const ComponentPtr_t & _pComponent)
+    { uT("Fog"), [=](const ComponentPtr_t & _pComponent)
+      { return CreateFog(_pComponent); } },
+    { uT("Light"), [=](const ComponentPtr_t & _pComponent)
       { return CreateLight(_pComponent); } },
-    { uT("Material"), [&](const ComponentPtr_t & _pComponent)
+    { uT("Material"), [=](const ComponentPtr_t & _pComponent)
       { return CreateMaterial(_pComponent); } },
-    { uT("Texture"), [&](const ComponentPtr_t & _pComponent)
+    { uT("Texture"), [=](const ComponentPtr_t & _pComponent)
       { return CreateTexture(_pComponent); } },
-    { uT("Buffer"), [&](const ComponentPtr_t & _pComponent)
+    { uT("Buffer"), [=](const ComponentPtr_t & _pComponent)
       { return CreateBuffer(_pComponent); } },
-    { uT("Present"), [&](const ComponentPtr_t & _pComponent)
+    { uT("Present"), [=](const ComponentPtr_t & _pComponent)
       { return CreatePresent(_pComponent); } },
+    m_Updater.GetCreator(),
   };
 }
 
@@ -251,7 +253,8 @@ auto OpenGLCommon::CreateState(const ComponentPtr_t & _pComponent) -> Render_t
   {
     return GetDepthRender(
       _pComponent->GetValue(uT("enabled"), false),
-      _pComponent->GetValue(uT("clear"), false));
+      _pComponent->GetValue(uT("clear"), false),
+      _pComponent->GetValue(uT("overwrite"), true));
   };
 
   const auto CreateClearState = [&](void)
@@ -292,6 +295,34 @@ auto OpenGLCommon::CreateState(const ComponentPtr_t & _pComponent) -> Render_t
   };
 
   return Creators[_pComponent->Kind]();
+}
+
+auto OpenGLCommon::CreateFog(const ComponentPtr_t & _pComponent) -> Render_t
+{
+  const auto sStyle = _pComponent->GetValue(uT("style"), uT("linear"));
+
+  const auto Style =
+    (sStyle == uT("linear")) ? GL_LINEAR :
+    (sStyle == uT("exp")) ? GL_EXP :
+    (sStyle == uT("exp2")) ? GL_EXP2 :
+    throw STD_EXCEPTION << "Unknown style fog: " << sStyle <<
+      " [" << _pComponent->Id << "].";
+
+  const auto pFogData =
+    m_ServiceComponents.Get({ { uT("Fog"), _pComponent } })[0];
+
+  return [=](void)
+  {
+    const Component::Fog Fog{ pFogData };
+
+    glEnable(GL_FOG);
+    glHint(GL_FOG_HINT, GL_NICEST);
+    glFogfv(GL_FOG_COLOR, ARGBtoFloat4(Fog.Color).data());
+    glFogi(GL_FOG_MODE, Style);
+    glFogf(GL_FOG_START, Fog.Near);
+    glFogf(GL_FOG_END, Fog.Far);
+    glFogf(GL_FOG_DENSITY, Fog.Density);
+  };
 }
 
 auto OpenGLCommon::CreateLight(const ComponentPtr_t & _pComponent) -> Render_t
@@ -419,18 +450,16 @@ private:
   GLuint m_TextureId;
 
 public:
-  explicit Texture(const ComponentPtr_t & _pComponent)
+  explicit Texture(const Component::Texture & _Data)
   {
-    const Component::Texture Data{ _pComponent };
-
     glGenTextures(1, &m_TextureId);
     glBindTexture(GL_TEXTURE_2D, m_TextureId);
 
     // glTexImage2D копирует переданные данные в видеопамять, поэтому копировать
     // их в промежуточный буфер не нужно.
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA,
-      Data.Width, Data.Height, 0,
-      GL_RGBA, GL_UNSIGNED_BYTE, Data.pData);
+      _Data.Width, _Data.Height, 0,
+      GL_RGBA, GL_UNSIGNED_BYTE, _Data.pData);
 
     const auto Error = glGetError();
     if (Error != GL_NO_ERROR)
@@ -446,17 +475,45 @@ public:
 
 auto OpenGLCommon::CreateTexture(const ComponentPtr_t & _pComponent) -> Render_t
 {
-  const auto * pSampleState = &m_SampleState;
+  const auto pTextureData = 
+    m_ServiceComponents.Get({ { uT("Texture"), _pComponent } })[0];
 
-  const auto pTexture = ::std::make_shared<Texture>(
-    m_ServiceComponents.Get({ { uT("Texture"), _pComponent } })[0]);
-
-  return [=](void)
+  static const ::std::vector<String_t> IgnoreDestination =
   {
-    pTexture->Render();
-
-    (*pSampleState)();
+    uT("metalness"),
+    uT("roughness"),
+    uT("normal"),
+    uT("occlusion"),
   };
+
+  const auto IsContained = [](const auto & _Container, const auto & _Value)
+  {
+    const auto itValue = 
+      ::std::find(_Container.cbegin(), _Container.cend(), _Value);
+    return (itValue != _Container.cend());
+  };
+
+  const auto Destination = 
+    pTextureData->GetValue(uT("destination"), uT("albedo"));
+
+  if (Destination == uT("albedo"))
+  {
+    const auto pTexture =
+      ::std::make_shared<Texture>(Component::Texture{ pTextureData });
+
+    return [=](void)
+    {
+      pTexture->Render();
+      m_SampleState();
+    };
+  }
+  else if (!IsContained(IgnoreDestination, Destination))
+  {
+    throw STD_EXCEPTION << "Unexpected destination texture: " << Destination <<
+      uT(" [id=") << _pComponent->Id << uT("].");
+  }
+
+  return nullptr;
 }
 
 auto OpenGLCommon::CreateBuffer(const ComponentPtr_t & _pBuffer) -> Render_t
@@ -494,7 +551,8 @@ auto OpenGLCommon::CreateBuffer(const ComponentPtr_t & _pBuffer) -> Render_t
 
   auto CreatePolyhedronVertexBuffer = [&](void) -> Render_t
   {
-    using Type_t = ::covellite::api::Vertex::Polyhedron;
+    using Type_t = ::covellite::api::vertex::Polyhedron;
+    using BufferMapper_t = cbBufferMap_t<Type_t>;
 
     if (!pBufferData->IsType<const Type_t *>(uT("data")))
     {
@@ -503,24 +561,40 @@ auto OpenGLCommon::CreateBuffer(const ComponentPtr_t & _pBuffer) -> Render_t
 
     const Component::Buffer<Type_t> Info{ pBufferData };
 
-    const ::std::vector<Type_t> Data{ Info.pData, Info.pData + Info.Count };
+    const auto pData = ::std::make_shared<::std::vector<Type_t>>(
+      Info.pData, Info.pData + Info.Count);
 
-    return [=](void)
+    const auto & cbBufferMapper =
+      _pBuffer->GetValue<const BufferMapper_t &>(uT("mapper"), nullptr);
+
+    const Render_t StaticRender = [=](void)
     {
-      glVertexPointer(3, GL_FLOAT, sizeof(Type_t), &Data[0].x);
+      glVertexPointer(3, GL_FLOAT, sizeof(Type_t), &(pData->data()->x));
       glEnableClientState(GL_VERTEX_ARRAY);
 
-      glNormalPointer(GL_FLOAT, sizeof(Type_t), &Data[0].nx);
+      glDisableClientState(GL_COLOR_ARRAY);
+
+      glNormalPointer(GL_FLOAT, sizeof(Type_t), &(pData->data()->nx));
       glEnableClientState(GL_NORMAL_ARRAY);
 
-      glTexCoordPointer(2, GL_FLOAT, sizeof(Type_t), &Data[0].tu);
+      glTexCoordPointer(2, GL_FLOAT, sizeof(Type_t), &(pData->data()->tu));
       glEnableClientState(GL_TEXTURE_COORD_ARRAY);
     };
+
+    const Render_t DynamicRender = [=](void)
+    {
+      const auto IsDirty = cbBufferMapper(nullptr);
+      if (IsDirty) cbBufferMapper(pData->data());
+
+      StaticRender();
+    };
+
+    return (cbBufferMapper == nullptr) ? StaticRender : DynamicRender;
   };
 
   auto CreatePolygonVertexBuffer = [&](void) -> Render_t
   {
-    using Type_t = ::covellite::api::Vertex::Polygon;
+    using Type_t = ::covellite::api::vertex::Polygon;
 
     if (!pBufferData->IsType<const Type_t *>(uT("data")))
     {
@@ -571,12 +645,13 @@ auto OpenGLCommon::CreatePresent(const ComponentPtr_t & _pComponent) -> Render_t
 
 auto OpenGLCommon::GetCameraCommon(void) -> Render_t
 {
-  const auto DisableDepthRender = GetDepthRender(false, false);
+  const auto DisableDepthRender = GetDepthRender(false, false, false);
 
   return [=](void)
   {
     DisableDepthRender();
 
+    glDisable(GL_FOG);
     glDisable(GL_BLEND);
     glDisable(GL_ALPHA_TEST);
     glDisable(GL_DITHER);
@@ -614,7 +689,7 @@ auto OpenGLCommon::GetCameraOrthographic(const ComponentPtr_t &) -> Render_t
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
 
-    glOrthof(
+    glOrtho(
       Viewport[0] + Pos.X, Viewport[0] + Viewport[2] + Pos.X,
       Viewport[1] + Viewport[3] + Pos.Y, Viewport[1] + Pos.Y,
       -1.0f, 1.0f);
@@ -689,21 +764,28 @@ auto OpenGLCommon::GetCameraPerspective(const ComponentPtr_t & _pComponent) -> R
   };
 }
 
-auto OpenGLCommon::GetDepthRender(bool _IsEnabled, bool _IsClear) -> Render_t
+auto OpenGLCommon::GetDepthRender(
+  const bool _IsEnabled, 
+  const bool _IsClear,
+  const bool _IsOverwrite) -> Render_t
 {
   const Render_t DepthDisable = [](void)
   {
     glDisable(GL_DEPTH_TEST);
   };
 
-  const Render_t DepthEnable = [](void)
+  const auto IsOverwrite = _IsOverwrite ? GL_TRUE : GL_FALSE;
+
+  const Render_t DepthEnable = [=](void)
   {
     glEnable(GL_DEPTH_TEST);
+    glDepthMask(IsOverwrite);
   };
 
-  const Render_t DepthClear = [](void)
+  const Render_t DepthClear = [=](void)
   {
     glEnable(GL_DEPTH_TEST);
+    glDepthMask(IsOverwrite);
     glClear(GL_DEPTH_BUFFER_BIT);
   };
 
@@ -723,9 +805,14 @@ auto OpenGLCommon::CreateGeometry(const ComponentPtr_t & _pComponent) -> Render_
     };
   };
 
-  const auto PreRender = _pComponent->GetValue(uT("static"), false) ?
-    GetPreRenderStaticGeometry () : GetPreRenderGeometry();
-  const auto * pDrawElements = &m_DrawElements;
+  const auto Variety = _pComponent->GetValue(uT("variety"), uT("Default"));
+
+  const auto PreRender =
+    (Variety == uT("Default")) ? GetPreRenderGeometry() :
+    (Variety == uT("Static")) ? GetPreRenderStaticGeometry() :
+    (Variety == uT("Billboard")) ? GetPreRenderBillboardGeometry() :
+      throw STD_EXCEPTION << "Unexpected variety: " << Variety <<
+      " [id=" << _pComponent->Id << "].";
 
   return [=](void)
   {
@@ -734,19 +821,15 @@ auto OpenGLCommon::CreateGeometry(const ComponentPtr_t & _pComponent) -> Render_
     // трансформации) можно было восстановить ее обратно.
     glPushMatrix();
 
-    ::glm::mat4 MatrixModelView;
-    glGetFloatv(GL_MODELVIEW_MATRIX, ::glm::value_ptr(MatrixModelView));
+    ::glm::mat4 MatrixView;
+    glGetFloatv(GL_MODELVIEW_MATRIX, ::glm::value_ptr(MatrixView));
 
-    PreRender(MatrixModelView);
+    PreRender(MatrixView);
 
-    glLoadMatrixf(::glm::value_ptr(MatrixModelView));
+    glLoadMatrixf(::glm::value_ptr(MatrixView));
 
-    (*pDrawElements)();
+    m_DrawElements();
 
-    glDisableClientState(GL_VERTEX_ARRAY);
-    glDisableClientState(GL_COLOR_ARRAY);
-    glDisableClientState(GL_NORMAL_ARRAY);
-    glDisableClientState(GL_TEXTURE_COORD_ARRAY);
     glDisable(GL_TEXTURE_2D);
 
     // Восстанавливаем матрицу вида, сформированную камерой.
@@ -796,6 +879,42 @@ auto OpenGLCommon::GetPreRenderGeometry(void) -> MatrixBuilder_t
       { uT("Rotation"), CreateRotation },
       { uT("Scale"), CreateScale },
     });
+
+  return [PreRenders](::glm::mat4 & _Matrix)
+  {
+    for (auto & Render : PreRenders) Render(_Matrix);
+  };
+}
+
+auto OpenGLCommon::GetPreRenderBillboardGeometry(void) -> MatrixBuilder_t
+{
+  ::std::deque<MatrixBuilder_t> PreRenders;
+
+  auto CreatePosition = [&](const ComponentPtr_t & _pPosition)
+  {
+    // OpenGL требует фомирования мартиц тансформации в обратном порядке!
+    PreRenders.push_front([_pPosition](::glm::mat4 & _Matrix)
+    {
+      const Component::Position Data{ _pPosition };
+      _Matrix = ::glm::translate(_Matrix, ::glm::vec3{ Data.X, Data.Y, Data.Z });
+    });
+  };
+
+  m_ServiceComponents.Process({ { uT("Position"), CreatePosition } });
+
+  PreRenders.push_front([=](::glm::mat4 & _Matrix)
+  {
+    auto Matrix = ::glm::transpose(_Matrix);
+    Matrix[0][3] = 0.0f;
+    Matrix[1][3] = 0.0f;
+    Matrix[2][3] = 0.0f;
+    Matrix[3][0] = 0.0f;
+    Matrix[3][1] = 0.0f;
+    Matrix[3][2] = 0.0f;
+    Matrix[3][3] = 1.0f;
+
+    _Matrix *= Matrix;
+  });
 
   return [PreRenders](::glm::mat4 & _Matrix)
   {

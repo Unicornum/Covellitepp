@@ -8,11 +8,11 @@
   </Options>
   <Process/>
   <Complete>
-    <Week6225>
-      <Task6 Text="Изменение логики работы цикла сообщений." Type="Red" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="false"/>
-    </Week6225>
-    <Week6224/>
-    <Week6223/>
-    <Week6222/>
+    <Week6237>
+      <Task6 Text="Android: расширение диагностики запуска приложения." Type="Red" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="true" ParentTaskText="false"/>
+    </Week6237>
+    <Week6236/>
+    <Week6235/>
+    <Week6234/>
   </Complete>
 </Tasks>

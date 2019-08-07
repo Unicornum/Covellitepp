@@ -64,12 +64,17 @@
     <ClCompile />
     <ClCompile>
       <AdditionalOptions>-Wno-unused-variable %(AdditionalOptions)</AdditionalOptions>
+      <Optimization>MaxSpeed</Optimization>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="Basements\Common.hpp" />
     <ClInclude Include="Basements\Demo.hpp" />
     <ClInclude Include="Basements\Demo\3DScene.hpp" />
+    <ClInclude Include="Basements\Demo\Animated.hpp" />
+    <ClInclude Include="Basements\Demo\Animation.hpp" />
+    <ClInclude Include="Basements\Demo\Animations.hpp" />
+    <ClInclude Include="Basements\Demo\Assimp.hpp" />
     <ClInclude Include="Basements\Demo\Camera.hpp" />
     <ClInclude Include="Basements\Demo\Compass.hpp" />
     <ClInclude Include="Basements\Demo\Constants.hpp" />
@@ -89,6 +94,7 @@
     <ClInclude Include="Basements\Demo\Landscape.hpp" />
     <ClInclude Include="Basements\Demo\Loader.hpp" />
     <ClInclude Include="Basements\Demo\Model.hpp" />
+    <ClInclude Include="Basements\Demo\Particles.hpp" />
     <ClInclude Include="Basements\Demo\Skybox.hpp" />
     <ClInclude Include="Basements\Demo\stdafx.h" />
     <ClInclude Include="Basements\Demo\View.hpp" />
@@ -131,6 +137,11 @@
       <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">$(IntDir)%(filename).basement.o</ObjectFileName>
     </ClCompile>
     <ClCompile Include="Basements\Demo\3DScene.cpp" />
+    <ClCompile Include="Basements\Demo\Animated.Animations.cpp" />
+    <ClCompile Include="Basements\Demo\Animated.cpp" />
+    <ClCompile Include="Basements\Demo\Animated.Mesh.cpp" />
+    <ClCompile Include="Basements\Demo\Animation.cpp" />
+    <ClCompile Include="Basements\Demo\Assimp.cpp" />
     <ClCompile Include="Basements\Demo\Camera.cpp" />
     <ClCompile Include="Basements\Demo\Compass.cpp" />
     <ClCompile Include="Basements\Demo\Controller.cpp" />
@@ -146,6 +157,7 @@
     <ClCompile Include="Basements\Demo\Landscape.Mesh.cpp" />
     <ClCompile Include="Basements\Demo\Loader.cpp" />
     <ClCompile Include="Basements\Demo\Model.cpp" />
+    <ClCompile Include="Basements\Demo\Particles.cpp" />
     <ClCompile Include="Basements\Demo\Skybox.cpp" />
     <ClCompile Include="Basements\Demo\View.cpp" />
     <ClCompile Include="Basements\Demo\Water.cpp" />

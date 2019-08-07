@@ -73,6 +73,10 @@
     <ClInclude Include="Renderer\fx\Hlsl.hpp">
       <Filter>Renderer\fx</Filter>
     </ClInclude>
+    <ClInclude Include="Defines.hpp" />
+    <ClInclude Include="Renderer\Updater.hpp">
+      <Filter>Renderer</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -105,6 +109,9 @@
       <Filter>Renderer</Filter>
     </ClCompile>
     <ClCompile Include="Window.windows.cpp" />
+    <ClCompile Include="Renderer\Updater.cpp">
+      <Filter>Renderer</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Renderer\fx\Vertex.fx">
@@ -114,6 +121,12 @@
       <Filter>Renderer\fx</Filter>
     </FxCompile>
     <FxCompile Include="Renderer\fx\Input.fx">
+      <Filter>Renderer\fx</Filter>
+    </FxCompile>
+    <FxCompile Include="Renderer\fx\PBR1.fx">
+      <Filter>Renderer\fx</Filter>
+    </FxCompile>
+    <FxCompile Include="Renderer\fx\Example.fx">
       <Filter>Renderer\fx</Filter>
     </FxCompile>
   </ItemGroup>

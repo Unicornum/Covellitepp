@@ -13,6 +13,7 @@ public:
     Start = 0,
     Auto,
     Manual,
+    Animation,
     Exit,
 
     None,

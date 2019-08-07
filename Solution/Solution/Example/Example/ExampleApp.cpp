@@ -42,9 +42,9 @@ void ExampleApp::DoInitLogger(void)
   if (::alicorn::extension::cpp::IS_RELEASE_CONFIGURATION)
   {
     LOGGER(Filter) << LOGGER_MIN_LEVEL(Info);
-    LOGGER(report::Html);
     LOGGER(MaxLogFiles) << 20;
     LOGGER(MaxLogSize) << 10 * 1024 * 1024;
+    LOGGER(report::Html);
   }
   else
   {

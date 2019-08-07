@@ -13,8 +13,7 @@
 *  
 */
 
-#include "Api\Events.hpp"
-#include "Api\Vertex.hpp"
+#include "Api\Defines.hpp"
 #include "Api\Component.inl"
 #include "Api\Renders.hpp"
 #include "Api\IWindow.hpp"

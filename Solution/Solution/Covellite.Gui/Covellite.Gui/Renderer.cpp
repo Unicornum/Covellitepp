@@ -16,7 +16,7 @@ namespace covellite
 namespace gui
 {
 
-using Vertex_t = ::covellite::api::Vertex::Polygon;
+using Vertex_t = ::covellite::api::vertex::Polygon;
 
 Renderer::Renderer(const RendersPtr_t & _pRenders) :
   m_pRenders(_pRenders),

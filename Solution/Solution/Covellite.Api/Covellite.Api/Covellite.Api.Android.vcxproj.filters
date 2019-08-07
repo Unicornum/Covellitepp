@@ -49,6 +49,10 @@
     <ClInclude Include="Renderer\CapturingServiceComponent.hpp">
       <Filter>Renderer</Filter>
     </ClInclude>
+    <ClInclude Include="Defines.hpp" />
+    <ClInclude Include="Renderer\Updater.hpp">
+      <Filter>Renderer</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Window.cpp" />
@@ -63,6 +67,9 @@
       <Filter>Renderer</Filter>
     </ClCompile>
     <ClCompile Include="Window.android.cpp" />
+    <ClCompile Include="Renderer\Updater.cpp">
+      <Filter>Renderer</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="Component.inl" />

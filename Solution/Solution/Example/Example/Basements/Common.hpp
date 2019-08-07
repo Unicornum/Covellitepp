@@ -45,7 +45,7 @@ protected:
     static size_t GetUniqueId(void);
 
   private:
-    const size_t m_Id;
+    size_t m_Id;
 
   public:
     Id(void);
@@ -55,7 +55,7 @@ public:
   void Render(void) override;
 
 protected:
-  void LoadTexture(const Path_t &, const String_t &);
+  void LoadTexture(const Path_t &, const String_t &, const String_t & = uT("albedo"));
 
 protected:
   const RendersPtr_t m_pRenders;

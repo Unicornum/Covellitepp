@@ -32,6 +32,7 @@ public:
     Red,
     Green,
     Blue,
+    PBR,
   };
 };
 
@@ -53,26 +54,27 @@ public:
 class Simple3DObject final :
   public Common
 {
-  using Updater_t = ::std::function<void(const float)>;
+  using Updater_t = ::covellite::api::Updater_t;
 
 public:
   void Notify(int, const ::boost::any &) override;
-  void Render(void) override;
 
 private:
   Updater_t GetUpdater(void);
 
 private:
   Id BuildCamera(void);
+  Id BuildShader(int);
   Id BuildLights(int);
   Id BuildCube(int, float, float, float);
 
 private:
   Component_t::ComponentPtr_t m_pCubeRotation;
-  ::std::vector<Id> m_Lights;
+  Id m_Camera;
+  ::std::vector<Id> m_Cubes;
 
 public:
-  Simple3DObject(const RendersPtr_t &, int, int);
+  Simple3DObject(const RendersPtr_t &, const int, const int);
   ~Simple3DObject(void);
 };
 

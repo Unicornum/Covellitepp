@@ -12,6 +12,7 @@
       <input type="checkbox" id="id_red" checked />Point (red)<br/>
       <input type="checkbox" id="id_green" checked />Point (green)<br/>
       <input type="checkbox" id="id_blue" checked />Point (blue)<br/>
+      <input type="checkbox" id="id_pbr" checked />PBR<br/>    
     </form>
     <cube-info>
       <polygons-per-cube>

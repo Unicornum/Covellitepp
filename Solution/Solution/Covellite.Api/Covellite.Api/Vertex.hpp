@@ -1,6 +1,6 @@
 
 #pragma once
-#include <alicorn/std/string.hpp>
+#include <cstdint>
 
 namespace covellite
 {
@@ -10,6 +10,9 @@ namespace api
 
 /**
 * \ingroup CovelliteApiGroup
+* \deprecated
+*  Класс устарел и будет удален в следующей стабильной версии, вместо него
+*  использовать классы из пространства имен vertex.
 * \brief
 *  Класс входит в проект \ref CovelliteApiPage \n
 *  Класс-контейнер форматов вертексных буферов.
@@ -28,7 +31,7 @@ namespace api
 * \copyright
 *  © CTAPOBEP 2018 - 2019
 */
-class Vertex final
+class [[deprecated]] Vertex final
 {
 public:
   /// \brief
@@ -54,6 +57,14 @@ public:
     float tu, tv;
   };
 };
+
+namespace vertex
+{
+
+using Polygon = Vertex::Polygon;
+using Polyhedron = Vertex::Polyhedron;
+
+} // namespace vertex
 
 } // namespace api
 

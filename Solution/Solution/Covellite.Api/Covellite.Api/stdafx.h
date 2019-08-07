@@ -2,6 +2,7 @@
 #pragma once
 #include "targetver.h"
 #include <memory>
+#include <chrono>
 #include <alicorn/requirements.hpp>
 #include <alicorn/std/string.hpp>
 #include <alicorn/cpp/math.hpp>

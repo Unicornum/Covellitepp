@@ -50,8 +50,10 @@ void Common::Render(void) /*override*/
   }
 }
 
-void Common::LoadTexture(const Path_t & _RelativePathToSourceFile,
-  const String_t & _TextureId)
+void Common::LoadTexture(
+  const Path_t & _RelativePathToSourceFile,
+  const String_t & _Id,
+  const String_t & _Destination)
 {
   using ::covellite::app::Settings_t;
   namespace image = ::alicorn::source::image;
@@ -75,10 +77,11 @@ void Common::LoadTexture(const Path_t & _RelativePathToSourceFile,
         { uT("data"), Image.GetData().Buffer.data() },
         { uT("width"), static_cast<int>(Image.GetData().Width) },
         { uT("height"), static_cast<int>(Image.GetData().Height) },
+        { uT("destination"), _Destination },
       }),
       Component_t::Make(
       {
-        { uT("id"), _TextureId },
+        { uT("id"), _Id },
         { uT("type"), uT("Texture") },
       }),
     });

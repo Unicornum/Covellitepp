@@ -1,8 +1,7 @@
 
 #pragma once
 #include <vector>
-#include <unordered_map>
-//#include <alicorn/std/vector.hpp>
+#include <Covellite/Api/robin_hood.hpp>
 #include "Defines.hpp"
 #include "CubeCoords.hpp"
 #include "Constants.hpp"
@@ -34,7 +33,8 @@ namespace support
 */
 class GameScene final
 {
-  using SceneObjects_t = ::std::unordered_map<uint64_t, ::std::vector<Id_t>>;
+  using SceneObjects_t = ::robin_hood::unordered_map<uint64_t, ::std::vector<Id_t>>;
+  using CellObject_t = ::robin_hood::pair<uint64_t, ::std::vector<Id_t>>;
   using Callback_t = ::std::function<void(const Id_t)>;
   using RenderObject_t = ::std::pair<float, Id_t>;
 

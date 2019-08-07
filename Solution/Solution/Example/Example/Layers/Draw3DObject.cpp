@@ -18,7 +18,8 @@ static const auto DescriptionLayer =
   uT("для оценки возможностей устройства по одновременному отображению ") +
   uT("количества полигонов).<br/>") +
   uT("<br/>") + 
-  uT("Checkbox'ы слева позволяют включать/отключать источники света.<br/>") +
+  uT("Checkbox'ы слева позволяют включать/отключать источники света и ") +
+  uT("использование режима PBR-текстур.<br/>") +
   uT("Кнопками внизу окна можно менять:<br/>") + 
   uT("- Количество полигонов, из которых состоит кубик.<br/>") +
   uT("- Количество отображаемых кубиков.<br/>") +
@@ -84,6 +85,12 @@ Draw3DObject::Draw3DObject(IWindowGui_t & _Window) :
     .Connect([=](void)
   {
     ChangeLights(::basement::Lights::Blue);
+  });
+
+  m_Events[Change.DocumentId(GetId()).ElementId("id_pbr")]
+    .Connect([=](void)
+  {
+    ChangeLights(::basement::Lights::PBR);
   });
 
   const auto ChangeScene = [&](const ::std::string & _ElementId, int _Value)

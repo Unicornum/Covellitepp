@@ -39,12 +39,12 @@ public:
 
 private:
   Render_t Create(const ComponentPtr_t &);
-  Render_t CreateUpdater(const ComponentPtr_t &);
 
 private:
-  const Creators_t m_Creators;
+  Creators_t m_Creators;
   ::std::map<Id_t, ::std::pair<size_t, Render_t>> m_AllExistingRenders;
   //::boost::mutex m_Mutex;
+  ::std::size_t m_MaxRendersCount = 10;
 
 public:
   explicit Renders(const Creators_t &);

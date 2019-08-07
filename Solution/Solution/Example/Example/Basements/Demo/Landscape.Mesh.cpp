@@ -196,18 +196,14 @@ void Landscape::Mesh::LoadMesh(
     for (int i = 0; i < _Count; i++)
     {
       const size_t iVertex = _pIndices[i].vertex_index - 1;
-      Triangle[i].x = Data.Vertex[iVertex].x;
-      Triangle[i].y = Data.Vertex[iVertex].y;
-      Triangle[i].z = Data.Vertex[iVertex].z;
+      Triangle.Vertexes[i].m_Vertex.x = Data.Vertex[iVertex].x;
+      Triangle.Vertexes[i].m_Vertex.y = Data.Vertex[iVertex].y;
+      Triangle.Vertexes[i].m_Vertex.z = Data.Vertex[iVertex].z;
 
       const size_t iNormal = _pIndices[i].normal_index - 1;
-      Triangle[i].nx = Data.Normal[iNormal].x;
-      Triangle[i].ny = Data.Normal[iNormal].y;
-      Triangle[i].nz = Data.Normal[iNormal].z;
-
-      const size_t iTexCoords = _pIndices[i].texcoord_index - 1;
-      Triangle[i].tu = Data.TexCoord[iTexCoords].x;
-      Triangle[i].tv = Data.TexCoord[iTexCoords].y;
+      Triangle.Vertexes[i].m_Vertex.nx = Data.Normal[iNormal].x;
+      Triangle.Vertexes[i].m_Vertex.ny = Data.Normal[iNormal].y;
+      Triangle.Vertexes[i].m_Vertex.nz = Data.Normal[iNormal].z;
 
       // Предполагается, что модель изначально использует текстурные координаты
       // диапазоне 0...1, а повторяется текстура в диапазонах 1...2, 2...3
@@ -228,9 +224,10 @@ void Landscape::Mesh::LoadMesh(
         return Result;
       };
 
-      Triangle[i].tu = Convert(Triangle[i].tu, 
+      const size_t iTexCoords = _pIndices[i].texcoord_index - 1;
+      Triangle.Vertexes[i].m_Vertex.tu = Convert(Data.TexCoord[iTexCoords].x,
         Data.TextureCoord.left, Data.TextureCoord.right);
-      Triangle[i].tv = Convert(Triangle[i].tv, 
+      Triangle.Vertexes[i].m_Vertex.tv = Convert(Data.TexCoord[iTexCoords].y,
         Data.TextureCoord.top, Data.TextureCoord.bottom);
     }
 
@@ -321,77 +318,6 @@ void Landscape::Mesh::BuildMesh(
           _TextureCoord);
       }
     }
-  }
-}
-
-void Landscape::Mesh::BuildBasementObject(const float _TextureRatioXY)
-{
-  const auto kX = 1.0f / (4.0f * _TextureRatioXY);
-
-  ::std::vector<Vertex_t> Points;
-
-  for (float i = 0.0f; i < 6.0f; i += 1.0f)
-  {
-    const auto HexPoint = GetPoint(i);
-
-    Points.push_back(
-      {
-        HexPoint.x, HexPoint.y, 0.0f,
-        0.0f, 0.0f, 1.0f,
-        kX * (0.5f + HexPoint.x), 0.25f * (0.5f + HexPoint.y),
-      });
-  }
-
-  for (float i = 0.0f; i < 6.0f; i += 1.0f)
-  {
-    const auto HexPoint = GetPoint(i);
-    const auto HexPointNext = GetPoint(i + 1);
-    const auto Normal = GetPoint(i, 1.0f);
-
-    Points.push_back(
-      {
-        HexPoint.x, HexPoint.y, 0.0f,
-        Normal.x, Normal.y, 0.0f,
-        0.0f, 0.25f,
-      });
-
-    Points.push_back(
-      {
-        HexPoint.x, HexPoint.y, -3.0f,
-        Normal.x, Normal.y, 0.0f,
-        0.0f, 1.0f,
-      });
-
-    Points.push_back(
-      {
-        HexPointNext.x, HexPointNext.y, 0.0f,
-        Normal.x, Normal.y, 0.0f,
-        kX, 0.25f,
-      });
-
-    Points.push_back(
-      {
-        HexPointNext.x, HexPointNext.y, -3.0f,
-        Normal.x, Normal.y, 0.0f,
-        kX, 1.0f,
-      });
-  }
-
-  const auto AddTriangle =
-    [this, &Points](const size_t _i1, const size_t _i2, const size_t _i3)
-  {
-    Add({ Points[_i1], Points[_i2], Points[_i3] });
-  };
-
-  AddTriangle(0, 1, 2);
-  AddTriangle(0, 2, 3);
-  AddTriangle(0, 3, 4);
-  AddTriangle(0, 4, 5);
-
-  for (size_t i = 0; i < 6; i++)
-  {
-    AddTriangle(6 + 4 * i, 7 + 4 * i, 9 + 4 * i);
-    AddTriangle(9 + 4 * i, 8 + 4 * i, 6 + 4 * i);
   }
 }
 
@@ -497,55 +423,54 @@ void Landscape::Mesh::BuildTriplex12Object(
     const auto Normal1 = GetPoint(Index - 0.5f, 1.0f);
     const auto Normal2 = GetPoint(Index - 2.5f, 1.0f);
 
-    Add(
-    {
-      {
-        HexPoint1.x, HexPoint1.y, HexPoint1.z + _OffsetZ,
-        Normal1.x, Normal1.y, 0.75f,
-        _TextureCoords.right, _TextureCoords.top,
-      },
-      {
-        HexPoint2.x, HexPoint2.y, HexPoint2.z + _OffsetZ,
-        Normal2.x, Normal2.y, 0.75f,
-        _TextureCoords.left, _TextureCoords.top,
-      },
-      {
-        HexPoint1.x, HexPoint1.y, 0.0f + _OffsetZ,
-        Normal1.x, Normal1.y, 0.0f,
-        _TextureCoords.right, _TextureCoords.bottom,
-      },
-    });
+    Triangle_t Triangle;
 
-    Add(
+    Triangle.Vertexes[0].m_Vertex =
+    { 
+      HexPoint1.x, HexPoint1.y, HexPoint1.z + _OffsetZ,
+      Normal1.x, Normal1.y, 0.75f,
+      _TextureCoords.right, _TextureCoords.top,
+    };
+
+    Triangle.Vertexes[1].m_Vertex =
     {
-      {
-        HexPoint1.x, HexPoint1.y, 0.0f + _OffsetZ,
-        Normal1.x, Normal1.y, 0.0f,
-        _TextureCoords.right, _TextureCoords.bottom,
-      },
-      {
-        HexPoint2.x, HexPoint2.y, HexPoint2.z + _OffsetZ,
-        Normal2.x, Normal2.y, 0.75f,
-        _TextureCoords.left, _TextureCoords.top,
-      },
-      {
-        HexPoint2.x, HexPoint2.y, 0.0f + _OffsetZ,
-        Normal2.x, Normal2.y, 0.0f,
-        _TextureCoords.left, _TextureCoords.bottom,
-      }
-    });
+      HexPoint2.x, HexPoint2.y, HexPoint2.z + _OffsetZ,
+      Normal2.x, Normal2.y, 0.75f,
+      _TextureCoords.left, _TextureCoords.top,
+    };
+
+    Triangle.Vertexes[2].m_Vertex =
+    {
+      HexPoint1.x, HexPoint1.y, 0.0f + _OffsetZ,
+      Normal1.x, Normal1.y, 0.0f,
+      _TextureCoords.right, _TextureCoords.bottom,
+    };
+
+    Add(Triangle);
+
+    Triangle.Vertexes[0].m_Vertex =
+    {
+      HexPoint1.x, HexPoint1.y, 0.0f + _OffsetZ,
+      Normal1.x, Normal1.y, 0.0f,
+      _TextureCoords.right, _TextureCoords.bottom,
+    };
+
+    Triangle.Vertexes[1].m_Vertex =
+    {
+      HexPoint2.x, HexPoint2.y, HexPoint2.z + _OffsetZ,
+      Normal2.x, Normal2.y, 0.75f,
+      _TextureCoords.left, _TextureCoords.top,
+    };
+
+    Triangle.Vertexes[2].m_Vertex =
+    {
+      HexPoint2.x, HexPoint2.y, 0.0f + _OffsetZ,
+      Normal2.x, Normal2.y, 0.0f,
+      _TextureCoords.left, _TextureCoords.bottom,
+    };
+
+    Add(Triangle);
   }
-}
-
-/*static*/ auto Landscape::Mesh::GetPoint(const float _Index, const float _Radius) -> Point
-{
-  namespace math = ::alicorn::extension::cpp::math;
-
-  return Point
-  {
-    _Radius * math::degree::Cos(60.0f * _Index),
-    _Radius * math::degree::Sin(60.0f * _Index)
-  };
 }
 
 } // namespace model

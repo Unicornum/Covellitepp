@@ -135,8 +135,6 @@ void GameScene::ProcessAll(const Callback_t & _CbObject)
 {
   ForEach(m_Scenes, [&](const Scene & _Scene)
   {
-    using CellObject_t = ::std::pair<uint64_t, ::std::vector<Id_t>>;
-
     ForEach(_Scene.Objects, [&](const CellObject_t & _Object)
     {
       ForEach(_Object.second, [&](const Id_t & _ObjectId)
@@ -149,8 +147,6 @@ void GameScene::ProcessAll(const Callback_t & _CbObject)
 
 void GameScene::BuildRenderObjects(void)
 {
-  using CellObject_t = ::std::pair<uint64_t, ::std::vector<Id_t>>;
-
   ::std::vector<RenderObject_t> SceneRenderObjects;
 
   const auto BuildSortedFromCameraDistance = 
@@ -218,7 +214,6 @@ void GameScene::BuildRenderObjects(void)
   {
     SceneRenderObjects.push_back(RenderObject_t{ 0.0f, _Object.second[0] });
   };
-
 
   m_PrepareRenderObjects.clear();
 

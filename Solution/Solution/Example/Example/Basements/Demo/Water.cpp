@@ -19,17 +19,16 @@ Water::Water(void) :
   // Изменение размеров треугольника не влияет на fps!
 
   AddTexture("demo.water.png");
-  AddMesh<Mesh>(Mesh::Data
-    {
-      {
-        { -570.0f, -330.0f,  0.0f,   0.0f, 0.0f, 1.0f,    0.0f, 200.0f, },  // 0
-        {    0.0f,  660.0f,  0.0f,   0.0f, 0.0f, 1.0f,  100.0f,   0.0f, },  // 1
-        {  570.0f, -330.0f,  0.0f,   0.0f, 0.0f, 1.0f,  200.0f, 200.0f, },  // 2
-      },
-      { 
-        0,  2,  1
-      }
-    });
+
+  Mesh::Triangle_t Triangle1;
+  Triangle1.Vertexes[0].m_Vertex =
+    { -570.0f, -330.0f,  0.0f,   0.0f, 0.0f, 1.0f,    0.0f, 200.0f, };  // 0
+  Triangle1.Vertexes[1].m_Vertex =
+    { 570.0f, -330.0f,  0.0f,   0.0f, 0.0f, 1.0f,  200.0f, 200.0f, };  // 2
+  Triangle1.Vertexes[2].m_Vertex =
+    { 0.0f,  660.0f,  0.0f,   0.0f, 0.0f, 1.0f,  100.0f,   0.0f, };  // 1
+
+  AddMesh<Mesh>(::std::vector<Mesh::Triangle_t>{ Triangle1 });
 }
 
 auto Water::GetObject(const Any_t &) const /*override*/ -> Objects_t

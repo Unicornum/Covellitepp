@@ -115,6 +115,13 @@ inline bool operator== (
 }
 
 inline bool operator== (
+  const ::Fog & _Left,
+  const ::Fog & _Right)
+{
+  return DirectX::operator== (_Left, _Right);
+}
+
+inline bool operator== (
   const ::Material & _Left,
   const ::Material & _Right)
 {
@@ -185,6 +192,80 @@ namespace mock
 
 namespace DirectX11
 {
+
+class Buffer :
+  public ID3D11Buffer
+{
+public:
+  virtual HRESULT STDMETHODCALLTYPE QueryInterface(
+    /* [in] */ REFIID riid,
+    /* [iid_is][out] */ _COM_Outptr_ void __RPC_FAR *__RPC_FAR *ppvObject) {
+    return E_FAIL;
+  }
+
+  virtual ULONG STDMETHODCALLTYPE AddRef(void) { return 0; }
+
+  MOCK_METHOD0(Release, ULONG(void));
+
+public:
+  virtual void STDMETHODCALLTYPE GetDevice(
+    /* [annotation] */
+    _Outptr_  ID3D11Device **ppDevice) { }
+
+  virtual HRESULT STDMETHODCALLTYPE GetPrivateData(
+    /* [annotation] */
+    _In_  REFGUID guid,
+    /* [annotation] */
+    _Inout_  UINT *pDataSize,
+    /* [annotation] */
+    _Out_writes_bytes_opt_(*pDataSize)  void *pData) {
+    return E_FAIL;
+  }
+
+  virtual HRESULT STDMETHODCALLTYPE SetPrivateData(
+    /* [annotation] */
+    _In_  REFGUID guid,
+    /* [annotation] */
+    _In_  UINT DataSize,
+    /* [annotation] */
+    _In_reads_bytes_opt_(DataSize)  const void *pData) {
+    return E_FAIL;
+  }
+
+  virtual HRESULT STDMETHODCALLTYPE SetPrivateDataInterface(
+    /* [annotation] */
+    _In_  REFGUID guid,
+    /* [annotation] */
+    _In_opt_  const IUnknown *pData) {
+    return E_FAIL;
+  }
+
+public:
+  virtual void STDMETHODCALLTYPE GetType(
+    /* [annotation] */
+    _Out_  D3D11_RESOURCE_DIMENSION *pResourceDimension) { }
+
+  virtual void STDMETHODCALLTYPE SetEvictionPriority(
+    /* [annotation] */
+    _In_  UINT EvictionPriority) {}
+
+  virtual UINT STDMETHODCALLTYPE GetEvictionPriority(void) { return 0; }
+
+public:
+  MOCK_METHOD0(GetDesc, D3D11_BUFFER_DESC(void));
+
+  virtual void STDMETHODCALLTYPE GetDesc(
+    /* [annotation] */
+    _Out_  D3D11_BUFFER_DESC *pDesc)
+  {
+    *pDesc = GetDesc();
+  }
+};
+
+class MatricesBuffer : public Buffer { };
+class MaterialBuffer : public Buffer { };
+class LightsBuffer : public Buffer { };
+class FogBuffer : public Buffer { };
 
 class Device :
   public ID3D11Device
@@ -753,6 +834,9 @@ public:
     /* [annotation] */
     _In_  UINT StartVertexLocation) {}
 
+  MOCK_METHOD2(Mapped, D3D11_MAPPED_SUBRESOURCE (ID3D11Resource *, D3D11_MAP));
+  MOCK_METHOD2(Map, HRESULT(UINT, UINT));
+
   virtual HRESULT STDMETHODCALLTYPE Map(
     /* [annotation] */
     _In_  ID3D11Resource *pResource,
@@ -763,15 +847,17 @@ public:
     /* [annotation] */
     _In_  UINT MapFlags,
     /* [annotation] */
-    _Out_  D3D11_MAPPED_SUBRESOURCE *pMappedResource) {
-    return E_FAIL;
+    _Out_  D3D11_MAPPED_SUBRESOURCE *pMappedResource) 
+  {
+    *pMappedResource = Mapped(pResource, MapType);
+    return Map(Subresource, MapFlags);
   }
 
-  virtual void STDMETHODCALLTYPE Unmap(
+  MOCK_METHOD2(Unmap, void (
     /* [annotation] */
-    _In_  ID3D11Resource *pResource,
+    _In_  ID3D11Resource *,
     /* [annotation] */
-    _In_  UINT Subresource) {}
+    _In_  UINT));
 
   MOCK_METHOD3(PSSetConstantBuffers, void(UINT, UINT, ID3D11Buffer *));
 
@@ -1055,6 +1141,8 @@ public:
     _In_  ID3D11Resource *pSrcResource) {}
 
   MOCK_METHOD6(UpdateSubresource, void(ID3D11Resource *, UINT,
+    const D3D11_BOX *, ::Fog, UINT, UINT));
+  MOCK_METHOD6(UpdateSubresource, void(ID3D11Resource *, UINT,
     const D3D11_BOX *, ::Material, UINT, UINT));
   MOCK_METHOD6(UpdateSubresource, void(ID3D11Resource *, UINT,
     const D3D11_BOX *, ::Lights, UINT, UINT));
@@ -1075,17 +1163,28 @@ public:
     /* [annotation] */
     _In_  UINT SrcDepthPitch)
   {
-    UpdateSubresource(pDstResource, DstSubresource, pDstBox,
-      *reinterpret_cast<const ::Material *>(pSrcData),
-      SrcRowPitch, SrcDepthPitch);
+    if (dynamic_cast<LightsBuffer *>(pDstResource) != nullptr)
+    {
+      UpdateSubresource(pDstResource, DstSubresource, pDstBox,
+        *reinterpret_cast<const ::Lights *>(pSrcData),
+        SrcRowPitch, SrcDepthPitch);
+    }
+    else if (dynamic_cast<FogBuffer *>(pDstResource) != nullptr)
+    {
+      UpdateSubresource(pDstResource, DstSubresource, pDstBox,
+        *reinterpret_cast<const ::Fog *>(pSrcData),
+        SrcRowPitch, SrcDepthPitch);
+    }
+    else
+    {
+      UpdateSubresource(pDstResource, DstSubresource, pDstBox,
+        *reinterpret_cast<const ::Material *>(pSrcData),
+        SrcRowPitch, SrcDepthPitch);
 
-    UpdateSubresource(pDstResource, DstSubresource, pDstBox,
-      *reinterpret_cast<const ::Lights *>(pSrcData),
-      SrcRowPitch, SrcDepthPitch);
-
-    UpdateSubresource(pDstResource, DstSubresource, pDstBox,
-      *reinterpret_cast<const ::Matrices *>(pSrcData), 
-      SrcRowPitch, SrcDepthPitch);
+      UpdateSubresource(pDstResource, DstSubresource, pDstBox,
+        *reinterpret_cast<const ::Matrices *>(pSrcData),
+        SrcRowPitch, SrcDepthPitch);
+    }
   }
 
   virtual void STDMETHODCALLTYPE CopyStructureCount(
@@ -1899,73 +1998,6 @@ public:
   virtual void STDMETHODCALLTYPE GetDesc(
     /* [annotation] */
     _Out_  D3D11_SHADER_RESOURCE_VIEW_DESC *pDesc) {}
-};
-
-class Buffer :
-  public ID3D11Buffer
-{
-public:
-  virtual HRESULT STDMETHODCALLTYPE QueryInterface(
-    /* [in] */ REFIID riid,
-    /* [iid_is][out] */ _COM_Outptr_ void __RPC_FAR *__RPC_FAR *ppvObject) { return E_FAIL; }
-
-  virtual ULONG STDMETHODCALLTYPE AddRef(void) { return 0; }
-
-  MOCK_METHOD0(Release, ULONG(void));
-
-public:
-  virtual void STDMETHODCALLTYPE GetDevice(
-    /* [annotation] */
-    _Outptr_  ID3D11Device **ppDevice) { }
-
-  virtual HRESULT STDMETHODCALLTYPE GetPrivateData(
-    /* [annotation] */
-    _In_  REFGUID guid,
-    /* [annotation] */
-    _Inout_  UINT *pDataSize,
-    /* [annotation] */
-    _Out_writes_bytes_opt_(*pDataSize)  void *pData) {
-    return E_FAIL;
-  }
-
-  virtual HRESULT STDMETHODCALLTYPE SetPrivateData(
-    /* [annotation] */
-    _In_  REFGUID guid,
-    /* [annotation] */
-    _In_  UINT DataSize,
-    /* [annotation] */
-    _In_reads_bytes_opt_(DataSize)  const void *pData) {
-    return E_FAIL;
-  }
-
-  virtual HRESULT STDMETHODCALLTYPE SetPrivateDataInterface(
-    /* [annotation] */
-    _In_  REFGUID guid,
-    /* [annotation] */
-    _In_opt_  const IUnknown *pData) {
-    return E_FAIL;
-  }
-
-public:
-  virtual void STDMETHODCALLTYPE GetType(
-    /* [annotation] */
-    _Out_  D3D11_RESOURCE_DIMENSION *pResourceDimension) { }
-
-  virtual void STDMETHODCALLTYPE SetEvictionPriority(
-    /* [annotation] */
-    _In_  UINT EvictionPriority)  {}
-
-  virtual UINT STDMETHODCALLTYPE GetEvictionPriority(void) { return 0; }
-
-public:
-  MOCK_METHOD0(GetDesc, D3D11_BUFFER_DESC(void));
-
-  virtual void STDMETHODCALLTYPE GetDesc(
-    /* [annotation] */
-    _Out_  D3D11_BUFFER_DESC *pDesc) 
-  {
-    *pDesc = GetDesc();
-  }
 };
 
 class Blob :

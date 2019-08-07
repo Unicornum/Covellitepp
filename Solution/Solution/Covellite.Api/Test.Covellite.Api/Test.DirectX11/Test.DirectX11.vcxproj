@@ -14,7 +14,7 @@
     <ProjectGuid>{C3A380DA-9BFA-475E-BE97-F5DFA580EB04}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>TestClass</RootNamespace>
-    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.17134.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
@@ -76,6 +76,7 @@
   <ItemGroup>
     <ClCompile Include="..\..\Covellite.Api\Renderer\CapturingServiceComponent.cpp" />
     <ClCompile Include="..\..\Covellite.Api\Renderer\DxCheck.cpp" />
+    <ClCompile Include="..\..\Covellite.Api\Renderer\Updater.cpp" />
     <ClCompile Include="DirectX11_test.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>

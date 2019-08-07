@@ -26,6 +26,9 @@ inline bool operator== (
 
 } // namespace DirectX
 
+#define GL_TRUE                           1
+#define GL_FALSE                          0
+
 #define GL_BLEND                          0x0BE2
 #define GL_COLOR_BUFFER_BIT               0x00004000
 #define GL_SRC_ALPHA                      0x0302
@@ -66,6 +69,16 @@ inline bool operator== (
 #define GL_DEPTH_BUFFER_BIT               0x00000100
 #define GL_NORMALIZE                      0x0BA1
 #define GL_ALPHA_TEST                     0x0BC0
+#define GL_FOG                            0x0B60
+#define GL_FOG_HINT                       0x0C54
+#define GL_FOG_DENSITY                    0x0B62
+#define GL_FOG_START                      0x0B63
+#define GL_FOG_END                        0x0B64
+#define GL_FOG_MODE                       0x0B65
+#define GL_FOG_COLOR                      0x0B66
+#define GL_EXP                            0x0800
+#define GL_EXP2                           0x0801
+#define GL_NICEST                         0x1102
 
 #define GL_LIGHT0                         0x4000
 #define GL_AMBIENT                        0x1200
@@ -107,6 +120,7 @@ public:
 
 public:
   MOCK_METHOD0(GetError, GLenum (void));
+  MOCK_METHOD1(DepthMask, void(GLboolean));
   MOCK_METHOD1(Enable, void(GLenum));
   MOCK_METHOD1(IsEnabled, GLboolean(GLenum));
   MOCK_METHOD1(Disable, void(GLenum));
@@ -149,6 +163,9 @@ public:
   MOCK_METHOD2(LightModelfv, void(GLenum, Floats_t));
   MOCK_METHOD1(LoadMatrixf, void(::DirectX::XMFLOAT4X4));
   MOCK_METHOD2(AlphaFunc, void (GLenum, GLclampf));
+  MOCK_METHOD2(Fogf, void(GLenum, GLfloat));
+  MOCK_METHOD2(Fogfv, void(GLenum, Floats_t));
+  MOCK_METHOD2(Fogi, void(GLenum, GLint));
 
 public:
   template<class T>
@@ -194,6 +211,11 @@ namespace
 GLenum glGetError(void) 
 { 
   return GLProxy::GetInstance()->GetError();
+}
+
+void glDepthMask(GLboolean _Flag)
+{
+  GLProxy::GetInstance()->DepthMask(_Flag);
 }
 
 void glEnable(GLenum _Param)
@@ -391,7 +413,7 @@ void glLoadIdentity(void)
   GLProxy::GetInstance()->LoadIdentity();
 }
 
-void glOrthof(GLfloat _Param1, GLfloat _Param2, GLfloat _Param3,
+void glOrtho(GLfloat _Param1, GLfloat _Param2, GLfloat _Param3,
   GLfloat _Param4, GLfloat _Param5, GLfloat _Param6)
 {
   GLProxy::GetInstance()->Ortho(
@@ -508,6 +530,28 @@ void glAlphaFunc(GLenum _Function, GLclampf _Value)
   GLProxy::GetInstance()->AlphaFunc(_Function, _Value);
 }
 
+void glFogf(GLenum pname, GLfloat param)
+{
+  GLProxy::GetInstance()->Fogf(pname, param);
+}
+
+void glFogfv(GLenum pname, const GLfloat * _pParams)
+{
+  ::std::vector<float> Params;
+
+  for (int i = 0; i < 4; i++)
+  {
+    Params.push_back(*(_pParams + i));
+  }
+
+  GLProxy::GetInstance()->Fogfv(pname, Params);
+}
+
+void glFogi(GLenum pname, GLint param)
+{
+  GLProxy::GetInstance()->Fogi(pname, param);
+}
+
 } // unnamed namespace
 
 } // namespace mock
@@ -531,6 +575,7 @@ using ::mock::GLfixed;
 using ::mock::GLubyte;
 
 using ::mock::glGetError;
+using ::mock::glDepthMask;
 using ::mock::glEnable;
 using ::mock::glIsEnabled;
 using ::mock::glDisable;
@@ -559,7 +604,7 @@ using ::mock::glBlendFunc;
 using ::mock::glViewport;
 using ::mock::glMatrixMode;
 using ::mock::glLoadIdentity;
-using ::mock::glOrthof;
+using ::mock::glOrtho;
 using ::mock::glScissor;
 using ::mock::glClearColor;
 using ::mock::glClear;
@@ -572,6 +617,9 @@ using ::mock::glLightf;
 using ::mock::glLightModelfv;
 using ::mock::glLoadMatrixf;
 using ::mock::glAlphaFunc;
+using ::mock::glFogf;
+using ::mock::glFogfv;
+using ::mock::glFogi;
 
 } // namespace api
 

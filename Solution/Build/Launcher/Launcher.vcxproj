@@ -117,7 +117,7 @@
     </Link>
     <PostBuildEvent>
       <Message>Установка и запуск собранной программы.</Message>
-      <Command>em Это обеспечивает пересборку проекта при каждой сборке
+      <Command>rem Это обеспечивает пересборку проекта при каждой сборке
 echo //%TIME% &gt; $(ProjectDir)Time.cpp
 
 if NOT "%USING_SCRIPT_BILDING%" == "" goto EndLaunch
@@ -173,7 +173,7 @@ set RUN_ADB=$(ANDROID_SDK_ROOT)\platform-tools\adb.exe
     </Link>
     <PostBuildEvent>
       <Message>Установка и запуск собранной программы.</Message>
-      <Command>em Это обеспечивает пересборку проекта при каждой сборке
+      <Command>rem Это обеспечивает пересборку проекта при каждой сборке
 echo //%TIME% &gt; $(ProjectDir)Time.cpp
 
 if NOT "%USING_SCRIPT_BILDING%" == "" goto EndLaunch

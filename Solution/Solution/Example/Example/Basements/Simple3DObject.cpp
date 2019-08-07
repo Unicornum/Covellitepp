@@ -1,18 +1,18 @@
 ﻿
 #include "stdafx.h"
 #include "Simple3DObject.hpp"
-#include <chrono>
 #include <alicorn/std/vector.hpp>
-#include <alicorn/cpp/math.hpp>
 #include <alicorn/logger.hpp>
-#include <Covellite/Api/Vertex.hpp>
-#include <Covellite/Api/Component.inl>
+#include <GLMath.hpp>
+#include <Covellite.Api/Covellite.Api/Renderer/fx/Hlsl.hpp>
 
 using namespace basement;
 namespace math = ::alicorn::extension::cpp::math;
 
-Simple3DObject::Simple3DObject(const RendersPtr_t & _pRenders, 
-  int _PolygonsCount, int _CubesCount) :
+Simple3DObject::Simple3DObject(
+  const RendersPtr_t & _pRenders, 
+  const int _PolygonsCount, 
+  const int _CubesCount) :
   Common(_pRenders),
   m_pCubeRotation(Component_t::Make(
     {
@@ -20,9 +20,18 @@ Simple3DObject::Simple3DObject(const RendersPtr_t & _pRenders,
       { uT("kind"), uT("Rotation") },
     }))
 {
-  LoadTexture("draw3dobject.title.png", uT("Example.Texture"));
+  LoadTexture("draw3dobject.title.png", 
+    uT("Example.Texture.Albedo"), uT("albedo"));
+  LoadTexture("draw3dobject.title.metalness.png", 
+    uT("Example.Texture.Metalness"), uT("metalness"));
+  LoadTexture("draw3dobject.title.roughness.png",
+    uT("Example.Texture.Roughness"), uT("roughness"));
+  LoadTexture("draw3dobject.title.normal.png", 
+    uT("Example.Texture.Normal"), uT("normal"));
+  LoadTexture("draw3dobject.title.occlusion.png",
+    uT("Example.Texture.Occlusion"), uT("occlusion"));
 
-  m_Scene.push_back(BuildCamera());
+  m_Camera = BuildCamera();
 
   const auto Step = static_cast<int>(sqrt(_CubesCount));
 
@@ -36,7 +45,7 @@ Simple3DObject::Simple3DObject(const RendersPtr_t & _pRenders,
   {
     for (int y = 0; y < Step; y++)
     {
-      m_Scene.push_back(BuildCube(
+      m_Cubes.push_back(BuildCube(
         _PolygonsCount / 12, 
         6.0f / Step,
         (10.0f / Step) * (x - Offset),
@@ -77,22 +86,19 @@ Simple3DObject::~Simple3DObject(void)
 
 void Simple3DObject::Notify(int _Message, const ::boost::any & _Value) /*override*/
 {
+  m_Scene.clear();
+  m_Scene.push_back(m_Camera);
+
+  using namespace ::alicorn::extension::std;
+
   if (_Message == ::events::Simple3DObject.LightsChanged)
   {
-    m_Lights.clear();
-    m_Lights.push_back(BuildLights(::boost::any_cast<int>(_Value)));
-  }
-}
+    m_Scene.push_back(BuildShader(::boost::any_cast<int>(_Value)));
+    m_Scene += m_Cubes;
 
-void Simple3DObject::Render(void) /*override*/
-{
-  Common::Render();
-
-  // Источники света - в конце, чтобы убедиться, что порядок их добавления 
-  // не влияет на результат.
-  for (const auto Id : m_Lights)
-  {
-    for (const auto & Render : m_Objects[Id]) Render();
+    // Источники света - в конце, чтобы убедиться, что порядок их добавления 
+    // не влияет на результат.
+    m_Scene.push_back(BuildLights(::boost::any_cast<int>(_Value)));
   }
 }
 
@@ -107,6 +113,82 @@ auto Simple3DObject::GetUpdater(void) -> Updater_t
     m_pCubeRotation->SetValue(uT("z"), static_cast<float>(
       math::PI * (math::radian::Sin(Angle) + 1.0)));
   };
+}
+
+auto Simple3DObject::BuildShader(int _LightsFlags) -> Id
+{
+  using Object_t = Component_t::Renders::Object_t;
+
+  Object_t Components =
+  {
+    Component_t::Make(
+    {
+      { uT("id"), uT("Example.State.Sampler") },
+      { uT("type"), uT("State") },
+      { uT("kind"), uT("Sampler") },
+    }),
+    Component_t::Make(
+    {
+      { uT("type"), uT("Data") },
+      { uT("kind"), uT("Shader.HLSL") },
+      { uT("version"), uT("vs_4_0") },
+      { uT("entry"), uT("vsTextured") },
+    }),
+    Component_t::Make(
+    {
+      { uT("id"), uT("Example.Shader.Vertex.Cube") },
+      { uT("type"), uT("Shader") },
+    }),
+  };
+
+  using namespace ::alicorn::extension::std;
+
+  if ((_LightsFlags & (1 << Lights::PBR)) != 0)
+  {
+    static const auto PixelShaderData = Vertex + PBR1;
+
+    Components += Object_t
+    {
+      Component_t::Make(
+      {
+        { uT("type"), uT("Data") },
+        { uT("kind"), uT("Shader.HLSL") },
+        { uT("version"), uT("ps_4_0") },
+        { uT("data"), PixelShaderData.data() },
+        { uT("count"), PixelShaderData.size() },
+        { uT("entry"), uT("psPbrSimple") },
+      }),
+      Component_t::Make(
+      {
+        { uT("id"), uT("Example.Shader.Pixel.Cube.PBR") },
+        { uT("type"), uT("Shader") },
+      }),
+    };
+  }
+  else
+  {
+    Components += Object_t
+    {
+      Component_t::Make(
+      {
+        { uT("type"), uT("Data") },
+        { uT("kind"), uT("Shader.HLSL") },
+        { uT("version"), uT("ps_4_0") },
+        { uT("entry"), uT("psTextured") },
+      }),
+      Component_t::Make(
+      {
+        { uT("id"), uT("Example.Shader.Pixel.Cube.Textured") },
+        { uT("type"), uT("Shader") },
+      }),
+    };
+  }
+
+  const Id Id;
+
+  m_Objects[Id] = m_pRenders->Obtain(Components);
+
+  return Id;
 }
 
 auto Simple3DObject::BuildLights(int _LightsFlags) -> Id
@@ -304,9 +386,44 @@ auto Simple3DObject::BuildCamera(void) -> Id
       }),
       Component_t::Make(
       {
-        { uT("id"), uT("Example.State.Sampler") },
-        { uT("type"), uT("State") },
-        { uT("kind"), uT("Sampler") },
+        { uT("id"), uT("Example.Material.Cube") },
+        { uT("type"), uT("Material") },
+        { uT("ambient"), 0xFFFFFFFF },
+        { uT("diffuse"), 0xFFFFFFFF },
+      }),
+      Component_t::Make(
+      {
+        { uT("id"), uT("Example.Texture.Albedo") },
+      }),
+      Component_t::Make(
+      {
+        { uT("id"), uT("Example.Texture.Metalness") },
+      }),
+      Component_t::Make(
+      {
+        { uT("id"), uT("Example.Texture.Roughness") },
+      }),
+      Component_t::Make(
+      {
+        { uT("id"), uT("Example.Texture.Normal") },
+      }),
+      Component_t::Make(
+      {
+        { uT("id"), uT("Example.Texture.Occlusion") },
+      }),
+      Component_t::Make(
+      {
+        { uT("id"), uT("Example.Shader.Vertex.Default") },
+        { uT("type"), uT("Shader") },
+        { uT("version"), uT("vs_4_0") },
+        { uT("entry"), uT("vsTextured") },
+      }),
+      Component_t::Make(
+      {
+        { uT("id"), uT("Example.Shader.Pixel.Default") },
+        { uT("type"), uT("Shader") },
+        { uT("version"), uT("ps_4_0") },
+        { uT("entry"), uT("psTextured") },
       }),
       Component_t::Make(
       {
@@ -320,109 +437,101 @@ auto Simple3DObject::BuildCamera(void) -> Id
   return Id;
 }
 
-auto Simple3DObject::BuildCube(int _PolygonsFactor, float _Scale,
-  float _PositionX, float _PositionY) // положение относительно экранных координат
+auto Simple3DObject::BuildCube(
+  int _PolygonsFactor, 
+  float _Scale,
+  float _PositionX, 
+  float _PositionY) // положение относительно экранных координат
   -> Id
 {
   /// [Vertex format]
-  using Vertex_t = ::covellite::api::Vertex::Polyhedron;
+  using Vertex_t = ::covellite::api::vertex::Polyhedron;
   /// [Vertex format]
 
-  const Id Id;
+  using namespace ::alicorn::extension::std;
 
-  const ::std::vector<Vertex_t> VertexData =
+  ::std::vector<Vertex_t> VertexData;
+  ::std::vector<int> IndexData;
+
+  const auto dAngle = 90.0f / _PolygonsFactor;
+
+  for (auto Angle = 0.0f; Angle < 90.0f; Angle += dAngle)
   {
-    { -0.5f, -0.5f,  0.5f,   0.0f, 0.0f, 1.0f,  0.0f, 0.0f, },  // 0
-    { -0.5f,  0.5f,  0.5f,   0.0f, 0.0f, 1.0f,  0.0f, 1.0f, },  // 1
-    {  0.5f, -0.5f,  0.5f,   0.0f, 0.0f, 1.0f,  1.0f, 0.0f, },  // 2
-    {  0.5f,  0.5f,  0.5f,   0.0f, 0.0f, 1.0f,  1.0f, 1.0f, },  // 3
+    namespace math = ::alicorn::extension::cpp::math;
 
-    {  0.5f, -0.5f,  0.5f,   1.0f, 0.0f, 0.0f,  0.0f, 0.0f, },  // 4
-    {  0.5f,  0.5f,  0.5f,   1.0f, 0.0f, 0.0f,  0.0f, 1.0f, },  // 5
-    {  0.5f, -0.5f, -0.5f,   1.0f, 0.0f, 0.0f,  1.0f, 0.0f, },  // 6
-    {  0.5f,  0.5f, -0.5f,   1.0f, 0.0f, 0.0f,  1.0f, 1.0f, },  // 7
+    const auto Lenght1 = 1.0f * math::degree::Sin(45.0f) / 
+      math::degree::Sin(180.0f - 45.0f - Angle);
 
-    { -0.5f, -0.5f, -0.5f,  -1.0f, 0.0f, 0.0f,  0.0f, 0.0f, },  // 8
-    { -0.5f,  0.5f, -0.5f,  -1.0f, 0.0f, 0.0f,  0.0f, 1.0f, },  // 9
-    { -0.5f, -0.5f,  0.5f,  -1.0f, 0.0f, 0.0f,  1.0f, 0.0f, },  // 10
-    { -0.5f,  0.5f,  0.5f,  -1.0f, 0.0f, 0.0f,  1.0f, 1.0f, },  // 11
+    const auto X1 = 0.5f - Lenght1 * math::degree::Cos(Angle);
+    const auto Y1 = 0.5f - Lenght1 * math::degree::Sin(Angle);
 
-    { -0.5f,  0.5f,  0.5f,   0.0f, 1.0f, 0.0f,  0.0f, 0.0f, },  // 12
-    { -0.5f,  0.5f, -0.5f,   0.0f, 1.0f, 0.0f,  0.0f, 1.0f, },  // 13
-    {  0.5f,  0.5f,  0.5f,   0.0f, 1.0f, 0.0f,  1.0f, 0.0f, },  // 14
-    {  0.5f,  0.5f, -0.5f,   0.0f, 1.0f, 0.0f,  1.0f, 1.0f, },  // 15
+    const auto Lenght2 = 1.0f * math::degree::Sin(45.0f) /
+      math::degree::Sin(180.0f - 45.0f - (Angle + dAngle));
 
-    { -0.5f, -0.5f, -0.5f,   0.0f, -1.0f, 0.0f,  0.0f, 0.0f, },  // 16
-    { -0.5f, -0.5f,  0.5f,   0.0f, -1.0f, 0.0f,  0.0f, 1.0f, },  // 17
-    {  0.5f, -0.5f, -0.5f,   0.0f, -1.0f, 0.0f,  1.0f, 0.0f, },  // 18
-    {  0.5f, -0.5f,  0.5f,   0.0f, -1.0f, 0.0f,  1.0f, 1.0f, },  // 19
+    const auto X2 = 0.5f - Lenght2 * math::degree::Cos(Angle + dAngle);
+    const auto Y2 = 0.5f - Lenght2 * math::degree::Sin(Angle + dAngle);
 
-    {  0.5f, -0.5f, -0.5f,   0.0f, 0.0f, -1.0f,  0.0f, 0.0f, },  // 20
-    {  0.5f,  0.5f, -0.5f,   0.0f, 0.0f, -1.0f,  0.0f, 1.0f, },  // 21
-    { -0.5f, -0.5f, -0.5f,   0.0f, 0.0f, -1.0f,  1.0f, 0.0f, },  // 22
-    { -0.5f,  0.5f, -0.5f,   0.0f, 0.0f, -1.0f,  1.0f, 1.0f, },  // 23
-  };
+    VertexData += ::std::vector<Vertex_t>
+    {
+      {  0.5f,  0.5f, 0.5f,   0.0f, 0.0f, 1.0f,  1.0f,       0.0f, },
+      {  X1,    Y1,   0.5f,   0.0f, 0.0f, 1.0f,  0.5f + X1,  0.5f - Y1, },
+      {  X2,    Y2,   0.5f,   0.0f, 0.0f, 1.0f,  0.5f + X2,  0.5f - Y2, },
+      { -0.5f, -0.5f, 0.5f,   0.0f, 0.0f, 1.0f,  0.0f,       1.0f, },
+      { -X1,   -Y1,   0.5f,   0.0f, 0.0f, 1.0f,  0.5f - X1,  0.5f + Y1, },
+      { -X2,   -Y2,   0.5f,   0.0f, 0.0f, 1.0f,  0.5f - X2,  0.5f + Y2, },
 
-  ::std::vector<int> IndexData =
-  {
-     0,  2,  1,   2,  3,  1,
-     4,  6,  5,   6,  7,  5,
-     8, 10,  9,  10, 11,  9,
-    12, 14, 13,  14, 15, 13,
-    16, 18, 17,  18, 19, 17,
-    20, 22, 21,  22, 23, 21,
-  };
+      { 0.5f, 0.5f,  0.5f,  1.0f, 0.0f, 0.0f,  1.0f,       0.0f, },
+      { 0.5f, X1,    Y1,    1.0f, 0.0f, 0.0f,  0.5f + X1,  0.5f - Y1, },
+      { 0.5f, X2,    Y2,    1.0f, 0.0f, 0.0f,  0.5f + X2,  0.5f - Y2, },
+      { 0.5f, -0.5f, -0.5f, 1.0f, 0.0f, 0.0f,  0.0f,       1.0f, },
+      { 0.5f, -X1,   -Y1,   1.0f, 0.0f, 0.0f,  0.5f - X1,  0.5f + Y1, },
+      { 0.5f, -X2,   -Y2,   1.0f, 0.0f, 0.0f,  0.5f - X2,  0.5f + Y2, },
 
-  while (_PolygonsFactor /= 2)
-  {
-    using namespace ::alicorn::extension::std;
+      {  0.5f, 0.5f,  0.5f, 0.0f, 1.0f, 0.0f,  1.0f,      0.0f, },
+      {  X2,   0.5f,  Y2,   0.0f, 1.0f, 0.0f,  0.5f + X2, 0.5f - Y2, },
+      {  X1,   0.5f,  Y1,   0.0f, 1.0f, 0.0f,  0.5f + X1, 0.5f - Y1, },
+      { -0.5f, 0.5f, -0.5f, 0.0f, 1.0f, 0.0f,  0.0f,      1.0f, },
+      { -X2,   0.5f, -Y2,   0.0f, 1.0f, 0.0f,  0.5f - X2, 0.5f + Y2, },
+      { -X1,   0.5f, -Y1,   0.0f, 1.0f, 0.0f,  0.5f - X1, 0.5f + Y1, },
 
-    IndexData += IndexData;
+      {  0.5f,  0.5f, -0.5f,   0.0f, 0.0f, -1.0f,  1.0f,      1.0f, },
+      {  X2,    Y2,   -0.5f,   0.0f, 0.0f, -1.0f,  0.5f + X2, 0.5f + Y2, },
+      {  X1,    Y1,   -0.5f,   0.0f, 0.0f, -1.0f,  0.5f + X1, 0.5f + Y1, },
+      { -0.5f, -0.5f, -0.5f,   0.0f, 0.0f, -1.0f,  0.0f,      0.0f, },
+      { -X2,   -Y2,   -0.5f,   0.0f, 0.0f, -1.0f,  0.5f - X2, 0.5f - Y2, },
+      { -X1,   -Y1,   -0.5f,   0.0f, 0.0f, -1.0f,  0.5f - X1, 0.5f - Y1, },
+
+      { -0.5f, 0.5f,  0.5f,  -1.0f, 0.0f, 0.0f,  1.0f,       1.0f, },
+      { -0.5f, X2,    Y2,    -1.0f, 0.0f, 0.0f,  0.5f + X2,  0.5f + Y2, },
+      { -0.5f, X1,    Y1,    -1.0f, 0.0f, 0.0f,  0.5f + X1,  0.5f + Y1, },
+      { -0.5f, -0.5f, -0.5f, -1.0f, 0.0f, 0.0f,  0.0f,       0.0f, },
+      { -0.5f, -X2,   -Y2,   -1.0f, 0.0f, 0.0f,  0.5f - X2,  0.5f - Y2, },
+      { -0.5f, -X1,   -Y1,   -1.0f, 0.0f, 0.0f,  0.5f - X1,  0.5f - Y1, },
+
+      { 0.5f,  -0.5f,  0.5f, 0.0f, -1.0f, 0.0f,  1.0f,      1.0f, },
+      { X1,    -0.5f,  Y1,   0.0f, -1.0f, 0.0f,  0.5f + X1, 0.5f + Y1, },
+      { X2,    -0.5f,  Y2,   0.0f, -1.0f, 0.0f,  0.5f + X2, 0.5f + Y2, },
+      { -0.5f, -0.5f, -0.5f, 0.0f, -1.0f, 0.0f,  0.0f,      0.0f, },
+      { -X1,   -0.5f, -Y1,   0.0f, -1.0f, 0.0f,  0.5f - X1, 0.5f - Y1, },
+      { -X2,   -0.5f, -Y2,   0.0f, -1.0f, 0.0f,  0.5f - X2, 0.5f - Y2, },
+    };
   }
+
+  for (int i = 0; i < static_cast<int>(VertexData.size()); i++)
+  {
+    IndexData.push_back(i);
+  }
+
+  const Id Id;
 
   /// [Textured object]
   m_Objects[Id] = m_pRenders->Obtain(
     {
       Component_t::Make(
       {
-        { uT("type"), uT("Data") },
-        { uT("kind"), uT("Shader.HLSL") },
-        { uT("version"), uT("vs_4_0") },
-        { uT("entry"), uT("vsTextured") },
-      }),
-      Component_t::Make(
-      {
-        { uT("id"), uT("Example.Shader.Vertex.Cube") },
-        { uT("type"), uT("Shader") },
-      }),
-      Component_t::Make(
-      {
-        { uT("type"), uT("Data") },
-        { uT("kind"), uT("Shader.HLSL") },
-        { uT("version"), uT("ps_4_0") },
-        { uT("entry"), uT("psTextured") },
-      }),
-      Component_t::Make(
-      {
-        { uT("id"), uT("Example.Shader.Pixel.Cube") },
-        { uT("type"), uT("Shader") },
-      }),
-      Component_t::Make(
-      {
-        { uT("id"), uT("Example.Material.Cube") },
-        { uT("type"), uT("Material") },
-        { uT("ambient"), 0xFFFFFFFF },
-        { uT("diffuse"), 0xFFFFFFFF },
-      }),
-      Component_t::Make(
-      {
-        { uT("id"), uT("Example.Texture") },
-      }),
-      Component_t::Make(
-      {
         { uT("id"), uT("Example.Buffer.Vertex.Cube") },
         { uT("type"), uT("Buffer") },
-        { uT("data"), VertexData.data() },
+        { uT("data"), (const Vertex_t *)VertexData.data() },
         { uT("count"), VertexData.size() },
       }),
       Component_t::Make(

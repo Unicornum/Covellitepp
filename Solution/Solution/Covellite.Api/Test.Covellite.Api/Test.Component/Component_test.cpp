@@ -1,5 +1,6 @@
 
 #include "stdafx.h"
+#include <chrono>
 
 // Примеры макросов библиотеки Google Test
 #include <alicorn\google\test\example.hpp>
@@ -34,7 +35,27 @@ protected:
   }
 
 protected:
-  ::std::hash<String_t> m_Hasher;
+  class Test
+  {
+  public:
+    class Proxy :
+      public ::alicorn::extension::testing::Proxy<Proxy>
+    {
+    public:
+      MOCK_METHOD0(CopyConstructor, void(void));
+    };
+
+  public:
+    const int Value;
+
+  public:
+    explicit Test(const int _Value) : Value(_Value) {}
+    Test(const Test & _Value) :
+      Value(_Value.Value)
+    {
+      Proxy::GetInstance()->CopyConstructor();
+    }
+  };
 };
 
 // Образец макроса для подстановки в класс Component 
@@ -208,6 +229,30 @@ TEST_F(Component_test, /*DISABLED_*/Test_GetValue_StringName_Pointer)
 }
 
 // ************************************************************************** //
+TEST_F(Component_test, /*DISABLED_*/Test_GetValue_StringName_Reference)
+{
+  using Proxy_t = Test::Proxy;
+  Proxy_t Proxy;
+  Proxy_t::GetInstance() = &Proxy;
+
+  const auto Expected = 1907211959;
+
+  const auto pExample = Tested_t::Make({
+    {
+      { uT("Data"), Test{ Expected } },
+    } });
+
+  using namespace ::testing;
+
+  EXPECT_CALL(Proxy, CopyConstructor())
+    .Times(0);
+
+  const auto Result = 
+    pExample->GetValue<const Test &>(uT("Data"), Test{ 0 }).Value;
+  EXPECT_EQ(Expected, Result);
+}
+
+// ************************************************************************** //
 TEST_F(Component_test, /*DISABLED_*/Test_GetValue_StringName_InvalidType)
 {
   const auto pExample = Tested_t::Make({
@@ -242,7 +287,7 @@ TEST_F(Component_test, /*DISABLED_*/Test_GetValue_Hash)
 
   auto GetValue = [&](const String_t & _Name, const auto & _DefaultValue) -> auto
   {
-    return pExample->GetValue(m_Hasher(_Name), _DefaultValue);
+    return pExample->GetValue(Tested_t::GetHash(_Name), _DefaultValue);
   };
 
   EXPECT_EQ(0, GetValue(uT("Param0"), 0));
@@ -270,8 +315,32 @@ TEST_F(Component_test, /*DISABLED_*/Test_GetValue_Hash_Pointer)
       { uT("pData"), pData },
     } });
 
-  EXPECT_EQ(pData, 
-    pExample->GetValue<const uint8_t *>(m_Hasher(uT("pData")), nullptr));
+  EXPECT_EQ(pData, pExample->GetValue<const uint8_t *>(
+    Tested_t::GetHash(uT("pData")), nullptr));
+}
+
+// ************************************************************************** //
+TEST_F(Component_test, /*DISABLED_*/Test_GetValue_Hash_Reference)
+{
+  using Proxy_t = Test::Proxy;
+  Proxy_t Proxy;
+  Proxy_t::GetInstance() = &Proxy;
+
+  const auto Expected = 1907212026;
+
+  const auto pExample = Tested_t::Make({
+    {
+      { uT("Data"), Test{ Expected } },
+    } });
+
+  using namespace ::testing;
+
+  EXPECT_CALL(Proxy, CopyConstructor())
+    .Times(0);
+
+  const auto Result = pExample->GetValue<const Test &>(
+    Tested_t::GetHash(uT("Data")), Test{ 0 }).Value;
+  EXPECT_EQ(Expected, Result);
 }
 
 // ************************************************************************** //
@@ -287,30 +356,13 @@ TEST_F(Component_test, /*DISABLED_*/Test_GetValue_Hash_InvalidType)
 
   auto GetValue = [&](const String_t & _Name, const auto & _DefaultValue) -> auto
   {
-    return pExample->GetValue(m_Hasher(_Name), _DefaultValue);
+    return pExample->GetValue(Tested_t::GetHash(_Name), _DefaultValue);
   };
 
   EXPECT_THROW(GetValue(uT("Param1"), 0), ::std::exception);
   EXPECT_THROW(GetValue(uT("Param2"), uT("Unknown")), ::std::exception);
   EXPECT_THROW(GetValue(uT("Param3"), uT("Unknown")), ::std::exception);
   EXPECT_THROW(GetValue(uT("Param4"), 0), ::std::exception);
-}
-
-// ************************************************************************** //
-TEST_F(Component_test, /*DISABLED_*/Test_SetValue)
-{
-  auto pExample = Tested_t::Make({
-    {
-      { uT("Param"), uT("12345") },
-    } });
-
-  EXPECT_EQ(12345, pExample->GetValue(uT("Param"), 0));
-
-  pExample->SetValue(uT("Param"), 67890);
-  EXPECT_EQ(67890, pExample->GetValue(uT("Param"), 0));
-
-  pExample->SetValue(uT("Param"), true);
-  EXPECT_EQ(true, pExample->GetValue(uT("Param"), false));
 }
 
 // ************************************************************************** //
@@ -328,4 +380,137 @@ TEST_F(Component_test, /*DISABLED_*/Test_SetValue_NotExistsParam)
 
   pExample->SetValue(uT("Param"), true);
   EXPECT_EQ(true, pExample->GetValue(uT("Param"), false));
+}
+
+// ************************************************************************** //
+TEST_F(Component_test, /*DISABLED_*/Test_SetValue)
+{
+  auto pExample = Tested_t::Make({
+    {
+      { uT("Param"), uT("12345") },
+    } });
+
+  EXPECT_EQ(12345, pExample->GetValue(uT("Param"), 0));
+
+  pExample->SetValue(uT("Param"), 67890);
+  EXPECT_EQ(67890, pExample->GetValue(uT("Param"), 0));
+
+  pExample->SetValue(uT("Param"), true);
+  EXPECT_EQ(true, pExample->GetValue(uT("Param"), false));
+
+  const ::std::vector<int> Data = { 1907211952, 1907211953, 1907211954 };
+
+  pExample->SetValue(uT("Param"), Data);
+  EXPECT_EQ(Data, pExample->GetValue(uT("Param"), ::std::vector<int>{}));
+}
+
+// ************************************************************************** //
+TEST_F(Component_test, /*DISABLED_*/Test_SetValue_Hash)
+{
+  auto pExample = Tested_t::Make({
+    {
+      { uT("Param"), uT("12345") },
+    } });
+
+  EXPECT_EQ(12345, pExample->GetValue(uT("Param"), 0));
+
+  pExample->SetValue(Tested_t::GetHash(uT("Param")), 67890);
+  EXPECT_EQ(67890, pExample->GetValue(uT("Param"), 0));
+
+  pExample->SetValue(Tested_t::GetHash(uT("Param")), true);
+  EXPECT_EQ(true, pExample->GetValue(uT("Param"), false));
+
+  const ::std::vector<int> Data = { 1907211955, 1907211956, 1907211957 };
+
+  pExample->SetValue(Tested_t::GetHash(uT("Param")), Data);
+  EXPECT_EQ(Data, pExample->GetValue(uT("Param"), ::std::vector<int>{}));
+}
+
+// ************************************************************************** //
+TEST_F(Component_test, /*DISABLED_*/Test_GetValue_Speed)
+{
+  const auto Run = [](const Tested_t::ComponentPtr_t & _pComponent)
+  {
+    using namespace ::std::chrono;
+
+    const auto Begin = system_clock::now();
+
+    float Result = 0;
+    size_t Count = 0;
+    const auto hName = Tested_t::GetHash(uT("Data"));
+
+    while ((system_clock::now() - Begin) < milliseconds(100))
+    {
+      for (int i = 0; i < 100; i++)
+      {
+        Result += _pComponent->GetValue<const float &>(hName, 0.0f);
+      }
+
+      Count += 100;
+    }
+
+    EXPECT_NE(0.0f, Result);
+
+    return Count;
+  };
+
+  const auto Result = Run(Tested_t::Make({
+  {
+    { uT("Data"), 1.0f },
+    { uT("Param1"), uT("Value1") },
+    { uT("Param2"), uT("Value2") },
+    { uT("Param3"), uT("true") },
+    { uT("Param4"), uT("false") },
+    { uT("Param5"), true },
+    { uT("Param6"), false },
+    { uT("Param7"), uT("12345") },
+    { uT("Param8"), 12345 },
+    { uT("Param9"), 123.45f },
+  } }));
+  EXPECT_TRUE(Result > 35000u) << "Result: " << Result;
+}
+
+// ************************************************************************** //
+TEST_F(Component_test, /*DISABLED_*/Test_SetValue_Speed)
+{
+  const auto Run = [](const Tested_t::ComponentPtr_t & _pComponent)
+  {
+    using namespace ::std::chrono;
+
+    const auto Begin = system_clock::now();
+
+    float Result = 0;
+    size_t Count = 0;
+    const auto hName = Tested_t::GetHash(uT("Data"));
+
+    while ((system_clock::now() - Begin) < milliseconds(100))
+    {
+      for (int i = 0; i < 100; i++)
+      {
+        Result += 1.0f;
+        _pComponent->SetValue(hName, Result);
+      }
+
+      Count += 100;
+    }
+
+    EXPECT_NE(0.0f, Result);
+
+    return Count;
+  };
+
+  const auto Result = Run(Tested_t::Make({
+  {
+    { uT("Data"), 1.0f },
+    { uT("Param1"), uT("Value1") },
+    { uT("Param2"), uT("Value2") },
+    { uT("Param3"), uT("true") },
+    { uT("Param4"), uT("false") },
+    { uT("Param5"), true },
+    { uT("Param6"), false },
+    { uT("Param7"), uT("12345") },
+    { uT("Param8"), 12345 },
+    { uT("Param9"), 123.45f },
+  } }));
+  EXPECT_TRUE(Result > 25000u) << "Result: " << Result;
 }

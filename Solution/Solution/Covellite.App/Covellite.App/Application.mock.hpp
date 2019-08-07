@@ -98,14 +98,14 @@ protected:
 public:
   explicit Application(Continuous) :
     m_Id(Proxy::GetInstance()->ContinuousConstructor()),
-    Run([&](void) { Proxy::GetInstance()->Run(m_Id); })
+    Run([=](void) { Proxy::GetInstance()->Run(m_Id); })
   {
 
   }
 
   explicit Application(EventBased) :
     m_Id(Proxy::GetInstance()->EventBasedConstructor()),
-    Run([&](void) { Proxy::GetInstance()->Run(m_Id); })
+    Run([=](void) { Proxy::GetInstance()->Run(m_Id); })
   {
 
   }

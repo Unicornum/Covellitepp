@@ -59,6 +59,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="Component.hpp" />
+    <ClInclude Include="Defines.hpp" />
     <ClInclude Include="Events.hpp" />
     <ClInclude Include="IWindow.hpp" />
     <ClInclude Include="pch.h" />
@@ -71,6 +72,7 @@
     <ClInclude Include="Renderer\OpenGLCommon.hpp" />
     <ClInclude Include="Renderer\OpenGLES.hpp" />
     <ClInclude Include="Renderer\stdafx.h" />
+    <ClInclude Include="Renderer\Updater.hpp" />
     <ClInclude Include="Renders.hpp" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="Vertex.hpp" />
@@ -81,6 +83,7 @@
     <ClCompile Include="Renderer\CapturingServiceComponent.cpp" />
     <ClCompile Include="Renderer\OpenGLCommon.cpp" />
     <ClCompile Include="Renderer\OpenGLES.cpp" />
+    <ClCompile Include="Renderer\Updater.cpp" />
     <ClCompile Include="Renders.cpp" />
     <ClCompile Include="Window.android.cpp" />
     <ClCompile Include="Window.cpp" />

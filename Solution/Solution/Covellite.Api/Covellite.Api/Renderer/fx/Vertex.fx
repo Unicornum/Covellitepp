@@ -84,13 +84,10 @@ Pixel vsTextured(Polyhedron _Value)
 {
   Pixel Result = (Pixel)0;
 
-  float4x4 WorldViewProj = mul(MatricesData.World, 
-    mul(MatricesData.View, MatricesData.Projection));
-  float4 Pos = float4(_Value.Position, 1.0f);
   float3 Normal = normalize(mul(_Value.Normal, (float3x3)MatricesData.World));
-  float4 WorldPos = mul(Pos, MatricesData.World);
+  float4 WorldPos = mul(float4(_Value.Position, 1.0f), MatricesData.World);
 
-  Result.ScreenPos = mul(Pos,  WorldViewProj);
+  Result.ScreenPos = mul(WorldPos, mul(MatricesData.View, MatricesData.Projection));
   Result.Color = GetGouraudLightsColor(WorldPos, Normal);
   Result.Normal = Normal;
   Result.TexCoord = _Value.Texture;

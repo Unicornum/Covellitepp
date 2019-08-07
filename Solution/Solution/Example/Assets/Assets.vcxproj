@@ -113,6 +113,10 @@ echo ... packed end.
     <None Include="Assets\Data\controls.rml" />
     <None Include="Assets\Data\demo.rcss" />
     <None Include="Assets\Data\demo.rml" />
+    <None Include="Assets\Data\demo\Human.dae" />
+    <None Include="Assets\Data\demo\Human.fbx" />
+    <None Include="Assets\Data\demo\Human.walking.dae" />
+    <None Include="Assets\Data\demo\Human.walking.fbx" />
     <None Include="Assets\Data\description.rcss" />
     <None Include="Assets\Data\description.rml" />
     <None Include="Assets\Data\draw3dobject.rcss" />
@@ -142,6 +146,7 @@ echo ... packed end.
     <Image Include="Assets\Data\demo\demo.grass2.png" />
     <Image Include="Assets\Data\demo\demo.grass3.png" />
     <Image Include="Assets\Data\demo\demo.none.jpg" />
+    <Image Include="Assets\Data\demo\demo.particles.png" />
     <Image Include="Assets\Data\demo\demo.sand.jpg" />
     <Image Include="Assets\Data\demo\demo.skybox.png" />
     <Image Include="Assets\Data\demo\demo.stone.jpg" />
@@ -150,6 +155,10 @@ echo ... packed end.
     <Image Include="Assets\Data\demo\demo.water.png" />
     <Image Include="Assets\Data\demo\demo.well.jpg" />
     <None Include="Assets\Data\draw3dobject.title.png" />
+    <Image Include="Assets\Data\demo\Human.Face.png" />
+    <Image Include="Assets\Data\demo\Human.Hand.Foot.png" />
+    <Image Include="Assets\Data\demo\Human.Head.png" />
+    <Image Include="Assets\Data\demo\Human.Outerwear.png" />
     <Image Include="Assets\Data\gradient.png" />
     <Image Include="Assets\Data\simple2dgame.bricks.jpg" />
     <Image Include="Assets\Data\simple2dgame.clock.png" />
@@ -258,6 +267,11 @@ echo ... packed end.
   </ItemGroup>
   <ItemGroup>
     <None Include="Assets\Data\demo\Shrooms.obj">
+      <FileType>Document</FileType>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Assets\Data\demo\Human.obj">
       <FileType>Document</FileType>
     </None>
   </ItemGroup>

@@ -9,6 +9,7 @@
       <form>
         <button id="id_auto">Auto</button>        
         <button id="id_manual">Manual</button>
+        <button id="id_animation">Animation</button>       
         <button id="id_help">Help</button>
         <button id="id_back">Exit</button>
       </form>

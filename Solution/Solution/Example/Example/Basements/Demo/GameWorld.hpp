@@ -34,7 +34,7 @@ class DbComponents;
 class GameWorld final :
   public IGameWorld
 {
-  using Updater_t = ::std::function<void(const float)>;
+  using Updater_t = ::covellite::api::Updater_t;
   using Events_t = ::covellite::events::Events;
   using IntPtr_t = int *;
   using Type_t = size_t;
@@ -47,6 +47,7 @@ public:
 
 private:
   void PrepareScene(const IntPtr_t &);
+  void PrepareAnimationScene(const IntPtr_t &);
   void RemoveAllObjects(void);
   Updater_t GetAutoProcessMoving(void);
   Updater_t GetManualProcessMoving(void);

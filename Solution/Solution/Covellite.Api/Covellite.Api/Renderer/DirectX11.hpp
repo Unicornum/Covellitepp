@@ -4,6 +4,7 @@
 #include "IGraphicApi.hpp"
 #include "Api.forward.hpp"
 #include "CapturingServiceComponent.hpp"
+#include "Updater.hpp"
 
 struct ID3D11Device;
 struct ID3D11DeviceContext;
@@ -33,14 +34,16 @@ namespace renderer
 *  1.0.0.0        \n
 *  1.1.0.0        \n
 *  1.2.0.0        \n
+*  1.3.0.0        \n
 * \date
 *  29 Август 2018    \n
 *  20 Ноябрь 2018    \n
 *  29 Декабрь 2018    \n
+*  23 Июль 2019    \n
 * \author
 *  CTAPOBEP (unicornum.verum@gmail.com)
 * \copyright
-*  © CTAPOBEP 2018
+*  © CTAPOBEP 2018 - 2019
 */
 class DirectX11 final :
   public Registator_t<IGraphicApi>
@@ -66,6 +69,7 @@ private:
 private:
   Render_t CreateCamera(const ComponentPtr_t &);
   Render_t CreateState(const ComponentPtr_t &);
+  Render_t CreateFog(const ComponentPtr_t &);
   Render_t CreateLight(const ComponentPtr_t &);
   Render_t CreateMaterial(const ComponentPtr_t &);
   Render_t CreateTexture(const ComponentPtr_t &);
@@ -76,8 +80,9 @@ private:
 
 private:
   Render_t CreateBlendState(bool);
-  Render_t GetDepthState(bool, bool);
+  Render_t GetDepthState(const bool, const bool, const bool);
   Render_t GetPreRenderGeometry(const bool);
+  Render_t GetPreRenderBillboardGeometry(void);
 
 private:
   Creators_t m_Creators;
@@ -94,12 +99,17 @@ private:
   class Data;
 
 private:
-  ::std::shared_ptr<Data>     m_pData;
-  CapturingServiceComponent   m_ServiceComponents;
+  ::std::shared_ptr<Data>   m_pData;
+  CapturingServiceComponent m_ServiceComponents;
+  Updater                   m_Updater;
 
 public:
   explicit DirectX11(const Data_t &);
   ~DirectX11(void);
+
+private:
+  FRIEND_TEST(DirectX11_test, Test_Present_Geometry_Billboard);
+  FRIEND_TEST(DirectX11_test, /*DISABLED_*/Test_Present_Geometry_CombineTransform);
 };
 
 FACTORY_REGISTER_STRING_NAME(DirectX11);
