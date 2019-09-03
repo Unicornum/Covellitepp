@@ -13,11 +13,22 @@
 *  Тесты класса OpenGL.
 */
 
-#define OpenGLCommon OpenGLCommon_windows
+#define GraphicApi GraphicApi_OpenGL
+#define OpenGLCommon OpenGLCommon_OpenGL
+#define OpenGLCommonShader OpenGLCommonShader_OpenGL
+
+#include <Covellite/Api/Defines.hpp>
+#include "../../Covellite.Api/Renderer/Component.hpp"
+#include "../../Covellite.Api/Renderer/Shaders/Shaders.hpp"
 
 // Расположение класса OpenGL
 #include "../../Covellite.Api/Renderer/OpenGL.cpp"
+#include "../../Covellite.Api/Renderer/GraphicApi.cpp"
+#include "../../Covellite.Api/Renderer/GraphicApi.Constants.hpp"
+#include "../../Covellite.Api/Renderer/GraphicApi.CapturingServiceComponent.cpp"
 #include "../../Covellite.Api/Renderer/OpenGLCommon.cpp"
+#include "../../Covellite.Api/Renderer/OpenGLCommon.Texture.cpp"
+#include "../../Covellite.Api/Renderer/OpenGLCommonShader.cpp"
 
 // Общий тестовый класс класса OpenGL
 class OpenGL_test :
@@ -43,22 +54,28 @@ protected:
     ::testing::DefaultValue<RECT>::Set({ 0, 0, 1, 1 });
     ::testing::DefaultValue<String_t>::Set(uT("0"));
     ::testing::DefaultValue<Time_t>::Set(Time_t{});
+
+    Tested::GetValue() = 0;
   }
 
   // Вызывается ПОСЛЕ запуска каждого теста
   void TearDown(void) override
   {
+    ::testing::DefaultValue<const ::mock::GLfloat *>::Clear();
     ::testing::DefaultValue<int>::Clear();
-    ::testing::DefaultValue<HGLRC>::Clear();
     ::testing::DefaultValue<HDC>::Clear();
+    ::testing::DefaultValue<HGLRC>::Clear();
     ::testing::DefaultValue<RECT>::Clear();
     ::testing::DefaultValue<String_t>::Clear();
-    ::testing::DefaultValue<const ::mock::GLfloat *>::Clear();
     ::testing::DefaultValue<Time_t>::Clear();
   }
 
 protected:
   const String_t m_UsingApi = uT("OpenGL");
+  static ::Camera & GetCameraMartix(Tested_t & _Example)
+  {
+    return _Example.m_pConstants->Get<::Camera>();
+  }
 
 protected:
   static const int m_Top = 0;
@@ -366,6 +383,7 @@ TEST_F(OpenGL_test, /*DISABLED_*/Test_GetUsingApi)
 
   using namespace ::alicorn::extension::std;
 
+  const char * const Unknown = "Unknown1908291913";
   const char * Version = "Version1710311100";
   const auto Expected = uT("OpenGL %VERSION%").Replace(uT("%VERSION%"), 
     string_cast<String, Locale::Default>(::std::string{ Version }));
@@ -379,9 +397,14 @@ TEST_F(OpenGL_test, /*DISABLED_*/Test_GetUsingApi)
   const Tested_t Example{ Data_t{} };
   const ITested_t & IExample = Example;
 
+  InSequence Dummy;
+
   EXPECT_CALL(GLProxy, GetString(GL_VERSION))
     .Times(1)
     .WillOnce(Return(reinterpret_cast<const unsigned char *>(Version)));
+
+  EXPECT_CALL(GLProxy, GetString(_))
+    .WillRepeatedly(Return(reinterpret_cast<const unsigned char *>(Unknown)));
 
   const auto Result = IExample.GetUsingApi();
   EXPECT_EQ(Expected, Result);
@@ -415,6 +438,13 @@ TEST_F(OpenGL_test, /*DISABLED_*/Test_PresentFrame)
 
 #define OpenGLCommon_test OpenGL_test
 #include "../OpenGLCommon_test.hpp"
+
+const ::std::string ShaderHeader = 
+  "#version 330 core\r\n"
+  "#define COVELLITE_SHADER_DESKTOP\r\n";
+
+#define OpenGLShader_test OpenGL_test
+#include "../OpenGLShader_test.hpp"
 
 #define Updater_test OpenGL_test
 #include "../Updater_test.hpp"

@@ -1,9 +1,9 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="com.$(ApplicationName)" android:versionName="@string/ProductVersionYear" android:versionCode="1817">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="com.$(ApplicationName)" android:versionName="@string/ProductVersionYear" android:versionCode="1961">
   <uses-sdk android:minSdkVersion="15" android:targetSdkVersion="26"/>
   <application android:label="@string/ApplicationName" android:icon="@drawable/icon" android:isGame="false" android:hasCode="true" android:hardwareAccelerated="true">
     <activity android:name="com.Covellitepp.Example" android:label="@string/ApplicationName" android:configChanges="keyboardHidden|orientation|screenSize">
-      <meta-data android:name="android.app.lib_name" android:value="Example"/>
+      <meta-data android:name="android.app.lib_name" android:value="@string/EntryPointLibName"/>
       <intent-filter>
         <action android:name="android.intent.action.MAIN"/>
         <category android:name="android.intent.category.LAUNCHER"/>

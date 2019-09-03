@@ -22,11 +22,11 @@ Water::Water(void) :
 
   Mesh::Triangle_t Triangle1;
   Triangle1.Vertexes[0].m_Vertex =
-    { -570.0f, -330.0f,  0.0f,   0.0f, 0.0f, 1.0f,    0.0f, 200.0f, };  // 0
+    { -570.0f, -330.0f, 0.0f, 1.0f,     0.0f, 200.0f,  0.0f, 0.0f, 1.0f, 0.0f };  // 0
   Triangle1.Vertexes[1].m_Vertex =
-    { 570.0f, -330.0f,  0.0f,   0.0f, 0.0f, 1.0f,  200.0f, 200.0f, };  // 2
+    {  570.0f, -330.0f, 0.0f, 1.0f,   200.0f, 200.0f,  0.0f, 0.0f, 1.0f, 0.0f };  // 2
   Triangle1.Vertexes[2].m_Vertex =
-    { 0.0f,  660.0f,  0.0f,   0.0f, 0.0f, 1.0f,  100.0f,   0.0f, };  // 1
+    {    0.0f,  660.0f, 0.0f, 1.0f,   100.0f,   0.0f,  0.0f, 0.0f, 1.0f, 0.0f };  // 1
 
   AddMesh<Mesh>(::std::vector<Mesh::Triangle_t>{ Triangle1 });
 }
@@ -41,40 +41,21 @@ auto Water::GetObject(const Any_t &) const /*override*/ -> Objects_t
     {
       Component_t::Make(
       {
-        { uT("type"), uT("Data") },
-        { uT("kind"), uT("Shader.HLSL") },
-        { uT("version"), uT("ps_4_0") },
-        { uT("entry"), uT("psTextured") },
+        { uT("id"), uT("Demo.Shader.Vertex.Water") },
+        { uT("type"), uT("Shader") },
+        { uT("entry"), uT("vsLights") },
       }),
       Component_t::Make(
       {
         { uT("id"), uT("Demo.Shader.Pixel.Water") },
         { uT("type"), uT("Shader") },
-      }),
-      Component_t::Make(
-      {
-        { uT("type"), uT("Data") },
-        { uT("kind"), uT("Shader.HLSL") },
-        { uT("version"), uT("vs_4_0") },
-        { uT("entry"), uT("vsTextured") },
-      }),
-      Component_t::Make(
-      {
-        { uT("id"), uT("Demo.Shader.Vertex") },
-        { uT("type"), uT("Shader") },
+        { uT("entry"), uT("psTextured") },
       }),
     } +
     GetTexture(0).GetObject() +
     GetMesh(0).GetObject() +
     Object_t
     {
-      Component_t::Make(
-      {
-        { uT("id"), uT("Demo.Material.Water") },
-        { uT("type"), uT("Material") },
-        { uT("ambient"), 0xFFFFFFFF },
-        { uT("diffuse"), 0xFFFFFFFF },
-      }),
       Component_t::Make(
       {
         { uT("id"), uT("Demo.Present.Water") },

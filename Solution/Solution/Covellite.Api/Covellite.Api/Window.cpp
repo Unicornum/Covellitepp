@@ -15,17 +15,20 @@
 # if BOOST_OS_WINDOWS
 
 #include "Renderer/OpenGL.hpp"
-#include "Renderer/DirectX9.hpp"
 #include "Renderer/DirectX10.hpp"
 #include "Renderer/DirectX11.hpp"
 
 # elif BOOST_OS_ANDROID
 
+#if __ANDROID_API__ >= 18
+#include "Renderer/OpenGLES3.hpp"
+#endif
+
 #include "Renderer/OpenGLES.hpp"
 
-# endif
+# endif // BOOST_OS_...
 
-#endif
+#endif // __USING_GTEST
 
 using namespace covellite::api;
 

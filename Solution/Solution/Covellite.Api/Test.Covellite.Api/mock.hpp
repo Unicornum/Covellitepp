@@ -67,3 +67,16 @@ public:
 
 #include <Covellite/App/Settings.mock.hpp>
 #include <Covellite/Os/Configuration.mock.hpp>
+
+class Tested
+{
+public:
+  static int & GetValue(void)
+  {
+    static int Value = 0;
+    return Value;
+  }
+};
+
+#define TEST_CALL_IF(n) \
+  if (Tested::GetValue() == n)

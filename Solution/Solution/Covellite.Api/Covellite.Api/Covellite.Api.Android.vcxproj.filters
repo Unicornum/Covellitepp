@@ -43,14 +43,23 @@
       <Filter>Renderer</Filter>
     </ClInclude>
     <ClInclude Include="Vertex.hpp" />
-    <ClInclude Include="Renderer\GLMath.hpp">
-      <Filter>Renderer</Filter>
-    </ClInclude>
-    <ClInclude Include="Renderer\CapturingServiceComponent.hpp">
-      <Filter>Renderer</Filter>
-    </ClInclude>
     <ClInclude Include="Defines.hpp" />
-    <ClInclude Include="Renderer\Updater.hpp">
+    <ClInclude Include="Renderer\OpenGLCommonStatic.hpp">
+      <Filter>Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="Renderer\OpenGLCommonShader.hpp">
+      <Filter>Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="Renderer\GraphicApi.hpp">
+      <Filter>Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="Renderer\OpenGLES3.hpp">
+      <Filter>Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="Renderer\OpenGLCommon.Texture.hpp">
+      <Filter>Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="Renderer\GraphicApi.Constants.hpp">
       <Filter>Renderer</Filter>
     </ClInclude>
   </ItemGroup>
@@ -63,11 +72,23 @@
     <ClCompile Include="Renderer\OpenGLCommon.cpp">
       <Filter>Renderer</Filter>
     </ClCompile>
-    <ClCompile Include="Renderer\CapturingServiceComponent.cpp">
+    <ClCompile Include="Window.android.cpp" />
+    <ClCompile Include="Renderer\OpenGLCommonStatic.cpp">
       <Filter>Renderer</Filter>
     </ClCompile>
-    <ClCompile Include="Window.android.cpp" />
-    <ClCompile Include="Renderer\Updater.cpp">
+    <ClCompile Include="Renderer\OpenGLCommonShader.cpp">
+      <Filter>Renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="Renderer\GraphicApi.cpp">
+      <Filter>Renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="Renderer\OpenGLES3.cpp">
+      <Filter>Renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="Renderer\OpenGLCommon.Texture.cpp">
+      <Filter>Renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="Renderer\GraphicApi.CapturingServiceComponent.cpp">
       <Filter>Renderer</Filter>
     </ClCompile>
   </ItemGroup>

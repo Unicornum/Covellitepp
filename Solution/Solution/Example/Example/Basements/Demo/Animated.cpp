@@ -5,7 +5,7 @@
 #include <alicorn/boost/format.inl>
 #include <alicorn/std/vector.hpp>
 #include <alicorn/logger.hpp>
-#include <Covellite/Api/Component.inl>
+#include <Covellite/Covellite.hpp>
 #include "Constants.hpp"
 #include "GameScene.hpp"
 
@@ -172,13 +172,6 @@ auto Animated::GetObject(const Any_t & _Value) const /*override*/ -> Objects_t
       { uT("id"), uT("Demo.Animated.State.Blend") },
       { uT("type"), uT("State") },
       { uT("kind"), uT("Blend") },
-    }),
-    Component_t::Make(
-    {
-      { uT("id"), uT("Demo.Animated.Material") },
-      { uT("type"), uT("Material") },
-      { uT("ambient"), 0xFFFFFFFF },
-      { uT("diffuse"), 0xFFFFFFFF },
     }),
   };
 }

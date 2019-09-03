@@ -8,11 +8,13 @@
   </Options>
   <Process/>
   <Complete>
+    <Week6240>
+      <Task1 Text="Перенос определений для обращения к виртуальной файловой системе." Type="Red" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="false"/>
+    </Week6240>
+    <Week6239/>
+    <Week6238/>
     <Week6237>
-      <Task6 Text="Android: расширение диагностики запуска приложения." Type="Red" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="true" ParentTaskText="false"/>
+      <Task7 Text="Android: расширение диагностики запуска приложения." Type="Red" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="true" ParentTaskText="false"/>
     </Week6237>
-    <Week6236/>
-    <Week6235/>
-    <Week6234/>
   </Complete>
 </Tasks>

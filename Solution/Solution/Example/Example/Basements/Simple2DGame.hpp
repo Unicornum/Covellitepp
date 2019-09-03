@@ -43,7 +43,7 @@ class Simple2DGame final :
   public Common
 {
   /// [Vertex format]
-  using Vertex_t = ::covellite::api::vertex::Polygon;
+  using Vertex_t = ::covellite::api::Vertex;
   /// [Vertex format]
   using VertexData_t = ::std::vector<Vertex_t>;
   using Object_t = ::std::vector<Component_t::ComponentPtr_t>;
@@ -101,10 +101,10 @@ private:
   void AddClock(void);
   void AddActors(void);
   Id BuildRectangle(const Object_t &, float, float, const String_t &);
-  Id BuildRectangle(const Object_t &, float, float, uint32_t);
-  Id BuildRectangle(const Rect &, uint32_t, const Rect &,
+  Id BuildRectangle(const Object_t &, float, float, float, float, float, float);
+  Id BuildRectangle(const Rect &, const Rect &, float, float, float, float,
     const String_t &, const Object_t &);
-  Id BuildRectangle(const Rect &, uint32_t, const Rect &, 
+  Id BuildRectangle(const Rect &, const Rect &, float, float, float, float,
     const Object_t &, const Object_t &);
 
 private:

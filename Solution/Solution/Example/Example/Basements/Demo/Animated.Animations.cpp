@@ -14,8 +14,6 @@ auto Animated::Animations::CreateAnimation(
   const ComponentPtr_t & _pTransform,
   const int _SkipAnimationFrames) -> BufferMapper_t
 {
-  namespace vertex = ::covellite::api::vertex;
-
   const auto Name = _pAnimation->GetValue(uT("name"), uT("Unknown"));
   const auto TicksPerSecond = _pAnimation->GetValue(uT("tps"), 1.0f);
   const auto RawFrames = _pAnimation->GetValue(uT("frames"), animation::Frames_t{});
@@ -53,7 +51,7 @@ auto Animated::Animations::CreateAnimation(
 
   static const auto hRawData = ::std::hash<String_t>{}(uT("data"));
 
-  return [=](vertex::Polyhedron * _pData)
+  return [=](::covellite::api::Vertex * _pData)
   {
     if (_pData == nullptr)
     {
@@ -119,12 +117,12 @@ auto Animated::Animations::CreateAnimation(
       {
         auto & DestVertex = _pData[iDestVertex];
 
-        DestVertex.x = Position.x;
-        DestVertex.y = Position.y;
-        DestVertex.z = Position.z;
-        DestVertex.nx = Normal.x;
-        DestVertex.ny = Normal.y;
-        DestVertex.nz = Normal.z;
+        DestVertex.px = Position.x;
+        DestVertex.py = Position.y;
+        DestVertex.pz = Position.z;
+        DestVertex.ex = Normal.x;
+        DestVertex.ey = Normal.y;
+        DestVertex.ez = Normal.z;
       }
     }
 

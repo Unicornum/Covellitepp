@@ -15,10 +15,10 @@
 #include <alicorn/settings.mock.hpp>
 #include <Platform/Android.mock.hpp>
 
-#include <Covellite/Gui/Vfs.hpp>
+#include <Covellite/App/Vfs.hpp>
 
-using ::covellite::gui::VfsCore_t;
-using ::covellite::gui::VfsPtr_t;
+using ::covellite::app::VfsCore_t;
+using ::covellite::app::VfsPtr_t;
 using ::alicorn::extension::std::Singleton;
 
 //! @cond Doxygen_Suppress

@@ -1,0 +1,186 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|ARM">
+      <Configuration>Debug</Configuration>
+      <Platform>ARM</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|ARM">
+      <Configuration>Release</Configuration>
+      <Platform>ARM</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{E7E13F1B-5211-48A7-B8F3-2BF4C924F446}</ProjectGuid>
+    <Keyword>Android</Keyword>
+    <RootNamespace>Example</RootNamespace>
+    <DefaultLanguage>en-US</DefaultLanguage>
+    <MinimumVisualStudioVersion>14.0</MinimumVisualStudioVersion>
+    <ApplicationType>Android</ApplicationType>
+    <ApplicationTypeRevision>2.0</ApplicationTypeRevision>
+    <ProjectName>Example.es.Android</ProjectName>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>Gcc_4_9</PlatformToolset>
+    <AndroidAPILevel>android-15</AndroidAPILevel>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>Gcc_4_9</PlatformToolset>
+    <AndroidAPILevel>android-15</AndroidAPILevel>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\..\..\Solution.ARM.props" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="..\..\..\Solution.ARM.props" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM'" />
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">
+    <ClCompile />
+    <Link>
+      <AdditionalLibraryDirectories>$(SolutionDir)$(Configuration)\Lib\$(PlatformTarget);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+    </Link>
+    <ClCompile />
+    <ClCompile>
+      <AdditionalOptions>-Wno-unused-variable %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">
+    <ClCompile />
+    <Link>
+      <AdditionalLibraryDirectories>$(SolutionDir)$(Configuration)\Lib\$(PlatformTarget);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+    </Link>
+    <ClCompile />
+    <ClCompile>
+      <AdditionalOptions>-Wno-unused-variable %(AdditionalOptions)</AdditionalOptions>
+      <Optimization>MaxSpeed</Optimization>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClInclude Include="Basements\Common.hpp" />
+    <ClInclude Include="Basements\Demo.hpp" />
+    <ClInclude Include="Basements\Demo\3DScene.hpp" />
+    <ClInclude Include="Basements\Demo\Animated.hpp" />
+    <ClInclude Include="Basements\Demo\Animation.hpp" />
+    <ClInclude Include="Basements\Demo\Animations.hpp" />
+    <ClInclude Include="Basements\Demo\Assimp.hpp" />
+    <ClInclude Include="Basements\Demo\Camera.hpp" />
+    <ClInclude Include="Basements\Demo\Compass.hpp" />
+    <ClInclude Include="Basements\Demo\Constants.hpp" />
+    <ClInclude Include="Basements\Demo\Controller.hpp" />
+    <ClInclude Include="Basements\Demo\CubeCoords.hpp" />
+    <ClInclude Include="Basements\Demo\DbComponents.hpp" />
+    <ClInclude Include="Basements\Demo\DbRenders.hpp" />
+    <ClInclude Include="Basements\Demo\Defines.hpp" />
+    <ClInclude Include="Basements\Demo\GameObject.hpp" />
+    <ClInclude Include="Basements\Demo\GameScene.hpp" />
+    <ClInclude Include="Basements\Demo\GameWorld.hpp" />
+    <ClInclude Include="Basements\Demo\I3DScene.hpp" />
+    <ClInclude Include="Basements\Demo\IDbComponents.hpp" />
+    <ClInclude Include="Basements\Demo\IDbRenders.hpp" />
+    <ClInclude Include="Basements\Demo\IGameObject.hpp" />
+    <ClInclude Include="Basements\Demo\IGameWorld.hpp" />
+    <ClInclude Include="Basements\Demo\Landscape.hpp" />
+    <ClInclude Include="Basements\Demo\Loader.hpp" />
+    <ClInclude Include="Basements\Demo\Model.hpp" />
+    <ClInclude Include="Basements\Demo\Particles.hpp" />
+    <ClInclude Include="Basements\Demo\Skybox.hpp" />
+    <ClInclude Include="Basements\Demo\stdafx.h" />
+    <ClInclude Include="Basements\Demo\View.hpp" />
+    <ClInclude Include="Basements\Demo\Water.hpp" />
+    <ClInclude Include="Basements\Dummy.hpp" />
+    <ClInclude Include="Basements\IBasement.hpp" />
+    <ClInclude Include="Basements\Simple2DGame.hpp" />
+    <ClInclude Include="Basements\Simple3DObject.hpp" />
+    <ClInclude Include="BasementWindow.hpp" />
+    <ClInclude Include="ExampleApp.hpp" />
+    <ClInclude Include="ExampleWindow.hpp" />
+    <ClInclude Include="Layers\Controls.hpp" />
+    <ClInclude Include="Layers\Demo.hpp" />
+    <ClInclude Include="Layers\Description.hpp" />
+    <ClInclude Include="Layers\Draw3DObject.hpp" />
+    <ClInclude Include="Layers\Example2DGame.hpp" />
+    <ClInclude Include="Layers\Layer.hpp" />
+    <ClInclude Include="Layers\MainScreen.hpp" />
+    <ClInclude Include="Layers\stdafx.h" />
+    <ClInclude Include="Layers\Text.hpp" />
+    <ClInclude Include="pch.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="Version.rc">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">true</ExcludedFromBuild>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\Externals.doxygen.ignore\CircularBar\Source\CircularBar\CircularBar.cpp" />
+    <ClCompile Include="..\..\Externals.doxygen.ignore\CircularBar\Source\CircularBar\ElementCircularBar.cpp" />
+    <ClCompile Include="..\..\Externals.doxygen.ignore\ProgressBar\Source\ProgressBar\ElementProgressBar.cpp">
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">-Wmaybe-uninitialized %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">-Wmaybe-uninitialized %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
+    <ClCompile Include="..\..\Externals.doxygen.ignore\ProgressBar\Source\ProgressBar\ProgressBar.cpp" />
+    <ClCompile Include="Basements\Common.cpp" />
+    <ClCompile Include="Basements\Demo.cpp">
+      <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">$(IntDir)%(filename).basement.o</ObjectFileName>
+      <ObjectFileName Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">$(IntDir)%(filename).basement.o</ObjectFileName>
+    </ClCompile>
+    <ClCompile Include="Basements\Demo\3DScene.cpp" />
+    <ClCompile Include="Basements\Demo\Animated.Animations.cpp" />
+    <ClCompile Include="Basements\Demo\Animated.cpp" />
+    <ClCompile Include="Basements\Demo\Animated.Mesh.cpp" />
+    <ClCompile Include="Basements\Demo\Animation.cpp" />
+    <ClCompile Include="Basements\Demo\Assimp.cpp" />
+    <ClCompile Include="Basements\Demo\Camera.cpp" />
+    <ClCompile Include="Basements\Demo\Compass.cpp" />
+    <ClCompile Include="Basements\Demo\Controller.cpp" />
+    <ClCompile Include="Basements\Demo\CubeCoords.cpp" />
+    <ClCompile Include="Basements\Demo\DbComponents.cpp" />
+    <ClCompile Include="Basements\Demo\DbRenders.cpp" />
+    <ClCompile Include="Basements\Demo\GameObject.cpp" />
+    <ClCompile Include="Basements\Demo\GameObject.Mesh.cpp" />
+    <ClCompile Include="Basements\Demo\GameObject.Texture.cpp" />
+    <ClCompile Include="Basements\Demo\GameScene.cpp" />
+    <ClCompile Include="Basements\Demo\GameWorld.cpp" />
+    <ClCompile Include="Basements\Demo\Landscape.cpp" />
+    <ClCompile Include="Basements\Demo\Landscape.Mesh.cpp" />
+    <ClCompile Include="Basements\Demo\Loader.cpp" />
+    <ClCompile Include="Basements\Demo\Model.cpp" />
+    <ClCompile Include="Basements\Demo\Particles.cpp" />
+    <ClCompile Include="Basements\Demo\Skybox.cpp" />
+    <ClCompile Include="Basements\Demo\View.cpp" />
+    <ClCompile Include="Basements\Demo\Water.cpp" />
+    <ClCompile Include="Basements\Simple2DGame.cpp" />
+    <ClCompile Include="Basements\Simple3DObject.cpp" />
+    <ClCompile Include="BasementWindow.cpp" />
+    <ClCompile Include="DefaultSettings.cpp" />
+    <ClCompile Include="ExampleApp.cpp" />
+    <ClCompile Include="ExampleWindow.cpp" />
+    <ClCompile Include="Layers\Controls.cpp" />
+    <ClCompile Include="Layers\Demo.cpp" />
+    <ClCompile Include="Layers\Description.cpp" />
+    <ClCompile Include="Layers\Draw3DObject.cpp" />
+    <ClCompile Include="Layers\Example2DGame.cpp" />
+    <ClCompile Include="Layers\Layer.cpp" />
+    <ClCompile Include="Layers\MainScreen.cpp" />
+    <ClCompile Include="Layers\Text.cpp" />
+    <ClCompile Include="ReadFileData.cpp" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

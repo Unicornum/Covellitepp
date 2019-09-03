@@ -3,7 +3,6 @@
 #include "GameObject.hpp"
 #include <alicorn/std/exception.hpp>
 #include <Covellite/Api/Component.inl>
-#include <Covellite.Api/Covellite.Api/Renderer/fx/Hlsl.hpp>
 #include "Skybox.hpp"
 #include "Camera.hpp"
 #include "Loader.hpp"
@@ -87,21 +86,20 @@ size_t GameObject::GetType(void) const /*final*/
 
 /*static*/ Object_t GameObject::GetShaderObject(const bool _IsSimple)
 {
-  static const auto PixelShaderData = Example;
+  static const auto PixelShaderData =
+    ::covellite::app::Vfs_t::GetInstance().GetData("Data\\Shaders\\Example.fx");
 
   const auto pShaderData = _IsSimple ?
     Component_t::Make(
       {
         { uT("type"), uT("Data") },
-        { uT("kind"), uT("Shader.HLSL") },
-        { uT("version"), uT("ps_4_0") },
+        { uT("kind"), uT("Shader") },
         { uT("entry"), uT("psTextured") },
       }) :
     Component_t::Make(
       {
         { uT("type"), uT("Data") },
-        { uT("kind"), uT("Shader.HLSL") },
-        { uT("version"), uT("ps_4_0") },
+        { uT("kind"), uT("Shader") },
         { uT("entry"), uT("psExample") },
         { uT("data"), PixelShaderData.data() },
         { uT("count"), PixelShaderData.size() },
@@ -109,22 +107,16 @@ size_t GameObject::GetType(void) const /*final*/
 
   return Object_t
   {
+    Component_t::Make(
+    {
+      { uT("id"), uT("Demo.Shader.Vertex") },
+      { uT("type"), uT("Shader") },
+      { uT("entry"), uT("vsLights") },
+    }),
     pShaderData,
     Component_t::Make(
     {
       { uT("id"), uT("Demo.Shader.Pixel") },
-      { uT("type"), uT("Shader") },
-    }),
-    Component_t::Make(
-    {
-      { uT("type"), uT("Data") },
-      { uT("kind"), uT("Shader.HLSL") },
-      { uT("version"), uT("vs_4_0") },
-      { uT("entry"), uT("vsTextured") },
-    }),
-    Component_t::Make(
-    {
-      { uT("id"), uT("Demo.Shader.Vertex") },
       { uT("type"), uT("Shader") },
     }),
     Component_t::Make(

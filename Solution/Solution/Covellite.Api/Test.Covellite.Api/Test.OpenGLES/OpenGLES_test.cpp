@@ -13,16 +13,22 @@
 *  Тесты класса OpenGLES.
 */
 
-#undef BOOST_OS_WINDOWS
-#undef BOOST_OS_ANDROID
-#define BOOST_OS_ANDROID 1
-#define OpenGLCommon OpenGLCommon_android
+#define GraphicApi GraphicApi_OpenGLES
+#define OpenGLCommon OpenGLCommon_OpenGLES
 
 #include <Covellite.Egl/Egl.mock.hpp>
+#include <Covellite/Api/Defines.hpp>
+#include "../../Covellite.Api/Renderer/Component.hpp"
+#include "../../Covellite.Api/Renderer/Shaders/Shaders.hpp"
 
 // Расположение класса OpenGLES
 #include "../../Covellite.Api/Renderer/OpenGLES.cpp"
+#include "../../Covellite.Api/Renderer/GraphicApi.cpp"
+#include "../../Covellite.Api/Renderer/GraphicApi.Constants.hpp"
+#include "../../Covellite.Api/Renderer/GraphicApi.CapturingServiceComponent.cpp"
 #include "../../Covellite.Api/Renderer/OpenGLCommon.cpp"
+#include "../../Covellite.Api/Renderer/OpenGLCommon.Texture.cpp"
+#include "../../Covellite.Api/Renderer/OpenGLCommonStatic.cpp"
 
 // Общий тестовый класс класса OpenGLES
 class OpenGLES_test :
@@ -130,7 +136,7 @@ TEST_F(OpenGLES_test, /*DISABLED_*/Test_Constructor_Destructor)
     .Times(1)
     .WillOnce(Return(SurfaceId));
 
-  EXPECT_CALL(ContextProxy, Constructor(DisplayId, ConfigId))
+  EXPECT_CALL(ContextProxy, Constructor(DisplayId, ConfigId, 1))
     .Times(1)
     .WillOnce(Return(ContextId));
 
@@ -208,6 +214,9 @@ TEST_F(OpenGLES_test, /*DISABLED_*/Test_PresentFrame)
 
 #define OpenGLCommon_test OpenGLES_test
 #include "../OpenGLCommon_test.hpp"
+
+#define OpenGLStatic_test OpenGLES_test
+#include "../OpenGLStatic_test.hpp"
 
 #define Updater_test OpenGLES_test
 #include "../Updater_test.hpp"

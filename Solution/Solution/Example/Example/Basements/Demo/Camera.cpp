@@ -70,14 +70,12 @@ auto Camera::GetObject(const Any_t &) const /*override*/ -> Objects_t
       {
         { uT("id"), uT("Example.Shader.Vertex.Default") },
         { uT("type"), uT("Shader") },
-        { uT("version"), uT("vs_4_0") },
-        { uT("entry"), uT("vsTextured") },
+        { uT("entry"), uT("vsLights") },
       }),
       Component_t::Make(
       {
         { uT("id"), uT("Example.Shader.Pixel.Default") },
         { uT("type"), uT("Shader") },
-        { uT("version"), uT("ps_4_0") },
         { uT("entry"), uT("psTextured") },
       }),
       Component_t::Make(

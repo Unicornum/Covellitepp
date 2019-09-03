@@ -14,16 +14,17 @@
 *  Тесты класса DirectX11.
 */
 
+#define GraphicApi GraphicApi_DirectX11
+
 // Расположение класса DirectX11
 #include "../../Covellite.Api/Renderer/DirectX11.cpp"
 #include "../../Covellite.Api/Renderer/DirectX.cpp"
+#include "../../Covellite.Api/Renderer/GraphicApi.cpp"
+#include "../../Covellite.Api/Renderer/GraphicApi.Constants.hpp"
+#include "../../Covellite.Api/Renderer/GraphicApi.CapturingServiceComponent.cpp"
 
 #include <Covellite/Api/Component.inl>
 #include <Covellite/Api/Vertex.hpp>
-#include "../../Covellite.Api/Renderer/fx/Vertex.auto.hpp"
-#include "../../Covellite.Api/Renderer/fx/Pixel.auto.hpp"
-#include "../../Covellite.Api/Renderer/fx/Data.auto.hpp"
-#include "../../Covellite.Api/Renderer/fx/Input.auto.hpp"
 
 namespace vertex = ::covellite::api::vertex;
 
@@ -38,7 +39,6 @@ protected:
   using String_t = ::alicorn::extension::std::String;
   using Render_t = ::std::function<void(void)>;
   using Time_t = ::std::chrono::microseconds;
-  using BufferMapper_t = ::covellite::api::cbBufferMap_t<vertex::Polyhedron>;
 
   // Вызывается ПЕРЕД запуском каждого теста
   void SetUp(void) override
@@ -108,6 +108,18 @@ private:
   ::mock::DirectX11::Buffer m_DefaultBuffer;
   D3D11_BUFFER_DESC m_DefaultBufferDesc = { 0 };
   ::mock::DirectX11::Blob m_DefaultBlob;
+
+protected:
+  ::DirectX::XMFLOAT4A ARGBtoFloat4(uint32_t _HexColor)
+  {
+    return ::DirectX::XMFLOAT4A
+    {
+      ((_HexColor & 0x00FF0000) >> 16) / 255.0f,
+      ((_HexColor & 0x0000FF00) >> 8) / 255.0f,
+      ((_HexColor & 0x000000FF) >> 0) / 255.0f,
+      ((_HexColor & 0xFF000000) >> 24) / 255.0f
+    };
+  }
 };
 
 // Образец макроса для подстановки в класс DirectX11 
@@ -2240,144 +2252,6 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_State_AlphaTest)
 }
 
 // ************************************************************************** //
-TEST_F(DirectX11_test, /*DISABLED_*/Test_Material_StructSizeAlign16Bytes)
-{
-  EXPECT_EQ(0, sizeof(::Material) % 16);
-}
-
-// ************************************************************************** //
-TEST_F(DirectX11_test, /*DISABLED_*/Test_Material_CreateBuffer_Fail)
-{
-  using DirectXProxy_t = ::mock::DirectX11::Proxy;
-  DirectXProxy_t DirectXProxy;
-  DirectXProxy_t::GetInstance() = &DirectXProxy;
-
-  ::mock::DirectX11::Device Device;
-
-  const auto pComponent = Component_t::Make({});
-
-  using namespace ::testing;
-
-  EXPECT_CALL(DirectXProxy, CreateDevice())
-    .Times(1)
-    .WillOnce(Return(&Device));
-
-  const Tested_t oExample{ Data_t{} };
-  const ITested_t & IExample = oExample;
-
-  auto itCreator = IExample.GetCreators().find(uT("Material"));
-  ASSERT_NE(IExample.GetCreators().end(), itCreator);
-
-  InSequence Dummy;
-
-  EXPECT_CALL(Device, CreateBuffer(_, _))
-    .Times(1);
-
-  EXPECT_CALL(Device, GetResult(Eq("CreateBuffer")))
-    .Times(1)
-    .WillOnce(Return(E_FAIL));
-
-  EXPECT_THROW(itCreator->second(pComponent), ::std::exception);
-}
-
-// ************************************************************************** //
-TEST_F(DirectX11_test, /*DISABLED_*/Test_Material)
-{
-  const auto TestCallRender = [](
-    const Component_t::ComponentPtr_t & _pComponent, 
-    const ::Material & _ExpectedMaterial)
-  {
-    using DirectXProxy_t = ::mock::DirectX11::Proxy;
-    DirectXProxy_t DirectXProxy;
-    DirectXProxy_t::GetInstance() = &DirectXProxy;
-
-    ::mock::DirectX11::Device Device;
-    ::mock::DirectX11::DeviceContext DeviceContext;
-    ::mock::DirectX11::Buffer ConstantBuffer;
-
-    using namespace ::testing;
-
-    EXPECT_CALL(DirectXProxy, CreateDevice())
-      .Times(1)
-      .WillOnce(Return(&Device));
-
-    EXPECT_CALL(DirectXProxy, CreateDeviceContext())
-      .Times(1)
-      .WillOnce(Return(&DeviceContext));
-
-    const Tested_t oExample{ Data_t{} };
-    const ITested_t & IExample = oExample;
-
-    D3D11_BUFFER_DESC ConstantBufferDesc = { 0 };
-    ConstantBufferDesc.Usage = D3D11_USAGE_DEFAULT;
-    ConstantBufferDesc.ByteWidth = sizeof(::Material);
-    ConstantBufferDesc.BindFlags = D3D11_BIND_CONSTANT_BUFFER;
-
-    D3D11_SUBRESOURCE_DATA InitData = { 0 };
-
-    auto itCreator = IExample.GetCreators().find(uT("Material"));
-    ASSERT_NE(IExample.GetCreators().end(), itCreator);
-
-    InSequence Dummy;
-
-    EXPECT_CALL(Device, CreateMaterialBuffer(_ExpectedMaterial))
-      .Times(1);
-
-    EXPECT_CALL(Device, CreateBuffer(ConstantBufferDesc, _))
-      .Times(1)
-      .WillOnce(Return(&ConstantBuffer));
-
-    auto Render = itCreator->second(_pComponent);
-    ASSERT_NE(nullptr, Render);
-
-    EXPECT_CALL(DeviceContext,
-      VSSetConstantBuffers(MATERIAL_BUFFER_INDEX, 1, &ConstantBuffer))
-      .Times(1);
-
-    EXPECT_CALL(DeviceContext,
-      PSSetConstantBuffers(MATERIAL_BUFFER_INDEX, 1, &ConstantBuffer))
-      .Times(1);
-
-    Render();
-
-    EXPECT_CALL(ConstantBuffer, Release())
-      .Times(1);
-  };
-
-  {
-    const auto pComponent = Component_t::Make({});
-
-    ::Material DefaultMaterial = { 0 };
-    DefaultMaterial.ARGBAmbient = 0xFF000000;
-    DefaultMaterial.ARGBDiffuse = 0xFF000000;
-    DefaultMaterial.ARGBSpecular = 0xFF000000;
-    DefaultMaterial.ARGBEmission = 0xFF000000;
-    DefaultMaterial.Shininess = 0.0f;
-
-    TestCallRender(pComponent, DefaultMaterial);
-  }
-
-  {
-    const auto pComponent = Component_t::Make({});
-
-    ::Material ExpectedMaterial = { 0 };
-    ExpectedMaterial.ARGBAmbient = 0x12311210;
-    ExpectedMaterial.ARGBDiffuse = 0x12311211;
-    ExpectedMaterial.ARGBSpecular = 0x12311212;
-    ExpectedMaterial.ARGBEmission = 0x12311213;
-    ExpectedMaterial.Shininess = 1812311214.0f;
-
-    pComponent->SetValue(uT("ambient"), ExpectedMaterial.ARGBAmbient);
-    pComponent->SetValue(uT("diffuse"), ExpectedMaterial.ARGBDiffuse);
-    pComponent->SetValue(uT("specular"), ExpectedMaterial.ARGBSpecular);
-    pComponent->SetValue(uT("emission"), ExpectedMaterial.ARGBEmission);
-    pComponent->SetValue(uT("shininess"), ExpectedMaterial.Shininess);
-
-    TestCallRender(pComponent, ExpectedMaterial);
-  }
-}
-
-// ************************************************************************** //
 TEST_F(DirectX11_test, /*DISABLED_*/Test_Texture_CreateTexture2D_Fail)
 {
   using DirectXProxy_t = ::mock::DirectX11::Proxy;
@@ -2775,11 +2649,10 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Shader_Compile_Fail)
 // ************************************************************************** //
 TEST_F(DirectX11_test, /*DISABLED_*/Test_Shader_CreateInputLayout_Fail)
 {
-  const ::std::string ShaderData
-  {
+  const ::std::string ShaderData =
     "Pixel vs1(Polygon _Value)\r\n"
     "Pixel vs2(Polyhedron _Value)\r\n"
-  };
+    "Pixel vs3(Vertex _Value)\r\n";
 
   const auto TestCallRender = [&](const ::std::string & _Entry)
   {
@@ -2830,16 +2703,16 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Shader_CreateInputLayout_Fail)
 
   TestCallRender("vs1");
   TestCallRender("vs2");
+  TestCallRender("vs3");
 }
 
 // ************************************************************************** //
 TEST_F(DirectX11_test, /*DISABLED_*/Test_Shader_CreateVertexShader_Fail)
 {
-  const ::std::string ShaderData
-  {
+  const ::std::string ShaderData =
     "Pixel vs1(Polygon _Value)\r\n"
     "Pixel vs2(Polyhedron _Value)\r\n"
-  };
+    "Pixel vs3(Vertex _Value)\r\n";
 
   const auto TestCallRender = [&](const ::std::string & _Entry)
   {
@@ -2893,6 +2766,7 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Shader_CreateVertexShader_Fail)
 
   TestCallRender("vs1");
   TestCallRender("vs2");
+  TestCallRender("vs3");
 }
 
 // ************************************************************************** //
@@ -2958,12 +2832,25 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Shader_CreatePixelShader_Fail)
 }
 
 // ************************************************************************** //
-TEST_F(DirectX11_test, /*DISABLED_*/Test_Shader_Vertex_DefaultData)
+TEST_F(DirectX11_test, /*DISABLED_*/Test_Shader_DefaultData_Deprecated)
 {
+  const ::std::string VertexShaderPrefix =
+    "#define COVELLITE_SHADER_DESKTOP\r\n"
+    "#define COVELLITE_SHADER_HLSL\r\n"
+    "#define COVELLITE_SHADER_VERTEX\r\n";
+
+  const ::std::string PixelShaderPrefix =
+    "#define COVELLITE_SHADER_DESKTOP\r\n"
+    "#define COVELLITE_SHADER_HLSL\r\n"
+    "#define COVELLITE_SHADER_PIXEL\r\n";
+
   const auto TestCallRender = [&](
     const Component_t::ComponentPtr_t & _pShader,
     const Component_t::ComponentPtr_t & _pData,
-    const ::std::string & _Entry)
+    const ::std::string & _Entry,
+    const ::std::string & _Version,
+    const ::std::string & _Prefix,
+    const ::std::string & _Postfix)
   {
     using DirectXProxy_t = ::mock::DirectX11::Proxy;
     DirectXProxy_t DirectXProxy;
@@ -2973,14 +2860,16 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Shader_Vertex_DefaultData)
 
     using namespace ::alicorn::extension::std;
     using ::alicorn::extension::cpp::IS_RELEASE_CONFIGURATION;
+    using Shader_t = ::covellite::api::renderer::DirectX::Shader;
 
     ::mock::DirectX11::CompileDesc Desc;
-    Desc.SrcData = ::Data + ::Input + ::Vertex + ::Pixel;
+    Desc.SrcData = Shader_t::Convert(_Prefix) + ::Predefined + ::Data + ::Input +
+      ::DefaultDeprecated + Shader_t::Convert(_Postfix);
     Desc.SourceName = "[Covellite::Api]: " + _Entry;
     Desc.pDefines = nullptr;
     Desc.pInclude = nullptr;
     Desc.Entrypoint = _Entry;
-    Desc.Target = "Version1902231915";
+    Desc.Target = _Version;
     Desc.Flags1 = (IS_RELEASE_CONFIGURATION) ? 0 :
       D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION;
     Desc.Flags2 = 0;
@@ -3020,7 +2909,7 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Shader_Vertex_DefaultData)
     ASSERT_NE(nullptr, Render);
   };
 
-  for (const auto & Entry : { uT("VS"), uT("vsTextured"), uT("psColored") })
+  for (const auto & Entry : { uT("VS"), uT("vsTextured") })
   {
     using namespace ::alicorn::extension::std;
 
@@ -3029,24 +2918,169 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Shader_Vertex_DefaultData)
     {
       const auto pComponent = Component_t::Make(
         {
-          { uT("version"), uT("Version1902231915") },
           { uT("entry"), Entry },
         });
 
-      TestCallRender(pComponent, nullptr, strEntry);
+      TestCallRender(pComponent, nullptr, strEntry, "vs_4_0",
+        VertexShaderPrefix, "");
     }
 
     {
       const auto pData = Component_t::Make(
         {
-          { uT("kind"), uT("Shader.HLSL") },
-          { uT("version"), uT("Version1902231915") },
+          { uT("kind"), uT("Shader") },
           { uT("entry"), Entry },
         });
 
       const auto pComponent = Component_t::Make({ });
 
-      TestCallRender(pComponent, pData, strEntry);
+      TestCallRender(pComponent, pData, strEntry, "vs_4_0",
+        VertexShaderPrefix, "");
+    }
+  }
+}
+
+// ************************************************************************** //
+TEST_F(DirectX11_test, /*DISABLED_*/Test_Shader_DefaultData)
+{
+  const ::std::string VertexShaderPrefix =
+    "#define COVELLITE_SHADER_DESKTOP\r\n"
+    "#define COVELLITE_SHADER_HLSL\r\n"
+    "#define COVELLITE_SHADER_VERTEX\r\n";
+
+  const ::std::string PixelShaderPrefix =
+    "#define COVELLITE_SHADER_DESKTOP\r\n"
+    "#define COVELLITE_SHADER_HLSL\r\n"
+    "#define COVELLITE_SHADER_PIXEL\r\n";
+
+  const auto TestCallRender = [&](
+    const Component_t::ComponentPtr_t & _pShader,
+    const Component_t::ComponentPtr_t & _pData,
+    const ::std::string & _Entry,
+    const ::std::string & _Version,
+    const ::std::string & _Prefix,
+    const ::std::string & _Postfix)
+  {
+    using DirectXProxy_t = ::mock::DirectX11::Proxy;
+    DirectXProxy_t DirectXProxy;
+    DirectXProxy_t::GetInstance() = &DirectXProxy;
+
+    ::mock::DirectX11::Blob CompiledEffect;
+
+    using namespace ::alicorn::extension::std;
+    using ::alicorn::extension::cpp::IS_RELEASE_CONFIGURATION;
+    using Shader_t = ::covellite::api::renderer::DirectX::Shader;
+
+    ::mock::DirectX11::CompileDesc Desc;
+    Desc.SrcData = Shader_t::Convert(_Prefix) + ::Predefined + ::Data + 
+      ::Input + ::Default + Shader_t::Convert(_Postfix);
+    Desc.SourceName = "[Covellite::Api]: " + _Entry;
+    Desc.pDefines = nullptr;
+    Desc.pInclude = nullptr;
+    Desc.Entrypoint = _Entry;
+    Desc.Target = _Version;
+    Desc.Flags1 = (IS_RELEASE_CONFIGURATION) ? 0 :
+      D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION;
+    Desc.Flags2 = 0;
+
+    using namespace ::testing;
+
+    const Tested_t oExample{ Data_t{} };
+    const ITested_t & IExample = oExample;
+
+    if (_pData != nullptr)
+    {
+      auto itCreator = IExample.GetCreators().find(uT("Data"));
+      ASSERT_NE(IExample.GetCreators().end(), itCreator);
+
+      auto Render = itCreator->second(_pData);
+      EXPECT_EQ(nullptr, Render);
+    }
+
+    auto itCreator = IExample.GetCreators().find(uT("Shader"));
+    ASSERT_NE(IExample.GetCreators().end(), itCreator);
+
+    {
+      InSequence Dummy;
+
+      EXPECT_CALL(DirectXProxy, CompileGetCode())
+        .Times(1)
+        .WillOnce(Return(&CompiledEffect));
+
+      EXPECT_CALL(DirectXProxy, Compile(Desc))
+        .Times(1);
+
+      EXPECT_CALL(CompiledEffect, Release())
+        .Times(1);
+    }
+
+    auto Render = itCreator->second(_pShader);
+    ASSERT_NE(nullptr, Render);
+  };
+
+  for (const auto & Entry : { uT("vsGui"), uT("vsLights") })
+  {
+    using namespace ::alicorn::extension::std;
+
+    const auto strEntry = string_cast<::std::string, Locale::Ascii128>(Entry);
+
+    {
+      const auto pComponent = Component_t::Make(
+        {
+          { uT("entry"), Entry },
+        });
+
+      TestCallRender(pComponent, nullptr, strEntry, "vs_4_0",
+        VertexShaderPrefix, "");
+    }
+
+    {
+      const auto pData = Component_t::Make(
+        {
+          { uT("kind"), uT("Shader") },
+          { uT("entry"), Entry },
+        });
+
+      const auto pComponent = Component_t::Make({ });
+
+      TestCallRender(pComponent, pData, strEntry, "vs_4_0",
+        VertexShaderPrefix, "");
+    }
+  }
+
+  for (const auto & Entry : { uT("psColored"), uT("psTextured") })
+  {
+    using namespace ::alicorn::extension::std;
+
+    const auto strEntry = string_cast<::std::string, Locale::Ascii128>(Entry);
+
+    const ::std::string PixelShaderPostfix =
+      "float4 psMain(Pixel _Value) : SV_Target\r\n"
+      "{\r\n"
+      "  return " + strEntry + "(_Value);\r\n"
+      "}\r\n";
+
+    {
+      const auto pComponent = Component_t::Make(
+        {
+          { uT("entry"), Entry },
+        });
+
+      TestCallRender(pComponent, nullptr, "psMain", "ps_4_0",
+        PixelShaderPrefix, PixelShaderPostfix);
+    }
+
+    {
+      const auto pData = Component_t::Make(
+        {
+          { uT("kind"), uT("Shader") },
+          { uT("entry"), Entry },
+        });
+
+      const auto pComponent = Component_t::Make({ });
+
+      TestCallRender(pComponent, pData, "psMain", "ps_4_0",
+        PixelShaderPrefix, PixelShaderPostfix);
     }
   }
 }
@@ -3054,11 +3088,15 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Shader_Vertex_DefaultData)
 // ************************************************************************** //
 TEST_F(DirectX11_test, /*DISABLED_*/Test_Shader_Vertex)
 {
-  const ::std::string ShaderData
-  {
+  const ::std::string VertexShaderPrefix =
+    "#define COVELLITE_SHADER_DESKTOP\r\n"
+    "#define COVELLITE_SHADER_HLSL\r\n"
+    "#define COVELLITE_SHADER_VERTEX\r\n";
+
+  const ::std::string ShaderData =
     "Pixel vs1(Polygon _Value)\r\n"
     "Pixel vs2(Polyhedron _Value)\r\n"
-  };
+    "Pixel vs3(Vertex _Value)\r\n";
 
   using InputDesc_t = ::std::vector<D3D11_INPUT_ELEMENT_DESC>;
 
@@ -3080,15 +3118,16 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Shader_Vertex)
 
     using namespace ::alicorn::extension::std;
     using ::alicorn::extension::cpp::IS_RELEASE_CONFIGURATION;
+    using Shader_t = ::covellite::api::renderer::DirectX::Shader;
 
     ::mock::DirectX11::CompileDesc Desc;
-    Desc.SrcData = ::Data + ::Input + 
-      ::std::vector<uint8_t>{ ShaderData.begin(), ShaderData.end() };
+    Desc.SrcData = Shader_t::Convert(VertexShaderPrefix) + 
+      ::Predefined + ::Data + ::Input + Shader_t::Convert(ShaderData);
     Desc.SourceName = "[Covellite::Api]: " + _EntryPoint;
     Desc.pDefines = nullptr;
     Desc.pInclude = nullptr;
     Desc.Entrypoint = _EntryPoint;
-    Desc.Target = "Version1811221242";
+    Desc.Target = "vs_4_0";
     Desc.Flags1 = (IS_RELEASE_CONFIGURATION) ? 0 :
       D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION;
     Desc.Flags2 = 0;
@@ -3182,7 +3221,6 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Shader_Vertex)
         {
           { uT("data"), (const uint8_t *)ShaderData.data() },
           { uT("count"), ShaderData.size() },
-          { uT("version"), uT("Version1811221242") },
           { uT("entry"), uT("vs1") },
         });
 
@@ -3194,10 +3232,9 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Shader_Vertex)
 
       const auto pData = Component_t::Make(
         {
-          { uT("kind"), uT("Shader.HLSL") },
+          { uT("kind"), uT("Shader") },
           { uT("data"), (const uint8_t *)ShaderData.data() },
           { uT("count"), ShaderData.size() },
-          { uT("version"), uT("Version1811221242") },
           { uT("entry"), uT("vs1") },
         });
 
@@ -3218,7 +3255,6 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Shader_Vertex)
         {
           { uT("data"), (const uint8_t *)ShaderData.data() },
           { uT("count"), ShaderData.size() },
-          { uT("version"), uT("Version1811221242") },
           { uT("entry"), uT("vs2") },
         });
 
@@ -3228,10 +3264,9 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Shader_Vertex)
     {
       const auto pData = Component_t::Make(
         {
-          { uT("kind"), uT("Shader.HLSL") },
+          { uT("kind"), uT("Shader") },
           { uT("data"), (const uint8_t *)ShaderData.data() },
           { uT("count"), ShaderData.size() },
-          { uT("version"), uT("Version1811221242") },
           { uT("entry"), uT("vs2") },
         });
 
@@ -3240,17 +3275,58 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Shader_Vertex)
       TestCallRender(pComponent, pData, Layout, "vs2");
     }
   }
+
+  {
+    const ::std::vector<D3D11_INPUT_ELEMENT_DESC> Layout =
+    {
+      { "POSITION", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+      { "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 16, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+      { "NORMAL", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 24, D3D11_INPUT_PER_VERTEX_DATA, 0 },
+    };
+
+    {
+      const auto pComponent = Component_t::Make(
+        {
+          { uT("data"), (const uint8_t *)ShaderData.data() },
+          { uT("count"), ShaderData.size() },
+          { uT("entry"), uT("vs3") },
+        });
+
+      TestCallRender(pComponent, nullptr, Layout, "vs3");
+    }
+
+    {
+      const auto pData = Component_t::Make(
+        {
+          { uT("kind"), uT("Shader") },
+          { uT("data"), (const uint8_t *)ShaderData.data() },
+          { uT("count"), ShaderData.size() },
+          { uT("entry"), uT("vs3") },
+        });
+
+      const auto pComponent = Component_t::Make({});
+
+      TestCallRender(pComponent, pData, Layout, "vs3");
+    }
+  }
 }
 
 // ************************************************************************** //
 TEST_F(DirectX11_test, /*DISABLED_*/Test_Shader_Pixel)
 {
-  const ::std::string ShaderData
-  {
-    "float4 ps1(??? _Value) : SV_Target\r\n"
-    "float4 ps2(Unknown _Value) : SV_Target\r\n"
-    "float4 ps3(Pixel _Value) : SV_Target\r\n"
-  };
+  const ::std::string PixelShaderPrefix =
+    "#define COVELLITE_SHADER_DESKTOP\r\n"
+    "#define COVELLITE_SHADER_HLSL\r\n"
+    "#define COVELLITE_SHADER_PIXEL\r\n";
+
+  const ::std::string ShaderData =
+    "float4 ps1(Pixel _Value) : SV_Target\r\n";
+
+  const ::std::string PixelShaderPostfix =
+    "float4 psMain(Pixel _Value) : SV_Target\r\n"
+    "{\r\n"
+    "  return ps1(_Value);\r\n"
+    "}\r\n";
 
   const auto TestCallRender = [&](
     const Component_t::ComponentPtr_t & _pShader,
@@ -3268,15 +3344,16 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Shader_Pixel)
 
     using namespace ::alicorn::extension::std;
     using ::alicorn::extension::cpp::IS_RELEASE_CONFIGURATION;
+    using Shader_t = ::covellite::api::renderer::DirectX::Shader;
 
     ::mock::DirectX11::CompileDesc Desc;
-    Desc.SrcData = ::Data + ::Input +
-      ::std::vector<uint8_t>{ ShaderData.begin(), ShaderData.end() };
+    Desc.SrcData = Shader_t::Convert(PixelShaderPrefix) + ::Predefined +
+      ::Data + ::Input + Shader_t::Convert(ShaderData + PixelShaderPostfix);
     Desc.SourceName = "[Covellite::Api]: " + _Entry;
     Desc.pDefines = nullptr;
     Desc.pInclude = nullptr;
     Desc.Entrypoint = _Entry;
-    Desc.Target = "Version1811221254";
+    Desc.Target = "ps_4_0";
     Desc.Flags1 = (IS_RELEASE_CONFIGURATION) ? 0 :
       D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION;
     Desc.Flags2 = 0;
@@ -3347,7 +3424,7 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Shader_Pixel)
       .Times(1);
   };
 
-  for (const auto & Entry : { uT("ps1"), uT("ps2"), uT("ps3") })
+  for (const auto & Entry : { uT("ps1") })
   {
     using namespace ::alicorn::extension::std;
 
@@ -3358,26 +3435,24 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Shader_Pixel)
         {
           { uT("data"), (const uint8_t *)ShaderData.data() },
           { uT("count"), ShaderData.size() },
-          { uT("version"), uT("Version1811221254") },
           { uT("entry"), Entry },
         });
 
-      TestCallRender(pComponent, nullptr, strEntry);
+      TestCallRender(pComponent, nullptr, "psMain");
     }
 
     {
       const auto pData = Component_t::Make(
         {
-          { uT("kind"), uT("Shader.HLSL") },
+          { uT("kind"), uT("Shader") },
           { uT("data"), (const uint8_t *)ShaderData.data() },
           { uT("count"), ShaderData.size() },
-          { uT("version"), uT("Version1811221254") },
           { uT("entry"), Entry },
         });
 
       const auto pComponent = Component_t::Make({ });
 
-      TestCallRender(pComponent, pData, strEntry);
+      TestCallRender(pComponent, pData, "psMain");
     }
   }
 }
@@ -3469,6 +3544,7 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Buffer_CreateVertex_Fail)
   }
 
   {
+    using BufferMapper_t = ::covellite::api::cbBufferMap_t<vertex::Polyhedron>;
     const BufferMapper_t Dummy = [](vertex::Polyhedron *) { return false; };
 
     const auto pData = Component_t::Make(
@@ -3626,11 +3702,54 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Buffer_Vertex_Static)
         VertexData.data(), VertexData.size(), sizeof(vertex::Polyhedron));
     }
   }
+
+  {
+    const ::std::vector<::covellite::api::Vertex> VertexData =
+    {
+      {
+        1.0f, 2.0f, 3.0f, 4.0f, 
+        5.0f, 6.0f,
+        7.0f, 8.0f, 9.0f, 0.0f
+      },
+      {
+        10.0f, 11.0f, 12.0f, 13.0f, 
+        14.0f, 15.0f, 
+        16.0f, 17.0f, 18.0f, 19.0f
+      },
+    };
+
+    {
+      const auto pComponent = Component_t::Make(
+        {
+          { uT("data"), VertexData.data() },
+          { uT("count"), VertexData.size() },
+        });
+
+      TestCallRender(pComponent, nullptr,
+        VertexData.data(), VertexData.size(), sizeof(::covellite::api::Vertex));
+    }
+
+    {
+      const auto pData = Component_t::Make(
+        {
+          { uT("kind"), uT("Buffer") },
+          { uT("data"), VertexData.data() },
+          { uT("count"), VertexData.size() },
+        });
+
+      const auto pComponent = Component_t::Make({});
+
+      TestCallRender(pComponent, pData,
+        VertexData.data(), VertexData.size(), sizeof(::covellite::api::Vertex));
+    }
+  }
 }
 
 // ************************************************************************** //
-TEST_F(DirectX11_test, /*DISABLED_*/Test_Buffer_Vertex_Dynamic)
+TEST_F(DirectX11_test, /*DISABLED_*/Test_Buffer_Polyhedron_Dynamic)
 {
+  using BufferMapper_t = ::covellite::api::cbBufferMap_t<vertex::Polyhedron>;
+
   class Proxy :
     public ::alicorn::extension::testing::Proxy<Proxy>
   {
@@ -3822,6 +3941,207 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Buffer_Vertex_Dynamic)
 
     TestCallRender(pComponent, pData,
       VertexData.data(), VertexData.size(), sizeof(vertex::Polyhedron));
+  }
+}
+
+// ************************************************************************** //
+TEST_F(DirectX11_test, /*DISABLED_*/Test_Buffer_Vertex_Dynamic)
+{
+  using BufferMapper_t = 
+    ::covellite::api::cbBufferMap_t<::covellite::api::Vertex>;
+
+  class Proxy :
+    public ::alicorn::extension::testing::Proxy<Proxy>
+  {
+  public:
+    MOCK_METHOD1(Mapper, bool(::covellite::api::Vertex *));
+  };
+
+  const auto TestCallRender = [](
+    const Component_t::ComponentPtr_t & _pBuffer,
+    const Component_t::ComponentPtr_t & _pData,
+    const void * _pRawData, size_t _RawDataSize, size_t _VertexSize)
+  {
+    using DirectXProxy_t = ::mock::DirectX11::Proxy;
+    DirectXProxy_t DirectXProxy;
+    DirectXProxy_t::GetInstance() = &DirectXProxy;
+
+    Proxy oProxy;
+    Proxy::GetInstance() = &oProxy;
+
+    ::mock::DirectX11::Device Device;
+    ::mock::DirectX11::DeviceContext DeviceContext;
+    ::mock::DirectX11::Buffer Buffer;
+
+    D3D11_SUBRESOURCE_DATA InitData = { 0 };
+    InitData.pSysMem = _pRawData;
+
+    D3D11_BUFFER_DESC Desc = { 0 };
+    Desc.Usage = D3D11_USAGE_DYNAMIC;
+    Desc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+    Desc.ByteWidth = static_cast<UINT>(_RawDataSize * _VertexSize);
+    Desc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
+
+    const BufferMapper_t Mapper = [&](::covellite::api::Vertex * _pData)
+    {
+      return oProxy.Mapper(_pData);
+    };
+
+    _pBuffer->SetValue(uT("mapper"), Mapper);
+
+    using namespace ::testing;
+
+    EXPECT_CALL(DirectXProxy, CreateDevice())
+      .Times(1)
+      .WillOnce(Return(&Device));
+
+    EXPECT_CALL(DirectXProxy, CreateDeviceContext())
+      .Times(1)
+      .WillOnce(Return(&DeviceContext));
+
+    const Tested_t oExample{ Data_t{} };
+    const ITested_t & IExample = oExample;
+
+    if (_pData != nullptr)
+    {
+      auto itCreator = IExample.GetCreators().find(uT("Data"));
+      ASSERT_NE(IExample.GetCreators().end(), itCreator);
+
+      auto Render = itCreator->second(_pData);
+      EXPECT_EQ(nullptr, Render);
+    }
+
+    auto itCreator = IExample.GetCreators().find(uT("Buffer"));
+    ASSERT_NE(IExample.GetCreators().end(), itCreator);
+
+    InSequence Dummy;
+
+    EXPECT_CALL(Device, CreateBuffer(Desc, InitData))
+      .Times(1)
+      .WillOnce(Return(&Buffer));
+
+    auto Render = itCreator->second(_pBuffer);
+    ASSERT_NE(nullptr, Render);
+
+    {
+      EXPECT_CALL(oProxy, Mapper(nullptr))
+        .Times(1)
+        .WillOnce(Return(false));
+
+      EXPECT_CALL(DeviceContext, Map(_, _))
+        .Times(0);
+
+      EXPECT_CALL(oProxy, Mapper(_))
+        .Times(0);
+
+      EXPECT_CALL(DeviceContext, Unmap(_, _))
+        .Times(0);
+
+      EXPECT_CALL(DeviceContext, IASetVertexBuffers(0, 1, &Buffer,
+        static_cast<UINT>(_VertexSize), 0))
+        .Times(1);
+
+      Render();
+    }
+
+    {
+      D3D11_MAPPED_SUBRESOURCE Resource = { 0 };
+
+      EXPECT_CALL(oProxy, Mapper(nullptr))
+        .Times(1)
+        .WillOnce(Return(true));
+
+      EXPECT_CALL(DeviceContext, Mapped(_, _))
+        .Times(1)
+        .WillOnce(Return(Resource));
+
+      EXPECT_CALL(DeviceContext, Map(_, _))
+        .Times(1)
+        .WillOnce(Return(E_FAIL));
+
+      EXPECT_CALL(oProxy, Mapper(_))
+        .Times(0);
+
+      EXPECT_CALL(DeviceContext, Unmap(_, _))
+        .Times(0);
+
+      EXPECT_CALL(DeviceContext, IASetVertexBuffers(_, _, _, _, _))
+        .Times(0);
+
+      EXPECT_THROW(Render(), ::std::exception);
+    }
+
+    {
+      D3D11_MAPPED_SUBRESOURCE Resource = { 0 };
+      Resource.pData = (void *)1908011249;
+
+      EXPECT_CALL(oProxy, Mapper(nullptr))
+        .Times(1)
+        .WillOnce(Return(true));
+
+      EXPECT_CALL(DeviceContext, Mapped(&Buffer, D3D11_MAP_WRITE_NO_OVERWRITE))
+        .Times(1)
+        .WillOnce(Return(Resource));
+
+      EXPECT_CALL(DeviceContext, Map(0, 0))
+        .Times(1)
+        .WillOnce(Return(S_OK));
+
+      EXPECT_CALL(oProxy, 
+        Mapper(reinterpret_cast<::covellite::api::Vertex *>(Resource.pData)))
+        .Times(1);
+
+      EXPECT_CALL(DeviceContext, Unmap(&Buffer, 0))
+        .Times(1);
+
+      EXPECT_CALL(DeviceContext, IASetVertexBuffers(0, 1, &Buffer,
+        static_cast<UINT>(_VertexSize), 0))
+        .Times(1);
+
+      Render();
+    }
+
+    EXPECT_CALL(Buffer, Release())
+      .Times(AtLeast(1));
+  };
+
+  const ::std::vector<::covellite::api::Vertex> VertexData =
+  {
+    {
+      1.0f, 2.0f, 3.0f, 4.0f, 
+      5.0f, 6.0f,
+      7.0f, 8.0f, 9.0f, 0.0f
+    },
+    {
+      10.0f, 11.0f, 12.0f, 13.0f, 
+      14.0f, 15.0f, 
+      16.0f, 17.0f, 18.0f, 19.0f
+    },
+  };
+
+  {
+    const auto pComponent = Component_t::Make(
+      {
+        { uT("data"), VertexData.data() },
+        { uT("count"), VertexData.size() },
+      });
+
+    TestCallRender(pComponent, nullptr,
+      VertexData.data(), VertexData.size(), sizeof(::covellite::api::Vertex));
+  }
+
+  {
+    const auto pData = Component_t::Make(
+      {
+        { uT("kind"), uT("Buffer") },
+        { uT("data"), VertexData.data() },
+        { uT("count"), VertexData.size() },
+      });
+
+    const auto pComponent = Component_t::Make({ });
+
+    TestCallRender(pComponent, pData,
+      VertexData.data(), VertexData.size(), sizeof(::covellite::api::Vertex));
   }
 }
 
@@ -4424,7 +4744,7 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Present_Geometry_Billboard)
     const Render_t & _Render,
     const ::Matrices & _Matrices)
   {
-    oExample.m_pData->Get<::Matrices>().View = _Matrices.View;
+    oExample.m_pConstants->Get<::Matrices>().View = _Matrices.View;
 
     EXPECT_CALL(DeviceContext,
       UpdateSubresource(&ConstantBuffer, 0, nullptr, _Matrices, 0, 0))
@@ -5519,14 +5839,14 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Light_Ambient)
 
   ::Lights DefaultLights; // = { 0 } недостаточно!
   memset(&DefaultLights, 0, sizeof(DefaultLights));
-  DefaultLights.Ambient.ARGBColor = 0xFF000000;
+  DefaultLights.Ambient.Color = ARGBtoFloat4(0xFF000000);
   DefaultLights.Ambient.IsValid = 1;
 
   const auto Ambient = 0xFF031717;
 
   ::Lights ExpectedLights; // = { 0 } недостаточно!
   memset(&ExpectedLights, 0, sizeof(ExpectedLights));
-  ExpectedLights.Ambient.ARGBColor = Ambient;
+  ExpectedLights.Ambient.Color = ARGBtoFloat4(Ambient);
   ExpectedLights.Ambient.IsValid = 1;
 
   const auto TestCallRender = [&](
@@ -5676,7 +5996,7 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Light_Direction)
   ::Lights DefaultLights; // = { 0 } недостаточно!
   memset(&DefaultLights, 0, sizeof(DefaultLights));
   DefaultLights.Direction.IsValid = 1;
-  DefaultLights.Direction.ARGBColor = 0xFF000000;
+  DefaultLights.Direction.Color = ARGBtoFloat4(0xFF000000);
   DefaultLights.Direction.Direction = { 1.0f, 0.0f, 0.0f, 0.0f };
 
   const auto Diffuse = 0xFF031836;
@@ -5688,7 +6008,7 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Light_Direction)
   ::Lights ExpectedLights; // = { 0 } недостаточно!
   memset(&ExpectedLights, 0, sizeof(ExpectedLights));
   ExpectedLights.Direction.IsValid = 1;
-  ExpectedLights.Direction.ARGBColor = Diffuse;
+  ExpectedLights.Direction.Color = ARGBtoFloat4(Diffuse);
   ExpectedLights.Direction.Direction = { X, Y, Z, 0.0f };
 
   const auto TestCallRender = [&](
@@ -5860,7 +6180,7 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Light_Points)
 
   ::Lights DefaultLight; // = { 0 } недостаточно!
   memset(&DefaultLight, 0, sizeof(DefaultLight));
-  DefaultLight.Points.Lights[0].ARGBColor = 0xFF000000;
+  DefaultLight.Points.Lights[0].Color = ARGBtoFloat4(0xFF000000);
   DefaultLight.Points.Lights[0].Position = { 0.0f, 0.0f, 0.0f, 1.0f };
   DefaultLight.Points.Lights[0].Attenuation = { 1.0f, 0.0f, 0.0f, 0.0f };
   DefaultLight.Points.UsedSlotCount = 1;
@@ -5906,7 +6226,8 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Light_Points)
   {
     DefaultLights.Points.Lights[i] = DefaultLight.Points.Lights[0];
 
-    ExpectedLights.Points.Lights[i].ARGBColor = SourceData[i].Diffuse;
+    ExpectedLights.Points.Lights[i].Color = 
+      ARGBtoFloat4(SourceData[i].Diffuse);
     ExpectedLights.Points.Lights[i].Position =
     { SourceData[i].X, SourceData[i].Y, SourceData[i].Z, 1.0f };
     ExpectedLights.Points.Lights[i].Attenuation =
@@ -6110,6 +6431,7 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Fog_SendInfoToPixelShader)
   const auto TestCallRender = [&](
     const Component_t::ComponentPtr_t & _pData,
     const Component_t::ComponentPtr_t & _pFog,
+    const uint32_t _Color,
     const ::Fog & _Expected)
   {
     EXPECT_CALL(DirectXProxy, CreateDevice())
@@ -6185,12 +6507,12 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Fog_SendInfoToPixelShader)
     if (_pData != nullptr)
     {
       ::Fog Expected = _Expected;
-      Expected.ARGBColor += 1;
+      Expected.Color = ARGBtoFloat4(_Color);
       Expected.Near += 2.0f;
       Expected.Far += 3.0f;
       Expected.Density += 4.0f;
 
-      _pData->SetValue(uT("color"), Expected.ARGBColor);
+      _pData->SetValue(uT("color"), _Color);
       _pData->SetValue(uT("near"), Expected.Near);
       _pData->SetValue(uT("far"), Expected.Far);
       _pData->SetValue(uT("density"), Expected.Density);
@@ -6205,20 +6527,22 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Fog_SendInfoToPixelShader)
     }
   };
 
-  ::Fog FogData = { 0 };
-  FogData.ARGBColor = 0xFFFFFFFF;
+  ::Fog FogData;
+  auto Color = 0xFFFFFFFF;
+  FogData.Color = ARGBtoFloat4(Color);
   FogData.Near = 10.0f;
   FogData.Far = 100.0f;
   FogData.Density = 1.0f;
 
   const auto pDefaultFog = Component_t::Make({ });
-  TestCallRender(nullptr, pDefaultFog, FogData);
+  TestCallRender(nullptr, pDefaultFog, Color, FogData);
 
   const auto Styles = { uT("linear"), uT("exp"), uT("exp2") };
 
   for (const auto & Style : Styles)
   {
-    FogData.ARGBColor -= 10;
+    Color -= 10;
+    FogData.Color = ARGBtoFloat4(Color);
     FogData.Near += 11.0f;
     FogData.Far += 12.0f;
     FogData.Density += 13.0f;
@@ -6226,18 +6550,19 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Fog_SendInfoToPixelShader)
     const auto pFog = Component_t::Make(
       {
         { uT("style"), Style },
-        { uT("color"), FogData.ARGBColor },
+        { uT("color"), Color },
         { uT("near"), FogData.Near },
         { uT("far"), FogData.Far },
         { uT("density"), FogData.Density },
       });
 
-    TestCallRender(nullptr, pFog, FogData);
+    TestCallRender(nullptr, pFog, Color, FogData);
   }
 
   for (const auto & Style : Styles)
   {
-    FogData.ARGBColor -= 10;
+    Color -= 10;
+    FogData.Color = ARGBtoFloat4(Color);
     FogData.Near += 11.0f;
     FogData.Far += 12.0f;
     FogData.Density += 13.0f;
@@ -6245,7 +6570,7 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Fog_SendInfoToPixelShader)
     const auto pData = Component_t::Make(
       {
         { uT("kind"), uT("Fog") },
-        { uT("color"), FogData.ARGBColor },
+        { uT("color"), Color },
         { uT("near"), FogData.Near },
         { uT("far"), FogData.Far },
         { uT("density"), FogData.Density },
@@ -6256,7 +6581,7 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Fog_SendInfoToPixelShader)
         { uT("style"), Style },
       });
 
-    TestCallRender(pData, pFog, FogData);
+    TestCallRender(pData, pFog, Color, FogData);
   }
 }
 

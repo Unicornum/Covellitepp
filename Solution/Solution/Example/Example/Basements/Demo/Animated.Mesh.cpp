@@ -85,13 +85,15 @@ Animated::Mesh::Mesh(const Path_t & _FileName)
     {
       Triangle.Vertexes[i].Hash = _Face.Vertexes[i].Hash;
 
-      Triangle.Vertexes[i].m_Vertex.x = _Face.Vertexes[i].Position.x;
-      Triangle.Vertexes[i].m_Vertex.y = _Face.Vertexes[i].Position.y;
-      Triangle.Vertexes[i].m_Vertex.z = _Face.Vertexes[i].Position.z;
+      Triangle.Vertexes[i].m_Vertex.px = _Face.Vertexes[i].Position.x;
+      Triangle.Vertexes[i].m_Vertex.py = _Face.Vertexes[i].Position.y;
+      Triangle.Vertexes[i].m_Vertex.pz = _Face.Vertexes[i].Position.z;
+      Triangle.Vertexes[i].m_Vertex.pw = 1.0f;
 
-      Triangle.Vertexes[i].m_Vertex.nx = _Face.Vertexes[i].Normal.x;
-      Triangle.Vertexes[i].m_Vertex.ny = _Face.Vertexes[i].Normal.y;
-      Triangle.Vertexes[i].m_Vertex.nz = _Face.Vertexes[i].Normal.z;
+      Triangle.Vertexes[i].m_Vertex.ex = _Face.Vertexes[i].Normal.x;
+      Triangle.Vertexes[i].m_Vertex.ey = _Face.Vertexes[i].Normal.y;
+      Triangle.Vertexes[i].m_Vertex.ez = _Face.Vertexes[i].Normal.z;
+      Triangle.Vertexes[i].m_Vertex.ew = 0.0f;
 
       const auto Convert =
         [](const float _Source, const float _Min, const float _Max)
@@ -353,10 +355,10 @@ void Animated::Mesh::AddSkin(
   if (_WeightBones.empty()) return;
 
   const ::glm::vec4 Position{
-    _Vertex.m_Vertex.x, _Vertex.m_Vertex.y, _Vertex.m_Vertex.z, 1.0f };
+    _Vertex.m_Vertex.px, _Vertex.m_Vertex.py, _Vertex.m_Vertex.pz, 1.0f };
 
   const ::glm::vec4 Normal{
-    _Vertex.m_Vertex.nx, _Vertex.m_Vertex.ny, _Vertex.m_Vertex.nz, 0.0f };
+    _Vertex.m_Vertex.ex, _Vertex.m_Vertex.ey, _Vertex.m_Vertex.ez, 0.0f };
 
   bool IsExist = false;
 

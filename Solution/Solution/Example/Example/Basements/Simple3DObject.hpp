@@ -1,5 +1,6 @@
 
 #pragma once
+#include <Covellite/Covellite.hpp>
 #include "Common.hpp"
 
 namespace events

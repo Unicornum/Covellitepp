@@ -10,9 +10,7 @@ using namespace covellite::api;
 {
   return
   {
-    uT("DirectX12"),
     uT("DirectX11"),
-    uT("Vulkan"),
     uT("OpenGL")
   };
 }

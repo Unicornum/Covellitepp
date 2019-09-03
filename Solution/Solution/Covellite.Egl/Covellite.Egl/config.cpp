@@ -21,6 +21,7 @@ Config::Config(const covellite::egl::Display & _Display,
 
   const EGLint Attributes[] =
   {
+    //EGL_RENDERABLE_TYPE, EGL_OPENGL_ES_BIT, // Ќужно дл€ ES2???
     EGL_SURFACE_TYPE, EGL_WINDOW_BIT,
     //EGL_ALPHA_SIZE,   8, // ѕриводит к проблемам с отрисовкой при переходе 
                            // к другому документу.

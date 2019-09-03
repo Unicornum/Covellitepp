@@ -166,27 +166,15 @@ void Simple2DGame::AddCommonComponents(void)
       /// [Common objects]
       Component_t::Make(
       {
-        { uT("type"), uT("Data") },
-        { uT("kind"), uT("Shader.HLSL") },
-        { uT("version"), uT("ps_4_0") },
-        { uT("entry"), uT("psTextured") },
-      }),
-      Component_t::Make(
-      {
         { uT("id"), uT("Simple2DGame.Shader.Pixel.Textured") },
         { uT("type"), uT("Shader") },
-      }),
-      Component_t::Make(
-      {
-        { uT("type"), uT("Data") },
-        { uT("kind"), uT("Shader.HLSL") },
-        { uT("version"), uT("ps_4_0") },
-        { uT("entry"), uT("psColored") },
+        { uT("entry"), uT("psTextured") },
       }),
       Component_t::Make(
       {
         { uT("id"), uT("Simple2DGame.Shader.Pixel.Colored") },
         { uT("type"), uT("Shader") },
+        { uT("entry"), uT("psColored") },
       }),
     });
 
@@ -227,15 +215,9 @@ void Simple2DGame::AddCamera(float _Xo, float _Yo)
       }),
       Component_t::Make(
       {
-        { uT("type"), uT("Data") },
-        { uT("kind"), uT("Shader.HLSL") },
-        { uT("version"), uT("vs_4_0") },
-        { uT("entry"), uT("VS") },
-      }),
-      Component_t::Make(
-      {
         { uT("id"), uT("Simple2DGame.Shader.Vertex.Rectangle") },
         { uT("type"), uT("Shader") },
+        { uT("entry"), uT("vsGui") },
       }),
     });
     
@@ -251,7 +233,7 @@ void Simple2DGame::AddBackground(void)
 
   m_Scene.push_back(BuildRectangle({},
     1.0f, 1.0f,
-    0xFF000000));
+    0.0f, 0.0f, 0.0f, 1.0f)); // 0xFF000000
 }
 
 void Simple2DGame::AddClock(void)
@@ -262,8 +244,8 @@ void Simple2DGame::AddClock(void)
 
   m_Scene.push_back(BuildRectangle(
     Rect{ -0.5f, -0.5f, 0.5f, 0.5f },
-    0x7FFFFFFF,
     Rect{ 0.00f, 0.00f, 0.72f, 0.72f },
+    1.0f, 1.0f, 1.0f, 0.5f, //0x7FFFFFFF,
     uT("Simple2DGame.Texture.Clock"),
     {}));
 
@@ -277,8 +259,8 @@ void Simple2DGame::AddClock(void)
 
   m_Scene.push_back(BuildRectangle(
     Rect{ -0.05f, -0.22f, 0.05f, 0.22f },
-    0x7FFFFFFF,
     Rect{ 0.85f, 0.14f, 0.99f, 0.70f },
+    1.0f, 1.0f, 1.0f, 0.5f, //0x7FFFFFFF,
     uT("Simple2DGame.Texture.Clock"),
     {
       Component_t::Make(
@@ -300,8 +282,8 @@ void Simple2DGame::AddClock(void)
 
   m_Scene.push_back(BuildRectangle(
     Rect{ -0.04f, -0.27f, 0.04f, 0.27f },
-    0x7F0000FF,
     Rect{ 0.738f, 0.00f, 0.848f, 0.70f },
+    1.0f, 0.0f, 0.0f, 0.5f, //0x7F0000FF,
     uT("Simple2DGame.Texture.Clock"),
     {
       Component_t::Make(
@@ -317,8 +299,8 @@ void Simple2DGame::AddClock(void)
 
   m_Scene.push_back(BuildRectangle(
     Rect{ -0.03f, -0.03f, 0.03f, 0.03f },
-    0x7F000000,
     Rect{ 0.755f, 0.768f, 0.957f, 0.965f },
+    0.0f, 0.0f, 0.0f, 0.5f, //0x7F000000,
     uT("Simple2DGame.Texture.Clock"),
     { }));
 
@@ -356,7 +338,7 @@ void Simple2DGame::AddActors(void)
   m_Scene.push_back(BuildRectangle(
     { m_UserUnit.m_pPosition },
     m_UserUnit.X.Size, m_UserUnit.Y.Size,
-    0xFF00FF00));
+    0.0f, 1.0f, 0.0f, 1.0f));//0xFF00FF00));
 
   auto EndGame = [&](void)
   {
@@ -364,7 +346,7 @@ void Simple2DGame::AddActors(void)
     m_Scene.push_back(BuildRectangle(
       { m_UserUnit.m_pPosition },
       m_UserUnit.X.Size, m_UserUnit.Y.Size,
-      0xFF0000FF));
+      1.0f, 0.0f, 0.0f, 1.0f));//0xFF0000FF));
 
     using namespace ::std::chrono;
 
@@ -441,19 +423,19 @@ auto Simple2DGame::BuildRectangle(const Object_t & _Transform,
 
   return BuildRectangle(
     Rect{ -_Width / 2.0f, -_Height / 2.0f, _Width / 2.0f, _Height / 2.0f },
-    0xFFFFFFFF,
     Rect{ 0.0f, 0.0f, U, V },
+    1.0f, 1.0f, 1.0f, 1.0f, //0xFFFFFFFF,
     _TextureId,
     _Transform);
 }
 
 auto Simple2DGame::BuildRectangle(const Object_t & _Transform,
-  float _Width, float _Height, uint32_t _Color) -> Id
+  float _Width, float _Height, float _R, float _G, float _B, float _A) -> Id
 {
   return BuildRectangle(
     Rect{ -_Width / 2.0f, -_Height / 2.0f, _Width / 2.0f, _Height / 2.0f },
-    _Color,
     Rect{ 0.0f, 0.0f, 0.0f, 0.0f },
+    _R, _G, _B, _A,
     {
       /// [Colored object]
       Component_t::Make(
@@ -467,12 +449,12 @@ auto Simple2DGame::BuildRectangle(const Object_t & _Transform,
 
 auto Simple2DGame::BuildRectangle(
   const Rect & _Polygon,
-  uint32_t _Color,
   const Rect & _TexCoord,
+  float _R, float _G, float _B, float _A,
   const String_t & _TextureId,
   const Object_t & _Transform) -> Id
 {
-  return BuildRectangle(_Polygon, _Color, _TexCoord,
+  return BuildRectangle(_Polygon, _TexCoord, _R, _G, _B, _A,
     {
       /// [Textured object]
       Component_t::Make(
@@ -488,9 +470,9 @@ auto Simple2DGame::BuildRectangle(
 }
 
 auto Simple2DGame::BuildRectangle(
-  const Rect & _Polygon, 
-  uint32_t _Color,
-  const Rect & _TexCoord, 
+  const Rect & _Polygon,
+  const Rect & _TexCoord,
+  float _R, float _G, float _B, float _A,
   const Object_t & _PixelData, 
   const Object_t & _Transform) -> Id
 {
@@ -499,10 +481,26 @@ auto Simple2DGame::BuildRectangle(
   /// [Vertex buffer]
   const VertexData_t VertexData =
   {
-    {  _Polygon.Left,  _Polygon.Top,     _Color,  _TexCoord.Left,  _TexCoord.Top,    }, // 0
-    {  _Polygon.Left,  _Polygon.Bottom,  _Color,  _TexCoord.Left,  _TexCoord.Bottom, }, // 1
-    {  _Polygon.Right, _Polygon.Top,     _Color,  _TexCoord.Right, _TexCoord.Top,    }, // 2
-    {  _Polygon.Right, _Polygon.Bottom,  _Color,  _TexCoord.Right, _TexCoord.Bottom, }, // 3
+    {  
+      _Polygon.Left, _Polygon.Top, 0.0f, 1.0f,
+      _TexCoord.Left, _TexCoord.Top,
+      _R, _G, _B, _A,
+    }, // 0
+    {  
+      _Polygon.Left, _Polygon.Bottom, 0.0f, 1.0f,
+      _TexCoord.Left, _TexCoord.Bottom,
+      _R, _G, _B, _A,
+    }, // 1
+    {  
+      _Polygon.Right, _Polygon.Top, 0.0f, 1.0f,
+      _TexCoord.Right, _TexCoord.Top,
+      _R, _G, _B, _A,
+    }, // 2
+    {  
+      _Polygon.Right, _Polygon.Bottom, 0.0f, 1.0f,
+      _TexCoord.Right, _TexCoord.Bottom,
+      _R, _G, _B, _A,
+    }, // 3
   };
   /// [Vertex buffer]
 
@@ -519,6 +517,7 @@ auto Simple2DGame::BuildRectangle(
         { uT("kind"), uT("Buffer") },
         { uT("data"), VertexData.data() },
         { uT("count"), VertexData.size() },
+        { uT("dimension"), 2 },
       }),
       Component_t::Make(
       {

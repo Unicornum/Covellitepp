@@ -1,10 +1,7 @@
 
 #pragma once
 #include <wrl.h>
-#include "IGraphicApi.hpp"
-#include "Api.forward.hpp"
-#include "CapturingServiceComponent.hpp"
-#include "Updater.hpp"
+#include "GraphicApi.hpp"
 
 struct ID3D11Device;
 struct ID3D11DeviceContext;
@@ -35,18 +32,20 @@ namespace renderer
 *  1.1.0.0        \n
 *  1.2.0.0        \n
 *  1.3.0.0        \n
+*  1.4.0.0        \n
 * \date
 *  29 Август 2018    \n
 *  20 Ноябрь 2018    \n
 *  29 Декабрь 2018    \n
 *  23 Июль 2019    \n
+*  11 Август 2019    \n
 * \author
 *  CTAPOBEP (unicornum.verum@gmail.com)
 * \copyright
 *  © CTAPOBEP 2018 - 2019
 */
 class DirectX11 final :
-  public Registator_t<IGraphicApi>
+  public GraphicApi
 {
   template<class T>
   using ComPtr_t = ::Microsoft::WRL::ComPtr<T>;
@@ -58,7 +57,18 @@ public:
   String_t GetUsingApi(void) const override;
   void PresentFrame(void) override;
   void ResizeWindow(int32_t, int32_t) override;
-  const Creators_t & GetCreators(void) const override;
+
+protected:
+  // Интерфейс GraphicApi:
+  Render_t CreateCamera(const ComponentPtr_t &) override;
+  Render_t CreateState(const ComponentPtr_t &) override;
+  Render_t CreateFog(const ComponentPtr_t &) override;
+  Render_t CreateMaterial(const ComponentPtr_t &) override;
+  Render_t CreateLight(const ComponentPtr_t &) override;
+  Render_t CreateTexture(const ComponentPtr_t &) override;
+  Render_t CreateShader(const ComponentPtr_t &) override;
+  Render_t CreateBuffer(const ComponentPtr_t &) override;
+  Render_t CreateGeometry(const ComponentPtr_t &) override;
 
 private:
   void CreateDeviceAndSwapChain(const Data_t &);
@@ -67,25 +77,10 @@ private:
   void CreateDepthStencilView(int, int);
 
 private:
-  Render_t CreateCamera(const ComponentPtr_t &);
-  Render_t CreateState(const ComponentPtr_t &);
-  Render_t CreateFog(const ComponentPtr_t &);
-  Render_t CreateLight(const ComponentPtr_t &);
-  Render_t CreateMaterial(const ComponentPtr_t &);
-  Render_t CreateTexture(const ComponentPtr_t &);
-  Render_t CreateShader(const ComponentPtr_t &);
-  Render_t CreateBuffer(const ComponentPtr_t &);
-  Render_t CreatePresent(const ComponentPtr_t &);
-  Render_t CreateGeometry(const ComponentPtr_t &);
-
-private:
   Render_t CreateBlendState(bool);
   Render_t GetDepthState(const bool, const bool, const bool);
   Render_t GetPreRenderGeometry(const bool);
   Render_t GetPreRenderBillboardGeometry(void);
-
-private:
-  Creators_t m_Creators;
 
 private:
   ComPtr_t<ID3D11Device>            m_pDevice;
@@ -96,12 +91,8 @@ private:
 
 private:
   class Buffer;
-  class Data;
-
-private:
-  ::std::shared_ptr<Data>   m_pData;
-  CapturingServiceComponent m_ServiceComponents;
-  Updater                   m_Updater;
+  template<class>
+  class ConstantBuffer;
 
 public:
   explicit DirectX11(const Data_t &);
@@ -109,7 +100,7 @@ public:
 
 private:
   FRIEND_TEST(DirectX11_test, Test_Present_Geometry_Billboard);
-  FRIEND_TEST(DirectX11_test, /*DISABLED_*/Test_Present_Geometry_CombineTransform);
+  FRIEND_TEST(DirectX11_test, Test_Present_Geometry_CombineTransform);
 };
 
 FACTORY_REGISTER_STRING_NAME(DirectX11);

@@ -19,30 +19,30 @@ Skybox::Skybox(void) :
 
   const ::std::vector<Vertex_t> Vertexes =
   {
-    { -0.5f,  0.5f,  0.5f,   0.0f, 0.0f, 1.0f,  0.499f, 0.499f, },  // 0
-    {  0.5f,  0.5f,  0.5f,   0.0f, 0.0f, 1.0f,  0.499f, 0.001f, },  // 1
-    { -0.5f, -0.5f,  0.5f,   0.0f, 0.0f, 1.0f,  0.251f, 0.499f, },  // 2
-    {  0.5f, -0.5f,  0.5f,   0.0f, 0.0f, 1.0f,  0.251f, 0.001f, },  // 3
-
-    {  0.5f, -0.5f,  0.5f,   1.0f, 0.0f, 0.0f,   1.0f,  0.5f, },  // 4
-    {  0.5f,  0.5f,  0.5f,   1.0f, 0.0f, 0.0f,  0.75f,  0.5f, },  // 5
-    {  0.5f, -0.5f, -0.5f,   1.0f, 0.0f, 0.0f,   1.0f,  1.0f, },  // 6
-    {  0.5f,  0.5f, -0.5f,   1.0f, 0.0f, 0.0f,  0.75f,  1.0f, },  // 7
-
-    { -0.5f, -0.5f,  0.5f,  -1.0f, 0.0f, 0.0f,  0.25f, 0.5f, },  // 8
-    { -0.5f,  0.5f,  0.5f,  -1.0f, 0.0f, 0.0f,  0.50f, 0.5f, },  // 9
-    { -0.5f, -0.5f, -0.5f,  -1.0f, 0.0f, 0.0f,  0.25f, 1.0f, },  // 10
-    { -0.5f,  0.5f, -0.5f,  -1.0f, 0.0f, 0.0f,  0.50f, 1.0f, },  // 11
-
-    { -0.5f,  0.5f,  0.5f,   0.0f, 1.0f, 0.0f,  0.50f, 0.5f, },  // 12
-    {  0.5f,  0.5f,  0.5f,   0.0f, 1.0f, 0.0f,  0.75f, 0.5f, },  // 13
-    { -0.5f,  0.5f, -0.5f,   0.0f, 1.0f, 0.0f,  0.50f, 1.0f, },  // 14
-    {  0.5f,  0.5f, -0.5f,   0.0f, 1.0f, 0.0f,  0.75f, 1.0f, },  // 15
-
-    { -0.5f, -0.5f,  0.5f,   0.0f, -1.0f, 0.0f,  0.25f, 0.5f, },  // 16
-    {  0.5f, -0.5f,  0.5f,   0.0f, -1.0f, 0.0f,  0.00f, 0.5f, },  // 17
-    { -0.5f, -0.5f, -0.5f,   0.0f, -1.0f, 0.0f,  0.25f, 1.0f, },  // 18
-    {  0.5f, -0.5f, -0.5f,   0.0f, -1.0f, 0.0f,  0.00f, 1.0f, },  // 19
+    { -0.5f,  0.5f,  0.5f, 1.0f,   0.499f, 0.499f,  0.0f, 0.0f, 1.0f, 0.0f, },  // 0
+    {  0.5f,  0.5f,  0.5f, 1.0f,   0.499f, 0.001f,  0.0f, 0.0f, 1.0f, 0.0f, },  // 1
+    { -0.5f, -0.5f,  0.5f, 1.0f,   0.251f, 0.499f,  0.0f, 0.0f, 1.0f, 0.0f, },  // 2
+    {  0.5f, -0.5f,  0.5f, 1.0f,   0.251f, 0.001f,  0.0f, 0.0f, 1.0f, 0.0f, },  // 3
+                                  
+    {  0.5f, -0.5f,  0.5f, 1.0f,    1.0f,  0.5f,    1.0f, 0.0f, 0.0f, 0.0f, },  // 4
+    {  0.5f,  0.5f,  0.5f, 1.0f,   0.75f,  0.5f,    1.0f, 0.0f, 0.0f, 0.0f, },  // 5
+    {  0.5f, -0.5f, -0.5f, 1.0f,    1.0f,  1.0f,    1.0f, 0.0f, 0.0f, 0.0f, },  // 6
+    {  0.5f,  0.5f, -0.5f, 1.0f,   0.75f,  1.0f,    1.0f, 0.0f, 0.0f, 0.0f, },  // 7
+                                  
+    { -0.5f, -0.5f,  0.5f, 1.0f,   0.25f,  0.5f,   -1.0f, 0.0f, 0.0f, 0.0f, },  // 8
+    { -0.5f,  0.5f,  0.5f, 1.0f,   0.50f,  0.5f,   -1.0f, 0.0f, 0.0f, 0.0f, },  // 9
+    { -0.5f, -0.5f, -0.5f, 1.0f,   0.25f,  1.0f,   -1.0f, 0.0f, 0.0f, 0.0f, },  // 10
+    { -0.5f,  0.5f, -0.5f, 1.0f,   0.50f,  1.0f,   -1.0f, 0.0f, 0.0f, 0.0f, },  // 11
+                                  
+    { -0.5f,  0.5f,  0.5f, 1.0f,   0.50f,  0.5f,    0.0f, 1.0f, 0.0f, 0.0f, },  // 12
+    {  0.5f,  0.5f,  0.5f, 1.0f,   0.75f,  0.5f,    0.0f, 1.0f, 0.0f, 0.0f, },  // 13
+    { -0.5f,  0.5f, -0.5f, 1.0f,   0.50f,  1.0f,    0.0f, 1.0f, 0.0f, 0.0f, },  // 14
+    {  0.5f,  0.5f, -0.5f, 1.0f,   0.75f,  1.0f,    0.0f, 1.0f, 0.0f, 0.0f, },  // 15
+                                  
+    { -0.5f, -0.5f,  0.5f, 1.0f,   0.25f,  0.5f,   0.0f, -1.0f, 0.0f, 0.0f, },  // 16
+    {  0.5f, -0.5f,  0.5f, 1.0f,   0.00f,  0.5f,   0.0f, -1.0f, 0.0f, 0.0f, },  // 17
+    { -0.5f, -0.5f, -0.5f, 1.0f,   0.25f,  1.0f,   0.0f, -1.0f, 0.0f, 0.0f, },  // 18
+    {  0.5f, -0.5f, -0.5f, 1.0f,   0.00f,  1.0f,   0.0f, -1.0f, 0.0f, 0.0f, },  // 19
   };
 
   const ::std::vector<int> Indexes =
@@ -98,12 +98,6 @@ auto Skybox::GetObject(const Any_t & _Value) const /*override*/ -> Objects_t
       }),
       Component_t::Make(
       {
-        { uT("id"), uT("Demo.Material.Skybox") },
-        { uT("type"), uT("Material") },
-        { uT("ambient"), 0xFFFFFFFF },
-      }),
-      Component_t::Make(
-      {
         { uT("id"), uT("Demo.State.Depth") },
         { uT("type"), uT("State") },
         { uT("kind"), uT("Depth") },
@@ -117,27 +111,15 @@ auto Skybox::GetObject(const Any_t & _Value) const /*override*/ -> Objects_t
       }),
       Component_t::Make(
       {
-        { uT("type"), uT("Data") },
-        { uT("kind"), uT("Shader.HLSL") },
-        { uT("version"), uT("ps_4_0") },
-        { uT("entry"), uT("psTextured") },
+        { uT("id"), uT("Demo.Shader.Vertex.Skybox") },
+        { uT("type"), uT("Shader") },
+        { uT("entry"), uT("vsLights") },
       }),
       Component_t::Make(
       {
         { uT("id"), uT("Demo.Shader.Pixel.Skybox") },
         { uT("type"), uT("Shader") },
-      }),
-      Component_t::Make(
-      {
-        { uT("type"), uT("Data") },
-        { uT("kind"), uT("Shader.HLSL") },
-        { uT("version"), uT("vs_4_0") },
-        { uT("entry"), uT("vsTextured") },
-      }),
-      Component_t::Make(
-      {
-        { uT("id"), uT("Demo.Shader.Vertex") },
-        { uT("type"), uT("Shader") },
+        { uT("entry"), uT("psTextured") },
       }),
     } +
     GetTexture(0).GetObject() +

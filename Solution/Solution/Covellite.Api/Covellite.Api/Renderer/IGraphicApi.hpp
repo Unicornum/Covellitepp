@@ -43,7 +43,7 @@ class IGraphicApi
 protected:
   using String_t = ::alicorn::extension::std::String;
   using Render_t = ::std::function<void(void)>;
-  using ComponentPtr_t = ::std::shared_ptr<Component>;
+  using ComponentPtr_t = ::std::shared_ptr<::covellite::api::Component>;
   using Creator_t = ::std::function<Render_t(const ComponentPtr_t &)>;
   using Creators_t = ::std::map<String_t, Creator_t>;
 

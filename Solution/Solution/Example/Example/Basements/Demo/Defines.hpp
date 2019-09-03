@@ -1,10 +1,5 @@
 
 #pragma once
-
-#ifdef GetObject
-# undef GetObject
-#endif
-
 #include <vector>
 #include <Covellite/Api/Renders.hpp>
 

@@ -22,12 +22,14 @@ class Surface;
 *
 * \version
 *  1.0.0.0        \n
+*  1.1.0.0        \n
 * \date
 *  19 Ноябрь 2016    \n
+*  09 Август 2019    \n
 * \author
 *  CTAPOBEP (unicornum.verum@gmail.com)
 * \copyright
-*  © CTAPOBEP 2016
+*  © CTAPOBEP 2016 - 2019
 */
 class Context final
 {
@@ -39,7 +41,8 @@ private:
   EGLContext m_Context;
 
 public:
-  Context(const covellite::egl::Display &, const covellite::egl::Config &);
+  Context(const covellite::egl::Display &, const covellite::egl::Config &,
+    const int);
   ~Context(void) noexcept;
 
 private:

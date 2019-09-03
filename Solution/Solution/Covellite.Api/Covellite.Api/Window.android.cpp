@@ -10,7 +10,8 @@ using namespace covellite::api;
 {
   return
   {
-    uT("Vulkan"),
+    uT("OpenGLES3"),
+    uT("OpenGLES2"),
     uT("OpenGLES")
   };
 }

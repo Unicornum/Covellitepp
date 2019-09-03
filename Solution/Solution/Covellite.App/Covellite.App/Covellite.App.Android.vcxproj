@@ -69,6 +69,7 @@
     <ClInclude Include="pch.h" />
     <ClInclude Include="Settings.hpp" />
     <ClInclude Include="Settings.mock.hpp" />
+    <ClInclude Include="Vfs.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="android_native_app_glue.c" />

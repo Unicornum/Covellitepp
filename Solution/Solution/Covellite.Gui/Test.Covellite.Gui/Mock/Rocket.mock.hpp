@@ -105,14 +105,15 @@ public:
   }
 
 public:
-  Vector2(void) {}
+  Vector2(void) : x(0), y(0) {}
   Vector2(Type _X, Type _Y) : x(_X), y(_Y) {}
 };
 
 template<typename ColourType, int AlphaDefault>
 class Colour
 {
-
+public:
+  uint8_t red, green, blue, alpha;
 };
 
 using Vector2f = Vector2<float>;

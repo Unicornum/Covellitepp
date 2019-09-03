@@ -1,0 +1,111 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|ARM">
+      <Configuration>Debug</Configuration>
+      <Platform>ARM</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|ARM">
+      <Configuration>Release</Configuration>
+      <Platform>ARM</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{34D52A6C-DF78-40FA-9AA3-3B1C1B1C6B97}</ProjectGuid>
+    <Keyword>Android</Keyword>
+    <RootNamespace>Covellite_Api</RootNamespace>
+    <MinimumVisualStudioVersion>14.0</MinimumVisualStudioVersion>
+    <ApplicationType>Android</ApplicationType>
+    <ApplicationTypeRevision>2.0</ApplicationTypeRevision>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>Gcc_4_9</PlatformToolset>
+    <AndroidAPILevel>android-15</AndroidAPILevel>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>Gcc_4_9</PlatformToolset>
+    <AndroidAPILevel>android-15</AndroidAPILevel>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings" />
+  <ImportGroup Label="Shared" />
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">
+    <Import Project="..\..\..\Solution.ARM.props" />
+    <Import Project="..\..\Externals\Externals.Build.props" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">
+    <Import Project="..\..\..\Solution.ARM.props" />
+    <Import Project="..\..\Externals\Externals.Build.props" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">
+    <OutDir>$(ThisFileDirectory)$(LibraryName)\$(TypeProjectDir)\$(PlatformTarget)\$(PlatformToolsetDirectory)\</OutDir>
+    <TargetName>$(PrefixAndroid)$(ProjectShortName)$(Suffix)</TargetName>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">
+    <OutDir>$(ThisFileDirectory)$(LibraryName)\$(TypeProjectDir)\$(PlatformTarget)\$(PlatformToolsetDirectory)\</OutDir>
+    <TargetName>$(PrefixAndroid)$(ProjectShortName)$(Suffix)</TargetName>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">
+    <ClCompile />
+    <ClCompile>
+      <AdditionalOptions>-Wno-unused-variable %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
+    <PreBuildEvent>
+      <Command />
+    </PreBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">
+    <ClCompile />
+    <ClCompile>
+      <AdditionalOptions>-Wno-unused-variable %(AdditionalOptions)</AdditionalOptions>
+    </ClCompile>
+    <PreBuildEvent>
+      <Command />
+    </PreBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClInclude Include="Component.hpp" />
+    <ClInclude Include="Defines.hpp" />
+    <ClInclude Include="Events.hpp" />
+    <ClInclude Include="IWindow.hpp" />
+    <ClInclude Include="pch.h" />
+    <ClInclude Include="Renderer\Api.forward.hpp" />
+    <ClInclude Include="Renderer\Component.hpp" />
+    <ClInclude Include="Renderer\GL.hpp" />
+    <ClInclude Include="Renderer\GraphicApi.Constants.hpp" />
+    <ClInclude Include="Renderer\GraphicApi.hpp" />
+    <ClInclude Include="Renderer\IGraphicApi.hpp" />
+    <ClInclude Include="Renderer\OpenGLCommon.hpp" />
+    <ClInclude Include="Renderer\OpenGLCommon.Texture.hpp" />
+    <ClInclude Include="Renderer\OpenGLCommonStatic.hpp" />
+    <ClInclude Include="Renderer\OpenGLES.hpp" />
+    <ClInclude Include="Renderer\stdafx.h" />
+    <ClInclude Include="Renders.hpp" />
+    <ClInclude Include="stdafx.h" />
+    <ClInclude Include="Vertex.hpp" />
+    <ClInclude Include="Window.hpp" />
+    <ClInclude Include="Window.mock.hpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Renderer\GraphicApi.CapturingServiceComponent.cpp" />
+    <ClCompile Include="Renderer\GraphicApi.cpp" />
+    <ClCompile Include="Renderer\OpenGLCommon.cpp" />
+    <ClCompile Include="Renderer\OpenGLCommon.Texture.cpp" />
+    <ClCompile Include="Renderer\OpenGLCommonStatic.cpp" />
+    <ClCompile Include="Renderer\OpenGLES.cpp" />
+    <ClCompile Include="Renders.cpp" />
+    <ClCompile Include="Window.android.cpp" />
+    <ClCompile Include="Window.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Component.inl" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets" />
+</Project>

@@ -1,6 +1,7 @@
 
 #include "stdafx.h"
 #include "Context.hpp"
+#include <vector>
 #include "Display.hpp"
 #include "Config.hpp"
 #include "Surface.hpp"
@@ -12,10 +13,21 @@ namespace covellite
 namespace egl
 {
 
-Context::Context(const covellite::egl::Display & _Display, 
-  const covellite::egl::Config & _Config) :
+static inline ::std::vector<EGLint> GetAttributes(const int _Version)
+{
+  return
+  {
+    EGL_CONTEXT_CLIENT_VERSION, _Version,
+    EGL_NONE
+  };
+}
+
+Context::Context(
+  const covellite::egl::Display & _Display, 
+  const covellite::egl::Config & _Config,
+  const int _Version) :
   m_Display(_Display.m_Display),
-  m_Context(eglCreateContext(m_Display, _Config.m_Config, EGL_NO_CONTEXT, nullptr))
+  m_Context(eglCreateContext(m_Display, _Config.m_Config, EGL_NO_CONTEXT, GetAttributes(_Version).data()))
 {
   if (m_Context == EGL_NO_CONTEXT) EGL_CALL 0;
 }

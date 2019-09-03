@@ -3,7 +3,7 @@
 #include "Assimp.hpp"
 #include <alicorn/logger.hpp>
 #include <Covellite/App/Settings.hpp>
-#include <Covellite/Gui/Vfs.hpp>
+#include <Covellite/App/Vfs.hpp>
 
 #if BOOST_COMP_MSVC
 # pragma warning(push)
@@ -20,6 +20,25 @@
 # pragma warning(disable: 4267)
 # pragma warning(disable: 4100)
 # pragma warning(disable: 4457)
+# pragma warning(disable: 26495)
+# pragma warning(disable: 6386)
+# pragma warning(disable: 26454)
+# pragma warning(disable: 26451)
+# pragma warning(disable: 26444)
+# pragma warning(disable: 6385)
+# pragma warning(disable: 6297)
+# pragma warning(disable: 6262)
+# pragma warning(disable: 6001)
+# pragma warning(disable: 6054)
+# pragma warning(disable: 6011)
+# pragma warning(disable: 26498)
+# pragma warning(disable: 26498)
+# pragma warning(disable: 26498)
+# pragma warning(disable: 26498)
+# pragma warning(disable: 26498)
+# pragma warning(disable: 26498)
+# pragma warning(disable: 26498)
+# pragma warning(disable: 26498)
 #endif
 
 #undef min
@@ -298,7 +317,7 @@ inline /*static*/ ::glm::mat4 Assimp::aiMatrix4x4ToGlm(const aiMatrix4x4 & from)
   const auto PathToMeshFile = PathToMeshDirectory / "demo" / _FileName;
 
   const auto RawData =
-    ::covellite::gui::Vfs_t::GetInstance().GetData(PathToMeshFile);
+    ::covellite::app::Vfs_t::GetInstance().GetData(PathToMeshFile);
 
   // Флаги для использования aiProcess_RemoveComponent
   _Importer.SetPropertyInteger(AI_CONFIG_PP_RVC_FLAGS,
@@ -378,7 +397,7 @@ inline /*static*/ ::glm::mat4 Assimp::aiMatrix4x4ToGlm(const aiMatrix4x4 & from)
   }
 }
 
-Assimp::BoneWeights_t Assimp::LoadBoneWeights(const aiMesh * const _pMesh)
+/*static*/ Assimp::BoneWeights_t Assimp::LoadBoneWeights(const aiMesh * const _pMesh)
 {
   if (!_pMesh->HasBones()) return {};
 
@@ -499,7 +518,7 @@ void Assimp::LoadSkin(
   }
 }
 
-Assimp::Frames::Keys_t Assimp::BuildFrames(
+/*static*/ Assimp::Frames::Keys_t Assimp::BuildFrames(
   const ::std::vector<aiVectorKey> & _PositionKeys,
   const ::std::vector<aiQuatKey> & _RotationKeys,
   const ::std::vector<aiVectorKey> & _ScalingKeys)

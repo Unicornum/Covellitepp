@@ -27,7 +27,7 @@ interface IGraphicApi as "renderer::IGraphicApi"
 }
 
 IGraphicApi --* Window
-IGraphicApi <|-.- "renderer::OpenGLES\nrenderer::OpenGL\nrenderer::DirectX9\nrenderer::DirectX10\nrenderer::DirectX11"
+IGraphicApi <|-.- "renderer::OpenGLES\nrenderer::OpenGLES2\nrenderer::OpenGLES3\nrenderer::OpenGL\nrenderer::DirectX10\nrenderer::DirectX11"
 
 class Component
 {

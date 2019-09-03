@@ -61,6 +61,12 @@ TEST_F(Context_test, /*DISABLED_*/Test_Using)
 
   const auto MockDisplay = (::covellite::egl::EGLDisplay)1611191236;
   const auto MockConfig = (::covellite::egl::EGLConfig)1611191237;
+  const auto Version = 1908090857;
+
+  const ::std::vector<::covellite::egl::EGLint> Attributes = 
+  { 
+    EGL_CONTEXT_CLIENT_VERSION, Version 
+  };
 
   using namespace ::testing;
 
@@ -77,12 +83,12 @@ TEST_F(Context_test, /*DISABLED_*/Test_Using)
   const auto Context = (::covellite::egl::EGLContext)1611191238;
 
   EXPECT_CALL(EglProxy, CreateContext(MockDisplay, MockConfig, EGL_NO_CONTEXT,
-    nullptr))
+    Attributes))
     .Times(1)
     .WillOnce(Return(Context));
 
   {
-    Tested_t Example(Display, Config);
+    Tested_t Example(Display, Config, Version);
     EXPECT_EQ(Context, Example.m_Context);
 
     EXPECT_CALL(EglProxy, MakeCurrent(Display.m_Display, 
@@ -118,13 +124,12 @@ TEST_F(Context_test, /*DISABLED_*/Test_CreateContext_Fail)
   ::mock::covellite::egl::Config Config(Display, nullptr);
   Config.m_Config = MockConfig;
 
-  EXPECT_CALL(EglProxy, CreateContext(MockDisplay, MockConfig, EGL_NO_CONTEXT,
-    nullptr))
+  EXPECT_CALL(EglProxy, CreateContext(_, _, _, _))
     .Times(1)
     .WillOnce(Return(EGL_NO_CONTEXT));
 
   {
-    EXPECT_THROW(Tested_t Example(Display, Config), ::std::exception);
+    EXPECT_THROW(Tested_t Example(Display, Config, 0), ::std::exception);
 
     EXPECT_CALL(EglProxy, DestroyContext(_, _))
       .Times(0);
@@ -153,12 +158,11 @@ TEST_F(Context_test, /*DISABLED_*/Test_MakeCurrent)
 
   const auto Context = (::covellite::egl::EGLContext)1611191941;
 
-  EXPECT_CALL(EglProxy, CreateContext(MockDisplay, _, ::covellite::egl::EGL_NO_CONTEXT,
-    nullptr))
+  EXPECT_CALL(EglProxy, CreateContext(_, _, _, _))
     .Times(1)
     .WillOnce(Return(Context));
 
-  const Tested_t Example(Display, Config);
+  const Tested_t Example(Display, Config, 0);
 
   const auto MockSurface = (::covellite::egl::EGLSurface)1611191942;
   ::mock::covellite::egl::Surface Surface(Display, Config, nullptr);
@@ -199,13 +203,12 @@ TEST_F(Context_test, /*DISABLED_*/Test_MakeCurrent_Fail)
 
   const auto Context = (::covellite::egl::EGLContext)1611191948;
 
-  EXPECT_CALL(EglProxy, CreateContext(MockDisplay, _, ::covellite::egl::EGL_NO_CONTEXT,
-    nullptr))
+  EXPECT_CALL(EglProxy, CreateContext(_, _, _, _))
     .Times(1)
     .WillOnce(Return(Context));
 
   {
-    const Tested_t Example(Display, Config);
+    const Tested_t Example(Display, Config, 0);
 
     const auto MockSurface = (::covellite::egl::EGLSurface)1611191949;
     ::mock::covellite::egl::Surface Surface(Display, Config, nullptr);

@@ -4,8 +4,7 @@
 #include <random>
 #include <alicorn/std/vector.hpp>
 #include <alicorn/boost/format.inl>
-#include <Covellite/Api/Component.inl>
-#include <Covellite.Api/Covellite.Api/Renderer/fx/Hlsl.hpp>
+#include <Covellite/Covellite.hpp>
 
 namespace basement
 {
@@ -28,50 +27,41 @@ auto Particles::GetObject(const Any_t & /*_Value*/) const /*override*/ -> Object
   using cbBufferMapper = ::covellite::api::cbBufferMap_t<Vertex_t>;
   using Updater_t = ::covellite::api::Updater_t;
 
-  static const auto ShaderData = Example;
-  static const auto Step = 1;
+  static const auto ShaderData =
+    ::covellite::app::Vfs_t::GetInstance().GetData("Data\\Shaders\\Example.fx");
+  static const ::std::size_t Step = 1;
 
   const cbBufferMapper Mapper = [pParticles = m_pParticles, 
-    Size = static_cast<int>(m_pParticles->size())](Vertex_t * _pData)
+    Size = m_pParticles->size()](Vertex_t * _pData)
   {
     if (_pData == nullptr) return true;
 
-    static int FirstIndex = 0;
+    static ::std::size_t FirstIndex = 0;
     FirstIndex++;
     FirstIndex = FirstIndex % Step;
 
-    for (int i = FirstIndex; i < Size; i += Step)
+    for (::std::size_t i = FirstIndex; i < Size; i += Step)
     {
       const auto & Source = (*pParticles)[i];
-      auto * Vertexes = _pData + 4 * i;
+      auto * Vertexes = _pData + 3 * i;
 
-      Vertexes[0].x = Source.Position.x - Source.HalfSize;
-      Vertexes[0].y = Source.Position.y + Source.HalfSize;
-      Vertexes[0].z = Source.Position.z;
-      Vertexes[0].nx = Source.Position.x;
-      Vertexes[0].ny = Source.Position.y;
-      Vertexes[0].nz = Source.Position.z;
+      //Vertexes[0].px = Source.Position.x;
+      Vertexes[0].py = 2.0f * Source.HalfSize;
+      Vertexes[0].ex = Source.Position.x;
+      Vertexes[0].ey = Source.Position.y;
+      Vertexes[0].ez = Source.Position.z;
                  
-      Vertexes[1].x = Source.Position.x + Source.HalfSize;
-      Vertexes[1].y = Source.Position.y + Source.HalfSize;
-      Vertexes[1].z = Source.Position.z;
-      Vertexes[1].nx = Source.Position.x;
-      Vertexes[1].ny = Source.Position.y;
-      Vertexes[1].nz = Source.Position.z;
+      Vertexes[1].px = 2.0f * Source.HalfSize;
+      Vertexes[1].py = - Source.HalfSize;
+      Vertexes[1].ex = Source.Position.x;
+      Vertexes[1].ey = Source.Position.y;
+      Vertexes[1].ez = Source.Position.z;
                  
-      Vertexes[2].x = Source.Position.x - Source.HalfSize;
-      Vertexes[2].y = Source.Position.y - Source.HalfSize;
-      Vertexes[2].z = Source.Position.z;
-      Vertexes[2].nx = Source.Position.x;
-      Vertexes[2].ny = Source.Position.y;
-      Vertexes[2].nz = Source.Position.z;
-                 
-      Vertexes[3].x = Source.Position.x + Source.HalfSize;
-      Vertexes[3].y = Source.Position.y - Source.HalfSize;
-      Vertexes[3].z = Source.Position.z;
-      Vertexes[3].nx = Source.Position.x;
-      Vertexes[3].ny = Source.Position.y;
-      Vertexes[3].nz = Source.Position.z;
+      Vertexes[2].px = - 2.0f * Source.HalfSize;
+      Vertexes[2].py = - Source.HalfSize;
+      Vertexes[2].ex = Source.Position.x;
+      Vertexes[2].ey = Source.Position.y;
+      Vertexes[2].ez = Source.Position.z;
     }
 
     return false;
@@ -86,7 +76,7 @@ auto Particles::GetObject(const Any_t & /*_Value*/) const /*override*/ -> Object
       return ::std::uniform_real_distribution<float>{ _From, _To }(Generator);
     };
 
-    static const auto ParticleHalfSize = 0.02f;
+    static const auto ParticleHalfSize = 0.03f;
 
     namespace math = ::alicorn::extension::cpp::math;
 
@@ -143,22 +133,7 @@ auto Particles::GetObject(const Any_t & /*_Value*/) const /*override*/ -> Object
       Component_t::Make(
       {
         { uT("type"), uT("Data") },
-        { uT("kind"), uT("Shader.HLSL") },
-        { uT("version"), uT("ps_4_0") },
-        { uT("entry"), uT("psParticles") },
-        { uT("data"), ShaderData.data() },
-        { uT("count"), ShaderData.size() },
-      }),
-      Component_t::Make(
-      {
-        { uT("id"), uT("Demo.Shader.Pixel.Particles") },
-        { uT("type"), uT("Shader") },
-      }),
-      Component_t::Make(
-      {
-        { uT("type"), uT("Data") },
-        { uT("kind"), uT("Shader.HLSL") },
-        { uT("version"), uT("vs_4_0") },
+        { uT("kind"), uT("Shader") },
         { uT("entry"), uT("vsParticles") },
         { uT("data"), ShaderData.data() },
         { uT("count"), ShaderData.size() },
@@ -170,10 +145,16 @@ auto Particles::GetObject(const Any_t & /*_Value*/) const /*override*/ -> Object
       }),
       Component_t::Make(
       {
-        { uT("id"), uT("Demo.Material.Particles") },
-        { uT("type"), uT("Material") },
-        { uT("ambient"), 0xFFFFFFFF },
-        { uT("diffuse"), 0xFFFFFFFF },
+        { uT("type"), uT("Data") },
+        { uT("kind"), uT("Shader") },
+        { uT("entry"), uT("psParticles") },
+        { uT("data"), ShaderData.data() },
+        { uT("count"), ShaderData.size() },
+      }),
+      Component_t::Make(
+      {
+        { uT("id"), uT("Demo.Shader.Pixel.Particles") },
+        { uT("type"), uT("Shader") },
       }),
       Component_t::Make(
       {
@@ -240,33 +221,42 @@ void Particles::BuildParticles(void)
 
   m_pParticles = ::std::make_shared<::std::vector<Particle>>(Count, Particle
     {
-      ::glm::vec3{ 0.0f, 0.0f, 0.0f }, ::glm::vec3{ 0.0f, 0.0f, 0.0f }, 0.0f, 0.0f
+      ::glm::vec3{ 0.0f }, ::glm::vec3{ 0.0f }, 0.0f, 0.0f
     });
 
-  m_Vertexes.resize(4 * m_pParticles->size());
+  m_Vertexes.resize(3 * m_pParticles->size());
   m_Indices.resize(Count / CellSize);
 
   for (::std::size_t i = 0; i < m_pParticles->size(); i++)
   {
-    m_Vertexes[4 * i + 0].tu = 0.0f;
-    m_Vertexes[4 * i + 0].tv = 1.0f;
-    m_Vertexes[4 * i + 1].tu = 1.0f;
-    m_Vertexes[4 * i + 1].tv = 1.0f;
-    m_Vertexes[4 * i + 2].tu = 0.0f;
-    m_Vertexes[4 * i + 2].tv = 0.0f;
-    m_Vertexes[4 * i + 3].tu = 1.0f;
-    m_Vertexes[4 * i + 3].tv = 0.0f;
+    const auto iOffset = static_cast<int>(3 * i);
+
+    m_Vertexes[iOffset + 0].px = 0.0f;
+    m_Vertexes[iOffset + 0].pz = 0.0f;
+    m_Vertexes[iOffset + 0].pw = 1.0f;
+    m_Vertexes[iOffset + 0].ew = 0.0f;
+    m_Vertexes[iOffset + 0].tu = 0.5f;
+    m_Vertexes[iOffset + 0].tv = 0.0f;
+
+    m_Vertexes[iOffset + 1].pz = 0.0f;
+    m_Vertexes[iOffset + 1].pw = 1.0f;
+    m_Vertexes[iOffset + 1].ew = 0.0f;
+    m_Vertexes[iOffset + 1].tu = 1.0f;
+    m_Vertexes[iOffset + 1].tv = 0.75f;
+
+    m_Vertexes[iOffset + 2].pz = 0.0f;
+    m_Vertexes[iOffset + 2].pw = 1.0f;
+    m_Vertexes[iOffset + 2].ew = 0.0f;
+    m_Vertexes[iOffset + 2].tu = 0.0f;
+    m_Vertexes[iOffset + 2].tv = 0.75f;
 
     auto & Indicies = m_Indices[i / CellSize];
-
-    const auto iOffset = static_cast<int>(4 * i);
 
     using namespace ::alicorn::extension::std;
 
     Indicies += ::std::vector<int>
     {
       iOffset + 0, iOffset + 2, iOffset + 1, 
-      iOffset + 2, iOffset + 3, iOffset + 1,
     };
   }
 }

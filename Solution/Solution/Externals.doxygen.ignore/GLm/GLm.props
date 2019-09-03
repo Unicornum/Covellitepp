@@ -7,7 +7,7 @@
   <PropertyGroup>
     <IncludePath>$(ThisFileDirectory)include;$(IncludePath)</IncludePath>
     <LibraryPath>$(ThisFileDirectory)Lib\$(PlatformTarget)\$(PlatformToolsetDirectory);$(LibraryPath)</LibraryPath>
-    <_PropertySheetDisplayName>GLm v0.9.9.3</_PropertySheetDisplayName>
+    <_PropertySheetDisplayName>GLm v0.9.9.5</_PropertySheetDisplayName>
   </PropertyGroup>
   <ItemDefinitionGroup>
     <Link />

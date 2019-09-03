@@ -17,7 +17,9 @@ namespace renderer
 static PIXELFORMATDESCRIPTOR PixelFormatDescriptor = { 0 };
 
 OpenGL::OpenGL(const Data_t & _Data) :
-  OpenGLCommon(_Data, uT("OpenGL ")),
+  OpenGLCommonShader(_Data, uT("OpenGL "), 
+    "#version 330 core\r\n"
+    "#define COVELLITE_SHADER_DESKTOP\r\n"),
   m_hWnd(::covellite::any_cast<HWND>(_Data.Handle)),
   m_hDeviceContex(USING_MOCK ::GetDC(m_hWnd))
 {
@@ -71,7 +73,7 @@ void OpenGL::PresentFrame(void) /*override*/
 {
   WINAPI_CHECK USING_MOCK ::SwapBuffers(m_hDeviceContex);
 
-  m_Updater.UpdateTime();
+  OpenGLCommon::PresentFrame();
 }
 
 } // namespace renderer

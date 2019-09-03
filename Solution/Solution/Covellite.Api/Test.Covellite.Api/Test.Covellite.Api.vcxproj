@@ -14,7 +14,7 @@
     <ProjectGuid>{0488EEE9-74C7-4625-A19F-2F65FF3593BD}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>TestProject</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0.17134.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.17763.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
@@ -49,7 +49,6 @@
       <Optimization>Disabled</Optimization>
       <PreprocessorDefinitions>_ENABLE_EXTENDED_ALIGNED_STORAGE;WIN32;_CONSOLE;_LIB;TESTDLL_EXPORTS;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <DisableSpecificWarnings>4324;4996;26439;26444;26495</DisableSpecificWarnings>
-      <SDLCheck>false</SDLCheck>
       <AdditionalOptions>/bigobj %(AdditionalOptions)</AdditionalOptions>
       <FloatingPointModel>Precise</FloatingPointModel>
     </ClCompile>
@@ -64,7 +63,6 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>_ENABLE_EXTENDED_ALIGNED_STORAGE;WIN32;_CONSOLE;_LIB;TESTDLL_EXPORTS;NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <DisableSpecificWarnings>4324;4996;26439;26444;26495</DisableSpecificWarnings>
-      <SDLCheck>false</SDLCheck>
       <AdditionalOptions>/bigobj %(AdditionalOptions)</AdditionalOptions>
       <FloatingPointModel>Precise</FloatingPointModel>
     </ClCompile>
@@ -78,24 +76,27 @@
     <ResourceCompile Include="Resources.rc" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\Covellite.Api\Renderer\CapturingServiceComponent.cpp" />
     <ClCompile Include="..\Covellite.Api\Renderer\DxCheck.cpp" />
-    <ClCompile Include="..\Covellite.Api\Renderer\Updater.cpp" />
     <ClCompile Include="..\Covellite.Api\Renders.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="Test.Component\Component_test.cpp" />
+    <ClCompile Include="Test.Fx\Fx.Predefined.Glsl_test.cpp" />
+    <ClCompile Include="Test.Fx\Fx.Predefined.Hlsl_test.cpp" />
     <ClCompile Include="Test.Fx\Fx_test.cpp" />
     <ClCompile Include="Test.DirectX11\DirectX11_test.cpp" />
     <ClCompile Include="Test.DxCheck\DxCheck_test.cpp" />
     <ClCompile Include="Test.IGraphicApi\IGraphicApi_test.cpp" />
     <ClCompile Include="Test.IWindow\IWindow_test.cpp" />
+    <ClCompile Include="Test.OpenGLES3\OpenGLES3_test.cpp" />
     <ClCompile Include="Test.OpenGLES\OpenGLES_test.cpp" />
     <ClCompile Include="Test.OpenGL\OpenGL_test.cpp" />
     <ClCompile Include="Test.Renders\Renders_test.cpp" />
+    <ClCompile Include="Test.Window\Window_test.android.cpp" />
     <ClCompile Include="Test.Window\Window_test.cpp" />
+    <ClCompile Include="Test.Window\Window_test.windows.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Covellite.Api\Component.hpp" />
@@ -104,6 +105,8 @@
     <ClInclude Include="..\Covellite.Api\Renders.hpp" />
     <ClInclude Include="mock.hpp" />
     <ClInclude Include="OpenGLCommon_test.hpp" />
+    <ClInclude Include="OpenGLShader_test.hpp" />
+    <ClInclude Include="OpenGLStatic_test.hpp" />
     <ClInclude Include="stdafx.h" />
   </ItemGroup>
   <ItemGroup>

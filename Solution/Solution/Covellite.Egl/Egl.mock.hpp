@@ -33,6 +33,7 @@ static const EGLint EGL_RED_SIZE = 1611182300;
 static const EGLint EGL_DEPTH_SIZE = 1812271130;
 static const EGLint EGL_WIDTH = 1611191345;
 static const EGLint EGL_HEIGHT = 1611191346;
+static const EGLint EGL_CONTEXT_CLIENT_VERSION = 1908090900;
 
 } // namespace egl
 

@@ -1,9 +1,9 @@
 
 #pragma once
-#include "Defines.hpp"
+#include "Animation.hpp"
 #include "GameObject.hpp"
 #include "CubeCoords.hpp"
-#include "Animation.hpp"
+#include "Defines.hpp"
 
 namespace basement
 {

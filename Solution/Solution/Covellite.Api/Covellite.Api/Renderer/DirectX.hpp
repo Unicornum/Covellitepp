@@ -33,12 +33,15 @@ class DirectX final
   template<class T>
   using ComPtr_t = ::Microsoft::WRL::ComPtr<T>;
   using BinaryData_t = ::std::vector<uint8_t>;
+  using String_t = ::alicorn::extension::std::String;
 
 public:
   class Shader final
   {
   public:
     static ComPtr_t<ID3DBlob> Compile(const BinaryData_t &, LPCSTR, LPCSTR);
+    static ::std::string GetVersion(const String_t &);
+    static BinaryData_t Convert(const ::std::string & _Source);
   };
 };
 

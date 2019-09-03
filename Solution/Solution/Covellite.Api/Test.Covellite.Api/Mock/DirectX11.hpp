@@ -5,7 +5,7 @@
 #include <directxmath.h>
 #include <d3d11.h>
 #include <d3dcompiler.h>
-#include "../../Covellite.Api/Renderer/fx/Data.h"
+#include "../../Covellite.Api/Renderer/Shaders/Shaders.hpp"
 
 #pragma warning(push)
 #pragma warning(disable: 4100)
@@ -118,14 +118,11 @@ inline bool operator== (
   const ::Fog & _Left,
   const ::Fog & _Right)
 {
-  return DirectX::operator== (_Left, _Right);
-}
-
-inline bool operator== (
-  const ::Material & _Left,
-  const ::Material & _Right)
-{
-  return DirectX::operator== (_Left, _Right);
+  if (!(_Left.Color == _Right.Color)) return false;
+  if (!(_Left.Density == _Right.Density)) return false;
+  if (!(_Left.Far == _Right.Far)) return false;
+  if (!(_Left.Near == _Right.Near)) return false;
+  return true;
 }
 
 inline bool operator== (
@@ -143,29 +140,29 @@ inline bool operator== (
 }
 
 inline bool operator== (
-  const ::Light::Ambient & _Left,
-  const ::Light::Ambient & _Right)
+  const ::Ambient_t & _Left,
+  const ::Ambient_t & _Right)
 {
   if (!(_Left.IsValid == _Right.IsValid)) return false;
-  if (!(_Left.ARGBColor == _Right.ARGBColor)) return false;
+  if (!(_Left.Color == _Right.Color)) return false;
   return true;
 }
 
 inline bool operator== (
-  const ::Light::Direction & _Left,
-  const ::Light::Direction & _Right)
+  const ::Direction_t & _Left,
+  const ::Direction_t & _Right)
 {
   if (!(_Left.IsValid == _Right.IsValid)) return false;
-  if (!(_Left.ARGBColor == _Right.ARGBColor)) return false;
+  if (!(_Left.Color == _Right.Color)) return false;
   if (!(_Left.Direction == _Right.Direction)) return false;
   return true;
 }
 
 inline bool operator== (
-  const ::Light::Point & _Left,
-  const ::Light::Point & _Right)
+  const ::Point_t & _Left,
+  const ::Point_t & _Right)
 {
-  if (!(_Left.ARGBColor == _Right.ARGBColor)) return false;
+  if (!(_Left.Color == _Right.Color)) return false;
   if (!(_Left.Position == _Right.Position)) return false;
   if (!(_Left.Attenuation == _Right.Attenuation)) return false;
   return true;
@@ -285,7 +282,6 @@ public:
 
 public:
   MOCK_METHOD2(CreateBuffer, ID3D11Buffer *(D3D11_BUFFER_DESC, D3D11_SUBRESOURCE_DATA));
-  MOCK_METHOD1(CreateMaterialBuffer, void(::Material));
 
   virtual HRESULT STDMETHODCALLTYPE CreateBuffer(
     /* [annotation] */
@@ -299,12 +295,6 @@ public:
 
     const auto * pInitialData = (_pInitialData != nullptr) ?
       _pInitialData : &EmptyInitData;
-
-    if (pInitialData->pSysMem != nullptr)
-    {
-      CreateMaterialBuffer(
-        *reinterpret_cast<const ::Material *>(_pInitialData->pSysMem));
-    }
 
     *ppBuffer = CreateBuffer(*pDesc, *pInitialData);
     return GetResult("CreateBuffer");
@@ -1143,8 +1133,6 @@ public:
   MOCK_METHOD6(UpdateSubresource, void(ID3D11Resource *, UINT,
     const D3D11_BOX *, ::Fog, UINT, UINT));
   MOCK_METHOD6(UpdateSubresource, void(ID3D11Resource *, UINT,
-    const D3D11_BOX *, ::Material, UINT, UINT));
-  MOCK_METHOD6(UpdateSubresource, void(ID3D11Resource *, UINT,
     const D3D11_BOX *, ::Lights, UINT, UINT));
   MOCK_METHOD6(UpdateSubresource, void(ID3D11Resource *, UINT, 
     const D3D11_BOX *, ::Matrices, UINT, UINT));
@@ -1177,10 +1165,6 @@ public:
     }
     else
     {
-      UpdateSubresource(pDstResource, DstSubresource, pDstBox,
-        *reinterpret_cast<const ::Material *>(pSrcData),
-        SrcRowPitch, SrcDepthPitch);
-
       UpdateSubresource(pDstResource, DstSubresource, pDstBox,
         *reinterpret_cast<const ::Matrices *>(pSrcData),
         SrcRowPitch, SrcDepthPitch);

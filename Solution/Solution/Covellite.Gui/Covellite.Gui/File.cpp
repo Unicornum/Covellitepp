@@ -1,7 +1,7 @@
 ﻿
 #include "stdafx.h"
 #include <Covellite\Gui\File.hpp>
-#include <Covellite\Gui\Vfs.hpp>
+#include <Covellite\App\Vfs.hpp>
 
 namespace covellite
 {
@@ -19,7 +19,7 @@ File::Handle_t File::Open(const Path_t & _PathToFile) /*override*/
   {
     const auto Handle = File::MakeUniqueHandle();
 
-    m_Infos[Handle].Data = Vfs_t::GetInstance().GetData(_PathToFile.CString());
+    m_Infos[Handle].Data = app::Vfs_t::GetInstance().GetData(_PathToFile.CString());
     m_Infos[Handle].Position = 0;
     return Handle;
   }

@@ -20,8 +20,9 @@ public:
     ::covellite::egl::EGLConfig, ::covellite::egl::EGLint));
   MOCK_METHOD4(SetBuffersGeometry, int32_t(::ANativeWindow *,
     int32_t, int32_t, int32_t));
-  MOCK_METHOD4(CreateContext, ::covellite::egl::EGLContext(::covellite::egl::EGLDisplay,
-    ::covellite::egl::EGLConfig, ::covellite::egl::EGLContext, const ::covellite::egl::EGLint *));
+  MOCK_METHOD4(CreateContext, ::covellite::egl::EGLContext(
+    ::covellite::egl::EGLDisplay, ::covellite::egl::EGLConfig, 
+    ::covellite::egl::EGLContext, ::std::vector<::covellite::egl::EGLint>));
   MOCK_METHOD2(DestroyContext, ::covellite::egl::EGLBoolean(::covellite::egl::EGLDisplay, 
     ::covellite::egl::EGLContext));
   MOCK_METHOD4(CreateSurface, ::covellite::egl::EGLContext(::covellite::egl::EGLDisplay,
@@ -114,8 +115,20 @@ inline ::covellite::egl::EGLContext eglCreateContext(::covellite::egl::EGLDispla
   ::covellite::egl::EGLConfig _Config, ::covellite::egl::EGLContext _ShareContext,
   const ::covellite::egl::EGLint * _Attributes)
 {
+  using namespace ::covellite::egl;
+
+  ::std::vector<EGLint> Attributes;
+
+  if (_Attributes != nullptr)
+  {
+    for (auto * SrcAttributes = _Attributes; *SrcAttributes != EGL_NONE; SrcAttributes++)
+    {
+      Attributes.push_back(*SrcAttributes);
+    }
+  }
+
   return ::mock::EglProxy::GetInstance()->CreateContext(_Display,
-    _Config, _ShareContext, _Attributes);
+    _Config, _ShareContext, Attributes);
 }
 
 inline ::covellite::egl::EGLBoolean eglDestroyContext(::covellite::egl::EGLDisplay _Display,

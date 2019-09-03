@@ -21,12 +21,6 @@
     <ClCompile Include="..\..\Covellite.Api\Renderer\DxCheck.cpp">
       <Filter>Source</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\Covellite.Api\Renderer\CapturingServiceComponent.cpp">
-      <Filter>Source</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Covellite.Api\Renderer\Updater.cpp">
-      <Filter>Source</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">

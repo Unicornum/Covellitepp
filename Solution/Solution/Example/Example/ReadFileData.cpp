@@ -1,7 +1,7 @@
 
 #include "stdafx.h"
 #include <alicorn/compress.hpp>
-#include <Covellite/Gui/Vfs.hpp>
+#include <Covellite/App/Vfs.hpp>
 
 /// \cond DoxygenWarningSuppress
   
@@ -14,7 +14,7 @@ namespace extension
 namespace std
 {
   
-using namespace ::covellite::gui;
+using namespace ::covellite::app;
     
 template<>
 /*static*/ VfsPtr_t Singleton<VfsCore_t>::Make(void)

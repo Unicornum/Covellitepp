@@ -1,7 +1,6 @@
 
 #pragma once
-#include <alicorn\std\singleton.hpp>
-#include <alicorn\vfs.hpp>
+#include <Covellite/App/Vfs.hpp>
 
 namespace covellite
 {
@@ -9,30 +8,16 @@ namespace covellite
 namespace gui
 {
 
-using VfsCore_t = ::alicorn::modules::vfs::Core;
-using VfsPtr_t = ::std::unique_ptr<VfsCore_t>;
-using Vfs_t = ::alicorn::extension::std::Singleton<const VfsCore_t &>;
+// Класс потребовался из-за того, что на using не работает [[deprecated]].
+class [[deprecated("Deprecated: use covellite::app::Vfs_t instead")]] Vfs_t
+{
+public:
+  inline static auto GetInstance(void)
+  {
+    return app::Vfs_t::GetInstance();
+  }
+};
 
 } // namespace gui
 
 } // namespace covellite
-
-namespace alicorn
-{
-
-namespace extension
-{
-
-namespace std
-{
-
-using namespace ::covellite::gui;
-
-template<>
-/*static*/ VfsPtr_t Singleton<VfsCore_t>::Make(void);
-
-} // namespace std
-
-} // namespace extension
-
-} // namespace alicorn

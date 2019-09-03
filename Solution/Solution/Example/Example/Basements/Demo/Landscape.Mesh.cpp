@@ -8,7 +8,7 @@
 #include <alicorn/boost/filesystem.hpp>
 #include <alicorn/logger.hpp>
 #include <Covellite/App/Settings.hpp>
-#include <Covellite/Gui/Vfs.hpp>
+#include <Covellite/App/Vfs.hpp>
 
 #if BOOST_COMP_MSVC
 # pragma warning(push)
@@ -66,7 +66,7 @@ private:
 
 public:
   explicit MeshStreamBuffer(const Path_t & _PathToFile) :
-    m_Data(::covellite::gui::Vfs_t::GetInstance().GetData(_PathToFile))
+    m_Data(::covellite::app::Vfs_t::GetInstance().GetData(_PathToFile))
   {
     setg(
       reinterpret_cast<char *>(m_Data.data()), 
@@ -195,15 +195,17 @@ void Landscape::Mesh::LoadMesh(
 
     for (int i = 0; i < _Count; i++)
     {
-      const size_t iVertex = _pIndices[i].vertex_index - 1;
-      Triangle.Vertexes[i].m_Vertex.x = Data.Vertex[iVertex].x;
-      Triangle.Vertexes[i].m_Vertex.y = Data.Vertex[iVertex].y;
-      Triangle.Vertexes[i].m_Vertex.z = Data.Vertex[iVertex].z;
+      const auto iVertex = static_cast<size_t>(_pIndices[i].vertex_index - 1);
+      Triangle.Vertexes[i].m_Vertex.px = Data.Vertex[iVertex].x;
+      Triangle.Vertexes[i].m_Vertex.py = Data.Vertex[iVertex].y;
+      Triangle.Vertexes[i].m_Vertex.pz = Data.Vertex[iVertex].z;
+      Triangle.Vertexes[i].m_Vertex.pw = 1.0f;
 
-      const size_t iNormal = _pIndices[i].normal_index - 1;
-      Triangle.Vertexes[i].m_Vertex.nx = Data.Normal[iNormal].x;
-      Triangle.Vertexes[i].m_Vertex.ny = Data.Normal[iNormal].y;
-      Triangle.Vertexes[i].m_Vertex.nz = Data.Normal[iNormal].z;
+      const auto iNormal = static_cast<size_t>(_pIndices[i].normal_index - 1);
+      Triangle.Vertexes[i].m_Vertex.ex = Data.Normal[iNormal].x;
+      Triangle.Vertexes[i].m_Vertex.ey = Data.Normal[iNormal].y;
+      Triangle.Vertexes[i].m_Vertex.ez = Data.Normal[iNormal].z;
+      Triangle.Vertexes[i].m_Vertex.ew = 0.0f;
 
       // Предполагается, что модель изначально использует текстурные координаты
       // диапазоне 0...1, а повторяется текстура в диапазонах 1...2, 2...3
@@ -224,7 +226,7 @@ void Landscape::Mesh::LoadMesh(
         return Result;
       };
 
-      const size_t iTexCoords = _pIndices[i].texcoord_index - 1;
+      const auto iTexCoords = static_cast<size_t>(_pIndices[i].texcoord_index - 1);
       Triangle.Vertexes[i].m_Vertex.tu = Convert(Data.TexCoord[iTexCoords].x,
         Data.TextureCoord.left, Data.TextureCoord.right);
       Triangle.Vertexes[i].m_Vertex.tv = Convert(Data.TexCoord[iTexCoords].y,
@@ -427,46 +429,46 @@ void Landscape::Mesh::BuildTriplex12Object(
 
     Triangle.Vertexes[0].m_Vertex =
     { 
-      HexPoint1.x, HexPoint1.y, HexPoint1.z + _OffsetZ,
-      Normal1.x, Normal1.y, 0.75f,
+      HexPoint1.x, HexPoint1.y, HexPoint1.z + _OffsetZ, 1.0f,
       _TextureCoords.right, _TextureCoords.top,
+      Normal1.x, Normal1.y, 0.75f, 0.0f
     };
 
     Triangle.Vertexes[1].m_Vertex =
     {
-      HexPoint2.x, HexPoint2.y, HexPoint2.z + _OffsetZ,
-      Normal2.x, Normal2.y, 0.75f,
+      HexPoint2.x, HexPoint2.y, HexPoint2.z + _OffsetZ, 1.0f,
       _TextureCoords.left, _TextureCoords.top,
+      Normal2.x, Normal2.y, 0.75f, 0.0f
     };
 
     Triangle.Vertexes[2].m_Vertex =
     {
-      HexPoint1.x, HexPoint1.y, 0.0f + _OffsetZ,
-      Normal1.x, Normal1.y, 0.0f,
+      HexPoint1.x, HexPoint1.y, 0.0f + _OffsetZ, 1.0f,
       _TextureCoords.right, _TextureCoords.bottom,
+      Normal1.x, Normal1.y, 0.0f, 0.0f
     };
 
     Add(Triangle);
 
     Triangle.Vertexes[0].m_Vertex =
     {
-      HexPoint1.x, HexPoint1.y, 0.0f + _OffsetZ,
-      Normal1.x, Normal1.y, 0.0f,
+      HexPoint1.x, HexPoint1.y, 0.0f + _OffsetZ, 1.0f,
       _TextureCoords.right, _TextureCoords.bottom,
+      Normal1.x, Normal1.y, 0.0f, 0.0f
     };
 
     Triangle.Vertexes[1].m_Vertex =
     {
-      HexPoint2.x, HexPoint2.y, HexPoint2.z + _OffsetZ,
-      Normal2.x, Normal2.y, 0.75f,
+      HexPoint2.x, HexPoint2.y, HexPoint2.z + _OffsetZ, 1.0f,
       _TextureCoords.left, _TextureCoords.top,
+      Normal2.x, Normal2.y, 0.75f, 0.0f
     };
 
     Triangle.Vertexes[2].m_Vertex =
     {
-      HexPoint2.x, HexPoint2.y, 0.0f + _OffsetZ,
-      Normal2.x, Normal2.y, 0.0f,
+      HexPoint2.x, HexPoint2.y, 0.0f + _OffsetZ, 1.0f,
       _TextureCoords.left, _TextureCoords.bottom,
+      Normal2.x, Normal2.y, 0.0f, 0.0f
     };
 
     Add(Triangle);

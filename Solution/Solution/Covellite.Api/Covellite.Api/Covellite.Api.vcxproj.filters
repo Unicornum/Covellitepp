@@ -7,8 +7,8 @@
     <Filter Include="Renderer">
       <UniqueIdentifier>{23fbb0b7-28d1-4755-81a8-16494792a8b1}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Renderer\fx">
-      <UniqueIdentifier>{0c0c957e-a39b-434a-b19c-ae5cde62b5ad}</UniqueIdentifier>
+    <Filter Include="Renderer\shaders">
+      <UniqueIdentifier>{0fa88aa0-4f55-4850-b20b-0a171ce7127d}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -45,9 +45,6 @@
     <ClInclude Include="Renderer\Component.hpp">
       <Filter>Renderer</Filter>
     </ClInclude>
-    <ClInclude Include="Renderer\DirectX9.hpp">
-      <Filter>Renderer</Filter>
-    </ClInclude>
     <ClInclude Include="Renderer\DirectX11.hpp">
       <Filter>Renderer</Filter>
     </ClInclude>
@@ -58,24 +55,36 @@
       <Filter>Renderer</Filter>
     </ClInclude>
     <ClInclude Include="Vertex.hpp" />
-    <ClInclude Include="Renderer\fx\Data.h">
-      <Filter>Renderer\fx</Filter>
-    </ClInclude>
-    <ClInclude Include="Renderer\GLMath.hpp">
-      <Filter>Renderer</Filter>
-    </ClInclude>
-    <ClInclude Include="Renderer\CapturingServiceComponent.hpp">
-      <Filter>Renderer</Filter>
-    </ClInclude>
     <ClInclude Include="Renderer\DirectX.hpp">
       <Filter>Renderer</Filter>
     </ClInclude>
-    <ClInclude Include="Renderer\fx\Hlsl.hpp">
-      <Filter>Renderer\fx</Filter>
-    </ClInclude>
     <ClInclude Include="Defines.hpp" />
-    <ClInclude Include="Renderer\Updater.hpp">
+    <ClInclude Include="Renderer\OpenGLCommonStatic.hpp">
       <Filter>Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="Renderer\OpenGLCommonShader.hpp">
+      <Filter>Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="Renderer\GLExt.hpp">
+      <Filter>Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="Renderer\GraphicApi.hpp">
+      <Filter>Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="Renderer\OpenGLCommon.Texture.hpp">
+      <Filter>Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="Renderer\GraphicApi.Constants.hpp">
+      <Filter>Renderer</Filter>
+    </ClInclude>
+    <ClInclude Include="Renderer\shaders\Data.h">
+      <Filter>Renderer\shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="Renderer\shaders\Shaders.hpp">
+      <Filter>Renderer\shaders</Filter>
+    </ClInclude>
+    <ClInclude Include="Renderer\shaders\Data.hpp">
+      <Filter>Renderer\shaders</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -90,9 +99,6 @@
     <ClCompile Include="Renderer\DirectX10.cpp">
       <Filter>Renderer</Filter>
     </ClCompile>
-    <ClCompile Include="Renderer\DirectX9.cpp">
-      <Filter>Renderer</Filter>
-    </ClCompile>
     <ClCompile Include="Renderer\DirectX11.cpp">
       <Filter>Renderer</Filter>
     </ClCompile>
@@ -102,32 +108,38 @@
     <ClCompile Include="Renderer\OpenGLCommon.cpp">
       <Filter>Renderer</Filter>
     </ClCompile>
-    <ClCompile Include="Renderer\CapturingServiceComponent.cpp">
-      <Filter>Renderer</Filter>
-    </ClCompile>
     <ClCompile Include="Renderer\DirectX.cpp">
       <Filter>Renderer</Filter>
     </ClCompile>
     <ClCompile Include="Window.windows.cpp" />
-    <ClCompile Include="Renderer\Updater.cpp">
+    <ClCompile Include="Renderer\OpenGLCommonStatic.cpp">
+      <Filter>Renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="Renderer\OpenGLCommonShader.cpp">
+      <Filter>Renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="Renderer\GraphicApi.cpp">
+      <Filter>Renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="Renderer\OpenGLCommon.Texture.cpp">
+      <Filter>Renderer</Filter>
+    </ClCompile>
+    <ClCompile Include="Renderer\GraphicApi.CapturingServiceComponent.cpp">
       <Filter>Renderer</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <FxCompile Include="Renderer\fx\Vertex.fx">
-      <Filter>Renderer\fx</Filter>
+    <FxCompile Include="Renderer\shaders\Input.fx">
+      <Filter>Renderer\shaders</Filter>
     </FxCompile>
-    <FxCompile Include="Renderer\fx\Pixel.fx">
-      <Filter>Renderer\fx</Filter>
+    <FxCompile Include="Renderer\shaders\DefaultDeprecated.fx">
+      <Filter>Renderer\shaders</Filter>
     </FxCompile>
-    <FxCompile Include="Renderer\fx\Input.fx">
-      <Filter>Renderer\fx</Filter>
+    <FxCompile Include="Renderer\shaders\Default.fx">
+      <Filter>Renderer\shaders</Filter>
     </FxCompile>
-    <FxCompile Include="Renderer\fx\PBR1.fx">
-      <Filter>Renderer\fx</Filter>
-    </FxCompile>
-    <FxCompile Include="Renderer\fx\Example.fx">
-      <Filter>Renderer\fx</Filter>
+    <FxCompile Include="Renderer\shaders\Predefined.fx">
+      <Filter>Renderer\shaders</Filter>
     </FxCompile>
   </ItemGroup>
   <ItemGroup>

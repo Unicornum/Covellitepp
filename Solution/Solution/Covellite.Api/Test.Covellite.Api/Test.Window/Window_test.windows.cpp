@@ -17,6 +17,7 @@
 #define RendererImpl RendererImpl_windows
 #define IGraphicApi IGraphicApi_windows
 
+#include <Covellite/App.mock.hpp>
 #include <Covellite/Os.mock.hpp>
 
 // Расположение класса Window
@@ -32,9 +33,7 @@ namespace windows
 {
 
 DEFINE_RENDER_IMPL(Dummy);
-DEFINE_RENDER_IMPL(DirectX12);
 DEFINE_RENDER_IMPL(DirectX11);
-DEFINE_RENDER_IMPL(Vulkan);
 DEFINE_RENDER_IMPL(OpenGL);
 
 } // namespace windows
@@ -67,6 +66,10 @@ protected:
     ::testing::DefaultValue<::covellite::Any_t>::Clear();
     ::testing::DefaultValue<String_t>::Clear();
   }
+
+protected:
+  using App_t = ::mock::covellite::app::Application;
+  App_t m_App{ App_t::EventBased{} };
 };
 
 // Образец макроса для подстановки в класс Renderer 
@@ -90,38 +93,7 @@ TEST_F(Window_windows_test, /*DISABLED_*/Test_Dummy)
     .WillOnce(Return(uT("false")))
     .WillRepeatedly(Return(uT("Dummy")));
 
-  WindowOs_t WindowOs;
-  Tested_t Example{ WindowOs };
-}
-
-// ************************************************************************** //
-TEST_F(Window_windows_test, /*DISABLED_*/Test_Constructor_Auto_DirectX12)
-{
-  using SettingsProxy_t = ::mock::alicorn::modules::settings::SectionImplProxy;
-  SettingsProxy_t SettingsProxy;
-  SettingsProxy_t::GetInstance() = &SettingsProxy;
-
-  using RendererImplProxy_t = ::mock::RendererImpl::Proxy;
-  RendererImplProxy_t RendererImplProxy;
-  RendererImplProxy_t::GetInstance() = &RendererImplProxy;
-
-  const ::mock::Id_t Id = 1809031219;
-
-  using namespace ::testing;
-
-  InSequence Dummy;
-
-  EXPECT_CALL(SettingsProxy, GetValue(_, _))
-    .WillOnce(Return(uT("false")))
-    .WillRepeatedly(Return(uT("Auto")));
-
-  EXPECT_CALL(RendererImplProxy, Constructor(_))
-    .WillOnce(Return(Id));
-
-  EXPECT_CALL(RendererImplProxy, SetClassName(Id, uT("DirectX12")))
-    .Times(1);
-
-  WindowOs_t WindowOs;
+  WindowOs_t WindowOs{ m_App };
   Tested_t Example{ WindowOs };
 }
 
@@ -147,46 +119,12 @@ TEST_F(Window_windows_test, /*DISABLED_*/Test_Constructor_Auto_DirectX11)
     .WillRepeatedly(Return(uT("Auto")));
 
   EXPECT_CALL(RendererImplProxy, Constructor(_))
-    .WillOnce(Throw(::std::exception{}))
     .WillOnce(Return(Id));
 
   EXPECT_CALL(RendererImplProxy, SetClassName(Id, uT("DirectX11")))
     .Times(1);
 
-  WindowOs_t WindowOs;
-  Tested_t Example{ WindowOs };
-}
-
-// ************************************************************************** //
-TEST_F(Window_windows_test, /*DISABLED_*/Test_Constructor_Auto_Vulkan)
-{
-  using SettingsProxy_t = ::mock::alicorn::modules::settings::SectionImplProxy;
-  SettingsProxy_t SettingsProxy;
-  SettingsProxy_t::GetInstance() = &SettingsProxy;
-
-  using RendererImplProxy_t = ::mock::RendererImpl::Proxy;
-  RendererImplProxy_t RendererImplProxy;
-  RendererImplProxy_t::GetInstance() = &RendererImplProxy;
-
-  const ::mock::Id_t Id = 1809031244;
-
-  using namespace ::testing;
-
-  InSequence Dummy;
-
-  EXPECT_CALL(SettingsProxy, GetValue(_, _))
-    .WillOnce(Return(uT("false")))
-    .WillRepeatedly(Return(uT("Auto")));
-
-  EXPECT_CALL(RendererImplProxy, Constructor(_))
-    .WillOnce(Throw(::std::exception{}))
-    .WillOnce(Throw(::std::exception{}))
-    .WillOnce(Return(Id));
-
-  EXPECT_CALL(RendererImplProxy, SetClassName(Id, uT("Vulkan")))
-    .Times(1);
-
-  WindowOs_t WindowOs;
+  WindowOs_t WindowOs{ m_App };
   Tested_t Example{ WindowOs };
 }
 
@@ -213,14 +151,12 @@ TEST_F(Window_windows_test, /*DISABLED_*/Test_Constructor_Auto_OpenGL)
 
   EXPECT_CALL(RendererImplProxy, Constructor(_))
     .WillOnce(Throw(::std::exception{}))
-    .WillOnce(Throw(::std::exception{}))
-    .WillOnce(Throw(::std::exception{}))
     .WillOnce(Return(Id));
 
   EXPECT_CALL(RendererImplProxy, SetClassName(Id, uT("OpenGL")))
     .Times(1);
 
-  WindowOs_t WindowOs;
+  WindowOs_t WindowOs{ m_App };
   Tested_t Example{ WindowOs };
 }
 
@@ -241,9 +177,7 @@ TEST_F(Window_windows_test, /*DISABLED_*/Test_Constructor_Auto_Nothing)
 
   const ::std::unordered_map<String_t, const char *> Datas =
   {
-    { uT("DirectX12"), "Error1809031406" },
     { uT("DirectX11"), "Error1809031412" },
-    { uT("Vulkan"), "Error1809031413" },
     { uT("OpenGL"), "Error1809031414" }
   };
 
@@ -268,6 +202,6 @@ TEST_F(Window_windows_test, /*DISABLED_*/Test_Constructor_Auto_Nothing)
       .Times(1);
   }
 
-  WindowOs_t WindowOs;
+  WindowOs_t WindowOs{ m_App };
   EXPECT_THROW(Tested_t{ WindowOs }, ::std::exception);
 }

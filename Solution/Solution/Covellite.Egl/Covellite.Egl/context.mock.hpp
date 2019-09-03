@@ -46,7 +46,7 @@ public:
   {
   public:
     MOCK_METHOD2(MakeCurrent, void(Id_t, Id_t));
-    MOCK_METHOD2(Constructor, Id_t(Id_t, Id_t));
+    MOCK_METHOD3(Constructor, Id_t(Id_t, Id_t, const int));
     MOCK_METHOD1(Destructor, void(Id_t));
   };
 
@@ -61,8 +61,8 @@ public:
     Proxy::GetInstance()->MakeCurrent(m_Id, _Param1.m_Id);
   }
 
-  Context(const Display & _Param1, const Config & _Param2) :
-    m_Id(Proxy::GetInstance()->Constructor(_Param1.m_Id, _Param2.m_Id))
+  Context(const Display & _Param1, const Config & _Param2, const int _Version) :
+    m_Id(Proxy::GetInstance()->Constructor(_Param1.m_Id, _Param2.m_Id, _Version))
   {
 
   }

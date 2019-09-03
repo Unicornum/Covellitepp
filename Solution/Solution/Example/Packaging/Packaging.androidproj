@@ -31,22 +31,22 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'" Label="Configuration">
     <UseDebugLibraries>true</UseDebugLibraries>
     <ConfigurationType>Application</ConfigurationType>
-    <AndroidAPILevel>android-28</AndroidAPILevel>
+    <AndroidAPILevel>android-29</AndroidAPILevel>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug.Product|ARM'" Label="Configuration">
     <UseDebugLibraries>true</UseDebugLibraries>
     <ConfigurationType>Application</ConfigurationType>
-    <AndroidAPILevel>android-28</AndroidAPILevel>
+    <AndroidAPILevel>android-29</AndroidAPILevel>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM'" Label="Configuration">
     <UseDebugLibraries>false</UseDebugLibraries>
     <ConfigurationType>Application</ConfigurationType>
-    <AndroidAPILevel>android-28</AndroidAPILevel>
+    <AndroidAPILevel>android-29</AndroidAPILevel>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release.Product|ARM'" Label="Configuration">
     <UseDebugLibraries>false</UseDebugLibraries>
     <ConfigurationType>Application</ConfigurationType>
-    <AndroidAPILevel>android-28</AndroidAPILevel>
+    <AndroidAPILevel>android-29</AndroidAPILevel>
   </PropertyGroup>
   <Import Project="$(AndroidTargetsPath)\Android.props" />
   <ImportGroup Label="ExtensionSettings" />
@@ -101,7 +101,10 @@
     <Content Include="assets\data\fonts\Vollkorn-Regular.ttf" />
     <Content Include="assets\data\fonts\Vollkorn-SemiBold.ttf" />
     <Content Include="res\drawable\icon.png" />
-    <Content Include="res\values\strings.xml" />
+    <Content Include="res\values-v18\strings.xml" />
+    <Content Include="res\values\strings.xml">
+      <SubType>Designer</SubType>
+    </Content>
     <AntBuildXml Include="build.xml" />
     <AndroidManifest Include="AndroidManifest.xml">
       <SubType>Designer</SubType>
@@ -117,6 +120,7 @@
     <JavaCompile Include="src\externals\MainActivity.java" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Example\Example.Android.es.vcxproj" />
     <ProjectReference Include="..\Example\Example.Android.vcxproj" />
   </ItemGroup>
   <Import Project="$(AndroidTargetsPath)\Android.targets" />

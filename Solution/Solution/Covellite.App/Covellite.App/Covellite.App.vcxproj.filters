@@ -22,6 +22,7 @@
     <ClInclude Include="ClassName.windows.hpp" />
     <ClInclude Include="Events.hpp" />
     <ClInclude Include="IApplication.hpp" />
+    <ClInclude Include="Vfs.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">

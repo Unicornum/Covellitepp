@@ -2,7 +2,9 @@
 #pragma once
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
-#include "OpenGLCommon.hpp"
+#include "OpenGLCommonShader.hpp"
+
+class OpenGL_test;
 
 namespace covellite
 {
@@ -22,29 +24,34 @@ namespace renderer
 * \version
 *  1.0.0.0        \n
 *  2.0.0.0        \n
+*  3.0.0.0        \n
 * \date
 *  16 Октябрь 2017    \n
 *  26 Август 2018    \n
+*  09 Август 2019    \n
 * \author
 *  CTAPOBEP (unicornum.verum@gmail.com)
 * \copyright
-*  © CTAPOBEP 2017 - 2018
+*  © CTAPOBEP 2017 - 2019
 */
 class OpenGL final :
-  public OpenGLCommon
+  public OpenGLCommonShader
 {
 public:
   // Интерфейс IGraphicApi:
   void PresentFrame(void) override;
 
 private:
-  HWND        m_hWnd;
-  HDC         m_hDeviceContex;
-  HGLRC       m_hRenderContex;
+  HWND  m_hWnd;
+  HDC   m_hDeviceContex;
+  HGLRC m_hRenderContex;
 
 public:
   explicit OpenGL(const Data_t &);
   ~OpenGL(void);
+
+private:
+  friend OpenGL_test;
 };
 
 FACTORY_REGISTER_STRING_NAME(OpenGL);

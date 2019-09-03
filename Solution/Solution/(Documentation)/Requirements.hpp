@@ -39,10 +39,11 @@
 *  - \checked Кроссплатформенный фреймворк с возможностью указания в настройках
 *  используемого графического API:
 *   + \checked Windows (OpenGL v4.5).
-*   + \checked Windows (DirectX v9/10/11).
-*   + \unchecked Windows (DirectX v12).
+*   + \checked Windows (DirectX 10/11).
+*   + \unchecked Windows (DirectX 12).
 *   + \unchecked Windows (Vulkan).
-*   + \checked Android (OpenGLES v1).
+*   + \checked Android (OpenGL ES).
+*   + \checked Android (OpenGL ES3).
 *   + \unchecked Android (Vulkan).
 *   + \checked Автоматический выбор наиболее подходящей реализации для
 *  платформы, на которой запускается приложение.

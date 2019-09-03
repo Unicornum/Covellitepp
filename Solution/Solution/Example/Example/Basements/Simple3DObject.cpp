@@ -4,7 +4,6 @@
 #include <alicorn/std/vector.hpp>
 #include <alicorn/logger.hpp>
 #include <GLMath.hpp>
-#include <Covellite.Api/Covellite.Api/Renderer/fx/Hlsl.hpp>
 
 using namespace basement;
 namespace math = ::alicorn::extension::cpp::math;
@@ -129,15 +128,9 @@ auto Simple3DObject::BuildShader(int _LightsFlags) -> Id
     }),
     Component_t::Make(
     {
-      { uT("type"), uT("Data") },
-      { uT("kind"), uT("Shader.HLSL") },
-      { uT("version"), uT("vs_4_0") },
-      { uT("entry"), uT("vsTextured") },
-    }),
-    Component_t::Make(
-    {
       { uT("id"), uT("Example.Shader.Vertex.Cube") },
       { uT("type"), uT("Shader") },
+      { uT("entry"), uT("vsLights") },
     }),
   };
 
@@ -145,15 +138,15 @@ auto Simple3DObject::BuildShader(int _LightsFlags) -> Id
 
   if ((_LightsFlags & (1 << Lights::PBR)) != 0)
   {
-    static const auto PixelShaderData = Vertex + PBR1;
+    static const auto PixelShaderData = 
+      ::covellite::app::Vfs_t::GetInstance().GetData("Data\\Shaders\\Pbr.ps.fx");
 
     Components += Object_t
     {
       Component_t::Make(
       {
         { uT("type"), uT("Data") },
-        { uT("kind"), uT("Shader.HLSL") },
-        { uT("version"), uT("ps_4_0") },
+        { uT("kind"), uT("Shader") },
         { uT("data"), PixelShaderData.data() },
         { uT("count"), PixelShaderData.size() },
         { uT("entry"), uT("psPbrSimple") },
@@ -163,6 +156,26 @@ auto Simple3DObject::BuildShader(int _LightsFlags) -> Id
         { uT("id"), uT("Example.Shader.Pixel.Cube.PBR") },
         { uT("type"), uT("Shader") },
       }),
+      Component_t::Make(
+      {
+        { uT("id"), uT("Example.Texture.Albedo") },
+      }),
+      Component_t::Make(
+      {
+        { uT("id"), uT("Example.Texture.Metalness") },
+      }),
+      Component_t::Make(
+      {
+        { uT("id"), uT("Example.Texture.Roughness") },
+      }),
+      Component_t::Make(
+      {
+        { uT("id"), uT("Example.Texture.Normal") },
+      }),
+      Component_t::Make(
+      {
+        { uT("id"), uT("Example.Texture.Occlusion") },
+      }),
     };
   }
   else
@@ -171,15 +184,13 @@ auto Simple3DObject::BuildShader(int _LightsFlags) -> Id
     {
       Component_t::Make(
       {
-        { uT("type"), uT("Data") },
-        { uT("kind"), uT("Shader.HLSL") },
-        { uT("version"), uT("ps_4_0") },
+        { uT("id"), uT("Example.Shader.Pixel.Cube.Textured") },
+        { uT("type"), uT("Shader") },
         { uT("entry"), uT("psTextured") },
       }),
       Component_t::Make(
       {
-        { uT("id"), uT("Example.Shader.Pixel.Cube.Textured") },
-        { uT("type"), uT("Shader") },
+        { uT("id"), uT("Example.Texture.Albedo") },
       }),
     };
   }
@@ -386,43 +397,14 @@ auto Simple3DObject::BuildCamera(void) -> Id
       }),
       Component_t::Make(
       {
-        { uT("id"), uT("Example.Material.Cube") },
-        { uT("type"), uT("Material") },
-        { uT("ambient"), 0xFFFFFFFF },
-        { uT("diffuse"), 0xFFFFFFFF },
-      }),
-      Component_t::Make(
-      {
-        { uT("id"), uT("Example.Texture.Albedo") },
-      }),
-      Component_t::Make(
-      {
-        { uT("id"), uT("Example.Texture.Metalness") },
-      }),
-      Component_t::Make(
-      {
-        { uT("id"), uT("Example.Texture.Roughness") },
-      }),
-      Component_t::Make(
-      {
-        { uT("id"), uT("Example.Texture.Normal") },
-      }),
-      Component_t::Make(
-      {
-        { uT("id"), uT("Example.Texture.Occlusion") },
-      }),
-      Component_t::Make(
-      {
         { uT("id"), uT("Example.Shader.Vertex.Default") },
         { uT("type"), uT("Shader") },
-        { uT("version"), uT("vs_4_0") },
-        { uT("entry"), uT("vsTextured") },
+        { uT("entry"), uT("vsLights") },
       }),
       Component_t::Make(
       {
         { uT("id"), uT("Example.Shader.Pixel.Default") },
         { uT("type"), uT("Shader") },
-        { uT("version"), uT("ps_4_0") },
         { uT("entry"), uT("psTextured") },
       }),
       Component_t::Make(
@@ -445,7 +427,7 @@ auto Simple3DObject::BuildCube(
   -> Id
 {
   /// [Vertex format]
-  using Vertex_t = ::covellite::api::vertex::Polyhedron;
+  using Vertex_t = ::covellite::api::Vertex;
   /// [Vertex format]
 
   using namespace ::alicorn::extension::std;
@@ -473,47 +455,47 @@ auto Simple3DObject::BuildCube(
 
     VertexData += ::std::vector<Vertex_t>
     {
-      {  0.5f,  0.5f, 0.5f,   0.0f, 0.0f, 1.0f,  1.0f,       0.0f, },
-      {  X1,    Y1,   0.5f,   0.0f, 0.0f, 1.0f,  0.5f + X1,  0.5f - Y1, },
-      {  X2,    Y2,   0.5f,   0.0f, 0.0f, 1.0f,  0.5f + X2,  0.5f - Y2, },
-      { -0.5f, -0.5f, 0.5f,   0.0f, 0.0f, 1.0f,  0.0f,       1.0f, },
-      { -X1,   -Y1,   0.5f,   0.0f, 0.0f, 1.0f,  0.5f - X1,  0.5f + Y1, },
-      { -X2,   -Y2,   0.5f,   0.0f, 0.0f, 1.0f,  0.5f - X2,  0.5f + Y2, },
+      {  0.5f,  0.5f, 0.5f,  1.0f,      1.0f,       0.0f,          0.0f, 0.0f, 1.0f,  0.0f, },
+      {  X1,    Y1,   0.5f,  1.0f,      0.5f + X1,  0.5f - Y1,     0.0f, 0.0f, 1.0f,  0.0f, },
+      {  X2,    Y2,   0.5f,  1.0f,      0.5f + X2,  0.5f - Y2,     0.0f, 0.0f, 1.0f,  0.0f, },
+      { -0.5f, -0.5f, 0.5f,  1.0f,      0.0f,       1.0f,          0.0f, 0.0f, 1.0f,  0.0f, },
+      { -X1,   -Y1,   0.5f,  1.0f,      0.5f - X1,  0.5f + Y1,     0.0f, 0.0f, 1.0f,  0.0f, },
+      { -X2,   -Y2,   0.5f,  1.0f,      0.5f - X2,  0.5f + Y2,     0.0f, 0.0f, 1.0f,  0.0f, },
 
-      { 0.5f, 0.5f,  0.5f,  1.0f, 0.0f, 0.0f,  1.0f,       0.0f, },
-      { 0.5f, X1,    Y1,    1.0f, 0.0f, 0.0f,  0.5f + X1,  0.5f - Y1, },
-      { 0.5f, X2,    Y2,    1.0f, 0.0f, 0.0f,  0.5f + X2,  0.5f - Y2, },
-      { 0.5f, -0.5f, -0.5f, 1.0f, 0.0f, 0.0f,  0.0f,       1.0f, },
-      { 0.5f, -X1,   -Y1,   1.0f, 0.0f, 0.0f,  0.5f - X1,  0.5f + Y1, },
-      { 0.5f, -X2,   -Y2,   1.0f, 0.0f, 0.0f,  0.5f - X2,  0.5f + Y2, },
+      { 0.5f, 0.5f,  0.5f,   1.0f,      1.0f,       0.0f,          1.0f, 0.0f, 0.0f,  0.0f, },
+      { 0.5f, X1,    Y1,     1.0f,      0.5f + X1,  0.5f - Y1,     1.0f, 0.0f, 0.0f,  0.0f, },
+      { 0.5f, X2,    Y2,     1.0f,      0.5f + X2,  0.5f - Y2,     1.0f, 0.0f, 0.0f,  0.0f, },
+      { 0.5f, -0.5f, -0.5f,  1.0f,      0.0f,       1.0f,          1.0f, 0.0f, 0.0f,  0.0f, },
+      { 0.5f, -X1,   -Y1,    1.0f,      0.5f - X1,  0.5f + Y1,     1.0f, 0.0f, 0.0f,  0.0f, },
+      { 0.5f, -X2,   -Y2,    1.0f,      0.5f - X2,  0.5f + Y2,     1.0f, 0.0f, 0.0f,  0.0f, },
 
-      {  0.5f, 0.5f,  0.5f, 0.0f, 1.0f, 0.0f,  1.0f,      0.0f, },
-      {  X2,   0.5f,  Y2,   0.0f, 1.0f, 0.0f,  0.5f + X2, 0.5f - Y2, },
-      {  X1,   0.5f,  Y1,   0.0f, 1.0f, 0.0f,  0.5f + X1, 0.5f - Y1, },
-      { -0.5f, 0.5f, -0.5f, 0.0f, 1.0f, 0.0f,  0.0f,      1.0f, },
-      { -X2,   0.5f, -Y2,   0.0f, 1.0f, 0.0f,  0.5f - X2, 0.5f + Y2, },
-      { -X1,   0.5f, -Y1,   0.0f, 1.0f, 0.0f,  0.5f - X1, 0.5f + Y1, },
+      {  0.5f, 0.5f,  0.5f,  1.0f,      1.0f,      0.0f,           0.0f, 1.0f, 0.0f,  0.0f, },
+      {  X2,   0.5f,  Y2,    1.0f,      0.5f + X2, 0.5f - Y2,      0.0f, 1.0f, 0.0f,  0.0f, },
+      {  X1,   0.5f,  Y1,    1.0f,      0.5f + X1, 0.5f - Y1,      0.0f, 1.0f, 0.0f,  0.0f, },
+      { -0.5f, 0.5f, -0.5f,  1.0f,      0.0f,      1.0f,           0.0f, 1.0f, 0.0f,  0.0f, },
+      { -X2,   0.5f, -Y2,    1.0f,      0.5f - X2, 0.5f + Y2,      0.0f, 1.0f, 0.0f,  0.0f, },
+      { -X1,   0.5f, -Y1,    1.0f,      0.5f - X1, 0.5f + Y1,      0.0f, 1.0f, 0.0f,  0.0f, },
 
-      {  0.5f,  0.5f, -0.5f,   0.0f, 0.0f, -1.0f,  1.0f,      1.0f, },
-      {  X2,    Y2,   -0.5f,   0.0f, 0.0f, -1.0f,  0.5f + X2, 0.5f + Y2, },
-      {  X1,    Y1,   -0.5f,   0.0f, 0.0f, -1.0f,  0.5f + X1, 0.5f + Y1, },
-      { -0.5f, -0.5f, -0.5f,   0.0f, 0.0f, -1.0f,  0.0f,      0.0f, },
-      { -X2,   -Y2,   -0.5f,   0.0f, 0.0f, -1.0f,  0.5f - X2, 0.5f - Y2, },
-      { -X1,   -Y1,   -0.5f,   0.0f, 0.0f, -1.0f,  0.5f - X1, 0.5f - Y1, },
+      {  0.5f,  0.5f, -0.5f, 1.0f,      1.0f,      1.0f,           0.0f, 0.0f, -1.0f, 0.0f, },
+      {  X2,    Y2,   -0.5f, 1.0f,      0.5f + X2, 0.5f + Y2,      0.0f, 0.0f, -1.0f, 0.0f, },
+      {  X1,    Y1,   -0.5f, 1.0f,      0.5f + X1, 0.5f + Y1,      0.0f, 0.0f, -1.0f, 0.0f, },
+      { -0.5f, -0.5f, -0.5f, 1.0f,      0.0f,      0.0f,           0.0f, 0.0f, -1.0f, 0.0f, },
+      { -X2,   -Y2,   -0.5f, 1.0f,      0.5f - X2, 0.5f - Y2,      0.0f, 0.0f, -1.0f, 0.0f, },
+      { -X1,   -Y1,   -0.5f, 1.0f,      0.5f - X1, 0.5f - Y1,      0.0f, 0.0f, -1.0f, 0.0f, },
 
-      { -0.5f, 0.5f,  0.5f,  -1.0f, 0.0f, 0.0f,  1.0f,       1.0f, },
-      { -0.5f, X2,    Y2,    -1.0f, 0.0f, 0.0f,  0.5f + X2,  0.5f + Y2, },
-      { -0.5f, X1,    Y1,    -1.0f, 0.0f, 0.0f,  0.5f + X1,  0.5f + Y1, },
-      { -0.5f, -0.5f, -0.5f, -1.0f, 0.0f, 0.0f,  0.0f,       0.0f, },
-      { -0.5f, -X2,   -Y2,   -1.0f, 0.0f, 0.0f,  0.5f - X2,  0.5f - Y2, },
-      { -0.5f, -X1,   -Y1,   -1.0f, 0.0f, 0.0f,  0.5f - X1,  0.5f - Y1, },
+      { -0.5f, 0.5f,  0.5f,  1.0f,      1.0f,       1.0f,         -1.0f, 0.0f, 0.0f,  0.0f, },
+      { -0.5f, X2,    Y2,    1.0f,      0.5f + X2,  0.5f + Y2,    -1.0f, 0.0f, 0.0f,  0.0f, },
+      { -0.5f, X1,    Y1,    1.0f,      0.5f + X1,  0.5f + Y1,    -1.0f, 0.0f, 0.0f,  0.0f, },
+      { -0.5f, -0.5f, -0.5f, 1.0f,      0.0f,       0.0f,         -1.0f, 0.0f, 0.0f,  0.0f, },
+      { -0.5f, -X2,   -Y2,   1.0f,      0.5f - X2,  0.5f - Y2,    -1.0f, 0.0f, 0.0f,  0.0f, },
+      { -0.5f, -X1,   -Y1,   1.0f,      0.5f - X1,  0.5f - Y1,    -1.0f, 0.0f, 0.0f,  0.0f, },
 
-      { 0.5f,  -0.5f,  0.5f, 0.0f, -1.0f, 0.0f,  1.0f,      1.0f, },
-      { X1,    -0.5f,  Y1,   0.0f, -1.0f, 0.0f,  0.5f + X1, 0.5f + Y1, },
-      { X2,    -0.5f,  Y2,   0.0f, -1.0f, 0.0f,  0.5f + X2, 0.5f + Y2, },
-      { -0.5f, -0.5f, -0.5f, 0.0f, -1.0f, 0.0f,  0.0f,      0.0f, },
-      { -X1,   -0.5f, -Y1,   0.0f, -1.0f, 0.0f,  0.5f - X1, 0.5f - Y1, },
-      { -X2,   -0.5f, -Y2,   0.0f, -1.0f, 0.0f,  0.5f - X2, 0.5f - Y2, },
+      { 0.5f,  -0.5f,  0.5f, 1.0f,      1.0f,      1.0f,           0.0f, -1.0f, 0.0f, 0.0f, },
+      { X1,    -0.5f,  Y1,   1.0f,      0.5f + X1, 0.5f + Y1,      0.0f, -1.0f, 0.0f, 0.0f, },
+      { X2,    -0.5f,  Y2,   1.0f,      0.5f + X2, 0.5f + Y2,      0.0f, -1.0f, 0.0f, 0.0f, },
+      { -0.5f, -0.5f, -0.5f, 1.0f,      0.0f,      0.0f,           0.0f, -1.0f, 0.0f, 0.0f, },
+      { -X1,   -0.5f, -Y1,   1.0f,      0.5f - X1, 0.5f - Y1,      0.0f, -1.0f, 0.0f, 0.0f, },
+      { -X2,   -0.5f, -Y2,   1.0f,      0.5f - X2, 0.5f - Y2,      0.0f, -1.0f, 0.0f, 0.0f, },
     };
   }
 
@@ -531,7 +513,7 @@ auto Simple3DObject::BuildCube(
       {
         { uT("id"), uT("Example.Buffer.Vertex.Cube") },
         { uT("type"), uT("Buffer") },
-        { uT("data"), (const Vertex_t *)VertexData.data() },
+        { uT("data"), static_cast<const Vertex_t *>(VertexData.data()) },
         { uT("count"), VertexData.size() },
       }),
       Component_t::Make(

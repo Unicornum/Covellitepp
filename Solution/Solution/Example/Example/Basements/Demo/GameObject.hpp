@@ -37,7 +37,7 @@ public:
 
 protected:
   using Path_t = ::boost::filesystem::path;
-  using Vertex_t = ::covellite::api::vertex::Polyhedron;
+  using Vertex_t = ::covellite::api::Vertex;
   using String_t = ::alicorn::extension::std::String;
 
 public:
@@ -69,7 +69,7 @@ public:
 
     public:
       Hash_t Hash = static_cast<Hash_t>(-1);
-      Vertex_t m_Vertex;
+      Vertex_t m_Vertex = { 0.0f, 0.0f, 0.0f, 0.0f,  0.0f, 0.0f,  0.0f, 0.0f, 0.0f, 0.0f };
     };
 
     class Triangle_t final

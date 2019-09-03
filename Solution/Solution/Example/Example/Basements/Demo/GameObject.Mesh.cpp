@@ -87,9 +87,9 @@ void GameObject::Mesh::BuildBasementObject(const float _TextureRatioXY)
 
     Points.push_back(
       {
-        HexPoint.x, HexPoint.y, 0.0f,
-        0.0f, 0.0f, 1.0f,
+        HexPoint.x, HexPoint.y, 0.0f, 1.0f,
         kX * (0.5f + HexPoint.x), 0.25f * (0.5f + HexPoint.y),
+        0.0f, 0.0f, 1.0f, 0.0f
       });
   }
 
@@ -101,30 +101,30 @@ void GameObject::Mesh::BuildBasementObject(const float _TextureRatioXY)
 
     Points.push_back(
       {
-        HexPoint.x, HexPoint.y, 0.0f,
-        Normal.x, Normal.y, 0.0f,
+        HexPoint.x, HexPoint.y, 0.0f, 1.0f,
         0.0f, 0.25f,
+        Normal.x, Normal.y, 0.0f, 0.0f
       });
 
     Points.push_back(
       {
-        HexPoint.x, HexPoint.y, -3.0f,
-        Normal.x, Normal.y, 0.0f,
+        HexPoint.x, HexPoint.y, -3.0f, 1.0f,
         0.0f, 1.0f,
+        Normal.x, Normal.y, 0.0f, 0.0f
       });
 
     Points.push_back(
       {
-        HexPointNext.x, HexPointNext.y, 0.0f,
-        Normal.x, Normal.y, 0.0f,
+        HexPointNext.x, HexPointNext.y, 0.0f, 1.0f,
         kX, 0.25f,
+        Normal.x, Normal.y, 0.0f, 0.0f
       });
 
     Points.push_back(
       {
-        HexPointNext.x, HexPointNext.y, -3.0f,
-        Normal.x, Normal.y, 0.0f,
+        HexPointNext.x, HexPointNext.y, -3.0f, 1.0f,
         kX, 1.0f,
+        Normal.x, Normal.y, 0.0f, 0.0f
       });
   }
 

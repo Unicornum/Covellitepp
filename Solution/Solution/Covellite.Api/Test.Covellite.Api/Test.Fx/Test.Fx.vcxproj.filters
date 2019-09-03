@@ -18,6 +18,8 @@
       <Filter>Common</Filter>
     </ClCompile>
     <ClCompile Include="Fx_test.cpp" />
+    <ClCompile Include="Fx.Predefined.Hlsl_test.cpp" />
+    <ClCompile Include="Fx.Predefined.Glsl_test.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">

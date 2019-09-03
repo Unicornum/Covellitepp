@@ -14,7 +14,7 @@
     <ProjectGuid>{750448C3-1872-4755-B0FE-DCAD5656D7E4}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>CovelliteApi</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0.17134.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.17763.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">

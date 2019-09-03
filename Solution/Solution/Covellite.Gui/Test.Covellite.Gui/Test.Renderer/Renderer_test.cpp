@@ -23,6 +23,13 @@ namespace std
 {
 
 bool operator== (
+  const ::covellite::api::Vertex & _Left,
+  const ::covellite::api::Vertex & _Right)
+{
+  return (memcmp(&_Left, &_Right, sizeof(::covellite::api::Vertex)) == 0);
+}
+
+bool operator== (
   const ::covellite::Any_t & _Left,
   const ::covellite::Any_t & _Right)
 {
@@ -66,15 +73,15 @@ bool operator== (
       ::covellite::any_cast<const int *>(_Right);
   }
 
-  using Vertex_t = ::covellite::api::Vertex::Polygon;
+  using Vertexes_t = ::std::vector<::covellite::api::Vertex>;
 
-  if (_Left.type() == typeid(const Vertex_t *))
+  if (_Left.type() == typeid(Vertexes_t))
   {
-    return ::covellite::any_cast<const Vertex_t *>(_Left) ==
-      ::covellite::any_cast<const Vertex_t *>(_Right);
+    return ::covellite::any_cast<Vertexes_t>(_Left) ==
+      ::covellite::any_cast<Vertexes_t>(_Right);
   }
 
-  throw STD_EXCEPTION << "Unknown type values.";
+  throw STD_EXCEPTION << "Unknown type values: " << _Left.type().name();
 }
 
 } // namespace std
@@ -90,7 +97,7 @@ protected:
   using Component_t = ::covellite::api::Component;
   using Renders_t = Component_t::Renders;
   using Values_t = ::std::vector<::covellite::Any_t>;
-  using Vertex_t = ::covellite::api::Vertex::Polygon;
+  using Vertex_t = ::covellite::api::Vertex;
 
   // Вызывается ПЕРЕД запуском каждого теста
   void SetUp(void) override
@@ -109,18 +116,42 @@ protected:
 protected:
   class ComponentData
   {
+    template<class T>
+    class Support
+    {
+    public:
+      static T GetValue(
+        const Component_t::ComponentPtr_t & _pComponent,
+        const String_t & _Name, 
+        const T & _DefaultValue)
+      {
+        return _pComponent->GetValue(_Name, _DefaultValue);
+      }
+    };
+
+    template<>
+    class Support<::std::vector<Vertex_t>>
+    {
+    public:
+      static ::std::vector<Vertex_t> GetValue(
+        const Component_t::ComponentPtr_t & /*_pComponent*/,
+        const String_t & /*_Name*/,
+        const ::std::vector<Vertex_t> & _DefaultValue)
+      {
+        return _DefaultValue;
+      }
+    };
+
   public:
     template<class T>
     ComponentData & AddValue(const String_t & _Name, const T & _DefaultValue)
     {
-      m_Values.push_back(m_pComponent->GetValue<T>(_Name, _DefaultValue));
+      m_Values.push_back(
+        Support<T>::GetValue(m_pComponent, _Name, _DefaultValue));
       return *this;
     }
 
-    inline Values_t GetValues(void) const
-    {
-      return m_Values;
-    }
+    inline Values_t GetValues(void) const { return m_Values; }
 
   private:
     Component_t::ComponentPtr_t m_pComponent;
@@ -142,6 +173,33 @@ protected:
 
 private:
   Renders_t::Creators_t m_EmptyCreators;
+
+protected:
+  ::std::vector<Vertex_t> Convert(
+    const ::std::vector<::mock::Rocket::Core::Vertex> & _Source)
+  {
+    ::std::vector<::covellite::api::Vertex> Result{ _Source.size() };
+
+    for (::std::size_t i = 0; i < Result.size(); i++)
+    {
+      auto & Vertex = Result[i];
+
+      Vertex.px = _Source[i].position.x;
+      Vertex.py = _Source[i].position.y;
+      Vertex.pz = 0.0f;
+      Vertex.pw = 1.0f;
+
+      Vertex.tu = _Source[i].tex_coord.x;
+      Vertex.tv = _Source[i].tex_coord.y;
+
+      Vertex.ex = _Source[i].colour.red / 255.0f;
+      Vertex.ey = _Source[i].colour.green / 255.0f;
+      Vertex.ez = _Source[i].colour.blue / 255.0f;
+      Vertex.ew = _Source[i].colour.alpha / 255.0f;
+    }
+
+    return Result;
+  }
 };
 
 // Образец макроса для подстановки в класс Renderer 
@@ -259,10 +317,7 @@ TEST_F(Renderer_test, /*DISABLED_*/Test_RenderCompiledGeometry_Textured)
       RenderProxy.Render(ComponentData{ _pComponent }
         .AddValue(uT("id"), uT(""))
         .AddValue(uT("type"), uT(""))
-        .AddValue(uT("version"), uT(""))
         .AddValue(uT("entry"), uT(""))
-        .AddValue(uT("data"), (const uint8_t *)nullptr)
-        .AddValue(uT("count"), (size_t)0)
         .GetValues());
     };
   };
@@ -272,13 +327,24 @@ TEST_F(Renderer_test, /*DISABLED_*/Test_RenderCompiledGeometry_Textured)
   {
     if (_pComponent->IsType<const Vertex_t *>(uT("data")))
     {
-      return [&, _pComponent]()
+      const auto * pData =
+        _pComponent->GetValue(uT("data"), (const Vertex_t *)nullptr);
+      const auto Count = 
+        _pComponent->GetValue(uT("count"), (::std::size_t)0);
+
+      // Данные нужно сохранять здесь, т.к. указатель на данные - локальный
+      // объект и при вызове рендера уже не существует.
+      const ::std::vector<Vertex_t> Data{ pData, pData + Count };
+
+      return [&, _pComponent, Data]()
       {
+        static const ::std::vector<Vertex_t> Dummy;
+
         RenderProxy.Render(ComponentData{ _pComponent }
           .AddValue(uT("id"), uT(""))
           .AddValue(uT("type"), uT(""))
-          .AddValue(uT("data"), (const Vertex_t *)nullptr)
-          .AddValue(uT("count"), (size_t)0)
+          .AddValue(uT("data"), Data)
+          .AddValue(uT("dimension"), 0)
           .GetValues());
       };
     }
@@ -328,14 +394,28 @@ TEST_F(Renderer_test, /*DISABLED_*/Test_RenderCompiledGeometry_Textured)
   Tested_t Example{ ::std::make_shared<Renders_t>(Creators) };
   RenderInterface_t & IExample = Example;
 
-  auto * const pVertex = (::mock::Rocket::Core::Vertex *)1811161257;
-  const int VertexCount = 1811161258;
+  ::std::vector<::mock::Rocket::Core::Vertex> Vertexes =
+  {
+    {
+      { 190.8202318f, 1908.202319f },
+      { 0x19, 0x08, 0x20, 0x23 },
+      { 19082.02320f, 190820.2321f },
+    },
+    {
+      { 190.8202317f, 1908.202316f },
+      { 0x18, 0x09, 0x21, 0x24 },
+      { 19.08202315f, 1.908202314f },
+    }
+  };
+
+  const auto Converted = Convert(Vertexes);
+
   auto * const pIndex = (int *)1811161259;
   const int IndexCount = 1811161300;
   const size_t TextureId = 1811161754;
 
-  const auto hGeometry =
-    IExample.CompileGeometry(pVertex, VertexCount, pIndex, IndexCount, TextureId);
+  const auto hGeometry = IExample.CompileGeometry(Vertexes.data(), 
+    static_cast<int>(Vertexes.size()), pIndex, IndexCount, TextureId);
 
   const auto strObjectId = uT("{ID}").Replace(uT("{ID}"), (size_t)hGeometry);
 
@@ -343,10 +423,7 @@ TEST_F(Renderer_test, /*DISABLED_*/Test_RenderCompiledGeometry_Textured)
   {
     uT("Covellite.Api.Shader.Pixel.Textured"),
     uT("Shader"),
-    uT("ps_4_0"),
     uT("psTextured"),
-    (const uint8_t *)nullptr,
-    (size_t)0,
   };
 
   const Values_t TextureValues =
@@ -367,8 +444,8 @@ TEST_F(Renderer_test, /*DISABLED_*/Test_RenderCompiledGeometry_Textured)
   {
     uT("Covellite.Api.Buffer.Vertex.") + strObjectId,
     uT("Buffer"),
-    (const Vertex_t *)pVertex,
-    (size_t)VertexCount,
+    Converted,
+    2
   };
 
   const Values_t IndexBufferValues =
@@ -390,20 +467,11 @@ TEST_F(Renderer_test, /*DISABLED_*/Test_RenderCompiledGeometry_Textured)
 
   InSequence Dummy;
 
-  // Первый вызов
+  const auto TestCall = [&](const float _X, const float _Y)
   {
-    const float X = 1811161750.0f;
-    const float Y = 1811161751.0f;
+    const Values_t PositionValues = { uT("Data"), uT("Position"), _X, _Y };
 
-    const Values_t PositionValues =
-    {
-      uT("Data"),
-      uT("Position"),
-      X,
-      Y,
-    };
-
-    IExample.RenderCompiledGeometry(hGeometry, { X, Y });
+    IExample.RenderCompiledGeometry(hGeometry, { _X, _Y });
 
     EXPECT_CALL(RenderProxy, Render(PixelShaderValues))
       .Times(1);
@@ -427,46 +495,10 @@ TEST_F(Renderer_test, /*DISABLED_*/Test_RenderCompiledGeometry_Textured)
       .Times(1);
 
     Example.RenderScene();
-  }
+  };
 
-  // Второй вызов
-  {
-    const float X = 1811161752.0f;
-    const float Y = 1811161753.0f;
-
-    const Values_t PositionValues =
-    {
-      uT("Data"),
-      uT("Position"),
-      X,
-      Y,
-    };
-
-    IExample.RenderCompiledGeometry(hGeometry, { X, Y });
-
-    EXPECT_CALL(RenderProxy, Render(PixelShaderValues))
-      .Times(1);
-
-    EXPECT_CALL(RenderProxy, Render(TextureValues))
-      .Times(1);
-
-    EXPECT_CALL(RenderProxy, Render(SamplerValues))
-      .Times(1);
-
-    EXPECT_CALL(RenderProxy, Render(VertexBufferValues))
-      .Times(1);
-
-    EXPECT_CALL(RenderProxy, Render(IndexBufferValues))
-      .Times(1);
-
-    EXPECT_CALL(RenderProxy, Render(PositionValues))
-      .Times(1);
-
-    EXPECT_CALL(RenderProxy, Render(PresentValues))
-      .Times(1);
-
-    Example.RenderScene();
-  }
+  TestCall(1811161750.0f, 1811161751.0f);
+  TestCall(1908202233.0f, 1908202234.0f);
 
   IExample.ReleaseCompiledGeometry(hGeometry);
 
@@ -510,10 +542,7 @@ TEST_F(Renderer_test, /*DISABLED_*/Test_RenderCompiledGeometry_NonTextured)
       RenderProxy.Render(ComponentData{ _pComponent }
         .AddValue(uT("id"), uT(""))
         .AddValue(uT("type"), uT(""))
-        .AddValue(uT("version"), uT(""))
         .AddValue(uT("entry"), uT(""))
-        .AddValue(uT("data"), (const uint8_t *)nullptr)
-        .AddValue(uT("count"), (size_t)0)
         .GetValues());
     };
   };
@@ -523,17 +552,28 @@ TEST_F(Renderer_test, /*DISABLED_*/Test_RenderCompiledGeometry_NonTextured)
   {
     if (_pComponent->IsType<const Vertex_t *>(uT("data")))
     {
-      return [&, _pComponent]()
+      const auto * pData =
+        _pComponent->GetValue(uT("data"), (const Vertex_t *)nullptr);
+      const auto Count =
+        _pComponent->GetValue(uT("count"), (::std::size_t)0);
+
+      // Данные нужно сохранять здесь, т.к. указатель на данные - локальный
+      // объект и при вызове рендера уже не существует.
+      const ::std::vector<Vertex_t> Data{ pData, pData + Count };
+
+      return [&, _pComponent, Data]()
       {
+        static const ::std::vector<Vertex_t> Dummy;
+
         RenderProxy.Render(ComponentData{ _pComponent }
           .AddValue(uT("id"), uT(""))
           .AddValue(uT("type"), uT(""))
-          .AddValue(uT("data"), (const Vertex_t *)nullptr)
-          .AddValue(uT("count"), (size_t)0)
+          .AddValue(uT("data"), Data)
+          .AddValue(uT("dimension"), 0)
           .GetValues());
       };
     }
-    if (_pComponent->IsType<const int *>(uT("data")))
+    else if (_pComponent->IsType<const int *>(uT("data")))
     {
       return [&, _pComponent]()
       {
@@ -577,13 +617,47 @@ TEST_F(Renderer_test, /*DISABLED_*/Test_RenderCompiledGeometry_NonTextured)
   Tested_t Example{ ::std::make_shared<Renders_t>(Creators) };
   RenderInterface_t & IExample = Example;
 
-  auto * const pVertex = (::mock::Rocket::Core::Vertex *)1811161257;
-  const int VertexCount = 1811161258;
+  ::std::vector<::mock::Rocket::Core::Vertex> Vertexes =
+  {
+    {
+      { 190.8202318f, 1908.202319f },
+      { 0x19, 0x08, 0x20, 0x23 },
+      { 19082.02320f, 190820.2321f },
+    },
+    {
+      { 190.8202317f, 1908.202316f },
+      { 0x18, 0x09, 0x21, 0x24 },
+      { 19.08202315f, 1.908202314f },
+    },
+    {
+      { 190.8202318f, 1908.202319f },
+      { 0x19, 0x08, 0x20, 0x23 },
+      { 19082.02320f, 190820.2321f },
+    },
+    {
+      { 190.8202317f, 1908.202316f },
+      { 0x18, 0x09, 0x21, 0x24 },
+      { 19.08202315f, 1.908202314f },
+    },
+    {
+      { 190.8202318f, 1908.202319f },
+      { 0x19, 0x08, 0x20, 0x23 },
+      { 19082.02320f, 190820.2321f },
+    },
+    {
+      { 190.8202317f, 1908.202316f },
+      { 0x18, 0x09, 0x21, 0x24 },
+      { 19.08202315f, 1.908202314f },
+    },
+  };
+
+  const auto Converted = Convert(Vertexes);
+
   auto * const pIndex = (int *)1811161259;
   const int IndexCount = 1811161300;
 
-  const auto hGeometry = 
-    IExample.CompileGeometry(pVertex, VertexCount, pIndex, IndexCount, 0);
+  const auto hGeometry = IExample.CompileGeometry(Vertexes.data(), 
+    static_cast<int>(Vertexes.size()), pIndex, IndexCount, 0);
 
   const auto strObjectId = uT("{ID}").Replace(uT("{ID}"), (size_t)hGeometry);
 
@@ -591,18 +665,15 @@ TEST_F(Renderer_test, /*DISABLED_*/Test_RenderCompiledGeometry_NonTextured)
   {
     uT("Covellite.Api.Shader.Pixel.Colored"),
     uT("Shader"),
-    uT("ps_4_0"),
     uT("psColored"),
-    (const uint8_t *)nullptr,
-    (size_t)0,
   };
 
   const Values_t VertexBufferValues =
   {
     uT("Covellite.Api.Buffer.Vertex.") + strObjectId,
     uT("Buffer"),
-    (const Vertex_t *)pVertex,
-    (size_t)VertexCount,
+    Converted,
+    2
   };
 
   const Values_t IndexBufferValues =
@@ -624,20 +695,11 @@ TEST_F(Renderer_test, /*DISABLED_*/Test_RenderCompiledGeometry_NonTextured)
 
   InSequence Dummy;
 
-  // Первый вызов
+  const auto TestCall = [&](const float _X, const float _Y)
   {
-    const float X = 1811161301.0f;
-    const float Y = 1811161302.0f;
+    const Values_t PositionValues = { uT("Data"), uT("Position"), _X, _Y };
 
-    const Values_t PositionValues =
-    {
-      uT("Data"),
-      uT("Position"),
-      X,
-      Y,
-    };
-
-    IExample.RenderCompiledGeometry(hGeometry, { X, Y });
+    IExample.RenderCompiledGeometry(hGeometry, { _X, _Y });
 
     EXPECT_CALL(RenderProxy, Render(PixelShaderValues))
       .Times(1);
@@ -655,40 +717,10 @@ TEST_F(Renderer_test, /*DISABLED_*/Test_RenderCompiledGeometry_NonTextured)
       .Times(1);
 
     Example.RenderScene();
-  }
+  };
 
-  // Второй вызов
-  {
-    const float X = 1811161303.0f;
-    const float Y = 1811161304.0f;
-
-    const Values_t PositionValues =
-    {
-      uT("Data"),
-      uT("Position"),
-      X,
-      Y,
-    };
-
-    IExample.RenderCompiledGeometry(hGeometry, { X, Y });
-
-    EXPECT_CALL(RenderProxy, Render(PixelShaderValues))
-      .Times(1);
-
-    EXPECT_CALL(RenderProxy, Render(VertexBufferValues))
-      .Times(1);
-
-    EXPECT_CALL(RenderProxy, Render(IndexBufferValues))
-      .Times(1);
-
-    EXPECT_CALL(RenderProxy, Render(PositionValues))
-      .Times(1);
-
-    EXPECT_CALL(RenderProxy, Render(PresentValues))
-      .Times(1);
-
-    Example.RenderScene();
-  }
+  TestCall(1811161301.0f, 1811161302.0f);
+  TestCall(1811161303.0f, 1811161304.0f);
 
   IExample.ReleaseCompiledGeometry(hGeometry);
 
@@ -1419,7 +1451,6 @@ TEST_F(Renderer_test, /*DISABLED_*/Test_RenderScene)
       RenderProxy.Render(ComponentData{ _pComponent }
         .AddValue(uT("id"), uT(""))
         .AddValue(uT("type"), uT(""))
-        .AddValue(uT("version"), uT(""))
         .AddValue(uT("entry"), uT(""))
         .AddValue<const uint8_t *>(uT("data"), nullptr)
         .AddValue(uT("count"), (size_t)0)
@@ -1457,8 +1488,7 @@ TEST_F(Renderer_test, /*DISABLED_*/Test_RenderScene)
   {
     uT("Covellite.Api.Shader.Vertex"),
     uT("Shader"),
-    uT("vs_4_0"),
-    uT("VS"),
+    uT("vsGui"),
     (const uint8_t *)nullptr,
     (size_t)0,
   };

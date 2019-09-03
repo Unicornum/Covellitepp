@@ -21,6 +21,9 @@
     <Filter Include="Assets\Data\Demo">
       <UniqueIdentifier>{02d6e34b-1141-4855-8622-4a4cd636dc2b}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Assets\Data\Shaders">
+      <UniqueIdentifier>{648cd282-932d-4187-a6de-204dc18324a1}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -300,5 +303,13 @@
     <Image Include="Assets\Data\demo\demo.particles.png">
       <Filter>Assets\Data\Demo</Filter>
     </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <FxCompile Include="Assets\Data\shaders\Pbr.ps.fx">
+      <Filter>Assets\Data\Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Assets\Data\Shaders\Example.fx">
+      <Filter>Assets\Data\Shaders</Filter>
+    </FxCompile>
   </ItemGroup>
 </Project>

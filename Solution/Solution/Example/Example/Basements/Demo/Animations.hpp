@@ -3,6 +3,7 @@
 #include "Animated.hpp"
 #include <random>
 #include <alicorn/std/memory.hpp>
+#include <Covellite/Covellite.hpp>
 
 namespace basement
 {
@@ -15,7 +16,7 @@ class Animated::Animations
   using AnimationPtr_t = ::std::shared_ptr<::basement::model::Animation>;
   using ComponentPtr_t = ::covellite::api::Component::ComponentPtr_t;
   using BufferMapper_t = 
-    ::covellite::api::cbBufferMap_t<::covellite::api::vertex::Polyhedron>;
+    ::covellite::api::cbBufferMap_t<::covellite::api::Vertex>;
   using UsingBones_t = ::std::vector<::std::pair<String_t, ::std::size_t>>;
 
 public:

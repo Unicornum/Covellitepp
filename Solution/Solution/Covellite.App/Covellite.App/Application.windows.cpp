@@ -83,7 +83,7 @@ Application::Application(EventBased) :
 
 /**
 * \brief
-*  Функция точки входа в программу.
+*  Платформозависимая реализация функции точки входа в программу.
 * \details
 *  - Функция вызывается внутри макроса APPLICATION_ENTRY_POINT.
 *  

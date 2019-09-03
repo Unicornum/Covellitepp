@@ -55,6 +55,7 @@ protected:
     {
       Proxy::GetInstance()->CopyConstructor();
     }
+    Test & operator= (const Test &) = delete;
   };
 };
 

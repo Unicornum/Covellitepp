@@ -1,6 +1,6 @@
 ﻿
 #pragma once
-#include "OpenGLCommon.hpp"
+#include "OpenGLCommonStatic.hpp"
 
 namespace covellite
 {
@@ -25,7 +25,7 @@ namespace renderer
 * \ingroup CovelliteApiRendererGroup
 * \brief
 *  Класс входит в проект \ref CovelliteApiPage \n
-*  Реализация рендера графического API для Android/OpenGL.
+*  Реализация рендера графического API для Android/OpenGL ES1.
 *
 * \version
 *  1.0.0.0        \n
@@ -41,7 +41,7 @@ namespace renderer
 *  © CTAPOBEP 2016 - 2018
 */
 class OpenGLES final :
-  public OpenGLCommon
+  public OpenGLCommonStatic
 {
   template<class TEgl>
   using EglPtr_t = ::std::shared_ptr<TEgl>;

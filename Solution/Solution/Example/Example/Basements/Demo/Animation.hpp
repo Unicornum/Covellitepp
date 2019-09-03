@@ -3,6 +3,7 @@
 #include <string>
 #include <vector>
 #include <GLMath.hpp>
+#include <Covellite/Covellite.hpp>
 #include <Covellite/Api/robin_hood.hpp>
 
 namespace basement

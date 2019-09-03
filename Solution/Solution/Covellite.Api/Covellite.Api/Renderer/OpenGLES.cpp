@@ -13,11 +13,11 @@ namespace renderer
 {
 
 OpenGLES::OpenGLES(const Data_t & _Data) :
-  OpenGLCommon(_Data, uT("")),
+  OpenGLCommonStatic(_Data, uT("")),
   m_pDisplay(::std::make_unique<covellite::egl::Display>()),
   m_pConfig(::std::make_unique<covellite::egl::Config>(*m_pDisplay, ::covellite::any_cast<ANativeWindow *>(_Data.Handle))),
   m_pSurface(::std::make_unique<covellite::egl::Surface>(*m_pDisplay, *m_pConfig, ::covellite::any_cast<ANativeWindow *>(_Data.Handle))),
-  m_pContext(::std::make_unique<covellite::egl::Context>(*m_pDisplay, *m_pConfig))
+  m_pContext(::std::make_unique<covellite::egl::Context>(*m_pDisplay, *m_pConfig, 1))
 {
   m_pContext->MakeCurrent(*m_pSurface);
 }
@@ -28,7 +28,7 @@ void OpenGLES::PresentFrame(void) /*override*/
 {
   m_pSurface->SwapBuffers();
 
-  m_Updater.UpdateTime();
+  OpenGLCommonStatic::PresentFrame();
 }
 
 } // namespace renderer

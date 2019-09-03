@@ -6,7 +6,7 @@
 #include <alicorn/logger.hpp>
 #include <Covellite/Api/Component.inl>
 #include <Covellite/App/Settings.hpp>
-#include <Covellite/Gui/Vfs.hpp>
+#include <Covellite/App/Vfs.hpp>
 
 namespace basement
 {
@@ -27,7 +27,7 @@ public:
 
 public:
   explicit Image(const Path_t & _PathToTextureFile) :
-    m_Image(::covellite::gui::Vfs_t::GetInstance().GetData(_PathToTextureFile))
+    m_Image(::covellite::app::Vfs_t::GetInstance().GetData(_PathToTextureFile))
   {
 
   }

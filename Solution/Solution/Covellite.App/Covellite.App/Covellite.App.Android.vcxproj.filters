@@ -19,6 +19,7 @@
     <ClInclude Include="Application.hpp" />
     <ClInclude Include="Events.hpp" />
     <ClInclude Include="IApplication.hpp" />
+    <ClInclude Include="Vfs.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="android_native_app_glue.c" />

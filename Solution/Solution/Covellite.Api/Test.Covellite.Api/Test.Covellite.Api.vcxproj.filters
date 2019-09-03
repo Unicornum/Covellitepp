@@ -37,6 +37,9 @@
     <Filter Include="Tests\Renders">
       <UniqueIdentifier>{fa672da2-c98e-4ba0-8fb8-712e6b17d935}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Tests\OpenGLES3">
+      <UniqueIdentifier>{d361d7bf-cbf0-475d-9de8-d838403d2787}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Resources.rc">
@@ -83,11 +86,20 @@
     <ClCompile Include="..\Covellite.Api\Renders.cpp">
       <Filter>Tests\Renders</Filter>
     </ClCompile>
-    <ClCompile Include="..\Covellite.Api\Renderer\CapturingServiceComponent.cpp">
-      <Filter>Tests</Filter>
+    <ClCompile Include="Test.Window\Window_test.android.cpp">
+      <Filter>Tests\Window</Filter>
     </ClCompile>
-    <ClCompile Include="..\Covellite.Api\Renderer\Updater.cpp">
-      <Filter>Tests</Filter>
+    <ClCompile Include="Test.Window\Window_test.windows.cpp">
+      <Filter>Tests\Window</Filter>
+    </ClCompile>
+    <ClCompile Include="Test.OpenGLES3\OpenGLES3_test.cpp">
+      <Filter>Tests\OpenGLES3</Filter>
+    </ClCompile>
+    <ClCompile Include="Test.Fx\Fx.Predefined.Glsl_test.cpp">
+      <Filter>Tests\Fx</Filter>
+    </ClCompile>
+    <ClCompile Include="Test.Fx\Fx.Predefined.Hlsl_test.cpp">
+      <Filter>Tests\Fx</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -109,6 +121,12 @@
     </ClInclude>
     <ClInclude Include="OpenGLCommon_test.hpp">
       <Filter>Tests\OpenGL</Filter>
+    </ClInclude>
+    <ClInclude Include="OpenGLShader_test.hpp">
+      <Filter>Tests\OpenGL</Filter>
+    </ClInclude>
+    <ClInclude Include="OpenGLStatic_test.hpp">
+      <Filter>Tests\OpenGLES</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

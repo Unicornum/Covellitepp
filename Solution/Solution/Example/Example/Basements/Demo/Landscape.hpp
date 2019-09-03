@@ -42,6 +42,7 @@ private:
   private:
     void LoadMesh(const Path_t &, const Rect &);
     void BuildMesh(const size_t, const int, const float, const Rect &);
+    // cppcheck-suppress unusedPrivateFunction
     // cppcheck-suppress functionStatic
     void BuildTriplex6Object(const Point &, const float, const float, 
       const float, const Rect &);

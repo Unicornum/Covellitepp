@@ -2,6 +2,7 @@
 #pragma once
 #include <alicorn/std/string.hpp>
 #include <Covellite/Api/Component.inl>
+#include <Covellite/Api/Defines.hpp>
 
 namespace covellite
 {
@@ -38,6 +39,7 @@ public:
   class Buffer;
   class Texture;
   class Shader;
+  class Shader2;
   class Transform;
   class Position;
   class Rotation;
@@ -75,16 +77,19 @@ private:
 public:
   const T * const pData;
   const size_t Count;
+  const int Dimension;
 
 public:
   explicit Buffer(const ComponentPtr_t & _pComponent) :
     pData(_pComponent->GetValue<const T *>(uT("data"), m_Data.data())),
-    Count(_pComponent->GetValue(uT("count"), m_Data.size()))
+    Count(_pComponent->GetValue(uT("count"), m_Data.size())),
+    Dimension(_pComponent->GetValue(uT("dimension"), 3))
   {
   }
   Buffer(const ComponentPtr_t & _pComponent, const ::std::vector<T> & _Data) :
     pData(_pComponent->GetValue(uT("data"), _Data.data())),
-    Count(_pComponent->GetValue(uT("count"), _Data.size()))
+    Count(_pComponent->GetValue(uT("count"), _Data.size())),
+    Dimension(_pComponent->GetValue(uT("dimension"), 3))
   {
   }
 };
@@ -95,12 +100,14 @@ class Component::Texture :
 public:
   const int Width;
   const int Height;
+  const String_t Destination;
 
 public:
   explicit Texture(const ComponentPtr_t & _pComponent) :
     Buffer(_pComponent),
     Width(_pComponent->GetValue(uT("width"), 0)),
-    Height(_pComponent->GetValue(uT("height"), 0))
+    Height(_pComponent->GetValue(uT("height"), 0)),
+    Destination(_pComponent->GetValue(uT("destination"), uT("diffuse")))
   {
 
   }
@@ -110,7 +117,6 @@ class Component::Shader :
   public Buffer<uint8_t>
 {
 public:
-  const ::std::string Version;
   const ::std::string Entry;
   const String_t Kind;
 
@@ -151,7 +157,6 @@ private:
 public:
   Shader(const ComponentPtr_t & _pComponent, const ::std::vector<uint8_t> & _Data) :
     Buffer(_pComponent, _Data),
-    Version(_pComponent->GetValue<::std::string>(uT("version"), "fx_unknown")),
     Entry(_pComponent->GetValue<::std::string>(uT("entry"), "Unknown")),
     Kind(GetShaderType(Entry, pData, pData + Count))
   {

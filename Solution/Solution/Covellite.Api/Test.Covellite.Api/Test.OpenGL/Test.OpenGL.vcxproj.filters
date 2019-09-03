@@ -18,17 +18,12 @@
       <Filter>Common</Filter>
     </ClCompile>
     <ClCompile Include="OpenGL_test.cpp" />
-    <ClCompile Include="..\..\Covellite.Api\Renderer\CapturingServiceComponent.cpp">
-      <Filter>Source</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Covellite.Api\Renderer\Updater.cpp">
-      <Filter>Source</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">
       <Filter>Common</Filter>
     </ClInclude>
     <ClInclude Include="..\OpenGLCommon_test.hpp" />
+    <ClInclude Include="..\OpenGLShader_test.hpp" />
   </ItemGroup>
 </Project>

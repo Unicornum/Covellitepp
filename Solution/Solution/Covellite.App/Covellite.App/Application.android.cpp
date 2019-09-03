@@ -150,6 +150,8 @@ Application::Application(EventBased) :
 /**
 * \brief
 *  Платформозависимая реализация функции точки входа в программу.
+* \details
+*  - Функция вызывается внутри макроса APPLICATION_ENTRY_POINT.
 *  
 * \param [in] _fnCreateApp
 *  Функция создания объекта приложения.

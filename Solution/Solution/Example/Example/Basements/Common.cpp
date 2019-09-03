@@ -3,8 +3,8 @@
 #include "Common.hpp"
 #include <alicorn/image.hpp>
 #include <Covellite/App/Settings.hpp>
+#include <Covellite/App/Vfs.hpp>
 #include <Covellite/Api/Component.inl>
-#include <Covellite/Gui/Vfs.hpp>
 
 using namespace basement;
 
@@ -64,7 +64,7 @@ void Common::LoadTexture(
   /// [Load texture]
   const image::Universal_t<image::pixel::RGBA> Image
   {
-    ::covellite::gui::Vfs_t::GetInstance().GetData(
+    ::covellite::app::Vfs_t::GetInstance().GetData(
       PathToTextureDirectory / _RelativePathToSourceFile)
   };
     

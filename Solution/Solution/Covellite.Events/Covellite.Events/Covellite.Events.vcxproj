@@ -15,7 +15,7 @@
     <ProjectGuid>{BA3E4AEF-BDA4-478F-9CAE-198145BD4747}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>CovelliteEvents</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0.17134.0</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0.17763.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">

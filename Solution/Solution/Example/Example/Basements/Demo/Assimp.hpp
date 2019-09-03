@@ -48,7 +48,7 @@ public:
     class Vertex final
     {
     public:
-      uint64_t   Hash;
+      uint64_t   Hash = static_cast<uint64_t>(-1);
       aiVector3D Position;
       aiVector3D Normal;
       aiVector3D TexCoords;
@@ -76,9 +76,9 @@ private:
   static BoneLocals_t LoadBoneLocals(const aiScene * const);
   static void LoadSkeleton(const BoneListener_t &, const BoneLocals_t &,
     const aiNode * const, const ::glm::mat4 & = ::glm::mat4{ 1.0f });
-  BoneWeights_t LoadBoneWeights(const aiMesh * const);
+  static BoneWeights_t LoadBoneWeights(const aiMesh * const);
   void LoadSkin(const FaceListener_t &, const aiScene *, const aiNode *);
-  Frames::Keys_t BuildFrames(const ::std::vector<aiVectorKey> &,
+  static Frames::Keys_t BuildFrames(const ::std::vector<aiVectorKey> &,
     const ::std::vector<aiQuatKey> &, const ::std::vector<aiVectorKey> &);
 
 private:
@@ -86,7 +86,7 @@ private:
   const ::aiScene *  m_pScene;
 
 public:
-  Assimp(const Path_t &);
+  explicit Assimp(const Path_t &);
 };
 
 } // namespace model

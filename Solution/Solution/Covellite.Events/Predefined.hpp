@@ -23,4 +23,10 @@ inline T any_cast(const Any_t & _Value)
   return ::boost::any_cast<T>(_Value);
 }
 
+template<class T>
+inline T any_cast(Any_t & _Value)
+{
+  return ::boost::any_cast<T>(_Value);
+}
+
 } // namespace covellite
