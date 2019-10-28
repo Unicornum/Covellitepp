@@ -57,10 +57,22 @@ BasementWindow::BasementWindow(const WindowApi_t & _WindowApi) :
   // ******************************** Demo ********************************** //
 
   m_Events[::events::Demo.Start].Connect(
-    [&](void)
+    [=](void)
   {
     m_pBasement = ::std::make_shared<::basement::Demo>(
       m_Events, m_WindowApi.GetRenders());
+
+    const auto WindowRect = m_WindowApi.GetClientRect();
+    m_Events[::events::Demo.Resize](
+      ::std::pair<int, int>{ WindowRect.Width, WindowRect.Height });
+  });
+
+  m_Events[::covellite::events::Window.Resize].Connect(
+    [=](void)
+  {
+    const auto WindowRect = m_WindowApi.GetClientRect();
+    m_Events[::events::Demo.Resize](
+      ::std::pair<int, int>{ WindowRect.Width, WindowRect.Height });
   });
 }
 

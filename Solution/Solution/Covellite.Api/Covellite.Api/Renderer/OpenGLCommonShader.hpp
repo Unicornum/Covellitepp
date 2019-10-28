@@ -33,17 +33,23 @@ class OpenGLCommonShader :
 public:
   // Èםעונפויס IGraphicApi:
   String_t GetUsingApi(void) const override;
+  void PresentFrame(void) override;
 
 protected:
   // Èםעופויס GraphicApi
   Render_t CreateCamera(const ComponentPtr_t &) override;
+  Render_t CreateBkSurface(const ComponentPtr_t &) override;
   Render_t CreateState(const ComponentPtr_t &) override;
   Render_t CreateFog(const ComponentPtr_t &) override;
-  Render_t CreateMaterial(const ComponentPtr_t &) override;
-  Render_t CreateLight(const ComponentPtr_t &) override;
   Render_t CreateTexture(const ComponentPtr_t &) override;
   Render_t CreateShader(const ComponentPtr_t &) override;
   Render_t CreateBuffer(const ComponentPtr_t &) override;
+  Render_t CreateTransform(const ComponentPtr_t &) override;
+  Render_t CreatePresentBuffer(const ComponentPtr_t &) override;
+
+protected:
+  // deprecated
+  Render_t CreateLight(const ComponentPtr_t &) override;
   Render_t CreateGeometry(const ComponentPtr_t &) override;
 
 private:

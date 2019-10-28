@@ -6,8 +6,10 @@
 #include <alicorn/std/exception.hpp>
 #include <alicorn/std/vector.hpp>
 #include <Covellite/Api/Component.inl>
+#include <Covellite/Api/Constant.hpp>
 #include "Constants.hpp"
 #include "IGameWorld.hpp"
+#include "PointLights.hpp"
 
 namespace basement
 {
@@ -160,17 +162,17 @@ auto Landscape::GetObject(const Any_t & _Value) const /*override*/ -> Objects_t
       // Release версии, но сильно роняет fps Debug версии программы.
       GetShaderObject()
       // При рендеринге объекта при помощи OpenGL текстура и буферы отключаются
-      // при вызове Present.Geometry, поэтому их следует добавлять каждому
+      // при вызове Present, поэтому их следует добавлять каждому
       // объекту.
-      //+ m_Texture + m_MeshObject
     };
   }
 
   auto & CellPosition = ::boost::any_cast<const CubeCoords &>(_Value);
-
-  const auto Material = GetMaterial(CellPosition);
-  const auto Present = GetPresent();
-
+  //const auto Material = GetMaterial(CellPosition);
+  const auto PointLights = 
+    //GetPointLight(CellPosition);
+    GetUserConstantBufferPointLight(CellPosition);
+  String_t TransformId;
   const auto & LodModels = m_Models[Random(0, m_Models.size() - 1)];
 
   Objects_t Result =
@@ -178,10 +180,10 @@ auto Landscape::GetObject(const Any_t & _Value) const /*override*/ -> Objects_t
     // Формирование полного набора компонентов для каждого объекта никак
     // не сказывается на производительности Release версии.
     GetTexture(LodModels[0].second).GetObject() +
-    GetMesh(LodModels[0].first).GetObject() +
-    Material +
-    GetTransform(CellPosition) +
-    Present
+    //Material +
+    PointLights +
+    GetTransform(CellPosition, TransformId) +
+    GetMesh(LodModels[0].first).GetObject()
   };
 
   for (::std::size_t i = 1; i < LodModels.size(); i++)
@@ -190,9 +192,10 @@ auto Landscape::GetObject(const Any_t & _Value) const /*override*/ -> Objects_t
     // не сказывается на производительности Release версии.
     Result.push_back(
       GetTexture(LodModels[i].second).GetObject() +
-      GetMesh(LodModels[i].first).GetObject() +
-      Material +
-      Present);
+      //Material +
+      PointLights +
+      Object_t { Component_t::Make({ { uT("id"), TransformId } }) } +
+      GetMesh(LodModels[i].first).GetObject());
   }
 
   return Result;
@@ -256,15 +259,28 @@ Object_t Landscape::GetMaterial(const CubeCoords & _CellPosition) const
   };
 }
 
-Object_t Landscape::GetTransform(const CubeCoords & _CellPosition) const
+Object_t Landscape::GetTransform(
+  const CubeCoords & _CellPosition,
+  String_t & _TransformComponentId) const
 {
+  using ::alicorn::extension::boost::Format;
+
+  static size_t Index = 0;
+
+  // Использование здесь String::Replace() увеличивает время формирования
+  // идентификатора в 10(!) раз, что существенно сказывается
+  // на производительности.
+  _TransformComponentId = 
+    (Format{ uT("Demo.Transform.Tile.%1%") } % Index++).ToString();
+
   const auto WorldPosition = _CellPosition.ToPlane();
 
   const auto Rotate = m_IsUsingRotate ?
     Random(0, 5) * math::Constant<float>::Pi / 3.0f : 0.0f;
   const auto Scale = 1.0f + (m_ScaleFactor - 1.0f) * Random(0, 100) / 100.0f;
 
-  return {
+  return 
+  {
     Component_t::Make(
       {
         { uT("type"), uT("Data") },
@@ -285,30 +301,82 @@ Object_t Landscape::GetTransform(const CubeCoords & _CellPosition) const
         { uT("y"), WorldPosition.second },
         { uT("z"), m_GameWorld.GetLandscapeHeight(_CellPosition) },
       }),
+    Component_t::Make(
+      {
+        { uT("id"), _TransformComponentId },
+        { uT("type"), uT("Transform") },
+        { uT("kind"), uT("Static") },
+      })
   };
 }
 
-/*static*/ Object_t Landscape::GetPresent(void)
+Object_t Landscape::GetPointLight(const CubeCoords & _CellPosition) const
 {
+  using BufferMapper_t = ::covellite::api::cbBufferMap_t<::Lights_t>;
+
   static size_t Index = 0;
-  Index++;
 
   using ::alicorn::extension::boost::Format;
 
   // Использование здесь String::Replace() увеличивает время формирования
   // идентификатора в 10(!) раз, что существенно сказывается
   // на производительности.
-  const auto Id = (Format{ uT("Demo.Present.Tile.%1%") } % Index).ToString();
+  const auto Id = (Format{ uT("Demo.Light.Point.Tile.%1%") } % Index++).ToString();
 
-  return 
+  const auto WorldHeight = m_GameWorld.GetLandscapeHeight(_CellPosition);
+
+  const BufferMapper_t Mapper = [=](Lights_t * _pLights)
+  {
+    _pLights->Points = 
+      m_GameWorld.GetPointLights().Get(_CellPosition, WorldHeight);
+
+    return false;
+  };
+
+  return
   {
     Component_t::Make(
     {
       { uT("id"), Id },
-      { uT("type"), uT("Present") },
-      { uT("kind"), uT("Geometry") },
-      { uT("variety"), uT("Static") },
-    })
+      { uT("type"), uT("Buffer") },
+      { uT("mapper"), Mapper },
+    }),
+  };
+}
+
+Object_t Landscape::GetUserConstantBufferPointLight(const CubeCoords & _CellPosition) const
+{
+  using BufferMapper_t = ::covellite::api::cbBufferMap_t<void>;
+
+  static size_t Index = 0;
+
+  using ::alicorn::extension::boost::Format;
+
+  // Использование здесь String::Replace() увеличивает время формирования
+  // идентификатора в 10(!) раз, что существенно сказывается
+  // на производительности.
+  const auto Id = (Format{ uT("Demo.Light.Point.Tile.%1%") } % Index++).ToString();
+
+  const auto WorldHeight = m_GameWorld.GetLandscapeHeight(_CellPosition);
+
+  const BufferMapper_t Mapper = [=](void * _pLights)
+  {
+    const auto & Lights = m_GameWorld.GetPointLights()
+      .GetUserConstantBuffer(_CellPosition, WorldHeight);
+    memcpy(_pLights, &Lights, sizeof(PointLights::Points));
+
+    return false;
+  };
+
+  return
+  {
+    Component_t::Make(
+    {
+      { uT("id"), Id },
+      { uT("type"), uT("Buffer") },
+      { uT("mapper"), Mapper },
+      { uT("size"), sizeof(PointLights::Points) },
+    }),
   };
 }
 

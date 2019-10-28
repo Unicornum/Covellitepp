@@ -50,7 +50,7 @@ public:
   virtual void Render(void) = 0;
 
 public:
-  virtual ~IBasement(void) {}
+  virtual ~IBasement(void) = default;
 };
 
 } // namespace basement

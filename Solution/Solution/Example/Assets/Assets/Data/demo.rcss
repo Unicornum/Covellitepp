@@ -46,9 +46,9 @@ form#id_main_menu {
   background-image: demo.background.jpg 0px 0px 800px 450px;
 }
 
-button#id_auto,
-button#id_manual,
+button#id_landscape,
 button#id_animation,
+button#id_shadows,
 button#id_help,
 button#id_back {
   max-width: 51%;
@@ -62,9 +62,9 @@ button#id_back {
   margin-bottom: 10px;
 }
 
-  button#id_auto:hover,
-  button#id_manual:hover,
+  button#id_landscape:hover,
   button#id_animation:hover,
+  button#id_shadows:hover,
   button#id_help:hover,
   button#id_back:hover {
     font-size: 2.26 em;
@@ -75,9 +75,9 @@ button#id_back {
     background-color: rgba(128, 128, 128, 128);
   }
 
-  button#id_auto:active,
-  button#id_manual:active,
+  button#id_landscape:active,
   button#id_animation:active,
+  button#id_shadows:active,
   button#id_help:active,
   button#id_back:active {
     font-size: 2 em;

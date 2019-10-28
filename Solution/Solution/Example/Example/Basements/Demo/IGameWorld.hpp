@@ -3,6 +3,8 @@
 #include "Defines.hpp"
 #include "IGameObject.hpp"
 
+class SoundDevice;
+
 namespace basement
 {
 
@@ -10,6 +12,8 @@ namespace model
 {
 
 class CubeCoords;
+class PointLights;
+class IDbComponents;
 
 /**
 * \ingroup ExampleBasementDemoGroup
@@ -32,6 +36,9 @@ public:
   virtual GameScenePtr_t CreateGameScene(void) = 0;
   virtual float GetLandscapeHeight(const CubeCoords &) const = 0;
   virtual IGameObject::Landscape::Value GetGameObjectType(const CubeCoords &) const = 0;
+  virtual const PointLights & GetPointLights(void) const = 0;
+  virtual SoundDevice & GetSoundDevice(void) = 0;
+  virtual const IDbComponents & GetDbComponents(void) const = 0;
 
 public:
   virtual ~IGameWorld(void) = default;

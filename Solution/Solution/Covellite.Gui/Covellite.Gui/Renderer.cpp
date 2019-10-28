@@ -38,21 +38,27 @@ Renderer::Renderer(const RendersPtr_t & _pRenders) :
     {
       Component_t::Make(
         {
-          { uT("id"), uT("Covellite.Api.Camera.Gui") },
+          { uT("id"), uT("Covellite.Gui.Camera.Gui") },
           { uT("type"), uT("Camera") },
           { uT("kind"), uT("Orthographic") },
         }),
       Component_t::Make(
         {
-          { uT("id"), uT("Covellite.Api.State.Blend") },
+          { uT("id"), uT("Covellite.Gui.State.Blend") },
           { uT("type"), uT("State") },
           { uT("kind"), uT("Blend") },
         }),
       Component_t::Make(
         {
-          { uT("id"), uT("Covellite.Api.Shader.Vertex") },
+          { uT("id"), uT("Covellite.Gui.State.Sampler") },
+          { uT("type"), uT("State") },
+          { uT("kind"), uT("Sampler") },
+        }),
+      Component_t::Make(
+        {
+          { uT("id"), uT("Covellite.Gui.Shader.Vertex") },
           { uT("type"), uT("Shader") },
-          { uT("entry"), uT("vsGui") },
+          { uT("entry"), uT("vsFlat") },
         }),
     })),
     m_pScissorRect(Component_t::Make(
@@ -63,7 +69,7 @@ Renderer::Renderer(const RendersPtr_t & _pRenders) :
 {
 }
 
-Renderer::~Renderer(void)
+Renderer::~Renderer(void) noexcept
 {
   // Рендеры общих компонентов не удаляются, т.к. они будут удалены вместе с
   // уникальным (для объектв класса Renderer) объектом m_pRenders.
@@ -98,42 +104,39 @@ Rocket::Core::CompiledGeometryHandle Renderer::CompileGeometry(
 
   Object_t Object;
 
+  using namespace ::alicorn::extension::std;
+
   if (_hTexture == 0)
   {
     Object.push_back(Component_t::Make(
       {
-        { uT("id"), uT("Covellite.Api.Shader.Pixel.Colored") },
+        { uT("id"), uT("Covellite.Gui.Shader.Pixel.Colored") },
         { uT("type"), uT("Shader") },
         { uT("entry"), uT("psColored") },
       }));
   }
   else
   {
-    Object.push_back(Component_t::Make(
-      {
-        { uT("id"), uT("Covellite.Api.Shader.Pixel.Textured") },
-        { uT("type"), uT("Shader") },
-        { uT("entry"), uT("psTextured") },
-      }));
-
     // Использование здесь String::Replace() увеличивает время формирования
     // идентификатора в 10(!) раз, что существенно сказывается
     // на производительности.
     const auto strTextureId =
-      (Format{ uT("Covellite.Api.Texture.%1%") } % (size_t)_hTexture).ToString();
+      (Format{ uT("Covellite.Gui.Texture.%1%") } % (size_t)_hTexture).ToString();
 
-    Object.push_back(Component_t::Make(
+    Object += Object_t
+    {
+      Component_t::Make(
+      {
+        { uT("id"), uT("Covellite.Gui.Shader.Pixel.Textured") },
+        { uT("type"), uT("Shader") },
+        { uT("entry"), uT("psLightened") },
+      }),
+      Component_t::Make(
       {
         { uT("id"), strTextureId },
         { uT("type"), uT("Texture") },
-      }));
-
-    Object.push_back(Component_t::Make(
-    {
-      { uT("id"), uT("Covellite.Api.State.Sampler") },
-      { uT("type"), uT("State") },
-      { uT("kind"), uT("Sampler") },
-    }));
+      })
+    };
   }
 
   const auto Convert = 
@@ -165,39 +168,38 @@ Rocket::Core::CompiledGeometryHandle Renderer::CompileGeometry(
   const auto Vertexes = 
     Convert(_pVertex, static_cast<::std::size_t>(_VertexCount));
 
-  Object.push_back(Component_t::Make(
-    {
-      { uT("id"), uT("Covellite.Api.Buffer.Vertex.") + strObjectId },
-      { uT("type"), uT("Buffer") },
-      { uT("data"), Vertexes.data() },
-      { uT("count"), Vertexes.size() },
-      { uT("dimension"), 2 },
-    }));
-
-  Object.push_back(Component_t::Make(
-    {
-      { uT("id"), uT("Covellite.Api.Buffer.Index.") + strObjectId },
-      { uT("type"), uT("Buffer") },
-      { uT("kind"), uT("Index") },
-      { uT("data"), static_cast<const int *>(_pIndex) },
-      { uT("count"), (size_t)_IndexCount }
-    }));
-
-  m_Objects[ObjectId].pPosition = Component_t::Make(
+  const auto pPosition = Component_t::Make(
     {
       { uT("type"), uT("Data") },
       { uT("kind"), uT("Position") },
     });
 
-  Object.push_back(m_Objects[ObjectId].pPosition);
-
-  Object.push_back(Component_t::Make(
+  Object += Object_t
+  {
+    Component_t::Make(
     {
-      { uT("id"), uT("Covellite.Api.Present.Geometry.") + strObjectId },
+      { uT("id"), uT("Covellite.Gui.Buffer.Vertex.") + strObjectId },
+      { uT("type"), uT("Buffer") },
+      { uT("data"), Vertexes.data() },
+      { uT("count"), Vertexes.size() },
+      { uT("dimension"), 2 },
+    }),
+    pPosition,
+    Component_t::Make(
+    {
+      { uT("id"), uT("Covellite.Gui.Transform.") + strObjectId },
+      { uT("type"), uT("Transform") },
+    }),
+    Component_t::Make(
+    {
+      { uT("id"), uT("Covellite.Gui.Present.") + strObjectId },
       { uT("type"), uT("Present") },
-      { uT("kind"), uT("Geometry") },
-    }));
+      { uT("data"), static_cast<const int *>(_pIndex) },
+      { uT("count"), (size_t)_IndexCount }
+    })
+  };
 
+  m_Objects[ObjectId].pPosition = pPosition;
   m_Objects[ObjectId].Renders = m_pRenders->Obtain(Object);
 
   return (Rocket::Core::CompiledGeometryHandle)ObjectId;
@@ -229,15 +231,11 @@ void Renderer::ReleaseCompiledGeometry(
   m_pRenders->Remove({
     Component_t::Make(
       {
-        { uT("id"), uT("Covellite.Api.Buffer.Vertex.") + strObjectId }
+        { uT("id"), uT("Covellite.Gui.Buffer.Vertex.") + strObjectId }
       }),
     Component_t::Make(
       {
-        { uT("id"), uT("Covellite.Api.Buffer.Index.") + strObjectId }
-      }),
-    Component_t::Make(
-      {
-        { uT("id"), uT("Covellite.Api.Present.Geometry.") + strObjectId }
+        { uT("id"), uT("Covellite.Gui.Present.") + strObjectId }
       }),
     });
 
@@ -254,7 +252,7 @@ void Renderer::EnableScissorRegion(bool _IsEnable) /*override*/
     {
       Component_t::Make(
       {
-        { uT("id"), uT("Covellite.Api.State.Scissor.Disabled") },
+        { uT("id"), uT("Covellite.Gui.State.Scissor.Disabled") },
         { uT("type"), uT("State") },
         { uT("kind"), uT("Scissor") },
         { uT("enabled"), uT("false") }
@@ -279,7 +277,7 @@ void Renderer::SetScissorRegion(int _X, int _Y, int _Width, int _Height) /*overr
       m_pScissorRect,
       Component_t::Make(
       {
-        { uT("id"), uT("Covellite.Api.State.Scissor.Enabled") },
+        { uT("id"), uT("Covellite.Gui.State.Scissor.Enabled") },
         { uT("type"), uT("State") },
         { uT("kind"), uT("Scissor") },
         { uT("enabled"), uT("true") }
@@ -334,7 +332,7 @@ bool Renderer::GenerateTexture(
   // идентификатора в 10(!) раз, что существенно сказывается
   // на производительности.
   const auto strTextureId =
-    (Format{ uT("Covellite.Api.Texture.%1%") } % (size_t)++TextureId).ToString();
+    (Format{ uT("Covellite.Gui.Texture.%1%") } % (size_t)++TextureId).ToString();
 
   auto Render = m_pRenders->Obtain(
     {
@@ -361,7 +359,7 @@ void Renderer::ReleaseTexture(Rocket::Core::TextureHandle _hTexture) /*override*
   // идентификатора в 10(!) раз, что существенно сказывается
   // на производительности.
   const auto strTextureId =
-    (Format{ uT("Covellite.Api.Texture.%1%") } % (size_t)_hTexture).ToString();
+    (Format{ uT("Covellite.Gui.Texture.%1%") } % (size_t)_hTexture).ToString();
 
   m_pRenders->Remove(
     {

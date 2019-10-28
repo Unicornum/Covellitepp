@@ -1,7 +1,8 @@
 
 #include "stdafx.h"
 #include "OpenGL.hpp"
-#include <alicorn\platform\winapi-check.hpp>
+#include <alicorn/platform/winapi-check.hpp>
+//#include <alicorn/logger.hpp>
 
 #pragma comment(lib, "opengl32.lib")
 
@@ -13,6 +14,40 @@ namespace api
 
 namespace renderer
 {
+
+//static void GLDebugCallback(GLenum /*source*/, GLenum type, GLuint id,
+//  GLenum severity, GLsizei /*length*/, const GLchar *message, const void * /*userParam*/)
+//{
+//  const auto strType = 
+//    (type == GL_DEBUG_TYPE_ERROR) ? "ERROR" :
+//    (type == GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR) ? "DEPRECATED BEHAVIOR" :
+//    (type == GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR) ? "UDEFINED BEHAVIOR" :
+//    (type == GL_DEBUG_TYPE_PORTABILITY) ? "PORTABILITY" :
+//    (type == GL_DEBUG_TYPE_PERFORMANCE) ? "PERFORMANCE" :
+//    (type == GL_DEBUG_TYPE_OTHER) ? "OTHER" :
+//    (type == GL_DEBUG_TYPE_MARKER) ? "MARKER" : "UNKNOWN";
+//
+//  if (severity == GL_DEBUG_SEVERITY_HIGH)
+//  {
+//    LOGGER(Error) << strType << ": " << message << " [" << id << "]";
+//  }
+//  else if (severity == GL_DEBUG_SEVERITY_MEDIUM)
+//  {
+//    LOGGER(Warning) << strType << ": " << message << " [" << id << "]";
+//  }
+//  else if (severity == GL_DEBUG_SEVERITY_LOW)
+//  {
+//    LOGGER(Info) << strType << ": " << message << " [" << id << "]";
+//  }
+//  else if (severity == GL_DEBUG_SEVERITY_NOTIFICATION)
+//  {
+//    LOGGER(Trace) << strType << ": " << message << " [" << id << "]";
+//  }
+//  else
+//  {
+//    LOGGER(Trace) << strType << ": " << message << " [" << id << "]";
+//  }
+//}
 
 static PIXELFORMATDESCRIPTOR PixelFormatDescriptor = { 0 };
 
@@ -59,9 +94,13 @@ OpenGL::OpenGL(const Data_t & _Data) :
 
   ResizeWindow(ClientRect.right - ClientRect.left,
     ClientRect.bottom - ClientRect.top);
+
+  //glEnable(GL_DEBUG_OUTPUT);
+  //glDebugMessageCallback(&GLDebugCallback, NULL);
+  //glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, NULL, GL_TRUE);
 }
 
-OpenGL::~OpenGL(void)
+OpenGL::~OpenGL(void) noexcept
 {
   USING_MOCK ::wglMakeCurrent(NULL, NULL);
   USING_MOCK ::wglDeleteContext(m_hRenderContex);
@@ -73,7 +112,7 @@ void OpenGL::PresentFrame(void) /*override*/
 {
   WINAPI_CHECK USING_MOCK ::SwapBuffers(m_hDeviceContex);
 
-  OpenGLCommon::PresentFrame();
+  OpenGLCommonShader::PresentFrame();
 }
 
 } // namespace renderer

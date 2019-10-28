@@ -71,7 +71,6 @@ protected:
   }
 
 protected:
-  const String_t m_UsingApi = uT("OpenGL");
   static ::Camera & GetCameraMartix(Tested_t & _Example)
   {
     return _Example.m_pConstants->Get<::Camera>();
@@ -439,7 +438,7 @@ TEST_F(OpenGL_test, /*DISABLED_*/Test_PresentFrame)
 #define OpenGLCommon_test OpenGL_test
 #include "../OpenGLCommon_test.hpp"
 
-const ::std::string ShaderHeader = 
+static const ::std::string ShaderHeader = 
   "#version 330 core\r\n"
   "#define COVELLITE_SHADER_DESKTOP\r\n";
 
@@ -448,3 +447,8 @@ const ::std::string ShaderHeader =
 
 #define Updater_test OpenGL_test
 #include "../Updater_test.hpp"
+
+static const auto ImplClassName = uT("OpenGL");
+
+#define Common_test OpenGL_test
+#include "../Common_test.hpp"

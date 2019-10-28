@@ -2,6 +2,7 @@
 #pragma once
 #include <gmock/gmock.hpp>
 #include <alicorn/std/vector.hpp>
+#include <boost/algorithm/string/replace.hpp>
 
 #ifndef OpenGLShader_test
 
@@ -28,7 +29,103 @@ namespace
 }
 
 // ************************************************************************** //
-TEST_F(OpenGLShader_test, /*DISABLED_*/Test_State_AlphaTest)
+TEST_F(OpenGLShader_test, /*DISABLED_*/Test_State_Sampler_Mipmapping)
+{
+  using GLProxy_t = ::mock::GLProxy;
+  GLProxy_t GLProxy;
+  GLProxy_t::GetInstance() = &GLProxy;
+
+  const Tested_t Example{ Data_t{} };
+  const ITested_t & IExample = Example;
+
+  auto itStateCreator = IExample.GetCreators().find(uT("State"));
+  ASSERT_NE(IExample.GetCreators().end(), itStateCreator);
+
+  auto itTextureCreator = IExample.GetCreators().find(uT("Texture"));
+  ASSERT_NE(IExample.GetCreators().end(), itTextureCreator);
+
+  auto SamplerRender = itStateCreator->second(Component_t::Make(
+    {
+      { uT("kind"), uT("Sampler") }
+    }));
+  ASSERT_NE(nullptr, SamplerRender);
+
+  auto TextureRender = itTextureCreator->second(Component_t::Make(
+    { 
+      { uT("mipmapping"), true }
+    }));
+  ASSERT_NE(nullptr, TextureRender);
+
+  using namespace ::testing;
+
+  EXPECT_CALL(GLProxy, TexParameteri(_, _, _))
+    .Times(0);
+
+  SamplerRender();
+
+  InSequence Dummy;
+
+  EXPECT_CALL(GLProxy, BindTexture(GL_TEXTURE_2D, _))
+    .Times(1);
+
+  EXPECT_CALL(GLProxy, TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,
+    GL_LINEAR_MIPMAP_LINEAR))
+    .Times(1);
+
+  EXPECT_CALL(GLProxy, TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER,
+    GL_LINEAR))
+    .Times(1);
+
+  EXPECT_CALL(GLProxy, TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT))
+    .Times(1);
+
+  EXPECT_CALL(GLProxy, TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT))
+    .Times(1);
+
+  TextureRender();
+}
+
+// ************************************************************************** //
+TEST_F(OpenGLShader_test, /*DISABLED_*/Test_BkSurface_Fail)
+{
+  using GLProxy_t = ::mock::GLProxy;
+  GLProxy_t GLProxy;
+  GLProxy_t::GetInstance() = &GLProxy;
+
+  const Tested_t Example{ Data_t{} };
+  const ITested_t & IExample = Example;
+
+  auto itCreator = IExample.GetCreators().find(uT("BkSurface"));
+  ASSERT_NE(IExample.GetCreators().end(), itCreator);
+
+  const ::mock::GLuint FrameBufferId = 1910041904;
+
+  using namespace ::testing;
+
+  InSequence Dummy;
+
+  EXPECT_CALL(GLProxy, GenFramebuffers(1))
+    .Times(1)
+    .WillOnce(Return(FrameBufferId));
+
+  EXPECT_CALL(GLProxy, BindFramebuffer(GL_FRAMEBUFFER, FrameBufferId))
+    .Times(1);
+
+  EXPECT_CALL(GLProxy, CheckFramebufferStatus(GL_FRAMEBUFFER))
+    .Times(1)
+    .WillOnce(Return(1910041903));
+
+  EXPECT_CALL(GLProxy, BindFramebuffer(GL_FRAMEBUFFER, 0))
+    .Times(1);
+
+  EXPECT_CALL(GLProxy, DeleteFramebuffers(1, FrameBufferId))
+    .Times(1);
+
+  EXPECT_THROW(itCreator->second(Component_t::Make({})), ::std::exception);
+}
+
+// ************************************************************************** //
+TEST_F(OpenGLShader_test, /*DISABLED_*/Test_BkSurface)
 {
   using GLProxy_t = ::mock::GLProxy;
   GLProxy_t GLProxy;
@@ -36,290 +133,148 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_State_AlphaTest)
 
   Tested_t Example{ Data_t{} };
   ITested_t & IExample = Example;
-
-  auto itCreator = IExample.GetCreators().find(uT("State"));
-  ASSERT_NE(IExample.GetCreators().end(), itCreator);
-
-  {
-    const auto pState = Component_t::Make(
-      {
-        { uT("kind"), uT("AlphaTest") },
-      });
-
-    EXPECT_EQ(nullptr, itCreator->second(pState));
-  }
-
-  {
-    const auto Value = 1904271913.0f;
-
-    const auto pState = Component_t::Make(
-      {
-        { uT("kind"), uT("AlphaTest") },
-        { uT("discard"), Value },
-      });
-
-    EXPECT_EQ(nullptr, itCreator->second(pState));
-  }
-}
-
-// ************************************************************************** //
-TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Material)
-{
-  using GLProxy_t = ::mock::GLProxy;
-  GLProxy_t GLProxy;
-  GLProxy_t::GetInstance() = &GLProxy;
-
-  const Tested_t Example{ Data_t{} };
-  const ITested_t & IExample = Example;
-
-  auto itCreator = IExample.GetCreators().find(uT("Material"));
-  ASSERT_NE(IExample.GetCreators().end(), itCreator);
-
-  auto Render = itCreator->second(Component_t::Make({ }));
-  EXPECT_EQ(nullptr, Render);
-}
-
-// ************************************************************************** //
-TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Texture_Default)
-{
-  using GLProxy_t = ::mock::GLProxy;
-  GLProxy_t GLProxy;
-  GLProxy_t::GetInstance() = &GLProxy;
-
-  const Tested_t Example{ Data_t{} };
-  const ITested_t & IExample = Example;
+  IExample.PresentFrame();
 
   auto itDataCreator = IExample.GetCreators().find(uT("Data"));
   ASSERT_NE(IExample.GetCreators().end(), itDataCreator);
 
-  auto itCreator = IExample.GetCreators().find(uT("Texture"));
+  auto itCreator = IExample.GetCreators().find(uT("BkSurface"));
   ASSERT_NE(IExample.GetCreators().end(), itCreator);
 
-  const ::mock::GLuint TextureId = 1812181809;
-  const ::mock::GLint ProgramId = 1908221258;
-  const ::mock::GLint LocationId = 1908221259;
+  const ::mock::GLint TextureId = 1910041735;
+  const ::mock::GLint FrameBufferId = 1910041803;
+  const int Width = 41931;
+  const int Height = 41932;
 
-  const auto TestCall = [&](const Component_t::ComponentPtr_t & _pTexture,
-    const uint8_t * _pSource, const int _Width, const int _Height)
+  const float Viewport[] =
   {
-    using namespace ::testing;
-
-    InSequence Dummy;
-
-    EXPECT_CALL(GLProxy, GenTextures(1))
-      .Times(1)
-      .WillOnce(Return(TextureId));
-
-    EXPECT_CALL(GLProxy, BindTexture(GL_TEXTURE_2D, TextureId))
-      .Times(1);
-
-    EXPECT_CALL(GLProxy, TexImage2D(GL_TEXTURE_2D, 0, GL_RGBA,
-      _Width, _Height, 0,
-      GL_RGBA, GL_UNSIGNED_BYTE, _pSource))
-      .Times(1);
-
-    EXPECT_CALL(GLProxy, BindTexture(GL_TEXTURE_2D, 0))
-      .Times(1);
-
-    EXPECT_CALL(GLProxy, GetError())
-      .Times(1)
-      .WillOnce(Return(GL_NO_ERROR));
-
-    auto Render = itCreator->second(_pTexture);
-    ASSERT_NE(nullptr, Render);
-
-    EXPECT_CALL(GLProxy, ActiveTexture(GL_TEXTURE0))
-      .Times(1);
-
-    EXPECT_CALL(GLProxy, BindTexture(GL_TEXTURE_2D, TextureId))
-      .Times(1);
-
-    EXPECT_CALL(GLProxy, GetIntegerv(GL_CURRENT_PROGRAM))
-      .Times(1)
-      .WillOnce(Return(&ProgramId));
-
-    EXPECT_CALL(GLProxy, GetUniformLocation(ProgramId, Eq("TexDiffuse")))
-      .Times(1)
-      .WillOnce(Return(LocationId));
-
-    EXPECT_CALL(GLProxy, Uniform1i(LocationId, 0))
-      .Times(1);
-
-    Render();
-
-    EXPECT_CALL(GLProxy, DeleteTextures(1, TextureId))
-      .Times(1);
+    0.0f, 0.0f, (float)Width, (float)Height
   };
 
+  const ::std::vector<String_t> Destinations =
   {
-    const uint8_t * pSource = (uint8_t *)1812181806;
-    const int Width = 1812181807;
-    const int Height = 1812181808;
-
-    const auto pTexture = Component_t::Make(
-      {
-        { uT("data"), pSource },
-        { uT("width"), Width },
-        { uT("height"), Height },
-      });
-
-    TestCall(pTexture, pSource, Width, Height);
-  }
-
-  {
-    const uint8_t * pSource = (uint8_t *)1907251056;
-    const int Width = 1907251057;
-    const int Height = 1907251058;
-
-    const auto pData = Component_t::Make(
-      {
-        { uT("kind"), uT("Texture") },
-        { uT("data"), pSource },
-        { uT("width"), Width },
-        { uT("height"), Height },
-      });
-
-    auto DataRender = itDataCreator->second(pData);
-    EXPECT_EQ(nullptr, DataRender);
-
-    TestCall(Component_t::Make({}), pSource, Width, Height);
-  }
-}
-
-// ************************************************************************** //
-TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Texture_PBR)
-{
-  using GLProxy_t = ::mock::GLProxy;
-  GLProxy_t GLProxy;
-  GLProxy_t::GetInstance() = &GLProxy;
-
-  const Tested_t Example{ Data_t{} };
-  const ITested_t & IExample = Example;
-
-  auto itDataCreator = IExample.GetCreators().find(uT("Data"));
-  ASSERT_NE(IExample.GetCreators().end(), itDataCreator);
-
-  auto itCreator = IExample.GetCreators().find(uT("Texture"));
-  ASSERT_NE(IExample.GetCreators().end(), itCreator);
-
-  const ::mock::GLuint TextureId = 1908221839;
-  const ::mock::GLint ProgramId = 1908221840;
-  const ::mock::GLint LocationId = 1908221841;
-
-  const auto TestCall = [&](
-    const Component_t::ComponentPtr_t & _pTexture,
-    const uint8_t * _pSource, 
-    const int _Width, const int _Height,
-    const ::std::size_t _Index,
-    const ::std::string & _TexName)
-  {
-    const auto Index = static_cast<::mock::GLint>(_Index);
-
-    using namespace ::testing;
-
-    InSequence Dummy;
-
-    EXPECT_CALL(GLProxy, GenTextures(1))
-      .Times(1)
-      .WillOnce(Return(TextureId));
-
-    EXPECT_CALL(GLProxy, BindTexture(GL_TEXTURE_2D, TextureId))
-      .Times(1);
-
-    EXPECT_CALL(GLProxy, TexImage2D(GL_TEXTURE_2D, 0, GL_RGBA,
-      _Width, _Height, 0,
-      GL_RGBA, GL_UNSIGNED_BYTE, _pSource))
-      .Times(1);
-
-    EXPECT_CALL(GLProxy, BindTexture(GL_TEXTURE_2D, 0))
-      .Times(1);
-
-    EXPECT_CALL(GLProxy, GetError())
-      .Times(1)
-      .WillOnce(Return(GL_NO_ERROR));
-
-    auto Render = itCreator->second(_pTexture);
-    ASSERT_NE(nullptr, Render);
-
-    EXPECT_CALL(GLProxy, ActiveTexture(GL_TEXTURE0 + Index))
-      .Times(1);
-
-    EXPECT_CALL(GLProxy, BindTexture(GL_TEXTURE_2D, TextureId))
-      .Times(1);
-
-    EXPECT_CALL(GLProxy, GetIntegerv(GL_CURRENT_PROGRAM))
-      .Times(1)
-      .WillOnce(Return(&ProgramId));
-
-    EXPECT_CALL(GLProxy, GetUniformLocation(ProgramId, _TexName))
-      .Times(1)
-      .WillOnce(Return(LocationId));
-
-    EXPECT_CALL(GLProxy, GetUniformLocation(_, Eq("TexDiffuse")))
-      .Times(0);
-
-    EXPECT_CALL(GLProxy, Uniform1i(LocationId, Index))
-      .Times(1);
-
-    Render();
-
-    EXPECT_CALL(GLProxy, DeleteTextures(1, TextureId))
-      .Times(1);
+    uT("depth"),
+    uT("albedo"),   
+    uT("metalness"),
+    uT("roughness"),
+    uT("depth"),
+    uT("normal"),   
+    uT("occlusion"),
+    uT("depth"),    
   };
 
-  const ::std::vector<::std::pair<String_t, ::std::string>> Destinations =
-  {
-    { uT("albedo"),    "TexAlbedo" },
-    { uT("metalness"), "TexMetalness" },
-    { uT("roughness"), "TexRoughness" },
-    { uT("normal"),    "TexNormal" },
-    { uT("occlusion"), "TexOcclusion" },
-  };
+  using namespace ::testing;
+
+  InSequence Dummy;
+
+  ::std::vector<Component_t::ComponentPtr_t> m_TextureComponents;
 
   for (::std::size_t i = 0; i < Destinations.size(); i++)
   {
+    const auto pTexture = Component_t::Make(
+      {
+        { uT("kind"), uT("Texture") },
+        { uT("destination"), Destinations[i] },
+      });
+
+    auto DataRender = itDataCreator->second(pTexture);
+    EXPECT_EQ(nullptr, DataRender);
+
+    m_TextureComponents.push_back(pTexture);
+  }
+
+  EXPECT_CALL(GLProxy, GetFloatv(GL_VIEWPORT))
+    .Times(1)
+    .WillOnce(Return(Viewport));
+
+  EXPECT_CALL(GLProxy, GenFramebuffers(1))
+    .Times(1)
+    .WillOnce(Return(FrameBufferId));
+
+  EXPECT_CALL(GLProxy, BindFramebuffer(GL_FRAMEBUFFER, FrameBufferId))
+    .Times(1);
+
+  ::std::vector<::mock::GLenum> AttachmentIndexes;
+
+  for (::std::size_t i = 0; i < Destinations.size(); i++)
+  {
+    auto Format = GL_DEPTH_COMPONENT;
+    auto Attachment = GL_DEPTH_ATTACHMENT;
+
+    if (Destinations[i] != uT("depth"))
     {
-      const uint8_t * pSource = (uint8_t *)1908221842;
-      const int Width = 1908221843;
-      const int Height = 1908221844;
-
-      const auto pTexture = Component_t::Make(
-        {
-          { uT("data"), pSource },
-          { uT("width"), Width },
-          { uT("height"), Height },
-          { uT("destination"), Destinations[i].first },
-        });
-
-      TestCall(pTexture, 
-        pSource, Width, Height, i, Destinations[i].second);
+      Format = GL_RGBA;
+      Attachment = GL_COLOR_ATTACHMENT0 + 
+        static_cast<int>(AttachmentIndexes.size());
+      AttachmentIndexes.push_back(Attachment);
     }
 
-    {
-      const uint8_t * pSource = (uint8_t *)1908221846;
-      const int Width = 1908221845;
-      const int Height = 1908221847;
+    EXPECT_CALL(GLProxy, GenTextures(1))
+      .Times(1)
+      .WillOnce(Return(TextureId + i));
 
-      const auto pData = Component_t::Make(
-        {
-          { uT("kind"), uT("Texture") },
-          { uT("data"), pSource },
-          { uT("width"), Width },
-          { uT("height"), Height },
-          { uT("destination"), Destinations[i].first },
-        });
+    EXPECT_CALL(GLProxy, BindTexture(GL_TEXTURE_2D, TextureId + i))
+      .Times(1);
 
-      auto DataRender = itDataCreator->second(pData);
-      EXPECT_EQ(nullptr, DataRender);
+    EXPECT_CALL(GLProxy, TexImage2D(GL_TEXTURE_2D, 0, _,
+      Width, Height, 0, Format, _, nullptr))
+      .Times(1);
 
-      TestCall(Component_t::Make({}), 
-        pSource, Width, Height, i, Destinations[i].second);
-    }
+    EXPECT_CALL(GLProxy, BindTexture(GL_TEXTURE_2D, 0))
+      .Times(1);
+
+    EXPECT_CALL(GLProxy, GetError())
+      .Times(1)
+      .WillOnce(Return(GL_NO_ERROR));
+
+    EXPECT_CALL(GLProxy, FramebufferTexture2D(GL_FRAMEBUFFER, Attachment,
+      GL_TEXTURE_2D, TextureId + i, 0))
+      .Times(1);
+  }
+
+  EXPECT_CALL(GLProxy, CheckFramebufferStatus(GL_FRAMEBUFFER))
+    .Times(1)
+    .WillOnce(Return(GL_FRAMEBUFFER_COMPLETE));
+
+  EXPECT_CALL(GLProxy, BindFramebuffer(GL_FRAMEBUFFER, 0))
+    .Times(1);
+
+  auto Render = itCreator->second(Component_t::Make({}));
+  ASSERT_NE(nullptr, Render);
+
+  EXPECT_CALL(GLProxy, TexImage2D(_, _, _, _, _, _, _, _, _))
+    .Times(0);
+
+  EXPECT_CALL(GLProxy, BindFramebuffer(GL_FRAMEBUFFER, FrameBufferId))
+    .Times(1);
+
+  EXPECT_CALL(GLProxy, DrawBuffers(AttachmentIndexes))
+    .Times(1);
+
+  Render();
+
+  EXPECT_CALL(GLProxy, DeleteFramebuffers(1, FrameBufferId))
+    .Times(1);
+
+  ASSERT_EQ(m_TextureComponents.size(), Destinations.size());
+
+  for (::std::size_t i = 0; i < m_TextureComponents.size(); i++)
+  {
+    using Texture_t = ::covellite::api::renderer::OpenGLCommon::Texture;
+
+    const auto pTextureComponent = m_TextureComponents[i];
+    const auto pTexture = 
+      pTextureComponent->GetValue(uT("entity"), Texture_t::Ptr_t{});
+    ASSERT_NE(nullptr, pTexture);
+    EXPECT_EQ(TextureId + i, pTexture->m_TextureId);
+    EXPECT_EQ(0, pTexture->m_ReadCopyData.size());
+    EXPECT_EQ(Width, pTextureComponent->GetValue(uT("width"), 0));
+    EXPECT_EQ(Height, pTextureComponent->GetValue(uT("height"), 0));
   }
 }
 
 // ************************************************************************** //
-TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Buffer_Fail)
+TEST_F(OpenGLShader_test, /*DISABLED_*/Test_BkSurface_RenderDepthOnly)
 {
   using GLProxy_t = ::mock::GLProxy;
   GLProxy_t GLProxy;
@@ -328,1383 +283,520 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Buffer_Fail)
   const Tested_t Example{ Data_t{} };
   const ITested_t & IExample = Example;
 
-  auto itCreator = IExample.GetCreators().find(uT("Buffer"));
+  auto itDataCreator = IExample.GetCreators().find(uT("Data"));
+  ASSERT_NE(IExample.GetCreators().end(), itDataCreator);
+
+  auto itCreator = IExample.GetCreators().find(uT("BkSurface"));
   ASSERT_NE(IExample.GetCreators().end(), itCreator);
 
-  auto itDataCreator = IExample.GetCreators().find(uT("Data"));
-  ASSERT_NE(IExample.GetCreators().end(), itDataCreator);
+  const ::mock::GLuint TextureId = 1910041735;
+  const ::mock::GLuint FrameBufferId = 1910041803;
+  const int Width = 41931;
+  const int Height = 41932;
 
-  auto TestCallRender = [&](const Component_t::ComponentPtr_t & _pComponent)
+  const float Viewport[] =
   {
-    using namespace ::testing;
-
-    InSequence Dummy;
-
-    EXPECT_CALL(GLProxy, GenBuffers(_))
-      .Times(1);
-
-    EXPECT_CALL(GLProxy, GetError())
-      .Times(1)
-      .WillOnce(Return(1908232144));
-
-    EXPECT_THROW(itCreator->second(_pComponent), ::std::exception);
+    0.0f, 0.0f, (float)Width, (float)Height
   };
 
-  {
-    const ::std::vector<::covellite::api::Vertex> Source;
+  using namespace ::testing;
 
-    const auto pBuffer = Component_t::Make(
-      {
-        { uT("data"), Source.data() },
-        { uT("count"), Source.size() },
-      });
+  InSequence Dummy;
 
-    TestCallRender(pBuffer);
+  const auto pTexture = Component_t::Make(
+    {
+      { uT("kind"), uT("Texture") },
+      { uT("destination"), uT("depth") },
+    });
 
-    const auto pData = Component_t::Make(
-      {
-        { uT("kind"), uT("Buffer") },
-        { uT("data"), Source.data() },
-        { uT("count"), Source.size() },
-      });
+  auto DataRender = itDataCreator->second(pTexture);
+  EXPECT_EQ(nullptr, DataRender);
 
-    auto DataRender = itDataCreator->second(pData);
-    EXPECT_EQ(nullptr, DataRender);
+  EXPECT_CALL(GLProxy, CheckFramebufferStatus(GL_FRAMEBUFFER))
+    .Times(1)
+    .WillOnce(Return(GL_FRAMEBUFFER_COMPLETE));
 
-    TestCallRender(Component_t::Make({ }));
-  }
+  auto Render = itCreator->second(Component_t::Make({}));
+  ASSERT_NE(nullptr, Render);
 
-  {
-    using BufferMapper_t = 
-      ::covellite::api::cbBufferMap_t<::covellite::api::Vertex>;
-    const ::std::vector<::covellite::api::Vertex> Source;
+  EXPECT_CALL(GLProxy, DrawBuffers(::std::vector<::mock::GLenum>{}))
+    .Times(1);
 
-    BufferMapper_t Mapper = [](::covellite::api::Vertex *) { return false; };
-
-    const auto pBuffer = Component_t::Make(
-      {
-        { uT("data"), Source.data() },
-        { uT("count"), Source.size() },
-        { uT("mapper"), Mapper },
-      });
-
-    TestCallRender(pBuffer);
-
-    const auto pData = Component_t::Make(
-      {
-        { uT("kind"), uT("Buffer") },
-        { uT("data"), Source.data() },
-        { uT("count"), Source.size() },
-        { uT("mapper"), Mapper },
-      });
-
-    auto DataRender = itDataCreator->second(pData);
-    EXPECT_EQ(nullptr, DataRender);
-
-    TestCallRender(Component_t::Make({ }));
-  }
-
-  {
-    const ::std::vector<int> Source;
-
-    const auto pBuffer = Component_t::Make(
-      {
-        { uT("data"), Source.data() },
-        { uT("count"), Source.size() },
-      });
-
-    TestCallRender(pBuffer);
-
-    const auto pData = Component_t::Make(
-      {
-        { uT("kind"), uT("Buffer") },
-        { uT("data"), Source.data() },
-        { uT("count"), Source.size() },
-      });
-
-    auto DataRender = itDataCreator->second(pData);
-    EXPECT_EQ(nullptr, DataRender);
-
-    TestCallRender(Component_t::Make({ }));
-  }
+  Render();
 }
 
 // ************************************************************************** //
-TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Buffer_Vertex_Static)
+TEST_F(OpenGLShader_test, /*DISABLED_*/Test_BkSurface_Mapping)
 {
-  using Vertex_t = ::covellite::api::Vertex;
+  using BufferMapper_t = ::covellite::api::cbBufferMap_t<const void>;
 
   using GLProxy_t = ::mock::GLProxy;
   GLProxy_t GLProxy;
   GLProxy_t::GetInstance() = &GLProxy;
 
-  const ::mock::GLuint BufferId = 1908231206;
-  const ::mock::GLint ProgramId = 1908231246;
-  const ::mock::GLint PositionId = 1908231301;
-  const ::mock::GLint TexCoordId = 1908231302;
-  const ::mock::GLint ExtraId = 1908231304;
+  Tested_t Example{ Data_t{} };
+  ITested_t & IExample = Example;
+  IExample.PresentFrame();
 
-  const ::std::vector<Vertex_t> Source =
-  {
-    {
-      1808261932.0f, 1808261933.0f, 1812161256.0f, 1808261934.0f,
-      1812161257.0f, 1808261935.0f,
-      1808261936.0f, 1812161258.0f, 1908201939.0f, 1908201940.0f
-    },
-    {
-      1808261932.0f, 1808261933.0f, 1812161259.0f, 1808261934.0f,
-      1812161300.0f, 1808261935.0f,
-      1808261936.0f, 1812161301.0f, 1908201941.0f, 1908201942.0f
-    },
-    { 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f }, // Маркер конца данных
-  };
+  auto itDataCreator = IExample.GetCreators().find(uT("Data"));
+  ASSERT_NE(IExample.GetCreators().end(), itDataCreator);
 
-  const ::mock::GLProxy::Floats_t ExpectedVertexData =
-  {
-    Source[0].px, Source[0].py, Source[0].pz,
-    Source[1].px, Source[1].py, Source[1].pz,
-  };
-
-  const ::mock::GLProxy::Floats_t ExpectedTexCoordData =
-  {
-    Source[0].tu, Source[0].tv,
-    Source[1].tu, Source[1].tv,
-  };
-
-  const ::mock::GLProxy::Floats_t ExpectedNormalData =
-  {
-    Source[0].ex, Source[0].ey, Source[0].ez,
-    Source[1].ex, Source[1].ey, Source[1].ez,
-  };
-
-  const Tested_t Example{ Data_t{} };
-  const ITested_t & IExample = Example;
-
-  auto itCreator = IExample.GetCreators().find(uT("Buffer"));
+  auto itCreator = IExample.GetCreators().find(uT("BkSurface"));
   ASSERT_NE(IExample.GetCreators().end(), itCreator);
 
-  auto itDataCreator = IExample.GetCreators().find(uT("Data"));
-  ASSERT_NE(IExample.GetCreators().end(), itDataCreator);
+  const ::mock::GLint TextureId = 1910041735;
+  const ::mock::GLint FrameBufferId = 1910041803;
+  const int Width = 12;
+  const int Height = 48;
 
-  auto TestCallRender = [&](const Component_t::ComponentPtr_t & _pComponent)
+  const float Viewport[] =
   {
-    using namespace ::testing;
-
-    InSequence Dummy;
-
-    EXPECT_CALL(GLProxy, GenBuffers(1))
-      .Times(1)
-      .WillOnce(Return(BufferId));
-
-    EXPECT_CALL(GLProxy, BindBuffer(GL_ARRAY_BUFFER, BufferId))
-      .Times(1);
-
-    const auto Size = 
-      static_cast<::mock::GLsizeiptr>(Source.size() * sizeof(Vertex_t));
-
-    EXPECT_CALL(GLProxy, 
-      BufferData(GL_ARRAY_BUFFER, Size, Source.data(), GL_STATIC_DRAW))
-      .Times(1);
-
-    EXPECT_CALL(GLProxy, BindBuffer(GL_ARRAY_BUFFER, 0))
-      .Times(1);
-
-    EXPECT_CALL(GLProxy, GetError())
-      .Times(1)
-      .WillOnce(Return(GL_NO_ERROR));
-
-    const auto Render = itCreator->second(_pComponent);
-    ASSERT_NE(nullptr, Render);
-
-    EXPECT_CALL(GLProxy, BindBuffer(GL_ARRAY_BUFFER, BufferId))
-      .Times(1);
-
-    EXPECT_CALL(GLProxy, GetIntegerv(GL_CURRENT_PROGRAM))
-      .Times(1)
-      .WillOnce(Return(&ProgramId));
-
-    EXPECT_CALL(GLProxy, 
-      GetAttribLocation(ProgramId, Eq("CovelliteVertexPosition")))
-      .Times(1)
-      .WillOnce(Return(PositionId));
-
-    EXPECT_CALL(GLProxy, VertexAttribPointer(PositionId, 4, GL_FLOAT, GL_FALSE,
-      sizeof(Vertex_t), (void*)0))
-      .Times(1);
-
-    EXPECT_CALL(GLProxy, EnableVertexAttribArray(PositionId))
-      .Times(1);
-
-    EXPECT_CALL(GLProxy,
-      GetAttribLocation(ProgramId, Eq("CovellteVertexTexCoord")))
-      .Times(1)
-      .WillOnce(Return(TexCoordId));
-
-    EXPECT_CALL(GLProxy, VertexAttribPointer(TexCoordId, 2, GL_FLOAT, GL_FALSE,
-      sizeof(Vertex_t), (void*)(sizeof(float) * 4)))
-      .Times(1);
-
-    EXPECT_CALL(GLProxy, EnableVertexAttribArray(TexCoordId))
-      .Times(1);
-
-    EXPECT_CALL(GLProxy,
-      GetAttribLocation(ProgramId, Eq("CovelliteVertexExtra")))
-      .Times(1)
-      .WillOnce(Return(ExtraId));
-
-    EXPECT_CALL(GLProxy, VertexAttribPointer(ExtraId, 4, GL_FLOAT, GL_FALSE,
-      sizeof(Vertex_t), (void*)(sizeof(float) * 6)))
-      .Times(1);
-
-    EXPECT_CALL(GLProxy, EnableVertexAttribArray(ExtraId))
-      .Times(1);
-
-    Render();
-
-    EXPECT_CALL(GLProxy, DeleteBuffers(1, BufferId))
-      .Times(1);
+    0.0f, 0.0f, (float)Width, (float)Height
   };
 
-  // ***************** Передача данных в объекте компонента ***************** //
-
+  const ::std::vector<String_t> Destinations =
   {
-    const auto pBuffer = Component_t::Make(
+    uT("depth"),
+    uT("albedo"),
+    uT("metalness"),
+    uT("roughness"),
+    uT("depth"),
+    uT("normal"),
+    uT("occlusion"),
+    uT("depth"),
+  };
+
+  using namespace ::testing;
+
+  InSequence Dummy;
+
+  ::std::vector<Component_t::ComponentPtr_t> m_TextureComponents;
+
+  for (::std::size_t i = 0; i < Destinations.size(); i++)
+  {
+    const auto pTexture = Component_t::Make(
       {
-        { uT("data"), Source.data() },
-        { uT("count"), Source.size() },
+        { uT("kind"), uT("Texture") },
+        { uT("destination"), Destinations[i] },
+        { uT("mapper"), BufferMapper_t{} },
       });
 
-    TestCallRender(pBuffer);
-  }
-
-  // ************** Передача данных в объекте компонента Data *************** //
-
-  {
-    const auto pData = Component_t::Make(
-      {
-        { uT("kind"), uT("Buffer") },
-        { uT("data"), Source.data() },
-        { uT("count"), Source.size() },
-      });
-
-    auto DataRender = itDataCreator->second(pData);
+    auto DataRender = itDataCreator->second(pTexture);
     EXPECT_EQ(nullptr, DataRender);
 
-    TestCallRender(Component_t::Make({ }));
+    m_TextureComponents.push_back(pTexture);
   }
-}
 
-// ************************************************************************** //
-TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Buffer_Vertex_Dynamic)
-{
-  using Vertex_t = ::covellite::api::Vertex;
-  using BufferMapper_t = ::covellite::api::cbBufferMap_t<Vertex_t>;
+  EXPECT_CALL(GLProxy, GetFloatv(GL_VIEWPORT))
+    .Times(1)
+    .WillOnce(Return(Viewport));
 
-  class Proxy :
-    public ::alicorn::extension::testing::Proxy<Proxy>
+  EXPECT_CALL(GLProxy, GenFramebuffers(1))
+    .Times(1)
+    .WillOnce(Return(FrameBufferId));
+
+  EXPECT_CALL(GLProxy, BindFramebuffer(GL_FRAMEBUFFER, FrameBufferId))
+    .Times(1);
+
+  ::std::vector<::mock::GLenum> AttachmentIndexes;
+
+  for (::std::size_t i = 0; i < Destinations.size(); i++)
   {
-  public:
-    MOCK_METHOD1(Mapper, bool(Vertex_t *));
-  };
+    auto Format = GL_DEPTH_COMPONENT;
+    auto Attachment = GL_DEPTH_ATTACHMENT;
 
-  Proxy oProxy;
-  Proxy::GetInstance() = &oProxy;
-
-  using GLProxy_t = ::mock::GLProxy;
-  GLProxy_t GLProxy;
-  GLProxy_t::GetInstance() = &GLProxy;
-
-  const ::mock::GLuint BufferId = 1908232202;
-  const ::mock::GLint ProgramId = 1908232203;
-  const ::mock::GLint PositionId = 1908232204;
-  const ::mock::GLint TexCoordId = 1908232205;
-  const ::mock::GLint ExtraId = 1908232206;
-
-  const ::std::vector<Vertex_t> Source1 =
-  {
-    { 
-      1808261932.0f, 1808261933.0f, 1812161256.0f, 1808261934.0f, 
-      1812161257.0f, 1808261935.0f, 
-      1808261936.0f, 1812161258.0f, 1908201945.0f, 1908201946.0f
-    },
+    if (Destinations[i] != uT("depth"))
     {
-      1808261932.0f, 1808261933.0f, 1812161259.0f, 1808261934.0f, 
-      1812161300.0f, 1808261935.0f, 
-      1808261936.0f, 1812161301.0f, 1908201947.0f, 1908201948.0f
-    },
-    { 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f }, // Маркер конца данных
-  };
-
-  const ::std::vector<::mock::GLfloat> Source2 =
-  {
-    1908011341.0f, 1908261933.0f, 1912161256.0f, 1908261934.0f, 
-    1912161257.0f, 1908261935.0f, 
-    1908261936.0f, 1912161258.0f, 1908201949.0f, 1908201950.0f,
-    1908261932.0f, 1908261933.0f, 1912161259.0f, 1908261934.0f, 
-    1912161300.0f, 1908261935.0f, 
-    1908261936.0f, 1912161301.0f, 1908201951.0f, 1908201952.0f,
-  };
-
-  const BufferMapper_t Mapper = [&](Vertex_t * _pData)
-  {
-    if (_pData != nullptr)
-    {
-      memcpy(_pData, Source2.data(), sizeof(::mock::GLfloat) * Source2.size());
+      Format = GL_RGBA;
+      Attachment = GL_COLOR_ATTACHMENT0 +
+        static_cast<int>(AttachmentIndexes.size());
+      AttachmentIndexes.push_back(Attachment);
     }
 
-    return oProxy.Mapper(_pData);
-  };
-
-  const Tested_t Example{ Data_t{} };
-  const ITested_t & IExample = Example;
-
-  auto itCreator = IExample.GetCreators().find(uT("Buffer"));
-  ASSERT_NE(IExample.GetCreators().end(), itCreator);
-
-  auto TestCallRender = [&](const Component_t::ComponentPtr_t & _pComponent)
-  {
-    using namespace ::testing;
-
-    InSequence Dummy;
-
-    EXPECT_CALL(GLProxy, GenBuffers(1))
+    EXPECT_CALL(GLProxy, GenTextures(1))
       .Times(1)
-      .WillOnce(Return(BufferId));
+      .WillOnce(Return(TextureId + i));
 
-    EXPECT_CALL(GLProxy, BindBuffer(GL_ARRAY_BUFFER, BufferId))
+    EXPECT_CALL(GLProxy, BindTexture(GL_TEXTURE_2D, TextureId + i))
       .Times(1);
 
-    const auto Size = 
-      static_cast<::mock::GLsizeiptr>(Source1.size() * sizeof(Vertex_t));
-
-    EXPECT_CALL(GLProxy, 
-      BufferData(GL_ARRAY_BUFFER, Size, Source1.data(), GL_DYNAMIC_DRAW))
+    EXPECT_CALL(GLProxy, TexImage2D(GL_TEXTURE_2D, 0, _,
+      Width, Height, 0, Format, _, nullptr))
       .Times(1);
 
-    EXPECT_CALL(GLProxy, BindBuffer(GL_ARRAY_BUFFER, 0))
+    EXPECT_CALL(GLProxy, BindTexture(GL_TEXTURE_2D, 0))
       .Times(1);
 
     EXPECT_CALL(GLProxy, GetError())
       .Times(1)
       .WillOnce(Return(GL_NO_ERROR));
 
-    const auto Render = itCreator->second(_pComponent);
-    ASSERT_NE(nullptr, Render);
-
-    {
-      EXPECT_CALL(GLProxy, BindBuffer(GL_ARRAY_BUFFER, BufferId))
-        .Times(1);
-
-      EXPECT_CALL(oProxy, Mapper(nullptr))
-        .Times(1)
-        .WillOnce(Return(false));
-
-      EXPECT_CALL(oProxy, Mapper(_))
-        .Times(0);
-
-      EXPECT_CALL(GLProxy, BufferSubData(_, _, _, _))
-        .Times(0);
-
-      EXPECT_CALL(GLProxy, GetIntegerv(GL_CURRENT_PROGRAM))
-        .Times(1)
-        .WillOnce(Return(&ProgramId));
-
-      EXPECT_CALL(GLProxy,
-        GetAttribLocation(ProgramId, Eq("CovelliteVertexPosition")))
-        .Times(1)
-        .WillOnce(Return(PositionId));
-
-      EXPECT_CALL(GLProxy, VertexAttribPointer(PositionId, 4, GL_FLOAT, GL_FALSE,
-        sizeof(Vertex_t), (void*)0))
-        .Times(1);
-
-      EXPECT_CALL(GLProxy, EnableVertexAttribArray(PositionId))
-        .Times(1);
-
-      EXPECT_CALL(GLProxy,
-        GetAttribLocation(ProgramId, Eq("CovellteVertexTexCoord")))
-        .Times(1)
-        .WillOnce(Return(TexCoordId));
-
-      EXPECT_CALL(GLProxy, VertexAttribPointer(TexCoordId, 2, GL_FLOAT, GL_FALSE,
-        sizeof(Vertex_t), (void*)(sizeof(float) * 4)))
-        .Times(1);
-
-      EXPECT_CALL(GLProxy, EnableVertexAttribArray(TexCoordId))
-        .Times(1);
-
-      EXPECT_CALL(GLProxy,
-        GetAttribLocation(ProgramId, Eq("CovelliteVertexExtra")))
-        .Times(1)
-        .WillOnce(Return(ExtraId));
-
-      EXPECT_CALL(GLProxy, VertexAttribPointer(ExtraId, 4, GL_FLOAT, GL_FALSE,
-        sizeof(Vertex_t), (void*)(sizeof(float) * 6)))
-        .Times(1);
-
-      EXPECT_CALL(GLProxy, EnableVertexAttribArray(ExtraId))
-        .Times(1);
-
-      Render();
-    }
-
-    {
-      EXPECT_CALL(GLProxy, BindBuffer(GL_ARRAY_BUFFER, BufferId))
-        .Times(1);
-
-      EXPECT_CALL(oProxy, Mapper(nullptr))
-        .Times(1)
-        .WillOnce(Return(true));
-
-      EXPECT_CALL(oProxy, Mapper(_))
-        .Times(1);
-
-      EXPECT_CALL(GLProxy, BufferSubData(GL_ARRAY_BUFFER, 0, Size, Source2))
-        .Times(1);
-
-      EXPECT_CALL(GLProxy, GetIntegerv(GL_CURRENT_PROGRAM))
-        .Times(1)
-        .WillOnce(Return(&ProgramId));
-
-      EXPECT_CALL(GLProxy,
-        GetAttribLocation(ProgramId, Eq("CovelliteVertexPosition")))
-        .Times(1)
-        .WillOnce(Return(PositionId));
-
-      EXPECT_CALL(GLProxy, VertexAttribPointer(PositionId, 4, GL_FLOAT, GL_FALSE,
-        sizeof(Vertex_t), (void*)0))
-        .Times(1);
-
-      EXPECT_CALL(GLProxy, EnableVertexAttribArray(PositionId))
-        .Times(1);
-
-      EXPECT_CALL(GLProxy,
-        GetAttribLocation(ProgramId, Eq("CovellteVertexTexCoord")))
-        .Times(1)
-        .WillOnce(Return(TexCoordId));
-
-      EXPECT_CALL(GLProxy, VertexAttribPointer(TexCoordId, 2, GL_FLOAT, GL_FALSE,
-        sizeof(Vertex_t), (void*)(sizeof(float) * 4)))
-        .Times(1);
-
-      EXPECT_CALL(GLProxy, EnableVertexAttribArray(TexCoordId))
-        .Times(1);
-
-      EXPECT_CALL(GLProxy,
-        GetAttribLocation(ProgramId, Eq("CovelliteVertexExtra")))
-        .Times(1)
-        .WillOnce(Return(ExtraId));
-
-      EXPECT_CALL(GLProxy, VertexAttribPointer(ExtraId, 4, GL_FLOAT, GL_FALSE,
-        sizeof(Vertex_t), (void*)(sizeof(float) * 6)))
-        .Times(1);
-
-      EXPECT_CALL(GLProxy, EnableVertexAttribArray(ExtraId))
-        .Times(1);
-
-      Render();
-    }
-
-    EXPECT_CALL(GLProxy, DeleteBuffers(1, BufferId))
+    EXPECT_CALL(GLProxy, FramebufferTexture2D(GL_FRAMEBUFFER, Attachment,
+      GL_TEXTURE_2D, TextureId + i, 0))
       .Times(1);
-  };
-
-  // ***************** Передача данных в объекте компонента ***************** //
-
-  {
-    const auto pBuffer = Component_t::Make(
-      {
-        { uT("data"), Source1.data() },
-        { uT("count"), Source1.size() },
-        { uT("mapper"), Mapper },
-      });
-
-    TestCallRender(pBuffer);
   }
 
-  // ************** Передача данных в объекте компонента Data *************** //
+  EXPECT_CALL(GLProxy, CheckFramebufferStatus(GL_FRAMEBUFFER))
+    .Times(1)
+    .WillOnce(Return(GL_FRAMEBUFFER_COMPLETE));
 
+  EXPECT_CALL(GLProxy, BindFramebuffer(GL_FRAMEBUFFER, 0))
+    .Times(1);
+
+  auto Render = itCreator->second(Component_t::Make({}));
+  ASSERT_NE(nullptr, Render);
+
+  EXPECT_CALL(GLProxy, TexImage2D(_, _, _, _, _, _, _, _, _))
+    .Times(0);
+
+  EXPECT_CALL(GLProxy, BindFramebuffer(GL_FRAMEBUFFER, FrameBufferId))
+    .Times(1);
+
+  EXPECT_CALL(GLProxy, DrawBuffers(AttachmentIndexes))
+    .Times(1);
+
+  Render();
+
+  EXPECT_CALL(GLProxy, DeleteFramebuffers(1, FrameBufferId))
+    .Times(1);
+
+  ASSERT_EQ(m_TextureComponents.size(), Destinations.size());
+
+  for (::std::size_t i = 0; i < m_TextureComponents.size(); i++)
   {
-    auto itDataCreator = IExample.GetCreators().find(uT("Data"));
-    ASSERT_NE(IExample.GetCreators().end(), itDataCreator);
+    using Texture_t = ::covellite::api::renderer::OpenGLCommon::Texture;
 
-    const auto pData = Component_t::Make(
-      {
-        { uT("kind"), uT("Buffer") },
-        { uT("data"), Source1.data() },
-        { uT("count"), Source1.size() },
-      });
-
-    auto DataRender = itDataCreator->second(pData);
-    EXPECT_EQ(nullptr, DataRender);
-
-    const auto pBuffer = Component_t::Make(
-      {
-        { uT("mapper"), Mapper },
-      });
-
-    TestCallRender(pBuffer);
+    const auto pTextureComponent = m_TextureComponents[i];
+    const auto pTexture =
+      pTextureComponent->GetValue(uT("entity"), Texture_t::Ptr_t{});
+    ASSERT_NE(nullptr, pTexture);
+    EXPECT_EQ(TextureId + i, pTexture->m_TextureId);
+    EXPECT_EQ(Width * Height * 4, pTexture->m_ReadCopyData.size());
+    EXPECT_EQ(Width, pTextureComponent->GetValue(uT("width"), 0));
+    EXPECT_EQ(Height, pTextureComponent->GetValue(uT("height"), 0));
   }
 }
 
 // ************************************************************************** //
-TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Present_Geometry_Default)
-{
-  using GLProxy_t = ::mock::GLProxy;
-  GLProxy_t GLProxy;
-  GLProxy_t::GetInstance() = &GLProxy;
-
-  const Tested_t Example{ Data_t{} };
-  const ITested_t & IExample = Example;
-
-  const ::mock::GLuint BufferId = 1908241121;
-  const ::mock::GLint ProgramId = 1908241203;
-  const ::mock::GLint MatrixWorldLocationId = 1908241207;
-
-  const ::std::vector<int> Indices =
-  {
-    1808261927,
-    1808261928,
-    1808261929,
-    1808261930,
-    1808261931
-  };
-
-  auto itDataCreator = IExample.GetCreators().find(uT("Data"));
-  ASSERT_NE(IExample.GetCreators().end(), itDataCreator);
-
-  auto itBufferCreator = IExample.GetCreators().find(uT("Buffer"));
-  ASSERT_NE(IExample.GetCreators().end(), itBufferCreator);
-
-  auto itPresentCreator = IExample.GetCreators().find(uT("Present"));
-  ASSERT_NE(IExample.GetCreators().end(), itPresentCreator);
-
-  auto pPosition = Component_t::Make({ { uT("kind"), uT("Position") } });
-  auto pRotation = Component_t::Make({ { uT("kind"), uT("Rotation") } });
-  auto pScale = Component_t::Make({ { uT("kind"), uT("Scale") } });
-
-  auto TestCallRender = [&](
-    const Component_t::ComponentPtr_t & _pIndexBuffer,
-    const Component_t::ComponentPtr_t & _pPresent)
-  {
-    using namespace ::testing;
-
-    InSequence Dummy;
-
-    EXPECT_CALL(GLProxy, GenBuffers(1))
-      .Times(1)
-      .WillOnce(Return(BufferId));
-
-    EXPECT_CALL(GLProxy, BindBuffer(GL_ELEMENT_ARRAY_BUFFER, BufferId))
-      .Times(1);
-
-    const auto Size = 
-      static_cast<::mock::GLsizeiptr>(Indices.size() * sizeof(int));
-
-    EXPECT_CALL(GLProxy, BufferData(GL_ELEMENT_ARRAY_BUFFER,
-      Size, Indices.data(), GL_STATIC_DRAW))
-      .Times(1);
-
-    EXPECT_CALL(GLProxy, BindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0))
-      .Times(1);
-
-    EXPECT_CALL(GLProxy, GetError())
-      .Times(1)
-      .WillOnce(Return(GL_NO_ERROR));
-
-    const auto IndexBufferRender = itBufferCreator->second(_pIndexBuffer);
-    ASSERT_NE(nullptr, IndexBufferRender);
-
-    auto PositionRender = itDataCreator->second(pPosition);
-    EXPECT_EQ(nullptr, PositionRender);
-
-    auto RotationRender = itDataCreator->second(pRotation);
-    EXPECT_EQ(nullptr, RotationRender);
-
-    auto ScaleRender = itDataCreator->second(pScale);
-    EXPECT_EQ(nullptr, ScaleRender);
-
-    const auto Render = itPresentCreator->second(_pPresent);
-    ASSERT_NE(nullptr, Render);
-
-    auto WorldMatrix = ::glm::identity<::glm::mat4>();
-
-    auto TestCallRender = [&](
-      float _X, float _Y, float _Z,
-      float _A, float _B, float _C,
-      float _Sx, float _Sy, float _Sz)
-    {
-      pPosition->SetValue(uT("x"), _X);
-      pPosition->SetValue(uT("y"), _Y);
-      pPosition->SetValue(uT("z"), _Z);
-
-      pRotation->SetValue(uT("x"), _A);
-      pRotation->SetValue(uT("y"), _B);
-      pRotation->SetValue(uT("z"), _C);
-
-      pScale->SetValue(uT("x"), _Sx);
-      pScale->SetValue(uT("y"), _Sy);
-      pScale->SetValue(uT("z"), _Sz);
-
-      WorldMatrix = ::glm::identity<::glm::mat4>();
-      WorldMatrix = ::glm::scale(WorldMatrix, { _Sx, _Sy, _Sz });
-      WorldMatrix = ::glm::rotate(WorldMatrix, _C, { 0.0f, 0.0f, 1.0f });
-      WorldMatrix = ::glm::rotate(WorldMatrix, _B, { 0.0f, 1.0f, 0.0f });
-      WorldMatrix = ::glm::rotate(WorldMatrix, _A, { 1.0f, 0.0f, 0.0f });
-      WorldMatrix = ::glm::translate(WorldMatrix, { _X, _Y, _Z });
-
-      EXPECT_CALL(GLProxy, BindBuffer(GL_ELEMENT_ARRAY_BUFFER, BufferId))
-        .Times(1);
-
-      IndexBufferRender();
-
-      EXPECT_CALL(GLProxy, GetIntegerv(GL_CURRENT_PROGRAM))
-        .Times(1)
-        .WillOnce(Return(&ProgramId));
-
-      EXPECT_CALL(GLProxy, GetUniformLocation(ProgramId, Eq("MatricesData.World")))
-        .Times(1)
-        .WillOnce(Return(MatrixWorldLocationId));
-
-      EXPECT_CALL(GLProxy,
-        UniformMatrix4fv(MatrixWorldLocationId, 1, GL_FALSE, WorldMatrix))
-        .Times(1);
-
-      EXPECT_CALL(GLProxy, DrawElements(GL_TRIANGLES, (int)Indices.size(),
-        GL_UNSIGNED_INT, nullptr))
-        .Times(1);
-
-      EXPECT_CALL(GLProxy, BindTexture(GL_TEXTURE_2D, 0))
-        .Times(1);
-
-      Render();
-    };
-
-    // Два вызова, чтобы убедиться, что изменение исходных данных приводит 
-    // к изменению результата рендеринга.
-
-    TestCallRender(
-      1956.0f, 1957.0f, 1958.0f,
-      1204.0f, 1205.0f, 1206.0f,
-      1152.0f, 1153.0f, 1154.0f);
-
-    TestCallRender(
-      1959.0f, 1960.0f, 1961.0f,
-      1145.0f, 1146.0f, 1147.0f,
-      1155.0f, 1157.0f, 1158.0f);
-
-    EXPECT_CALL(GLProxy, DeleteBuffers(1, BufferId))
-      .Times(1);
-  };
-
-  {
-    // Индексный буфер в компоненте буфера
-
-    const auto pIndexBuffer = Component_t::Make(
-      {
-        { uT("kind"), uT("Index") },
-        { uT("data"), Indices.data() },
-        { uT("count"), Indices.size() },
-      });
-
-    const auto pPresent = Component_t::Make(
-      {
-        { uT("kind"), uT("Geometry") },
-      });
-
-    TestCallRender(pIndexBuffer, pPresent);
-  }
-
-  {
-    // Индексный буфер через компонент Data
-
-    auto IndexBufferDataRender = itDataCreator->second(Component_t::Make(
-      {
-        { uT("kind"), uT("Buffer") },
-        { uT("data"), Indices.data() },
-        { uT("count"), Indices.size() },
-      }));
-    EXPECT_EQ(nullptr, IndexBufferDataRender);
-
-    const auto pIndexBuffer = Component_t::Make(
-      {
-        { uT("kind"), uT("Index") },
-      });
-
-    const auto pPresent = Component_t::Make(
-      {
-        { uT("kind"), uT("Geometry") },
-      });
-
-    TestCallRender(pIndexBuffer, pPresent);
-  }
-}
-
-// ************************************************************************** //
-TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Present_Geometry_Static)
-{
-  using GLProxy_t = ::mock::GLProxy;
-  GLProxy_t GLProxy;
-  GLProxy_t::GetInstance() = &GLProxy;
-
-  const Tested_t Example{ Data_t{} };
-  const ITested_t & IExample = Example;
-
-  const ::mock::GLuint BufferId = 1908241121;
-  const ::mock::GLint ProgramId = 1908241203;
-  const ::mock::GLint MatrixWorldLocationId = 1908241207;
-
-  const ::std::vector<int> Indices =
-  {
-    1808261927,
-    1808261928,
-    1808261929,
-    1808261930,
-    1808261931
-  };
-
-  auto itDataCreator = IExample.GetCreators().find(uT("Data"));
-  ASSERT_NE(IExample.GetCreators().end(), itDataCreator);
-
-  auto itBufferCreator = IExample.GetCreators().find(uT("Buffer"));
-  ASSERT_NE(IExample.GetCreators().end(), itBufferCreator);
-
-  auto itPresentCreator = IExample.GetCreators().find(uT("Present"));
-  ASSERT_NE(IExample.GetCreators().end(), itPresentCreator);
-
-  auto pPosition = Component_t::Make({ { uT("kind"), uT("Position") } });
-  auto pRotation = Component_t::Make({ { uT("kind"), uT("Rotation") } });
-  auto pScale = Component_t::Make({ { uT("kind"), uT("Scale") } });
-
-  auto TestCallRender = [&](
-    const Component_t::ComponentPtr_t & _pIndexBuffer,
-    const Component_t::ComponentPtr_t & _pPresent)
-  {
-    using namespace ::testing;
-
-    InSequence Dummy;
-
-    EXPECT_CALL(GLProxy, GenBuffers(1))
-      .Times(1)
-      .WillOnce(Return(BufferId));
-
-    EXPECT_CALL(GLProxy, BindBuffer(GL_ELEMENT_ARRAY_BUFFER, BufferId))
-      .Times(1);
-
-    const auto Size = 
-      static_cast<::mock::GLsizeiptr>(Indices.size() * sizeof(int));
-
-    EXPECT_CALL(GLProxy, BufferData(GL_ELEMENT_ARRAY_BUFFER,
-      Size, Indices.data(), GL_STATIC_DRAW))
-      .Times(1);
-
-    EXPECT_CALL(GLProxy, BindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0))
-      .Times(1);
-
-    EXPECT_CALL(GLProxy, GetError())
-      .Times(1)
-      .WillOnce(Return(GL_NO_ERROR));
-
-    const auto IndexBufferRender = itBufferCreator->second(_pIndexBuffer);
-    ASSERT_NE(nullptr, IndexBufferRender);
-
-    auto WorldMatrix = ::glm::identity<::glm::mat4>();
-
-    auto SetValues = [&](const bool _IsBuildMatrix,
-      float _X, float _Y, float _Z,
-      float _A, float _B, float _C,
-      float _Sx, float _Sy, float _Sz)
-    {
-      pPosition->SetValue(uT("x"), _X);
-      pPosition->SetValue(uT("y"), _Y);
-      pPosition->SetValue(uT("z"), _Z);
-
-      pRotation->SetValue(uT("x"), _A);
-      pRotation->SetValue(uT("y"), _B);
-      pRotation->SetValue(uT("z"), _C);
-
-      pScale->SetValue(uT("x"), _Sx);
-      pScale->SetValue(uT("y"), _Sy);
-      pScale->SetValue(uT("z"), _Sz);
-
-      if (_IsBuildMatrix)
-      {
-        WorldMatrix = ::glm::identity<::glm::mat4>();
-        WorldMatrix = ::glm::scale(WorldMatrix, { _Sx, _Sy, _Sz });
-        WorldMatrix = ::glm::rotate(WorldMatrix, _C, { 0.0f, 0.0f, 1.0f });
-        WorldMatrix = ::glm::rotate(WorldMatrix, _B, { 0.0f, 1.0f, 0.0f });
-        WorldMatrix = ::glm::rotate(WorldMatrix, _A, { 1.0f, 0.0f, 0.0f });
-        WorldMatrix = ::glm::translate(WorldMatrix, { _X, _Y, _Z });
-      }
-    };
-
-    SetValues(true,
-      1956.0f, 1957.0f, 1958.0f,
-      1204.0f, 1205.0f, 1206.0f,
-      1152.0f, 1153.0f, 1154.0f);
-
-    auto PositionRender = itDataCreator->second(pPosition);
-    EXPECT_EQ(nullptr, PositionRender);
-
-    auto RotationRender = itDataCreator->second(pRotation);
-    EXPECT_EQ(nullptr, RotationRender);
-
-    auto ScaleRender = itDataCreator->second(pScale);
-    EXPECT_EQ(nullptr, ScaleRender);
-
-    const auto Render = itPresentCreator->second(_pPresent);
-    ASSERT_NE(nullptr, Render);
-
-    auto TestCallRender = [&](void)
-    {
-      EXPECT_CALL(GLProxy, BindBuffer(GL_ELEMENT_ARRAY_BUFFER, BufferId))
-        .Times(1);
-
-      IndexBufferRender();
-
-      EXPECT_CALL(GLProxy, GetIntegerv(GL_CURRENT_PROGRAM))
-        .Times(1)
-        .WillOnce(Return(&ProgramId));
-
-      EXPECT_CALL(GLProxy, GetUniformLocation(ProgramId, Eq("MatricesData.World")))
-        .Times(1)
-        .WillOnce(Return(MatrixWorldLocationId));
-
-      EXPECT_CALL(GLProxy,
-        UniformMatrix4fv(MatrixWorldLocationId, 1, GL_FALSE, WorldMatrix))
-        .Times(1);
-
-      EXPECT_CALL(GLProxy, DrawElements(GL_TRIANGLES, (int)Indices.size(),
-        GL_UNSIGNED_INT, nullptr))
-        .Times(1);
-
-      EXPECT_CALL(GLProxy, BindTexture(GL_TEXTURE_2D, 0))
-        .Times(1);
-
-      Render();
-    };
-
-    // Два вызова, чтобы убедиться, что изменение исходных данных не приводит 
-    // к изменению результата рендеринга.
-
-    TestCallRender();
-
-    SetValues(false,
-      1959.0f, 1960.0f, 1961.0f,
-      1145.0f, 1146.0f, 1147.0f,
-      1155.0f, 1157.0f, 1158.0f);
-
-    TestCallRender();
-
-    EXPECT_CALL(GLProxy, DeleteBuffers(1, BufferId))
-      .Times(1);
-  };
-
-  {
-    // Индексный буфер в компоненте буфера
-
-    const auto pIndexBuffer = Component_t::Make(
-      {
-        { uT("kind"), uT("Index") },
-        { uT("data"), Indices.data() },
-        { uT("count"), Indices.size() },
-      });
-
-    const auto pPresent = Component_t::Make(
-      {
-        { uT("kind"), uT("Geometry") },
-        { uT("variety"), uT("Static") },
-      });
-
-    TestCallRender(pIndexBuffer, pPresent);
-  }
-
-  {
-    // Индексный буфер через компонент Data
-
-    auto IndexBufferDataRender = itDataCreator->second(Component_t::Make(
-      {
-        { uT("kind"), uT("Buffer") },
-        { uT("data"), Indices.data() },
-        { uT("count"), Indices.size() },
-      }));
-    EXPECT_EQ(nullptr, IndexBufferDataRender);
-
-    const auto pIndexBuffer = Component_t::Make(
-      {
-        { uT("kind"), uT("Index") },
-      });
-
-    const auto pPresent = Component_t::Make(
-      {
-        { uT("kind"), uT("Geometry") },
-        { uT("variety"), uT("Static") },
-      });
-
-    TestCallRender(pIndexBuffer, pPresent);
-  }
-}
-
-// ************************************************************************** //
-TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Present_Geometry_Billboard)
+TEST_F(OpenGLShader_test, /*DISABLED_*/Test_BkSurface_ResizeWindow)
 {
   using GLProxy_t = ::mock::GLProxy;
   GLProxy_t GLProxy;
   GLProxy_t::GetInstance() = &GLProxy;
 
   Tested_t Example{ Data_t{} };
-  const ITested_t & IExample = Example;
-
-  const ::mock::GLuint BufferId = 1908241121;
-  const ::mock::GLint ProgramId = 1908241203;
-  const ::mock::GLint MatrixWorldLocationId = 1908241207;
-
-  const ::std::vector<int> Indices =
-  {
-    1808261927,
-    1808261928,
-    1808261929,
-    1808261930,
-    1808261931
-  };
+  ITested_t & IExample = Example;
+  IExample.PresentFrame();
 
   auto itDataCreator = IExample.GetCreators().find(uT("Data"));
   ASSERT_NE(IExample.GetCreators().end(), itDataCreator);
 
-  auto itBufferCreator = IExample.GetCreators().find(uT("Buffer"));
-  ASSERT_NE(IExample.GetCreators().end(), itBufferCreator);
+  auto itCreator = IExample.GetCreators().find(uT("BkSurface"));
+  ASSERT_NE(IExample.GetCreators().end(), itCreator);
 
-  auto itPresentCreator = IExample.GetCreators().find(uT("Present"));
-  ASSERT_NE(IExample.GetCreators().end(), itPresentCreator);
+  const ::mock::GLuint TextureId = 1910091302;
+  const int Width = 91305;
+  const int Height = 91306;
 
-  auto pPosition = Component_t::Make({ { uT("kind"), uT("Position") } });
-
-  auto TestCallRender = [&](
-    const Component_t::ComponentPtr_t & _pIndexBuffer,
-    const Component_t::ComponentPtr_t & _pPresent)
+  const float Viewport[] =
   {
-    using namespace ::testing;
+    0.0f, 0.0f, (float)Width, (float)Height
+  };
 
-    InSequence Dummy;
+  const ::std::vector<String_t> Destinations =
+  {
+    uT("albedo"),
+    uT("metalness"),
+    uT("roughness"),
+    uT("normal"),
+    uT("occlusion"),
+    uT("depth"),
+  };
 
-    EXPECT_CALL(GLProxy, GenBuffers(1))
+  using namespace ::testing;
+
+  InSequence Dummy;
+
+  ::std::vector<Component_t::ComponentPtr_t> m_TextureComponents;
+
+  for (::std::size_t i = 0; i < Destinations.size(); i++)
+  {
+    const auto pTexture = Component_t::Make(
+      {
+        { uT("kind"), uT("Texture") },
+        { uT("destination"), Destinations[i] },
+      });
+
+    auto DataRender = itDataCreator->second(pTexture);
+    EXPECT_EQ(nullptr, DataRender);
+
+    m_TextureComponents.push_back(pTexture);
+  }
+
+  EXPECT_CALL(GLProxy, GetFloatv(GL_VIEWPORT))
+    .Times(1)
+    .WillOnce(Return(Viewport));
+
+  for (::std::size_t i = 0; i < Destinations.size(); i++)
+  {
+    EXPECT_CALL(GLProxy, GenTextures(1))
       .Times(1)
-      .WillOnce(Return(BufferId));
+      .WillOnce(Return(TextureId + i));
 
-    EXPECT_CALL(GLProxy, BindBuffer(GL_ELEMENT_ARRAY_BUFFER, BufferId))
+    EXPECT_CALL(GLProxy, BindTexture(GL_TEXTURE_2D, TextureId + i))
       .Times(1);
 
-    const auto Size = 
-      static_cast<::mock::GLsizeiptr>(Indices.size() * sizeof(int));
-
-    EXPECT_CALL(GLProxy, BufferData(GL_ELEMENT_ARRAY_BUFFER,
-      Size, Indices.data(), GL_STATIC_DRAW))
+    EXPECT_CALL(GLProxy, TexImage2D(GL_TEXTURE_2D, _, _,
+      Width, Height, _, _, _, nullptr))
       .Times(1);
 
-    EXPECT_CALL(GLProxy, BindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0))
+    EXPECT_CALL(GLProxy, BindTexture(GL_TEXTURE_2D, 0))
       .Times(1);
 
     EXPECT_CALL(GLProxy, GetError())
       .Times(1)
       .WillOnce(Return(GL_NO_ERROR));
-
-    const auto IndexBufferRender = itBufferCreator->second(_pIndexBuffer);
-    ASSERT_NE(nullptr, IndexBufferRender);
-
-    auto PositionRender = itDataCreator->second(pPosition);
-    EXPECT_EQ(nullptr, PositionRender);
-
-    const auto Render = itPresentCreator->second(_pPresent);
-    ASSERT_NE(nullptr, Render);
-
-    auto WorldMatrix = ::glm::identity<::glm::mat4>();
-
-    auto TestCallRender = [&](float _X, float _Y, float _Z)
-    {
-      pPosition->SetValue(uT("x"), _X);
-      pPosition->SetValue(uT("y"), _Y);
-      pPosition->SetValue(uT("z"), _Z);
-
-      WorldMatrix = ::glm::identity<::glm::mat4>();
-      WorldMatrix = ::glm::translate(WorldMatrix, { _X, _Y, _Z });
-
-      const auto ViewMatrix = ::glm::mat4
-      {
-        { 1.0f, 2.0f, 3.0f, 4.0f },
-        { 5.0f, 6.0f, 7.0f, 8.0f },
-        { 9.0f, 10.0f, 11.0f, 12.0f },
-        { 13.0f, 14.0f, 15.0f, 16.0f },
-      };
-
-      GetCameraMartix(Example).View = ViewMatrix;
-
-      auto TransposeViewMatrix = ::glm::transpose(ViewMatrix);
-      TransposeViewMatrix[0][3] = 0.0f;
-      TransposeViewMatrix[1][3] = 0.0f;
-      TransposeViewMatrix[2][3] = 0.0f;
-      TransposeViewMatrix[3][0] = 0.0f;
-      TransposeViewMatrix[3][1] = 0.0f;
-      TransposeViewMatrix[3][2] = 0.0f;
-      TransposeViewMatrix[3][3] = 1.0f;
-
-      WorldMatrix = TransposeViewMatrix *
-        ::glm::translate(::glm::identity<::glm::mat4>(), { _X, _Y, _Z });
-
-      EXPECT_CALL(GLProxy, BindBuffer(GL_ELEMENT_ARRAY_BUFFER, BufferId))
-        .Times(1);
-
-      IndexBufferRender();
-
-      EXPECT_CALL(GLProxy, GetIntegerv(GL_CURRENT_PROGRAM))
-        .Times(1)
-        .WillOnce(Return(&ProgramId));
-
-      EXPECT_CALL(GLProxy, GetUniformLocation(ProgramId, Eq("MatricesData.World")))
-        .Times(1)
-        .WillOnce(Return(MatrixWorldLocationId));
-
-      EXPECT_CALL(GLProxy,
-        UniformMatrix4fv(MatrixWorldLocationId, 1, GL_FALSE, WorldMatrix))
-        .Times(1);
-
-      EXPECT_CALL(GLProxy, DrawElements(GL_TRIANGLES, (int)Indices.size(),
-        GL_UNSIGNED_INT, nullptr))
-        .Times(1);
-
-      EXPECT_CALL(GLProxy, BindTexture(GL_TEXTURE_2D, 0))
-        .Times(1);
-
-      Render();
-    };
-
-    // Два вызова, чтобы убедиться, что изменение исходных данных приводит 
-    // к изменению результата рендеринга.
-
-    TestCallRender(1956.0f, 1957.0f, 1958.0f);
-
-    TestCallRender(1959.0f, 1960.0f, 1961.0f);
-
-    EXPECT_CALL(GLProxy, DeleteBuffers(1, BufferId))
-      .Times(1);
-  };
-
-  {
-    // Индексный буфер в компоненте буфера
-
-    const auto pIndexBuffer = Component_t::Make(
-      {
-        { uT("kind"), uT("Index") },
-        { uT("data"), Indices.data() },
-        { uT("count"), Indices.size() },
-      });
-
-    const auto pPresent = Component_t::Make(
-      {
-        { uT("kind"), uT("Geometry") },
-        { uT("variety"), uT("Billboard") },
-      });
-
-    TestCallRender(pIndexBuffer, pPresent);
   }
 
+  EXPECT_CALL(GLProxy, CheckFramebufferStatus(GL_FRAMEBUFFER))
+    .Times(1)
+    .WillOnce(Return(GL_FRAMEBUFFER_COMPLETE));
+
+  auto Render = itCreator->second(Component_t::Make({}));
+  ASSERT_NE(nullptr, Render);
+
+  EXPECT_CALL(GLProxy, TexImage2D(_, _, _, _, _, _, _, _, _))
+    .Times(0);
+
+  EXPECT_CALL(GLProxy, BindFramebuffer(GL_FRAMEBUFFER, _))
+    .Times(1);
+
+  Render();
+  IExample.PresentFrame();
+
+  const int Width2 = 91307;
+  const int Height2 = 91308;
+
+  const float Viewport2[] =
   {
-    // Индексный буфер через компонент Data
+    0.0f, 0.0f, (float)Width2, (float)Height2
+  };
 
-    auto IndexBufferDataRender = itDataCreator->second(Component_t::Make(
-      {
-        { uT("kind"), uT("Buffer") },
-        { uT("data"), Indices.data() },
-        { uT("count"), Indices.size() },
-      }));
-    EXPECT_EQ(nullptr, IndexBufferDataRender);
+  IExample.ResizeWindow(Width2, Height2);
 
-    const auto pIndexBuffer = Component_t::Make(
-      {
-        { uT("kind"), uT("Index") },
-      });
+  EXPECT_CALL(GLProxy, GetFloatv(GL_VIEWPORT))
+    .Times(1)
+    .WillOnce(Return(Viewport2));
 
-    const auto pPresent = Component_t::Make(
-      {
-        { uT("kind"), uT("Geometry") },
-        { uT("variety"), uT("Billboard") },
-      });
+  for (::std::size_t i = 0; i < Destinations.size(); i++)
+  {
+    EXPECT_CALL(GLProxy, BindTexture(GL_TEXTURE_2D, TextureId + i))
+      .Times(1);
 
-    TestCallRender(pIndexBuffer, pPresent);
+    EXPECT_CALL(GLProxy, TexImage2D(GL_TEXTURE_2D, _, _,
+      Width2, Height2, _, _, _, nullptr))
+      .Times(1);
+
+    EXPECT_CALL(GLProxy, BindTexture(GL_TEXTURE_2D, 0))
+      .Times(1);
+
+    EXPECT_CALL(GLProxy, GetError())
+      .Times(1)
+      .WillOnce(Return(GL_NO_ERROR));
+  }
+
+  EXPECT_CALL(GLProxy, BindFramebuffer(GL_FRAMEBUFFER, _))
+    .Times(1);
+
+  Render();
+  IExample.PresentFrame();
+
+  EXPECT_CALL(GLProxy, TexImage2D(_, _, _, _, _, _, _, _, _))
+    .Times(0);
+
+  EXPECT_CALL(GLProxy, BindFramebuffer(GL_FRAMEBUFFER, _))
+    .Times(1);
+
+  Render();
+  IExample.PresentFrame();
+
+  for (::std::size_t i = 0; i < m_TextureComponents.size(); i++)
+  {
+    const auto pTextureComponent = m_TextureComponents[i];
+    EXPECT_EQ(Width2, pTextureComponent->GetValue(uT("width"), 0));
+    EXPECT_EQ(Height2, pTextureComponent->GetValue(uT("height"), 0));
   }
 }
 
 // ************************************************************************** //
-TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Present_Geometry_DefaultTransformValues)
+TEST_F(OpenGLShader_test, /*DISABLED_*/Test_BkSurface_ResizeWindow_Mapping)
 {
+  using Texture_t = ::covellite::api::renderer::OpenGLCommon::Texture;
+  using BufferMapper_t = ::covellite::api::cbBufferMap_t<const void>;
+
   using GLProxy_t = ::mock::GLProxy;
   GLProxy_t GLProxy;
   GLProxy_t::GetInstance() = &GLProxy;
 
   Tested_t Example{ Data_t{} };
-  const ITested_t & IExample = Example;
+  ITested_t & IExample = Example;
+  IExample.PresentFrame();
 
   auto itDataCreator = IExample.GetCreators().find(uT("Data"));
   ASSERT_NE(IExample.GetCreators().end(), itDataCreator);
 
-  auto itPresentCreator = IExample.GetCreators().find(uT("Present"));
-  ASSERT_NE(IExample.GetCreators().end(), itPresentCreator);
-
-  auto pPosition = Component_t::Make({ { uT("kind"), uT("Position") } });
-  auto pRotation = Component_t::Make({ { uT("kind"), uT("Rotation") } });
-  auto pScale = Component_t::Make({ { uT("kind"), uT("Scale") } });
-
-  auto TestCallRender = [&](const Component_t::ComponentPtr_t & _pComponent,
-    const bool _IsFullTransform = true)
-  {
-    auto PositionRender = itDataCreator->second(pPosition);
-    EXPECT_EQ(nullptr, PositionRender);
-
-    if (_IsFullTransform)
-    {
-      auto RotationRender = itDataCreator->second(pRotation);
-      EXPECT_EQ(nullptr, RotationRender);
-
-      auto ScaleRender = itDataCreator->second(pScale);
-      EXPECT_EQ(nullptr, ScaleRender);
-    }
-
-    const auto Render = itPresentCreator->second(_pComponent);
-    ASSERT_NE(nullptr, Render);
-
-    const auto ViewMatrix = ::glm::mat4
-    {
-      { 1.0f, 2.0f, 3.0f, 4.0f },
-      { 5.0f, 6.0f, 7.0f, 8.0f },
-      { 9.0f, 10.0f, 11.0f, 12.0f },
-      { 13.0f, 14.0f, 15.0f, 16.0f },
-    };
-
-    GetCameraMartix(Example).View = ViewMatrix;
-
-    auto WorldMatrix = ::glm::identity<::glm::mat4>();
-
-    if (_IsFullTransform)
-    {
-      WorldMatrix = ::glm::scale(WorldMatrix, { 1.0f, 1.0f, 1.0f });
-    }
-    else
-    {
-      auto TransposeViewMatrix = ::glm::transpose(ViewMatrix);
-      TransposeViewMatrix[0][3] = 0.0f;
-      TransposeViewMatrix[1][3] = 0.0f;
-      TransposeViewMatrix[2][3] = 0.0f;
-      TransposeViewMatrix[3][0] = 0.0f;
-      TransposeViewMatrix[3][1] = 0.0f;
-      TransposeViewMatrix[3][2] = 0.0f;
-      TransposeViewMatrix[3][3] = 1.0f;
-
-      WorldMatrix = TransposeViewMatrix;
-    }
-
-    using namespace ::testing;
-
-    EXPECT_CALL(GLProxy, UniformMatrix4fv(_, _, _, WorldMatrix))
-      .Times(1);
-
-    Render();
-  };
-
-  TestCallRender(Component_t::Make(
-    {
-      { uT("kind"), uT("Geometry") },
-    }));
-
-  TestCallRender(Component_t::Make(
-    {
-      { uT("kind"), uT("Geometry") },
-      { uT("variety"), uT("Static") },
-    }));
-
-  TestCallRender(Component_t::Make(
-    {
-      { uT("kind"), uT("Geometry") },
-      { uT("variety"), uT("Billboard") },
-    }), false);
-}
-
-// ************************************************************************** //
-TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Present_Geometry_CombineTransform)
-{
-  using GLProxy_t = ::mock::GLProxy;
-  GLProxy_t GLProxy;
-  GLProxy_t::GetInstance() = &GLProxy;
-
-  Tested_t Example{ Data_t{} };
-  const ITested_t & IExample = Example;
-
-  auto itDataCreator = IExample.GetCreators().find(uT("Data"));
-  ASSERT_NE(IExample.GetCreators().end(), itDataCreator);
-
-  auto itCreator = IExample.GetCreators().find(uT("Present"));
+  auto itCreator = IExample.GetCreators().find(uT("BkSurface"));
   ASSERT_NE(IExample.GetCreators().end(), itCreator);
 
-  auto MatrixIdentity = ::glm::identity<::glm::mat4>();
+  const ::mock::GLuint TextureId = 1910091302;
+  const int Width = 18;
+  const int Height = 53;
 
-  ::std::deque<Component_t::ComponentPtr_t> Components;
-
-  const auto SetPosition = [&](float _X, float _Y, float _Z)
+  const float Viewport[] =
   {
-    Components.push_front(Component_t::Make(
-      {
-        { uT("kind"), uT("Position") },
-        { uT("x"), _X },
-        { uT("y"), _Y },
-        { uT("z"), _Z },
-      }));
-
-    MatrixIdentity = ::glm::translate(MatrixIdentity, { _X, _Y, _Z });
+    0.0f, 0.0f, (float)Width, (float)Height
   };
 
-  const auto SetRotation = [&](float _X, float _Y, float _Z)
+  const ::std::vector<String_t> Destinations =
   {
-    Components.push_front(Component_t::Make(
-      {
-        { uT("kind"), uT("Rotation") },
-        { uT("x"), _X },
-        { uT("y"), _Y },
-        { uT("z"), _Z },
-      }));
-
-    MatrixIdentity = ::glm::rotate(MatrixIdentity, _Z, { 0.0f, 0.0f, 1.0f });
-    MatrixIdentity = ::glm::rotate(MatrixIdentity, _Y, { 0.0f, 1.0f, 0.0f });
-    MatrixIdentity = ::glm::rotate(MatrixIdentity, _X, { 1.0f, 0.0f, 0.0f });
+    uT("albedo"),
+    uT("metalness"),
+    uT("roughness"),
+    uT("normal"),
+    uT("occlusion"),
+    uT("depth"),
   };
 
-  const auto SetScale = [&](float _X, float _Y, float _Z)
+  using namespace ::testing;
+
+  InSequence Dummy;
+
+  ::std::vector<Component_t::ComponentPtr_t> m_TextureComponents;
+
+  for (::std::size_t i = 0; i < Destinations.size(); i++)
   {
-    Components.push_front(Component_t::Make(
+    const auto pTexture = Component_t::Make(
       {
-        { uT("kind"), uT("Scale") },
-        { uT("x"), _X },
-        { uT("y"), _Y },
-        { uT("z"), _Z },
-      }));
+        { uT("kind"), uT("Texture") },
+        { uT("destination"), Destinations[i] },
+        { uT("mapper"), BufferMapper_t{}}
+     });
 
-    MatrixIdentity = ::glm::scale(MatrixIdentity, { _X, _Y, _Z });
-  };
+    auto DataRender = itDataCreator->second(pTexture);
+    EXPECT_EQ(nullptr, DataRender);
 
-  {
-    MatrixIdentity = ::glm::identity<::glm::mat4>();
-    Components.clear();
-
-    SetPosition(1.0f, 2.0f, 3.0f);
-    SetRotation(4.0f, 5.0f, 6.0f);
-    SetScale(7.0f, 8.0f, 9.0f);
-
-    SetPosition(11.0f, 22.0f, 33.0f);
-    SetRotation(44.0f, 55.0f, 66.0f);
-    SetScale(77.0f, 88.0f, 99.0f);
-
-    for (const auto & pComponent : Components)
-    {
-      auto ScaleRender = itDataCreator->second(pComponent);
-      EXPECT_EQ(nullptr, ScaleRender);
-    }
-
-    auto Render = itCreator->second(Component_t::Make(
-      {
-        { uT("kind"), uT("Geometry") }
-      }));
-    ASSERT_NE(nullptr, Render);
-
-    using namespace ::testing;
-
-    InSequence Dummy;
-
-    EXPECT_CALL(GLProxy, UniformMatrix4fv(_, _, _, MatrixIdentity))
-      .Times(1);
-
-    Render();
+    m_TextureComponents.push_back(pTexture);
   }
 
+  EXPECT_CALL(GLProxy, GetFloatv(GL_VIEWPORT))
+    .Times(1)
+    .WillOnce(Return(Viewport));
+
+  for (::std::size_t i = 0; i < Destinations.size(); i++)
   {
-    MatrixIdentity = ::glm::identity<::glm::mat4>();
-    Components.clear();
+    EXPECT_CALL(GLProxy, GenTextures(1))
+      .Times(1)
+      .WillOnce(Return(TextureId + i));
 
-    SetPosition(1.0f, 2.0f, 3.0f);
-    SetRotation(4.0f, 5.0f, 6.0f);
-    SetScale(7.0f, 8.0f, 9.0f);
-
-    SetPosition(11.0f, 22.0f, 33.0f);
-    SetRotation(44.0f, 55.0f, 66.0f);
-    SetScale(77.0f, 88.0f, 99.0f);
-
-    for (const auto & pComponent : Components)
-    {
-      auto ScaleRender = itDataCreator->second(pComponent);
-      EXPECT_EQ(nullptr, ScaleRender);
-    }
-
-    auto Render = itCreator->second(Component_t::Make(
-      {
-        { uT("kind"), uT("Geometry") },
-        { uT("variety"), uT("Static") },
-      }));
-    ASSERT_NE(nullptr, Render);
-
-    using namespace ::testing;
-
-    InSequence Dummy;
-
-    EXPECT_CALL(GLProxy, UniformMatrix4fv(_, _, _, MatrixIdentity))
+    EXPECT_CALL(GLProxy, BindTexture(GL_TEXTURE_2D, TextureId + i))
       .Times(1);
 
-    Render();
+    EXPECT_CALL(GLProxy, TexImage2D(GL_TEXTURE_2D, _, _,
+      Width, Height, _, _, _, nullptr))
+      .Times(1);
+
+    EXPECT_CALL(GLProxy, BindTexture(GL_TEXTURE_2D, 0))
+      .Times(1);
+
+    EXPECT_CALL(GLProxy, GetError())
+      .Times(1)
+      .WillOnce(Return(GL_NO_ERROR));
   }
 
+  EXPECT_CALL(GLProxy, CheckFramebufferStatus(GL_FRAMEBUFFER))
+    .Times(1)
+    .WillOnce(Return(GL_FRAMEBUFFER_COMPLETE));
+
+  auto Render = itCreator->second(Component_t::Make({}));
+  ASSERT_NE(nullptr, Render);
+
+  for (::std::size_t i = 0; i < m_TextureComponents.size(); i++)
   {
-    const auto ViewMatrix = ::glm::mat4
-    {
-      { 1.0f, 2.0f, 3.0f, 4.0f },
-      { 5.0f, 6.0f, 7.0f, 8.0f },
-      { 9.0f, 10.0f, 11.0f, 12.0f },
-      { 13.0f, 14.0f, 15.0f, 16.0f },
-    };
+    const auto pTextureComponent = m_TextureComponents[i];
+    EXPECT_EQ(Width, pTextureComponent->GetValue(uT("width"), 0));
+    EXPECT_EQ(Height, pTextureComponent->GetValue(uT("height"), 0));
 
-    GetCameraMartix(Example).View = ViewMatrix;
+    const auto pTexture =
+      pTextureComponent->GetValue(uT("entity"), Texture_t::Ptr_t{});
+    ASSERT_NE(nullptr, pTexture);
+    EXPECT_EQ(Width * Height * 4, pTexture->m_ReadCopyData.size());
+  }
 
-    auto TransposeViewMatrix = ::glm::transpose(ViewMatrix);
-    TransposeViewMatrix[0][3] = 0.0f;
-    TransposeViewMatrix[1][3] = 0.0f;
-    TransposeViewMatrix[2][3] = 0.0f;
-    TransposeViewMatrix[3][0] = 0.0f;
-    TransposeViewMatrix[3][1] = 0.0f;
-    TransposeViewMatrix[3][2] = 0.0f;
-    TransposeViewMatrix[3][3] = 1.0f;
+  EXPECT_CALL(GLProxy, TexImage2D(_, _, _, _, _, _, _, _, _))
+    .Times(0);
 
-    MatrixIdentity = TransposeViewMatrix;
-    Components.clear();
+  EXPECT_CALL(GLProxy, BindFramebuffer(GL_FRAMEBUFFER, _))
+    .Times(1);
 
-    SetPosition(1.0f, 2.0f, 3.0f);
-    SetPosition(11.0f, 22.0f, 33.0f);
-    SetPosition(111.0f, 222.0f, 333.0f);
+  Render();
+  IExample.PresentFrame();
 
-    for (const auto & pComponent : Components)
-    {
-      auto ScaleRender = itDataCreator->second(pComponent);
-      EXPECT_EQ(nullptr, ScaleRender);
-    }
+  const int Width2 = 36;
+  const int Height2 = 17;
 
-    auto Render = itCreator->second(Component_t::Make(
-      {
-        { uT("kind"), uT("Geometry") },
-        { uT("variety"), uT("Billboard") },
-      }));
-    ASSERT_NE(nullptr, Render);
+  const float Viewport2[] =
+  {
+    0.0f, 0.0f, (float)Width2, (float)Height2
+  };
 
-    using namespace ::testing;
+  IExample.ResizeWindow(Width2, Height2);
 
-    InSequence Dummy;
+  EXPECT_CALL(GLProxy, GetFloatv(GL_VIEWPORT))
+    .Times(1)
+    .WillOnce(Return(Viewport2));
 
-    EXPECT_CALL(GLProxy, UniformMatrix4fv(_, _, _, MatrixIdentity))
+  for (::std::size_t i = 0; i < Destinations.size(); i++)
+  {
+    EXPECT_CALL(GLProxy, BindTexture(GL_TEXTURE_2D, TextureId + i))
       .Times(1);
 
-    Render();
+    EXPECT_CALL(GLProxy, TexImage2D(GL_TEXTURE_2D, _, _,
+      Width2, Height2, _, _, _, nullptr))
+      .Times(1);
+
+    EXPECT_CALL(GLProxy, BindTexture(GL_TEXTURE_2D, 0))
+      .Times(1);
+
+    EXPECT_CALL(GLProxy, GetError())
+      .Times(1)
+      .WillOnce(Return(GL_NO_ERROR));
+  }
+
+  EXPECT_CALL(GLProxy, BindFramebuffer(GL_FRAMEBUFFER, _))
+    .Times(1);
+
+  Render();
+  IExample.PresentFrame();
+
+  EXPECT_CALL(GLProxy, TexImage2D(_, _, _, _, _, _, _, _, _))
+    .Times(0);
+
+  EXPECT_CALL(GLProxy, BindFramebuffer(GL_FRAMEBUFFER, _))
+    .Times(1);
+
+  Render();
+  IExample.PresentFrame();
+
+  for (::std::size_t i = 0; i < m_TextureComponents.size(); i++)
+  {
+    const auto pTextureComponent = m_TextureComponents[i];
+    EXPECT_EQ(Width2, pTextureComponent->GetValue(uT("width"), 0));
+    EXPECT_EQ(Height2, pTextureComponent->GetValue(uT("height"), 0));
+
+    const auto pTexture =
+      pTextureComponent->GetValue(uT("entity"), Texture_t::Ptr_t{});
+    ASSERT_NE(nullptr, pTexture);
+    EXPECT_EQ(Width2 * Height2 * 4, pTexture->m_ReadCopyData.size());
   }
 }
 
@@ -1870,13 +962,13 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Shader_CompileFail)
       .Times(1);
 
     EXPECT_STDEXCEPTION(itCreator->second(_pShader),
-      (".*Compile shader fail: " + ErrorText).c_str());
+      (".*Compile shader fail: " + ErrorText + " \\[header line: 266\\]").c_str());
   };
 
   {
     const auto pShader = Component_t::Make(
       {
-        { uT("entry"), uT("vsGui") },
+        { uT("entry"), uT("vsFlat") },
       });
 
     TestCall(pShader);
@@ -1886,7 +978,7 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Shader_CompileFail)
     const auto pData = Component_t::Make(
       {
         { uT("kind"), uT("Shader") },
-        { uT("entry"), uT("vsLights") },
+        { uT("entry"), uT("vsVolume") },
       });
 
     auto DataRender = itDataCreator->second(pData);
@@ -1898,8 +990,7 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Shader_CompileFail)
 
 ::std::string ConvertTextShader(const ::std::vector<uint8_t> & _ShaderText)
 {
-  return ::std::string{ 
-    reinterpret_cast<const char *>(_ShaderText.data()), _ShaderText.size() };
+  return ::std::string{ _ShaderText.cbegin(), _ShaderText.cend() };
 }
 
 // ************************************************************************** //
@@ -1934,9 +1025,9 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Shader_CreateVertex_Default)
       "void main()\r\n"
       "{\r\n"
       "  Vertex InputData;\r\n"
-      "  InputData.Position = CovelliteVertexPosition;\r\n"
-      "  InputData.TexCoord = CovellteVertexTexCoord;\r\n"
-      "  InputData.Extra = CovelliteVertexExtra;\r\n"
+      "  InputData.Position = Covellite_VertexPosition;\r\n"
+      "  InputData.TexCoord = Covellite_VertexTexCoord;\r\n"
+      "  InputData.Extra = Covellite_VertexExtra;\r\n"
       "  PixelValue = " + _Entry + "(InputData);\r\n"
       "  gl_Position = PixelValue.ScreenPos;\r\n"
       "}\r\n";
@@ -1971,23 +1062,23 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Shader_CreateVertex_Default)
   {
     const auto pShader = Component_t::Make(
       {
-        { uT("entry"), uT("vsGui") },
+        { uT("entry"), uT("vsFlat") },
       });
 
-    TestCall(pShader, "vsGui");
+    TestCall(pShader, "vsFlat");
   }
 
   {
     const auto pData = Component_t::Make(
       {
         { uT("kind"), uT("Shader") },
-        { uT("entry"), uT("vsLights") },
+        { uT("entry"), uT("vsVolume") },
       });
 
     auto DataRender = itDataCreator->second(pData);
     EXPECT_EQ(nullptr, DataRender);
 
-    TestCall(Component_t::Make({}), "vsLights");
+    TestCall(Component_t::Make({}), "vsVolume");
   }
 }
 
@@ -2027,9 +1118,9 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Shader_CreateVertex)
       "void main()\r\n"
       "{\r\n"
       "  Vertex InputData;\r\n"
-      "  InputData.Position = CovelliteVertexPosition;\r\n"
-      "  InputData.TexCoord = CovellteVertexTexCoord;\r\n"
-      "  InputData.Extra = CovelliteVertexExtra;\r\n"
+      "  InputData.Position = Covellite_VertexPosition;\r\n"
+      "  InputData.TexCoord = Covellite_VertexTexCoord;\r\n"
+      "  InputData.Extra = Covellite_VertexExtra;\r\n"
       "  PixelValue = " + _Entry + "(InputData);\r\n"
       "  gl_Position = PixelValue.ScreenPos;\r\n"
       "}\r\n";
@@ -2042,7 +1133,7 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Shader_CreateVertex)
       .Times(1)
       .WillOnce(Return(ShaderId));
 
-    EXPECT_CALL(GLProxy, ShaderSource(ShaderId, 1, _, nullptr))
+    EXPECT_CALL(GLProxy, ShaderSource(ShaderId, 1, ExpectedShaderText, nullptr))
       .Times(1);
 
     EXPECT_CALL(GLProxy, CompileShader(ShaderId))
@@ -2089,6 +1180,178 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Shader_CreateVertex)
 }
 
 // ************************************************************************** //
+TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Shader_CreateVertex_Instance_InvalidValue)
+{
+  const ::std::string ShaderData =
+    "Pixel vs1(Vertex _Value)\r\n"
+    "Pixel vs2(Vertex _Value)\r\n";
+
+  using GLProxy_t = ::mock::GLProxy;
+  GLProxy_t GLProxy;
+  GLProxy_t::GetInstance() = &GLProxy;
+
+  const Tested_t Example{ Data_t{} };
+  const ITested_t & IExample = Example;
+
+  auto itDataCreator = IExample.GetCreators().find(uT("Data"));
+  ASSERT_NE(IExample.GetCreators().end(), itDataCreator);
+
+  auto itCreator = IExample.GetCreators().find(uT("Shader"));
+  ASSERT_NE(IExample.GetCreators().end(), itCreator);
+
+  using namespace ::testing;
+
+  const auto TestCall = [&](const Component_t::ComponentPtr_t & _pShader)
+  {
+    EXPECT_CALL(GLProxy, CompileShader(_))
+      .Times(0);
+
+    EXPECT_THROW(itCreator->second(_pShader), ::std::exception);
+  };
+
+  {
+    const auto pShader = Component_t::Make(
+      {
+        { uT("entry"), uT("vs1") },
+        { uT("data"), (const uint8_t *)ShaderData.data() },
+        { uT("count"), ShaderData.size() },
+        { uT("instance"), uT("invalid1909231417") },
+      });
+
+    TestCall(pShader);
+  }
+
+  {
+    const auto pData = Component_t::Make(
+      {
+        { uT("kind"), uT("Shader") },
+        { uT("entry"), uT("vs2") },
+        { uT("data"), (const uint8_t *)ShaderData.data() },
+        { uT("count"), ShaderData.size() },
+        { uT("instance"), uT("invalid1909231418") },
+     });
+
+    auto DataRender = itDataCreator->second(pData);
+    EXPECT_EQ(nullptr, DataRender);
+
+    TestCall(Component_t::Make({}));
+  }
+}
+
+// ************************************************************************** //
+TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Shader_CreateVertex_Instance)
+{
+  const ::std::string ShaderData =
+    "Pixel vs1(Vertex _Value)\r\n"
+    "Pixel vs2(Vertex _Value)\r\n";
+
+  using GLProxy_t = ::mock::GLProxy;
+  GLProxy_t GLProxy;
+  GLProxy_t::GetInstance() = &GLProxy;
+
+  const Tested_t Example{ Data_t{} };
+  const ITested_t & IExample = Example;
+
+  auto itDataCreator = IExample.GetCreators().find(uT("Data"));
+  ASSERT_NE(IExample.GetCreators().end(), itDataCreator);
+
+  auto itCreator = IExample.GetCreators().find(uT("Shader"));
+  ASSERT_NE(IExample.GetCreators().end(), itCreator);
+
+  const ::mock::GLuint ShaderId = 1908250832;
+
+  auto InputData = ConvertTextShader(::Input);
+
+  ::boost::algorithm::replace_first(InputData,
+    "/* place for instance variables */", ::std::string{} +
+    "COVELLITE_IN float4 iValue1 COVELLITE_INPUT_SEMANTIC(TEXCOORD1);" + (char)0x5C + "\r\n"
+    "COVELLITE_IN float4 iValue2 COVELLITE_INPUT_SEMANTIC(TEXCOORD2);" + (char)0x5C + "\r\n"
+    "COVELLITE_IN int4 iValue3 COVELLITE_INPUT_SEMANTIC(TEXCOORD3);" + (char)0x5C + "\r\n"
+    "COVELLITE_IN float4 iValue4 COVELLITE_INPUT_SEMANTIC(TEXCOORD4);" + (char)0x5C + "\r\n"
+  );
+
+  const auto TestCall = [&](const Component_t::ComponentPtr_t & _pShader,
+    const ::std::string & _Entry)
+  {
+    using namespace ::alicorn::extension::std;
+
+    const auto ExpectedShaderText =
+      ShaderHeader +
+      "#define COVELLITE_SHADER_GLSL\r\n"
+      "#define COVELLITE_SHADER_VERTEX\r\n" +
+      ConvertTextShader(::Predefined + ::Data) + InputData + ShaderData +
+      "out Pixel PixelValue;\r\n"
+      "void main()\r\n"
+      "{\r\n"
+      "  Vertex InputData;\r\n"
+      "  InputData.Position = Covellite_VertexPosition;\r\n"
+      "  InputData.TexCoord = Covellite_VertexTexCoord;\r\n"
+      "  InputData.Extra = Covellite_VertexExtra;\r\n"
+      "  InputData.iValue1 = iValue1;\r\n"
+      "  InputData.iValue2 = iValue2;\r\n"
+      "  InputData.iValue3 = iValue3;\r\n"
+      "  InputData.iValue4 = iValue4;\r\n"
+      "  PixelValue = " + _Entry + "(InputData);\r\n"
+      "  gl_Position = PixelValue.ScreenPos;\r\n"
+      "}\r\n";
+
+    using namespace ::testing;
+
+    InSequence Dummy;
+
+    EXPECT_CALL(GLProxy, CreateShader(GL_VERTEX_SHADER))
+      .Times(1)
+      .WillOnce(Return(ShaderId));
+
+    EXPECT_CALL(GLProxy, ShaderSource(ShaderId, 1, ExpectedShaderText, nullptr))
+      .Times(1);
+
+    EXPECT_CALL(GLProxy, CompileShader(ShaderId))
+      .Times(1);
+
+    EXPECT_CALL(GLProxy, GetShaderiv(ShaderId, GL_COMPILE_STATUS))
+      .Times(1)
+      .WillOnce(Return(GL_TRUE));
+
+    auto Render = itCreator->second(_pShader);
+    ASSERT_NE(nullptr, Render);
+
+    Render();
+
+    EXPECT_CALL(GLProxy, DeleteShader(ShaderId))
+      .Times(1);
+  };
+
+  {
+    const auto pShader = Component_t::Make(
+      {
+        { uT("entry"), uT("vs1") },
+        { uT("data"), (const uint8_t *)ShaderData.data() },
+        { uT("count"), ShaderData.size() },
+        { uT("instance"), uT("f4f4i4f4") },
+      });
+
+    TestCall(pShader, "vs1");
+  }
+
+  {
+    const auto pData = Component_t::Make(
+      {
+        { uT("kind"), uT("Shader") },
+        { uT("entry"), uT("vs2") },
+        { uT("data"), (const uint8_t *)ShaderData.data() },
+        { uT("count"), ShaderData.size() },
+        { uT("instance"), uT("f4f4i4f4") },
+      });
+
+    auto DataRender = itDataCreator->second(pData);
+    EXPECT_EQ(nullptr, DataRender);
+
+    TestCall(Component_t::Make({}), "vs2");
+  }
+}
+
+// ************************************************************************** //
 TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Shader_CreatePixel_Default)
 {
   using GLProxy_t = ::mock::GLProxy;
@@ -2117,10 +1380,10 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Shader_CreatePixel_Default)
       "#define COVELLITE_SHADER_PIXEL\r\n" +
       ConvertTextShader(::Predefined + ::Data + ::Input + ::Default) +
       "in Pixel PixelValue;\r\n"
-      "out vec4 OutPixelColor;\r\n"
+      "out vec4 Covellite_OutPixelColor;\r\n"
       "void main()\r\n"
       "{\r\n"
-      "  OutPixelColor = " + _Entry + "(PixelValue);\r\n"
+      "  Covellite_OutPixelColor = " + _Entry + "(PixelValue);\r\n"
       "}\r\n";
 
     using namespace ::testing;
@@ -2163,22 +1426,22 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Shader_CreatePixel_Default)
     const auto pData = Component_t::Make(
       {
         { uT("kind"), uT("Shader") },
-        { uT("entry"), uT("psTextured") },
+        { uT("entry"), uT("psLightened") },
       });
 
     auto DataRender = itDataCreator->second(pData);
     EXPECT_EQ(nullptr, DataRender);
 
-    TestCall(Component_t::Make({}), "psTextured");
+    TestCall(Component_t::Make({}), "psLightened");
   }
 }
 
 // ************************************************************************** //
-TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Shader_CreatePixel)
+TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Shader_CreatePixel_SingleTarget)
 {
   const ::std::string ShaderData =
     "float4 ps1(Pixel _Value)\r\n"
-    "float4 ps2(Pixel _Value)\r\n";
+    "vec4 ps2(Pixel _Value)\r\n";
 
   using GLProxy_t = ::mock::GLProxy;
   GLProxy_t GLProxy;
@@ -2206,10 +1469,10 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Shader_CreatePixel)
       "#define COVELLITE_SHADER_PIXEL\r\n" +
       ConvertTextShader(::Predefined + ::Data + ::Input) + ShaderData +
       "in Pixel PixelValue;\r\n"
-      "out vec4 OutPixelColor;\r\n"
+      "out vec4 Covellite_OutPixelColor;\r\n"
       "void main()\r\n"
       "{\r\n"
-      "  OutPixelColor = " + _Entry + "(PixelValue);\r\n"
+      "  Covellite_OutPixelColor = " + _Entry + "(PixelValue);\r\n"
       "}\r\n";
 
     using namespace ::testing;
@@ -2263,6 +1526,188 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Shader_CreatePixel)
     EXPECT_EQ(nullptr, DataRender);
 
     TestCall(Component_t::Make({}), "ps2");
+  }
+}
+
+// ************************************************************************** //
+TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Shader_CreatePixel_MultiTarget)
+{
+  const ::std::string ShaderData =
+    "Multi1910031832 ps(Pixel _Value)\r\n";
+
+  using GLProxy_t = ::mock::GLProxy;
+  GLProxy_t GLProxy;
+  GLProxy_t::GetInstance() = &GLProxy;
+
+  const Tested_t Example{ Data_t{} };
+  const ITested_t & IExample = Example;
+
+  auto itDataCreator = IExample.GetCreators().find(uT("Data"));
+  ASSERT_NE(IExample.GetCreators().end(), itDataCreator);
+
+  auto itCreator = IExample.GetCreators().find(uT("Shader"));
+  ASSERT_NE(IExample.GetCreators().end(), itCreator);
+
+  const ::mock::GLuint ShaderId = 1908250832;
+
+  const auto TestCall = [&](const Component_t::ComponentPtr_t & _pShader,
+    const ::std::string & _Entry)
+  {
+    using namespace ::alicorn::extension::std;
+
+    const auto ExpectedShaderText =
+      ShaderHeader +
+      "#define COVELLITE_SHADER_GLSL\r\n"
+      "#define COVELLITE_SHADER_PIXEL\r\n" +
+      ConvertTextShader(::Predefined + ::Data + ::Input) + ShaderData +
+      "in Pixel PixelValue;\r\n"
+      "void main()\r\n"
+      "{\r\n"
+      "  Covellite_MultiOutPixelColor = " + _Entry + "(PixelValue).Target;\r\n"
+      "}\r\n";
+
+    using namespace ::testing;
+
+    InSequence Dummy;
+
+    EXPECT_CALL(GLProxy, CreateShader(GL_FRAGMENT_SHADER))
+      .Times(1)
+      .WillOnce(Return(ShaderId));
+
+    EXPECT_CALL(GLProxy, ShaderSource(ShaderId, 1, ExpectedShaderText, nullptr))
+      .Times(1);
+
+    EXPECT_CALL(GLProxy, CompileShader(ShaderId))
+      .Times(1);
+
+    EXPECT_CALL(GLProxy, GetShaderiv(ShaderId, GL_COMPILE_STATUS))
+      .Times(1)
+      .WillOnce(Return(GL_TRUE));
+
+    auto Render = itCreator->second(_pShader);
+    ASSERT_NE(nullptr, Render);
+
+    Render();
+
+    EXPECT_CALL(GLProxy, DeleteShader(ShaderId))
+      .Times(1);
+  };
+
+  {
+    const auto pShader = Component_t::Make(
+      {
+        { uT("entry"), uT("ps") },
+        { uT("data"), (const uint8_t *)ShaderData.data() },
+        { uT("count"), ShaderData.size() },
+      });
+
+    TestCall(pShader, "ps");
+  }
+
+  {
+    const auto pData = Component_t::Make(
+      {
+        { uT("kind"), uT("Shader") },
+        { uT("entry"), uT("ps") },
+        { uT("data"), (const uint8_t *)ShaderData.data() },
+        { uT("count"), ShaderData.size() },
+      });
+
+    auto DataRender = itDataCreator->second(pData);
+    EXPECT_EQ(nullptr, DataRender);
+
+    TestCall(Component_t::Make({}), "ps");
+  }
+}
+
+// ************************************************************************** //
+TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Shader_CreatePixel_NoReturn)
+{
+  const ::std::string ShaderData =
+    "void ps(Pixel _Value)\r\n";
+
+  using GLProxy_t = ::mock::GLProxy;
+  GLProxy_t GLProxy;
+  GLProxy_t::GetInstance() = &GLProxy;
+
+  const Tested_t Example{ Data_t{} };
+  const ITested_t & IExample = Example;
+
+  auto itDataCreator = IExample.GetCreators().find(uT("Data"));
+  ASSERT_NE(IExample.GetCreators().end(), itDataCreator);
+
+  auto itCreator = IExample.GetCreators().find(uT("Shader"));
+  ASSERT_NE(IExample.GetCreators().end(), itCreator);
+
+  const ::mock::GLuint ShaderId = 1908250832;
+
+  const auto TestCall = [&](const Component_t::ComponentPtr_t & _pShader,
+    const ::std::string & _Entry)
+  {
+    using namespace ::alicorn::extension::std;
+
+    const auto ExpectedShaderText =
+      ShaderHeader +
+      "#define COVELLITE_SHADER_GLSL\r\n"
+      "#define COVELLITE_SHADER_PIXEL\r\n" +
+      ConvertTextShader(::Predefined + ::Data + ::Input) + ShaderData +
+      "in Pixel PixelValue;\r\n"
+      "void main()\r\n"
+      "{\r\n"
+      "  " + _Entry + "(PixelValue);\r\n"
+      "}\r\n";
+
+    using namespace ::testing;
+
+    InSequence Dummy;
+
+    EXPECT_CALL(GLProxy, CreateShader(GL_FRAGMENT_SHADER))
+      .Times(1)
+      .WillOnce(Return(ShaderId));
+
+    EXPECT_CALL(GLProxy, ShaderSource(ShaderId, 1, ExpectedShaderText, nullptr))
+      .Times(1);
+
+    EXPECT_CALL(GLProxy, CompileShader(ShaderId))
+      .Times(1);
+
+    EXPECT_CALL(GLProxy, GetShaderiv(ShaderId, GL_COMPILE_STATUS))
+      .Times(1)
+      .WillOnce(Return(GL_TRUE));
+
+    auto Render = itCreator->second(_pShader);
+    ASSERT_NE(nullptr, Render);
+
+    Render();
+
+    EXPECT_CALL(GLProxy, DeleteShader(ShaderId))
+      .Times(1);
+  };
+
+  {
+    const auto pShader = Component_t::Make(
+      {
+        { uT("entry"), uT("ps") },
+        { uT("data"), (const uint8_t *)ShaderData.data() },
+        { uT("count"), ShaderData.size() },
+      });
+
+    TestCall(pShader, "ps");
+  }
+
+  {
+    const auto pData = Component_t::Make(
+      {
+        { uT("kind"), uT("Shader") },
+        { uT("entry"), uT("ps") },
+        { uT("data"), (const uint8_t *)ShaderData.data() },
+        { uT("count"), ShaderData.size() },
+      });
+
+    auto DataRender = itDataCreator->second(pData);
+    EXPECT_EQ(nullptr, DataRender);
+
+    TestCall(Component_t::Make({}), "ps");
   }
 }
 
@@ -2774,147 +2219,11 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Shader_UsingProgram_LinkProgramFail)
 }
 
 // ************************************************************************** //
-TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Camera_Orthographic_DefaultPosition)
+TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Texture_Default)
 {
-  Tested::GetValue() = 1;
-
   using GLProxy_t = ::mock::GLProxy;
   GLProxy_t GLProxy;
   GLProxy_t::GetInstance() = &GLProxy;
-
-  const Tested_t Example{ Data_t{} };
-  const ITested_t & IExample = Example;
-
-  auto itCreator = IExample.GetCreators().find(uT("Camera"));
-  ASSERT_NE(IExample.GetCreators().end(), itCreator);
-
-  auto Render = itCreator->second(Component_t::Make(
-    {
-      { uT("kind"), uT("Orthographic") },
-    }));
-  ASSERT_NE(nullptr, Render);
-
-  auto itShaderCreator = IExample.GetCreators().find(uT("Shader"));
-  ASSERT_NE(IExample.GetCreators().end(), itShaderCreator);
-
-  auto VsRender = itShaderCreator->second(Component_t::Make(
-    {
-      { uT("entry"), uT("vsGui") },
-    }));
-  ASSERT_NE(nullptr, VsRender);
-
-  auto PsRender = itShaderCreator->second(Component_t::Make(
-    {
-      { uT("entry"), uT("psColored") },
-    }));
-  ASSERT_NE(nullptr, PsRender);
-
-  const float Viewport[] =
-  {
-    1812271148.0f, 1812271149.0f, 1812181722.0f, 1812181723.0f
-  };
-
-  using namespace ::testing;
-
-  EXPECT_CALL(GLProxy, Disable(GL_DEPTH_TEST))
-    .Times(1);
-
-  EXPECT_CALL(GLProxy, Enable(GL_DEPTH_TEST))
-    .Times(0);
-
-  EXPECT_CALL(GLProxy, Clear(GL_DEPTH_BUFFER_BIT))
-    .Times(0);
-
-  EXPECT_CALL(GLProxy, Disable(GL_BLEND))
-    .Times(1);
-
-  EXPECT_CALL(GLProxy, Disable(GL_DITHER))
-    .Times(1);
-
-  EXPECT_CALL(GLProxy, Enable(GL_CULL_FACE))
-    .Times(1);
-
-  EXPECT_CALL(GLProxy, CullFace(GL_BACK))
-    .Times(1);
-
-  EXPECT_CALL(GLProxy, FrontFace(GL_CCW))
-    .Times(1);
-
-  EXPECT_CALL(GLProxy, GetFloatv(GL_VIEWPORT))
-    .Times(1)
-    .WillOnce(Return(Viewport));
-
-  Render(); // Формирует матрицы вида и проекции
-
-  VsRender(); // Нужно, чтобы сформировалась шейдерная программа, иначе
-              // не будет вызывана функция glUseProgram().
-
-  const ::mock::GLint ProgramId = 1908251932;
-  const ::mock::GLint ProjectionLocationId = 1908251933;
-  const ::mock::GLint ViewLocationId = 1908252005;
-  const ::mock::GLint ViewInverseLocationId = 1908252013;
-
-  const auto Projection = ::glm::identity<::glm::mat4>();
-  const auto View = ::glm::ortho(
-    Viewport[0], 
-    Viewport[0] + Viewport[2],
-    Viewport[1] + Viewport[3], 
-    Viewport[1],
-    -1.0f, 1.0f);
-  const auto ViewInverse = ::glm::inverse(View);
-
-  InSequence Dummy;
-
-  EXPECT_CALL(GLProxy, UseProgram(_))
-    .Times(1);
-
-  EXPECT_CALL(GLProxy, GetIntegerv(GL_CURRENT_PROGRAM))
-    .Times(1)
-    .WillOnce(Return(&ProgramId));
-
-  EXPECT_CALL(GLProxy, GetUniformLocation(ProgramId, Eq("MatricesData.Projection")))
-    .Times(1)
-    .WillOnce(Return(ProjectionLocationId));
-
-  EXPECT_CALL(GLProxy,
-    UniformMatrix4fv(ProjectionLocationId, 1, GL_FALSE, Projection))
-    .Times(1);
-
-  EXPECT_CALL(GLProxy, GetUniformLocation(ProgramId, Eq("MatricesData.View")))
-    .Times(1)
-    .WillOnce(Return(ViewLocationId));
-
-  EXPECT_CALL(GLProxy,
-    UniformMatrix4fv(ViewLocationId, 1, GL_FALSE, View))
-    .Times(1);
-
-  EXPECT_CALL(GLProxy, GetUniformLocation(ProgramId, Eq("MatricesData.ViewInverse")))
-    .Times(1)
-    .WillOnce(Return(ViewInverseLocationId));
-
-  EXPECT_CALL(GLProxy,
-    UniformMatrix4fv(ViewInverseLocationId, 1, GL_FALSE, ViewInverse))
-    .Times(1);
-
-  PsRender(); // Передача матриц вида и проекции шейдеру
-}
-
-// ************************************************************************** //
-TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Camera_Orthographic)
-{
-  Tested::GetValue() = 1;
-
-  using GLProxy_t = ::mock::GLProxy;
-  GLProxy_t GLProxy;
-  GLProxy_t::GetInstance() = &GLProxy;
-
-  const auto X = 11111.0f;
-  const auto Y = 22222.0f;
-
-  const float SourceViewport[] =
-  {
-    19022.82014f, 19022.82015f, 19022.82016f, 19022.82017f
-  };
 
   const Tested_t Example{ Data_t{} };
   const ITested_t & IExample = Example;
@@ -2922,378 +2231,1741 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Camera_Orthographic)
   auto itDataCreator = IExample.GetCreators().find(uT("Data"));
   ASSERT_NE(IExample.GetCreators().end(), itDataCreator);
 
-  auto itCreator = IExample.GetCreators().find(uT("Camera"));
+  auto itCreator = IExample.GetCreators().find(uT("Texture"));
   ASSERT_NE(IExample.GetCreators().end(), itCreator);
 
-  auto itShaderCreator = IExample.GetCreators().find(uT("Shader"));
-  ASSERT_NE(IExample.GetCreators().end(), itShaderCreator);
+  const ::mock::GLuint TextureId = 1812181809;
+  const ::mock::GLint ProgramId = 1908221258;
+  const ::mock::GLint LocationId = 1908221259;
 
-  auto VsRender = itShaderCreator->second(Component_t::Make(
-    {
-      { uT("entry"), uT("vsGui") },
-    }));
-  ASSERT_NE(nullptr, VsRender);
-
-  auto PsRender = itShaderCreator->second(Component_t::Make(
-    {
-      { uT("entry"), uT("psColored") },
-    }));
-  ASSERT_NE(nullptr, PsRender);
-
-  using namespace ::testing;
-
-  auto PositionRender = itDataCreator->second(Component_t::Make(
-    {
-      { uT("kind"), uT("Position") },
-      { uT("x"), X },
-      { uT("y"), Y },
-    }));
-  EXPECT_EQ(nullptr, PositionRender);
-
-  auto Render = itCreator->second(Component_t::Make(
-    {
-      { uT("kind"), uT("Orthographic") },
-    }));
-  ASSERT_NE(nullptr, Render);
-
-  InSequence Dummy;
-
-  EXPECT_CALL(GLProxy, Disable(GL_DEPTH_TEST))
-    .Times(1);
-
-  EXPECT_CALL(GLProxy, Enable(GL_DEPTH_TEST))
-    .Times(0);
-
-  EXPECT_CALL(GLProxy, Clear(GL_DEPTH_BUFFER_BIT))
-    .Times(0);
-
-  EXPECT_CALL(GLProxy, Disable(GL_BLEND))
-    .Times(1);
-
-  EXPECT_CALL(GLProxy, Disable(GL_DITHER))
-    .Times(1);
-
-  EXPECT_CALL(GLProxy, Enable(GL_CULL_FACE))
-    .Times(1);
-
-  EXPECT_CALL(GLProxy, CullFace(GL_BACK))
-    .Times(1);
-
-  EXPECT_CALL(GLProxy, FrontFace(GL_CCW))
-    .Times(1);
-
-  EXPECT_CALL(GLProxy, GetFloatv(GL_VIEWPORT))
-    .Times(1)
-    .WillOnce(Return(SourceViewport));
-
-  Render(); // Формирует матрицы вида и проекции
-
-  VsRender(); // Нужно, чтобы сформировалась шейдерная программа, иначе
-              // не будет вызывана функция glUseProgram().
-
-  EXPECT_CALL(GLProxy, UseProgram(_))
-    .Times(1);
-
-  const ::mock::GLint ProgramId = 1908251932;
-  const ::mock::GLint ProjectionLocationId = 1908251933;
-  const ::mock::GLint ViewLocationId = 1908252005;
-  const ::mock::GLint ViewInverseLocationId = 1908252013;
-
-  const auto Projection = ::glm::identity<::glm::mat4>();
-  const auto View = ::glm::ortho(
-    SourceViewport[0] + X,
-    SourceViewport[0] + SourceViewport[2] + X,
-    SourceViewport[1] + SourceViewport[3] + Y,
-    SourceViewport[1] + Y,
-    -1.0f, 1.0f);
-  const auto ViewInverse = ::glm::inverse(View);
-
-  EXPECT_CALL(GLProxy, GetIntegerv(GL_CURRENT_PROGRAM))
-    .Times(1)
-    .WillRepeatedly(Return(&ProgramId));
-
-  EXPECT_CALL(GLProxy, GetUniformLocation(ProgramId, Eq("MatricesData.Projection")))
-    .Times(1)
-    .WillOnce(Return(ProjectionLocationId));
-
-  EXPECT_CALL(GLProxy,
-    UniformMatrix4fv(ProjectionLocationId, 1, GL_FALSE, Projection))
-    .Times(1);
-
-  EXPECT_CALL(GLProxy, GetUniformLocation(ProgramId, Eq("MatricesData.View")))
-    .Times(1)
-    .WillOnce(Return(ViewLocationId));
-
-  EXPECT_CALL(GLProxy,
-    UniformMatrix4fv(ViewLocationId, 1, GL_FALSE, View))
-    .Times(1);
-
-  EXPECT_CALL(GLProxy, GetUniformLocation(ProgramId, Eq("MatricesData.ViewInverse")))
-    .Times(1)
-    .WillOnce(Return(ViewInverseLocationId));
-
-  EXPECT_CALL(GLProxy,
-    UniformMatrix4fv(ViewInverseLocationId, 1, GL_FALSE, ViewInverse))
-    .Times(1);
-
-  PsRender(); // Передача матриц вида и проекции шейдеру
-}
-
-// ************************************************************************** //
-TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Camera_Perspective)
-{
-  Tested::GetValue() = 1;
-
-  using GLProxy_t = ::mock::GLProxy;
-  GLProxy_t GLProxy;
-  GLProxy_t::GetInstance() = &GLProxy;
-
-  const float Width = 1024.0f;
-  const float Height = 768.0f;
-
-  const Tested_t Example{ Data_t{} };
-  const ITested_t & IExample = Example;
-
-  auto itShaderCreator = IExample.GetCreators().find(uT("Shader"));
-  ASSERT_NE(IExample.GetCreators().end(), itShaderCreator);
-
-  auto VsRender = itShaderCreator->second(Component_t::Make(
-    {
-      { uT("entry"), uT("vsGui") },
-    }));
-  ASSERT_NE(nullptr, VsRender);
-
-  auto PsRender = itShaderCreator->second(Component_t::Make(
-    {
-      { uT("entry"), uT("psColored") },
-    }));
-  ASSERT_NE(nullptr, PsRender);
-
-  using namespace ::testing;
-
-  auto TestCallRender = [&](Render_t & _Render, 
-    float _AngleY, float _zFar,
-    float _X, float _Y, float _Z,
-    float _A, float _B, float _C,
-    float _Distance)
+  const auto TestCall = [&](const Component_t::ComponentPtr_t & _pTexture,
+    const uint8_t * _pSource, const int _Width, const int _Height)
   {
-    ASSERT_NE(nullptr, _Render);
-
-    const float AngleYRadians = _AngleY *
-      static_cast<float>(::alicorn::extension::cpp::math::GreedToRadian);
+    using namespace ::testing;
 
     InSequence Dummy;
 
-    EXPECT_CALL(GLProxy, Disable(GL_DEPTH_TEST))
-      .Times(1);
-
-    EXPECT_CALL(GLProxy, Enable(GL_DEPTH_TEST))
-      .Times(0);
-
-    EXPECT_CALL(GLProxy, Clear(GL_DEPTH_BUFFER_BIT))
-      .Times(0);
-
-    EXPECT_CALL(GLProxy, Disable(GL_BLEND))
-      .Times(1);
-
-    EXPECT_CALL(GLProxy, Disable(GL_DITHER))
-      .Times(1);
-
-    EXPECT_CALL(GLProxy, Enable(GL_CULL_FACE))
-      .Times(1);
-
-    EXPECT_CALL(GLProxy, CullFace(GL_BACK))
-      .Times(1);
-
-    EXPECT_CALL(GLProxy, FrontFace(GL_CCW))
-      .Times(1);
-
-    const float Viewport[] = { 0, 0, Width, Height };
-
-    EXPECT_CALL(GLProxy, GetFloatv(GL_VIEWPORT))
+    EXPECT_CALL(GLProxy, GenTextures(1))
       .Times(1)
-      .WillOnce(Return(Viewport));
+      .WillOnce(Return(TextureId));
 
-    _Render(); // Формирует матрицы вида и проекции
+    EXPECT_CALL(GLProxy, BindTexture(GL_TEXTURE_2D, TextureId))
+      .Times(1);
 
-    EXPECT_CALL(GLProxy, UseProgram(_))
-      .Times(AtLeast(1));
+    EXPECT_CALL(GLProxy, TexImage2D(GL_TEXTURE_2D, 0, GL_RGBA,
+      _Width, _Height, 0,
+      GL_RGBA, GL_UNSIGNED_BYTE, _pSource))
+      .Times(1);
 
-    VsRender(); // Нужно, чтобы сформировалась шейдерная программа, иначе
-                // не будет вызывана функция glUseProgram().
+    EXPECT_CALL(GLProxy, BindTexture(GL_TEXTURE_2D, 0))
+      .Times(1);
 
-    const ::mock::GLint ProgramId = 1908251932;
-    const ::mock::GLint ProjectionLocationId = 1908251933;
-    const ::mock::GLint ViewLocationId = 1908252005;
-    const ::mock::GLint ViewInverseLocationId = 1908252013;
+    EXPECT_CALL(GLProxy, GetError())
+      .Times(1)
+      .WillOnce(Return(GL_NO_ERROR));
 
-    const auto Projection = ::glm::perspectiveFovRH(AngleYRadians,
-      Viewport[2], Viewport[3], 0.01f, _zFar);
+    auto Render = itCreator->second(_pTexture);
+    ASSERT_NE(nullptr, Render);
 
-    auto GetEye = [&](void) -> ::glm::vec3
-    {
-      const auto Distance = _Distance + 0.1f;
+    EXPECT_CALL(GLProxy, ActiveTexture(GL_TEXTURE0))
+      .Times(1);
 
-      ::glm::mat4 Transform = ::glm::identity<::glm::mat4>();
-
-      Transform = ::glm::translate(Transform,
-        ::glm::vec3{ _X, _Y, _Z });
-      Transform = ::glm::rotate(Transform,
-        _C, ::glm::vec3{ 0.0f, 0.0f, 1.0f });
-      Transform = ::glm::rotate(Transform,
-        _B, ::glm::vec3{ 0.0f, 1.0f, 0.0f });
-      Transform = ::glm::rotate(Transform,
-        _A, ::glm::vec3{ 1.0f, 0.0f, 0.0f });
-
-      return Transform * ::glm::vec4{ Distance, 0.0f, 0.0f, 1.0f };
-    };
-
-    const auto View = ::glm::lookAtRH(
-      GetEye(),
-      ::glm::vec3{ _X, _Y, _Z },
-      ::glm::vec3{ 0.0f, 0.0f, 1.0f });
-    const auto ViewInverse = ::glm::inverse(View);
+    EXPECT_CALL(GLProxy, BindTexture(GL_TEXTURE_2D, TextureId))
+      .Times(1);
 
     EXPECT_CALL(GLProxy, GetIntegerv(GL_CURRENT_PROGRAM))
       .Times(1)
-      .WillRepeatedly(Return(&ProgramId));
+      .WillOnce(Return(&ProgramId));
 
-    EXPECT_CALL(GLProxy, GetUniformLocation(ProgramId, Eq("MatricesData.Projection")))
+    EXPECT_CALL(GLProxy, GetUniformLocation(ProgramId, Eq("TexDiffuse")))
       .Times(1)
-      .WillOnce(Return(ProjectionLocationId));
+      .WillOnce(Return(LocationId));
 
-    EXPECT_CALL(GLProxy,
-      UniformMatrix4fv(ProjectionLocationId, 1, GL_FALSE, Projection))
+    EXPECT_CALL(GLProxy, Uniform1i(LocationId, 0))
       .Times(1);
 
-    EXPECT_CALL(GLProxy, GetUniformLocation(ProgramId, Eq("MatricesData.View")))
-      .Times(1)
-      .WillOnce(Return(ViewLocationId));
+    Render();
 
-    EXPECT_CALL(GLProxy,
-      UniformMatrix4fv(ViewLocationId, 1, GL_FALSE, View))
+    EXPECT_CALL(GLProxy, DeleteTextures(1, TextureId))
       .Times(1);
-
-    EXPECT_CALL(GLProxy, GetUniformLocation(ProgramId, Eq("MatricesData.ViewInverse")))
-      .Times(1)
-      .WillOnce(Return(ViewInverseLocationId));
-
-    EXPECT_CALL(GLProxy,
-      UniformMatrix4fv(ViewInverseLocationId, 1, GL_FALSE, ViewInverse))
-      .Times(1);
-
-    PsRender(); // Передача матриц вида и проекции шейдеру
   };
+
+  {
+    const uint8_t * pSource = (uint8_t *)1812181806;
+    const int Width = 1812181807;
+    const int Height = 1812181808;
+
+    const auto pTexture = Component_t::Make(
+      {
+        { uT("data"), pSource },
+        { uT("width"), Width },
+        { uT("height"), Height },
+      });
+
+    TestCall(pTexture, pSource, Width, Height);
+  }
+
+  {
+    const uint8_t * pSource = (uint8_t *)1907251056;
+    const int Width = 1907251057;
+    const int Height = 1907251058;
+
+    const auto pData = Component_t::Make(
+      {
+        { uT("kind"), uT("Texture") },
+        { uT("data"), pSource },
+        { uT("width"), Width },
+        { uT("height"), Height },
+      });
+
+    auto DataRender = itDataCreator->second(pData);
+    EXPECT_EQ(nullptr, DataRender);
+
+    TestCall(Component_t::Make({}), pSource, Width, Height);
+  }
+}
+
+// ************************************************************************** //
+TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Texture_PBR)
+{
+  using GLProxy_t = ::mock::GLProxy;
+  GLProxy_t GLProxy;
+  GLProxy_t::GetInstance() = &GLProxy;
+
+  const Tested_t Example{ Data_t{} };
+  const ITested_t & IExample = Example;
 
   auto itDataCreator = IExample.GetCreators().find(uT("Data"));
   ASSERT_NE(IExample.GetCreators().end(), itDataCreator);
 
-  auto itCreator = IExample.GetCreators().find(uT("Camera"));
+  auto itCreator = IExample.GetCreators().find(uT("Texture"));
   ASSERT_NE(IExample.GetCreators().end(), itCreator);
 
-  class CameraInfo
+  const ::mock::GLuint TextureId = 1908221839;
+  const ::mock::GLint ProgramId = 1908221840;
+  const ::mock::GLint LocationId = 1908221841;
+
+  const auto TestCall = [&](
+    const Component_t::ComponentPtr_t & _pTexture,
+    const uint8_t * _pSource,
+    const int _Width, const int _Height,
+    const ::std::size_t _Index,
+    const ::std::string & _TexName)
+  {
+    const auto Index = static_cast<::mock::GLint>(_Index);
+
+    using namespace ::testing;
+
+    InSequence Dummy;
+
+    EXPECT_CALL(GLProxy, GenTextures(1))
+      .Times(1)
+      .WillOnce(Return(TextureId));
+
+    EXPECT_CALL(GLProxy, BindTexture(GL_TEXTURE_2D, TextureId))
+      .Times(1);
+
+    EXPECT_CALL(GLProxy, TexImage2D(GL_TEXTURE_2D, 0, GL_RGBA,
+      _Width, _Height, 0,
+      GL_RGBA, GL_UNSIGNED_BYTE, _pSource))
+      .Times(1);
+
+    EXPECT_CALL(GLProxy, BindTexture(GL_TEXTURE_2D, 0))
+      .Times(1);
+
+    EXPECT_CALL(GLProxy, GetError())
+      .Times(1)
+      .WillOnce(Return(GL_NO_ERROR));
+
+    EXPECT_CALL(GLProxy, GenFramebuffers(1))
+      .Times(0);
+
+    auto Render = itCreator->second(_pTexture);
+    ASSERT_NE(nullptr, Render);
+
+    EXPECT_CALL(GLProxy, ActiveTexture(GL_TEXTURE0 + Index))
+      .Times(1);
+
+    EXPECT_CALL(GLProxy, BindTexture(GL_TEXTURE_2D, TextureId))
+      .Times(1);
+
+    EXPECT_CALL(GLProxy, GetIntegerv(GL_CURRENT_PROGRAM))
+      .Times(1)
+      .WillOnce(Return(&ProgramId));
+
+    EXPECT_CALL(GLProxy, GetUniformLocation(ProgramId, _TexName))
+      .Times(1)
+      .WillOnce(Return(LocationId));
+
+    EXPECT_CALL(GLProxy, GetUniformLocation(_, Eq("TexDiffuse")))
+      .Times(0);
+
+    EXPECT_CALL(GLProxy, Uniform1i(LocationId, Index))
+      .Times(1);
+
+    Render();
+
+    EXPECT_CALL(GLProxy, DeleteTextures(1, TextureId))
+      .Times(1);
+  };
+
+  const ::std::vector<::std::pair<String_t, ::std::string>> Destinations =
+  {
+    { uT("albedo"),    "TexAlbedo" },
+    { uT("metalness"), "TexMetalness" },
+    { uT("roughness"), "TexRoughness" },
+    { uT("normal"),    "TexNormal" },
+    { uT("occlusion"), "TexOcclusion" },
+  };
+
+  for (::std::size_t i = 0; i < Destinations.size(); i++)
+  {
+    {
+      const uint8_t * pSource = (uint8_t *)1908221842;
+      const int Width = 1908221843;
+      const int Height = 1908221844;
+
+      const auto pTexture = Component_t::Make(
+        {
+          { uT("data"), pSource },
+          { uT("width"), Width },
+          { uT("height"), Height },
+          { uT("destination"), Destinations[i].first },
+        });
+
+      TestCall(pTexture,
+        pSource, Width, Height, i, Destinations[i].second);
+    }
+
+    {
+      const uint8_t * pSource = (uint8_t *)1908221846;
+      const int Width = 1908221845;
+      const int Height = 1908221847;
+
+      const auto pData = Component_t::Make(
+        {
+          { uT("kind"), uT("Texture") },
+          { uT("data"), pSource },
+          { uT("width"), Width },
+          { uT("height"), Height },
+          { uT("destination"), Destinations[i].first },
+        });
+
+      auto DataRender = itDataCreator->second(pData);
+      EXPECT_EQ(nullptr, DataRender);
+
+      TestCall(Component_t::Make({}),
+        pSource, Width, Height, i, Destinations[i].second);
+    }
+
+    {
+      const uint8_t * pSource = (uint8_t *)1908221842;
+      const int Width = 1908221843;
+      const int Height = 1908221844;
+
+      const auto pTexture = Component_t::Make(
+        {
+          { uT("data"), pSource },
+          { uT("width"), Width },
+          { uT("height"), Height },
+          { uT("destination"), Destinations[i].first },
+          { uT("mipmapping"), false },
+        });
+
+      TestCall(pTexture,
+        pSource, Width, Height, i, Destinations[i].second);
+    }
+
+    {
+      const uint8_t * pSource = (uint8_t *)1908221846;
+      const int Width = 1908221845;
+      const int Height = 1908221847;
+
+      const auto pData = Component_t::Make(
+        {
+          { uT("kind"), uT("Texture") },
+          { uT("data"), pSource },
+          { uT("width"), Width },
+          { uT("height"), Height },
+          { uT("destination"), Destinations[i].first },
+          { uT("mipmapping"), false },
+        });
+
+      auto DataRender = itDataCreator->second(pData);
+      EXPECT_EQ(nullptr, DataRender);
+
+      TestCall(Component_t::Make({}),
+        pSource, Width, Height, i, Destinations[i].second);
+    }
+  }
+}
+
+// ************************************************************************** //
+TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Texture_PBR_Mipmapping)
+{
+  using GLProxy_t = ::mock::GLProxy;
+  GLProxy_t GLProxy;
+  GLProxy_t::GetInstance() = &GLProxy;
+
+  const Tested_t Example{ Data_t{} };
+  const ITested_t & IExample = Example;
+
+  auto itDataCreator = IExample.GetCreators().find(uT("Data"));
+  ASSERT_NE(IExample.GetCreators().end(), itDataCreator);
+
+  auto itCreator = IExample.GetCreators().find(uT("Texture"));
+  ASSERT_NE(IExample.GetCreators().end(), itCreator);
+
+  const ::mock::GLuint TextureId = 1908221839;
+  const ::mock::GLint ProgramId = 1908221840;
+  const ::mock::GLint LocationId = 1908221841;
+
+  const auto TestCall = [&](
+    const Component_t::ComponentPtr_t & _pTexture,
+    const uint8_t * _pSource,
+    const int _Width, const int _Height,
+    const ::std::size_t _Index,
+    const ::std::string & _TexName)
+  {
+    const auto Index = static_cast<::mock::GLint>(_Index);
+
+    using namespace ::testing;
+
+    InSequence Dummy;
+
+    EXPECT_CALL(GLProxy, GenTextures(1))
+      .Times(1)
+      .WillOnce(Return(TextureId));
+
+    EXPECT_CALL(GLProxy, BindTexture(GL_TEXTURE_2D, TextureId))
+      .Times(1);
+
+    EXPECT_CALL(GLProxy, TexImage2D(GL_TEXTURE_2D, 0, GL_RGBA,
+      _Width, _Height, 0,
+      GL_RGBA, GL_UNSIGNED_BYTE, _pSource))
+      .Times(1);
+
+    EXPECT_CALL(GLProxy, BindTexture(GL_TEXTURE_2D, 0))
+      .Times(1);
+
+    EXPECT_CALL(GLProxy, GetError())
+      .Times(1)
+      .WillOnce(Return(GL_NO_ERROR));
+
+    EXPECT_CALL(GLProxy, BindTexture(GL_TEXTURE_2D, TextureId))
+      .Times(1);
+
+    EXPECT_CALL(GLProxy, GenerateMipmap(GL_TEXTURE_2D))
+      .Times(1);
+
+    EXPECT_CALL(GLProxy, BindTexture(GL_TEXTURE_2D, 0))
+      .Times(1);
+
+    EXPECT_CALL(GLProxy, GenFramebuffers(1))
+      .Times(0);
+
+    auto Render = itCreator->second(_pTexture);
+    ASSERT_NE(nullptr, Render);
+
+    EXPECT_CALL(GLProxy, ActiveTexture(GL_TEXTURE0 + Index))
+      .Times(1);
+
+    EXPECT_CALL(GLProxy, BindTexture(GL_TEXTURE_2D, TextureId))
+      .Times(1);
+
+    EXPECT_CALL(GLProxy, GetIntegerv(GL_CURRENT_PROGRAM))
+      .Times(1)
+      .WillOnce(Return(&ProgramId));
+
+    EXPECT_CALL(GLProxy, GetUniformLocation(ProgramId, _TexName))
+      .Times(1)
+      .WillOnce(Return(LocationId));
+
+    EXPECT_CALL(GLProxy, GetUniformLocation(_, Eq("TexDiffuse")))
+      .Times(0);
+
+    EXPECT_CALL(GLProxy, Uniform1i(LocationId, Index))
+      .Times(1);
+
+    Render();
+
+    EXPECT_CALL(GLProxy, DeleteTextures(1, TextureId))
+      .Times(1);
+  };
+
+  const ::std::vector<::std::pair<String_t, ::std::string>> Destinations =
+  {
+    { uT("albedo"),    "TexAlbedo" },
+    { uT("metalness"), "TexMetalness" },
+    { uT("roughness"), "TexRoughness" },
+    { uT("normal"),    "TexNormal" },
+    { uT("occlusion"), "TexOcclusion" },
+  };
+
+  for (::std::size_t i = 0; i < Destinations.size(); i++)
+  {
+    {
+      const uint8_t * pSource = (uint8_t *)1908221842;
+      const int Width = 1908221843;
+      const int Height = 1908221844;
+
+      const auto pTexture = Component_t::Make(
+        {
+          { uT("data"), pSource },
+          { uT("width"), Width },
+          { uT("height"), Height },
+          { uT("destination"), Destinations[i].first },
+          { uT("mipmapping"), true },
+        });
+
+      TestCall(pTexture,
+        pSource, Width, Height, i, Destinations[i].second);
+    }
+
+    {
+      const uint8_t * pSource = (uint8_t *)1908221846;
+      const int Width = 1908221845;
+      const int Height = 1908221847;
+
+      const auto pData = Component_t::Make(
+        {
+          { uT("kind"), uT("Texture") },
+          { uT("data"), pSource },
+          { uT("width"), Width },
+          { uT("height"), Height },
+          { uT("destination"), Destinations[i].first },
+          { uT("mipmapping"), true },
+        });
+
+      auto DataRender = itDataCreator->second(pData);
+      EXPECT_EQ(nullptr, DataRender);
+
+      TestCall(Component_t::Make({}),
+        pSource, Width, Height, i, Destinations[i].second);
+    }
+  }
+}
+
+// ************************************************************************** //
+TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Texture_PBR_ReadData)
+{
+  using Texture_t = ::covellite::api::renderer::OpenGLCommon::Texture;
+  using BufferMapper_t = ::covellite::api::cbBufferMap_t<const void>;
+
+  using GLProxy_t = ::mock::GLProxy;
+  GLProxy_t GLProxy;
+  GLProxy_t::GetInstance() = &GLProxy;
+
+  class MapperProxy :
+    public ::alicorn::extension::testing::Proxy<MapperProxy>
   {
   public:
-    float AngleY;
-    float X, Y, Z;
-    float A, B, C;
-    float Distance;
+    MOCK_METHOD1(Map, bool(const void *));
+    MOCK_METHOD1(CheckData, void(::std::vector<uint32_t>));
   };
 
-  const float zFar = 200.0f; // const
+  MapperProxy oMapperProxy;
+  MapperProxy::GetInstance() = &oMapperProxy;
 
-  const ::std::vector<CameraInfo> CameraInfos =
-  {
-    { 90.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f }, // Default values
-    { 91.0f, 1.0f, 2.0f, 3.0f, 4.0f, 5.0f, 6.0f, 7.0f },
-    { 92.0f, 2.0f, 3.0f, 4.0f, 5.0f, 6.0f, 7.0f, 8.0f },
-  };
+  const int Width = 3;
+  const int Height = 4;
 
-  auto TestCamera = [&](const Component_t::ComponentPtr_t & _pCamera)
+  const BufferMapper_t Mapper = [&](const void * _pData)
   {
+    if (_pData != nullptr)
     {
-      // Default values + not using Position & Rotation
-
-      auto Render = itCreator->second(_pCamera);
-
-      auto Info = CameraInfos[0];
-
-      TestCallRender(Render, 
-        Info.AngleY, zFar,
-        Info.X, Info.Y, Info.Z,
-        Info.A, Info.B, Info.C,
-        Info.Distance);
+      ::std::vector<uint32_t> Data(Width * Height);
+      memcpy(Data.data(), _pData, Width * Height * 4);
+      oMapperProxy.CheckData(Data);
     }
 
-    const auto pPosition = Component_t::Make(
+    return oMapperProxy.Map(_pData);
+  };
+
+  const Tested_t Example{ Data_t{} };
+  const ITested_t & IExample = Example;
+
+  auto itDataCreator = IExample.GetCreators().find(uT("Data"));
+  ASSERT_NE(IExample.GetCreators().end(), itDataCreator);
+
+  auto itCreator = IExample.GetCreators().find(uT("Texture"));
+  ASSERT_NE(IExample.GetCreators().end(), itCreator);
+
+  const ::mock::GLint TextureId = 1910221154;
+  const ::mock::GLint ProgramId = 1910221155;
+  const ::mock::GLint LocationId = 1910221156;
+  const ::mock::GLint FrameBufferId = 1910221209;
+  const ::mock::GLint DefaultFrameBufferId = 1910221236;
+
+  const auto TestCall = [&](
+    const Component_t::ComponentPtr_t & _pDataTexture,
+    const ::std::size_t _Index,
+    const ::std::string & _TexName,
+    const ::std::vector<uint32_t> & _RawData,
+    const ::std::vector<uint32_t> & _ExpectData)
+  {
+    const auto Index = static_cast<::mock::GLint>(_Index);
+
+    ::covellite::api::renderer::Component::Texture TextureData{ _pDataTexture };
+
+    using namespace ::testing;
+
+    InSequence Dummy;
+
+    EXPECT_CALL(GLProxy, GenTextures(1))
+      .Times(1)
+      .WillOnce(Return(TextureId));
+
+    EXPECT_CALL(GLProxy, BindTexture(GL_TEXTURE_2D, TextureId))
+      .Times(1);
+
+    EXPECT_CALL(GLProxy, TexImage2D(GL_TEXTURE_2D, 0, GL_RGBA,
+      Width, Height, 0,
+      GL_RGBA, GL_UNSIGNED_BYTE, nullptr))
+      .Times(1);
+
+    EXPECT_CALL(GLProxy, BindTexture(GL_TEXTURE_2D, 0))
+      .Times(1);
+
+    EXPECT_CALL(GLProxy, GetError())
+      .Times(1)
+      .WillOnce(Return(GL_NO_ERROR));
+
+    const auto pTexture = ::std::make_shared<Texture_t>(TextureData);
+    ASSERT_EQ(Width * Height * 4, pTexture->m_ReadCopyData.size());
+
+    _pDataTexture->SetValue(uT("entity"), pTexture);
+
+    EXPECT_CALL(GLProxy, GenFramebuffers(1))
+      .Times(1)
+      .WillOnce(Return(FrameBufferId));
+
+    EXPECT_CALL(GLProxy, GenTextures(1))
+      .Times(0);
+
+    auto Render = itCreator->second(Component_t::Make({}));
+    ASSERT_NE(nullptr, Render);
+
+    const auto TestCallActivateTexture = [&](void)
+    {
+      EXPECT_CALL(GLProxy, ActiveTexture(GL_TEXTURE0 + Index))
+        .Times(1);
+
+      EXPECT_CALL(GLProxy, BindTexture(GL_TEXTURE_2D, TextureId))
+        .Times(1);
+
+      EXPECT_CALL(GLProxy, GetIntegerv(GL_CURRENT_PROGRAM))
+        .Times(1)
+        .WillOnce(Return(&ProgramId));
+
+      EXPECT_CALL(GLProxy, GetUniformLocation(ProgramId, _TexName))
+        .Times(1)
+        .WillOnce(Return(LocationId));
+
+      EXPECT_CALL(GLProxy, GetUniformLocation(_, Eq("TexDiffuse")))
+        .Times(0);
+
+      EXPECT_CALL(GLProxy, Uniform1i(LocationId, Index))
+        .Times(1);
+    };
+
+    ////////////////////////////////////////////////////////////////////////////
+
+    EXPECT_CALL(oMapperProxy, Map(nullptr))
+      .Times(1)
+      .WillOnce(Return(false));
+
+    EXPECT_CALL(GLProxy, BindFramebuffer(_, _))
+      .Times(0);
+
+    TestCallActivateTexture();
+    Render();
+
+    ////////////////////////////////////////////////////////////////////////////
+
+    EXPECT_CALL(oMapperProxy, Map(nullptr))
+      .Times(1)
+      .WillOnce(Return(true));
+
+    EXPECT_CALL(GLProxy, GetIntegerv(GL_FRAMEBUFFER_BINDING))
+      .Times(1)
+      .WillOnce(Return(&DefaultFrameBufferId));
+
+    EXPECT_CALL(GLProxy, BindFramebuffer(GL_FRAMEBUFFER, FrameBufferId))
+      .Times(1);
+
+    EXPECT_CALL(GLProxy, FramebufferTexture2D(GL_FRAMEBUFFER,
+      GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, TextureId, 0))
+      .Times(1);
+
+    EXPECT_CALL(GLProxy, GetReadPixelsRawData())
+      .Times(1)
+      .WillOnce(Return(_RawData));
+
+    EXPECT_CALL(GLProxy, ReadPixels(0, 0, Width, Height, GL_RGBA, 
+      GL_UNSIGNED_BYTE, pTexture->m_ReadCopyData.data()))
+      .Times(1);
+
+    EXPECT_CALL(oMapperProxy, CheckData(_ExpectData))
+      .Times(1);
+
+    EXPECT_CALL(oMapperProxy, Map(pTexture->m_ReadCopyData.data()))
+      .Times(1);
+
+    EXPECT_CALL(GLProxy, BindFramebuffer(GL_FRAMEBUFFER, DefaultFrameBufferId))
+      .Times(1);
+
+    TestCallActivateTexture();
+    Render();
+
+    ////////////////////////////////////////////////////////////////////////////
+
+    EXPECT_CALL(GLProxy, DeleteFramebuffers(1, FrameBufferId))
+      .Times(1);
+
+    EXPECT_CALL(GLProxy, DeleteTextures(1, TextureId))
+      .Times(1);
+  };
+
+  const ::std::vector<::std::pair<String_t, ::std::string>> Destinations =
+  {
+    { uT("albedo"),    "TexAlbedo" },
+    { uT("metalness"), "TexMetalness" },
+    { uT("roughness"), "TexRoughness" },
+    { uT("normal"),    "TexNormal" },
+    { uT("occlusion"), "TexOcclusion" },
+  };
+
+  for (::std::size_t i = 0; i < Destinations.size(); i++)
+  {
+    const ::std::vector<uint32_t> RawData =
+    {
+      0x10221334, 0x10221335, 0x10221336,
+      0x10221337, 0x10221338, 0x10221339,
+      0x10221340, 0x10221341, 0x10221342,
+      0x10221343, 0x10221344, 0x10221345,
+    };
+
+    const ::std::vector<uint32_t> ExpectData =
+    {
+      0x10221343, 0x10221344, 0x10221345,
+      0x10221340, 0x10221341, 0x10221342,
+      0x10221337, 0x10221338, 0x10221339,
+      0x10221334, 0x10221335, 0x10221336,
+    };
+
+    const auto pData = Component_t::Make(
       {
-        { uT("kind"), uT("Position") },
+        { uT("kind"), uT("Texture") },
+        { uT("width"), Width },
+        { uT("height"), Height },
+        { uT("mapper"), Mapper },
+        { uT("destination"), Destinations[i].first },
       });
 
-    const auto pRotation = Component_t::Make(
-      {
-        { uT("kind"), uT("Rotation") },
-      });
+    auto DataRender = itDataCreator->second(pData);
+    EXPECT_EQ(nullptr, DataRender);
 
-    {
-      // Default values from Position & Rotation
+    TestCall(pData, i, Destinations[i].second, RawData, ExpectData);
+  }
+}
 
-      auto Position = itDataCreator->second(pPosition);
-      EXPECT_EQ(nullptr, Position);
+// ************************************************************************** //
+TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Texture_Depth)
+{
+  using GLProxy_t = ::mock::GLProxy;
+  GLProxy_t GLProxy;
+  GLProxy_t::GetInstance() = &GLProxy;
 
-      auto Rotation = itDataCreator->second(pRotation);
-      EXPECT_EQ(nullptr, Rotation);
+  const Tested_t Example{ Data_t{} };
+  const ITested_t & IExample = Example;
 
-      auto Render = itCreator->second(_pCamera);
+  auto itDataCreator = IExample.GetCreators().find(uT("Data"));
+  ASSERT_NE(IExample.GetCreators().end(), itDataCreator);
 
-      auto Info = CameraInfos[0];
+  auto itCreator = IExample.GetCreators().find(uT("Texture"));
+  ASSERT_NE(IExample.GetCreators().end(), itCreator);
 
-      TestCallRender(Render, 
-        Info.AngleY, zFar,
-        Info.X, Info.Y, Info.Z,
-        Info.A, Info.B, Info.C,
-        Info.Distance);
-    }
+  const ::mock::GLuint TextureId = 1910041336;
+  const ::mock::GLint ProgramId = 1910041337;
+  const ::mock::GLint LocationId = 1910041338;
 
-    {
-      // Change values from Position & Rotation
+  const auto TestCall = [&](
+    const Component_t::ComponentPtr_t & _pTexture,
+    const uint8_t * _pSource,
+    const int _Width, const int _Height,
+    const ::std::size_t _Index,
+    const ::std::string & _TexName)
+  {
+    const auto Index = static_cast<::mock::GLint>(_Index);
 
-      auto Position = itDataCreator->second(pPosition);
-      EXPECT_EQ(nullptr, Position);
+    using namespace ::testing;
 
-      auto Rotation = itDataCreator->second(pRotation);
-      EXPECT_EQ(nullptr, Rotation);
+    InSequence Dummy;
 
-      auto Render = itCreator->second(_pCamera);
+    EXPECT_CALL(GLProxy, GenTextures(1))
+      .Times(1)
+      .WillOnce(Return(TextureId));
 
-      for (size_t i = 1; i < CameraInfos.size(); i++)
-      {
-        auto Info = CameraInfos[i];
+    EXPECT_CALL(GLProxy, BindTexture(GL_TEXTURE_2D, TextureId))
+      .Times(1);
 
-        pPosition->SetValue(uT("x"), Info.X);
-        pPosition->SetValue(uT("y"), Info.Y);
-        pPosition->SetValue(uT("z"), Info.Z);
+    EXPECT_CALL(GLProxy, TexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT,
+      _Width, _Height, 0,
+      GL_DEPTH_COMPONENT, GL_UNSIGNED_INT, _pSource))
+      .Times(1);
 
-        pRotation->SetValue(uT("x"), Info.A);
-        pRotation->SetValue(uT("y"), Info.B);
-        pRotation->SetValue(uT("z"), Info.C);
+    EXPECT_CALL(GLProxy, BindTexture(GL_TEXTURE_2D, 0))
+      .Times(1);
 
-        _pCamera->SetValue(uT("fov"), Info.AngleY);
-        _pCamera->SetValue(uT("distance"), Info.Distance);
+    EXPECT_CALL(GLProxy, GetError())
+      .Times(1)
+      .WillOnce(Return(GL_NO_ERROR));
 
-        TestCallRender(Render, 
-          Info.AngleY, zFar,
-          Info.X, Info.Y, Info.Z,
-          Info.A, Info.B, Info.C,
-          Info.Distance);
-      }
-    }
+    auto Render = itCreator->second(_pTexture);
+    ASSERT_NE(nullptr, Render);
+
+    EXPECT_CALL(GLProxy, ActiveTexture(GL_TEXTURE0 + Index))
+      .Times(1);
+
+    EXPECT_CALL(GLProxy, BindTexture(GL_TEXTURE_2D, TextureId))
+      .Times(1);
+
+    EXPECT_CALL(GLProxy, GetIntegerv(GL_CURRENT_PROGRAM))
+      .Times(1)
+      .WillOnce(Return(&ProgramId));
+
+    EXPECT_CALL(GLProxy, GetUniformLocation(ProgramId, _TexName))
+      .Times(1)
+      .WillOnce(Return(LocationId));
+
+    EXPECT_CALL(GLProxy, GetUniformLocation(_, Eq("TexDiffuse")))
+      .Times(0);
+
+    EXPECT_CALL(GLProxy, Uniform1i(LocationId, Index))
+      .Times(1);
+
+    Render();
+
+    EXPECT_CALL(GLProxy, DeleteTextures(1, TextureId))
+      .Times(1);
   };
 
-  TestCamera(Component_t::Make(
+  {
+    const uint8_t * pSource = (uint8_t *)1910041342;
+    const int Width = 1910041343;
+    const int Height = 1910041344;
+
+    const auto pTexture = Component_t::Make(
+      {
+        { uT("data"), pSource },
+        { uT("width"), Width },
+        { uT("height"), Height },
+        { uT("destination"), uT("depth") },
+      });
+
+    TestCall(pTexture, pSource, Width, Height, 5, "TexDepth");
+  }
+
+  {
+    const uint8_t * pSource = (uint8_t *)1910041345;
+    const int Width = 1910041346;
+    const int Height = 1910041347;
+
+    const auto pData = Component_t::Make(
+      {
+        { uT("kind"), uT("Texture") },
+        { uT("data"), pSource },
+        { uT("width"), Width },
+        { uT("height"), Height },
+        { uT("destination"), uT("depth") },
+      });
+
+    auto DataRender = itDataCreator->second(pData);
+    EXPECT_EQ(nullptr, DataRender);
+
+    TestCall(Component_t::Make({}), pSource, Width, Height, 5, "TexDepth");
+  }
+}
+
+// ************************************************************************** //
+TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Texture_UsingExists)
+{
+  using Texture_t = ::covellite::api::renderer::OpenGLCommon::Texture;
+
+  using GLProxy_t = ::mock::GLProxy;
+  GLProxy_t GLProxy;
+  GLProxy_t::GetInstance() = &GLProxy;
+
+  const Tested_t Example{ Data_t{} };
+  const ITested_t & IExample = Example;
+
+  auto itDataCreator = IExample.GetCreators().find(uT("Data"));
+  ASSERT_NE(IExample.GetCreators().end(), itDataCreator);
+
+  auto itCreator = IExample.GetCreators().find(uT("Texture"));
+  ASSERT_NE(IExample.GetCreators().end(), itCreator);
+
+  const ::mock::GLuint TextureId = 1908221839;
+  const ::mock::GLint ProgramId = 1908221840;
+  const ::mock::GLint LocationId = 1908221841;
+
+  const auto TestCall = [&](
+    const Component_t::ComponentPtr_t & _pData,
+    const Component_t::ComponentPtr_t & _pTexture,
+    const uint8_t * _pSource,
+    const int _Width, const int _Height,
+    const ::std::size_t _Index,
+    const ::std::string & _TexName)
+  {
+    const ::covellite::api::renderer::Component::Texture TextureData{ _pData };
+    const auto Index = static_cast<::mock::GLint>(_Index);
+
+    using namespace ::testing;
+
+    InSequence Dummy;
+
+    EXPECT_CALL(GLProxy, GenTextures(1))
+      .Times(1)
+      .WillOnce(Return(TextureId));
+
+    EXPECT_CALL(GLProxy, BindTexture(GL_TEXTURE_2D, TextureId))
+      .Times(1);
+
+    EXPECT_CALL(GLProxy, TexImage2D(GL_TEXTURE_2D, 0, _,
+      _Width, _Height, 0, _, _, _pSource))
+      .Times(1);
+
+    EXPECT_CALL(GLProxy, BindTexture(GL_TEXTURE_2D, 0))
+      .Times(1);
+
+    EXPECT_CALL(GLProxy, GetError())
+      .Times(1)
+      .WillOnce(Return(GL_NO_ERROR));
+
+    _pData->SetValue(uT("entity"), 
+      ::std::make_shared<Texture_t>(TextureData));
+
+    EXPECT_CALL(GLProxy, GenTextures(_))
+      .Times(0);
+
+    auto Render = itCreator->second(_pTexture);
+    ASSERT_NE(nullptr, Render);
+
+    const auto pEntity = _pData->GetValue(uT("entity"), Texture_t::Ptr_t{});
+    EXPECT_EQ(nullptr, pEntity);
+
+    EXPECT_CALL(GLProxy, ActiveTexture(GL_TEXTURE0 + Index))
+      .Times(1);
+
+    EXPECT_CALL(GLProxy, BindTexture(GL_TEXTURE_2D, TextureId))
+      .Times(1);
+
+    EXPECT_CALL(GLProxy, GetIntegerv(GL_CURRENT_PROGRAM))
+      .Times(1)
+      .WillOnce(Return(&ProgramId));
+
+    EXPECT_CALL(GLProxy, GetUniformLocation(ProgramId, _TexName))
+      .Times(1)
+      .WillOnce(Return(LocationId));
+
+    EXPECT_CALL(GLProxy, Uniform1i(LocationId, Index))
+      .Times(1);
+
+    Render();
+
+    EXPECT_CALL(GLProxy, DeleteTextures(1, TextureId))
+      .Times(1);
+  };
+
+  const ::std::vector<::std::pair<String_t, ::std::string>> Destinations =
+  {
+    { uT("albedo"),    "TexAlbedo" },
+    { uT("metalness"), "TexMetalness" },
+    { uT("roughness"), "TexRoughness" },
+    { uT("normal"),    "TexNormal" },
+    { uT("occlusion"), "TexOcclusion" },
+    { uT("depth"),     "TexDepth" },
+  };
+
+  for (::std::size_t i = 0; i < Destinations.size(); i++)
+  {
+    const uint8_t * pSource = (uint8_t *)1908221846;
+    const int Width = 1908221845;
+    const int Height = 1908221847;
+
+    const auto pData = Component_t::Make(
+      {
+        { uT("kind"), uT("Texture") },
+        { uT("data"), pSource },
+        { uT("width"), Width },
+        { uT("height"), Height },
+        { uT("destination"), Destinations[i].first },
+      });
+
+    auto DataRender = itDataCreator->second(pData);
+    EXPECT_EQ(nullptr, DataRender);
+
+    TestCall(pData, Component_t::Make({}),
+      pSource, Width, Height, i, Destinations[i].second);
+  }
+}
+
+// ************************************************************************** //
+TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Texture_NoDeclaredInShader)
+{
+  using GLProxy_t = ::mock::GLProxy;
+  GLProxy_t GLProxy;
+  GLProxy_t::GetInstance() = &GLProxy;
+
+  const Tested_t Example{ Data_t{} };
+  const ITested_t & IExample = Example;
+
+  auto itDataCreator = IExample.GetCreators().find(uT("Data"));
+  ASSERT_NE(IExample.GetCreators().end(), itDataCreator);
+
+  auto itCreator = IExample.GetCreators().find(uT("Texture"));
+  ASSERT_NE(IExample.GetCreators().end(), itCreator);
+
+  const ::mock::GLuint TextureId = 1908221839;
+
+  const auto TestCall = [&](
+    const Component_t::ComponentPtr_t & _pTexture,
+    const uint8_t * _pSource,
+    const int _Width, const int _Height,
+    const ::std::size_t _Index,
+    const ::std::string & _TexName)
+  {
+    const auto Index = static_cast<::mock::GLint>(_Index);
+
+    using namespace ::testing;
+
+    InSequence Dummy;
+
+    EXPECT_CALL(GLProxy, GenTextures(1))
+      .Times(1)
+      .WillOnce(Return(TextureId));
+
+    auto Render = itCreator->second(_pTexture);
+    ASSERT_NE(nullptr, Render);
+
+    EXPECT_CALL(GLProxy, GetUniformLocation(_, _TexName))
+      .Times(1)
+      .WillOnce(Return(-1));
+
+    EXPECT_CALL(GLProxy, Uniform1i(_, _))
+      .Times(0);
+
+    EXPECT_THROW(Render(), ::std::exception);
+
+    EXPECT_CALL(GLProxy, DeleteTextures(1, TextureId))
+      .Times(1);
+  };
+
+  const ::std::vector<::std::pair<String_t, ::std::string>> Destinations =
+  {
+    { uT("albedo"),    "TexAlbedo" },
+    { uT("metalness"), "TexMetalness" },
+    { uT("roughness"), "TexRoughness" },
+    { uT("normal"),    "TexNormal" },
+    { uT("occlusion"), "TexOcclusion" },
+    { uT("depth"),     "TexDepth" },
+  };
+
+  for (::std::size_t i = 0; i < Destinations.size(); i++)
+  {
     {
-      { uT("kind"), uT("Perspective") },
-    }));
+      const uint8_t * pSource = (uint8_t *)1908221842;
+      const int Width = 1908221843;
+      const int Height = 1908221844;
+
+      const auto pTexture = Component_t::Make(
+        {
+          { uT("data"), pSource },
+          { uT("width"), Width },
+          { uT("height"), Height },
+          { uT("destination"), Destinations[i].first },
+        });
+
+      TestCall(pTexture,
+        pSource, Width, Height, i, Destinations[i].second);
+    }
+
+    {
+      const uint8_t * pSource = (uint8_t *)1908221846;
+      const int Width = 1908221845;
+      const int Height = 1908221847;
+
+      const auto pData = Component_t::Make(
+        {
+          { uT("kind"), uT("Texture") },
+          { uT("data"), pSource },
+          { uT("width"), Width },
+          { uT("height"), Height },
+          { uT("destination"), Destinations[i].first },
+        });
+
+      auto DataRender = itDataCreator->second(pData);
+      EXPECT_EQ(nullptr, DataRender);
+
+      TestCall(Component_t::Make({}),
+        pSource, Width, Height, i, Destinations[i].second);
+    }
+  }
+}
+
+// ************************************************************************** //
+TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Buffer_Fail)
+{
+  using GLProxy_t = ::mock::GLProxy;
+  GLProxy_t GLProxy;
+  GLProxy_t::GetInstance() = &GLProxy;
+
+  const Tested_t Example{ Data_t{} };
+  const ITested_t & IExample = Example;
+
+  auto itCreator = IExample.GetCreators().find(uT("Buffer"));
+  ASSERT_NE(IExample.GetCreators().end(), itCreator);
+
+  auto itDataCreator = IExample.GetCreators().find(uT("Data"));
+  ASSERT_NE(IExample.GetCreators().end(), itDataCreator);
+
+  auto TestCallRender = [&](const Component_t::ComponentPtr_t & _pComponent)
+  {
+    using namespace ::testing;
+
+    InSequence Dummy;
+
+    EXPECT_CALL(GLProxy, GenBuffers(_))
+      .Times(1);
+
+    EXPECT_CALL(GLProxy, GetError())
+      .Times(1)
+      .WillOnce(Return(1908232144));
+
+    EXPECT_THROW(itCreator->second(_pComponent), ::std::exception);
+  };
+
+  {
+    const ::std::vector<::covellite::api::Vertex> Source;
+
+    const auto pBuffer = Component_t::Make(
+      {
+        { uT("data"), Source.data() },
+        { uT("count"), Source.size() },
+      });
+
+    TestCallRender(pBuffer);
+
+    const auto pData = Component_t::Make(
+      {
+        { uT("kind"), uT("Buffer") },
+        { uT("data"), Source.data() },
+        { uT("count"), Source.size() },
+      });
+
+    auto DataRender = itDataCreator->second(pData);
+    EXPECT_EQ(nullptr, DataRender);
+
+    TestCallRender(Component_t::Make({ }));
+  }
+
+  {
+    using BufferMapper_t =
+      ::covellite::api::cbBufferMap_t<::covellite::api::Vertex>;
+    const ::std::vector<::covellite::api::Vertex> Source;
+
+    BufferMapper_t Mapper = [](::covellite::api::Vertex *) { return false; };
+
+    const auto pBuffer = Component_t::Make(
+      {
+        { uT("data"), Source.data() },
+        { uT("count"), Source.size() },
+        { uT("mapper"), Mapper },
+      });
+
+    TestCallRender(pBuffer);
+
+    const auto pData = Component_t::Make(
+      {
+        { uT("kind"), uT("Buffer") },
+        { uT("data"), Source.data() },
+        { uT("count"), Source.size() },
+        { uT("mapper"), Mapper },
+      });
+
+    auto DataRender = itDataCreator->second(pData);
+    EXPECT_EQ(nullptr, DataRender);
+
+    TestCallRender(Component_t::Make({ }));
+  }
+
+  {
+    const ::std::vector<int> Source;
+
+    const auto pBuffer = Component_t::Make(
+      {
+        { uT("data"), Source.data() },
+        { uT("count"), Source.size() },
+      });
+
+    TestCallRender(pBuffer);
+
+    const auto pData = Component_t::Make(
+      {
+        { uT("kind"), uT("Buffer") },
+        { uT("data"), Source.data() },
+        { uT("count"), Source.size() },
+      });
+
+    auto DataRender = itDataCreator->second(pData);
+    EXPECT_EQ(nullptr, DataRender);
+
+    TestCallRender(Component_t::Make({ }));
+  }
+}
+
+// ************************************************************************** //
+TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Buffer_Vertex_Static)
+{
+  using Vertex_t = ::covellite::api::Vertex;
+
+  using GLProxy_t = ::mock::GLProxy;
+  GLProxy_t GLProxy;
+  GLProxy_t::GetInstance() = &GLProxy;
+
+  const ::mock::GLuint BufferId = 1908231206;
+  const ::mock::GLint ProgramId = 1908231246;
+  const ::mock::GLint PositionId = 1908231301;
+  const ::mock::GLint TexCoordId = 1908231302;
+  const ::mock::GLint ExtraId = 1908231304;
+
+  const ::std::vector<Vertex_t> Source =
+  {
+    {
+      1808261932.0f, 1808261933.0f, 1812161256.0f, 1808261934.0f,
+      1812161257.0f, 1808261935.0f,
+      1808261936.0f, 1812161258.0f, 1908201939.0f, 1908201940.0f
+    },
+    {
+      1808261932.0f, 1808261933.0f, 1812161259.0f, 1808261934.0f,
+      1812161300.0f, 1808261935.0f,
+      1808261936.0f, 1812161301.0f, 1908201941.0f, 1908201942.0f
+    },
+    { 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f }, // Маркер конца данных
+  };
+
+  const ::mock::GLProxy::Floats_t ExpectedVertexData =
+  {
+    Source[0].px, Source[0].py, Source[0].pz,
+    Source[1].px, Source[1].py, Source[1].pz,
+  };
+
+  const ::mock::GLProxy::Floats_t ExpectedTexCoordData =
+  {
+    Source[0].tu, Source[0].tv,
+    Source[1].tu, Source[1].tv,
+  };
+
+  const ::mock::GLProxy::Floats_t ExpectedNormalData =
+  {
+    Source[0].ex, Source[0].ey, Source[0].ez,
+    Source[1].ex, Source[1].ey, Source[1].ez,
+  };
+
+  const Tested_t Example{ Data_t{} };
+  const ITested_t & IExample = Example;
+
+  auto itCreator = IExample.GetCreators().find(uT("Buffer"));
+  ASSERT_NE(IExample.GetCreators().end(), itCreator);
+
+  auto itDataCreator = IExample.GetCreators().find(uT("Data"));
+  ASSERT_NE(IExample.GetCreators().end(), itDataCreator);
+
+  auto TestCallRender = [&](const Component_t::ComponentPtr_t & _pComponent)
+  {
+    using namespace ::testing;
+
+    InSequence Dummy;
+
+    EXPECT_CALL(GLProxy, GenBuffers(1))
+      .Times(1)
+      .WillOnce(Return(BufferId));
+
+    EXPECT_CALL(GLProxy, BindBuffer(GL_ARRAY_BUFFER, BufferId))
+      .Times(1);
+
+    const auto Size =
+      static_cast<::mock::GLsizeiptr>(Source.size() * sizeof(Vertex_t));
+
+    EXPECT_CALL(GLProxy,
+      BufferData(GL_ARRAY_BUFFER, Size, Source.data(), GL_STATIC_DRAW))
+      .Times(1);
+
+    EXPECT_CALL(GLProxy, BindBuffer(GL_ARRAY_BUFFER, 0))
+      .Times(1);
+
+    EXPECT_CALL(GLProxy, GetError())
+      .Times(1)
+      .WillOnce(Return(GL_NO_ERROR));
+
+    const auto Render = itCreator->second(_pComponent);
+    ASSERT_NE(nullptr, Render);
+
+    EXPECT_CALL(GLProxy, BindBuffer(GL_ARRAY_BUFFER, BufferId))
+      .Times(1);
+
+    EXPECT_CALL(GLProxy, GetIntegerv(GL_CURRENT_PROGRAM))
+      .Times(1)
+      .WillOnce(Return(&ProgramId));
+
+    EXPECT_CALL(GLProxy,
+      GetAttribLocation(ProgramId, Eq("Covellite_VertexPosition")))
+      .Times(1)
+      .WillOnce(Return(PositionId));
+
+    EXPECT_CALL(GLProxy, EnableVertexAttribArray(PositionId))
+      .Times(1);
+
+    EXPECT_CALL(GLProxy, VertexAttribPointer(PositionId, 4, GL_FLOAT, GL_FALSE,
+      sizeof(Vertex_t), (void*)0))
+      .Times(1);
+
+    EXPECT_CALL(GLProxy, VertexAttribDivisor(PositionId, 0))
+      .Times(1);
+
+    EXPECT_CALL(GLProxy,
+      GetAttribLocation(ProgramId, Eq("Covellite_VertexTexCoord")))
+      .Times(1)
+      .WillOnce(Return(TexCoordId));
+
+    EXPECT_CALL(GLProxy, EnableVertexAttribArray(TexCoordId))
+      .Times(1);
+
+    EXPECT_CALL(GLProxy, VertexAttribPointer(TexCoordId, 2, GL_FLOAT, GL_FALSE,
+      sizeof(Vertex_t), (void*)(sizeof(float) * 4)))
+      .Times(1);
+
+    EXPECT_CALL(GLProxy, VertexAttribDivisor(TexCoordId, 0))
+      .Times(1);
+
+    EXPECT_CALL(GLProxy,
+      GetAttribLocation(ProgramId, Eq("Covellite_VertexExtra")))
+      .Times(1)
+      .WillOnce(Return(ExtraId));
+
+    EXPECT_CALL(GLProxy, EnableVertexAttribArray(ExtraId))
+      .Times(1);
+
+    EXPECT_CALL(GLProxy, VertexAttribPointer(ExtraId, 4, GL_FLOAT, GL_FALSE,
+      sizeof(Vertex_t), (void*)(sizeof(float) * 6)))
+      .Times(1);
+
+    EXPECT_CALL(GLProxy, VertexAttribDivisor(ExtraId, 0))
+      .Times(1);
+
+    EXPECT_CALL(GLProxy, BindBuffer(GL_ARRAY_BUFFER, 0))
+      .Times(1);
+
+    Render();
+
+    EXPECT_CALL(GLProxy, DeleteBuffers(1, BufferId))
+      .Times(1);
+  };
+
+  // ***************** Передача данных в объекте компонента ***************** //
+
+  {
+    const auto pBuffer = Component_t::Make(
+      {
+        { uT("data"), Source.data() },
+        { uT("count"), Source.size() },
+      });
+
+    TestCallRender(pBuffer);
+  }
+
+  // ************** Передача данных в объекте компонента Data *************** //
+
+  {
+    const auto pData = Component_t::Make(
+      {
+        { uT("kind"), uT("Buffer") },
+        { uT("data"), Source.data() },
+        { uT("count"), Source.size() },
+      });
+
+    auto DataRender = itDataCreator->second(pData);
+    EXPECT_EQ(nullptr, DataRender);
+
+    TestCallRender(Component_t::Make({ }));
+  }
+}
+
+// ************************************************************************** //
+TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Buffer_Vertex_Dynamic)
+{
+  using Vertex_t = ::covellite::api::Vertex;
+  using BufferMapper_t = ::covellite::api::cbBufferMap_t<Vertex_t>;
+
+  class Proxy :
+    public ::alicorn::extension::testing::Proxy<Proxy>
+  {
+  public:
+    MOCK_METHOD1(Mapper, bool(Vertex_t *));
+  };
+
+  Proxy oProxy;
+  Proxy::GetInstance() = &oProxy;
+
+  using GLProxy_t = ::mock::GLProxy;
+  GLProxy_t GLProxy;
+  GLProxy_t::GetInstance() = &GLProxy;
+
+  const ::mock::GLuint BufferId = 1908232202;
+  const ::mock::GLint ProgramId = 1908232203;
+  const ::mock::GLint PositionId = 1908232204;
+  const ::mock::GLint TexCoordId = 1908232205;
+  const ::mock::GLint ExtraId = 1908232206;
+
+  const ::std::vector<Vertex_t> Source1 =
+  {
+    {
+      1808261932.0f, 1808261933.0f, 1812161256.0f, 1808261934.0f,
+      1812161257.0f, 1808261935.0f,
+      1808261936.0f, 1812161258.0f, 1908201945.0f, 1908201946.0f
+    },
+    {
+      1808261932.0f, 1808261933.0f, 1812161259.0f, 1808261934.0f,
+      1812161300.0f, 1808261935.0f,
+      1808261936.0f, 1812161301.0f, 1908201947.0f, 1908201948.0f
+    },
+    { 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f }, // Маркер конца данных
+  };
+
+  const ::std::vector<::mock::GLfloat> Source2 =
+  {
+    1908011341.0f, 1908261933.0f, 1912161256.0f, 1908261934.0f,
+    1912161257.0f, 1908261935.0f,
+    1908261936.0f, 1912161258.0f, 1908201949.0f, 1908201950.0f,
+    1908261932.0f, 1908261933.0f, 1912161259.0f, 1908261934.0f,
+    1912161300.0f, 1908261935.0f,
+    1908261936.0f, 1912161301.0f, 1908201951.0f, 1908201952.0f,
+  };
+
+  const BufferMapper_t Mapper = [&](Vertex_t * _pData)
+  {
+    if (_pData != nullptr)
+    {
+      memcpy(_pData, Source2.data(), sizeof(::mock::GLfloat) * Source2.size());
+    }
+
+    return oProxy.Mapper(_pData);
+  };
+
+  const Tested_t Example{ Data_t{} };
+  const ITested_t & IExample = Example;
+
+  auto itCreator = IExample.GetCreators().find(uT("Buffer"));
+  ASSERT_NE(IExample.GetCreators().end(), itCreator);
+
+  auto TestCallRender = [&](const Component_t::ComponentPtr_t & _pComponent)
+  {
+    using namespace ::testing;
+
+    InSequence Dummy;
+
+    EXPECT_CALL(GLProxy, GenBuffers(1))
+      .Times(1)
+      .WillOnce(Return(BufferId));
+
+    EXPECT_CALL(GLProxy, BindBuffer(GL_ARRAY_BUFFER, BufferId))
+      .Times(1);
+
+    const auto Size =
+      static_cast<::mock::GLsizeiptr>(Source1.size() * sizeof(Vertex_t));
+
+    EXPECT_CALL(GLProxy,
+      BufferData(GL_ARRAY_BUFFER, Size, Source1.data(), GL_DYNAMIC_DRAW))
+      .Times(1);
+
+    EXPECT_CALL(GLProxy, BindBuffer(GL_ARRAY_BUFFER, 0))
+      .Times(1);
+
+    EXPECT_CALL(GLProxy, GetError())
+      .Times(1)
+      .WillOnce(Return(GL_NO_ERROR));
+
+    const auto Render = itCreator->second(_pComponent);
+    ASSERT_NE(nullptr, Render);
+
+    {
+      EXPECT_CALL(GLProxy, BindBuffer(GL_ARRAY_BUFFER, BufferId))
+        .Times(1);
+
+      EXPECT_CALL(oProxy, Mapper(nullptr))
+        .Times(1)
+        .WillOnce(Return(false));
+
+      EXPECT_CALL(oProxy, Mapper(_))
+        .Times(0);
+
+      EXPECT_CALL(GLProxy, BufferSubData(_, _, _, _))
+        .Times(0);
+
+      EXPECT_CALL(GLProxy, GetIntegerv(GL_CURRENT_PROGRAM))
+        .Times(1)
+        .WillOnce(Return(&ProgramId));
+
+      EXPECT_CALL(GLProxy,
+        GetAttribLocation(ProgramId, Eq("Covellite_VertexPosition")))
+        .Times(1)
+        .WillOnce(Return(PositionId));
+
+      EXPECT_CALL(GLProxy, EnableVertexAttribArray(PositionId))
+        .Times(1);
+
+      EXPECT_CALL(GLProxy, VertexAttribPointer(PositionId, 4, GL_FLOAT, GL_FALSE,
+        sizeof(Vertex_t), (void*)0))
+        .Times(1);
+
+      EXPECT_CALL(GLProxy, VertexAttribDivisor(PositionId, 0))
+        .Times(1);
+
+      EXPECT_CALL(GLProxy,
+        GetAttribLocation(ProgramId, Eq("Covellite_VertexTexCoord")))
+        .Times(1)
+        .WillOnce(Return(TexCoordId));
+
+      EXPECT_CALL(GLProxy, EnableVertexAttribArray(TexCoordId))
+        .Times(1);
+
+      EXPECT_CALL(GLProxy, VertexAttribPointer(TexCoordId, 2, GL_FLOAT, GL_FALSE,
+        sizeof(Vertex_t), (void*)(sizeof(float) * 4)))
+        .Times(1);
+
+      EXPECT_CALL(GLProxy, VertexAttribDivisor(TexCoordId, 0))
+        .Times(1);
+
+      EXPECT_CALL(GLProxy,
+        GetAttribLocation(ProgramId, Eq("Covellite_VertexExtra")))
+        .Times(1)
+        .WillOnce(Return(ExtraId));
+
+      EXPECT_CALL(GLProxy, EnableVertexAttribArray(ExtraId))
+        .Times(1);
+
+      EXPECT_CALL(GLProxy, VertexAttribPointer(ExtraId, 4, GL_FLOAT, GL_FALSE,
+        sizeof(Vertex_t), (void*)(sizeof(float) * 6)))
+        .Times(1);
+
+      EXPECT_CALL(GLProxy, VertexAttribDivisor(ExtraId, 0))
+        .Times(1);
+
+      EXPECT_CALL(GLProxy, BindBuffer(GL_ARRAY_BUFFER, 0))
+        .Times(1);
+
+      Render();
+    }
+
+    {
+      EXPECT_CALL(GLProxy, BindBuffer(GL_ARRAY_BUFFER, BufferId))
+        .Times(1);
+
+      EXPECT_CALL(oProxy, Mapper(nullptr))
+        .Times(1)
+        .WillOnce(Return(true));
+
+      EXPECT_CALL(oProxy, Mapper(_))
+        .Times(1);
+
+      EXPECT_CALL(GLProxy, BufferSubData(GL_ARRAY_BUFFER, 0, Size, Source2))
+        .Times(1);
+
+      EXPECT_CALL(GLProxy, GetIntegerv(GL_CURRENT_PROGRAM))
+        .Times(1)
+        .WillOnce(Return(&ProgramId));
+
+      EXPECT_CALL(GLProxy,
+        GetAttribLocation(ProgramId, Eq("Covellite_VertexPosition")))
+        .Times(1)
+        .WillOnce(Return(PositionId));
+
+      EXPECT_CALL(GLProxy, EnableVertexAttribArray(PositionId))
+        .Times(1);
+
+      EXPECT_CALL(GLProxy, VertexAttribPointer(PositionId, 4, GL_FLOAT, GL_FALSE,
+        sizeof(Vertex_t), (void*)0))
+        .Times(1);
+
+      EXPECT_CALL(GLProxy, VertexAttribDivisor(PositionId, 0))
+        .Times(1);
+
+      EXPECT_CALL(GLProxy,
+        GetAttribLocation(ProgramId, Eq("Covellite_VertexTexCoord")))
+        .Times(1)
+        .WillOnce(Return(TexCoordId));
+
+      EXPECT_CALL(GLProxy, EnableVertexAttribArray(TexCoordId))
+        .Times(1);
+
+      EXPECT_CALL(GLProxy, VertexAttribPointer(TexCoordId, 2, GL_FLOAT, GL_FALSE,
+        sizeof(Vertex_t), (void*)(sizeof(float) * 4)))
+        .Times(1);
+
+      EXPECT_CALL(GLProxy, VertexAttribDivisor(TexCoordId, 0))
+        .Times(1);
+
+      EXPECT_CALL(GLProxy,
+        GetAttribLocation(ProgramId, Eq("Covellite_VertexExtra")))
+        .Times(1)
+        .WillOnce(Return(ExtraId));
+
+      EXPECT_CALL(GLProxy, EnableVertexAttribArray(ExtraId))
+        .Times(1);
+
+      EXPECT_CALL(GLProxy, VertexAttribPointer(ExtraId, 4, GL_FLOAT, GL_FALSE,
+        sizeof(Vertex_t), (void*)(sizeof(float) * 6)))
+        .Times(1);
+
+      EXPECT_CALL(GLProxy, VertexAttribDivisor(ExtraId, 0))
+        .Times(1);
+
+      EXPECT_CALL(GLProxy, BindBuffer(GL_ARRAY_BUFFER, 0))
+        .Times(1);
+
+      Render();
+    }
+
+    EXPECT_CALL(GLProxy, DeleteBuffers(1, BufferId))
+      .Times(1);
+  };
+
+  // ***************** Передача данных в объекте компонента ***************** //
+
+  {
+    const auto pBuffer = Component_t::Make(
+      {
+        { uT("data"), Source1.data() },
+        { uT("count"), Source1.size() },
+        { uT("mapper"), Mapper },
+      });
+
+    TestCallRender(pBuffer);
+  }
+
+  // ************** Передача данных в объекте компонента Data *************** //
+
+  {
+    auto itDataCreator = IExample.GetCreators().find(uT("Data"));
+    ASSERT_NE(IExample.GetCreators().end(), itDataCreator);
+
+    const auto pData = Component_t::Make(
+      {
+        { uT("kind"), uT("Buffer") },
+        { uT("data"), Source1.data() },
+        { uT("count"), Source1.size() },
+      });
+
+    auto DataRender = itDataCreator->second(pData);
+    EXPECT_EQ(nullptr, DataRender);
+
+    const auto pBuffer = Component_t::Make(
+      {
+        { uT("mapper"), Mapper },
+      });
+
+    TestCallRender(pBuffer);
+  }
+}
+
+// ************************************************************************** //
+TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Buffer_Vertex_IgnoreNotExistsVariables)
+{
+  using Vertex_t = ::covellite::api::Vertex;
+  using BufferMapper_t = ::covellite::api::cbBufferMap_t<Vertex_t>;
+
+  using GLProxy_t = ::mock::GLProxy;
+  GLProxy_t GLProxy;
+  GLProxy_t::GetInstance() = &GLProxy;
+
+  const ::mock::GLuint BufferId = 1908231206;
+  const ::mock::GLint ProgramId = 1908231246;
+
+  const ::std::vector<Vertex_t> Source =
+  {
+    {
+      1808261932.0f, 1808261933.0f, 1812161256.0f, 1808261934.0f,
+      1812161257.0f, 1808261935.0f,
+      1808261936.0f, 1812161258.0f, 1908201939.0f, 1908201940.0f
+    },
+    {
+      1808261932.0f, 1808261933.0f, 1812161259.0f, 1808261934.0f,
+      1812161300.0f, 1808261935.0f,
+      1808261936.0f, 1812161301.0f, 1908201941.0f, 1908201942.0f
+    },
+    { 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f }, // Маркер конца данных
+  };
+
+  const Tested_t Example{ Data_t{} };
+  const ITested_t & IExample = Example;
+
+  auto itCreator = IExample.GetCreators().find(uT("Buffer"));
+  ASSERT_NE(IExample.GetCreators().end(), itCreator);
+
+  auto itDataCreator = IExample.GetCreators().find(uT("Data"));
+  ASSERT_NE(IExample.GetCreators().end(), itDataCreator);
+
+  auto TestCallRender = [&](const Component_t::ComponentPtr_t & _pComponent)
+  {
+    using namespace ::testing;
+
+    InSequence Dummy;
+
+    EXPECT_CALL(GLProxy, GenBuffers(1))
+      .Times(1)
+      .WillOnce(Return(BufferId));
+
+    EXPECT_CALL(GLProxy, BindBuffer(GL_ARRAY_BUFFER, BufferId))
+      .Times(1);
+
+    EXPECT_CALL(GLProxy, BufferData(GL_ARRAY_BUFFER, _, _, _))
+      .Times(1);
+
+    EXPECT_CALL(GLProxy, BindBuffer(GL_ARRAY_BUFFER, 0))
+      .Times(1);
+
+    EXPECT_CALL(GLProxy, GetError())
+      .Times(1)
+      .WillOnce(Return(GL_NO_ERROR));
+
+    const auto Render = itCreator->second(_pComponent);
+    ASSERT_NE(nullptr, Render);
+
+    EXPECT_CALL(GLProxy, BindBuffer(GL_ARRAY_BUFFER, BufferId))
+      .Times(1);
+
+    EXPECT_CALL(GLProxy, GetIntegerv(GL_CURRENT_PROGRAM))
+      .Times(1)
+      .WillOnce(Return(&ProgramId));
+
+    EXPECT_CALL(GLProxy,
+      GetAttribLocation(ProgramId, Eq("Covellite_VertexPosition")))
+      .Times(1)
+      .WillOnce(Return(-1));
+
+    EXPECT_CALL(GLProxy, EnableVertexAttribArray(_))
+      .Times(0);
+
+    EXPECT_CALL(GLProxy, VertexAttribPointer(_, _, _, _, _, _))
+      .Times(0);
+
+    EXPECT_CALL(GLProxy, VertexAttribDivisor(_, _))
+      .Times(0);
+
+    EXPECT_CALL(GLProxy,
+      GetAttribLocation(ProgramId, Eq("Covellite_VertexTexCoord")))
+      .Times(1)
+      .WillOnce(Return(-1));
+
+    EXPECT_CALL(GLProxy, EnableVertexAttribArray(_))
+      .Times(0);
+
+    EXPECT_CALL(GLProxy, VertexAttribPointer(_, _, _, _, _, _))
+      .Times(0);
+
+    EXPECT_CALL(GLProxy, VertexAttribDivisor(_, _))
+      .Times(0);
+
+    EXPECT_CALL(GLProxy,
+      GetAttribLocation(ProgramId, Eq("Covellite_VertexExtra")))
+      .Times(1)
+      .WillOnce(Return(-1));
+
+    EXPECT_CALL(GLProxy, EnableVertexAttribArray(_))
+      .Times(0);
+
+    EXPECT_CALL(GLProxy, VertexAttribPointer(_, _, _, _, _, _))
+      .Times(0);
+
+    EXPECT_CALL(GLProxy, VertexAttribDivisor(_, _))
+      .Times(0);
+
+    EXPECT_CALL(GLProxy, BindBuffer(GL_ARRAY_BUFFER, 0))
+      .Times(1);
+
+    Render();
+
+    EXPECT_CALL(GLProxy, DeleteBuffers(1, BufferId))
+      .Times(1);
+  };
+
+  // ***************** Передача данных в объекте компонента ***************** //
+
+  {
+    const auto pBuffer = Component_t::Make(
+      {
+        { uT("data"), Source.data() },
+        { uT("count"), Source.size() },
+      });
+
+    TestCallRender(pBuffer);
+  }
+
+  // ************** Передача данных в объекте компонента Data *************** //
+
+  {
+    const auto pData = Component_t::Make(
+      {
+        { uT("kind"), uT("Buffer") },
+        { uT("data"), Source.data() },
+        { uT("count"), Source.size() },
+      });
+
+    auto DataRender = itDataCreator->second(pData);
+    EXPECT_EQ(nullptr, DataRender);
+
+    TestCallRender(Component_t::Make({ }));
+  }
+
+  //////////////////////////////////////////////////////////////////////////////
+
+  // ***************** Передача данных в объекте компонента ***************** //
+
+  {
+    const auto pBuffer = Component_t::Make(
+      {
+        { uT("data"), Source.data() },
+        { uT("count"), Source.size() },
+        { uT("mapper"), BufferMapper_t{} },
+      });
+
+    TestCallRender(pBuffer);
+  }
+
+  // ************** Передача данных в объекте компонента Data *************** //
+
+  {
+    auto itDataCreator = IExample.GetCreators().find(uT("Data"));
+    ASSERT_NE(IExample.GetCreators().end(), itDataCreator);
+
+    const auto pData = Component_t::Make(
+      {
+        { uT("kind"), uT("Buffer") },
+        { uT("data"), Source.data() },
+        { uT("count"), Source.size() },
+      });
+
+    auto DataRender = itDataCreator->second(pData);
+    EXPECT_EQ(nullptr, DataRender);
+
+    const auto pBuffer = Component_t::Make(
+      {
+        { uT("mapper"), BufferMapper_t{} },
+      });
+
+    TestCallRender(pBuffer);
+  }
 }
 
 // ************************************************************************** //
@@ -3319,7 +3991,7 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Fog)
 
   auto VsRender = itShaderCreator->second(Component_t::Make(
     {
-      { uT("entry"), uT("vsGui") },
+      { uT("entry"), uT("vsFlat") },
     }));
   ASSERT_NE(nullptr, VsRender);
 
@@ -3455,7 +4127,3806 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Fog)
 }
 
 // ************************************************************************** //
-TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Light_Ambient)
+TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Transform_UnknownKind)
+{
+  // 17 Сентябрь 2019 12:54 (unicornum.verum@gmail.com)
+  TODO("Одинаковый тест во всех реализациях");
+
+  const Tested_t oExample{ Data_t{} };
+  const ITested_t & IExample = oExample;
+
+  auto itCreator = IExample.GetCreators().find(uT("Transform"));
+  ASSERT_NE(IExample.GetCreators().end(), itCreator);
+
+  const auto pComponent = Component_t::Make(
+    {
+      { uT("kind"), uT("Unknow1908061947") },
+    });
+
+  EXPECT_THROW(itCreator->second(pComponent), ::std::exception);
+}
+
+// ************************************************************************** //
+TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Transform_Default)
+{
+  using GLProxy_t = ::mock::GLProxy;
+  GLProxy_t GLProxy;
+  GLProxy_t::GetInstance() = &GLProxy;
+
+  const Tested_t Example{ Data_t{} };
+  const ITested_t & IExample = Example;
+
+  const ::mock::GLint ProgramId = 1908241203;
+  const ::mock::GLint MatrixWorldLocationId = 1908241207;
+
+  auto itDataCreator = IExample.GetCreators().find(uT("Data"));
+  ASSERT_NE(IExample.GetCreators().end(), itDataCreator);
+
+  auto itCreator = IExample.GetCreators().find(uT("Transform"));
+  ASSERT_NE(IExample.GetCreators().end(), itCreator);
+
+  auto pPosition = Component_t::Make({ { uT("kind"), uT("Position") } });
+  auto pRotation = Component_t::Make({ { uT("kind"), uT("Rotation") } });
+  auto pScale = Component_t::Make({ { uT("kind"), uT("Scale") } });
+  const auto pTransform = Component_t::Make({});
+
+  auto PositionRender = itDataCreator->second(pPosition);
+  EXPECT_EQ(nullptr, PositionRender);
+
+  auto RotationRender = itDataCreator->second(pRotation);
+  EXPECT_EQ(nullptr, RotationRender);
+
+  auto ScaleRender = itDataCreator->second(pScale);
+  EXPECT_EQ(nullptr, ScaleRender);
+
+  const auto Render = itCreator->second(pTransform);
+  ASSERT_NE(nullptr, Render);
+
+  auto WorldMatrix = ::glm::identity<::glm::mat4>();
+
+  auto TestCallRender = [&](
+    float _X, float _Y, float _Z,
+    float _A, float _B, float _C,
+    float _Sx, float _Sy, float _Sz)
+  {
+    pPosition->SetValue(uT("x"), _X);
+    pPosition->SetValue(uT("y"), _Y);
+    pPosition->SetValue(uT("z"), _Z);
+
+    pRotation->SetValue(uT("x"), _A);
+    pRotation->SetValue(uT("y"), _B);
+    pRotation->SetValue(uT("z"), _C);
+
+    pScale->SetValue(uT("x"), _Sx);
+    pScale->SetValue(uT("y"), _Sy);
+    pScale->SetValue(uT("z"), _Sz);
+
+    WorldMatrix = ::glm::identity<::glm::mat4>();
+    WorldMatrix = ::glm::scale(WorldMatrix, { _Sx, _Sy, _Sz });
+    WorldMatrix = ::glm::rotate(WorldMatrix, _C, { 0.0f, 0.0f, 1.0f });
+    WorldMatrix = ::glm::rotate(WorldMatrix, _B, { 0.0f, 1.0f, 0.0f });
+    WorldMatrix = ::glm::rotate(WorldMatrix, _A, { 1.0f, 0.0f, 0.0f });
+    WorldMatrix = ::glm::translate(WorldMatrix, { _X, _Y, _Z });
+    WorldMatrix = ::glm::transpose(WorldMatrix);
+
+    using namespace ::testing;
+
+    InSequence Dummy;
+
+    EXPECT_CALL(GLProxy, GetIntegerv(GL_CURRENT_PROGRAM))
+      .Times(1)
+      .WillOnce(Return(&ProgramId));
+
+    EXPECT_CALL(GLProxy, GetUniformLocation(ProgramId, Eq("ObjectData.World")))
+      .Times(1)
+      .WillOnce(Return(MatrixWorldLocationId));
+
+    EXPECT_CALL(GLProxy,
+      UniformMatrix4fv(MatrixWorldLocationId, 1, GL_FALSE, WorldMatrix))
+      .Times(1);
+
+    // *************** Передача других данных шейдеру ********************* //
+
+    EXPECT_CALL(GLProxy, GetUniformLocation(_, _))
+      .Times(AtLeast(1));
+
+    // ******************************************************************** //
+
+    Render();
+  };
+
+  // Два вызова, чтобы убедиться, что изменение исходных данных приводит 
+  // к изменению результата рендеринга.
+
+  TestCallRender(
+    1956.0f, 1957.0f, 1958.0f,
+    1204.0f, 1205.0f, 1206.0f,
+    1152.0f, 1153.0f, 1154.0f);
+
+  TestCallRender(
+    1959.0f, 1960.0f, 1961.0f,
+    1145.0f, 1146.0f, 1147.0f,
+    1155.0f, 1157.0f, 1158.0f);
+}
+
+// ************************************************************************** //
+TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Transform_Static)
+{
+  using GLProxy_t = ::mock::GLProxy;
+  GLProxy_t GLProxy;
+  GLProxy_t::GetInstance() = &GLProxy;
+
+  const Tested_t Example{ Data_t{} };
+  const ITested_t & IExample = Example;
+
+  const ::mock::GLint ProgramId = 1908241203;
+  const ::mock::GLint MatrixWorldLocationId = 1908241207;
+
+  auto itDataCreator = IExample.GetCreators().find(uT("Data"));
+  ASSERT_NE(IExample.GetCreators().end(), itDataCreator);
+
+  auto itCreator = IExample.GetCreators().find(uT("Transform"));
+  ASSERT_NE(IExample.GetCreators().end(), itCreator);
+
+  auto pPosition = Component_t::Make({ { uT("kind"), uT("Position") } });
+  auto pRotation = Component_t::Make({ { uT("kind"), uT("Rotation") } });
+  auto pScale = Component_t::Make({ { uT("kind"), uT("Scale") } });
+
+  auto TestCallRender = [&](const Component_t::ComponentPtr_t & _pTransform)
+  {
+    auto WorldMatrix = ::glm::identity<::glm::mat4>();
+
+    auto SetValues = [&](const bool _IsBuildMatrix,
+      float _X, float _Y, float _Z,
+      float _A, float _B, float _C,
+      float _Sx, float _Sy, float _Sz)
+    {
+      pPosition->SetValue(uT("x"), _X);
+      pPosition->SetValue(uT("y"), _Y);
+      pPosition->SetValue(uT("z"), _Z);
+
+      pRotation->SetValue(uT("x"), _A);
+      pRotation->SetValue(uT("y"), _B);
+      pRotation->SetValue(uT("z"), _C);
+
+      pScale->SetValue(uT("x"), _Sx);
+      pScale->SetValue(uT("y"), _Sy);
+      pScale->SetValue(uT("z"), _Sz);
+
+      if (_IsBuildMatrix)
+      {
+        WorldMatrix = ::glm::identity<::glm::mat4>();
+        WorldMatrix = ::glm::scale(WorldMatrix, { _Sx, _Sy, _Sz });
+        WorldMatrix = ::glm::rotate(WorldMatrix, _C, { 0.0f, 0.0f, 1.0f });
+        WorldMatrix = ::glm::rotate(WorldMatrix, _B, { 0.0f, 1.0f, 0.0f });
+        WorldMatrix = ::glm::rotate(WorldMatrix, _A, { 1.0f, 0.0f, 0.0f });
+        WorldMatrix = ::glm::translate(WorldMatrix, { _X, _Y, _Z });
+        WorldMatrix = ::glm::transpose(WorldMatrix);
+      }
+    };
+
+    SetValues(true,
+      1956.0f, 1957.0f, 1958.0f,
+      1204.0f, 1205.0f, 1206.0f,
+      1152.0f, 1153.0f, 1154.0f);
+
+    auto PositionRender = itDataCreator->second(pPosition);
+    EXPECT_EQ(nullptr, PositionRender);
+
+    auto RotationRender = itDataCreator->second(pRotation);
+    EXPECT_EQ(nullptr, RotationRender);
+
+    auto ScaleRender = itDataCreator->second(pScale);
+    EXPECT_EQ(nullptr, ScaleRender);
+
+    const auto Render = itCreator->second(_pTransform);
+    ASSERT_NE(nullptr, Render);
+
+    auto TestCallRender = [&](void)
+    {
+      using namespace ::testing;
+
+      InSequence Dummy;
+
+      EXPECT_CALL(GLProxy, GetIntegerv(GL_CURRENT_PROGRAM))
+        .Times(1)
+        .WillOnce(Return(&ProgramId));
+
+      EXPECT_CALL(GLProxy, GetUniformLocation(ProgramId, Eq("ObjectData.World")))
+        .Times(1)
+        .WillOnce(Return(MatrixWorldLocationId));
+
+      EXPECT_CALL(GLProxy,
+        UniformMatrix4fv(MatrixWorldLocationId, 1, GL_FALSE, WorldMatrix))
+        .Times(1);
+
+      // *************** Передача других данных шейдеру ********************* //
+
+      EXPECT_CALL(GLProxy, GetUniformLocation(_, _))
+        .Times(AtLeast(1));
+
+      // ******************************************************************** //
+
+      Render();
+    };
+
+    // Два вызова, чтобы убедиться, что изменение исходных данных не приводит 
+    // к изменению результата рендеринга.
+
+    TestCallRender();
+
+    SetValues(false,
+      1959.0f, 1960.0f, 1961.0f,
+      1145.0f, 1146.0f, 1147.0f,
+      1155.0f, 1157.0f, 1158.0f);
+
+    TestCallRender();
+  };
+
+  const auto pTransform = Component_t::Make(
+    {
+      { uT("kind"), uT("Static") },
+    });
+
+  TestCallRender(pTransform);
+}
+
+// ************************************************************************** //
+TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Transform_Billboard)
+{
+  using GLProxy_t = ::mock::GLProxy;
+  GLProxy_t GLProxy;
+  GLProxy_t::GetInstance() = &GLProxy;
+
+  Tested_t Example{ Data_t{} };
+  const ITested_t & IExample = Example;
+
+  const ::mock::GLint ProgramId = 1908241203;
+  const ::mock::GLint MatrixWorldLocationId = 1908241207;
+
+  auto itDataCreator = IExample.GetCreators().find(uT("Data"));
+  ASSERT_NE(IExample.GetCreators().end(), itDataCreator);
+
+  auto itCreator = IExample.GetCreators().find(uT("Transform"));
+  ASSERT_NE(IExample.GetCreators().end(), itCreator);
+
+  auto pPosition = Component_t::Make({ { uT("kind"), uT("Position") } });
+
+  auto TestCallRender = [&](const Component_t::ComponentPtr_t & _pTransform)
+  {
+    auto PositionRender = itDataCreator->second(pPosition);
+    EXPECT_EQ(nullptr, PositionRender);
+
+    const auto Render = itCreator->second(_pTransform);
+    ASSERT_NE(nullptr, Render);
+
+    auto WorldMatrix = ::glm::identity<::glm::mat4>();
+
+    auto TestCallRender = [&](float _X, float _Y, float _Z)
+    {
+      pPosition->SetValue(uT("x"), _X);
+      pPosition->SetValue(uT("y"), _Y);
+      pPosition->SetValue(uT("z"), _Z);
+
+      WorldMatrix = ::glm::identity<::glm::mat4>();
+      WorldMatrix = ::glm::translate(WorldMatrix, { _X, _Y, _Z });
+
+      const auto ViewMatrix = ::glm::mat4
+      {
+        { 1.0f, 2.0f, 3.0f, 4.0f },
+        { 5.0f, 6.0f, 7.0f, 8.0f },
+        { 9.0f, 10.0f, 11.0f, 12.0f },
+        { 13.0f, 14.0f, 15.0f, 16.0f },
+      };
+
+      GetCameraMartix(Example).View = ViewMatrix;
+
+      auto TransposeViewMatrix = ViewMatrix;
+      TransposeViewMatrix[0][3] = 0.0f;
+      TransposeViewMatrix[1][3] = 0.0f;
+      TransposeViewMatrix[2][3] = 0.0f;
+      TransposeViewMatrix[3][0] = 0.0f;
+      TransposeViewMatrix[3][1] = 0.0f;
+      TransposeViewMatrix[3][2] = 0.0f;
+      TransposeViewMatrix[3][3] = 1.0f;
+
+      WorldMatrix = TransposeViewMatrix *
+        ::glm::translate(::glm::identity<::glm::mat4>(), { _X, _Y, _Z });
+      WorldMatrix = ::glm::transpose(WorldMatrix);
+
+      using namespace ::testing;
+
+      InSequence Dummy;
+
+      EXPECT_CALL(GLProxy, GetIntegerv(GL_CURRENT_PROGRAM))
+        .Times(1)
+        .WillOnce(Return(&ProgramId));
+
+      EXPECT_CALL(GLProxy, GetUniformLocation(ProgramId, Eq("ObjectData.World")))
+        .Times(1)
+        .WillOnce(Return(MatrixWorldLocationId));
+
+      EXPECT_CALL(GLProxy,
+        UniformMatrix4fv(MatrixWorldLocationId, 1, GL_FALSE, WorldMatrix))
+        .Times(1);
+
+      // *************** Передача других данных шейдеру ********************* //
+
+      EXPECT_CALL(GLProxy, GetUniformLocation(_, _))
+        .Times(AtLeast(1));
+
+      // ******************************************************************** //
+
+      Render();
+    };
+
+    // Два вызова, чтобы убедиться, что изменение исходных данных приводит 
+    // к изменению результата рендеринга.
+
+    TestCallRender(1956.0f, 1957.0f, 1958.0f);
+    TestCallRender(1959.0f, 1960.0f, 1961.0f);
+  };
+
+  const auto pTransform = Component_t::Make(
+    {
+      { uT("kind"), uT("Billboard") },
+    });
+
+  TestCallRender(pTransform);
+}
+
+// ************************************************************************** //
+TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Transform_DefaultValues)
+{
+  using GLProxy_t = ::mock::GLProxy;
+  GLProxy_t GLProxy;
+  GLProxy_t::GetInstance() = &GLProxy;
+
+  Tested_t Example{ Data_t{} };
+  const ITested_t & IExample = Example;
+
+  auto itDataCreator = IExample.GetCreators().find(uT("Data"));
+  ASSERT_NE(IExample.GetCreators().end(), itDataCreator);
+
+  auto itCreator = IExample.GetCreators().find(uT("Transform"));
+  ASSERT_NE(IExample.GetCreators().end(), itCreator);
+
+  auto pPosition = Component_t::Make({ { uT("kind"), uT("Position") } });
+  auto pRotation = Component_t::Make({ { uT("kind"), uT("Rotation") } });
+  auto pScale = Component_t::Make({ { uT("kind"), uT("Scale") } });
+
+  auto TestCallRender = [&](const Component_t::ComponentPtr_t & _pComponent,
+    const bool _IsFullTransform = true)
+  {
+    auto PositionRender = itDataCreator->second(pPosition);
+    EXPECT_EQ(nullptr, PositionRender);
+
+    if (_IsFullTransform)
+    {
+      auto RotationRender = itDataCreator->second(pRotation);
+      EXPECT_EQ(nullptr, RotationRender);
+
+      auto ScaleRender = itDataCreator->second(pScale);
+      EXPECT_EQ(nullptr, ScaleRender);
+    }
+
+    const auto Render = itCreator->second(_pComponent);
+    ASSERT_NE(nullptr, Render);
+
+    const auto ViewMatrix = ::glm::mat4
+    {
+      { 1.0f, 2.0f, 3.0f, 4.0f },
+      { 5.0f, 6.0f, 7.0f, 8.0f },
+      { 9.0f, 10.0f, 11.0f, 12.0f },
+      { 13.0f, 14.0f, 15.0f, 16.0f },
+    };
+
+    GetCameraMartix(Example).View = ViewMatrix;
+
+    auto WorldMatrix = ::glm::identity<::glm::mat4>();
+
+    if (_IsFullTransform)
+    {
+      WorldMatrix = ::glm::scale(WorldMatrix, { 1.0f, 1.0f, 1.0f });
+      WorldMatrix = ::glm::transpose(WorldMatrix);
+    }
+    else
+    {
+      auto TransposeViewMatrix = ViewMatrix;
+      TransposeViewMatrix[0][3] = 0.0f;
+      TransposeViewMatrix[1][3] = 0.0f;
+      TransposeViewMatrix[2][3] = 0.0f;
+      TransposeViewMatrix[3][0] = 0.0f;
+      TransposeViewMatrix[3][1] = 0.0f;
+      TransposeViewMatrix[3][2] = 0.0f;
+      TransposeViewMatrix[3][3] = 1.0f;
+
+      WorldMatrix = TransposeViewMatrix;
+      WorldMatrix = ::glm::transpose(WorldMatrix);
+    }
+
+    using namespace ::testing;
+
+    EXPECT_CALL(GLProxy, UniformMatrix4fv(_, _, _, WorldMatrix))
+      .Times(1);
+
+    Render();
+  };
+
+  TestCallRender(Component_t::Make(
+    {
+    }));
+
+  TestCallRender(Component_t::Make(
+    {
+      { uT("kind"), uT("Static") },
+    }));
+
+  TestCallRender(Component_t::Make(
+    {
+      { uT("kind"), uT("Billboard") },
+    }), false);
+}
+
+// ************************************************************************** //
+TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Transform_Combine)
+{
+  using GLProxy_t = ::mock::GLProxy;
+  GLProxy_t GLProxy;
+  GLProxy_t::GetInstance() = &GLProxy;
+
+  Tested_t Example{ Data_t{} };
+  const ITested_t & IExample = Example;
+
+  auto itDataCreator = IExample.GetCreators().find(uT("Data"));
+  ASSERT_NE(IExample.GetCreators().end(), itDataCreator);
+
+  auto itCreator = IExample.GetCreators().find(uT("Transform"));
+  ASSERT_NE(IExample.GetCreators().end(), itCreator);
+
+  auto MatrixIdentity = ::glm::identity<::glm::mat4>();
+
+  ::std::deque<Component_t::ComponentPtr_t> Components;
+
+  const auto SetPosition = [&](float _X, float _Y, float _Z)
+  {
+    Components.push_front(Component_t::Make(
+      {
+        { uT("kind"), uT("Position") },
+        { uT("x"), _X },
+        { uT("y"), _Y },
+        { uT("z"), _Z },
+      }));
+
+    MatrixIdentity = ::glm::translate(MatrixIdentity, { _X, _Y, _Z });
+  };
+
+  const auto SetRotation = [&](float _X, float _Y, float _Z)
+  {
+    Components.push_front(Component_t::Make(
+      {
+        { uT("kind"), uT("Rotation") },
+        { uT("x"), _X },
+        { uT("y"), _Y },
+        { uT("z"), _Z },
+      }));
+
+    MatrixIdentity = ::glm::rotate(MatrixIdentity, _Z, { 0.0f, 0.0f, 1.0f });
+    MatrixIdentity = ::glm::rotate(MatrixIdentity, _Y, { 0.0f, 1.0f, 0.0f });
+    MatrixIdentity = ::glm::rotate(MatrixIdentity, _X, { 1.0f, 0.0f, 0.0f });
+  };
+
+  const auto SetScale = [&](float _X, float _Y, float _Z)
+  {
+    Components.push_front(Component_t::Make(
+      {
+        { uT("kind"), uT("Scale") },
+        { uT("x"), _X },
+        { uT("y"), _Y },
+        { uT("z"), _Z },
+      }));
+
+    MatrixIdentity = ::glm::scale(MatrixIdentity, { _X, _Y, _Z });
+  };
+
+  {
+    MatrixIdentity = ::glm::identity<::glm::mat4>();
+    Components.clear();
+
+    SetPosition(1.0f, 2.0f, 3.0f);
+    SetRotation(4.0f, 5.0f, 6.0f);
+    SetScale(7.0f, 8.0f, 9.0f);
+
+    SetPosition(11.0f, 22.0f, 33.0f);
+    SetRotation(44.0f, 55.0f, 66.0f);
+    SetScale(77.0f, 88.0f, 99.0f);
+
+    MatrixIdentity = ::glm::transpose(MatrixIdentity);
+
+    for (const auto & pComponent : Components)
+    {
+      auto ScaleRender = itDataCreator->second(pComponent);
+      EXPECT_EQ(nullptr, ScaleRender);
+    }
+
+    auto Render = itCreator->second(Component_t::Make({ }));
+    ASSERT_NE(nullptr, Render);
+
+    using namespace ::testing;
+
+    InSequence Dummy;
+
+    EXPECT_CALL(GLProxy, UniformMatrix4fv(_, _, _, MatrixIdentity))
+      .Times(1);
+
+    Render();
+  }
+
+  {
+    MatrixIdentity = ::glm::identity<::glm::mat4>();
+    Components.clear();
+
+    SetPosition(1.0f, 2.0f, 3.0f);
+    SetRotation(4.0f, 5.0f, 6.0f);
+    SetScale(7.0f, 8.0f, 9.0f);
+
+    SetPosition(11.0f, 22.0f, 33.0f);
+    SetRotation(44.0f, 55.0f, 66.0f);
+    SetScale(77.0f, 88.0f, 99.0f);
+
+    MatrixIdentity = ::glm::transpose(MatrixIdentity);
+
+    for (const auto & pComponent : Components)
+    {
+      auto ScaleRender = itDataCreator->second(pComponent);
+      EXPECT_EQ(nullptr, ScaleRender);
+    }
+
+    auto Render = itCreator->second(Component_t::Make(
+      {
+        { uT("kind"), uT("Static") },
+      }));
+    ASSERT_NE(nullptr, Render);
+
+    using namespace ::testing;
+
+    InSequence Dummy;
+
+    EXPECT_CALL(GLProxy, UniformMatrix4fv(_, _, _, MatrixIdentity))
+      .Times(1);
+
+    Render();
+  }
+
+  {
+    const auto ViewMatrix = ::glm::mat4
+    {
+      { 1.0f, 2.0f, 3.0f, 4.0f },
+      { 5.0f, 6.0f, 7.0f, 8.0f },
+      { 9.0f, 10.0f, 11.0f, 12.0f },
+      { 13.0f, 14.0f, 15.0f, 16.0f },
+    };
+
+    GetCameraMartix(Example).View = ViewMatrix;
+
+    auto TransposeViewMatrix = ViewMatrix;
+    TransposeViewMatrix[0][3] = 0.0f;
+    TransposeViewMatrix[1][3] = 0.0f;
+    TransposeViewMatrix[2][3] = 0.0f;
+    TransposeViewMatrix[3][0] = 0.0f;
+    TransposeViewMatrix[3][1] = 0.0f;
+    TransposeViewMatrix[3][2] = 0.0f;
+    TransposeViewMatrix[3][3] = 1.0f;
+
+    MatrixIdentity = TransposeViewMatrix;
+    Components.clear();
+
+    SetPosition(1.0f, 2.0f, 3.0f);
+    SetPosition(11.0f, 22.0f, 33.0f);
+    SetPosition(111.0f, 222.0f, 333.0f);
+
+    MatrixIdentity = ::glm::transpose(MatrixIdentity);
+
+    for (const auto & pComponent : Components)
+    {
+      auto ScaleRender = itDataCreator->second(pComponent);
+      EXPECT_EQ(nullptr, ScaleRender);
+    }
+
+    auto Render = itCreator->second(Component_t::Make(
+      {
+        { uT("kind"), uT("Billboard") },
+      }));
+    ASSERT_NE(nullptr, Render);
+
+    using namespace ::testing;
+
+    InSequence Dummy;
+
+    EXPECT_CALL(GLProxy, UniformMatrix4fv(_, _, _, MatrixIdentity))
+      .Times(1);
+
+    Render();
+  }
+}
+
+// ************************************************************************** //
+TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Buffer_Constant_ObjectLights_EmptyMapper)
+{
+  // 17 Сентябрь 2019 13:32 (unicornum.verum@gmail.com)
+  TODO("Одинаковый тест для всех реализаций");
+
+  using BufferMapper_t = ::covellite::api::cbBufferMap_t<::Lights_t>;
+
+  const Tested_t oExample{ Data_t{} };
+  const ITested_t & IExample = oExample;
+
+  auto itCreator = IExample.GetCreators().find(uT("Buffer"));
+  ASSERT_NE(IExample.GetCreators().end(), itCreator);
+
+  // Тип буфера выводится из переданного mapper'a
+  //EXPECT_THROW(itCreator->second(Component_t::Make({ })), ::std::exception);
+
+  const auto pComponent1 = Component_t::Make(
+    {
+      { uT("mapper"), BufferMapper_t{ } },
+    });
+
+  EXPECT_THROW(itCreator->second(pComponent1), ::std::exception);
+
+  const auto pComponent2 = Component_t::Make(
+    {
+      { uT("mapper"), BufferMapper_t{ nullptr } },
+    });
+
+  EXPECT_THROW(itCreator->second(pComponent2), ::std::exception);
+}
+
+// ************************************************************************** //
+TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Buffer_Const_ObjectLights_Ambient)
+{
+  using BufferMapper_t = ::covellite::api::cbBufferMap_t<::Lights_t>;
+
+  using GLProxy_t = ::mock::GLProxy;
+  GLProxy_t GLProxy;
+  GLProxy_t::GetInstance() = &GLProxy;
+
+  const ::mock::GLint ProgramId = 1908261929;
+  const ::mock::GLint IsValidLocationId = 1908261935;
+  const ::mock::GLint ColorLocationId = 1908261936;
+
+  Lights_t Lights;
+  memset(&Lights, 0x00, sizeof(Lights));
+
+  Lights.Ambient.IsValid = 1909161807;
+  Lights.Ambient.Color = color_t{ 0.1f, 9.09f, 1.61f, 8.08f };
+
+  const Tested_t oExample{ Data_t{} };
+  const ITested_t & IExample = oExample;
+
+  auto itConstBufferCreator = IExample.GetCreators().find(uT("Buffer"));
+  ASSERT_NE(IExample.GetCreators().end(), itConstBufferCreator);
+
+  auto itTransformCreator = IExample.GetCreators().find(uT("Transform"));
+  ASSERT_NE(IExample.GetCreators().end(), itTransformCreator);
+
+  const BufferMapper_t BufferMapper = [&](Lights_t * _pLights)
+  {
+    *_pLights = Lights;
+    return false;
+  };
+
+  auto ConstBufferRender = itConstBufferCreator->second(Component_t::Make(
+    {
+      { uT("mapper"), BufferMapper },
+    }));
+  ASSERT_NE(nullptr, ConstBufferRender);
+
+  auto TransformRender = itTransformCreator->second(Component_t::Make({ }));
+  ASSERT_NE(nullptr, TransformRender);
+
+  ConstBufferRender(); // Вызывается BufferMapper
+
+  using namespace ::testing;
+
+  InSequence Dummy;
+
+  EXPECT_CALL(GLProxy, GetIntegerv(GL_CURRENT_PROGRAM))
+    .Times(1)
+    .WillOnce(Return(&ProgramId));
+
+  // *************** Передача других данных шейдеру ********************* //
+
+  EXPECT_CALL(GLProxy, GetUniformLocation(_, _))
+    .Times(AtLeast(1));
+
+  // ******************************************************************** //
+
+  EXPECT_CALL(GLProxy,
+    GetUniformLocation(ProgramId, Eq("ObjectData.Lights.Ambient.IsValid")))
+    .Times(1)
+    .WillOnce(Return(IsValidLocationId));
+
+  EXPECT_CALL(GLProxy,
+    GetUniformLocation(ProgramId, Eq("ObjectData.Lights.Ambient.Color")))
+    .Times(1)
+    .WillOnce(Return(ColorLocationId));
+
+  EXPECT_CALL(GLProxy, Uniform1i(IsValidLocationId, Lights.Ambient.IsValid))
+    .Times(1);
+
+  EXPECT_CALL(GLProxy, Uniform4fv(ColorLocationId, 1, Lights.Ambient.Color))
+    .Times(1);
+
+  // *************** Передача других данных шейдеру ********************* //
+
+  EXPECT_CALL(GLProxy, GetUniformLocation(_, _))
+    .Times(AtLeast(1));
+
+  EXPECT_CALL(GLProxy, Uniform1i(_, _))
+    .Times(1);
+
+  EXPECT_CALL(GLProxy, Uniform4fv(_, _, _))
+    .Times(AtLeast(1));
+
+  EXPECT_CALL(GLProxy, GetUniformLocation(_, _))
+    .Times(AtLeast(1));
+
+  EXPECT_CALL(GLProxy, Uniform1i(_, _))
+    .Times(1);
+
+  // ******************************************************************** //
+
+  TransformRender(); // Заполненный константный буфер передается шейдеру
+}
+
+// ************************************************************************** //
+TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Buffer_Const_ObjectLights_Direction)
+{
+  using BufferMapper_t = ::covellite::api::cbBufferMap_t<::Lights_t>;
+
+  using GLProxy_t = ::mock::GLProxy;
+  GLProxy_t GLProxy;
+  GLProxy_t::GetInstance() = &GLProxy;
+
+  const ::mock::GLint ProgramId = 1908262007;
+  const ::mock::GLint IsValidLocationId = 1908262008;
+  const ::mock::GLint ColorLocationId = 1908262009;
+  const ::mock::GLint DirectionLocationId = 1908262010;
+
+  Lights_t Lights;
+  memset(&Lights, 0x00, sizeof(Lights));
+
+  Lights.Direction.IsValid = 1909161809;
+  Lights.Direction.Color = color_t{ 1.9f, 0.91f, 6.18f, 1.1f };
+  Lights.Direction.Direction = float4{ 19.0f, 0.9f, 16.1f, 812.0f };
+
+  const Tested_t oExample{ Data_t{} };
+  const ITested_t & IExample = oExample;
+
+  auto itConstBufferCreator = IExample.GetCreators().find(uT("Buffer"));
+  ASSERT_NE(IExample.GetCreators().end(), itConstBufferCreator);
+
+  auto itTransformCreator = IExample.GetCreators().find(uT("Transform"));
+  ASSERT_NE(IExample.GetCreators().end(), itTransformCreator);
+
+  const BufferMapper_t BufferMapper = [&](Lights_t * _pLights)
+  {
+    *_pLights = Lights;
+    return false;
+  };
+
+  auto ConstBufferRender = itConstBufferCreator->second(Component_t::Make(
+    {
+      { uT("mapper"), BufferMapper },
+    }));
+  ASSERT_NE(nullptr, ConstBufferRender);
+
+  auto TransformRender = itTransformCreator->second(Component_t::Make({ }));
+  ASSERT_NE(nullptr, TransformRender);
+
+  ConstBufferRender(); // Вызывается BufferMapper
+
+  using namespace ::testing;
+
+  InSequence Dummy;
+
+  EXPECT_CALL(GLProxy, GetIntegerv(GL_CURRENT_PROGRAM))
+    .Times(1)
+    .WillOnce(Return(&ProgramId));
+
+  // *************** Передача других данных шейдеру ********************* //
+
+  EXPECT_CALL(GLProxy, GetUniformLocation(_, _))
+    .Times(AtLeast(1));
+
+  EXPECT_CALL(GLProxy, Uniform1i(_, _))
+    .Times(1);
+
+  EXPECT_CALL(GLProxy, Uniform4fv(_, _, _))
+    .Times(AtLeast(1));
+
+  // ******************************************************************** //
+
+  EXPECT_CALL(GLProxy,
+    GetUniformLocation(ProgramId, Eq("ObjectData.Lights.Direction.IsValid")))
+    .Times(1)
+    .WillOnce(Return(IsValidLocationId));
+
+  EXPECT_CALL(GLProxy,
+    GetUniformLocation(ProgramId, Eq("ObjectData.Lights.Direction.Color")))
+    .Times(1)
+    .WillOnce(Return(ColorLocationId));
+
+  EXPECT_CALL(GLProxy,
+    GetUniformLocation(ProgramId, Eq("ObjectData.Lights.Direction.Direction")))
+    .Times(1)
+    .WillOnce(Return(DirectionLocationId));
+
+  EXPECT_CALL(GLProxy, Uniform1i(IsValidLocationId, Lights.Direction.IsValid))
+    .Times(1);
+
+  EXPECT_CALL(GLProxy, Uniform4fv(ColorLocationId, 1, Lights.Direction.Color))
+    .Times(1);
+
+  EXPECT_CALL(GLProxy, Uniform4fv(DirectionLocationId, 1, Lights.Direction.Direction))
+    .Times(1);
+
+  // *************** Передача других данных шейдеру ********************* //
+
+  EXPECT_CALL(GLProxy, GetUniformLocation(_, _))
+    .Times(AtLeast(1));
+
+  EXPECT_CALL(GLProxy, Uniform1i(_, _))
+    .Times(1);
+
+  // ******************************************************************** //
+
+  TransformRender(); // Заполненный константный буфер передается шейдеру
+}
+
+// ************************************************************************** //
+TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Buffer_Const_ObjectLights_Points)
+{
+  using BufferMapper_t = ::covellite::api::cbBufferMap_t<::Lights_t>;
+
+  using GLProxy_t = ::mock::GLProxy;
+  GLProxy_t GLProxy;
+  GLProxy_t::GetInstance() = &GLProxy;
+
+  const ::mock::GLint ProgramId = 1908262028;
+  const ::mock::GLint UsedSlodCountId = 1908271923;
+  const ::mock::GLint ColorLocationId = 1908262029;
+  const ::mock::GLint PositionLocationId = 1908262030;
+  const ::mock::GLint AttenuationLocationId = 1908262031;
+
+  Lights_t Lights;
+  memset(&Lights, 0x00, sizeof(Lights));
+
+  Lights.Points.UsedSlotCount = COVELLITE_MAX_LIGHT_POINT_OBJECT_COUNT;
+
+  for (int i = 0; i < Lights.Points.UsedSlotCount; i++)
+  {
+    Lights.Points.Lights[i].Color = color_t{ 1.9f, 0.91f, 6.18f, 1.4f };
+    Lights.Points.Lights[i].Position = float4{ 1.9f, 0.91f, 6.18f, 1.5f };
+    Lights.Points.Lights[i].Attenuation = float4{ 1.9f, 0.91f, 6.18f, 1.6f };
+  }
+
+  const Tested_t oExample{ Data_t{} };
+  const ITested_t & IExample = oExample;
+
+  auto itConstBufferCreator = IExample.GetCreators().find(uT("Buffer"));
+  ASSERT_NE(IExample.GetCreators().end(), itConstBufferCreator);
+
+  auto itTransformCreator = IExample.GetCreators().find(uT("Transform"));
+  ASSERT_NE(IExample.GetCreators().end(), itTransformCreator);
+
+  const BufferMapper_t BufferMapper = [&](Lights_t * _pLights)
+  {
+    *_pLights = Lights;
+    return false;
+  };
+
+  auto ConstBufferRender = itConstBufferCreator->second(Component_t::Make(
+    {
+      { uT("mapper"), BufferMapper },
+    }));
+  ASSERT_NE(nullptr, ConstBufferRender);
+
+  auto TransformRender = itTransformCreator->second(Component_t::Make({ }));
+  ASSERT_NE(nullptr, TransformRender);
+
+  ConstBufferRender(); // Вызывается BufferMapper
+
+  using namespace ::testing;
+
+  InSequence Dummy;
+
+  EXPECT_CALL(GLProxy, GetIntegerv(GL_CURRENT_PROGRAM))
+    .Times(1)
+    .WillOnce(Return(&ProgramId));
+
+  // *************** Передача других данных шейдеру ********************* //
+
+  EXPECT_CALL(GLProxy, GetUniformLocation(_, _))
+    .Times(AtLeast(1));
+
+  EXPECT_CALL(GLProxy, Uniform1i(_, _))
+    .Times(1);
+
+  EXPECT_CALL(GLProxy, Uniform4fv(_, _, _))
+    .Times(AtLeast(1));
+
+  EXPECT_CALL(GLProxy, GetUniformLocation(_, _))
+    .Times(AtLeast(1));
+
+  EXPECT_CALL(GLProxy, Uniform1i(_, _))
+    .Times(1);
+
+  EXPECT_CALL(GLProxy, Uniform4fv(_, _, _))
+    .Times(AtLeast(1));
+
+  // ******************************************************************** //
+
+  EXPECT_CALL(GLProxy,
+    GetUniformLocation(ProgramId, Eq("ObjectData.Lights.Points.UsedSlotCount")))
+    .Times(1)
+    .WillOnce(Return(UsedSlodCountId));
+
+  EXPECT_CALL(GLProxy, Uniform1i(UsedSlodCountId, Lights.Points.UsedSlotCount))
+    .Times(1);
+
+  for (int i = 0; i < Lights.Points.UsedSlotCount; i++)
+  {
+    auto & Light = Lights.Points.Lights[i];
+
+    using namespace ::alicorn::extension::std;
+
+    const auto Point = string_cast<::std::string, Locale::Ascii128>(
+      uT("ObjectData.Lights.Points.Lights[<index>]").Replace(uT("<index>"), i));
+
+    EXPECT_CALL(GLProxy,
+      GetUniformLocation(ProgramId, Point + ".Color"))
+      .Times(1)
+      .WillOnce(Return(ColorLocationId + i));
+
+    EXPECT_CALL(GLProxy,
+      Uniform4fv(ColorLocationId + i, 1, Light.Color))
+      .Times(1);
+
+    EXPECT_CALL(GLProxy,
+      GetUniformLocation(ProgramId, Point + ".Position"))
+      .Times(1)
+      .WillOnce(Return(PositionLocationId + i));
+
+    EXPECT_CALL(GLProxy,
+      Uniform4fv(PositionLocationId + i, 1, Light.Position))
+      .Times(1);
+
+    EXPECT_CALL(GLProxy,
+      GetUniformLocation(ProgramId, Point + ".Attenuation"))
+      .Times(1)
+      .WillOnce(Return(AttenuationLocationId + i));
+
+    EXPECT_CALL(GLProxy,
+      Uniform4fv(AttenuationLocationId + i, 1, Light.Attenuation))
+      .Times(1);
+  }
+
+  TransformRender(); // Заполненный константный буфер передается шейдеру
+}
+
+// ************************************************************************** //
+TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Buffer_Constant_User_EmptyMapper)
+{
+  // 17 Сентябрь 2019 13:32 (unicornum.verum@gmail.com)
+  TODO("Одинаковый тест для всех реализаций");
+
+  using BufferMapper_t = ::covellite::api::cbBufferMap_t<void>;
+
+  const Tested_t oExample{ Data_t{} };
+  const ITested_t & IExample = oExample;
+
+  auto itCreator = IExample.GetCreators().find(uT("Buffer"));
+  ASSERT_NE(IExample.GetCreators().end(), itCreator);
+
+  // Тип буфера выводится из переданного mapper'a
+  //EXPECT_THROW(itCreator->second(Component_t::Make({ })), ::std::exception);
+
+  const auto pComponent1 = Component_t::Make(
+    {
+      { uT("mapper"), BufferMapper_t{ } },
+    });
+
+  EXPECT_THROW(itCreator->second(pComponent1), ::std::exception);
+
+  const auto pComponent2 = Component_t::Make(
+    {
+      { uT("mapper"), BufferMapper_t{ nullptr } },
+    });
+
+  EXPECT_THROW(itCreator->second(pComponent2), ::std::exception);
+}
+
+// ************************************************************************** //
+TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Buffer_Constant_User_EmptySize)
+{
+  // 17 Сентябрь 2019 13:32 (unicornum.verum@gmail.com)
+  TODO("Одинаковый тест для всех реализаций");
+
+  using BufferMapper_t = ::covellite::api::cbBufferMap_t<void>;
+
+  const Tested_t oExample{ Data_t{} };
+  const ITested_t & IExample = oExample;
+
+  auto itCreator = IExample.GetCreators().find(uT("Buffer"));
+  ASSERT_NE(IExample.GetCreators().end(), itCreator);
+
+  const auto pComponent = Component_t::Make(
+    {
+      { uT("mapper"), BufferMapper_t{ [](void *) { return false; } } },
+    });
+
+  EXPECT_THROW(itCreator->second(pComponent), ::std::exception);
+}
+
+// ************************************************************************** //
+TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Buffer_Constant_User_CreateBuffer_Error)
+{
+  using BufferMapper_t = ::covellite::api::cbBufferMap_t<void>;
+
+  using GLProxy_t = ::mock::GLProxy;
+  GLProxy_t GLProxy;
+  GLProxy_t::GetInstance() = &GLProxy;
+
+  struct Data { };
+  const BufferMapper_t BufferMapper = [&](void *) { return false; };
+
+  const Tested_t oExample{ Data_t{} };
+  const ITested_t & IExample = oExample;
+
+  auto itConstBufferCreator = IExample.GetCreators().find(uT("Buffer"));
+  ASSERT_NE(IExample.GetCreators().end(), itConstBufferCreator);
+
+  auto TestCallRender = [&](const Component_t::ComponentPtr_t & _pComponent)
+  {
+    using namespace ::testing;
+
+    InSequence Dummy;
+
+    EXPECT_CALL(GLProxy, GenBuffers(_))
+      .Times(1);
+
+    EXPECT_CALL(GLProxy, GetError())
+      .Times(1)
+      .WillOnce(Return(1909211243));
+
+    EXPECT_THROW(itConstBufferCreator->second(_pComponent), ::std::exception);
+  };
+
+  const auto pBuffer = Component_t::Make(
+    {
+      { uT("mapper"), BufferMapper },
+      { uT("size"), sizeof(Data) },
+    });
+  TestCallRender(pBuffer);
+}
+
+// ************************************************************************** //
+TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Buffer_Constant_User_UpdateBuffer_NotExistsName)
+{
+  using BufferMapper_t = ::covellite::api::cbBufferMap_t<void>;
+
+  using GLProxy_t = ::mock::GLProxy;
+  GLProxy_t GLProxy;
+  GLProxy_t::GetInstance() = &GLProxy;
+
+  const BufferMapper_t BufferMapper = [&](void *) { return false; };
+
+  using namespace ::testing;
+
+  const Tested_t oExample{ Data_t{} };
+  const ITested_t & IExample = oExample;
+
+  auto itConstBufferCreator = IExample.GetCreators().find(uT("Buffer"));
+  ASSERT_NE(IExample.GetCreators().end(), itConstBufferCreator);
+
+  auto TestCallRender = [&](const Component_t::ComponentPtr_t & _pComponent)
+  {
+    using namespace ::testing;
+
+    const auto Render = itConstBufferCreator->second(_pComponent);
+    ASSERT_NE(nullptr, Render);
+
+    InSequence Dummy;
+
+    EXPECT_CALL(GLProxy, GetUniformBlockIndex(_, _))
+      .Times(1)
+      .WillOnce(Return(GL_INVALID_INDEX));
+
+    EXPECT_CALL(GLProxy, BindBuffer(_, _))
+      .Times(0);
+
+    EXPECT_CALL(GLProxy, UniformBufferSubData(_, _, _))
+      .Times(0);
+
+    EXPECT_CALL(GLProxy, BindBufferBase(_, _, _))
+      .Times(0);
+
+    EXPECT_CALL(GLProxy, UniformBlockBinding(_, _, _))
+      .Times(0);
+
+    Render();
+  };
+
+  const auto pBuffer = Component_t::Make(
+    {
+      { uT("mapper"), BufferMapper },
+      { uT("size"), ::std::size_t{ 4 } },
+    });
+
+  TestCallRender(pBuffer);
+}
+
+// ************************************************************************** //
+TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Buffer_Constant_User)
+{
+  using BufferMapper_t = ::covellite::api::cbBufferMap_t<void>;
+
+  using GLProxy_t = ::mock::GLProxy;
+  GLProxy_t GLProxy;
+  GLProxy_t::GetInstance() = &GLProxy;
+
+  class MapperProxy :
+    public ::alicorn::extension::testing::Proxy<MapperProxy>
+  {
+  public:
+    MOCK_METHOD1(DoMapper, void(const void *));
+  };
+
+  MapperProxy oMapperProxy;
+  MapperProxy::GetInstance() = &oMapperProxy;
+
+  const ::mock::GLuint BufferId = 1909211301;
+  const ::mock::GLint ProgramId = 1909211302;
+  const ::mock::GLint BlockIndex = 1909211332;
+  const ::std::size_t Size = 313;
+
+  void * pData = nullptr;
+
+  const BufferMapper_t BufferMapper = [&](void * _pData)
+  {
+    pData = _pData;
+    oMapperProxy.DoMapper(_pData);
+    return false;
+  };
+
+  const Tested_t oExample{ Data_t{} };
+  const ITested_t & IExample = oExample;
+
+  auto itConstBufferCreator = IExample.GetCreators().find(uT("Buffer"));
+  ASSERT_NE(IExample.GetCreators().end(), itConstBufferCreator);
+
+  auto TestCallRender = [&](const Component_t::ComponentPtr_t & _pComponent,
+    const ::std::string & _Name)
+  {
+    using namespace ::testing;
+
+    InSequence Dummy;
+
+    EXPECT_CALL(GLProxy, GenBuffers(1))
+      .Times(1)
+      .WillOnce(Return(BufferId));
+
+    EXPECT_CALL(GLProxy, BindBuffer(GL_UNIFORM_BUFFER, BufferId))
+      .Times(1);
+
+    EXPECT_CALL(GLProxy,
+      BufferData(GL_UNIFORM_BUFFER, Size, _, GL_DYNAMIC_DRAW))
+      .Times(1);
+
+    EXPECT_CALL(GLProxy, BindBuffer(GL_UNIFORM_BUFFER, 0))
+      .Times(1);
+
+    EXPECT_CALL(GLProxy, GetError())
+      .Times(1)
+      .WillOnce(Return(GL_NO_ERROR));
+
+    const auto Render = itConstBufferCreator->second(_pComponent);
+    ASSERT_NE(nullptr, Render);
+
+    EXPECT_CALL(oMapperProxy, DoMapper(_))
+      .Times(1);
+
+    EXPECT_CALL(GLProxy, GetIntegerv(_))
+      .Times(1);
+
+    EXPECT_CALL(GLProxy, GetUniformBlockIndex(_, _))
+      .Times(1)
+      .WillOnce(Return(BlockIndex));
+
+    EXPECT_CALL(GLProxy, BindBuffer(_, _))
+      .Times(1);
+
+    EXPECT_CALL(GLProxy, UniformBufferSubData(_, _, _))
+      .Times(1);
+
+    EXPECT_CALL(GLProxy, BindBuffer(_, _))
+      .Times(1);
+
+    EXPECT_CALL(GLProxy, BindBufferBase(_, _, _))
+      .Times(1);
+
+    EXPECT_CALL(GLProxy, UniformBlockBinding(_, _, _))
+      .Times(1);
+
+    Render(); // Первый вызов, чтобы запомнить указатель на локальный буфер данных
+
+    EXPECT_CALL(oMapperProxy, DoMapper(pData))
+      .Times(1);
+
+    EXPECT_CALL(GLProxy, GetIntegerv(GL_CURRENT_PROGRAM))
+      .Times(1)
+      .WillOnce(Return(&ProgramId));
+
+    EXPECT_CALL(GLProxy, GetUniformBlockIndex(ProgramId, _Name))
+      .Times(1)
+      .WillOnce(Return(BlockIndex));
+
+    EXPECT_CALL(GLProxy, BindBuffer(GL_UNIFORM_BUFFER, BufferId))
+      .Times(1);
+
+    EXPECT_CALL(GLProxy, UniformBufferSubData(0, Size, pData))
+      .Times(1);
+
+    EXPECT_CALL(GLProxy, BindBuffer(GL_UNIFORM_BUFFER, 0))
+      .Times(1);
+
+    EXPECT_CALL(GLProxy, 
+      BindBufferBase(GL_UNIFORM_BUFFER, COVELLITE_BUFFER_INDEX_USER, BufferId))
+      .Times(1);
+
+    EXPECT_CALL(GLProxy, 
+      UniformBlockBinding(ProgramId, BlockIndex, COVELLITE_BUFFER_INDEX_USER))
+      .Times(1);
+
+    Render();
+
+    EXPECT_CALL(GLProxy, DeleteBuffers(1, BufferId))
+      .Times(1);
+  };
+
+  // Default constant buffer name
+  {
+    const auto pBuffer = Component_t::Make(
+      {
+        { uT("mapper"), BufferMapper },
+        { uT("size"), Size },
+      });
+
+    TestCallRender(pBuffer, "cbUserData");
+  }
+
+  {
+    const ::std::string Name = "Name1909211251";
+
+    const auto pBuffer = Component_t::Make(
+      {
+        { uT("mapper"), BufferMapper },
+        { uT("size"), Size },
+        { uT("name"), Name },
+      });
+
+    TestCallRender(pBuffer, Name);
+  }
+}
+
+// ************************************************************************** //
+TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Camera_Orthographic_DefaultPosition)
+{
+  Tested::GetValue() = 1;
+
+  using GLProxy_t = ::mock::GLProxy;
+  GLProxy_t GLProxy;
+  GLProxy_t::GetInstance() = &GLProxy;
+
+  const Tested_t Example{ Data_t{} };
+  const ITested_t & IExample = Example;
+
+  auto itCreator = IExample.GetCreators().find(uT("Camera"));
+  ASSERT_NE(IExample.GetCreators().end(), itCreator);
+
+  auto Render = itCreator->second(Component_t::Make(
+    {
+      { uT("kind"), uT("Orthographic") },
+    }));
+  ASSERT_NE(nullptr, Render);
+
+  auto itShaderCreator = IExample.GetCreators().find(uT("Shader"));
+  ASSERT_NE(IExample.GetCreators().end(), itShaderCreator);
+
+  auto VsRender = itShaderCreator->second(Component_t::Make(
+    {
+      { uT("entry"), uT("vsFlat") },
+    }));
+  ASSERT_NE(nullptr, VsRender);
+
+  auto PsRender = itShaderCreator->second(Component_t::Make(
+    {
+      { uT("entry"), uT("psColored") },
+    }));
+  ASSERT_NE(nullptr, PsRender);
+
+  const float Viewport[] =
+  {
+    1812271148.0f, 1812271149.0f, 1812181722.0f, 1812181723.0f
+  };
+
+  using namespace ::testing;
+
+  EXPECT_CALL(GLProxy, BindFramebuffer(GL_FRAMEBUFFER, 0))
+    .Times(1);
+
+  EXPECT_CALL(GLProxy, Disable(GL_DEPTH_TEST))
+    .Times(1);
+
+  EXPECT_CALL(GLProxy, Enable(GL_DEPTH_TEST))
+    .Times(0);
+
+  EXPECT_CALL(GLProxy, Clear(GL_DEPTH_BUFFER_BIT))
+    .Times(0);
+
+  EXPECT_CALL(GLProxy, Disable(GL_BLEND))
+    .Times(1);
+
+  EXPECT_CALL(GLProxy, Disable(GL_DITHER))
+    .Times(1);
+
+  EXPECT_CALL(GLProxy, Enable(GL_CULL_FACE))
+    .Times(1);
+
+  EXPECT_CALL(GLProxy, CullFace(GL_BACK))
+    .Times(1);
+
+  EXPECT_CALL(GLProxy, FrontFace(GL_CCW))
+    .Times(1);
+
+  EXPECT_CALL(GLProxy, GetFloatv(GL_VIEWPORT))
+    .Times(1)
+    .WillOnce(Return(Viewport));
+
+  Render(); // Формирует матрицы вида и проекции
+
+  VsRender(); // Нужно, чтобы сформировалась шейдерная программа, иначе
+              // не будет вызывана функция glUseProgram().
+
+  const ::mock::GLint ProgramId = 1908251932;
+  const ::mock::GLint ProjectionLocationId = 1908251933;
+  const ::mock::GLint ViewLocationId = 1908252005;
+  const ::mock::GLint ViewInverseLocationId = 1908252013;
+
+  const auto Projection = ::glm::transpose(::glm::ortho(
+    Viewport[0], Viewport[0] + Viewport[2],
+    Viewport[1] + Viewport[3], Viewport[1],
+    1.0f, -1.0f));
+  auto View = ::glm::identity<::glm::mat4>();
+  const auto ViewInverse = ::glm::transpose(::glm::inverse(View));
+  View = ::glm::transpose(View);
+
+  InSequence Dummy;
+
+  EXPECT_CALL(GLProxy, UseProgram(_))
+    .Times(1);
+
+  EXPECT_CALL(GLProxy, GetIntegerv(GL_CURRENT_PROGRAM))
+    .Times(1)
+    .WillOnce(Return(&ProgramId));
+
+  // *************** Передача других данных шейдеру ********************* //
+
+  EXPECT_CALL(GLProxy, GetUniformLocation(_, _))
+    .Times(AtLeast(1));
+
+  EXPECT_CALL(GLProxy, UniformMatrix4fv(_, _, _, _))
+    .Times(AtLeast(1));
+
+  // ******************************************************************** //
+
+  EXPECT_CALL(GLProxy, GetUniformLocation(ProgramId, Eq("CameraData.Projection")))
+    .Times(1)
+    .WillOnce(Return(ProjectionLocationId));
+
+  EXPECT_CALL(GLProxy, GetUniformLocation(ProgramId, Eq("CameraData.View")))
+    .Times(1)
+    .WillOnce(Return(ViewLocationId));
+
+  EXPECT_CALL(GLProxy, GetUniformLocation(ProgramId, Eq("CameraData.ViewInverse")))
+    .Times(1)
+    .WillOnce(Return(ViewInverseLocationId));
+
+  EXPECT_CALL(GLProxy,
+    UniformMatrix4fv(ProjectionLocationId, 1, GL_FALSE, Projection))
+    .Times(1);
+
+  EXPECT_CALL(GLProxy,
+    UniformMatrix4fv(ViewLocationId, 1, GL_FALSE, View))
+    .Times(1);
+
+  EXPECT_CALL(GLProxy,
+    UniformMatrix4fv(ViewInverseLocationId, 1, GL_FALSE, ViewInverse))
+    .Times(1);
+
+  PsRender(); // Передача матриц вида и проекции шейдеру
+}
+
+// ************************************************************************** //
+TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Camera_Orthographic)
+{
+  Tested::GetValue() = 1;
+
+  using GLProxy_t = ::mock::GLProxy;
+  GLProxy_t GLProxy;
+  GLProxy_t::GetInstance() = &GLProxy;
+
+  const auto X = 11111.0f;
+  const auto Y = 22222.0f;
+
+  const float SourceViewport[] =
+  {
+    19022.82014f, 19022.82015f, 19022.82016f, 19022.82017f
+  };
+
+  const Tested_t Example{ Data_t{} };
+  const ITested_t & IExample = Example;
+
+  auto itDataCreator = IExample.GetCreators().find(uT("Data"));
+  ASSERT_NE(IExample.GetCreators().end(), itDataCreator);
+
+  auto itCreator = IExample.GetCreators().find(uT("Camera"));
+  ASSERT_NE(IExample.GetCreators().end(), itCreator);
+
+  auto itShaderCreator = IExample.GetCreators().find(uT("Shader"));
+  ASSERT_NE(IExample.GetCreators().end(), itShaderCreator);
+
+  auto VsRender = itShaderCreator->second(Component_t::Make(
+    {
+      { uT("entry"), uT("vsFlat") },
+    }));
+  ASSERT_NE(nullptr, VsRender);
+
+  auto PsRender = itShaderCreator->second(Component_t::Make(
+    {
+      { uT("entry"), uT("psColored") },
+    }));
+  ASSERT_NE(nullptr, PsRender);
+
+  using namespace ::testing;
+
+  auto PositionRender = itDataCreator->second(Component_t::Make(
+    {
+      { uT("kind"), uT("Position") },
+      { uT("x"), X },
+      { uT("y"), Y },
+    }));
+  EXPECT_EQ(nullptr, PositionRender);
+
+  const auto pCameraComponent = Component_t::Make(
+    {
+      { uT("kind"), uT("Orthographic") },
+    });
+
+  auto Render = itCreator->second(pCameraComponent);
+  ASSERT_NE(nullptr, Render);
+
+  InSequence Dummy;
+
+  EXPECT_CALL(GLProxy, BindFramebuffer(GL_FRAMEBUFFER, 0))
+    .Times(1);
+
+  EXPECT_CALL(GLProxy, Disable(GL_DEPTH_TEST))
+    .Times(1);
+
+  EXPECT_CALL(GLProxy, Enable(GL_DEPTH_TEST))
+    .Times(0);
+
+  EXPECT_CALL(GLProxy, Clear(GL_DEPTH_BUFFER_BIT))
+    .Times(0);
+
+  EXPECT_CALL(GLProxy, Disable(GL_BLEND))
+    .Times(1);
+
+  EXPECT_CALL(GLProxy, Disable(GL_DITHER))
+    .Times(1);
+
+  EXPECT_CALL(GLProxy, Enable(GL_CULL_FACE))
+    .Times(1);
+
+  EXPECT_CALL(GLProxy, CullFace(GL_BACK))
+    .Times(1);
+
+  EXPECT_CALL(GLProxy, FrontFace(GL_CCW))
+    .Times(1);
+
+  EXPECT_CALL(GLProxy, GetFloatv(GL_VIEWPORT))
+    .Times(1)
+    .WillOnce(Return(SourceViewport));
+
+  Render(); // Формирует матрицы вида и проекции
+
+  const auto Projection = ::glm::transpose(::glm::ortho(
+    SourceViewport[0] + X,
+    SourceViewport[0] + SourceViewport[2] + X,
+    SourceViewport[1] + SourceViewport[3] + Y,
+    SourceViewport[1] + Y,
+    1.0f, -1.0f));
+
+  auto View = ::glm::identity<::glm::mat4>();
+  const auto ViewInverse = ::glm::transpose(::glm::inverse(View));
+  View = ::glm::transpose(View);
+
+  EXPECT_EQ(View, pCameraComponent->GetValue(uT("view"), ::glm::mat4{ 1.0f }));
+  EXPECT_EQ(Projection, pCameraComponent->GetValue(uT("projection"), ::glm::mat4{ 1.0f }));
+
+  VsRender(); // Нужно, чтобы сформировалась шейдерная программа, иначе
+              // не будет вызывана функция glUseProgram().
+
+  EXPECT_CALL(GLProxy, UseProgram(_))
+    .Times(1);
+
+  const ::mock::GLint ProgramId = 1908251932;
+  const ::mock::GLint ProjectionLocationId = 1908251933;
+  const ::mock::GLint ViewLocationId = 1908252005;
+  const ::mock::GLint ViewInverseLocationId = 1908252013;
+
+  EXPECT_CALL(GLProxy, GetIntegerv(GL_CURRENT_PROGRAM))
+    .Times(1)
+    .WillRepeatedly(Return(&ProgramId));
+
+  // *************** Передача других данных шейдеру ********************* //
+
+  EXPECT_CALL(GLProxy, GetUniformLocation(_, _))
+    .Times(AtLeast(1));
+
+  EXPECT_CALL(GLProxy, UniformMatrix4fv(_, _, _, _))
+    .Times(AtLeast(1));
+
+  // ******************************************************************** //
+
+  EXPECT_CALL(GLProxy, GetUniformLocation(ProgramId, Eq("CameraData.Projection")))
+    .Times(1)
+    .WillOnce(Return(ProjectionLocationId));
+
+  EXPECT_CALL(GLProxy, GetUniformLocation(ProgramId, Eq("CameraData.View")))
+    .Times(1)
+    .WillOnce(Return(ViewLocationId));
+
+  EXPECT_CALL(GLProxy, GetUniformLocation(ProgramId, Eq("CameraData.ViewInverse")))
+    .Times(1)
+    .WillOnce(Return(ViewInverseLocationId));
+
+  EXPECT_CALL(GLProxy,
+    UniformMatrix4fv(ProjectionLocationId, 1, GL_FALSE, Projection))
+    .Times(1);
+
+  EXPECT_CALL(GLProxy,
+    UniformMatrix4fv(ViewLocationId, 1, GL_FALSE, View))
+    .Times(1);
+
+  EXPECT_CALL(GLProxy,
+    UniformMatrix4fv(ViewInverseLocationId, 1, GL_FALSE, ViewInverse))
+    .Times(1);
+
+  PsRender(); // Передача матриц вида и проекции шейдеру
+}
+
+// ************************************************************************** //
+TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Camera_Perspective)
+{
+  Tested::GetValue() = 1;
+
+  using GLProxy_t = ::mock::GLProxy;
+  GLProxy_t GLProxy;
+  GLProxy_t::GetInstance() = &GLProxy;
+
+  const float Width = 1024.0f;
+  const float Height = 768.0f;
+
+  const Tested_t Example{ Data_t{} };
+  const ITested_t & IExample = Example;
+
+  auto itShaderCreator = IExample.GetCreators().find(uT("Shader"));
+  ASSERT_NE(IExample.GetCreators().end(), itShaderCreator);
+
+  auto VsRender = itShaderCreator->second(Component_t::Make(
+    {
+      { uT("entry"), uT("vsFlat") },
+    }));
+  ASSERT_NE(nullptr, VsRender);
+
+  auto PsRender = itShaderCreator->second(Component_t::Make(
+    {
+      { uT("entry"), uT("psColored") },
+    }));
+  ASSERT_NE(nullptr, PsRender);
+
+  using namespace ::testing;
+
+  auto TestCallRender = [&](
+    const Component_t::ComponentPtr_t & _pCameraComponent,
+    Render_t & _Render,
+    float _AngleY, float _zNear, float _zFar,
+    float _X, float _Y, float _Z,
+    float _A, float _B, float _C,
+    float _Distance)
+  {
+    ASSERT_NE(nullptr, _Render);
+
+    const float AngleYRadians = _AngleY *
+      static_cast<float>(::alicorn::extension::cpp::math::GreedToRadian);
+
+    InSequence Dummy;
+
+    EXPECT_CALL(GLProxy, BindFramebuffer(GL_FRAMEBUFFER, 0))
+      .Times(1);
+
+    EXPECT_CALL(GLProxy, Disable(GL_DEPTH_TEST))
+      .Times(1);
+
+    EXPECT_CALL(GLProxy, Enable(GL_DEPTH_TEST))
+      .Times(0);
+
+    EXPECT_CALL(GLProxy, Clear(GL_DEPTH_BUFFER_BIT))
+      .Times(0);
+
+    EXPECT_CALL(GLProxy, Disable(GL_BLEND))
+      .Times(1);
+
+    EXPECT_CALL(GLProxy, Disable(GL_DITHER))
+      .Times(1);
+
+    EXPECT_CALL(GLProxy, Enable(GL_CULL_FACE))
+      .Times(1);
+
+    EXPECT_CALL(GLProxy, CullFace(GL_BACK))
+      .Times(1);
+
+    EXPECT_CALL(GLProxy, FrontFace(GL_CCW))
+      .Times(1);
+
+    const float Viewport[] = { 0, 0, Width, Height };
+
+    EXPECT_CALL(GLProxy, GetFloatv(GL_VIEWPORT))
+      .Times(1)
+      .WillOnce(Return(Viewport));
+
+    _Render(); // Формирует матрицы вида и проекции
+
+    const auto Projection = ::glm::transpose(::glm::perspectiveFovRH(
+      AngleYRadians, Viewport[2], Viewport[3], _zFar, _zNear));
+
+    auto GetEye = [&](void) -> ::glm::vec3
+    {
+      const auto Distance = _Distance + 0.1f;
+
+      ::glm::mat4 Transform = ::glm::identity<::glm::mat4>();
+
+      Transform = ::glm::translate(Transform,
+        ::glm::vec3{ _X, _Y, _Z });
+      Transform = ::glm::rotate(Transform,
+        _C, ::glm::vec3{ 0.0f, 0.0f, 1.0f });
+      Transform = ::glm::rotate(Transform,
+        _B, ::glm::vec3{ 0.0f, 1.0f, 0.0f });
+      Transform = ::glm::rotate(Transform,
+        _A, ::glm::vec3{ 1.0f, 0.0f, 0.0f });
+
+      return Transform * ::glm::vec4{ Distance, 0.0f, 0.0f, 1.0f };
+    };
+
+    auto View = ::glm::lookAtRH(
+      GetEye(),
+      ::glm::vec3{ _X, _Y, _Z },
+      ::glm::vec3{ 0.0f, 0.0f, 1.0f });
+    const auto ViewInverse = ::glm::transpose(::glm::inverse(View));
+    View = ::glm::transpose(View);
+
+    EXPECT_EQ(View, _pCameraComponent->GetValue(uT("view"), ::glm::mat4{ 1.0f }));
+    EXPECT_EQ(Projection, _pCameraComponent->GetValue(uT("projection"), ::glm::mat4{ 1.0f }));
+
+    EXPECT_CALL(GLProxy, UseProgram(_))
+      .Times(AtLeast(1));
+
+    VsRender(); // Нужно, чтобы сформировалась шейдерная программа, иначе
+                // не будет вызывана функция glUseProgram().
+
+    const ::mock::GLint ProgramId = 1908251932;
+    const ::mock::GLint ProjectionLocationId = 1908251933;
+    const ::mock::GLint ViewLocationId = 1908252005;
+    const ::mock::GLint ViewInverseLocationId = 1908252013;
+
+    EXPECT_CALL(GLProxy, GetIntegerv(GL_CURRENT_PROGRAM))
+      .Times(1)
+      .WillRepeatedly(Return(&ProgramId));
+
+    // *************** Передача других данных шейдеру ********************* //
+
+    EXPECT_CALL(GLProxy, GetUniformLocation(_, _))
+      .Times(AtLeast(1));
+
+    EXPECT_CALL(GLProxy, UniformMatrix4fv(_, _, _, _))
+      .Times(AtLeast(1));
+
+    // ******************************************************************** //
+
+    EXPECT_CALL(GLProxy, GetUniformLocation(ProgramId, Eq("CameraData.Projection")))
+      .Times(1)
+      .WillOnce(Return(ProjectionLocationId));
+
+    EXPECT_CALL(GLProxy, GetUniformLocation(ProgramId, Eq("CameraData.View")))
+      .Times(1)
+      .WillOnce(Return(ViewLocationId));
+
+    EXPECT_CALL(GLProxy, GetUniformLocation(ProgramId, Eq("CameraData.ViewInverse")))
+      .Times(1)
+      .WillOnce(Return(ViewInverseLocationId));
+
+    EXPECT_CALL(GLProxy,
+      UniformMatrix4fv(ProjectionLocationId, 1, GL_FALSE, Projection))
+      .Times(1);
+
+    EXPECT_CALL(GLProxy,
+      UniformMatrix4fv(ViewLocationId, 1, GL_FALSE, View))
+      .Times(1);
+
+    EXPECT_CALL(GLProxy,
+      UniformMatrix4fv(ViewInverseLocationId, 1, GL_FALSE, ViewInverse))
+      .Times(1);
+
+    PsRender(); // Передача матриц вида и проекции шейдеру
+  };
+
+  auto itDataCreator = IExample.GetCreators().find(uT("Data"));
+  ASSERT_NE(IExample.GetCreators().end(), itDataCreator);
+
+  auto itCreator = IExample.GetCreators().find(uT("Camera"));
+  ASSERT_NE(IExample.GetCreators().end(), itCreator);
+
+  class CameraInfo
+  {
+  public:
+    float AngleY;
+    float zNear, zFar;
+    float X, Y, Z;
+    float A, B, C;
+    float Distance;
+  };
+
+  const ::std::vector<CameraInfo> CameraInfos =
+  {
+    { 90.0f, 0.01f, 200.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f }, // Default values
+    { 91.0f, 1.11f, 10.1f, 1.0f, 2.0f, 3.0f, 4.0f, 5.0f, 6.0f, 7.0f },
+    { 92.0f, 2.22f, 20.2f, 2.0f, 3.0f, 4.0f, 5.0f, 6.0f, 7.0f, 8.0f },
+  };
+
+  auto TestCamera = [&](const Component_t::ComponentPtr_t & _pCamera)
+  {
+    {
+      // Default values + not using Position & Rotation
+
+      auto Render = itCreator->second(_pCamera);
+
+      auto Info = CameraInfos[0];
+
+      TestCallRender(
+        _pCamera, Render,
+        Info.AngleY, Info.zNear, Info.zFar,
+        Info.X, Info.Y, Info.Z,
+        Info.A, Info.B, Info.C,
+        Info.Distance);
+    }
+
+    const auto pPosition = Component_t::Make(
+      {
+        { uT("kind"), uT("Position") },
+      });
+
+    const auto pRotation = Component_t::Make(
+      {
+        { uT("kind"), uT("Rotation") },
+      });
+
+    {
+      // Default values from Position & Rotation
+
+      auto Position = itDataCreator->second(pPosition);
+      EXPECT_EQ(nullptr, Position);
+
+      auto Rotation = itDataCreator->second(pRotation);
+      EXPECT_EQ(nullptr, Rotation);
+
+      auto Render = itCreator->second(_pCamera);
+
+      auto Info = CameraInfos[0];
+
+      TestCallRender(
+        _pCamera, Render,
+        Info.AngleY, Info.zNear, Info.zFar,
+        Info.X, Info.Y, Info.Z,
+        Info.A, Info.B, Info.C,
+        Info.Distance);
+    }
+
+    {
+      // Change values from Position & Rotation
+
+      auto Position = itDataCreator->second(pPosition);
+      EXPECT_EQ(nullptr, Position);
+
+      auto Rotation = itDataCreator->second(pRotation);
+      EXPECT_EQ(nullptr, Rotation);
+
+      auto Render = itCreator->second(_pCamera);
+
+      for (size_t i = 1; i < CameraInfos.size(); i++)
+      {
+        auto Info = CameraInfos[i];
+
+        pPosition->SetValue(uT("x"), Info.X);
+        pPosition->SetValue(uT("y"), Info.Y);
+        pPosition->SetValue(uT("z"), Info.Z);
+
+        pRotation->SetValue(uT("x"), Info.A);
+        pRotation->SetValue(uT("y"), Info.B);
+        pRotation->SetValue(uT("z"), Info.C);
+
+        _pCamera->SetValue(uT("fov"), Info.AngleY);
+        _pCamera->SetValue(uT("znear"), Info.zNear);
+        _pCamera->SetValue(uT("zfar"), Info.zFar);
+        _pCamera->SetValue(uT("distance"), Info.Distance);
+
+        TestCallRender(
+          _pCamera, Render,
+          Info.AngleY, Info.zNear, Info.zFar,
+          Info.X, Info.Y, Info.Z,
+          Info.A, Info.B, Info.C,
+          Info.Distance);
+      }
+    }
+  };
+
+  TestCamera(Component_t::Make(
+    {
+      { uT("kind"), uT("Perspective") },
+    }));
+}
+
+// ************************************************************************** //
+TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Present_Index_CreateBuffer_Fail)
+{
+  using GLProxy_t = ::mock::GLProxy;
+  GLProxy_t GLProxy;
+  GLProxy_t::GetInstance() = &GLProxy;
+
+  const Tested_t Example{ Data_t{} };
+  const ITested_t & IExample = Example;
+
+  auto itCreator = IExample.GetCreators().find(uT("Present"));
+  ASSERT_NE(IExample.GetCreators().end(), itCreator);
+
+  auto itDataCreator = IExample.GetCreators().find(uT("Data"));
+  ASSERT_NE(IExample.GetCreators().end(), itDataCreator);
+
+  auto TestCallRender = [&](const Component_t::ComponentPtr_t & _pComponent)
+  {
+    using namespace ::testing;
+
+    InSequence Dummy;
+
+    EXPECT_CALL(GLProxy, GenBuffers(_))
+      .Times(1);
+
+    EXPECT_CALL(GLProxy, BindBuffer(GL_ELEMENT_ARRAY_BUFFER, _))
+      .Times(AtLeast(1));
+
+    EXPECT_CALL(GLProxy, GetError())
+      .Times(1)
+      .WillOnce(Return(1908232144));
+
+    EXPECT_THROW(itCreator->second(_pComponent), ::std::exception);
+  };
+
+  const ::std::vector<int> Source;
+
+  const auto pBuffer = Component_t::Make(
+    {
+      { uT("data"), Source.data() },
+      { uT("count"), Source.size() },
+    });
+
+  TestCallRender(pBuffer);
+
+  const auto pData = Component_t::Make(
+    {
+      { uT("kind"), uT("Buffer") },
+      { uT("data"), Source.data() },
+      { uT("count"), Source.size() },
+    });
+
+  auto DataRender = itDataCreator->second(pData);
+  EXPECT_EQ(nullptr, DataRender);
+
+  TestCallRender(Component_t::Make({ }));
+}
+
+// ************************************************************************** //
+TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Present_Index)
+{
+  using GLProxy_t = ::mock::GLProxy;
+  GLProxy_t GLProxy;
+  GLProxy_t::GetInstance() = &GLProxy;
+
+  const Tested_t Example{ Data_t{} };
+  const ITested_t & IExample = Example;
+
+  const ::mock::GLuint BufferId = 1908241121;
+
+  const ::std::vector<int> Indices =
+  {
+    1808261927,
+    1808261928,
+    1808261929,
+    1808261930,
+    1808261931
+  };
+
+  auto itDataCreator = IExample.GetCreators().find(uT("Data"));
+  ASSERT_NE(IExample.GetCreators().end(), itDataCreator);
+
+  auto itPresentCreator = IExample.GetCreators().find(uT("Present"));
+  ASSERT_NE(IExample.GetCreators().end(), itPresentCreator);
+
+  auto TestCallRender = [&](const Component_t::ComponentPtr_t & _pPresent)
+  {
+    using namespace ::testing;
+
+    InSequence Dummy;
+
+    EXPECT_CALL(GLProxy, GenBuffers(1))
+      .Times(1)
+      .WillOnce(Return(BufferId));
+
+    EXPECT_CALL(GLProxy, BindBuffer(GL_ELEMENT_ARRAY_BUFFER, BufferId))
+      .Times(1);
+
+    const auto Size =
+      static_cast<::mock::GLsizeiptr>(Indices.size() * sizeof(int));
+
+    EXPECT_CALL(GLProxy, BufferData(GL_ELEMENT_ARRAY_BUFFER,
+      Size, Indices.data(), GL_STATIC_DRAW))
+      .Times(1);
+
+    EXPECT_CALL(GLProxy, BindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0))
+      .Times(1);
+
+    EXPECT_CALL(GLProxy, GetError())
+      .Times(1)
+      .WillOnce(Return(GL_NO_ERROR));
+
+    const auto Render = itPresentCreator->second(_pPresent);
+    ASSERT_NE(nullptr, Render);
+
+    EXPECT_CALL(GLProxy, BindBuffer(GL_ELEMENT_ARRAY_BUFFER, BufferId))
+      .Times(1);
+
+    EXPECT_CALL(GLProxy, DrawElements(GL_TRIANGLES, (int)Indices.size(),
+      GL_UNSIGNED_INT, nullptr))
+      .Times(1);
+
+    EXPECT_CALL(GLProxy, BindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0))
+      .Times(1);
+
+    EXPECT_CALL(GLProxy, BindTexture(GL_TEXTURE_2D, 0))
+      .Times(0); // Нельзя!!!
+
+    Render();
+
+    EXPECT_CALL(GLProxy, DeleteBuffers(1, BufferId))
+      .Times(1);
+  };
+
+  {
+    const auto pPresent = Component_t::Make(
+      {
+        { uT("data"), Indices.data() },
+        { uT("count"), Indices.size() },
+      });
+
+    TestCallRender(pPresent);
+  }
+
+  {
+    // Индексный буфер через компонент Data
+
+    auto IndexBufferDataRender = itDataCreator->second(Component_t::Make(
+      {
+        { uT("kind"), uT("Buffer") },
+        { uT("data"), Indices.data() },
+        { uT("count"), Indices.size() },
+      }));
+    EXPECT_EQ(nullptr, IndexBufferDataRender);
+
+    TestCallRender(Component_t::Make({ }));
+  }
+}
+
+// ************************************************************************** //
+TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Present_Instance_CreateBuffer_Fail)
+{
+  using BufferMapper_t = ::covellite::api::cbBufferMap_t<void>;
+
+  using GLProxy_t = ::mock::GLProxy;
+  GLProxy_t GLProxy;
+  GLProxy_t::GetInstance() = &GLProxy;
+
+  const Tested_t Example{ Data_t{} };
+  const ITested_t & IExample = Example;
+
+  auto itCreator = IExample.GetCreators().find(uT("Present"));
+  ASSERT_NE(IExample.GetCreators().end(), itCreator);
+
+  auto itDataCreator = IExample.GetCreators().find(uT("Data"));
+  ASSERT_NE(IExample.GetCreators().end(), itDataCreator);
+
+  auto TestCallRender = [&](const Component_t::ComponentPtr_t & _pComponent)
+  {
+    using namespace ::testing;
+
+    InSequence Dummy;
+
+    EXPECT_CALL(GLProxy, GenBuffers(_))
+      .Times(1);
+
+    EXPECT_CALL(GLProxy, BindBuffer(GL_ELEMENT_ARRAY_BUFFER, _))
+      .Times(AtLeast(1));
+
+    EXPECT_CALL(GLProxy, GetError())
+      .Times(1)
+      .WillOnce(Return(GL_NO_ERROR));
+
+    EXPECT_CALL(GLProxy, GenBuffers(_))
+      .Times(1);
+
+    EXPECT_CALL(GLProxy, BindBuffer(GL_ARRAY_BUFFER, _))
+      .Times(AtLeast(1));
+
+    EXPECT_CALL(GLProxy, GetError())
+      .Times(1)
+      .WillOnce(Return(1908232144));
+
+    EXPECT_THROW(itCreator->second(_pComponent), ::std::exception);
+  };
+
+  const ::std::vector<int> Source;
+
+  const auto pInstanceData = Component_t::Make(
+    {
+      { uT("kind"), uT("Buffer") },
+      { uT("mapper"), BufferMapper_t{} },
+    });
+
+  auto InstanceDataRender = itDataCreator->second(pInstanceData);
+  EXPECT_EQ(nullptr, InstanceDataRender);
+
+  const auto pPresent = Component_t::Make(
+    {
+      { uT("data"), Source.data() },
+      { uT("count"), Source.size() },
+    });
+
+  TestCallRender(pPresent);
+}
+
+// ************************************************************************** //
+TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Present_Instance)
+{
+  using BufferMapper_t = ::covellite::api::cbBufferMap_t<void>;
+
+  using GLProxy_t = ::mock::GLProxy;
+  GLProxy_t GLProxy;
+  GLProxy_t::GetInstance() = &GLProxy;
+
+  class MapperProxy_t
+  {
+  public:
+    MOCK_METHOD1(Map, bool(void *));
+  };
+
+  MapperProxy_t MapperProxy;
+
+  const ::mock::GLuint IndexBufferId = 1909231813;
+  const ::mock::GLuint InstanceBufferId = 1909231820;
+  const ::std::size_t InstanceCount = 120;
+  const ::std::size_t InstanceStride = 48;
+  const ::std::size_t InstanceBufferSize = InstanceCount * InstanceStride;
+  const ::mock::GLint ProgramId = 1909231917;
+
+  const ::std::vector<int> Indices =
+  {
+    1808261927,
+    1808261928,
+    1808261929,
+    1808261930,
+    1808261931,
+    1909231821,
+    1909231822,
+    1909231823,
+  };
+
+  void * pLocalData = (void *)1909232013;
+
+  const BufferMapper_t Mapper = [&](void * _pData)
+  {
+    pLocalData = _pData;
+    return MapperProxy.Map(_pData);
+  };
+
+  const Tested_t Example{ Data_t{} };
+  const ITested_t & IExample = Example;
+
+  auto itCreator = IExample.GetCreators().find(uT("Present"));
+  ASSERT_NE(IExample.GetCreators().end(), itCreator);
+
+  auto itDataCreator = IExample.GetCreators().find(uT("Data"));
+  ASSERT_NE(IExample.GetCreators().end(), itDataCreator);
+
+  auto TestCallRender = [&](const Component_t::ComponentPtr_t & _pPresent)
+  {
+    using namespace ::testing;
+
+    InSequence Dummy;
+
+    // *************************** Индексный буфер ************************** //
+
+    EXPECT_CALL(GLProxy, GenBuffers(1))
+      .Times(1)
+      .WillOnce(Return(IndexBufferId));
+
+    EXPECT_CALL(GLProxy, BindBuffer(GL_ELEMENT_ARRAY_BUFFER, IndexBufferId))
+      .Times(1);
+
+    const auto Size =
+      static_cast<::mock::GLsizeiptr>(Indices.size() * sizeof(int));
+
+    EXPECT_CALL(GLProxy, BufferData(GL_ELEMENT_ARRAY_BUFFER,
+      Size, Indices.data(), GL_STATIC_DRAW))
+      .Times(1);
+
+    EXPECT_CALL(GLProxy, BindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0))
+      .Times(1);
+
+    EXPECT_CALL(GLProxy, GetError())
+      .Times(1)
+      .WillOnce(Return(GL_NO_ERROR));
+
+    // ****************************** Инстанс-буфер ************************* //
+
+    EXPECT_CALL(GLProxy, GenBuffers(1))
+      .Times(1)
+      .WillOnce(Return(InstanceBufferId));
+
+    EXPECT_CALL(GLProxy, BindBuffer(GL_ARRAY_BUFFER, InstanceBufferId))
+      .Times(1);
+
+    EXPECT_CALL(GLProxy, 
+      BufferData(GL_ARRAY_BUFFER, InstanceBufferSize, nullptr, GL_DYNAMIC_DRAW))
+      .Times(1);
+
+    EXPECT_CALL(GLProxy, BindBuffer(GL_ARRAY_BUFFER, 0))
+      .Times(1);
+
+    EXPECT_CALL(GLProxy, GetError())
+      .Times(1)
+      .WillOnce(Return(GL_NO_ERROR));
+
+    // ********************************************************************** //
+
+    const auto Render = itCreator->second(_pPresent);
+    ASSERT_NE(nullptr, Render);
+
+    // ****************** Отрисовка без обновления ************************** //
+
+    const auto TestCallDraw = [&](void)
+    {
+      EXPECT_CALL(GLProxy, BindBuffer(GL_ELEMENT_ARRAY_BUFFER, IndexBufferId))
+        .Times(1);
+
+      EXPECT_CALL(GLProxy, DrawElementsInstanced(GL_TRIANGLES,
+        (int)Indices.size(), GL_UNSIGNED_INT, nullptr, InstanceCount))
+        .Times(1);
+
+      EXPECT_CALL(GLProxy, BindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0))
+        .Times(1);
+
+      EXPECT_CALL(GLProxy, BindTexture(GL_TEXTURE_2D, 0))
+        .Times(0); // Нельзя!!!
+    };
+
+    EXPECT_CALL(MapperProxy, Map(nullptr))
+      .Times(1)
+      .WillOnce(Return(false));
+
+    EXPECT_CALL(MapperProxy, Map(_))
+      .Times(0);
+
+    EXPECT_CALL(GLProxy, BindBuffer(GL_ARRAY_BUFFER, InstanceBufferId))
+      .Times(0);
+
+    TestCallDraw();
+    Render();
+
+    // ******************* Отрисовка с обновлением ************************** //
+
+    const auto TestCallSetInstanceData = [&](
+      const ::mock::GLenum _iType,
+      const ::mock::GLenum _Type,
+      const ::mock::GLint _LocationIndex0,
+      auto pData)
+    {
+      EXPECT_CALL(MapperProxy, Map(nullptr))
+        .Times(1)
+        .WillOnce(Return(true));
+
+      EXPECT_CALL(MapperProxy, Map(pData))
+        .Times(1);
+
+      EXPECT_CALL(GLProxy, BindBuffer(GL_ARRAY_BUFFER, InstanceBufferId))
+        .Times(1);
+
+      EXPECT_CALL(GLProxy, 
+        BufferSubDataRaw(GL_ARRAY_BUFFER, 0, InstanceBufferSize, pData))
+        .Times(1);
+
+      EXPECT_CALL(GLProxy, GetIntegerv(GL_CURRENT_PROGRAM))
+        .Times(1)
+        .WillOnce(Return(&ProgramId));
+
+      constexpr auto BlockSize = sizeof(float) * 4;
+
+      for (int i = 0; i < InstanceStride / BlockSize; i++)
+      {
+        EXPECT_CALL(GLProxy,
+          GetAttribLocation(ProgramId, "iValue" + ::std::to_string(i + 1)))
+          .Times(1)
+          .WillOnce(Return(_LocationIndex0 + i));
+
+        if (_LocationIndex0 + i >= 0)
+        {
+          EXPECT_CALL(GLProxy, 
+            GetActiveAttribType(ProgramId, _LocationIndex0 + i)) 
+            .Times(1)
+            .WillOnce(Return(_iType));
+
+          EXPECT_CALL(GLProxy, EnableVertexAttribArray(_LocationIndex0 + i))
+            .Times(1);
+
+          EXPECT_CALL(GLProxy, VertexAttribPointer(_LocationIndex0 + i, 4, _Type,
+            GL_FALSE, InstanceStride, (void*)(BlockSize * i)))
+            .Times(1);
+
+          EXPECT_CALL(GLProxy, VertexAttribDivisor(_LocationIndex0 + i, 1))
+            .Times(1);
+        }
+        else
+        {
+          EXPECT_CALL(GLProxy, GetActiveAttribType(_, _))
+            .Times(0);
+
+          EXPECT_CALL(GLProxy, EnableVertexAttribArray(_))
+            .Times(0);
+
+          EXPECT_CALL(GLProxy, VertexAttribPointer(_, _, _, _, _, _))
+            .Times(0);
+
+          EXPECT_CALL(GLProxy, VertexAttribDivisor(_, _))
+            .Times(0);
+        }
+      }
+
+      EXPECT_CALL(GLProxy, BindBuffer(GL_ARRAY_BUFFER, 0))
+        .Times(1);
+    };
+
+    // Первый вызов без значения, чтобы сохранился указатель на локальные
+    // данные в pLocalData
+    TestCallSetInstanceData(GL_FLOAT_VEC4, GL_FLOAT, 1909232004, _);
+    TestCallDraw();
+    Render();
+
+    TestCallSetInstanceData(GL_FLOAT_VEC4, GL_FLOAT, 1909232004, pLocalData);
+    TestCallDraw();
+    Render();
+
+    TestCallSetInstanceData(GL_INT_VEC4, GL_INT, 1909232005, pLocalData);
+    TestCallDraw();
+    Render();
+
+    TestCallSetInstanceData(GL_FLOAT_VEC4, GL_FLOAT, -1, pLocalData);
+    TestCallDraw();
+    Render();
+
+    TestCallSetInstanceData(GL_INT_VEC4, GL_INT, -1, pLocalData);
+    TestCallDraw();
+    Render();
+
+    // ********************************************************************** //
+
+    EXPECT_CALL(GLProxy, DeleteBuffers(1, IndexBufferId))
+      .Times(1);
+
+    EXPECT_CALL(GLProxy, DeleteBuffers(1, InstanceBufferId))
+      .Times(1);
+  };
+
+  const auto pInstanceData = Component_t::Make(
+    {
+      { uT("kind"), uT("Buffer") },
+      { uT("size"), InstanceBufferSize },
+      { uT("mapper"), Mapper },
+      { uT("count"), InstanceCount },
+    });
+
+  auto InstanceDataRender = itDataCreator->second(pInstanceData);
+  EXPECT_EQ(nullptr, InstanceDataRender);
+
+  const auto pPresent = Component_t::Make(
+    {
+      { uT("data"), Indices.data() },
+      { uT("count"), Indices.size() },
+    });
+
+  TestCallRender(pPresent);
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
+
+
+// ************************************************************************** //
+TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Present_Geometry_Default_deprecated)
+{
+  using GLProxy_t = ::mock::GLProxy;
+  GLProxy_t GLProxy;
+  GLProxy_t::GetInstance() = &GLProxy;
+
+  const Tested_t Example{ Data_t{} };
+  const ITested_t & IExample = Example;
+
+  const ::mock::GLuint BufferId = 1908241121;
+  const ::mock::GLint ProgramId = 1908241203;
+  const ::mock::GLint MatrixWorldLocationId = 1908241207;
+
+  const ::std::vector<int> Indices =
+  {
+    1808261927,
+    1808261928,
+    1808261929,
+    1808261930,
+    1808261931
+  };
+
+  auto itDataCreator = IExample.GetCreators().find(uT("Data"));
+  ASSERT_NE(IExample.GetCreators().end(), itDataCreator);
+
+  auto itBufferCreator = IExample.GetCreators().find(uT("Buffer"));
+  ASSERT_NE(IExample.GetCreators().end(), itBufferCreator);
+
+  auto itPresentCreator = IExample.GetCreators().find(uT("Present"));
+  ASSERT_NE(IExample.GetCreators().end(), itPresentCreator);
+
+  auto pPosition = Component_t::Make({ { uT("kind"), uT("Position") } });
+  auto pRotation = Component_t::Make({ { uT("kind"), uT("Rotation") } });
+  auto pScale = Component_t::Make({ { uT("kind"), uT("Scale") } });
+
+  auto TestCallRender = [&](
+    const Component_t::ComponentPtr_t & _pIndexBuffer,
+    const Component_t::ComponentPtr_t & _pPresent)
+  {
+    using namespace ::testing;
+
+    InSequence Dummy;
+
+    EXPECT_CALL(GLProxy, GenBuffers(1))
+      .Times(1)
+      .WillOnce(Return(BufferId));
+
+    EXPECT_CALL(GLProxy, BindBuffer(GL_ELEMENT_ARRAY_BUFFER, BufferId))
+      .Times(1);
+
+    const auto Size =
+      static_cast<::mock::GLsizeiptr>(Indices.size() * sizeof(int));
+
+    EXPECT_CALL(GLProxy, BufferData(GL_ELEMENT_ARRAY_BUFFER,
+      Size, Indices.data(), GL_STATIC_DRAW))
+      .Times(1);
+
+    EXPECT_CALL(GLProxy, BindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0))
+      .Times(1);
+
+    EXPECT_CALL(GLProxy, GetError())
+      .Times(1)
+      .WillOnce(Return(GL_NO_ERROR));
+
+    const auto IndexBufferRender = itBufferCreator->second(_pIndexBuffer);
+    ASSERT_NE(nullptr, IndexBufferRender);
+
+    auto PositionRender = itDataCreator->second(pPosition);
+    EXPECT_EQ(nullptr, PositionRender);
+
+    auto RotationRender = itDataCreator->second(pRotation);
+    EXPECT_EQ(nullptr, RotationRender);
+
+    auto ScaleRender = itDataCreator->second(pScale);
+    EXPECT_EQ(nullptr, ScaleRender);
+
+    const auto Render = itPresentCreator->second(_pPresent);
+    ASSERT_NE(nullptr, Render);
+
+    auto WorldMatrix = ::glm::identity<::glm::mat4>();
+
+    auto TestCallRender = [&](
+      float _X, float _Y, float _Z,
+      float _A, float _B, float _C,
+      float _Sx, float _Sy, float _Sz)
+    {
+      pPosition->SetValue(uT("x"), _X);
+      pPosition->SetValue(uT("y"), _Y);
+      pPosition->SetValue(uT("z"), _Z);
+
+      pRotation->SetValue(uT("x"), _A);
+      pRotation->SetValue(uT("y"), _B);
+      pRotation->SetValue(uT("z"), _C);
+
+      pScale->SetValue(uT("x"), _Sx);
+      pScale->SetValue(uT("y"), _Sy);
+      pScale->SetValue(uT("z"), _Sz);
+
+      WorldMatrix = ::glm::identity<::glm::mat4>();
+      WorldMatrix = ::glm::scale(WorldMatrix, { _Sx, _Sy, _Sz });
+      WorldMatrix = ::glm::rotate(WorldMatrix, _C, { 0.0f, 0.0f, 1.0f });
+      WorldMatrix = ::glm::rotate(WorldMatrix, _B, { 0.0f, 1.0f, 0.0f });
+      WorldMatrix = ::glm::rotate(WorldMatrix, _A, { 1.0f, 0.0f, 0.0f });
+      WorldMatrix = ::glm::translate(WorldMatrix, { _X, _Y, _Z });
+      WorldMatrix = ::glm::transpose(WorldMatrix);
+
+      EXPECT_CALL(GLProxy, BindBuffer(GL_ELEMENT_ARRAY_BUFFER, BufferId))
+        .Times(1);
+
+      IndexBufferRender();
+
+      EXPECT_CALL(GLProxy, GetIntegerv(GL_CURRENT_PROGRAM))
+        .Times(1)
+        .WillOnce(Return(&ProgramId));
+
+      EXPECT_CALL(GLProxy, GetUniformLocation(ProgramId, Eq("MatricesData.World")))
+        .Times(1)
+        .WillOnce(Return(MatrixWorldLocationId));
+
+      EXPECT_CALL(GLProxy,
+        UniformMatrix4fv(MatrixWorldLocationId, 1, GL_FALSE, WorldMatrix))
+        .Times(1);
+
+      EXPECT_CALL(GLProxy, DrawElements(GL_TRIANGLES, (int)Indices.size(),
+        GL_UNSIGNED_INT, nullptr))
+        .Times(1);
+
+      EXPECT_CALL(GLProxy, BindTexture(GL_TEXTURE_2D, 0))
+        .Times(1);
+
+      Render();
+    };
+
+    // Два вызова, чтобы убедиться, что изменение исходных данных приводит 
+    // к изменению результата рендеринга.
+
+    TestCallRender(
+      1956.0f, 1957.0f, 1958.0f,
+      1204.0f, 1205.0f, 1206.0f,
+      1152.0f, 1153.0f, 1154.0f);
+
+    TestCallRender(
+      1959.0f, 1960.0f, 1961.0f,
+      1145.0f, 1146.0f, 1147.0f,
+      1155.0f, 1157.0f, 1158.0f);
+
+    EXPECT_CALL(GLProxy, DeleteBuffers(1, BufferId))
+      .Times(1);
+  };
+
+  {
+    // Индексный буфер в компоненте буфера
+
+    const auto pIndexBuffer = Component_t::Make(
+      {
+        { uT("kind"), uT("Index") },
+        { uT("data"), Indices.data() },
+        { uT("count"), Indices.size() },
+      });
+
+    const auto pPresent = Component_t::Make(
+      {
+        { uT("kind"), uT("Geometry") },
+      });
+
+    TestCallRender(pIndexBuffer, pPresent);
+  }
+
+  {
+    // Индексный буфер через компонент Data
+
+    auto IndexBufferDataRender = itDataCreator->second(Component_t::Make(
+      {
+        { uT("kind"), uT("Buffer") },
+        { uT("data"), Indices.data() },
+        { uT("count"), Indices.size() },
+      }));
+    EXPECT_EQ(nullptr, IndexBufferDataRender);
+
+    const auto pIndexBuffer = Component_t::Make(
+      {
+        { uT("kind"), uT("Index") },
+      });
+
+    const auto pPresent = Component_t::Make(
+      {
+        { uT("kind"), uT("Geometry") },
+      });
+
+    TestCallRender(pIndexBuffer, pPresent);
+  }
+}
+
+// ************************************************************************** //
+TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Present_Geometry_Static_deprecated)
+{
+  using GLProxy_t = ::mock::GLProxy;
+  GLProxy_t GLProxy;
+  GLProxy_t::GetInstance() = &GLProxy;
+
+  const Tested_t Example{ Data_t{} };
+  const ITested_t & IExample = Example;
+
+  const ::mock::GLuint BufferId = 1908241121;
+  const ::mock::GLint ProgramId = 1908241203;
+  const ::mock::GLint MatrixWorldLocationId = 1908241207;
+
+  const ::std::vector<int> Indices =
+  {
+    1808261927,
+    1808261928,
+    1808261929,
+    1808261930,
+    1808261931
+  };
+
+  auto itDataCreator = IExample.GetCreators().find(uT("Data"));
+  ASSERT_NE(IExample.GetCreators().end(), itDataCreator);
+
+  auto itBufferCreator = IExample.GetCreators().find(uT("Buffer"));
+  ASSERT_NE(IExample.GetCreators().end(), itBufferCreator);
+
+  auto itPresentCreator = IExample.GetCreators().find(uT("Present"));
+  ASSERT_NE(IExample.GetCreators().end(), itPresentCreator);
+
+  auto pPosition = Component_t::Make({ { uT("kind"), uT("Position") } });
+  auto pRotation = Component_t::Make({ { uT("kind"), uT("Rotation") } });
+  auto pScale = Component_t::Make({ { uT("kind"), uT("Scale") } });
+
+  auto TestCallRender = [&](
+    const Component_t::ComponentPtr_t & _pIndexBuffer,
+    const Component_t::ComponentPtr_t & _pPresent)
+  {
+    using namespace ::testing;
+
+    InSequence Dummy;
+
+    EXPECT_CALL(GLProxy, GenBuffers(1))
+      .Times(1)
+      .WillOnce(Return(BufferId));
+
+    EXPECT_CALL(GLProxy, BindBuffer(GL_ELEMENT_ARRAY_BUFFER, BufferId))
+      .Times(1);
+
+    const auto Size =
+      static_cast<::mock::GLsizeiptr>(Indices.size() * sizeof(int));
+
+    EXPECT_CALL(GLProxy, BufferData(GL_ELEMENT_ARRAY_BUFFER,
+      Size, Indices.data(), GL_STATIC_DRAW))
+      .Times(1);
+
+    EXPECT_CALL(GLProxy, BindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0))
+      .Times(1);
+
+    EXPECT_CALL(GLProxy, GetError())
+      .Times(1)
+      .WillOnce(Return(GL_NO_ERROR));
+
+    const auto IndexBufferRender = itBufferCreator->second(_pIndexBuffer);
+    ASSERT_NE(nullptr, IndexBufferRender);
+
+    auto WorldMatrix = ::glm::identity<::glm::mat4>();
+
+    auto SetValues = [&](const bool _IsBuildMatrix,
+      float _X, float _Y, float _Z,
+      float _A, float _B, float _C,
+      float _Sx, float _Sy, float _Sz)
+    {
+      pPosition->SetValue(uT("x"), _X);
+      pPosition->SetValue(uT("y"), _Y);
+      pPosition->SetValue(uT("z"), _Z);
+
+      pRotation->SetValue(uT("x"), _A);
+      pRotation->SetValue(uT("y"), _B);
+      pRotation->SetValue(uT("z"), _C);
+
+      pScale->SetValue(uT("x"), _Sx);
+      pScale->SetValue(uT("y"), _Sy);
+      pScale->SetValue(uT("z"), _Sz);
+
+      if (_IsBuildMatrix)
+      {
+        WorldMatrix = ::glm::identity<::glm::mat4>();
+        WorldMatrix = ::glm::scale(WorldMatrix, { _Sx, _Sy, _Sz });
+        WorldMatrix = ::glm::rotate(WorldMatrix, _C, { 0.0f, 0.0f, 1.0f });
+        WorldMatrix = ::glm::rotate(WorldMatrix, _B, { 0.0f, 1.0f, 0.0f });
+        WorldMatrix = ::glm::rotate(WorldMatrix, _A, { 1.0f, 0.0f, 0.0f });
+        WorldMatrix = ::glm::translate(WorldMatrix, { _X, _Y, _Z });
+        WorldMatrix = ::glm::transpose(WorldMatrix);
+      }
+    };
+
+    SetValues(true,
+      1956.0f, 1957.0f, 1958.0f,
+      1204.0f, 1205.0f, 1206.0f,
+      1152.0f, 1153.0f, 1154.0f);
+
+    auto PositionRender = itDataCreator->second(pPosition);
+    EXPECT_EQ(nullptr, PositionRender);
+
+    auto RotationRender = itDataCreator->second(pRotation);
+    EXPECT_EQ(nullptr, RotationRender);
+
+    auto ScaleRender = itDataCreator->second(pScale);
+    EXPECT_EQ(nullptr, ScaleRender);
+
+    const auto Render = itPresentCreator->second(_pPresent);
+    ASSERT_NE(nullptr, Render);
+
+    auto TestCallRender = [&](void)
+    {
+      EXPECT_CALL(GLProxy, BindBuffer(GL_ELEMENT_ARRAY_BUFFER, BufferId))
+        .Times(1);
+
+      IndexBufferRender();
+
+      EXPECT_CALL(GLProxy, GetIntegerv(GL_CURRENT_PROGRAM))
+        .Times(1)
+        .WillOnce(Return(&ProgramId));
+
+      EXPECT_CALL(GLProxy, GetUniformLocation(ProgramId, Eq("MatricesData.World")))
+        .Times(1)
+        .WillOnce(Return(MatrixWorldLocationId));
+
+      EXPECT_CALL(GLProxy,
+        UniformMatrix4fv(MatrixWorldLocationId, 1, GL_FALSE, WorldMatrix))
+        .Times(1);
+
+      EXPECT_CALL(GLProxy, DrawElements(GL_TRIANGLES, (int)Indices.size(),
+        GL_UNSIGNED_INT, nullptr))
+        .Times(1);
+
+      EXPECT_CALL(GLProxy, BindTexture(GL_TEXTURE_2D, 0))
+        .Times(1);
+
+      Render();
+    };
+
+    // Два вызова, чтобы убедиться, что изменение исходных данных не приводит 
+    // к изменению результата рендеринга.
+
+    TestCallRender();
+
+    SetValues(false,
+      1959.0f, 1960.0f, 1961.0f,
+      1145.0f, 1146.0f, 1147.0f,
+      1155.0f, 1157.0f, 1158.0f);
+
+    TestCallRender();
+
+    EXPECT_CALL(GLProxy, DeleteBuffers(1, BufferId))
+      .Times(1);
+  };
+
+  {
+    // Индексный буфер в компоненте буфера
+
+    const auto pIndexBuffer = Component_t::Make(
+      {
+        { uT("kind"), uT("Index") },
+        { uT("data"), Indices.data() },
+        { uT("count"), Indices.size() },
+      });
+
+    const auto pPresent = Component_t::Make(
+      {
+        { uT("kind"), uT("Geometry") },
+        { uT("variety"), uT("Static") },
+      });
+
+    TestCallRender(pIndexBuffer, pPresent);
+  }
+
+  {
+    // Индексный буфер через компонент Data
+
+    auto IndexBufferDataRender = itDataCreator->second(Component_t::Make(
+      {
+        { uT("kind"), uT("Buffer") },
+        { uT("data"), Indices.data() },
+        { uT("count"), Indices.size() },
+      }));
+    EXPECT_EQ(nullptr, IndexBufferDataRender);
+
+    const auto pIndexBuffer = Component_t::Make(
+      {
+        { uT("kind"), uT("Index") },
+      });
+
+    const auto pPresent = Component_t::Make(
+      {
+        { uT("kind"), uT("Geometry") },
+        { uT("variety"), uT("Static") },
+      });
+
+    TestCallRender(pIndexBuffer, pPresent);
+  }
+}
+
+// ************************************************************************** //
+TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Present_Geometry_Billboard_deprecated)
+{
+  using GLProxy_t = ::mock::GLProxy;
+  GLProxy_t GLProxy;
+  GLProxy_t::GetInstance() = &GLProxy;
+
+  Tested_t Example{ Data_t{} };
+  const ITested_t & IExample = Example;
+
+  const ::mock::GLuint BufferId = 1908241121;
+  const ::mock::GLint ProgramId = 1908241203;
+  const ::mock::GLint MatrixWorldLocationId = 1908241207;
+
+  const ::std::vector<int> Indices =
+  {
+    1808261927,
+    1808261928,
+    1808261929,
+    1808261930,
+    1808261931
+  };
+
+  auto itDataCreator = IExample.GetCreators().find(uT("Data"));
+  ASSERT_NE(IExample.GetCreators().end(), itDataCreator);
+
+  auto itBufferCreator = IExample.GetCreators().find(uT("Buffer"));
+  ASSERT_NE(IExample.GetCreators().end(), itBufferCreator);
+
+  auto itPresentCreator = IExample.GetCreators().find(uT("Present"));
+  ASSERT_NE(IExample.GetCreators().end(), itPresentCreator);
+
+  auto pPosition = Component_t::Make({ { uT("kind"), uT("Position") } });
+
+  auto TestCallRender = [&](
+    const Component_t::ComponentPtr_t & _pIndexBuffer,
+    const Component_t::ComponentPtr_t & _pPresent)
+  {
+    using namespace ::testing;
+
+    InSequence Dummy;
+
+    EXPECT_CALL(GLProxy, GenBuffers(1))
+      .Times(1)
+      .WillOnce(Return(BufferId));
+
+    EXPECT_CALL(GLProxy, BindBuffer(GL_ELEMENT_ARRAY_BUFFER, BufferId))
+      .Times(1);
+
+    const auto Size =
+      static_cast<::mock::GLsizeiptr>(Indices.size() * sizeof(int));
+
+    EXPECT_CALL(GLProxy, BufferData(GL_ELEMENT_ARRAY_BUFFER,
+      Size, Indices.data(), GL_STATIC_DRAW))
+      .Times(1);
+
+    EXPECT_CALL(GLProxy, BindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0))
+      .Times(1);
+
+    EXPECT_CALL(GLProxy, GetError())
+      .Times(1)
+      .WillOnce(Return(GL_NO_ERROR));
+
+    const auto IndexBufferRender = itBufferCreator->second(_pIndexBuffer);
+    ASSERT_NE(nullptr, IndexBufferRender);
+
+    auto PositionRender = itDataCreator->second(pPosition);
+    EXPECT_EQ(nullptr, PositionRender);
+
+    const auto Render = itPresentCreator->second(_pPresent);
+    ASSERT_NE(nullptr, Render);
+
+    auto WorldMatrix = ::glm::identity<::glm::mat4>();
+
+    auto TestCallRender = [&](float _X, float _Y, float _Z)
+    {
+      pPosition->SetValue(uT("x"), _X);
+      pPosition->SetValue(uT("y"), _Y);
+      pPosition->SetValue(uT("z"), _Z);
+
+      WorldMatrix = ::glm::identity<::glm::mat4>();
+      WorldMatrix = ::glm::translate(WorldMatrix, { _X, _Y, _Z });
+
+      const auto ViewMatrix = ::glm::mat4
+      {
+        { 1.0f, 2.0f, 3.0f, 4.0f },
+        { 5.0f, 6.0f, 7.0f, 8.0f },
+        { 9.0f, 10.0f, 11.0f, 12.0f },
+        { 13.0f, 14.0f, 15.0f, 16.0f },
+      };
+
+      GetCameraMartix(Example).View = ViewMatrix;
+
+      auto TransposeViewMatrix = ViewMatrix;
+      TransposeViewMatrix[0][3] = 0.0f;
+      TransposeViewMatrix[1][3] = 0.0f;
+      TransposeViewMatrix[2][3] = 0.0f;
+      TransposeViewMatrix[3][0] = 0.0f;
+      TransposeViewMatrix[3][1] = 0.0f;
+      TransposeViewMatrix[3][2] = 0.0f;
+      TransposeViewMatrix[3][3] = 1.0f;
+
+      WorldMatrix = TransposeViewMatrix *
+        ::glm::translate(::glm::identity<::glm::mat4>(), { _X, _Y, _Z });
+      WorldMatrix = ::glm::transpose(WorldMatrix);
+
+      EXPECT_CALL(GLProxy, BindBuffer(GL_ELEMENT_ARRAY_BUFFER, BufferId))
+        .Times(1);
+
+      IndexBufferRender();
+
+      EXPECT_CALL(GLProxy, GetIntegerv(GL_CURRENT_PROGRAM))
+        .Times(1)
+        .WillOnce(Return(&ProgramId));
+
+      EXPECT_CALL(GLProxy, GetUniformLocation(ProgramId, Eq("MatricesData.World")))
+        .Times(1)
+        .WillOnce(Return(MatrixWorldLocationId));
+
+      EXPECT_CALL(GLProxy,
+        UniformMatrix4fv(MatrixWorldLocationId, 1, GL_FALSE, WorldMatrix))
+        .Times(1);
+
+      EXPECT_CALL(GLProxy, DrawElements(GL_TRIANGLES, (int)Indices.size(),
+        GL_UNSIGNED_INT, nullptr))
+        .Times(1);
+
+      EXPECT_CALL(GLProxy, BindTexture(GL_TEXTURE_2D, 0))
+        .Times(1);
+
+      Render();
+    };
+
+    // Два вызова, чтобы убедиться, что изменение исходных данных приводит 
+    // к изменению результата рендеринга.
+
+    TestCallRender(1956.0f, 1957.0f, 1958.0f);
+
+    TestCallRender(1959.0f, 1960.0f, 1961.0f);
+
+    EXPECT_CALL(GLProxy, DeleteBuffers(1, BufferId))
+      .Times(1);
+  };
+
+  {
+    // Индексный буфер в компоненте буфера
+
+    const auto pIndexBuffer = Component_t::Make(
+      {
+        { uT("kind"), uT("Index") },
+        { uT("data"), Indices.data() },
+        { uT("count"), Indices.size() },
+      });
+
+    const auto pPresent = Component_t::Make(
+      {
+        { uT("kind"), uT("Geometry") },
+        { uT("variety"), uT("Billboard") },
+      });
+
+    TestCallRender(pIndexBuffer, pPresent);
+  }
+
+  {
+    // Индексный буфер через компонент Data
+
+    auto IndexBufferDataRender = itDataCreator->second(Component_t::Make(
+      {
+        { uT("kind"), uT("Buffer") },
+        { uT("data"), Indices.data() },
+        { uT("count"), Indices.size() },
+      }));
+    EXPECT_EQ(nullptr, IndexBufferDataRender);
+
+    const auto pIndexBuffer = Component_t::Make(
+      {
+        { uT("kind"), uT("Index") },
+      });
+
+    const auto pPresent = Component_t::Make(
+      {
+        { uT("kind"), uT("Geometry") },
+        { uT("variety"), uT("Billboard") },
+      });
+
+    TestCallRender(pIndexBuffer, pPresent);
+  }
+}
+
+// ************************************************************************** //
+TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Present_Geometry_DefaultTransformValues_deprecated)
+{
+  using GLProxy_t = ::mock::GLProxy;
+  GLProxy_t GLProxy;
+  GLProxy_t::GetInstance() = &GLProxy;
+
+  Tested_t Example{ Data_t{} };
+  const ITested_t & IExample = Example;
+
+  auto itDataCreator = IExample.GetCreators().find(uT("Data"));
+  ASSERT_NE(IExample.GetCreators().end(), itDataCreator);
+
+  auto itPresentCreator = IExample.GetCreators().find(uT("Present"));
+  ASSERT_NE(IExample.GetCreators().end(), itPresentCreator);
+
+  auto pPosition = Component_t::Make({ { uT("kind"), uT("Position") } });
+  auto pRotation = Component_t::Make({ { uT("kind"), uT("Rotation") } });
+  auto pScale = Component_t::Make({ { uT("kind"), uT("Scale") } });
+
+  auto TestCallRender = [&](const Component_t::ComponentPtr_t & _pComponent,
+    const bool _IsFullTransform = true)
+  {
+    auto PositionRender = itDataCreator->second(pPosition);
+    EXPECT_EQ(nullptr, PositionRender);
+
+    if (_IsFullTransform)
+    {
+      auto RotationRender = itDataCreator->second(pRotation);
+      EXPECT_EQ(nullptr, RotationRender);
+
+      auto ScaleRender = itDataCreator->second(pScale);
+      EXPECT_EQ(nullptr, ScaleRender);
+    }
+
+    const auto Render = itPresentCreator->second(_pComponent);
+    ASSERT_NE(nullptr, Render);
+
+    const auto ViewMatrix = ::glm::mat4
+    {
+      { 1.0f, 2.0f, 3.0f, 4.0f },
+      { 5.0f, 6.0f, 7.0f, 8.0f },
+      { 9.0f, 10.0f, 11.0f, 12.0f },
+      { 13.0f, 14.0f, 15.0f, 16.0f },
+    };
+
+    GetCameraMartix(Example).View = ViewMatrix;
+
+    auto WorldMatrix = ::glm::identity<::glm::mat4>();
+
+    if (_IsFullTransform)
+    {
+      WorldMatrix = ::glm::scale(WorldMatrix, { 1.0f, 1.0f, 1.0f });
+      WorldMatrix = ::glm::transpose(WorldMatrix);
+    }
+    else
+    {
+      auto TransposeViewMatrix = ViewMatrix;
+      TransposeViewMatrix[0][3] = 0.0f;
+      TransposeViewMatrix[1][3] = 0.0f;
+      TransposeViewMatrix[2][3] = 0.0f;
+      TransposeViewMatrix[3][0] = 0.0f;
+      TransposeViewMatrix[3][1] = 0.0f;
+      TransposeViewMatrix[3][2] = 0.0f;
+      TransposeViewMatrix[3][3] = 1.0f;
+
+      WorldMatrix = TransposeViewMatrix;
+      WorldMatrix = ::glm::transpose(WorldMatrix);
+    }
+
+    using namespace ::testing;
+
+    EXPECT_CALL(GLProxy, UniformMatrix4fv(_, _, _, WorldMatrix))
+      .Times(1);
+
+    Render();
+  };
+
+  TestCallRender(Component_t::Make(
+    {
+      { uT("kind"), uT("Geometry") },
+    }));
+
+  TestCallRender(Component_t::Make(
+    {
+      { uT("kind"), uT("Geometry") },
+      { uT("variety"), uT("Static") },
+    }));
+
+  TestCallRender(Component_t::Make(
+    {
+      { uT("kind"), uT("Geometry") },
+      { uT("variety"), uT("Billboard") },
+    }), false);
+}
+
+// ************************************************************************** //
+TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Present_Geometry_CombineTransform_deprecated)
+{
+  using GLProxy_t = ::mock::GLProxy;
+  GLProxy_t GLProxy;
+  GLProxy_t::GetInstance() = &GLProxy;
+
+  Tested_t Example{ Data_t{} };
+  const ITested_t & IExample = Example;
+
+  auto itDataCreator = IExample.GetCreators().find(uT("Data"));
+  ASSERT_NE(IExample.GetCreators().end(), itDataCreator);
+
+  auto itCreator = IExample.GetCreators().find(uT("Present"));
+  ASSERT_NE(IExample.GetCreators().end(), itCreator);
+
+  auto MatrixIdentity = ::glm::identity<::glm::mat4>();
+
+  ::std::deque<Component_t::ComponentPtr_t> Components;
+
+  const auto SetPosition = [&](float _X, float _Y, float _Z)
+  {
+    Components.push_front(Component_t::Make(
+      {
+        { uT("kind"), uT("Position") },
+        { uT("x"), _X },
+        { uT("y"), _Y },
+        { uT("z"), _Z },
+      }));
+
+    MatrixIdentity = ::glm::translate(MatrixIdentity, { _X, _Y, _Z });
+  };
+
+  const auto SetRotation = [&](float _X, float _Y, float _Z)
+  {
+    Components.push_front(Component_t::Make(
+      {
+        { uT("kind"), uT("Rotation") },
+        { uT("x"), _X },
+        { uT("y"), _Y },
+        { uT("z"), _Z },
+      }));
+
+    MatrixIdentity = ::glm::rotate(MatrixIdentity, _Z, { 0.0f, 0.0f, 1.0f });
+    MatrixIdentity = ::glm::rotate(MatrixIdentity, _Y, { 0.0f, 1.0f, 0.0f });
+    MatrixIdentity = ::glm::rotate(MatrixIdentity, _X, { 1.0f, 0.0f, 0.0f });
+  };
+
+  const auto SetScale = [&](float _X, float _Y, float _Z)
+  {
+    Components.push_front(Component_t::Make(
+      {
+        { uT("kind"), uT("Scale") },
+        { uT("x"), _X },
+        { uT("y"), _Y },
+        { uT("z"), _Z },
+      }));
+
+    MatrixIdentity = ::glm::scale(MatrixIdentity, { _X, _Y, _Z });
+  };
+
+  {
+    MatrixIdentity = ::glm::identity<::glm::mat4>();
+    Components.clear();
+
+    SetPosition(1.0f, 2.0f, 3.0f);
+    SetRotation(4.0f, 5.0f, 6.0f);
+    SetScale(7.0f, 8.0f, 9.0f);
+
+    SetPosition(11.0f, 22.0f, 33.0f);
+    SetRotation(44.0f, 55.0f, 66.0f);
+    SetScale(77.0f, 88.0f, 99.0f);
+
+    MatrixIdentity = ::glm::transpose(MatrixIdentity);
+
+    for (const auto & pComponent : Components)
+    {
+      auto ScaleRender = itDataCreator->second(pComponent);
+      EXPECT_EQ(nullptr, ScaleRender);
+    }
+
+    auto Render = itCreator->second(Component_t::Make(
+      {
+        { uT("kind"), uT("Geometry") }
+      }));
+    ASSERT_NE(nullptr, Render);
+
+    using namespace ::testing;
+
+    InSequence Dummy;
+
+    EXPECT_CALL(GLProxy, UniformMatrix4fv(_, _, _, MatrixIdentity))
+      .Times(1);
+
+    Render();
+  }
+
+  {
+    MatrixIdentity = ::glm::identity<::glm::mat4>();
+    Components.clear();
+
+    SetPosition(1.0f, 2.0f, 3.0f);
+    SetRotation(4.0f, 5.0f, 6.0f);
+    SetScale(7.0f, 8.0f, 9.0f);
+
+    SetPosition(11.0f, 22.0f, 33.0f);
+    SetRotation(44.0f, 55.0f, 66.0f);
+    SetScale(77.0f, 88.0f, 99.0f);
+
+    MatrixIdentity = ::glm::transpose(MatrixIdentity);
+
+    for (const auto & pComponent : Components)
+    {
+      auto ScaleRender = itDataCreator->second(pComponent);
+      EXPECT_EQ(nullptr, ScaleRender);
+    }
+
+    auto Render = itCreator->second(Component_t::Make(
+      {
+        { uT("kind"), uT("Geometry") },
+        { uT("variety"), uT("Static") },
+      }));
+    ASSERT_NE(nullptr, Render);
+
+    using namespace ::testing;
+
+    InSequence Dummy;
+
+    EXPECT_CALL(GLProxy, UniformMatrix4fv(_, _, _, MatrixIdentity))
+      .Times(1);
+
+    Render();
+  }
+
+  {
+    const auto ViewMatrix = ::glm::mat4
+    {
+      { 1.0f, 2.0f, 3.0f, 4.0f },
+      { 5.0f, 6.0f, 7.0f, 8.0f },
+      { 9.0f, 10.0f, 11.0f, 12.0f },
+      { 13.0f, 14.0f, 15.0f, 16.0f },
+    };
+
+    GetCameraMartix(Example).View = ViewMatrix;
+
+    auto TransposeViewMatrix = ViewMatrix;
+    TransposeViewMatrix[0][3] = 0.0f;
+    TransposeViewMatrix[1][3] = 0.0f;
+    TransposeViewMatrix[2][3] = 0.0f;
+    TransposeViewMatrix[3][0] = 0.0f;
+    TransposeViewMatrix[3][1] = 0.0f;
+    TransposeViewMatrix[3][2] = 0.0f;
+    TransposeViewMatrix[3][3] = 1.0f;
+
+    MatrixIdentity = TransposeViewMatrix;
+    Components.clear();
+
+    SetPosition(1.0f, 2.0f, 3.0f);
+    SetPosition(11.0f, 22.0f, 33.0f);
+    SetPosition(111.0f, 222.0f, 333.0f);
+
+    MatrixIdentity = ::glm::transpose(MatrixIdentity);
+
+    for (const auto & pComponent : Components)
+    {
+      auto ScaleRender = itDataCreator->second(pComponent);
+      EXPECT_EQ(nullptr, ScaleRender);
+    }
+
+    auto Render = itCreator->second(Component_t::Make(
+      {
+        { uT("kind"), uT("Geometry") },
+        { uT("variety"), uT("Billboard") },
+      }));
+    ASSERT_NE(nullptr, Render);
+
+    using namespace ::testing;
+
+    InSequence Dummy;
+
+    EXPECT_CALL(GLProxy, UniformMatrix4fv(_, _, _, MatrixIdentity))
+      .Times(1);
+
+    Render();
+  }
+}
+
+// ************************************************************************** //
+TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Camera_Orthographic_DefaultPosition_deprecated)
+{
+  Tested::GetValue() = 1;
+
+  using GLProxy_t = ::mock::GLProxy;
+  GLProxy_t GLProxy;
+  GLProxy_t::GetInstance() = &GLProxy;
+
+  const Tested_t Example{ Data_t{} };
+  const ITested_t & IExample = Example;
+
+  auto itCreator = IExample.GetCreators().find(uT("Camera"));
+  ASSERT_NE(IExample.GetCreators().end(), itCreator);
+
+  auto Render = itCreator->second(Component_t::Make(
+    {
+      { uT("kind"), uT("Orthographic") },
+    }));
+  ASSERT_NE(nullptr, Render);
+
+  auto itShaderCreator = IExample.GetCreators().find(uT("Shader"));
+  ASSERT_NE(IExample.GetCreators().end(), itShaderCreator);
+
+  auto VsRender = itShaderCreator->second(Component_t::Make(
+    {
+      { uT("entry"), uT("vsFlat") },
+    }));
+  ASSERT_NE(nullptr, VsRender);
+
+  auto PsRender = itShaderCreator->second(Component_t::Make(
+    {
+      { uT("entry"), uT("psColored") },
+    }));
+  ASSERT_NE(nullptr, PsRender);
+
+  const float Viewport[] =
+  {
+    1812271148.0f, 1812271149.0f, 1812181722.0f, 1812181723.0f
+  };
+
+  using namespace ::testing;
+
+  EXPECT_CALL(GLProxy, BindFramebuffer(GL_FRAMEBUFFER, 0))
+    .Times(1);
+
+  EXPECT_CALL(GLProxy, Disable(GL_DEPTH_TEST))
+    .Times(1);
+
+  EXPECT_CALL(GLProxy, Enable(GL_DEPTH_TEST))
+    .Times(0);
+
+  EXPECT_CALL(GLProxy, Clear(GL_DEPTH_BUFFER_BIT))
+    .Times(0);
+
+  EXPECT_CALL(GLProxy, Disable(GL_BLEND))
+    .Times(1);
+
+  EXPECT_CALL(GLProxy, Disable(GL_DITHER))
+    .Times(1);
+
+  EXPECT_CALL(GLProxy, Enable(GL_CULL_FACE))
+    .Times(1);
+
+  EXPECT_CALL(GLProxy, CullFace(GL_BACK))
+    .Times(1);
+
+  EXPECT_CALL(GLProxy, FrontFace(GL_CCW))
+    .Times(1);
+
+  EXPECT_CALL(GLProxy, GetFloatv(GL_VIEWPORT))
+    .Times(1)
+    .WillOnce(Return(Viewport));
+
+  Render(); // Формирует матрицы вида и проекции
+
+  VsRender(); // Нужно, чтобы сформировалась шейдерная программа, иначе
+              // не будет вызывана функция glUseProgram().
+
+  const ::mock::GLint ProgramId = 1908251932;
+  const ::mock::GLint ProjectionLocationId = 1908251933;
+  const ::mock::GLint ViewLocationId = 1908252005;
+  const ::mock::GLint ViewInverseLocationId = 1908252013;
+
+  const auto Projection = ::glm::transpose(::glm::ortho(
+    Viewport[0], Viewport[0] + Viewport[2],
+    Viewport[1] + Viewport[3], Viewport[1],
+    1.0f, -1.0f));
+
+  auto View = ::glm::identity<::glm::mat4>();
+  const auto ViewInverse = ::glm::transpose(::glm::inverse(View));
+  View = ::glm::transpose(View);
+
+  InSequence Dummy;
+
+  EXPECT_CALL(GLProxy, UseProgram(_))
+    .Times(1);
+
+  EXPECT_CALL(GLProxy, GetIntegerv(GL_CURRENT_PROGRAM))
+    .Times(1)
+    .WillOnce(Return(&ProgramId));
+
+  EXPECT_CALL(GLProxy, GetUniformLocation(ProgramId, Eq("MatricesData.Projection")))
+    .Times(1)
+    .WillOnce(Return(ProjectionLocationId));
+
+  EXPECT_CALL(GLProxy, GetUniformLocation(ProgramId, Eq("MatricesData.View")))
+    .Times(1)
+    .WillOnce(Return(ViewLocationId));
+
+  EXPECT_CALL(GLProxy, GetUniformLocation(ProgramId, Eq("MatricesData.ViewInverse")))
+    .Times(1)
+    .WillOnce(Return(ViewInverseLocationId));
+
+  EXPECT_CALL(GLProxy,
+    UniformMatrix4fv(ProjectionLocationId, 1, GL_FALSE, Projection))
+    .Times(1);
+
+  EXPECT_CALL(GLProxy,
+    UniformMatrix4fv(ViewLocationId, 1, GL_FALSE, View))
+    .Times(1);
+
+  EXPECT_CALL(GLProxy,
+    UniformMatrix4fv(ViewInverseLocationId, 1, GL_FALSE, ViewInverse))
+    .Times(1);
+
+  // *************** Передача других данных шейдеру ********************* //
+
+  EXPECT_CALL(GLProxy, GetUniformLocation(_, _))
+    .Times(AtLeast(1));
+
+  EXPECT_CALL(GLProxy, UniformMatrix4fv(_, _, _, _))
+    .Times(AtLeast(1));
+
+  // ******************************************************************** //
+
+  PsRender(); // Передача матриц вида и проекции шейдеру
+}
+
+// ************************************************************************** //
+TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Camera_Orthographic_deprecated)
+{
+  Tested::GetValue() = 1;
+
+  using GLProxy_t = ::mock::GLProxy;
+  GLProxy_t GLProxy;
+  GLProxy_t::GetInstance() = &GLProxy;
+
+  const auto X = 11111.0f;
+  const auto Y = 22222.0f;
+
+  const float SourceViewport[] =
+  {
+    19022.82014f, 19022.82015f, 19022.82016f, 19022.82017f
+  };
+
+  const Tested_t Example{ Data_t{} };
+  const ITested_t & IExample = Example;
+
+  auto itDataCreator = IExample.GetCreators().find(uT("Data"));
+  ASSERT_NE(IExample.GetCreators().end(), itDataCreator);
+
+  auto itCreator = IExample.GetCreators().find(uT("Camera"));
+  ASSERT_NE(IExample.GetCreators().end(), itCreator);
+
+  auto itShaderCreator = IExample.GetCreators().find(uT("Shader"));
+  ASSERT_NE(IExample.GetCreators().end(), itShaderCreator);
+
+  auto VsRender = itShaderCreator->second(Component_t::Make(
+    {
+      { uT("entry"), uT("vsFlat") },
+    }));
+  ASSERT_NE(nullptr, VsRender);
+
+  auto PsRender = itShaderCreator->second(Component_t::Make(
+    {
+      { uT("entry"), uT("psColored") },
+    }));
+  ASSERT_NE(nullptr, PsRender);
+
+  using namespace ::testing;
+
+  auto PositionRender = itDataCreator->second(Component_t::Make(
+    {
+      { uT("kind"), uT("Position") },
+      { uT("x"), X },
+      { uT("y"), Y },
+    }));
+  EXPECT_EQ(nullptr, PositionRender);
+
+  auto Render = itCreator->second(Component_t::Make(
+    {
+      { uT("kind"), uT("Orthographic") },
+    }));
+  ASSERT_NE(nullptr, Render);
+
+  InSequence Dummy;
+
+  EXPECT_CALL(GLProxy, BindFramebuffer(GL_FRAMEBUFFER, 0))
+    .Times(1);
+
+  EXPECT_CALL(GLProxy, Disable(GL_DEPTH_TEST))
+    .Times(1);
+
+  EXPECT_CALL(GLProxy, Enable(GL_DEPTH_TEST))
+    .Times(0);
+
+  EXPECT_CALL(GLProxy, Clear(GL_DEPTH_BUFFER_BIT))
+    .Times(0);
+
+  EXPECT_CALL(GLProxy, Disable(GL_BLEND))
+    .Times(1);
+
+  EXPECT_CALL(GLProxy, Disable(GL_DITHER))
+    .Times(1);
+
+  EXPECT_CALL(GLProxy, Enable(GL_CULL_FACE))
+    .Times(1);
+
+  EXPECT_CALL(GLProxy, CullFace(GL_BACK))
+    .Times(1);
+
+  EXPECT_CALL(GLProxy, FrontFace(GL_CCW))
+    .Times(1);
+
+  EXPECT_CALL(GLProxy, GetFloatv(GL_VIEWPORT))
+    .Times(1)
+    .WillOnce(Return(SourceViewport));
+
+  Render(); // Формирует матрицы вида и проекции
+
+  VsRender(); // Нужно, чтобы сформировалась шейдерная программа, иначе
+              // не будет вызывана функция glUseProgram().
+
+  EXPECT_CALL(GLProxy, UseProgram(_))
+    .Times(1);
+
+  const ::mock::GLint ProgramId = 1908251932;
+  const ::mock::GLint ProjectionLocationId = 1908251933;
+  const ::mock::GLint ViewLocationId = 1908252005;
+  const ::mock::GLint ViewInverseLocationId = 1908252013;
+
+  const auto Projection = ::glm::transpose(::glm::ortho(
+    SourceViewport[0] + X, SourceViewport[0] + SourceViewport[2] + X,
+    SourceViewport[1] + SourceViewport[3] + Y, SourceViewport[1] + Y,
+    1.0f, -1.0f));
+
+  auto View = ::glm::identity<::glm::mat4>();
+  const auto ViewInverse = ::glm::transpose(::glm::inverse(View));
+  View = ::glm::transpose(View);
+
+  EXPECT_CALL(GLProxy, GetIntegerv(GL_CURRENT_PROGRAM))
+    .Times(1)
+    .WillRepeatedly(Return(&ProgramId));
+
+  EXPECT_CALL(GLProxy, GetUniformLocation(ProgramId, Eq("MatricesData.Projection")))
+    .Times(1)
+    .WillOnce(Return(ProjectionLocationId));
+
+  EXPECT_CALL(GLProxy, GetUniformLocation(ProgramId, Eq("MatricesData.View")))
+    .Times(1)
+    .WillOnce(Return(ViewLocationId));
+
+  EXPECT_CALL(GLProxy, GetUniformLocation(ProgramId, Eq("MatricesData.ViewInverse")))
+    .Times(1)
+    .WillOnce(Return(ViewInverseLocationId));
+
+  EXPECT_CALL(GLProxy,
+    UniformMatrix4fv(ProjectionLocationId, 1, GL_FALSE, Projection))
+    .Times(1);
+
+  EXPECT_CALL(GLProxy,
+    UniformMatrix4fv(ViewLocationId, 1, GL_FALSE, View))
+    .Times(1);
+
+  EXPECT_CALL(GLProxy,
+    UniformMatrix4fv(ViewInverseLocationId, 1, GL_FALSE, ViewInverse))
+    .Times(1);
+
+  // *************** Передача других данных шейдеру ********************* //
+
+  EXPECT_CALL(GLProxy, GetUniformLocation(_, _))
+    .Times(AtLeast(1));
+
+  EXPECT_CALL(GLProxy, UniformMatrix4fv(_, _, _, _))
+    .Times(AtLeast(1));
+
+  // ******************************************************************** //
+
+  PsRender(); // Передача матриц вида и проекции шейдеру
+}
+
+// ************************************************************************** //
+TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Camera_Perspective_deprecated)
+{
+  Tested::GetValue() = 1;
+
+  using GLProxy_t = ::mock::GLProxy;
+  GLProxy_t GLProxy;
+  GLProxy_t::GetInstance() = &GLProxy;
+
+  const float Width = 1024.0f;
+  const float Height = 768.0f;
+
+  const Tested_t Example{ Data_t{} };
+  const ITested_t & IExample = Example;
+
+  auto itShaderCreator = IExample.GetCreators().find(uT("Shader"));
+  ASSERT_NE(IExample.GetCreators().end(), itShaderCreator);
+
+  auto VsRender = itShaderCreator->second(Component_t::Make(
+    {
+      { uT("entry"), uT("vsFlat") },
+    }));
+  ASSERT_NE(nullptr, VsRender);
+
+  auto PsRender = itShaderCreator->second(Component_t::Make(
+    {
+      { uT("entry"), uT("psColored") },
+    }));
+  ASSERT_NE(nullptr, PsRender);
+
+  using namespace ::testing;
+
+  auto TestCallRender = [&](Render_t & _Render,
+    float _AngleY, float _zFar,
+    float _X, float _Y, float _Z,
+    float _A, float _B, float _C,
+    float _Distance)
+  {
+    ASSERT_NE(nullptr, _Render);
+
+    const float AngleYRadians = _AngleY *
+      static_cast<float>(::alicorn::extension::cpp::math::GreedToRadian);
+
+    InSequence Dummy;
+
+    EXPECT_CALL(GLProxy, BindFramebuffer(GL_FRAMEBUFFER, 0))
+      .Times(1);
+
+    EXPECT_CALL(GLProxy, Disable(GL_DEPTH_TEST))
+      .Times(1);
+
+    EXPECT_CALL(GLProxy, Enable(GL_DEPTH_TEST))
+      .Times(0);
+
+    EXPECT_CALL(GLProxy, Clear(GL_DEPTH_BUFFER_BIT))
+      .Times(0);
+
+    EXPECT_CALL(GLProxy, Disable(GL_BLEND))
+      .Times(1);
+
+    EXPECT_CALL(GLProxy, Disable(GL_DITHER))
+      .Times(1);
+
+    EXPECT_CALL(GLProxy, Enable(GL_CULL_FACE))
+      .Times(1);
+
+    EXPECT_CALL(GLProxy, CullFace(GL_BACK))
+      .Times(1);
+
+    EXPECT_CALL(GLProxy, FrontFace(GL_CCW))
+      .Times(1);
+
+    const float Viewport[] = { 0, 0, Width, Height };
+
+    EXPECT_CALL(GLProxy, GetFloatv(GL_VIEWPORT))
+      .Times(1)
+      .WillOnce(Return(Viewport));
+
+    _Render(); // Формирует матрицы вида и проекции
+
+    EXPECT_CALL(GLProxy, UseProgram(_))
+      .Times(AtLeast(1));
+
+    VsRender(); // Нужно, чтобы сформировалась шейдерная программа, иначе
+                // не будет вызывана функция glUseProgram().
+
+    const ::mock::GLint ProgramId = 1908251932;
+    const ::mock::GLint ProjectionLocationId = 1908251933;
+    const ::mock::GLint ViewLocationId = 1908252005;
+    const ::mock::GLint ViewInverseLocationId = 1908252013;
+
+    const auto Projection = ::glm::transpose(::glm::perspectiveFovRH(
+      AngleYRadians, Viewport[2], Viewport[3], _zFar, 0.01f));
+
+    auto GetEye = [&](void) -> ::glm::vec3
+    {
+      const auto Distance = _Distance + 0.1f;
+
+      ::glm::mat4 Transform = ::glm::identity<::glm::mat4>();
+
+      Transform = ::glm::translate(Transform,
+        ::glm::vec3{ _X, _Y, _Z });
+      Transform = ::glm::rotate(Transform,
+        _C, ::glm::vec3{ 0.0f, 0.0f, 1.0f });
+      Transform = ::glm::rotate(Transform,
+        _B, ::glm::vec3{ 0.0f, 1.0f, 0.0f });
+      Transform = ::glm::rotate(Transform,
+        _A, ::glm::vec3{ 1.0f, 0.0f, 0.0f });
+
+      return Transform * ::glm::vec4{ Distance, 0.0f, 0.0f, 1.0f };
+    };
+
+    auto View = ::glm::lookAtRH(
+      GetEye(),
+      ::glm::vec3{ _X, _Y, _Z },
+      ::glm::vec3{ 0.0f, 0.0f, 1.0f });
+    const auto ViewInverse = ::glm::transpose(::glm::inverse(View));
+    View = ::glm::transpose(View);
+
+    EXPECT_CALL(GLProxy, GetIntegerv(GL_CURRENT_PROGRAM))
+      .Times(1)
+      .WillRepeatedly(Return(&ProgramId));
+
+    EXPECT_CALL(GLProxy, GetUniformLocation(ProgramId, Eq("MatricesData.Projection")))
+      .Times(1)
+      .WillOnce(Return(ProjectionLocationId));
+
+    EXPECT_CALL(GLProxy, GetUniformLocation(ProgramId, Eq("MatricesData.View")))
+      .Times(1)
+      .WillOnce(Return(ViewLocationId));
+
+    EXPECT_CALL(GLProxy, GetUniformLocation(ProgramId, Eq("MatricesData.ViewInverse")))
+      .Times(1)
+      .WillOnce(Return(ViewInverseLocationId));
+
+    EXPECT_CALL(GLProxy,
+      UniformMatrix4fv(ProjectionLocationId, 1, GL_FALSE, Projection))
+      .Times(1);
+
+    EXPECT_CALL(GLProxy,
+      UniformMatrix4fv(ViewLocationId, 1, GL_FALSE, View))
+      .Times(1);
+
+    EXPECT_CALL(GLProxy,
+      UniformMatrix4fv(ViewInverseLocationId, 1, GL_FALSE, ViewInverse))
+      .Times(1);
+
+    // *************** Передача других данных шейдеру ********************* //
+
+    EXPECT_CALL(GLProxy, GetUniformLocation(_, _))
+      .Times(AtLeast(1));
+
+    EXPECT_CALL(GLProxy, UniformMatrix4fv(_, _, _, _))
+      .Times(AtLeast(1));
+
+    // ******************************************************************** //
+
+    PsRender(); // Передача матриц вида и проекции шейдеру
+  };
+
+  auto itDataCreator = IExample.GetCreators().find(uT("Data"));
+  ASSERT_NE(IExample.GetCreators().end(), itDataCreator);
+
+  auto itCreator = IExample.GetCreators().find(uT("Camera"));
+  ASSERT_NE(IExample.GetCreators().end(), itCreator);
+
+  class CameraInfo
+  {
+  public:
+    float AngleY;
+    float X, Y, Z;
+    float A, B, C;
+    float Distance;
+  };
+
+  const float zFar = 200.0f; // const
+
+  const ::std::vector<CameraInfo> CameraInfos =
+  {
+    { 90.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f }, // Default values
+    { 91.0f, 1.0f, 2.0f, 3.0f, 4.0f, 5.0f, 6.0f, 7.0f },
+    { 92.0f, 2.0f, 3.0f, 4.0f, 5.0f, 6.0f, 7.0f, 8.0f },
+  };
+
+  auto TestCamera = [&](const Component_t::ComponentPtr_t & _pCamera)
+  {
+    {
+      // Default values + not using Position & Rotation
+
+      auto Render = itCreator->second(_pCamera);
+
+      auto Info = CameraInfos[0];
+
+      TestCallRender(Render,
+        Info.AngleY, zFar,
+        Info.X, Info.Y, Info.Z,
+        Info.A, Info.B, Info.C,
+        Info.Distance);
+    }
+
+    const auto pPosition = Component_t::Make(
+      {
+        { uT("kind"), uT("Position") },
+      });
+
+    const auto pRotation = Component_t::Make(
+      {
+        { uT("kind"), uT("Rotation") },
+      });
+
+    {
+      // Default values from Position & Rotation
+
+      auto Position = itDataCreator->second(pPosition);
+      EXPECT_EQ(nullptr, Position);
+
+      auto Rotation = itDataCreator->second(pRotation);
+      EXPECT_EQ(nullptr, Rotation);
+
+      auto Render = itCreator->second(_pCamera);
+
+      auto Info = CameraInfos[0];
+
+      TestCallRender(Render,
+        Info.AngleY, zFar,
+        Info.X, Info.Y, Info.Z,
+        Info.A, Info.B, Info.C,
+        Info.Distance);
+    }
+
+    {
+      // Change values from Position & Rotation
+
+      auto Position = itDataCreator->second(pPosition);
+      EXPECT_EQ(nullptr, Position);
+
+      auto Rotation = itDataCreator->second(pRotation);
+      EXPECT_EQ(nullptr, Rotation);
+
+      auto Render = itCreator->second(_pCamera);
+
+      for (size_t i = 1; i < CameraInfos.size(); i++)
+      {
+        auto Info = CameraInfos[i];
+
+        pPosition->SetValue(uT("x"), Info.X);
+        pPosition->SetValue(uT("y"), Info.Y);
+        pPosition->SetValue(uT("z"), Info.Z);
+
+        pRotation->SetValue(uT("x"), Info.A);
+        pRotation->SetValue(uT("y"), Info.B);
+        pRotation->SetValue(uT("z"), Info.C);
+
+        _pCamera->SetValue(uT("fov"), Info.AngleY);
+        _pCamera->SetValue(uT("distance"), Info.Distance);
+
+        TestCallRender(Render,
+          Info.AngleY, zFar,
+          Info.X, Info.Y, Info.Z,
+          Info.A, Info.B, Info.C,
+          Info.Distance);
+      }
+    }
+  };
+
+  TestCamera(Component_t::Make(
+    {
+      { uT("kind"), uT("Perspective") },
+    }));
+}
+
+// ************************************************************************** //
+TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Light_Ambient_deprecated)
 {
   Tested::GetValue() = 3;
 
@@ -3495,17 +7966,17 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Light_Ambient)
       { uT("entry"), uT("ps") },
     });
 
-  ::Lights EmptyLights; // = { 0 } недостаточно!
+  ::SceneLights EmptyLights; // = { 0 } недостаточно!
   memset(&EmptyLights, 0, sizeof(EmptyLights));
 
-  ::Lights DefaultLights; // = { 0 } недостаточно!
+  ::SceneLights DefaultLights; // = { 0 } недостаточно!
   memset(&DefaultLights, 0, sizeof(DefaultLights));
   DefaultLights.Ambient.Color = ARGBtoVec4(0xFF000000);
   DefaultLights.Ambient.IsValid = 1;
 
   const auto Ambient = 0xFF031717;
 
-  ::Lights ExpectedLights; // = { 0 } недостаточно!
+  ::SceneLights ExpectedLights; // = { 0 } недостаточно!
   memset(&ExpectedLights, 0, sizeof(ExpectedLights));
   ExpectedLights.Ambient.Color = ARGBtoVec4(Ambient);
   ExpectedLights.Ambient.IsValid = 1;
@@ -3546,8 +8017,8 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Light_Ambient)
 
     const auto TestUsingLight = [&](
       const Render_t & _Camera,
-      const Render_t & _Light, 
-      const ::Lights & _ExpectedLights)
+      const Render_t & _Light,
+      const ::SceneLights & _ExpectedLights)
     {
       const ::mock::GLint ProgramId = 1908261929;
       const ::mock::GLint IsValidLocationId = 1908261935;
@@ -3653,7 +8124,7 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Light_Ambient)
 }
 
 // ************************************************************************** //
-TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Light_Direction)
+TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Light_Direction_deprecated)
 {
   Tested::GetValue() = 3;
 
@@ -3696,10 +8167,10 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Light_Direction)
       { uT("entry"), uT("ps") },
     });
 
-  ::Lights EmptyLights; // = { 0 } недостаточно!
+  ::SceneLights EmptyLights; // = { 0 } недостаточно!
   memset(&EmptyLights, 0, sizeof(EmptyLights));
 
-  ::Lights DefaultLights; // = { 0 } недостаточно!
+  ::SceneLights DefaultLights; // = { 0 } недостаточно!
   memset(&DefaultLights, 0, sizeof(DefaultLights));
   DefaultLights.Direction.IsValid = 1;
   DefaultLights.Direction.Color = ARGBtoVec4(0xFF000000);
@@ -3711,7 +8182,7 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Light_Direction)
   const auto Y = 1901031852.0f;
   const auto Z = 1901031854.0f;
 
-  ::Lights ExpectedLights; // = { 0 } недостаточно!
+  ::SceneLights ExpectedLights; // = { 0 } недостаточно!
   memset(&ExpectedLights, 0, sizeof(ExpectedLights));
   ExpectedLights.Direction.IsValid = 1;
   ExpectedLights.Direction.Color = ARGBtoVec4(Diffuse);
@@ -3765,7 +8236,7 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Light_Direction)
     const auto TestUsingLight = [&](
       const Render_t & _Camera,
       const Render_t & _Light,
-      const ::Lights & _ExpectedLights)
+      const ::SceneLights & _ExpectedLights)
     {
       const ::mock::GLint ProgramId = 1908262007;
       const ::mock::GLint IsValidLocationId = 1908262008;
@@ -3896,7 +8367,7 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Light_Direction)
 }
 
 // ************************************************************************** //
-TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Light_Points)
+TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Light_Points_deprecated)
 {
   Tested::GetValue() = 3;
 
@@ -3939,10 +8410,10 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Light_Points)
       { uT("entry"), uT("ps") },
     });
 
-  ::Lights EmptyLights; // = { 0 } недостаточно!
+  ::SceneLights EmptyLights; // = { 0 } недостаточно!
   memset(&EmptyLights, 0, sizeof(EmptyLights));
 
-  ::Lights DefaultLight; // = { 0 } недостаточно!
+  ::SceneLights DefaultLight; // = { 0 } недостаточно!
   memset(&DefaultLight, 0, sizeof(DefaultLight));
   DefaultLight.Points.Lights[0].Color = ARGBtoVec4(0xFF000000);
   DefaultLight.Points.Lights[0].Position = { 0.0f, 0.0f, 0.0f, 1.0f };
@@ -4041,12 +8512,12 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Light_Points)
     },
   };
 
-  ::Lights DefaultLights; // = { 0 } недостаточно!
+  ::SceneLights DefaultLights; // = { 0 } недостаточно!
   memset(&DefaultLights, 0, sizeof(DefaultLights));
   DefaultLights.Points.UsedSlotCount =
     static_cast<uint32_t>(SourceData.size());
 
-  ::Lights ExpectedLights; // = { 0 } недостаточно!
+  ::SceneLights ExpectedLights; // = { 0 } недостаточно!
   memset(&ExpectedLights, 0, sizeof(ExpectedLights));
   ExpectedLights.Points.UsedSlotCount =
     static_cast<uint32_t>(SourceData.size());
@@ -4144,7 +8615,7 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Light_Points)
     Camera2Render();
 
     const auto TestUsingLight = [&](const Render_t & _Camera,
-      const Render_t & _Light, const ::Lights & _ExpectedLights)
+      const Render_t & _Light, const ::SceneLights & _ExpectedLights)
     {
       const ::mock::GLint ProgramId = 1908262028;
       const ::mock::GLint UsedSlodCountId = 1908271923;
@@ -4187,12 +8658,12 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Light_Points)
 
       // ******************************************************************** //
 
-      EXPECT_CALL(GLProxy, 
+      EXPECT_CALL(GLProxy,
         GetUniformLocation(ProgramId, Eq("LightsData.Points.UsedSlotCount")))
         .Times(1)
         .WillOnce(Return(UsedSlodCountId));
 
-      EXPECT_CALL(GLProxy, 
+      EXPECT_CALL(GLProxy,
         Uniform1i(UsedSlodCountId, _ExpectedLights.Points.UsedSlotCount))
         .Times(1);
 
@@ -4210,7 +8681,7 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Light_Points)
           .Times(1)
           .WillOnce(Return(ColorLocationId + i));
 
-        EXPECT_CALL(GLProxy, 
+        EXPECT_CALL(GLProxy,
           Uniform4fv(ColorLocationId + i, 1, Light.Color))
           .Times(1);
 
@@ -4219,7 +8690,7 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Light_Points)
           .Times(1)
           .WillOnce(Return(PositionLocationId + i));
 
-        EXPECT_CALL(GLProxy, 
+        EXPECT_CALL(GLProxy,
           Uniform4fv(PositionLocationId + i, 1, Light.Position))
           .Times(1);
 
@@ -4228,7 +8699,7 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Light_Points)
           .Times(1)
           .WillOnce(Return(AttenuationLocationId + i));
 
-        EXPECT_CALL(GLProxy, 
+        EXPECT_CALL(GLProxy,
           Uniform4fv(AttenuationLocationId + i, 1, Light.Attenuation))
           .Times(1);
       }
@@ -4294,34 +8765,6 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Light_Points)
     });
 
   TestCallRender(pFocalCamera1, pFocalCamera2);
-}
-
-// ************************************************************************** //
-TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Light_Points_LimitCount)
-{
-  Tested::GetValue() = 3;
-
-  const Tested_t oExample{ Data_t{} };
-  const ITested_t & IExample = oExample;
-
-  auto itLightCreator = IExample.GetCreators().find(uT("Light"));
-  ASSERT_NE(IExample.GetCreators().end(), itLightCreator);
-
-  auto pLight = Component_t::Make(
-    {
-      { uT("kind"), uT("Point") },
-    });
-
-  auto LightRender = itLightCreator->second(pLight);
-  ASSERT_NE(nullptr, LightRender);
-
-  for (size_t i = 0; i < MAX_LIGHT_POINT_COUNT; i++)
-  {
-    LightRender();
-  }
-
-  // Лишний источник света - не должно упасть.
-  LightRender();
 }
 
 } // unnamed namespace

@@ -17,7 +17,7 @@ Events::Events(const Events & _Events) :
 
 }
 
-Events::~Events(void)
+Events::~Events(void) noexcept
 {
   for (auto & Connection : m_Connections)
   {

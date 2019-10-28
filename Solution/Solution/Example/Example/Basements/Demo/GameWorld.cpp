@@ -5,12 +5,18 @@
 #include <alicorn/std/vector.hpp>
 #include <alicorn/logger.hpp>
 #include <Covellite/Api/Component.inl>
+#include <Covellite/Os/Events.hpp>
 #include "DbComponents.hpp"
 #include "GameScene.hpp"
+#include "PointLights.hpp"
+#include "Constants.hpp"
 
 // 17 Март 2019 11:45 (unicornum.verum@gmail.com)
 TODO("Недопустимая ссылка на заголовочный файл!");
 #include "../../Layers/Demo.hpp"
+
+#define SOUND_DEVICE_IMPLEMENTATION
+#include <SoundDevice.hpp>
 
 namespace basement
 {
@@ -28,25 +34,30 @@ const auto Random = [](const int _From, const int _To)
 
 GameWorld::GameWorld(const Events_t & _Events, DbComponents & _DbComponents) :
   m_Events(_Events),
-  m_DbComponents(_DbComponents)
+  m_DbComponents(_DbComponents),
+  m_pPointLights(::std::make_shared<PointLights>()),
+  m_pSoundDevice(::std::make_shared<SoundDevice>())
 {
   LOGGER(Trace) << "Create GameWorld.";
+
+  m_Events[::events::Demo.Resize].Connect(
+    [this](const ::std::pair<int, int> & _Size)
+  {
+    m_WindowX = _Size.first;
+    m_WindowY = _Size.second;
+  });
 
   m_Events[::covellite::events::Application.Update].Connect([this](void)
   {
     m_ProcessingMode(0.0f);
   });
 
-  m_Events[::events::Demo.Auto].Connect([this](const IntPtr_t & _pLoadingPercent)
+  m_Events[::events::Demo.Landscape].Connect([this](const IntPtr_t & _pLoadingPercent)
   {
-    PrepareScene(_pLoadingPercent);
-    m_ProcessingMode = GetAutoProcessMoving();
-  });
+    PrepareLanscapeScene(_pLoadingPercent);
 
-  m_Events[::events::Demo.Manual].Connect([this](const IntPtr_t & _pLoadingPercent)
-  {
-    PrepareScene(_pLoadingPercent);
-    m_ProcessingMode = GetManualProcessMoving();
+    m_ProcessingMode = Constant::GetSettings<bool>(uT("IsAutoRun")) ?
+      GetAutoProcessMoving() : GetManualProcessMoving();
   });
 
   m_Events[::events::Demo.Animation].Connect([this](const IntPtr_t & _pLoadingPercent)
@@ -54,13 +65,23 @@ GameWorld::GameWorld(const Events_t & _Events, DbComponents & _DbComponents) :
     PrepareAnimationScene(_pLoadingPercent);
   });
 
+  m_Events[::events::Demo.Shadows].Connect([this](const IntPtr_t & _pLoadingPercent)
+  {
+    PrepareShadowsScene(_pLoadingPercent);
+  });
+
   m_Events[::events::Demo.Exit].Connect([this](void) 
   { 
     RemoveAllObjects(); 
   });
+
+  m_Events[::covellite::events::Key.Back].Connect([this](void)
+  {
+    RemoveAllObjects();
+  });
 }
 
-GameWorld::~GameWorld(void)
+GameWorld::~GameWorld(void) noexcept
 {
   RemoveAllObjects();
 
@@ -97,14 +118,33 @@ auto GameWorld::GetGameObjectType(const CubeCoords & _CellPosition) const /*over
 
   const auto Type = Random(0, 100);
 
+  if (Type > (100 - Constant::GetSettings<int>(uT("PointLightsPercent"))))
+  {
+    return GameObject::Landscape::None;
+  }
+
   if (Type > 27) return GameObject::Landscape::Grass;
   if (Type > 25) return GameObject::Landscape::Rock;
   if (Type > 10) return GameObject::Landscape::Bush;
-  if (Type > 2) return GameObject::Landscape::Tree;
-  return GameObject::Landscape::None;
+  return GameObject::Landscape::Tree;
 }
 
-void GameWorld::PrepareScene(const IntPtr_t & _pLoadingPercent)
+const PointLights & GameWorld::GetPointLights(void) const /*override*/
+{
+  return *m_pPointLights;
+}
+
+SoundDevice & GameWorld::GetSoundDevice(void) /*override*/
+{
+  return *m_pSoundDevice;
+}
+
+const IDbComponents & GameWorld::GetDbComponents(void) const /*override*/
+{
+  return m_DbComponents;
+}
+
+void GameWorld::PrepareLanscapeScene(const IntPtr_t & _pLoadingPercent)
 {
   LOGGER(Trace) << "Create game objects...";
 
@@ -123,7 +163,7 @@ void GameWorld::PrepareScene(const IntPtr_t & _pLoadingPercent)
     // Скайбокс должен быть добавлен после камеры, т.к. он извлекает
     // компонент положения камеры.
     LoadObject(GameObject::Create(GameObject::Support::Skybox),
-      static_cast<const IDbComponents *>(&m_DbComponents));
+      static_cast<IGameWorld *>(this));
   });
 
   m_LoadingQueue.push([this](const float)
@@ -135,12 +175,6 @@ void GameWorld::PrepareScene(const IntPtr_t & _pLoadingPercent)
   {
     LoadObject(GameObject::Create(GameObject::Another::Particles, m_pGameScene));
   });
-
-  //m_LoadingQueue.push([this](void)
-  //{
-  //  LoadObject(GameObject::Create(GameObject::Extra::Compass), 
-  //    static_cast<const IDbComponents *>(&m_DbComponents));
-  //});
 }
 
 void GameWorld::PrepareAnimationScene(const IntPtr_t & _pLoadingPercent)
@@ -167,8 +201,7 @@ void GameWorld::PrepareAnimationScene(const IntPtr_t & _pLoadingPercent)
     {
       const CubeCoords CellPosition{ x, y };
 
-      if (CellPosition.GetZ() >= -CellRadius &&
-        CellPosition.GetZ() <= CellRadius)
+      if (abs(CellPosition.GetZ()) <= CellRadius)
       {
         m_LoadingQueue.push([=](const float)
         {
@@ -179,6 +212,42 @@ void GameWorld::PrepareAnimationScene(const IntPtr_t & _pLoadingPercent)
   }
 
   m_ProcessingMode = [](float) {};
+}
+
+void GameWorld::PrepareShadowsScene(const IntPtr_t & _pLoadingPercent)
+{
+  const auto pCursorData = ::std::make_shared<Cursor>();
+
+  LOGGER(Trace) << "Load object...";
+
+  PrepareLoader(_pLoadingPercent);
+  m_pGameScene->CompleteReplace();
+
+  const auto pPrototype = 
+    GameObject::Create(GameObject::Another::Shadows, m_pGameScene);
+
+  m_LoadingQueue.push([=](const float)
+  {
+    LoadObject(pPrototype, pCursorData);
+  });
+
+  m_ProcessingMode = [](float) {};
+
+  using Cursor_t = ::covellite::events::Cursor_t;
+
+  m_Events[::covellite::events::Cursor.Touch].Connect([=](void)
+  {
+    pCursorData->IsClick = true;
+  });
+
+  m_Events[::covellite::events::Cursor.Motion].Connect(
+    [=](const Cursor_t::Position & _Position)
+  {
+    pCursorData->X = _Position.X;
+    pCursorData->Y = _Position.Y;
+    pCursorData->WindowX = m_WindowX;
+    pCursorData->WindowY = m_WindowY;
+  });
 }
 
 void GameWorld::RemoveAllObjects(void)
@@ -632,6 +701,12 @@ auto GameWorld::GetCellLoader(const CubeCoords & _CellPosition) -> Updater_t
     }
 
     LoadObject(m_LandscapeObjects[ObjectType], _CellPosition);
+
+    if (ObjectType == GameObject::Landscape::None && 
+      Constant::GetSettings<bool>(uT("IsNightMode")))
+    {
+      m_pPointLights->Add(_CellPosition, GetLandscapeHeight(_CellPosition));
+    }
   };
 }
 
@@ -643,6 +718,7 @@ auto GameWorld::GetCellRemover(const CubeCoords & _CellPosition) -> Updater_t
       _CellPosition.GetX() << ", " << _CellPosition.GetY() << "].";
 
     const auto Objects = m_pGameScene->Remove(_CellPosition);
+    m_pPointLights->Remove(_CellPosition);
 
     for (const auto & Object : Objects)
     {

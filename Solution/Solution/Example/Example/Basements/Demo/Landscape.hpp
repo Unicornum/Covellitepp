@@ -33,7 +33,7 @@ class Landscape final :
 public:
   Objects_t GetObject(const Any_t &) const override;
 
-private:
+public:
   class Mesh final :
     public GameObject::Mesh
   {
@@ -41,7 +41,7 @@ private:
 
   private:
     void LoadMesh(const Path_t &, const Rect &);
-    void BuildMesh(const size_t, const int, const float, const Rect &);
+    void BuildGrass(const int, const float, const Rect &);
     // cppcheck-suppress unusedPrivateFunction
     // cppcheck-suppress functionStatic
     void BuildTriplex6Object(const Point &, const float, const float, 
@@ -57,8 +57,9 @@ private:
 
 private:
   Object_t GetMaterial(const CubeCoords &) const;
-  Object_t GetTransform(const CubeCoords &) const;
-  static Object_t GetPresent(void);
+  Object_t GetTransform(const CubeCoords &, String_t &) const;
+  Object_t GetPointLight(const CubeCoords &) const;
+  Object_t GetUserConstantBufferPointLight(const CubeCoords &) const;
 
 private:
   bool m_IsUsingRotate = true;

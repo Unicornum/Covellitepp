@@ -140,11 +140,14 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Covellite.Api", "Covellite.
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "(Documentation)", "(Documentation)", "{798C693D-A334-4F98-B44C-801BA0546BFD}"
 	ProjectSection(SolutionItems) = preProject
+		Solution\Solution\Covellite.Api\(Documentation)\BkSurface.hpp = Solution\Solution\Covellite.Api\(Documentation)\BkSurface.hpp
 		Solution\Solution\Covellite.Api\(Documentation)\Classes.png = Solution\Solution\Covellite.Api\(Documentation)\Classes.png
 		Solution\Solution\Covellite.Api\(Documentation)\Classes.txt = Solution\Solution\Covellite.Api\(Documentation)\Classes.txt
 		Solution\Solution\Covellite.Api\(Documentation)\ComponentSystem.hpp = Solution\Solution\Covellite.Api\(Documentation)\ComponentSystem.hpp
+		Solution\Solution\Covellite.Api\(Documentation)\Instancing.hpp = Solution\Solution\Covellite.Api\(Documentation)\Instancing.hpp
 		Solution\Solution\Covellite.Api\(Documentation)\ProjectPage.hpp = Solution\Solution\Covellite.Api\(Documentation)\ProjectPage.hpp
 		Solution\Solution\Covellite.Api\(Documentation)\Shaders.hpp = Solution\Solution\Covellite.Api\(Documentation)\Shaders.hpp
+		Solution\Solution\Covellite.Api\(Documentation)\UserConstantBuffer.hpp = Solution\Solution\Covellite.Api\(Documentation)\UserConstantBuffer.hpp
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Test.Covellite.Api", "Solution\Solution\Covellite.Api\Test.Covellite.Api\Test.Covellite.Api.vcxproj", "{0488EEE9-74C7-4625-A19F-2F65FF3593BD}"

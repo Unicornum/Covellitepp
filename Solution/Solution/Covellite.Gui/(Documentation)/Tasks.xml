@@ -8,11 +8,11 @@
   </Options>
   <Process/>
   <Complete>
-    <Week6241>
-      <Task6 Text="Изменение способа передачи данных вертексного буфера." Type="Red" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="false"/>
-    </Week6241>
-    <Week6240/>
-    <Week6239/>
-    <Week6238/>
+    <Week6251>
+      <Task6 Text="Некорректная работа кнопки BACKSPACE на Android'e." Type="Bug" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="true" ParentTaskText="false"/>
+    </Week6251>
+    <Week6250/>
+    <Week6249/>
+    <Week6248/>
   </Complete>
 </Tasks>

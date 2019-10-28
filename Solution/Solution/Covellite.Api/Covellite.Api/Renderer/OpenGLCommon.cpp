@@ -1,6 +1,7 @@
 ﻿
 #include "stdafx.h"
 #include "OpenGLCommon.hpp"
+#include <GLMath.hpp>
 #include "Component.hpp"
 #include "Shaders/Shaders.hpp"
 #include "GraphicApi.Constants.hpp"
@@ -34,6 +35,8 @@ void OpenGLCommon::ResizeWindow(int32_t _Width, int32_t _Height) /*final*/
 {
   // (x, y) - левый нижний угол!
   glViewport(0, 0, _Width, _Height - m_Top);
+
+  m_IsResizeWindow = true;
 }
 
 auto OpenGLCommon::CreateState(const ComponentPtr_t & _pComponent) -> Render_t /*override*/
@@ -51,14 +54,10 @@ auto OpenGLCommon::CreateState(const ComponentPtr_t & _pComponent) -> Render_t /
   {
     return [=](void)
     {
-      m_SamplerState = [](void)
-      {
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-      };
+      m_TexParameters.MinFilter = GL_LINEAR;
+      m_TexParameters.MagFilter = GL_LINEAR;
+      m_TexParameters.WrapS = GL_REPEAT;
+      m_TexParameters.WrapT = GL_REPEAT;
     };
   };
 
@@ -150,12 +149,15 @@ auto OpenGLCommon::GetDepthRender(
   {
     glEnable(GL_DEPTH_TEST);
     glDepthMask(IsOverwrite);
+    glDepthFunc(GL_GREATER);
   };
 
   const Render_t DepthClear = [=](void)
   {
     glEnable(GL_DEPTH_TEST);
     glDepthMask(IsOverwrite);
+    glDepthFunc(GL_GREATER);
+    glClearDepth(0.0f);
     glClear(GL_DEPTH_BUFFER_BIT);
   };
 
@@ -229,16 +231,13 @@ auto OpenGLCommon::GetPreRenderBillboardGeometry(void) -> MatrixBuilder_t
 
   PreRenders.push_front([=](::glm::mat4 & _Matrix)
   {
-    auto Matrix = ::glm::transpose(_Matrix);
-    Matrix[0][3] = 0.0f;
-    Matrix[1][3] = 0.0f;
-    Matrix[2][3] = 0.0f;
-    Matrix[3][0] = 0.0f;
-    Matrix[3][1] = 0.0f;
-    Matrix[3][2] = 0.0f;
-    Matrix[3][3] = 1.0f;
-
-    _Matrix = Matrix;
+    _Matrix[0][3] = 0.0f;
+    _Matrix[1][3] = 0.0f;
+    _Matrix[2][3] = 0.0f;
+    _Matrix[3][0] = 0.0f;
+    _Matrix[3][1] = 0.0f;
+    _Matrix[3][2] = 0.0f;
+    _Matrix[3][3] = 1.0f;
   });
 
   return [PreRenders](::glm::mat4 & _Matrix)

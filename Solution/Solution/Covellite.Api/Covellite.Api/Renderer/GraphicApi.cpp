@@ -44,6 +44,8 @@ GraphicApi::GraphicApi(void) :
     },
     { uT("Camera"), [=](const ComponentPtr_t & _pComponent)
       { return CreateCamera(_pComponent); } },
+    { uT("BkSurface"), [=](const ComponentPtr_t & _pComponent)
+      { return CreateBkSurface(_pComponent); } },
     { uT("State"), [=](const ComponentPtr_t & _pComponent)
       { return CreateState(_pComponent); } },
     { uT("Fog"), [=](const ComponentPtr_t & _pComponent)
@@ -58,6 +60,8 @@ GraphicApi::GraphicApi(void) :
       { return CreateShader(_pComponent); } },
     { uT("Buffer"), [=](const ComponentPtr_t & _pComponent)
       { return CreateBuffer(_pComponent); } },
+    { uT("Transform"), [this](const ComponentPtr_t & _pComponent)
+      { return CreateTransform(_pComponent); } },
     { uT("Present"), [=](const ComponentPtr_t & _pComponent)
       { return CreatePresent(_pComponent); } },
     { uT("Updater"), [this](const ComponentPtr_t & _pComponent)
@@ -70,6 +74,7 @@ void GraphicApi::PresentFrame(void) /*override*/
   const ::std::chrono::duration<float> Time =
     (std::chrono::system_clock::now() - m_StartProgram);
   m_CurrentFrameTime = Time.count();
+  m_IsResizeWindow = false;
 }
 
 auto GraphicApi::GetCreators(void) const -> const Creators_t & /*final*/
@@ -79,12 +84,14 @@ auto GraphicApi::GetCreators(void) const -> const Creators_t & /*final*/
 
 auto GraphicApi::CreatePresent(const ComponentPtr_t & _pComponent) -> Render_t
 {
-  ::std::map<String_t, ::std::function<Render_t(void)>> Creators =
+  if (_pComponent->Kind == uT("Geometry"))
   {
-    { uT("Geometry"), [&](void) { return CreateGeometry(_pComponent); } },
-  };
+    return CreateGeometry(_pComponent);
+  }
 
-  return Creators[_pComponent->Kind]();
+  // 13 Сентябрь 2019 12:20 (unicornum.verum@gmail.com)
+  TODO("При удалении устаревшего кода заменить здесь вызов на CreateBuffer()");
+  return CreatePresentBuffer(_pComponent);
 }
 
 auto GraphicApi::CreateUpdater(const ComponentPtr_t & _pComponent) const -> Render_t

@@ -7,8 +7,6 @@
 #include <alicorn/std/exception.hpp>
 #include <alicorn/boost/filesystem.hpp>
 #include <alicorn/logger.hpp>
-#include <Covellite/App/Settings.hpp>
-#include <Covellite/App/Vfs.hpp>
 
 #if BOOST_COMP_MSVC
 # pragma warning(push)
@@ -76,12 +74,11 @@ public:
 };
 
 Landscape::Mesh::Mesh(
-  const size_t _Type, 
+  const size_t /*_Type*/, 
   const float _TextureRatioXY,
-  const Rect & _TextureCoord)
+  const Rect & /*_TextureCoord*/)
 {
   BuildBasementObject(_TextureRatioXY);
-  BuildMesh(_Type, 1, _TextureRatioXY, _TextureCoord);
 }
 
 Landscape::Mesh::Mesh(
@@ -90,7 +87,7 @@ Landscape::Mesh::Mesh(
   const Rect & _TextureCoord)
 {
   BuildBasementObject(_TextureRatioXY);
-  BuildMesh(GameObject::Landscape::Grass, _TriplexCount, _TextureRatioXY, _TextureCoord);
+  BuildGrass(_TriplexCount, _TextureRatioXY, _TextureCoord);
 }
 
 Landscape::Mesh::Mesh(
@@ -195,13 +192,13 @@ void Landscape::Mesh::LoadMesh(
 
     for (int i = 0; i < _Count; i++)
     {
-      const auto iVertex = static_cast<size_t>(_pIndices[i].vertex_index - 1);
+      const auto iVertex = static_cast<size_t>(_pIndices[i].vertex_index) - 1;
       Triangle.Vertexes[i].m_Vertex.px = Data.Vertex[iVertex].x;
       Triangle.Vertexes[i].m_Vertex.py = Data.Vertex[iVertex].y;
       Triangle.Vertexes[i].m_Vertex.pz = Data.Vertex[iVertex].z;
       Triangle.Vertexes[i].m_Vertex.pw = 1.0f;
 
-      const auto iNormal = static_cast<size_t>(_pIndices[i].normal_index - 1);
+      const auto iNormal = static_cast<size_t>(_pIndices[i].normal_index) - 1;
       Triangle.Vertexes[i].m_Vertex.ex = Data.Normal[iNormal].x;
       Triangle.Vertexes[i].m_Vertex.ey = Data.Normal[iNormal].y;
       Triangle.Vertexes[i].m_Vertex.ez = Data.Normal[iNormal].z;
@@ -226,7 +223,7 @@ void Landscape::Mesh::LoadMesh(
         return Result;
       };
 
-      const auto iTexCoords = static_cast<size_t>(_pIndices[i].texcoord_index - 1);
+      const auto iTexCoords = static_cast<size_t>(_pIndices[i].texcoord_index) - 1;
       Triangle.Vertexes[i].m_Vertex.tu = Convert(Data.TexCoord[iTexCoords].x,
         Data.TextureCoord.left, Data.TextureCoord.right);
       Triangle.Vertexes[i].m_Vertex.tv = Convert(Data.TexCoord[iTexCoords].y,
@@ -277,48 +274,46 @@ void Landscape::Mesh::LoadMesh(
   }
 }
 
-void Landscape::Mesh::BuildMesh(
-  const size_t _Type,
+void Landscape::Mesh::BuildGrass(
   const int _TriplexCount,
   const float _TextureRatioXY,
   const Rect & _TextureCoord)
 {
+  if (_TriplexCount <= 1) return;
+
   const auto Random = [](const float _From, const float _To)
   {
     static ::std::mt19937 Generator{ ::std::random_device{}() };
     return ::std::uniform_real_distribution<float>{ _From, _To }(Generator);
   };
 
-  if (_Type == GameObject::Landscape::Grass && _TriplexCount > 1)
+  const auto Step = -0.001f + 0.7f / (_TriplexCount - 1);
+
+  const auto RatioXY = _TextureRatioXY * 
+    (_TextureCoord.right - _TextureCoord.left) /
+    (_TextureCoord.bottom - _TextureCoord.top);
+
+  for (float y = -0.35f; y < 0.35f; y += Step)
   {
-    const auto Step = -0.001f + 0.7f / (_TriplexCount - 1);
-
-    const auto RatioXY = _TextureRatioXY * 
-      (_TextureCoord.right - _TextureCoord.left) /
-      (_TextureCoord.bottom - _TextureCoord.top);
-
-    for (float y = -0.35f; y < 0.35f; y += Step)
+    for (float x = -0.35f; x < 0.35f; x += Step)
     {
-      for (float x = -0.35f; x < 0.35f; x += Step)
-      {
-        const auto Height = Random(0.2f, 0.5f);
+      const auto Height = Random(0.2f, 0.5f);
 
-        // »спользование триплексов, у которых плоскости состо€т из одного
-        // треугольника существенно (в 2.5 раза!) рон€ет fps (веро€тно,
-        // производительность обратно пропорциональна количеству пикселей, которые
-        // треугольник занимает на экране).
-        //BuildTriplex6Object(
-        BuildTriplex12Object(
-          Point{
-            Random(x - 0.375f * Step, x + 0.375f * Step),
-            Random(y - 0.375f * Step, y + 0.375f * Step),
-            Height
-          },
-          -0.33f * Height,
-          RatioXY * 1.33f * Height / 2.0f,
-          Random(0.75f, 1.25f),
-          _TextureCoord);
-      }
+      // »спользование триплексов, у которых плоскости состо€т из одного
+      // треугольника существенно (в 2.5 раза!) рон€ет fps (веро€тно,
+      // производительность обратно пропорциональна количеству пикселей, которые
+      // треугольник занимает на экране).
+      //BuildTriplex6Object(
+      BuildTriplex12Object(
+        Point{
+          Random(x - 0.375f * Step, x + 0.375f * Step),
+          Random(y - 0.375f * Step, y + 0.375f * Step),
+          Height
+        },
+        -0.33f * Height,
+        RatioXY * 1.33f * Height / 2.0f,
+        Random(0.75f, 1.25f),
+        _TextureCoord);
     }
   }
 }

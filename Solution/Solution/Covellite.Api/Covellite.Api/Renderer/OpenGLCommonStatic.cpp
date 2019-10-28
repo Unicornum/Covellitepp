@@ -1,6 +1,7 @@
 ﻿
 #include "stdafx.h"
 #include "OpenGLCommonStatic.hpp"
+#include <GLMath.hpp>
 
 #if BOOST_COMP_MSVC 
 # pragma warning(push)
@@ -30,18 +31,31 @@ namespace api
 namespace renderer
 {
 
-template<class TData>
+template<class>
 class Support
 {
-public:
-  static void Update(const TData &) {}
 };
 
 template<>
-class Support<::Lights>
+class Support<::Camera>
 {
 public:
-  static void Update(const ::Lights & Lights)
+  static void Update(const ::Camera &) {}
+};
+
+template<>
+class Support<::Fog>
+{
+public:
+  static void Update(const ::Fog &) {}
+};
+
+template<>
+class Support<::Object>
+{
+public:
+  template<class TLights>
+  static void Update(const TLights & Lights, const int _MaxPointLightCount)
   {
     if (Lights.Ambient.IsValid == 0 &&
       Lights.Direction.IsValid == 0 &&
@@ -60,8 +74,8 @@ public:
     int Index = GL_LIGHT0;
 
     auto SetLight = [&](
-      const ::glm::vec4 & _Ambient, 
-      const ::glm::vec4 & _Diffuse, 
+      const ::glm::vec4 & _Ambient,
+      const ::glm::vec4 & _Diffuse,
       const ::glm::vec4 & _Specular,
       const ::glm::vec4 & _Position = { 0.0f, 0.0f, 1.0f, 0.0f },
       const ::glm::vec4 & _Attenuation = ::glm::vec4{ 1.0f, 0.0f, 0.0f, 0.0f })
@@ -103,10 +117,34 @@ public:
       SetLight(DefaultColor, Color, Color, Light.Position, Light.Attenuation);
     }
 
-    while (glIsEnabled(Index) && Index < (GL_LIGHT0 + MAX_LIGHT_POINT_COUNT))
+    while (glIsEnabled(Index) && Index < (GL_LIGHT0 + _MaxPointLightCount))
     {
       glDisable(Index++);
     }
+  }
+
+public:
+  static void Update(const ::Object & _Object) 
+  {
+    Support<::Object>::Update(
+      _Object.Lights, COVELLITE_MAX_LIGHT_POINT_OBJECT_COUNT);
+  }
+};
+
+template<>
+class Support<::Matrices>
+{
+public:
+  static void Update(const ::Matrices &) {}
+};
+
+template<>
+class Support<::SceneLights>
+{
+public:
+  static void Update(const ::SceneLights & Lights)
+  {
+    Support<::Object>::Update(Lights, COVELLITE_MAX_LIGHT_POINT_SCENE_COUNT);
   }
 };
 
@@ -140,7 +178,7 @@ auto OpenGLCommonStatic::CreateCamera(const ComponentPtr_t & _pComponent) -> Ren
     Camera();
 
     m_pConstants->SetCameraId(CameraId);
-    m_pConstants->Update<::Lights>();
+    m_pConstants->Update<::SceneLights>();
   };
 }
 
@@ -221,7 +259,7 @@ auto OpenGLCommonStatic::CreateMaterial(const ComponentPtr_t & _pComponent) -> R
 
 auto OpenGLCommonStatic::CreateLight(const ComponentPtr_t & _pComponent) -> Render_t /*override*/
 {
-  return DoCreateLight<::Lights>(_pComponent, true);
+  return DoCreateLight<::SceneLights>(_pComponent, true);
 }
 
 auto OpenGLCommonStatic::CreateTexture(const ComponentPtr_t & _pComponent) -> Render_t /*override*/
@@ -255,7 +293,10 @@ auto OpenGLCommonStatic::CreateTexture(const ComponentPtr_t & _pComponent) -> Re
     return [=](void)
     {
       pTexture->Bind();
-      m_SamplerState(); // Нужно делать после установки каждой текстуры!
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, m_TexParameters.MinFilter);
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, m_TexParameters.MagFilter);
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, m_TexParameters.WrapS);
+      glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, m_TexParameters.WrapT);
     };
   }
   else if (!IsContained(IgnoreDestination, Destination))
@@ -264,11 +305,6 @@ auto OpenGLCommonStatic::CreateTexture(const ComponentPtr_t & _pComponent) -> Re
       uT(" [id=") << _pComponent->Id << uT("].");
   }
 
-  return nullptr;
-}
-
-auto OpenGLCommonStatic::CreateShader(const ComponentPtr_t &) -> Render_t /*override*/
-{
   return nullptr;
 }
 
@@ -285,18 +321,38 @@ auto OpenGLCommonStatic::CreateBuffer(const ComponentPtr_t & _pBuffer) -> Render
   const auto pBufferData = 
     m_ServiceComponents.Get({ { uT("Buffer"), _pBuffer } })[0];
 
+  auto CreateConstantLightsBuffer = [&](void) -> Render_t
+  {
+    using Type_t = cbBufferMap_t<::Lights_t>;
+
+    if (!_pBuffer->IsType<const Type_t &>(uT("mapper")))
+    {
+      throw STD_EXCEPTION << "Unexpected buffer format [" <<
+        "id: " << _pBuffer->Id << ", " <<
+        "type: " << _pBuffer->Type << ", " <<
+        "kind: " << _pBuffer->Kind << "].";
+    }
+
+    const auto cbBufferMapper = _pBuffer->GetValue(uT("mapper"), Type_t{});
+    if (!cbBufferMapper)
+    {
+      throw STD_EXCEPTION << "Unexpected empty mapper: " << _pBuffer->Id;
+    }
+
+    return [=](void)
+    {
+      cbBufferMapper(&m_pConstants->Get<::Object>().Lights);
+      m_pConstants->Update<::Object>();
+    };
+  };
+
   auto CreateIndexBuffer = [&](void) -> Render_t
   {
-    auto * pDrawElements = &m_DrawElements;
-
     using Type_t = int;
 
     if (!pBufferData->IsType<const Type_t *>(uT("data")))
     {
-      throw STD_EXCEPTION << "Unexpected buffer format [" << 
-        "id: " << _pBuffer->Id << ", " <<
-        "type: " << _pBuffer->Type << ", " <<
-        "kind: " << _pBuffer->Kind << "].";
+      return CreateConstantLightsBuffer();
     }
 
     const Component::Buffer<Type_t> Info{ pBufferData };
@@ -305,7 +361,7 @@ auto OpenGLCommonStatic::CreateBuffer(const ComponentPtr_t & _pBuffer) -> Render
 
     return [=](void)
     {
-      *pDrawElements = [=](void)
+      m_DrawElements = [=](void)
       {
         glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(BufferData.size()),
           GL_UNSIGNED_INT, BufferData.data());
@@ -451,6 +507,86 @@ auto OpenGLCommonStatic::CreateBuffer(const ComponentPtr_t & _pBuffer) -> Render
 # pragma GCC diagnostic pop
 #endif
 
+auto OpenGLCommonStatic::CreateTransform(const ComponentPtr_t & _pComponent) -> Render_t /*override*/
+{
+  using PreRender_t = ::std::function<void(::glm::mat4 &)>;
+
+  const auto GetPreRenderDefaultGeometry = [&](void) -> PreRender_t
+  {
+    const auto PreRender = GetPreRenderGeometry();
+
+    return [=](::glm::mat4 & _Matrix)
+    {
+      PreRender(_Matrix);
+    };
+  };
+
+  const auto GetPreRenderStaticGeometry = [&](void) -> PreRender_t
+  {
+    ::glm::mat4 MatrixWorld = ::glm::identity<::glm::mat4>();
+    GetPreRenderGeometry()(MatrixWorld);
+
+    return [=](::glm::mat4 & _Matrix)
+    {
+      _Matrix *= MatrixWorld;
+    };
+  };
+
+  const auto GetPreRenderBillboardGeometry = [&](void) -> PreRender_t
+  {
+    const auto PreRender = OpenGLCommonStatic::GetPreRenderBillboardGeometry();
+
+    return [=](::glm::mat4 & _Matrix)
+    {
+      ::glm::mat4 MatrixWorld = ::glm::transpose(_Matrix);
+      PreRender(MatrixWorld);
+
+      _Matrix *= MatrixWorld;
+    };
+  };
+
+  const auto PreRender =
+    (_pComponent->Kind == uT("Unknown")) ? GetPreRenderDefaultGeometry() :
+    (_pComponent->Kind == uT("Static")) ? GetPreRenderStaticGeometry() :
+    (_pComponent->Kind == uT("Billboard")) ? GetPreRenderBillboardGeometry() :
+      throw STD_EXCEPTION << "Unexpected transform component: " <<
+        " [id=" << _pComponent->Id << ", kind: " << _pComponent->Kind << "].";
+
+  return [=](void)
+  {
+    // Сохраняем в стеке матрицу вида, сформированную камерой, чтобы после
+    // рендеринга меша (при котором она будет домножена на матрицу 
+    // трансформации) можно было восстановить ее обратно.
+    glPushMatrix();
+
+    ::glm::mat4 MatrixView;
+    glGetFloatv(GL_MODELVIEW_MATRIX, ::glm::value_ptr(MatrixView));
+
+    PreRender(MatrixView);
+
+    glLoadMatrixf(::glm::value_ptr(MatrixView));
+  };
+}
+
+auto OpenGLCommonStatic::CreatePresentBuffer(const ComponentPtr_t &_pBuffer) -> Render_t /*override*/
+{
+  const auto pBufferData =
+    m_ServiceComponents.Get({ { uT("Buffer"), _pBuffer } })[0];
+
+  const Component::Buffer<int> Info{ pBufferData };
+  const ::std::vector<int> BufferData{ Info.pData, Info.pData + Info.Count };
+
+  return [=](void)
+  {
+    glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(BufferData.size()),
+      GL_UNSIGNED_INT, BufferData.data());
+    glBindTexture(GL_TEXTURE_2D, 0);
+
+    // Восстанавливаем матрицу вида, сформированную камерой.
+    glPopMatrix();
+  };
+}
+
 auto OpenGLCommonStatic::CreateGeometry(const ComponentPtr_t & _pComponent) -> Render_t /*override*/
 {
   using PreRender_t = ::std::function<void(void)>;
@@ -495,7 +631,7 @@ auto OpenGLCommonStatic::CreateGeometry(const ComponentPtr_t & _pComponent) -> R
       ::glm::mat4 MatrixView;
       glGetFloatv(GL_MODELVIEW_MATRIX, ::glm::value_ptr(MatrixView));
 
-      ::glm::mat4 MatrixWorld = MatrixView;
+      ::glm::mat4 MatrixWorld = ::glm::transpose(MatrixView);
       PreRender(MatrixWorld);
 
       MatrixView *= MatrixWorld;
@@ -579,7 +715,7 @@ auto OpenGLCommonStatic::GetCameraOrthographic(const ComponentPtr_t &) -> Render
     glOrtho(
       Viewport[0] + Pos.X, Viewport[0] + Viewport[2] + Pos.X,
       Viewport[1] + Viewport[3] + Pos.Y, Viewport[1] + Pos.Y,
-      -1.0f, 1.0f);
+      1.0f, -1.0f);
   };
 }
 
@@ -607,7 +743,7 @@ auto OpenGLCommonStatic::GetCameraPerspective(const ComponentPtr_t & _pComponent
     const float zFar = 200.0f;
 
     const ::glm::mat4 Perspective = ::glm::perspectiveFovRH(AngleY,
-      Viewport[2], Viewport[3], 0.01f, zFar);
+      Viewport[2], Viewport[3], zFar, 0.01f);
 
     glMatrixMode(GL_PROJECTION);
     glLoadMatrixf(::glm::value_ptr(Perspective));

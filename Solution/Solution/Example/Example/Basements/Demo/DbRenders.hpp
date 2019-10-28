@@ -41,7 +41,7 @@ private:
 
 public:
   explicit DbRenders(const RendersPtr_t &);
-  ~DbRenders(void);
+  ~DbRenders(void) noexcept;
 };
 
 } // namespace view

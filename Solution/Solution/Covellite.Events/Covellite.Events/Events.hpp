@@ -53,7 +53,7 @@ public:
   Events(const Events &);
 
 public:
-  ~Events(void);
+  ~Events(void) noexcept;
 };
 
 } // namespace events

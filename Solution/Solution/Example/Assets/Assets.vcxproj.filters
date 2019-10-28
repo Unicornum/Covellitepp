@@ -24,6 +24,9 @@
     <Filter Include="Assets\Data\Shaders">
       <UniqueIdentifier>{648cd282-932d-4187-a6de-204dc18324a1}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Assets\Data\Sounds">
+      <UniqueIdentifier>{374c7686-2147-442e-8193-c2d5c863c3ab}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -279,9 +282,6 @@
     <Image Include="Assets\Data\demo\demo.well.jpg">
       <Filter>Assets\Data\Demo</Filter>
     </Image>
-    <Image Include="Assets\Data\demo\demo.skybox.png">
-      <Filter>Assets\Data\Demo</Filter>
-    </Image>
     <Image Include="Assets\Data\demo\demo.grass2.png">
       <Filter>Assets\Data\Demo</Filter>
     </Image>
@@ -303,6 +303,12 @@
     <Image Include="Assets\Data\demo\demo.particles.png">
       <Filter>Assets\Data\Demo</Filter>
     </Image>
+    <Image Include="Assets\Data\demo\demo.skybox.day.jpg">
+      <Filter>Assets\Data\Demo</Filter>
+    </Image>
+    <Image Include="Assets\Data\demo\demo.skybox.night.jpg">
+      <Filter>Assets\Data\Demo</Filter>
+    </Image>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Assets\Data\shaders\Pbr.ps.fx">
@@ -311,5 +317,34 @@
     <FxCompile Include="Assets\Data\Shaders\Example.fx">
       <Filter>Assets\Data\Shaders</Filter>
     </FxCompile>
+    <FxCompile Include="Assets\Data\Shaders\iParticles.fx">
+      <Filter>Assets\Data\Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Assets\Data\Shaders\vParticles.fx">
+      <Filter>Assets\Data\Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Assets\Data\Shaders\Cube.instance.fx">
+      <Filter>Assets\Data\Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Assets\Data\Shaders\Shadows.pass2.fx">
+      <Filter>Assets\Data\Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Assets\Data\Shaders\Shadows.pass1.fx">
+      <Filter>Assets\Data\Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Assets\Data\Shaders\Shadows.pass3.fx">
+      <Filter>Assets\Data\Shaders</Filter>
+    </FxCompile>
+    <FxCompile Include="Assets\Data\Shaders\Textured.fx">
+      <Filter>Assets\Data\Shaders</Filter>
+    </FxCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Media Include="Assets\Data\Sounds\Ambient.day.mp3">
+      <Filter>Assets\Data\Sounds</Filter>
+    </Media>
+    <Media Include="Assets\Data\Sounds\Ambient.night.mp3">
+      <Filter>Assets\Data\Sounds</Filter>
+    </Media>
   </ItemGroup>
 </Project>

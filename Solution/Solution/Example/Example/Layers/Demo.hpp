@@ -11,9 +11,10 @@ public:
   enum Id
   {
     Start = 0,
-    Auto,
-    Manual,
+    Resize,
+    Landscape,
     Animation,
+    Shadows,
     Exit,
 
     None,

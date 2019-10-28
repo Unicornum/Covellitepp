@@ -76,7 +76,7 @@ Application::Application(EventBased) :
 {
 }
 
-/*virtual*/ Application::~Application(void)
+/*virtual*/ Application::~Application(void) noexcept
 {
   USING_MOCK ::UnregisterClass(ClassName, GetModuleHandle(nullptr));
 }

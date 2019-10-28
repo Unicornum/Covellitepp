@@ -7,6 +7,8 @@
 #include <alicorn/std/vector.hpp>
 #include <alicorn/logger.hpp>
 #include <Covellite/Api/Component.inl>
+#include <Covellite/App/Settings.hpp>
+#include <Covellite/App/Vfs.hpp>
 
 using namespace basement;
 namespace math = ::alicorn::extension::cpp::math;
@@ -106,7 +108,7 @@ Simple2DGame::Simple2DGame(const Events_t & _Events,
   m_BeginRenderFrameTime = ::std::chrono::system_clock::now();
 }
 
-Simple2DGame::~Simple2DGame(void)
+Simple2DGame::~Simple2DGame(void) noexcept
 {
   LOGGER(Info) << "Basements Simple2DGame destoyed.";
 
@@ -147,9 +149,25 @@ void Simple2DGame::AddCommonComponents(void)
   /// [Common objects]
   const ::std::vector<int> IndexData = { 0,  1,  2,   2,  1,  3, };
     
-  const auto Renders = 
-    m_pRenders->Obtain(
+  static const auto ShaderData =
+    ::covellite::app::Vfs_t::GetInstance().GetData("Data\\Shaders\\Textured.fx");
+    
+  const auto Renders = m_pRenders->Obtain(
     {
+      Component_t::Make(
+      {
+        { uT("id"), uT("Simple2DGame.Shader.Pixel.Textured") },
+        { uT("type"), uT("Shader") },
+        { uT("entry"), uT("psTextured") },
+        { uT("data"), ShaderData.data() },
+        { uT("count"), ShaderData.size() },
+      }),
+      Component_t::Make(
+      {
+        { uT("id"), uT("Simple2DGame.Shader.Pixel.Colored") },
+        { uT("type"), uT("Shader") },
+        { uT("entry"), uT("psColored") },
+      }),
       Component_t::Make(
       {
         { uT("type"), uT("Data") },
@@ -159,24 +177,11 @@ void Simple2DGame::AddCommonComponents(void)
       }),
       Component_t::Make(
       {
-        { uT("id"), uT("Simple2DGame.Buffer.Index.Rectangle") },
-        { uT("type"), uT("Buffer") },
-        { uT("kind"), uT("Index") },
-      }),
-      /// [Common objects]
-      Component_t::Make(
-      {
-        { uT("id"), uT("Simple2DGame.Shader.Pixel.Textured") },
-        { uT("type"), uT("Shader") },
-        { uT("entry"), uT("psTextured") },
-      }),
-      Component_t::Make(
-      {
-        { uT("id"), uT("Simple2DGame.Shader.Pixel.Colored") },
-        { uT("type"), uT("Shader") },
-        { uT("entry"), uT("psColored") },
+        { uT("id"), uT("Simple2DGame.Present.Rectangle") },
+        { uT("type"), uT("Present") },
       }),
     });
+  /// [Common objects]
 
   ::boost::ignore_unused(Renders);
 }
@@ -217,7 +222,7 @@ void Simple2DGame::AddCamera(float _Xo, float _Yo)
       {
         { uT("id"), uT("Simple2DGame.Shader.Vertex.Rectangle") },
         { uT("type"), uT("Shader") },
-        { uT("entry"), uT("vsGui") },
+        { uT("entry"), uT("vsFlat") },
       }),
     });
     
@@ -524,10 +529,6 @@ auto Simple2DGame::BuildRectangle(
         { uT("id"), uT("Simple2DGame.Buffer.Vertex.") + Id.GetStringId() },
         { uT("type"), uT("Buffer") },
       }),
-      Component_t::Make(
-      {
-        { uT("id"), uT("Simple2DGame.Buffer.Index.Rectangle") },
-      }),
     } +
     _Transform +
     Object_t
@@ -541,9 +542,13 @@ auto Simple2DGame::BuildRectangle(
       }),
       Component_t::Make(
       {
-        { uT("id"), uT("Simple2DGame.Present.Rectangle.") + Id.GetStringId() },
+        { uT("id"), uT("Simple2DGame.Transform.Rectangle.") + Id.GetStringId() },
+        { uT("type"), uT("Transform") },
+      }),
+      Component_t::Make(
+      {
+        { uT("id"), uT("Simple2DGame.Present.Rectangle") },
         { uT("type"), uT("Present") },
-        { uT("kind"), uT("Geometry") },
       })
     });
     /// [Common object renders]

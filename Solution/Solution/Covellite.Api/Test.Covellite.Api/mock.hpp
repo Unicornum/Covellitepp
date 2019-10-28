@@ -39,7 +39,7 @@ public:
   const ::mock::Id_t m_Id;
 
 public:
-  virtual ~RenderInterface(void) {}
+  virtual ~RenderInterface(void) = default;
   virtual void RenderGeometry(Vertex *, int, int *, int, TextureHandle,
     const Vector2f &) {}
   virtual CompiledGeometryHandle CompileGeometry(Vertex *, int, int *, int,

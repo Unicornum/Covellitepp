@@ -111,7 +111,6 @@ set EXCLUDE=-x!Package -x!Test -x!arm -x!x86 -x!*.apk -x!*.apk.recipe* -x!*.zip 
     <ClInclude Include="Basements\Demo\Animations.hpp" />
     <ClInclude Include="Basements\Demo\Assimp.hpp" />
     <ClInclude Include="Basements\Demo\Camera.hpp" />
-    <ClInclude Include="Basements\Demo\Compass.hpp" />
     <ClInclude Include="Basements\Demo\Constants.hpp" />
     <ClInclude Include="Basements\Demo\Controller.hpp" />
     <ClInclude Include="Basements\Demo\CubeCoords.hpp" />
@@ -130,6 +129,8 @@ set EXCLUDE=-x!Package -x!Test -x!arm -x!x86 -x!*.apk -x!*.apk.recipe* -x!*.zip 
     <ClInclude Include="Basements\Demo\Loader.hpp" />
     <ClInclude Include="Basements\Demo\Model.hpp" />
     <ClInclude Include="Basements\Demo\Particles.hpp" />
+    <ClInclude Include="Basements\Demo\PointLights.hpp" />
+    <ClInclude Include="Basements\Demo\Shadows.hpp" />
     <ClInclude Include="Basements\Demo\Skybox.hpp" />
     <ClInclude Include="Basements\Demo\stdafx.h" />
     <ClInclude Include="Basements\Demo\View.hpp" />
@@ -174,7 +175,6 @@ set EXCLUDE=-x!Package -x!Test -x!arm -x!x86 -x!*.apk -x!*.apk.recipe* -x!*.zip 
       <AdditionalOptions Condition="'$(Configuration)|$(Platform)'=='Release|x64'">/bigobj %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <ClCompile Include="Basements\Demo\Camera.cpp" />
-    <ClCompile Include="Basements\Demo\Compass.cpp" />
     <ClCompile Include="Basements\Demo\Controller.cpp">
       <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">26444</DisableSpecificWarnings>
       <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='Release|x64'">26444</DisableSpecificWarnings>
@@ -195,6 +195,8 @@ set EXCLUDE=-x!Package -x!Test -x!arm -x!x86 -x!*.apk -x!*.apk.recipe* -x!*.zip 
       <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='Release|x64'">26444</DisableSpecificWarnings>
     </ClCompile>
     <ClCompile Include="Basements\Demo\Particles.cpp" />
+    <ClCompile Include="Basements\Demo\PointLights.cpp" />
+    <ClCompile Include="Basements\Demo\Shadows.cpp" />
     <ClCompile Include="Basements\Demo\Skybox.cpp" />
     <ClCompile Include="Basements\Demo\View.cpp" />
     <ClCompile Include="Basements\Demo\Water.cpp" />

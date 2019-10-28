@@ -28,6 +28,11 @@ inline void glFogi(GLenum _Name, GLint _Value)
   glFogx(_Name, _Value);
 }
 
+inline void glClearDepth(GLfloat depth)
+{
+  glClearDepthf(depth);
+}
+
 #if __ANDROID_API__ >= 18
 
 #include <gles3\gl3.h>

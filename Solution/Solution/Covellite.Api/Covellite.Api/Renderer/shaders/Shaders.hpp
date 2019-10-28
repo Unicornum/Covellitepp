@@ -6,8 +6,7 @@
 #pragma warning(disable: 4324)
 #endif // BOOST_COMP_MSVC
 
-#include "Data.hpp"
-#include "Data.h"
+#include <Covellite/Api/Constant.hpp>
 #include "Data.auto.hpp"
 #include "Predefined.auto.hpp"
 #include "Input.auto.hpp"

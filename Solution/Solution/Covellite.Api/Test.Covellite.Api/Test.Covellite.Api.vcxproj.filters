@@ -65,9 +65,6 @@
     <ClCompile Include="Test.OpenGLES\OpenGLES_test.cpp">
       <Filter>Tests\OpenGLES</Filter>
     </ClCompile>
-    <ClCompile Include="Test.Fx\Fx_test.cpp">
-      <Filter>Tests\Fx</Filter>
-    </ClCompile>
     <ClCompile Include="Test.DirectX11\DirectX11_test.cpp">
       <Filter>Tests\DirectX11</Filter>
     </ClCompile>
@@ -99,6 +96,15 @@
       <Filter>Tests\Fx</Filter>
     </ClCompile>
     <ClCompile Include="Test.Fx\Fx.Predefined.Hlsl_test.cpp">
+      <Filter>Tests\Fx</Filter>
+    </ClCompile>
+    <ClCompile Include="Test.Fx\Fx.Data_test.cpp">
+      <Filter>Tests\Fx</Filter>
+    </ClCompile>
+    <ClCompile Include="Test.Fx\Fx.Default.Pixel_test.cpp">
+      <Filter>Tests\Fx</Filter>
+    </ClCompile>
+    <ClCompile Include="Test.Fx\Fx.Default.Vertex_test.cpp">
       <Filter>Tests\Fx</Filter>
     </ClCompile>
   </ItemGroup>

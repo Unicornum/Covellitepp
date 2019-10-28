@@ -48,7 +48,7 @@ private:
 
 public:
   explicit OpenGL(const Data_t &);
-  ~OpenGL(void);
+  ~OpenGL(void) noexcept;
 
 private:
   friend OpenGL_test;

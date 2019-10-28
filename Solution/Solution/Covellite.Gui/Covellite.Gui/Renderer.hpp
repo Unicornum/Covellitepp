@@ -90,7 +90,7 @@ private:
 
 public:
   explicit Renderer(const RendersPtr_t &);
-  ~Renderer(void);
+  ~Renderer(void) noexcept;
 
 private:
   friend ::covellite::api::renderer::Renderer;

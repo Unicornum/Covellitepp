@@ -1,13 +1,18 @@
 
 #pragma once
-#include <GLMath.test.hpp>
+#include <GLMath.hpp>
 
 #ifdef min
 #undef min
 #endif
 
+#define GL_NONE                           0
 #define GL_TRUE                           1
 #define GL_FALSE                          0
+#define GL_INVALID_INDEX                  0xFFFFFFFFu
+#define GL_FLOAT_VEC4                     0x8B52
+#define GL_INT_VEC4                       0x8B55
+#define GL_INT                            0x1404
 
 #define GL_VENDOR                         0x1F00
 #define GL_RENDERER                       0x1F01
@@ -43,6 +48,7 @@
 #define GL_TEXTURE_MAG_FILTER             0x2800
 #define GL_TEXTURE_MIN_FILTER             0x2801
 #define GL_LINEAR                         0x2601
+#define GL_LINEAR_MIPMAP_LINEAR           0x2703
 #define GL_TEXTURE_WRAP_S                 0x2802
 #define GL_TEXTURE_WRAP_T                 0x2803
 #define GL_REPEAT                         0x2901
@@ -94,10 +100,22 @@
 #define GL_ELEMENT_ARRAY_BUFFER           0x8893
 #define GL_ARRAY_BUFFER_BINDING           0x8894
 #define GL_ELEMENT_ARRAY_BUFFER_BINDING   0x8895
+#define GL_UNIFORM_BUFFER                 0x8A11
 
 #define GL_STREAM_DRAW                    0x88E0
 #define GL_STATIC_DRAW                    0x88E4
 #define GL_DYNAMIC_DRAW                   0x88E8
+
+#define GL_FRAMEBUFFER                    0x8D40
+#define GL_FRAMEBUFFER_COMPLETE           0x8CD5
+#define GL_FRAMEBUFFER_BINDING            0x8CA6
+#define GL_COLOR_ATTACHMENT0              0x8CE0
+#define GL_DEPTH_ATTACHMENT               0x8D00
+#define GL_STENCIL_ATTACHMENT             0x8D20
+#define GL_DEPTH_STENCIL_ATTACHMENT       0x821A
+#define GL_DEPTH_STENCIL                  0x84F9
+#define GL_UNSIGNED_INT_24_8              0x84FA
+#define GL_DEPTH24_STENCIL8               0x88F0
 
 namespace mock
 {
@@ -115,6 +133,7 @@ using GLfixed = int32_t;
 using GLubyte = unsigned char;
 using GLboolean = unsigned char;
 using GLchar = char;
+typedef double GLclampd;
 typedef signed   long  int GLsizeiptr;
 typedef signed   long  int GLintptr;
 
@@ -188,6 +207,8 @@ public:
     GLsizei, const GLvoid *));
   MOCK_METHOD1(EnableVertexAttribArray, void(GLuint));
   MOCK_METHOD4(BufferSubData, void(GLenum, GLintptr, GLsizeiptr, Floats_t));
+  MOCK_METHOD3(UniformBufferSubData, void(GLintptr, GLsizeiptr, const void *));
+  MOCK_METHOD4(BufferSubDataRaw, void(GLenum, GLintptr, GLsizeiptr, const void *));
   MOCK_METHOD1(CreateShader, GLuint(GLenum));
   MOCK_METHOD1(DeleteShader, void(GLuint));
   MOCK_METHOD4(ShaderSource, void(GLuint, GLsizei, ::std::string, const GLint *));
@@ -206,6 +227,25 @@ public:
   MOCK_METHOD2(Uniform1f, void(GLuint, GLfloat));
   MOCK_METHOD3(Uniform4fv, void (GLint, GLsizei, ::glm::vec4));
   MOCK_METHOD4(UniformMatrix4fv, void(GLint, GLsizei, GLboolean, ::glm::mat4));
+  MOCK_METHOD2(GetUniformBlockIndex, GLuint(GLuint, ::std::string));
+  MOCK_METHOD3(BindBufferBase, void(GLenum, GLuint, GLuint));
+  MOCK_METHOD3(UniformBlockBinding, void(GLuint, GLuint, GLuint));
+  MOCK_METHOD5(DrawElementsInstanced, void(GLenum, GLsizei, GLenum,
+    const void *, GLsizei));
+  MOCK_METHOD2(VertexAttribDivisor, void(GLuint, GLuint));
+  MOCK_METHOD2(GetActiveAttribType, GLenum(GLuint, GLuint));
+  MOCK_METHOD1(ClearDepth, void(GLclampd));
+  MOCK_METHOD1(DepthFunc, void(GLenum));
+  MOCK_METHOD1(GenFramebuffers, GLuint(GLsizei));
+  MOCK_METHOD2(DeleteFramebuffers, void(GLsizei, GLuint));
+  MOCK_METHOD2(BindFramebuffer, void(GLenum, GLuint));
+  MOCK_METHOD5(FramebufferTexture2D, void(GLenum, GLenum, GLenum, GLuint, GLint));
+  MOCK_METHOD1(CheckFramebufferStatus, GLenum(GLenum));
+  MOCK_METHOD1(DrawBuffers, void(::std::vector<GLenum>));
+  MOCK_METHOD1(GenerateMipmap, void(GLenum));
+  MOCK_METHOD0(GetReadPixelsRawData, ::std::vector<uint32_t>(void));
+  MOCK_METHOD7(ReadPixels, void(GLint, GLint, GLsizei, GLsizei, GLenum, GLenum, 
+    GLvoid *));
 
 public:
   template<class T>
@@ -247,6 +287,103 @@ public:
 
 namespace
 {
+
+void glReadPixels(GLint x, GLint y, GLsizei width, GLsizei height, 
+  GLenum format, GLenum type, GLvoid * data)
+{
+  const auto RawData = GLProxy::GetInstance()->GetReadPixelsRawData();
+  memcpy(data, RawData.data(), RawData.size() * sizeof(RawData[0]));
+
+  GLProxy::GetInstance()->ReadPixels(x, y, width, height, format, type, data);
+}
+
+void glGenerateMipmap(GLenum target)
+{
+  GLProxy::GetInstance()->GenerateMipmap(target);
+}
+
+void glGenFramebuffers(GLsizei n, GLuint * ids)
+{
+  *ids = GLProxy::GetInstance()->GenFramebuffers(n);
+}
+
+void glDeleteFramebuffers(GLsizei n, const GLuint * framebuffers)
+{
+  GLProxy::GetInstance()->DeleteFramebuffers(n, *framebuffers);
+}
+
+void glBindFramebuffer(GLenum target, GLuint framebuffer)
+{
+  GLProxy::GetInstance()->BindFramebuffer(target, framebuffer);
+}
+
+void glFramebufferTexture2D(GLenum target, GLenum attachment,
+  GLenum textarget, GLuint texture, GLint level)
+{
+  GLProxy::GetInstance()->FramebufferTexture2D(target, attachment,
+    textarget, texture, level);
+}
+
+GLenum glCheckFramebufferStatus(GLenum target)
+{
+  return GLProxy::GetInstance()->CheckFramebufferStatus(target);
+}
+
+void glDrawBuffers(GLsizei n, const GLenum * bufs)
+{
+  GLProxy::GetInstance()->DrawBuffers(::std::vector<GLenum>{ bufs, bufs + n });
+}
+
+void glClearDepth(GLclampd depth)
+{
+  GLProxy::GetInstance()->ClearDepth(depth);
+}
+
+void glDepthFunc(GLenum func)
+{
+  GLProxy::GetInstance()->DepthFunc(func);
+}
+
+void glGetActiveAttrib(
+  GLuint program,
+  GLuint index,
+  GLsizei /*bufSize*/,
+  GLsizei * /*length*/,
+  GLint * /*size*/,
+  GLenum * type,
+  GLchar * /*name*/)
+{
+  *type = GLProxy::GetInstance()->GetActiveAttribType(program, index);
+}
+
+void glVertexAttribDivisor(GLuint index, GLuint divisor)
+{
+  GLProxy::GetInstance()->VertexAttribDivisor(index, divisor);
+}
+
+void glDrawElementsInstanced(GLenum mode, GLsizei count, GLenum type,
+  const void * indices, GLsizei instancecount)
+{
+  GLProxy::GetInstance()->DrawElementsInstanced(mode, count, type, indices, 
+    instancecount);
+}
+
+void glUniformBlockBinding(GLuint program, GLuint uniformBlockIndex,
+  GLuint uniformBlockBinding)
+{
+  GLProxy::GetInstance()->UniformBlockBinding(program, uniformBlockIndex,
+    uniformBlockBinding);
+}
+
+void glBindBufferBase(GLenum target, GLuint index, GLuint buffer)
+{
+  GLProxy::GetInstance()->BindBufferBase(target, index, buffer);
+}
+
+GLuint glGetUniformBlockIndex(GLuint program, const GLchar *uniformBlockName)
+{
+  return GLProxy::GetInstance()->GetUniformBlockIndex(program, uniformBlockName);
+}
 
 void glUniform1i(GLint location, GLint v0)
 {
@@ -345,8 +482,17 @@ void glGetShaderiv(GLuint shader, GLenum pname, GLint *params)
 void glBufferSubData(GLenum target, GLintptr offset, GLsizeiptr size,
   const GLvoid * data)
 {
-  GLProxy::GetInstance()->BufferSubData(target, offset, size,
-    GLProxy::GetData<GLfloat>(1, sizeof(GLfloat), data));
+  if (target == GL_UNIFORM_BUFFER)
+  {
+    GLProxy::GetInstance()->UniformBufferSubData(offset, size, data);
+  }
+  else
+  {
+    GLProxy::GetInstance()->BufferSubDataRaw(target, offset, size, data);
+
+    GLProxy::GetInstance()->BufferSubData(target, offset, size,
+      GLProxy::GetData<GLfloat>(1, sizeof(GLfloat), data));
+  }
 }
 
 GLint glGetAttribLocation(GLuint program, const GLchar * name)
@@ -655,7 +801,7 @@ void glGetIntegerv(GLenum _Name, GLint * _pParams)
     _pParams[2] = pParams[2];
     _pParams[3] = pParams[3];
   }
-  else if (_Name == GL_CURRENT_PROGRAM)
+  else
   {
     *_pParams = *pParams;
   }
@@ -851,6 +997,22 @@ using ::mock::glUniform1i;
 using ::mock::glUniform1f;
 using ::mock::glUniform4fv;
 using ::mock::glUniformMatrix4fv;
+using ::mock::glGetUniformBlockIndex;
+using ::mock::glBindBufferBase;
+using ::mock::glUniformBlockBinding;
+using ::mock::glDrawElementsInstanced;
+using ::mock::glVertexAttribDivisor;
+using ::mock::glGetActiveAttrib;
+using ::mock::glClearDepth;
+using ::mock::glDepthFunc;
+using ::mock::glGenFramebuffers;
+using ::mock::glBindFramebuffer;
+using ::mock::glDeleteFramebuffers;
+using ::mock::glFramebufferTexture2D;
+using ::mock::glCheckFramebufferStatus;
+using ::mock::glDrawBuffers;
+using ::mock::glGenerateMipmap;
+using ::mock::glReadPixels;
 
 } // namespace api
 

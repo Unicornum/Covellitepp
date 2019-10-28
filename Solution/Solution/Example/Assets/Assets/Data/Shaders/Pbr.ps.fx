@@ -1,21 +1,11 @@
 
-#ifdef COVELLITE_SHADER_HLSL
-
-#define CONST static const
-
-#elif defined COVELLITE_SHADER_GLSL
-
-#define CONST const
-
-#endif
-
 // ************************************************************************** //
 
 float4 CalcPointLight(Point_t _Light, float4 _Position, float3 _Normal)
 {
   float4 Direction = _Light.Position - _Position;
 
-  float LightFactor = max(dot(_Normal, normalize(Direction.xyz)), 0.0f);
+  float LightFactor = max(dot(_Normal, normalize(ToFloat3(Direction))), 0.0f);
   float4 Color = LightFactor * _Light.Color;
   float Distance = length(Direction);
 
@@ -35,34 +25,17 @@ float3 SyncSaturate(float3 _Color)
   return _Color / MaxXYZ;
 }
 
-float4 GetGouraudLightsColor(float4 _WorldPos, float3 _Normal)
+float4 GetLightsColor(float4 _AmbientDirection, float4 _WorldPos, float3 _Normal)
 {
-  // Source: https://habr.com/ru/post/338254/
+  float4 Result = _AmbientDirection;
 
-  float4 Result = float4(0.0f, 0.0f, 0.0f, 0.0f);
-
-  if (LightsData.Ambient.IsValid == 1) // Ambient
+  for (int i = 0; i < ObjectData.Lights.Points.UsedSlotCount; i++)
   {
-    Result += LightsData.Ambient.Color;
+    Result += CalcPointLight(
+      ObjectData.Lights.Points.Lights[i], _WorldPos, _Normal);
   }
 
-  if (LightsData.Direction.IsValid == 1) // Direction
-  {
-    float3 Direction = normalize(LightsData.Direction.Direction.xyz);
-    Result += max(dot(_Normal, Direction), 0.0f) * LightsData.Direction.Color;
-  }
-
-  // Points
-
-  int MaxCount = MAX_LIGHT_POINT_COUNT;
-  int PointLightSlotCount = min(LightsData.Points.UsedSlotCount, MaxCount);
-
-  for (int i = 0; i < PointLightSlotCount; i++)
-  {
-    Result += CalcPointLight(LightsData.Points.Lights[i], _WorldPos, _Normal);
-  }
-
-  return float4(SyncSaturate(Result.xyz), 1.0f);
+  return float4(SyncSaturate(Result.rgb), 1.0f);
 }
 
 // ************************************************************************** //
@@ -75,14 +48,20 @@ COVELLITE_DECLARE_TEX2D(TexRoughness, 2);
 COVELLITE_DECLARE_TEX2D(TexNormal, 3);
 COVELLITE_DECLARE_TEX2D(TexOcclusion, 4);
 
+float4 psSimple(Pixel _Value)
+{
+  return COVELLITE_TEX2D_COLOR(TexAlbedo, _Value.TexCoord) *
+    GetLightsColor(_Value.Color, _Value.WorldPos, _Value.Normal);
+}
+
 // Constants
-CONST float Pi = 3.14159265359f;
-CONST float OneDivPi = 1.0f / Pi;
+COVELLITE_DECLARE_STATIC const float Pi = 3.14159265359f;
+COVELLITE_DECLARE_STATIC const float OneDivPi = 1.0f / Pi;
 
 // Lys constants
-CONST float k0 = 0.00098f, k1 = 0.9921f, fUserMaxSPow = 0.2425f;
-CONST float g_fMaxT = (exp2(-10.0 / sqrt(fUserMaxSPow)) - k0) / k1;
-CONST int nMipOffset = 0;
+COVELLITE_DECLARE_STATIC const float k0 = 0.00098f, k1 = 0.9921f, fUserMaxSPow = 0.2425f;
+COVELLITE_DECLARE_STATIC const float g_fMaxT = (exp2(-10.0 / sqrt(fUserMaxSPow)) - k0) / k1;
+COVELLITE_DECLARE_STATIC const int nMipOffset = 0;
 
 // Lys function, copy/pasted from 
 // https://www.knaldtech.com/docs/doku.php?id=specular_lys
@@ -121,17 +100,21 @@ float3 perturb_normal(float3 N, float3 V, float2 texcoord)
 
   // assume N, the interpolated vertex normal and 
   // V, the view vector (vertex to eye)
-  float3 map = COVELLITE_TEX2D_COLOR(TexNormal, texcoord).xyz;
-  map = map * 2.0f - 1.0f;
+  float3 map = COVELLITE_TEX2D_COLOR(TexNormal, texcoord).xyz * 2.0f - 1.0f;
   //map = float3(0.0f, 0.0f, 1.0f); // Flat normal.
+
+# ifdef COVELLITE_SHADER_HLSL
   return normalize(mul(map, TBN));
+# elif defined COVELLITE_SHADER_GLSL
+  return normalize(mul(TBN, map));
+# endif
 }
 
 float4 psPbrSimple(Pixel _Value)
 {
-  float3 camPos = MatricesData.ViewInverse[3].xyz;
+  float3 CameraPosition = COVELLITE_MATRIX_ROW(CameraData.ViewInverse, 3).xyz;
 
-  float3 camToPixelRaw = _Value.WorldPos.xyz - camPos;
+  float3 camToPixelRaw = _Value.WorldPos.xyz - CameraPosition;
   float3 camToPixel = normalize(camToPixelRaw);
 
   // Calculate normal
@@ -139,14 +122,14 @@ float4 psPbrSimple(Pixel _Value)
   float3 camNormalReflect = reflect(camToPixel, -normal);
 
   float3 DiffuseLightColor =
-    GetGouraudLightsColor(_Value.WorldPos, normal).rgb;
+    GetLightsColor(_Value.Color, _Value.WorldPos, normal).rgb;
 
   float3 BaseColorSample = COVELLITE_TEX2D_COLOR(TexAlbedo, _Value.TexCoord).rgb;
   float3 RoughnessSample = COVELLITE_TEX2D_COLOR(TexRoughness, _Value.TexCoord).rrr;
   float3 OcclusionSample = COVELLITE_TEX2D_COLOR(TexOcclusion, _Value.TexCoord).rrr;
 
   float3 SpecularLightColor =
-    GetGouraudLightsColor(_Value.WorldPos, camNormalReflect).rgb;
+    GetLightsColor(_Value.Color, _Value.WorldPos, camNormalReflect).rgb;
 
   float3 BaseColorSpecular = COVELLITE_TEX2D_COLOR(TexAlbedo, camNormalReflect.xy).rgb;
   float3 MetalnessSample = COVELLITE_TEX2D_COLOR(TexMetalness, _Value.TexCoord).rrr;

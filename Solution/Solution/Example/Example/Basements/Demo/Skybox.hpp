@@ -30,6 +30,9 @@ public:
   Objects_t GetObject(const Any_t &) const override;
 
 private:
+  const bool m_IsNightMode;
+
+private:
   Skybox(void);
   friend GameObject;
 };

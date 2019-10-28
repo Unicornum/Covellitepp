@@ -49,6 +49,21 @@ auto Model::GetGameObjectType(const CubeCoords & _CellPosition) const /*override
   return m_GameWorld.GetGameObjectType(_CellPosition);
 }
 
+const PointLights & Model::GetPointLights(void) const /*override*/
+{
+  return m_GameWorld.GetPointLights();
+}
+
+SoundDevice & Model::GetSoundDevice(void) /*override*/
+{
+  return m_GameWorld.GetSoundDevice();
+}
+
+const IDbComponents & Model::GetDbComponents(void) const /*override*/
+{
+  return m_GameWorld.GetDbComponents();
+}
+
 } // namespace model
 
 } // namespace basement

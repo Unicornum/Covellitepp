@@ -6,9 +6,8 @@
 struct ID3D10Device;
 struct IDXGISwapChain;
 struct ID3D10RenderTargetView;
-struct ID3D10Buffer;
-struct ID3D10Texture2D;
 struct ID3D10DepthStencilView;
+struct ID3D10RasterizerState;
 
 namespace covellite
 {
@@ -61,32 +60,41 @@ public:
 protected:
   // Èםעונפויס GraphicApi:
   Render_t CreateCamera(const ComponentPtr_t &) override;
+  Render_t CreateBkSurface(const ComponentPtr_t &) override;
   Render_t CreateState(const ComponentPtr_t &) override;
   Render_t CreateFog(const ComponentPtr_t &) override;
-  Render_t CreateMaterial(const ComponentPtr_t &) override;
-  Render_t CreateLight(const ComponentPtr_t &) override;
   Render_t CreateTexture(const ComponentPtr_t &) override;
   Render_t CreateShader(const ComponentPtr_t &) override;
   Render_t CreateBuffer(const ComponentPtr_t &) override;
-  Render_t CreateGeometry(const ComponentPtr_t &) override;
+  Render_t CreateTransform(const ComponentPtr_t &) override;
+  Render_t CreatePresentBuffer(const ComponentPtr_t &) override;
 
 private:
   void SetViewport(int, int);
   Render_t CreateBlendState(bool);
   Render_t GetDepthState(bool, bool, bool);
   Render_t CreateBasePreRenderGeometry(void);
+  Render_t CreateStaticPreRenderGeometry(void);
   Render_t CreateBillboardPreRenderGeometry(void);
 
 private:
   ComPtr_t<ID3D10Device>            m_pDevice;
   ComPtr_t<IDXGISwapChain>          m_pSwapChain;
-  ComPtr_t<ID3D10RenderTargetView>  m_pRenderTargetView;
-  ComPtr_t<ID3D10DepthStencilView>  m_pDepthStencilView;
+  ComPtr_t<ID3D10RasterizerState>   m_pDefaultRasterizerState;
+  // Screen render targets
+  ComPtr_t<ID3D10RenderTargetView>  m_pScreenRenderTargetView;
+  ComPtr_t<ID3D10DepthStencilView>  m_pScreenDepthStencilView;
+  // Active render targets
+  ::std::vector<ID3D10RenderTargetView *> m_CurrentRenderTargets;
+  ComPtr_t<ID3D10DepthStencilView>  m_pCurrentDepthStencilView;
 
 private:
   class Buffer;
   template<class>
   class ConstantBuffer;
+
+private:
+  class Texture;
 
 public:
   explicit DirectX10(const Data_t &);

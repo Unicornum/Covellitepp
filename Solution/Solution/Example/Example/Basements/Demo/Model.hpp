@@ -40,6 +40,9 @@ public:
   GameScenePtr_t CreateGameScene(void) override;
   float GetLandscapeHeight(const CubeCoords &) const override;
   IGameObject::Landscape::Value GetGameObjectType(const CubeCoords &) const override;
+  const PointLights & GetPointLights(void) const override;
+  SoundDevice & GetSoundDevice(void) override;
+  const IDbComponents & GetDbComponents(void) const override;
 
 private:
   DbComponents  m_DbComponents;

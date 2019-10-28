@@ -36,6 +36,8 @@ public:
     {
       Skybox = 0, // Перед камерой основной сцены!
       Camera,
+
+      Invalid,
     };
   };
 
@@ -45,7 +47,7 @@ public:
     enum Value
     {
       // Объекты поверхности, не содержащие прозрачных пикселей
-      None = Support::Camera + 1, // После камеры!
+      None = Support::Invalid, // После камеры!
       Sand,
       Rock,
       Well,
@@ -65,11 +67,10 @@ public:
     enum Value
     {
       Water = Landscape::Invalid, // Вода - после объектов поверхности!
-      Compass, // Должен рендерится гарантированно последним
       Loader,  // Должен рендерится последним, т.к. его updater удаляет
                // объекты, которые еще находятся в списке рендеринга.
 
-       Invalid,
+      Invalid,
     };
   };
 
@@ -80,6 +81,9 @@ public:
     {
       Animated = Extra::Invalid,
       Particles,
+      Shadows,
+
+      Invalid,
     };
   };
 

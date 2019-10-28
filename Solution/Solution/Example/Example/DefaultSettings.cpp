@@ -30,6 +30,9 @@ template<>
   (*pSettings).AddExtra(uT("PathToMeshDirectory"),
     uT("Data"));        // Путь к папке расположения файлов 3D объектов, которые 
                         // используются в проекте примера.
+  (*pSettings).AddExtra(uT("PathToSoundsDirectory"),
+    uT("Data/Sounds"));        // Путь к папке расположения звуковых файлов, которые 
+                        // используются в проекте примера.
     
   (*pSettings)[uT("Window")].SetDefault(uT("IsFullScreen"),
     false, uT("Полноэкранный/оконный режим работы программы."));
@@ -48,14 +51,27 @@ template<>
     480); // Минимальная высота клиентской области окна программы.
     
   (*pSettings)[uT("Window")][uT("BackgroundColor")].AddExtra(uT("R"), 
-    128); // Цвет фона окна программы по умолчанию: красная компонента [0...255].
+    0x80); // Цвет фона окна программы по умолчанию: красная компонента [0...255].
   (*pSettings)[uT("Window")][uT("BackgroundColor")].AddExtra(uT("G"), 
-    128); // Цвет фона окна программы по умолчанию: зеленая компонента [0...255].
+    0x80); // Цвет фона окна программы по умолчанию: зеленая компонента [0...255].
   (*pSettings)[uT("Window")][uT("BackgroundColor")].AddExtra(uT("B"), 
-    128); // Цвет фона окна программы по умолчанию: синяя компонента [0...255].
+    0x80); // Цвет фона окна программы по умолчанию: синяя компонента [0...255].
   (*pSettings)[uT("Window")][uT("BackgroundColor")].AddExtra(uT("A"), 
-    128); // Цвет фона окна программы по умолчанию: прозрачность [0...255].
-    
+    0x80); // Цвет фона окна программы по умолчанию: прозрачность [0...255].
+
+  (*pSettings)[uT("Demo")].SetDefault(uT("IsParticleInstance"),
+    true, uT("Использовать instancing для рендеринга частиц."));
+  (*pSettings)[uT("Demo")].SetDefault(uT("ParticlesCount"),
+    10000, uT("Количество частиц."));
+  (*pSettings)[uT("Demo")].SetDefault(uT("IsCubeInstance"),
+    true, uT("Использовать instancing для рендеринга кубиков."));
+  (*pSettings)[uT("Demo")].SetDefault(uT("IsNightMode"),
+    false, uT("Режим рендеринга ночь/день."));
+  (*pSettings)[uT("Demo")].SetDefault(uT("PointLightsPercent"),
+    5, uT("Количесто точечных источников света ночью в процентах от общей площади игровой сцены."));
+  (*pSettings)[uT("Demo")].SetDefault(uT("IsAutoRun"),
+    false, uT("Включение/выключение автоматического перемещения по ландшафту."));
+
   return pSettings;
 }
   

@@ -8,9 +8,9 @@
 #include "Loader.hpp"
 #include "Landscape.hpp"
 #include "Water.hpp"
-#include "Compass.hpp"
 #include "Animated.hpp"
 #include "Particles.hpp"
+#include "Shadows.hpp"
 
 namespace basement
 {
@@ -51,10 +51,6 @@ size_t GameObject::GetType(void) const /*final*/
   {
     return IGameObjectPtr_t{ new Water };
   }
-  else if (_Type == Extra::Compass)
-  {
-    return IGameObjectPtr_t{ new Compass };
-  }
   else if (_Type == Extra::Loader)
   {
     return IGameObjectPtr_t{ new Loader };
@@ -80,6 +76,10 @@ size_t GameObject::GetType(void) const /*final*/
   {
     return IGameObjectPtr_t{ new Particles };
   }
+  else if (_Type == Another::Shadows)
+  {
+    return IGameObjectPtr_t{ new Shadows };
+  }
 
   throw STD_EXCEPTION << "Unknown type object: Another::" << _Type;
 }
@@ -94,7 +94,7 @@ size_t GameObject::GetType(void) const /*final*/
       {
         { uT("type"), uT("Data") },
         { uT("kind"), uT("Shader") },
-        { uT("entry"), uT("psTextured") },
+        { uT("entry"), uT("psLightened") },
       }) :
     Component_t::Make(
       {
@@ -111,7 +111,7 @@ size_t GameObject::GetType(void) const /*final*/
     {
       { uT("id"), uT("Demo.Shader.Vertex") },
       { uT("type"), uT("Shader") },
-      { uT("entry"), uT("vsLights") },
+      { uT("entry"), uT("vsVolume") },
     }),
     pShaderData,
     Component_t::Make(

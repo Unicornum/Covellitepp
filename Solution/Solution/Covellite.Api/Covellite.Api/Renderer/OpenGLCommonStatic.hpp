@@ -42,10 +42,14 @@ protected:
   Render_t CreateState(const ComponentPtr_t &) override;
   Render_t CreateFog(const ComponentPtr_t &) override;
   Render_t CreateMaterial(const ComponentPtr_t &) override;
-  Render_t CreateLight(const ComponentPtr_t &) override;
   Render_t CreateTexture(const ComponentPtr_t &) override;
-  Render_t CreateShader(const ComponentPtr_t &) override;
   Render_t CreateBuffer(const ComponentPtr_t &) override;
+  Render_t CreateTransform(const ComponentPtr_t &) override;
+  Render_t CreatePresentBuffer(const ComponentPtr_t &) override;
+
+private:
+  // deprecated
+  Render_t CreateLight(const ComponentPtr_t &) override;
   Render_t CreateGeometry(const ComponentPtr_t &) override;
 
 private:

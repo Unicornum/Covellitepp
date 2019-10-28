@@ -1,8 +1,13 @@
 ﻿
 #pragma once
 #include <alicorn/std/string.hpp>
+#include <alicorn/cpp/math.hpp>
 #include "GraphicApi.hpp"
 #include "../robin_hood.hpp"
+
+#ifdef min
+#undef min
+#endif
 
 namespace covellite
 {
@@ -40,7 +45,7 @@ private:
 
 private:
   ::robin_hood::unordered_map<::std::size_t, ::covellite::Any_t> m_Data;
-  ::std::map<CameraId_t, ::Lights>  m_Lights;
+  ::std::map<CameraId_t, ::SceneLights>  m_Lights;
   CameraId_t                        m_CurrentCameraId;
 };
 
@@ -74,7 +79,7 @@ inline T & GraphicApi::Constants::Get(void)
 }
 
 template<>
-inline ::Lights & GraphicApi::Constants::Get(void)
+inline ::SceneLights & GraphicApi::Constants::Get(void)
 {
   return m_Lights[m_CurrentCameraId];
 }
@@ -88,9 +93,9 @@ inline void GraphicApi::Constants::Update(void)
 inline void GraphicApi::Constants::SetCameraId(const CameraId_t & _CameraId)
 {
   m_CurrentCameraId = _CameraId;
-  GetBuffer<::Lights>().m_Data = Get<::Lights>();
+  GetBuffer<::SceneLights>().m_Data = Get<::SceneLights>();
 
-  memset(&Get<::Lights>(), 0, sizeof(::Lights));
+  memset(&Get<::SceneLights>(), 0, sizeof(::SceneLights));
 }
 
 template<class T>
@@ -112,9 +117,12 @@ void GraphicApi::MakeConstants(TArgs && ... _Args)
 {
   m_pConstants = ::std::make_shared<Constants>();
   m_pConstants->Create<::Camera, TBuffer>(_Args ...);
-  m_pConstants->Create<::Matrices, TBuffer>(_Args ...);
   m_pConstants->Create<::Fog, TBuffer>(_Args ...);
-  m_pConstants->Create<::Lights, TBuffer>(_Args ...);
+  m_pConstants->Create<::Object, TBuffer>(_Args ...);
+
+  // deprecated
+  m_pConstants->Create<::Matrices, TBuffer>(_Args ...);
+  m_pConstants->Create<::SceneLights, TBuffer>(_Args ...);
 }
 
 template<class TColor>
@@ -130,12 +138,14 @@ template<class TColor>
 }
 
 template<class TFog>
-auto GraphicApi::DoCreateFog(const ComponentPtr_t & _pComponent) -> Render_t
+auto GraphicApi::DoCreateFog(
+  const ComponentPtr_t & _pComponent, 
+  const bool _IsUpdate) -> Render_t
 {
   const auto pFogData =
     m_ServiceComponents.Get({ { uT("Fog"), _pComponent } })[0];
 
-  return [=](void)
+  const Render_t NoUpdateRender = [=](void)
   {
     const Component::Fog RawFogData{ pFogData };
 
@@ -145,6 +155,21 @@ auto GraphicApi::DoCreateFog(const ComponentPtr_t & _pComponent) -> Render_t
     Fog.Far = RawFogData.Far;
     Fog.Density = RawFogData.Density;
   };
+
+  const Render_t UpdateRender = [=](void)
+  {
+    const Component::Fog RawFogData{ pFogData };
+
+    auto & Fog = m_pConstants->Get<TFog>();
+    Fog.Color = ARGBtoFloat4<color_t>(RawFogData.Color);
+    Fog.Near = RawFogData.Near;
+    Fog.Far = RawFogData.Far;
+    Fog.Density = RawFogData.Density;
+
+    m_pConstants->Update<TFog>();
+  };
+
+  return _IsUpdate ? UpdateRender : NoUpdateRender;
 }
 
 template<class TLight>
@@ -211,7 +236,7 @@ auto GraphicApi::DoCreateLight(
 
       auto & Lights = m_pConstants->Get<TLight>().Points;
 
-      if (Lights.UsedSlotCount >= MAX_LIGHT_POINT_COUNT)
+      if (Lights.UsedSlotCount >= COVELLITE_MAX_LIGHT_POINT_SCENE_COUNT)
       {
         // 04 Январь 2019 19:30 (unicornum.verum@gmail.com)
         TODO("Запись в лог информации об избыточных источниках света.");
@@ -226,6 +251,7 @@ auto GraphicApi::DoCreateLight(
                                       // Такой сложный способ из-за того,
                                       // что здесь должен быть 0.0f, если
                                       // pPosition не задан.
+
       Light.Attenuation =
       {
         pAttenuation->GetValue(uT("const"), 1.0f),

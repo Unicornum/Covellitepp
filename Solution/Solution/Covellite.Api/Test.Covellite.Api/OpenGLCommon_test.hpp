@@ -16,22 +16,13 @@ namespace
 {
 
 // ************************************************************************** //
-TEST_F(OpenGLCommon_test, /*DISABLED_*/Test_Destructor)
+TEST_F(OpenGLCommon_test, /*DISABLED_*/Test_NoEqMatrix)
 {
-  EXPECT_TRUE(::std::has_virtual_destructor<Tested_t>::value);
-  EXPECT_TRUE(::std::is_nothrow_destructible<Tested_t>::value);
-}
-
-// ************************************************************************** //
-TEST_F(OpenGLCommon_test, /*DISABLED_*/Test_RegisterIntoFactory)
-{
-  using namespace ::alicorn::modules::patterns;
-
-  const Data_t oData;
-  const ::covellite::api::renderer::SettingsData & Data = oData;
-
-  auto pExample = factory::make_unique<ITested_t>(m_UsingApi, Data);
-  EXPECT_NO_THROW(dynamic_cast<Tested_t &>(*pExample));
+  // ѕри определении некоторых макросов glm оператор == возвращает true дл€
+  // разных матриц, поэтому в тестовых проектах используетс€ отдельный
+  // заголовочный файл, провер€ем это:
+  EXPECT_FALSE(::glm::mat4{ 1.0f } == ::glm::mat4{ 2.0f });
+  EXPECT_TRUE(::glm::mat4{ 1.0f } != ::glm::mat4{ 2.0f });
 }
 
 // ************************************************************************** //
@@ -56,7 +47,7 @@ TEST_F(OpenGLCommon_test, /*DISABLED_*/Test_ResizeWindow)
 }
 
 // ************************************************************************** //
-TEST_F(OpenGLCommon_test, /*DISABLED_*/Test_BlendState)
+TEST_F(OpenGLCommon_test, /*DISABLED_*/Test_State_Blend)
 {
   using GLProxy_t = ::mock::GLProxy;
   GLProxy_t GLProxy;
@@ -88,7 +79,7 @@ TEST_F(OpenGLCommon_test, /*DISABLED_*/Test_BlendState)
 }
 
 // ************************************************************************** //
-TEST_F(OpenGLCommon_test, /*DISABLED_*/Test_SamplerState)
+TEST_F(OpenGLCommon_test, /*DISABLED_*/Test_State_Sampler)
 {
   using GLProxy_t = ::mock::GLProxy;
   GLProxy_t GLProxy;
@@ -142,7 +133,7 @@ TEST_F(OpenGLCommon_test, /*DISABLED_*/Test_SamplerState)
 }
 
 // ************************************************************************** //
-TEST_F(OpenGLCommon_test, /*DISABLED_*/Test_Scissor_Enable)
+TEST_F(OpenGLCommon_test, /*DISABLED_*/Test_State_Scissor_Enable)
 {
   using GLProxy_t = ::mock::GLProxy;
   GLProxy_t GLProxy;
@@ -210,7 +201,7 @@ TEST_F(OpenGLCommon_test, /*DISABLED_*/Test_Scissor_Enable)
 }
 
 // ************************************************************************** //
-TEST_F(OpenGLCommon_test, /*DISABLED_*/Test_Scissor_Disable)
+TEST_F(OpenGLCommon_test, /*DISABLED_*/Test_State_Scissor_Disable)
 {
   using GLProxy_t = ::mock::GLProxy;
   GLProxy_t GLProxy;
@@ -265,6 +256,12 @@ TEST_F(OpenGLCommon_test, /*DISABLED_*/Test_State_Depth_Disabled)
     EXPECT_CALL(GLProxy, Enable(GL_DEPTH_TEST))
       .Times(0);
 
+    EXPECT_CALL(GLProxy, DepthFunc(_))
+      .Times(0);
+
+    EXPECT_CALL(GLProxy, ClearDepth(_))
+      .Times(0);
+
     EXPECT_CALL(GLProxy, Clear(GL_DEPTH_BUFFER_BIT))
       .Times(0);
 
@@ -315,6 +312,12 @@ TEST_F(OpenGLCommon_test, /*DISABLED_*/Test_State_Depth_Enable_NoClear_Overwrite
   EXPECT_CALL(GLProxy, DepthMask(GL_TRUE))
     .Times(1);
 
+  EXPECT_CALL(GLProxy, DepthFunc(GL_GREATER))
+    .Times(1);
+
+  EXPECT_CALL(GLProxy, ClearDepth(_))
+    .Times(0);
+
   EXPECT_CALL(GLProxy, Clear(GL_DEPTH_BUFFER_BIT))
     .Times(0);
 
@@ -351,6 +354,12 @@ TEST_F(OpenGLCommon_test, /*DISABLED_*/Test_State_Depth_Enable_Clear_Overwrite)
     .Times(1);
 
   EXPECT_CALL(GLProxy, DepthMask(GL_TRUE))
+    .Times(1);
+
+  EXPECT_CALL(GLProxy, DepthFunc(GL_GREATER))
+    .Times(1);
+
+  EXPECT_CALL(GLProxy, ClearDepth(0.0f))
     .Times(1);
 
   EXPECT_CALL(GLProxy, Clear(GL_DEPTH_BUFFER_BIT))
@@ -392,6 +401,12 @@ TEST_F(OpenGLCommon_test, /*DISABLED_*/Test_State_Depth_Enable_NoClear_NoOverwri
   EXPECT_CALL(GLProxy, DepthMask(GL_FALSE))
     .Times(1);
 
+  EXPECT_CALL(GLProxy, DepthFunc(GL_GREATER))
+    .Times(1);
+
+  EXPECT_CALL(GLProxy, ClearDepth(_))
+    .Times(0);
+
   EXPECT_CALL(GLProxy, Clear(GL_DEPTH_BUFFER_BIT))
     .Times(0);
 
@@ -429,6 +444,12 @@ TEST_F(OpenGLCommon_test, /*DISABLED_*/Test_State_Depth_Enable_Clear_NoOverwrite
     .Times(1);
 
   EXPECT_CALL(GLProxy, DepthMask(GL_FALSE))
+    .Times(1);
+
+  EXPECT_CALL(GLProxy, DepthFunc(GL_GREATER))
+    .Times(1);
+
+  EXPECT_CALL(GLProxy, ClearDepth(0.0f))
     .Times(1);
 
   EXPECT_CALL(GLProxy, Clear(GL_DEPTH_BUFFER_BIT))
@@ -671,8 +692,12 @@ TEST_F(OpenGLCommon_test, /*DISABLED_*/Test_Buffer_UnknownType)
   }
 }
 
+
+////////////////////////////////////////////////////////////////////////////////
+
+
 // ************************************************************************** //
-TEST_F(OpenGLCommon_test, /*DISABLED_*/Test_Present_Geometry_UnknownVariety)
+TEST_F(OpenGLCommon_test, /*DISABLED_*/Test_Present_Geometry_UnknownVariety_deprecated)
 {
   const Tested_t Example{ Data_t{} };
   const ITested_t & IExample = Example;

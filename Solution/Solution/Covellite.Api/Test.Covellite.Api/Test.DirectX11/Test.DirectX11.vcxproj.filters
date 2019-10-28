@@ -26,5 +26,7 @@
     <ClInclude Include="stdafx.h">
       <Filter>Common</Filter>
     </ClInclude>
+    <ClInclude Include="..\Common_test.hpp" />
+    <ClInclude Include="..\Updater_test.hpp" />
   </ItemGroup>
 </Project>

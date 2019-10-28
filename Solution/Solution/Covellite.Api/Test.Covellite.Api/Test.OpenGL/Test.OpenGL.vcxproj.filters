@@ -25,5 +25,6 @@
     </ClInclude>
     <ClInclude Include="..\OpenGLCommon_test.hpp" />
     <ClInclude Include="..\OpenGLShader_test.hpp" />
+    <ClInclude Include="..\Common_test.hpp" />
   </ItemGroup>
 </Project>

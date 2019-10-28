@@ -33,12 +33,14 @@ class GameObject :
   public IGameObject
 {
 public:
+  using String_t = ::alicorn::extension::std::String;
+  using Index_t = int;
   using IGameObjectPtr_t = ::std::shared_ptr<IGameObject>;
+  using Material_t = ::std::map<String_t, ::std::vector<Index_t>>;
 
 protected:
   using Path_t = ::boost::filesystem::path;
   using Vertex_t = ::covellite::api::Vertex;
-  using String_t = ::alicorn::extension::std::String;
 
 public:
   // Èםעונפויס IGameObject:
@@ -57,10 +59,6 @@ public:
 public:
   class Mesh
   {
-    using Index_t = int;
-
-  protected:
-
   public:
     class Vertex final
     {
@@ -95,7 +93,7 @@ public:
   protected:
     const String_t m_MeshId;
     ::std::vector<Vertex_t> m_Vertexes;
-    mutable ::std::map<String_t, ::std::vector<Index_t>> m_MaterialIndices;
+    mutable Material_t m_MaterialIndices;
 
   public:
     explicit Mesh(const ::std::vector<Triangle_t> & = {});

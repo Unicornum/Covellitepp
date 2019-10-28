@@ -30,7 +30,8 @@ class Animated final :
   public GameObject
 {
   using ComponentPtr_t = ::covellite::api::Component::ComponentPtr_t;
-  using cbMaterial_t = ::std::function<Object_t(const String_t &)>;
+  using cbMaterial_t = 
+    ::std::function<Object_t(const Material_t::value_type &)>;
   class Animations;
 
   class Value_t
@@ -131,7 +132,8 @@ private:
 private:
   static Object_t GetCameraObject(const GameScenePtr_t &);
   static Object_t GetLightsObject(void);
-  static Object_t GetPresentObject(const CubeCoords &);
+  static Object_t GetPresentObject(const CubeCoords &, 
+    const ::std::vector<Index_t> &);
 
 private:
   const GameScenePtr_t m_pGameScene;

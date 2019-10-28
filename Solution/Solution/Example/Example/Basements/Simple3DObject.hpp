@@ -55,6 +55,9 @@ public:
 class Simple3DObject final :
   public Common
 {
+  /// [Vertex format]
+  using Vertex_t = ::covellite::api::Vertex;
+  /// [Vertex format]
   using Updater_t = ::covellite::api::Updater_t;
 
 public:
@@ -65,18 +68,24 @@ private:
 
 private:
   Id BuildCamera(void);
-  Id BuildShader(int);
+  Id BuildShader(int, bool);
   Id BuildLights(int);
-  Id BuildCube(int, float, float, float);
+  void BuildSimpleCubes(int, float);
+  void BuildInstanceCubes(int, int, float);
+  void BuildCubeData(int);
+  Id BuildSimpleCubeObject(float, float, float);
 
 private:
   Component_t::ComponentPtr_t m_pCubeRotation;
   Id m_Camera;
+  ::std::vector<Vertex_t> m_VertexData;
+  ::std::vector<int> m_IndexData;
   ::std::vector<Id> m_Cubes;
+  ::std::vector<float> m_InstanceData;
 
 public:
   Simple3DObject(const RendersPtr_t &, const int, const int);
-  ~Simple3DObject(void);
+  ~Simple3DObject(void) noexcept;
 };
 
 } // namespace basement

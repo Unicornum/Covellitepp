@@ -91,7 +91,7 @@ private:
 public:
   explicit Application(Continuous);
   explicit Application(EventBased);
-  virtual ~Application(void);
+  virtual ~Application(void) noexcept;
 
 private:
   friend Application_test;

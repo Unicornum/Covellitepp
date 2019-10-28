@@ -367,9 +367,7 @@ TEST_F(Renderer_test, /*DISABLED_*/Test_RenderCompiledGeometry_Textured)
   auto SimpleCreator =
     [&](const Component_t::ComponentPtr_t & _pComponent) -> Renders_t::Render_t
   {
-    const auto Kind = _pComponent->Kind;
-
-    if (Kind == uT("Blend") || Kind == uT("Camera")) return nullptr;
+    if (_pComponent->Kind == uT("Camera")) return nullptr;
 
     return [&, _pComponent]()
     {
@@ -384,11 +382,11 @@ TEST_F(Renderer_test, /*DISABLED_*/Test_RenderCompiledGeometry_Textured)
   const Renders_t::Creators_t Creators =
   {
     { uT("Data"), DataCreator },
-    { uT("State"), SimpleCreator },
     { uT("Texture"), SimpleCreator },
     { uT("Shader"), ShaderCreator },
     { uT("Buffer"), BufferCreator },
-    { uT("Present"), SimpleCreator },
+    { uT("Transform"), SimpleCreator },
+    { uT("Present"), BufferCreator },
   };
 
   Tested_t Example{ ::std::make_shared<Renders_t>(Creators) };
@@ -421,46 +419,39 @@ TEST_F(Renderer_test, /*DISABLED_*/Test_RenderCompiledGeometry_Textured)
 
   const Values_t PixelShaderValues =
   {
-    uT("Covellite.Api.Shader.Pixel.Textured"),
+    uT("Covellite.Gui.Shader.Pixel.Textured"),
     uT("Shader"),
-    uT("psTextured"),
+    uT("psLightened"),
   };
 
   const Values_t TextureValues =
   {
-    uT("Covellite.Api.Texture.{ID}").Replace(uT("{ID}"), TextureId),
+    uT("Covellite.Gui.Texture.{ID}").Replace(uT("{ID}"), TextureId),
     uT("Texture"),
     uT("")
   };
 
-  const Values_t SamplerValues =
-  {
-    uT("Covellite.Api.State.Sampler"),
-    uT("State"),
-    uT("Sampler")
-  };
-
   const Values_t VertexBufferValues =
   {
-    uT("Covellite.Api.Buffer.Vertex.") + strObjectId,
+    uT("Covellite.Gui.Buffer.Vertex.") + strObjectId,
     uT("Buffer"),
     Converted,
     2
   };
 
-  const Values_t IndexBufferValues =
+  const Values_t TransformValues =
   {
-    uT("Covellite.Api.Buffer.Index.") + strObjectId,
-    uT("Buffer"),
-    (const int *)pIndex,
-    (size_t)IndexCount,
+    uT("Covellite.Gui.Transform.") + strObjectId,
+    uT("Transform"),
+    uT("")
   };
 
   const Values_t PresentValues =
   {
-    uT("Covellite.Api.Present.Geometry.") + strObjectId,
+    uT("Covellite.Gui.Present.") + strObjectId,
     uT("Present"),
-    uT("Geometry")
+    (const int *)pIndex,
+    (size_t)IndexCount,
   };
 
   using namespace ::testing;
@@ -479,16 +470,13 @@ TEST_F(Renderer_test, /*DISABLED_*/Test_RenderCompiledGeometry_Textured)
     EXPECT_CALL(RenderProxy, Render(TextureValues))
       .Times(1);
 
-    EXPECT_CALL(RenderProxy, Render(SamplerValues))
-      .Times(1);
-
     EXPECT_CALL(RenderProxy, Render(VertexBufferValues))
       .Times(1);
 
-    EXPECT_CALL(RenderProxy, Render(IndexBufferValues))
+    EXPECT_CALL(RenderProxy, Render(PositionValues))
       .Times(1);
 
-    EXPECT_CALL(RenderProxy, Render(PositionValues))
+    EXPECT_CALL(RenderProxy, Render(TransformValues))
       .Times(1);
 
     EXPECT_CALL(RenderProxy, Render(PresentValues))
@@ -589,7 +577,7 @@ TEST_F(Renderer_test, /*DISABLED_*/Test_RenderCompiledGeometry_NonTextured)
     throw ::std::exception{ "Unknown buffer type." };
   };
 
-  auto PresentCreator =
+  auto SimpleCreator =
     [&](const Component_t::ComponentPtr_t & _pComponent) -> Renders_t::Render_t
   {
     const auto Kind = _pComponent->Kind;
@@ -611,7 +599,8 @@ TEST_F(Renderer_test, /*DISABLED_*/Test_RenderCompiledGeometry_NonTextured)
     { uT("Data"), DataCreator },
     { uT("Shader"), ShaderCreator },
     { uT("Buffer"), BufferCreator },
-    { uT("Present"), PresentCreator },
+    { uT("Transform"), SimpleCreator },
+    { uT("Present"), BufferCreator },
   };
 
   Tested_t Example{ ::std::make_shared<Renders_t>(Creators) };
@@ -663,32 +652,32 @@ TEST_F(Renderer_test, /*DISABLED_*/Test_RenderCompiledGeometry_NonTextured)
 
   const Values_t PixelShaderValues =
   {
-    uT("Covellite.Api.Shader.Pixel.Colored"),
+    uT("Covellite.Gui.Shader.Pixel.Colored"),
     uT("Shader"),
     uT("psColored"),
   };
 
   const Values_t VertexBufferValues =
   {
-    uT("Covellite.Api.Buffer.Vertex.") + strObjectId,
+    uT("Covellite.Gui.Buffer.Vertex.") + strObjectId,
     uT("Buffer"),
     Converted,
     2
   };
 
-  const Values_t IndexBufferValues =
+  const Values_t TransformValues =
   {
-    uT("Covellite.Api.Buffer.Index.") + strObjectId,
-    uT("Buffer"),
-    (const int *)pIndex,
-    (size_t)IndexCount,
+    uT("Covellite.Gui.Transform.") + strObjectId,
+    uT("Transform"),
+    uT("")
   };
 
   const Values_t PresentValues =
-  { 
-    uT("Covellite.Api.Present.Geometry.") + strObjectId,
-    uT("Present"), 
-    uT("Geometry"),
+  {
+    uT("Covellite.Gui.Present.") + strObjectId,
+    uT("Present"),
+    (const int *)pIndex,
+    (size_t)IndexCount,
   };
 
   using namespace ::testing;
@@ -707,10 +696,10 @@ TEST_F(Renderer_test, /*DISABLED_*/Test_RenderCompiledGeometry_NonTextured)
     EXPECT_CALL(RenderProxy, Render(VertexBufferValues))
       .Times(1);
 
-    EXPECT_CALL(RenderProxy, Render(IndexBufferValues))
+    EXPECT_CALL(RenderProxy, Render(PositionValues))
       .Times(1);
 
-    EXPECT_CALL(RenderProxy, Render(PositionValues))
+    EXPECT_CALL(RenderProxy, Render(TransformValues))
       .Times(1);
 
     EXPECT_CALL(RenderProxy, Render(PresentValues))
@@ -747,14 +736,13 @@ TEST_F(Renderer_test, /*DISABLED_*/Test_ReleaseCompiledGeometry_RemoveUniqueComp
       RenderProxy.Render(ComponentData{ _pComponent }
         .AddValue(uT("id"), uT(""))
         .AddValue(uT("type"), uT(""))
-        .AddValue(uT("data"), uT(""))
+        .AddValue(uT("test_data"), uT(""))
         .GetValues());
     };
   };
 
   const Renders_t::Creators_t Creators =
   {
-    { uT("Data"), Creator },
     { uT("Buffer"), Creator },
     { uT("Present"), Creator },
   };
@@ -774,41 +762,28 @@ TEST_F(Renderer_test, /*DISABLED_*/Test_ReleaseCompiledGeometry_RemoveUniqueComp
       {
         Component_t::Make(
         {
-          { uT("id"), uT("Covellite.Api.Buffer.Vertex.") + strObjectId },
+          { uT("id"), uT("Covellite.Gui.Buffer.Vertex.") + strObjectId },
           { uT("type"), uT("Buffer") },
-          { uT("data"), uT("Vertex.1811161832") },
+          { uT("test_data"), uT("Vertex.1811161832") },
          }),
         Component_t::Make(
         {
-          { uT("id"), uT("Covellite.Api.Buffer.Index.") + strObjectId },
-          { uT("type"), uT("Buffer") },
-          { uT("data"), uT("Index.1811161840") },
-         }),
-        Component_t::Make(
-        {
-          { uT("id"), uT("Covellite.Api.Present.Geometry.") + strObjectId },
+          { uT("id"), uT("Covellite.Gui.Present.") + strObjectId },
           { uT("type"), uT("Present") },
-          { uT("data"), uT("Present.1811261258") },
+          { uT("test_data"), uT("Present.1811261258") },
          }),
       });
 
     const Values_t ExpectedVertexBufferData =
     {
-      uT("Covellite.Api.Buffer.Vertex.") + strObjectId,
+      uT("Covellite.Gui.Buffer.Vertex.") + strObjectId,
       uT("Buffer"),
       uT("Vertex.1811161832")
     };
 
-    const Values_t ExpectedIndexBufferData =
-    {
-      uT("Covellite.Api.Buffer.Index.") + strObjectId,
-      uT("Buffer"),
-      uT("Index.1811161840")
-    };
-
     const Values_t ExpectedPresentData =
     {
-      uT("Covellite.Api.Present.Geometry.") + strObjectId,
+      uT("Covellite.Gui.Present.") + strObjectId,
       uT("Present"),
       uT("Present.1811261258")
     };
@@ -816,13 +791,10 @@ TEST_F(Renderer_test, /*DISABLED_*/Test_ReleaseCompiledGeometry_RemoveUniqueComp
     EXPECT_CALL(RenderProxy, Render(ExpectedVertexBufferData))
       .Times(1);
 
-    EXPECT_CALL(RenderProxy, Render(ExpectedIndexBufferData))
-      .Times(1);
-
     EXPECT_CALL(RenderProxy, Render(ExpectedPresentData))
       .Times(1);
 
-    EXPECT_EQ(3, Renders.size());
+    EXPECT_EQ(2, Renders.size());
     for (auto & Render : Renders) Render();
   }
 
@@ -834,38 +806,26 @@ TEST_F(Renderer_test, /*DISABLED_*/Test_ReleaseCompiledGeometry_RemoveUniqueComp
       {
         Component_t::Make(
         {
-          { uT("id"), uT("Covellite.Api.Buffer.Vertex.") + strObjectId },
+          { uT("id"), uT("Covellite.Gui.Buffer.Vertex.") + strObjectId },
           { uT("type"), uT("Buffer") },
          }),
         Component_t::Make(
         {
-          { uT("id"), uT("Covellite.Api.Buffer.Index.") + strObjectId },
-          { uT("type"), uT("Buffer") },
-         }),
-        Component_t::Make(
-        {
-          { uT("id"), uT("Covellite.Api.Present.Geometry.") + strObjectId },
+          { uT("id"), uT("Covellite.Gui.Present.") + strObjectId },
           { uT("type"), uT("Present") },
          }),
       });
 
     const Values_t ExpectedVertexBufferData =
     {
-      uT("Covellite.Api.Buffer.Vertex.") + strObjectId,
-      uT("Buffer"),
-      uT("")
-    };
-
-    const Values_t ExpectedIndexBufferData =
-    {
-      uT("Covellite.Api.Buffer.Index.") + strObjectId,
+      uT("Covellite.Gui.Buffer.Vertex.") + strObjectId,
       uT("Buffer"),
       uT("")
     };
 
     const Values_t ExpectedPresentData =
     {
-      uT("Covellite.Api.Present.Geometry.") + strObjectId,
+      uT("Covellite.Gui.Present.") + strObjectId,
       uT("Present"),
       uT("")
     };
@@ -873,13 +833,10 @@ TEST_F(Renderer_test, /*DISABLED_*/Test_ReleaseCompiledGeometry_RemoveUniqueComp
     EXPECT_CALL(RenderProxy, Render(ExpectedVertexBufferData))
       .Times(1);
 
-    EXPECT_CALL(RenderProxy, Render(ExpectedIndexBufferData))
-      .Times(1);
-
     EXPECT_CALL(RenderProxy, Render(ExpectedPresentData))
       .Times(1);
 
-    EXPECT_EQ(3, Renders.size());
+    EXPECT_EQ(2, Renders.size());
     for (auto & Render : Renders) Render();
   }
 }
@@ -961,7 +918,7 @@ TEST_F(Renderer_test, /*DISABLED_*/Test_EnableScissorRegion_False)
 
   const Values_t ExpectScissorData = 
   { 
-    uT("Covellite.Api.State.Scissor.Disabled"),
+    uT("Covellite.Gui.State.Scissor.Disabled"),
     uT("State"), 
     uT("Scissor"), 
     uT("false"),
@@ -1022,7 +979,7 @@ TEST_F(Renderer_test, /*DISABLED_*/Test_SetScissorRegion)
 
   const Values_t ExpectedScissorData =
   {
-    uT("Covellite.Api.State.Scissor.Enabled"),
+    uT("Covellite.Gui.State.Scissor.Enabled"),
     uT("State"),
     uT("Scissor"),
     uT("true"),
@@ -1264,7 +1221,7 @@ TEST_F(Renderer_test, /*DISABLED_*/Test_GenerateTexture)
       {
         Component_t::Make(
           {
-            { uT("id"), uT("Covellite.Api.Texture.1") },
+            { uT("id"), uT("Covellite.Gui.Texture.1") },
             { uT("type"), uT("Texture") },
           }),
       });
@@ -1272,7 +1229,7 @@ TEST_F(Renderer_test, /*DISABLED_*/Test_GenerateTexture)
 
     const Values_t ExpectedTextureData =
     {
-      uT("Covellite.Api.Texture.1"),
+      uT("Covellite.Gui.Texture.1"),
       uT("Texture"),
       pData,
       Width,
@@ -1300,7 +1257,7 @@ TEST_F(Renderer_test, /*DISABLED_*/Test_GenerateTexture)
       {
         Component_t::Make(
           {
-            { uT("id"), uT("Covellite.Api.Texture.2") },
+            { uT("id"), uT("Covellite.Gui.Texture.2") },
             { uT("type"), uT("Texture") },
           }),
       });
@@ -1308,7 +1265,7 @@ TEST_F(Renderer_test, /*DISABLED_*/Test_GenerateTexture)
 
     const Values_t ExpectedTextureData =
     {
-      uT("Covellite.Api.Texture.2"),
+      uT("Covellite.Gui.Texture.2"),
       uT("Texture"),
       pData,
       Width,
@@ -1378,7 +1335,7 @@ TEST_F(Renderer_test, /*DISABLED_*/Test_ReleaseTexture)
       {
           Component_t::Make(
           {
-            { uT("id"), uT("Covellite.Api.Texture.1811071543") },
+            { uT("id"), uT("Covellite.Gui.Texture.1811071543") },
             { uT("type"), uT("Texture") },
             { uT("data"), (const uint8_t *)1811071544 },
            })
@@ -1388,7 +1345,7 @@ TEST_F(Renderer_test, /*DISABLED_*/Test_ReleaseTexture)
 
     const Values_t ExpectedTextureData =
     {
-      uT("Covellite.Api.Texture.1811071543"),
+      uT("Covellite.Gui.Texture.1811071543"),
       uT("Texture"),
       (const uint8_t *)1811071544,
     };
@@ -1406,7 +1363,7 @@ TEST_F(Renderer_test, /*DISABLED_*/Test_ReleaseTexture)
       {
           Component_t::Make(
           {
-            { uT("id"), uT("Covellite.Api.Texture.1811071543") },
+            { uT("id"), uT("Covellite.Gui.Texture.1811071543") },
             { uT("type"), uT("Texture") },
            })
       });
@@ -1415,7 +1372,7 @@ TEST_F(Renderer_test, /*DISABLED_*/Test_ReleaseTexture)
 
     const Values_t ExpectedTextureData =
     {
-      uT("Covellite.Api.Texture.1811071543"),
+      uT("Covellite.Gui.Texture.1811071543"),
       uT("Texture"),
       (const uint8_t *)nullptr,
     };
@@ -1472,23 +1429,30 @@ TEST_F(Renderer_test, /*DISABLED_*/Test_RenderScene)
 
   const Values_t ExpectedCameraData =
   {
-    uT("Covellite.Api.Camera.Gui"),
+    uT("Covellite.Gui.Camera.Gui"),
     uT("Camera"),
     uT("Orthographic"),
   };
 
   const Values_t ExpectedBlendData =
   {
-    uT("Covellite.Api.State.Blend"),
+    uT("Covellite.Gui.State.Blend"),
     uT("State"),
     uT("Blend"),
   };
 
+  const Values_t SamplerValues =
+  {
+    uT("Covellite.Gui.State.Sampler"),
+    uT("State"),
+    uT("Sampler")
+  };
+
   const Values_t ExpectedShaderData =
   {
-    uT("Covellite.Api.Shader.Vertex"),
+    uT("Covellite.Gui.Shader.Vertex"),
     uT("Shader"),
-    uT("vsGui"),
+    uT("vsFlat"),
     (const uint8_t *)nullptr,
     (size_t)0,
   };
@@ -1503,6 +1467,9 @@ TEST_F(Renderer_test, /*DISABLED_*/Test_RenderScene)
     .Times(1);
 
   EXPECT_CALL(RenderProxy, Render(ExpectedBlendData))
+    .Times(1);
+
+  EXPECT_CALL(RenderProxy, Render(SamplerValues))
     .Times(1);
 
   EXPECT_CALL(RenderProxy, Render(Eq(ExpectedShaderData)))

@@ -53,4 +53,12 @@ public:
   float left, top, right, bottom;
 };
 
+class Cursor final
+{
+public:
+  int32_t X = 0, Y = 0;
+  float WindowX = 1, WindowY = 1;
+  bool IsClick = false;
+};
+
 } // namespace basement

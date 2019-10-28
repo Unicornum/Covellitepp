@@ -1,6 +1,7 @@
 ﻿
 #include "stdafx.h"
 #include "OpenGLCommonShader.hpp"
+#include <GLMath.hpp>
 #include <alicorn/std/vector.hpp>
 
 #if BOOST_COMP_MSVC 
@@ -22,6 +23,17 @@
 #include "Shaders/Shaders.hpp"
 #include "GraphicApi.Constants.hpp"
 
+namespace std
+{
+
+template<class T>
+istream & operator>>(istream &, shared_ptr<T> &)
+{
+  throw STD_EXCEPTION << "Это не должно вызываться, нужно для компилируемости";
+}
+
+} // namespace std
+
 namespace covellite
 {
 
@@ -31,6 +43,19 @@ namespace api
 namespace renderer
 {
 
+inline void CheckError(const int _Line)
+{
+  auto Error = glGetError();
+  if (Error != GL_NO_ERROR)
+  {
+    throw EXCEPTION_NO_FILE_LINE(::std::runtime_error) << 
+      _Line << ": error " << Error;
+  }
+}
+
+#define GL_CHECK \
+  CheckError(__LINE__)
+
 template<class>
 class Support; // Not implement!!!
 
@@ -38,28 +63,171 @@ template<>
 class Support<::Camera>
 {
 public:
-  static void Update(const GLint _ProgramId, const ::Camera & _Matrices)
+  static const GLuint Index = COVELLITE_BUFFER_INDEX_CAMERA;
+
+private:
+  static void Update(
+    const GLint _ProgramId, 
+    const ::Camera & _Matrices,
+    const ::std::string & _BufferName)
   {
-    const auto MatrixProjectionId = 
-      glGetUniformLocation(_ProgramId, "MatricesData.Projection");
-    glUniformMatrix4fv(MatrixProjectionId, 1, GL_FALSE, 
+    const auto MatrixProjectionId =
+      glGetUniformLocation(_ProgramId, (_BufferName + ".Projection").c_str());
+    const auto MatrixViewId =
+      glGetUniformLocation(_ProgramId, (_BufferName + ".View").c_str());
+    const auto MatrixViewInverseId =
+      glGetUniformLocation(_ProgramId, (_BufferName + ".ViewInverse").c_str());
+
+    glUniformMatrix4fv(MatrixProjectionId, 1, GL_FALSE,
       ::glm::value_ptr(_Matrices.Projection));
-
-    const auto MatrixViewId = 
-      glGetUniformLocation(_ProgramId, "MatricesData.View");
-    glUniformMatrix4fv(MatrixViewId, 1, GL_FALSE, 
+    glUniformMatrix4fv(MatrixViewId, 1, GL_FALSE,
       ::glm::value_ptr(_Matrices.View));
-
-    const auto MatrixViewInverseId = 
-      glGetUniformLocation(_ProgramId, "MatricesData.ViewInverse");
-    glUniformMatrix4fv(MatrixViewInverseId, 1, GL_FALSE, 
+    glUniformMatrix4fv(MatrixViewInverseId, 1, GL_FALSE,
       ::glm::value_ptr(_Matrices.ViewInverse));
   }
+
+public:
+  static void Update(const GLint _ProgramId, const ::Camera & _Matrices)
+  {
+    Update(_ProgramId, _Matrices, "MatricesData");
+    Update(_ProgramId, _Matrices, "CameraData");
+  }
+};
+
+template<>
+class Support<::Fog>
+{
+public:
+  static const GLuint Index = COVELLITE_BUFFER_INDEX_FOG;
+
+public:
+  static void Update(const GLint _ProgramId, const ::Fog & _Fog)
+  {
+    const auto ColorId = glGetUniformLocation(_ProgramId, "FogData.Color");
+    glUniform4fv(ColorId, 1, ::glm::value_ptr(_Fog.Color));
+
+    const auto NearId = glGetUniformLocation(_ProgramId, "FogData.Near");
+    glUniform1f(NearId, _Fog.Near);
+
+    const auto FarId = glGetUniformLocation(_ProgramId, "FogData.Far");
+    glUniform1f(FarId, _Fog.Far);
+
+    const auto DensityId = glGetUniformLocation(_ProgramId, "FogData.Density");
+    glUniform1f(DensityId, _Fog.Density);
+  }
+};
+
+template<>
+class Support<::Object>
+{
+public:
+  static const GLuint Index = COVELLITE_BUFFER_INDEX_OBJECT;
+
+  static void Update(const GLint _ProgramId, const ::Ambient_t & _Light)
+  {
+    const auto IsValidId =
+      glGetUniformLocation(_ProgramId, "ObjectData.Lights.Ambient.IsValid");
+    const auto ColorId =
+      glGetUniformLocation(_ProgramId, "ObjectData.Lights.Ambient.Color");
+
+    glUniform1i(IsValidId, _Light.IsValid);
+    glUniform4fv(ColorId, 1, ::glm::value_ptr(_Light.Color));
+  }
+
+  static void Update(const GLint _ProgramId, const ::Direction_t & _Light)
+  {
+    const auto IsValidId =
+      glGetUniformLocation(_ProgramId, "ObjectData.Lights.Direction.IsValid");
+    const auto ColorId =
+      glGetUniformLocation(_ProgramId, "ObjectData.Lights.Direction.Color");
+    const auto DirectionId =
+      glGetUniformLocation(_ProgramId, "ObjectData.Lights.Direction.Direction");
+
+    glUniform1i(IsValidId, _Light.IsValid);
+    glUniform4fv(ColorId, 1, ::glm::value_ptr(_Light.Color));
+    glUniform4fv(DirectionId, 1, ::glm::value_ptr(_Light.Direction));
+  }
+
+  static void Update(const GLint _ProgramId, const ::Points_t & _Lights)
+  {
+    static const ::std::string LightsDataPoints[] =
+    {
+      "ObjectData.Lights.Points.Lights[0]",
+      "ObjectData.Lights.Points.Lights[1]",
+      "ObjectData.Lights.Points.Lights[2]",
+      "ObjectData.Lights.Points.Lights[3]",
+      "ObjectData.Lights.Points.Lights[4]",
+      "ObjectData.Lights.Points.Lights[5]",
+      "ObjectData.Lights.Points.Lights[6]",
+      "ObjectData.Lights.Points.Lights[7]",
+      "ObjectData.Lights.Points.Lights[8]",
+      "ObjectData.Lights.Points.Lights[9]",
+      "ObjectData.Lights.Points.Lights[10]",
+      "ObjectData.Lights.Points.Lights[11]",
+      "ObjectData.Lights.Points.Lights[12]",
+      "ObjectData.Lights.Points.Lights[13]",
+      "ObjectData.Lights.Points.Lights[14]",
+      "ObjectData.Lights.Points.Lights[15]",
+    };
+
+    constexpr auto LightCount =
+      sizeof(LightsDataPoints) / sizeof(LightsDataPoints[0]);
+    static_assert(LightCount >= COVELLITE_MAX_LIGHT_POINT_OBJECT_COUNT,
+      "Unexpected LightsDataPoints array size.");
+
+    const auto UsedSlotCountId =
+      glGetUniformLocation(_ProgramId, "ObjectData.Lights.Points.UsedSlotCount");
+    glUniform1i(UsedSlotCountId, _Lights.UsedSlotCount);
+
+    for (int i = 0; i < _Lights.UsedSlotCount; i++)
+    {
+      auto & Light = _Lights.Lights[i];
+
+      using namespace ::alicorn::extension::std;
+
+      const auto & Point = LightsDataPoints[i];
+
+      const auto ColorId =
+        glGetUniformLocation(_ProgramId, (Point + ".Color").c_str());
+      glUniform4fv(ColorId, 1, ::glm::value_ptr(Light.Color));
+
+      const auto PositionId =
+        glGetUniformLocation(_ProgramId, (Point + ".Position").c_str());
+      glUniform4fv(PositionId, 1, ::glm::value_ptr(Light.Position));
+
+      const auto AttenuationId =
+        glGetUniformLocation(_ProgramId, (Point + ".Attenuation").c_str());
+      glUniform4fv(AttenuationId, 1, ::glm::value_ptr(Light.Attenuation));
+    }
+  }
+
+public:
+  static void Update(const GLint _ProgramId, const ::Object & _Object)
+  {
+    const auto MatrixWorldId =
+      glGetUniformLocation(_ProgramId, "ObjectData.World");
+    glUniformMatrix4fv(MatrixWorldId, 1, GL_FALSE,
+      ::glm::value_ptr(_Object.World));
+
+    Update(_ProgramId, _Object.Lights.Ambient);
+    Update(_ProgramId, _Object.Lights.Direction);
+    Update(_ProgramId, _Object.Lights.Points);
+  }
+};
+
+template<>
+class Support<uint8_t>
+{
+public:
+  static const GLuint Index = COVELLITE_BUFFER_INDEX_USER;
 };
 
 template<>
 class Support<::Matrices>
 {
+public:
+  static const GLuint Index = COVELLITE_BUFFER_INDEX_MATRICES;
+
 public:
   static void Update(const GLint _ProgramId, const ::Matrices & _Matrices)
   {
@@ -71,8 +239,12 @@ public:
 };
 
 template<>
-class Support<::Lights>
+class Support<::SceneLights>
 {
+public:
+  static const GLuint Index = COVELLITE_BUFFER_INDEX_LIGHTS;
+
+private:
   static void Update(const GLint _ProgramId, const ::Ambient_t & _Light)
   {
     const auto IsValidId =
@@ -98,7 +270,7 @@ class Support<::Lights>
     glUniform4fv(DirectionId, 1, ::glm::value_ptr(_Light.Direction));
   }
 
-  static void Update(const GLint _ProgramId, const ::Points_t & _Lights)
+  static void Update(const GLint _ProgramId, const ::ScenePoints & _Lights)
   {
     static const ::std::string LightsDataPoints[] =
     {
@@ -122,7 +294,7 @@ class Support<::Lights>
 
     constexpr auto LightCount = 
       sizeof(LightsDataPoints) / sizeof(LightsDataPoints[0]);
-    static_assert(LightCount >= MAX_LIGHT_POINT_COUNT,
+    static_assert(LightCount >= COVELLITE_MAX_LIGHT_POINT_SCENE_COUNT,
       "Unexpected LightsDataPoints array size.");
 
     const auto UsedSlotCountId =
@@ -152,7 +324,7 @@ class Support<::Lights>
   }
 
 public:
-  static void Update(const GLint _ProgramId, const ::Lights & _Lights)
+  static void Update(const GLint _ProgramId, const ::SceneLights & _Lights)
   {
     Update(_ProgramId, _Lights.Ambient);
     Update(_ProgramId, _Lights.Direction);
@@ -160,23 +332,166 @@ public:
   }
 };
 
-template<>
-class Support<::Fog>
+class OpenGLCommonShader::Buffer
 {
 public:
-  static void Update(const GLint _ProgramId, const ::Fog & _Fog)
+  inline void Bind(const bool _IsActivate = true) const
   {
-    const auto ColorId = glGetUniformLocation(_ProgramId, "FogData.Color");
-    glUniform4fv(ColorId, 1, ::glm::value_ptr(_Fog.Color));
+    glBindBuffer(m_Type, _IsActivate ? m_BufferId : 0);
+  }
 
-    const auto NearId = glGetUniformLocation(_ProgramId, "FogData.Near");
-    glUniform1f(NearId, _Fog.Near);
+  inline void UpdateData(const void * _pData, const GLsizeiptr _Size) const
+  {
+    glBufferSubData(m_Type, 0, _Size, _pData);
+  }
 
-    const auto FarId = glGetUniformLocation(_ProgramId, "FogData.Far");
-    glUniform1f(FarId, _Fog.Far);
+  inline void UpdateData(const ::std::string & _UniformBufferName,
+    const void * _pData, const GLsizeiptr _Size) const
+  {
+    GLint ProgramId = 0;
+    glGetIntegerv(GL_CURRENT_PROGRAM, &ProgramId);
 
-    const auto DensityId = glGetUniformLocation(_ProgramId, "FogData.Density");
-    glUniform1f(DensityId, _Fog.Density);
+    const auto BlockIndex = 
+      glGetUniformBlockIndex(ProgramId, _UniformBufferName.c_str());
+
+    // Вероятно, шейдерная программа выкидывает неиспользуемые uniform-буфера,
+    // в результате чего Index становится некорректным и glUniformBlockBinding()
+    // завершается с ошибкой.
+    // При игнорирование ошибки здесь визуально все работает корректно.
+    if (BlockIndex == GL_INVALID_INDEX) return;
+
+    Bind();
+    UpdateData(_pData, _Size);
+    Bind(false);
+
+    glBindBufferBase(m_Type, m_Index, m_BufferId);
+    glUniformBlockBinding(ProgramId, BlockIndex, m_Index);
+  }
+
+  void SetVertexInputData(void) const
+  {
+    // Нужно обязательно проверять валидность идентификаторов, т.к. некоторые
+    // реализации драйверов (не все!) удаляют при компиляции шейдера
+    // объявленные, но не используемые переменные.
+
+    // Явный вызов glVertexAttribDivisor() требуется по той же причине -
+    // из-за удаления в шейдере не используемой переменной вызов этой функции
+    // при использовании инстансинга привяжет смещение к идентификатору,
+    // который в дальнейшем может быть получен здесь.
+
+    GLint ProgramId = 0;
+    glGetIntegerv(GL_CURRENT_PROGRAM, &ProgramId);
+
+    const auto hPosition =
+      glGetAttribLocation(ProgramId, "Covellite_VertexPosition");
+    if (hPosition != -1)
+    {
+      glEnableVertexAttribArray(hPosition);
+      glVertexAttribPointer(hPosition, 4, GL_FLOAT, GL_FALSE,
+        sizeof(::covellite::api::Vertex), (void*)0);
+      glVertexAttribDivisor(hPosition, 0);
+    }
+
+    const auto hTexCoord =
+      glGetAttribLocation(ProgramId, "Covellite_VertexTexCoord");
+    if (hTexCoord != -1)
+    {
+      glEnableVertexAttribArray(hTexCoord);
+      glVertexAttribPointer(hTexCoord, 2, GL_FLOAT, GL_FALSE,
+        sizeof(::covellite::api::Vertex), (void*)(sizeof(float) * 4));
+      glVertexAttribDivisor(hTexCoord, 0);
+    }
+
+    const auto hExtra =
+      glGetAttribLocation(ProgramId, "Covellite_VertexExtra");
+    if (hExtra != -1)
+    {
+      glEnableVertexAttribArray(hExtra);
+      glVertexAttribPointer(hExtra, 4, GL_FLOAT, GL_FALSE,
+        sizeof(::covellite::api::Vertex), (void*)(sizeof(float) * 6));
+      glVertexAttribDivisor(hExtra, 0);
+    }
+  }
+
+  void SetInstanceData(
+    const void * _pData, 
+    const GLsizeiptr _Size, 
+    const GLsizei _Stride)
+  {
+    constexpr auto BlockSize = sizeof(float) * 4;
+    const auto BlockCount = _Stride / BlockSize;
+
+    Bind(true);
+    UpdateData(_pData, _Size);
+
+    GLint ProgramId = 0;
+    glGetIntegerv(GL_CURRENT_PROGRAM, &ProgramId);
+
+    for (::std::size_t i = 0; i < BlockCount; i++)
+    {
+      const auto hInstance = glGetAttribLocation(ProgramId, 
+        ("iValue" + ::std::to_string(i + 1)).c_str());
+      if (hInstance == -1) continue;
+
+      constexpr GLsizei NameBufferSize = 255;
+      GLsizei NameLength = 0;
+      GLint ValueSize = 0;
+      GLchar ValueName[NameBufferSize] = { 0 };
+
+      GLenum iType = static_cast<GLenum>(-1);
+      glGetActiveAttrib(ProgramId, hInstance, NameBufferSize, &NameLength, 
+        &ValueSize, &iType, ValueName);
+
+      const GLenum Type = 
+        (iType == GL_FLOAT_VEC4) ? GL_FLOAT :
+        (iType == GL_INT_VEC4) ? GL_INT : 0;
+
+      glEnableVertexAttribArray(hInstance);
+      glVertexAttribPointer(hInstance, 4, Type, GL_FALSE, _Stride,
+        (void*)(BlockSize * i));
+      glVertexAttribDivisor(hInstance, 1);
+    }
+
+    Bind(false);
+  }
+
+private:
+  const GLenum m_Type;
+  const GLuint m_Index;
+  GLuint       m_BufferId;
+
+public:
+  Buffer(
+    const GLenum _Type,
+    const void * _pData,
+    const ::std::size_t _Size,
+    const GLenum _Usage,
+    const GLuint _Index = static_cast<GLuint>(-1)) :
+    m_Type(_Type),
+    m_Index(_Index)
+  {
+    glGenBuffers(1, &m_BufferId);
+    Bind();
+    glBufferData(m_Type, static_cast<GLsizeiptr>(_Size), _pData, _Usage);
+    Bind(false);
+
+    const auto Error = glGetError();
+    if (Error != GL_NO_ERROR)
+    {
+      throw STD_EXCEPTION << "Create buffer error: " << Error;
+    }
+  }
+
+  template<class T>
+  Buffer(const T * _pData, const ::std::size_t _Size) :
+    Buffer(GL_UNIFORM_BUFFER, _pData, _Size, GL_DYNAMIC_DRAW, Support<T>::Index)
+  {
+
+  }
+
+  ~Buffer(void) noexcept
+  {
+    glDeleteBuffers(1, &m_BufferId);
   }
 };
 
@@ -191,7 +506,33 @@ public:
     glGetIntegerv(GL_CURRENT_PROGRAM, &ProgramId);
 
     Support<T>::Update(ProgramId, Constants::Data<T>::m_Data);
+
+    // 21 Сентябрь 2019 11:58 (unicornum.verum@gmail.com)
+    TODO("Использование uniform-буфера");
+
+    //static const char * Name[] =
+    //{
+    //  "cbCameraData",
+    //  "cbFogData",
+    //  "cbObjectData",
+    //  "cbUserData",
+    //  "cbMatricesData",
+    //  "cbLightsData",
+    //};
+
+    //const auto & Data = Constants::Data<T>::m_Data;
+
+    //if (m_pBuffer == nullptr)
+    //{
+    //  m_pBuffer = ::std::make_shared<OpenGLCommonShader::Buffer>(
+    //    &Data, sizeof(T));
+    //}
+
+    //m_pBuffer->Update(Name[Support<T>::Index], &Data, sizeof(T));
   }
+
+private:
+  //mutable ::std::shared_ptr<OpenGLCommonShader::Buffer> m_pBuffer;
 };
 
 OpenGLCommonShader::OpenGLCommonShader(
@@ -227,6 +568,13 @@ auto OpenGLCommonShader::GetUsingApi(void) const -> String_t /*override*/
   return UsingApi;
 }
 
+void OpenGLCommonShader::PresentFrame(void) /*override*/
+{
+  OpenGLCommon::PresentFrame();
+
+  //GL_CHECK;
+}
+
 auto OpenGLCommonShader::CreateCamera(const ComponentPtr_t & _pComponent) -> Render_t /*override*/
 {
   const auto CameraRender = (_pComponent->Kind == uT("Perspective")) ? 
@@ -242,6 +590,109 @@ auto OpenGLCommonShader::CreateCamera(const ComponentPtr_t & _pComponent) -> Ren
   };
 }
 
+class FrameBuffer
+{
+public:
+  inline void Bind(void) const
+  {
+    glGetIntegerv(GL_FRAMEBUFFER_BINDING, &m_CurrentFrameBufferId);
+    glBindFramebuffer(GL_FRAMEBUFFER, m_Id);
+  }
+
+  inline void Unbind(void) const
+  {
+    glBindFramebuffer(GL_FRAMEBUFFER, m_CurrentFrameBufferId);
+  }
+
+private:
+  GLuint m_Id = 0;
+  mutable GLint m_CurrentFrameBufferId = 0;
+
+public:
+  FrameBuffer(void)
+  {
+    glGenFramebuffers(1, &m_Id);
+  }
+  ~FrameBuffer(void) noexcept
+  {
+    glDeleteFramebuffers(1, &m_Id);
+  }
+};
+
+auto OpenGLCommonShader::CreateBkSurface(
+  const ComponentPtr_t & _pComponent) -> Render_t /*override*/
+{
+  GLfloat Viewport[4] = { 0 };
+  glGetFloatv(GL_VIEWPORT, Viewport);
+
+  const auto pFrameBuffer = ::std::make_shared<FrameBuffer>();
+  pFrameBuffer->Bind();
+
+  ::std::vector<GLenum> AttachmentIndexes;
+  ::std::vector<::std::pair<ComponentPtr_t, Texture::Ptr_t>> Textures;
+
+  const auto DoDataTexture = [&](const ComponentPtr_t & _pDataTexture)
+  {
+    _pDataTexture->SetValue(uT("width"), static_cast<int>(Viewport[2]));
+    _pDataTexture->SetValue(uT("height"), static_cast<int>(Viewport[3]));
+
+    const Component::Texture TextureData{ _pDataTexture };
+
+    const auto pTexture = ::std::make_shared<Texture>(TextureData);
+    Textures.push_back({ _pDataTexture, pTexture });
+
+    if (pTexture->m_Format != GL_DEPTH_COMPONENT)
+    {
+      auto Attachment = GL_COLOR_ATTACHMENT0 +
+        static_cast<int>(AttachmentIndexes.size());
+      AttachmentIndexes.push_back(Attachment);
+      glFramebufferTexture2D(GL_FRAMEBUFFER, Attachment, GL_TEXTURE_2D,
+        pTexture->m_TextureId, 0);
+    }
+    else
+    {
+      glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, 
+        GL_TEXTURE_2D, pTexture->m_TextureId, 0);
+    }
+
+    _pDataTexture->SetValue(uT("entity"), pTexture);
+  };
+
+  m_ServiceComponents.Process(
+    {
+      { uT("Texture"), DoDataTexture },
+    });
+ 
+  const auto FramebufferStatus = glCheckFramebufferStatus(GL_FRAMEBUFFER);
+  pFrameBuffer->Unbind();
+
+  if (FramebufferStatus != GL_FRAMEBUFFER_COMPLETE)
+  {
+    throw STD_EXCEPTION << "Create Framebuffer fail: " << _pComponent->Id;
+  }
+
+  return [=](void)
+  {
+    if (m_IsResizeWindow)
+    {
+      GLfloat Viewport[4] = { 0 };
+      glGetFloatv(GL_VIEWPORT, Viewport);
+
+      for (const auto & Texture : Textures)
+      {
+        Texture.first->SetValue(uT("width"), static_cast<int>(Viewport[2]));
+        Texture.first->SetValue(uT("height"), static_cast<int>(Viewport[3]));
+        Texture.second->MakeContent(Viewport[2], Viewport[3], nullptr);
+      }
+    }
+
+    pFrameBuffer->Bind();
+    glDrawBuffers(static_cast<GLsizei>(AttachmentIndexes.size()),
+      AttachmentIndexes.data());
+    //glViewport(0, 0, 1280, 768);
+  };
+}
+
 auto OpenGLCommonShader::CreateState(const ComponentPtr_t & _pComponent) -> Render_t /*override*/
 {
   if (_pComponent->Kind == uT("AlphaTest")) return nullptr;
@@ -254,62 +705,115 @@ auto OpenGLCommonShader::CreateFog(const ComponentPtr_t & _pComponent) -> Render
   return DoCreateFog<::Fog>(_pComponent);
 }
 
-auto OpenGLCommonShader::CreateMaterial(const ComponentPtr_t &) -> Render_t /*override*/
-{
-  return nullptr;
-}
-
 auto OpenGLCommonShader::CreateLight(const ComponentPtr_t & _pComponent) -> Render_t /*override*/
 {
-  return DoCreateLight<::Lights>(_pComponent);
+  return DoCreateLight<::SceneLights>(_pComponent);
 }
 
 auto OpenGLCommonShader::CreateTexture(const ComponentPtr_t & _pComponent) -> Render_t /*override*/
 {
-  using Destination_t = ::std::pair<String_t, const char *>;
+  using BufferMapper_t = cbBufferMap_t<const void>;
 
   const auto pTextureDataComponent =
     m_ServiceComponents.Get({ { uT("Texture"), _pComponent } })[0];
 
-  static const ::std::vector<Destination_t> Destinations =
-  {
-    { uT("albedo"),    "TexAlbedo" },
-    { uT("metalness"), "TexMetalness" },
-    { uT("roughness"), "TexRoughness" },
-    { uT("normal"),    "TexNormal" },
-    { uT("occlusion"), "TexOcclusion" },
-    { uT("diffuse"),   "TexDiffuse" },
-  };
-
   const Component::Texture TextureData{ pTextureDataComponent };
 
-  const auto itValue = ::std::find_if(Destinations.cbegin(), 
-    Destinations.cend(), [&](const Destination_t & _Dest) 
-      { 
-        return (TextureData.Destination == _Dest.first); 
-      });
-  if (itValue == Destinations.cend())
+  ::std::function<GLint(void)> GetTexMinFilter = 
+    [=](void) { return m_TexParameters.MinFilter; };
+
+  Texture::Ptr_t pTexture =
+    pTextureDataComponent->GetValue(uT("entity"), Texture::Ptr_t{});
+  if (pTexture == nullptr)
   {
-    throw STD_EXCEPTION << "Unexpected destination texture: " <<
-      TextureData.Destination << uT(" [id=") << _pComponent->Id << uT("].");
+    pTexture = ::std::make_shared<Texture>(TextureData);
+
+    if (TextureData.IsUsingMipmapping)
+    {
+      GetTexMinFilter = [](void) { return GL_LINEAR_MIPMAP_LINEAR; };
+
+      pTexture->Bind();
+      glGenerateMipmap(GL_TEXTURE_2D);
+      pTexture->Bind(false);
+    }
+  }
+  else
+  {
+    pTextureDataComponent->SetValue(uT("entity"), Texture::Ptr_t{});
   }
 
-  const auto pTexture = ::std::make_shared<Texture>(TextureData);
-
-  GLint IndexDestination = static_cast<GLint>(
-    ::std::distance(Destinations.cbegin(), itValue));
-  const auto TexName = Destinations[IndexDestination].second;
-  if (TextureData.Destination == uT("diffuse")) IndexDestination = 0;
-
-  return [=](void)
+  const Render_t TextureRender = [=](void)
   {
-    glActiveTexture(GL_TEXTURE0 + IndexDestination);
+    auto Index = pTexture->m_Destination.first;
+
+    glActiveTexture(GL_TEXTURE0 + Index);
     pTexture->Bind();
-    m_SamplerState(); // Нужно делать после установки каждой текстуры!
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GetTexMinFilter());
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, m_TexParameters.MagFilter);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, m_TexParameters.WrapS);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, m_TexParameters.WrapT);
 
     GLint ProgramId = 0;
     glGetIntegerv(GL_CURRENT_PROGRAM, &ProgramId);
-    glUniform1i(glGetUniformLocation(ProgramId, TexName), IndexDestination);
+
+    const auto LocationId = glGetUniformLocation(ProgramId,
+      pTexture->m_Destination.second.c_str());
+    if (LocationId == -1)
+    {
+      // Нужна явная проверка, т.к. это не приведет к генерации ошибки
+      // для glGetError().
+      throw STD_EXCEPTION << "No texture declared in shader: " <<
+        pTexture->m_Destination.second << " [id: " << _pComponent->Id << "].";
+    }
+
+    glUniform1i(LocationId, Index);
+  };
+
+  if (!pTextureDataComponent->IsType<const BufferMapper_t &>(uT("mapper")))
+  {
+    return TextureRender;
+  }
+
+  const auto cbBufferMapper = 
+    pTextureDataComponent->GetValue<const BufferMapper_t &>(uT("mapper"), BufferMapper_t{});
+  const auto pFrameBuffer = ::std::make_shared<FrameBuffer>();
+
+  return [=](void)
+  {
+    if (cbBufferMapper(nullptr))
+    {
+      pFrameBuffer->Bind();
+      glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
+        GL_TEXTURE_2D, pTexture->m_TextureId, 0);
+
+      auto * pData = reinterpret_cast<uint32_t *>(pTexture->m_ReadCopyData.data());
+
+      glReadPixels(0, 0, TextureData.Width, TextureData.Height, GL_RGBA,
+        GL_UNSIGNED_BYTE, pData);
+
+      // Изображение в текстуре OpenGL перевернуто по Y, поэтому... 
+      for (int y = 0; y < TextureData.Height / 2; y++)
+      {
+        auto * pLineUp = 
+          pData + (y * TextureData.Width);
+        auto * pLineDown = 
+          pData + ((TextureData.Height - y - 1) * TextureData.Width);
+
+        for (int x = 0; x < TextureData.Width; x++)
+        {
+          auto & Up = *(pLineUp + x);
+          auto & Down = *(pLineDown + x);
+
+          ::std::swap(Up, Down);
+        }
+      }
+
+      cbBufferMapper(pData);
+      pFrameBuffer->Unbind();
+    }
+
+    TextureRender();
   };
 }
 
@@ -343,7 +847,7 @@ class OpenGLCommonShader::Programs final
       Id{ glCreateProgram() }
     {
     }
-    ~Program(void)
+    ~Program(void) noexcept
     {
       glDeleteProgram(Id);
     }
@@ -369,24 +873,48 @@ class OpenGLCommonShader::Programs final
         char InfoLog[512] = { 0 };
         glGetShaderInfoLog(Id, sizeof(InfoLog), nullptr, InfoLog);
 
-        throw STD_EXCEPTION << "Compile shader fail: " << InfoLog;
+        throw STD_EXCEPTION << "Compile shader fail: " << InfoLog
+          << " [header line: " << GetHeaderLines(m_Header) << "]";
       };
+    }
+
+  private:
+    static ::std::size_t GetHeaderLines(const ::std::string & _Header)
+    {
+      ::std::size_t Result = 0;
+
+      auto itPosition = _Header.cbegin();
+      while (true)
+      {
+        itPosition = ::std::find(itPosition, _Header.cend(), '\n');
+        if (itPosition == _Header.cend()) break;
+
+        ++itPosition;
+        Result++;
+      }
+
+      return Result;
     }
 
   public:
     Programs & m_Programs;
     const GLenum Type;
+    const ::std::string m_Header;
     const GLuint Id;
 
   public:
-    Shader(Programs & _Programs, const GLenum _Type, const GLchar * _ShaderCode) :
+    Shader(Programs & _Programs, const GLenum _Type, 
+      const GLchar * _Header, const GLchar * _Body) :
       m_Programs{ _Programs },
       Type{ _Type },
+      m_Header(_Header),
       Id{ glCreateShader(_Type) }
     {
-      glShaderSource(Id, 1, &_ShaderCode, nullptr);
+      const auto FullShaderBody = ::std::string{ _Header } +_Body;
+      auto pFullShaderBody = FullShaderBody.c_str();
+      glShaderSource(Id, 1, &pFullShaderBody, nullptr);
     }
-    ~Shader(void)
+    ~Shader(void) noexcept
     {
       m_Programs.Clear(Id);
       glDeleteShader(Id);
@@ -401,22 +929,30 @@ public:
   ShaderPtr_t MakeVertex(const Component::Shader & _ShaderData)
   {
     using namespace ::alicorn::extension::std;
+    
+    const auto HeaderShaderText =
+      ::Predefined + 
+      ::Data + 
+      _ShaderData.GetInstanceInput(::Input);
 
-    const auto ShaderText = 
-      ::Predefined + ::Data + ::Input + ::std::vector<uint8_t>{
-      _ShaderData.pData, _ShaderData.pData + _ShaderData.Count };
+    const auto BodyShaderText =
+      _ShaderData.GetBody();
 
     return ::std::make_shared<Shader>(*this, GL_VERTEX_SHADER,
       (m_ShaderHeader +
       "#define COVELLITE_SHADER_VERTEX\r\n" +
-      ::std::string{ reinterpret_cast<const char *>(ShaderText.data()), ShaderText.size() } +
+      ::std::string{ reinterpret_cast<const char *>(
+        HeaderShaderText.data()), HeaderShaderText.size() }).c_str(),
+      (::std::string{ reinterpret_cast<const char *>(
+        BodyShaderText.data()), BodyShaderText.size() } +
       "out Pixel PixelValue;\r\n"
       "void main()\r\n"
       "{\r\n"
       "  Vertex InputData;\r\n"
-      "  InputData.Position = CovelliteVertexPosition;\r\n"
-      "  InputData.TexCoord = CovellteVertexTexCoord;\r\n"
-      "  InputData.Extra = CovelliteVertexExtra;\r\n"
+      "  InputData.Position = Covellite_VertexPosition;\r\n"
+      "  InputData.TexCoord = Covellite_VertexTexCoord;\r\n"
+      "  InputData.Extra = Covellite_VertexExtra;\r\n" +
+      _ShaderData.GetInstanceCopyData() +
       "  PixelValue = " + _ShaderData.Entry + "(InputData);\r\n"
       "  gl_Position = PixelValue.ScreenPos;\r\n"
       "}\r\n").c_str());
@@ -426,20 +962,47 @@ public:
   {
     using namespace ::alicorn::extension::std;
 
-    const auto ShaderText = 
-      ::Predefined + ::Data + ::Input + ::std::vector<uint8_t>{
+    const auto HeaderShaderText = ::Predefined + ::Data + ::Input;
+    const auto BodyShaderText = ::std::string{
       _ShaderData.pData, _ShaderData.pData + _ShaderData.Count };
+
+    ::std::string Main;
+
+    if (_ShaderData.ReturnType == "float4" ||
+      _ShaderData.ReturnType == "vec4")
+    {
+      Main =
+        "out vec4 Covellite_OutPixelColor;\r\n"
+        "void main()\r\n"
+        "{\r\n"
+        "  Covellite_OutPixelColor = " + _ShaderData.Entry + "(PixelValue);\r\n"
+        "}\r\n";
+    }
+    else if (_ShaderData.ReturnType == "void")
+    {
+      Main =
+        "void main()\r\n"
+        "{\r\n"
+        "  " + _ShaderData.Entry + "(PixelValue);\r\n"
+        "}\r\n";
+    }
+    else
+    {
+      Main =
+        "void main()\r\n"
+        "{\r\n"
+        "  Covellite_MultiOutPixelColor = " + _ShaderData.Entry + "(PixelValue).Target;\r\n"
+        "}\r\n";
+    }
 
     return ::std::make_shared<Shader>(*this, GL_FRAGMENT_SHADER,
       (m_ShaderHeader +
       "#define COVELLITE_SHADER_PIXEL\r\n" +
-      ::std::string{ reinterpret_cast<const char *>(ShaderText.data()), ShaderText.size() } +
-      "in Pixel PixelValue;\r\n"
-      "out vec4 OutPixelColor;\r\n"
-      "void main()\r\n"
-      "{\r\n"
-      "  OutPixelColor = " + _ShaderData.Entry + "(PixelValue);\r\n"
-      "}\r\n").c_str());
+      ::std::string{ reinterpret_cast<const char *>(
+        HeaderShaderText.data()), HeaderShaderText.size() }).c_str(),
+      (BodyShaderText +
+      "in Pixel PixelValue;\r\n" +
+      Main).c_str());
   }
 
   void Activate(const ShaderPtr_t & _pShader)
@@ -530,7 +1093,7 @@ auto OpenGLCommonShader::CreateShader(const ComponentPtr_t & _pComponent) -> Ren
 
       TEST_CALL_IF(1) m_pConstants->Update<::Camera>();
       TEST_CALL_IF(2) m_pConstants->Update<::Fog>();
-      TEST_CALL_IF(3) m_pConstants->Update<::Lights>();
+      TEST_CALL_IF(3) m_pConstants->Update<::SceneLights>();
 
 #     undef TEST_CALL_IF
     };
@@ -539,48 +1102,73 @@ auto OpenGLCommonShader::CreateShader(const ComponentPtr_t & _pComponent) -> Ren
   return nullptr;
 }
 
-class OpenGLCommonShader::Buffer
-{
-public:
-  inline void Bind(void)
-  {
-    glBindBuffer(m_Type, m_BufferId);
-  }
-
-private:
-  const GLenum m_Type;
-  GLuint m_BufferId;
-
-public:
-  Buffer(
-    const GLenum _Type, 
-    const void * _pData,
-    const ::std::size_t _Size,
-    const GLenum _Usage) :
-    m_Type(_Type)
-  {
-    glGenBuffers(1, &m_BufferId);
-    glBindBuffer(m_Type, m_BufferId);
-    glBufferData(m_Type, static_cast<GLsizeiptr>(_Size), _pData, _Usage);
-    glBindBuffer(m_Type, 0);
-
-    const auto Error = glGetError();
-    if (Error != GL_NO_ERROR)
-    {
-      throw STD_EXCEPTION << "Create buffer error: " << Error;
-    }
-  }
-
-  ~Buffer(void)
-  {
-    glDeleteBuffers(1, &m_BufferId);
-  }
-};
-
 auto OpenGLCommonShader::CreateBuffer(const ComponentPtr_t & _pBuffer) -> Render_t /*override*/
 {
   const auto pBufferData = 
     m_ServiceComponents.Get({ { uT("Buffer"), _pBuffer } })[0];
+
+  auto CreateConstantUserBuffer = [&](void) -> Render_t
+  {
+    using Type_t = cbBufferMap_t<void>;
+    using BufferData_t = ::std::vector<uint8_t>;
+
+    if (!_pBuffer->IsType<const Type_t &>(uT("mapper")))
+    {
+      throw STD_EXCEPTION << "Unexpected buffer format [" <<
+        "id: " << _pBuffer->Id << ", " <<
+        "type: " << _pBuffer->Type << ", " <<
+        "kind: " << _pBuffer->Kind << "].";
+    }
+
+    const auto cbBufferMapper =
+      _pBuffer->GetValue<const Type_t &>(uT("mapper"), Type_t{});
+    if (!cbBufferMapper)
+    {
+      throw STD_EXCEPTION << "Unexpected empty mapper: " << _pBuffer->Id;
+    }
+
+    const auto BufferSize = 
+      _pBuffer->GetValue(uT("size"), (::std::size_t)0);
+    if (BufferSize == 0)
+    {
+      throw STD_EXCEPTION << "Unexpected zero size: " << _pBuffer->Id;
+    }
+
+    const auto cbName =
+      _pBuffer->GetValue(uT("name"), ::std::string{ "cbUserData" });
+
+    const auto pData =
+      ::std::make_shared<BufferData_t>(BufferSize, (uint8_t)0x00);
+    const auto pBuffer = 
+      ::std::make_shared<Buffer>(pData->data(), pData->size());
+
+    return [=](void)
+    {
+      cbBufferMapper(pData->data());
+      pBuffer->UpdateData(cbName, pData->data(), pData->size());
+    };
+  };
+
+  auto CreateConstantLightsBuffer = [&](void) -> Render_t
+  {
+    using Type_t = cbBufferMap_t<::Lights_t>;
+
+    if (!_pBuffer->IsType<const Type_t &>(uT("mapper")))
+    {
+      return CreateConstantUserBuffer();
+    }
+
+    const auto cbBufferMapper = _pBuffer->GetValue(uT("mapper"), Type_t{});
+    if (!cbBufferMapper)
+    {
+      throw STD_EXCEPTION << "Unexpected empty mapper: " << _pBuffer->Id;
+    }
+
+    return [=](void)
+    {
+      cbBufferMapper(&m_pConstants->Get<::Object>().Lights);
+    };
+  };
 
   auto CreateIndexBuffer = [&](void) -> Render_t
   {
@@ -588,25 +1176,20 @@ auto OpenGLCommonShader::CreateBuffer(const ComponentPtr_t & _pBuffer) -> Render
 
     if (!pBufferData->IsType<const Type_t *>(uT("data")))
     {
-      throw STD_EXCEPTION << "Unexpected buffer format [" << 
-        "id: " << _pBuffer->Id << ", " <<
-        "type: " << _pBuffer->Type << ", " <<
-        "kind: " << _pBuffer->Kind << "].";
+      return CreateConstantLightsBuffer();
     }
 
     const Component::Buffer<Type_t> Info{ pBufferData };
 
     const auto pBuffer = ::std::make_shared<Buffer>(GL_ELEMENT_ARRAY_BUFFER,
       Info.pData, Info.Count * sizeof(Type_t), GL_STATIC_DRAW);
-
-    auto * pDrawElements = &m_DrawElements;
     const auto Size = static_cast<GLsizei>(Info.Count);
 
     return [=](void)
     {
       pBuffer->Bind();
 
-      *pDrawElements = [=](void) 
+      m_DrawElements = [=](void)
       { 
         glDrawElements(GL_TRIANGLES, Size, GL_UNSIGNED_INT, nullptr);
       };
@@ -623,30 +1206,6 @@ auto OpenGLCommonShader::CreateBuffer(const ComponentPtr_t & _pBuffer) -> Render
       return CreateIndexBuffer();
     }
 
-    const Render_t Render = [=](void)
-    {
-      GLint ProgramId = 0;
-      glGetIntegerv(GL_CURRENT_PROGRAM, &ProgramId);
-
-      const auto hPosition = 
-        glGetAttribLocation(ProgramId, "CovelliteVertexPosition");
-      glVertexAttribPointer(hPosition, 4, GL_FLOAT, GL_FALSE, sizeof(Type_t), 
-        (void*)0);
-      glEnableVertexAttribArray(hPosition);
-
-      const auto hTexCoord = 
-        glGetAttribLocation(ProgramId, "CovellteVertexTexCoord");
-      glVertexAttribPointer(hTexCoord, 2, GL_FLOAT, GL_FALSE, sizeof(Type_t),
-        (void*)(sizeof(float) * 4));
-      glEnableVertexAttribArray(hTexCoord);
-
-      const auto hExtra = 
-        glGetAttribLocation(ProgramId, "CovelliteVertexExtra");
-      glVertexAttribPointer(hExtra, 4, GL_FLOAT, GL_FALSE, sizeof(Type_t),
-        (void*)(sizeof(float) * 6));
-      glEnableVertexAttribArray(hExtra);
-    };
-
     const Component::Buffer<Type_t> Info{ pBufferData };
 
     const auto & cbBufferMapper =
@@ -660,7 +1219,8 @@ auto OpenGLCommonShader::CreateBuffer(const ComponentPtr_t & _pBuffer) -> Render
       return [=](void)
       {
         pBuffer->Bind();
-        Render();
+        pBuffer->SetVertexInputData();
+        pBuffer->Bind(false);
       };
     }
 
@@ -679,15 +1239,158 @@ auto OpenGLCommonShader::CreateBuffer(const ComponentPtr_t & _pBuffer) -> Render
       {
         cbBufferMapper(pData->data());
 
-        glBufferSubData(GL_ARRAY_BUFFER, 0, 
-          static_cast<GLsizeiptr>(pData->size() * sizeof(Type_t)), pData->data());
+        pBuffer->UpdateData(pData->data(),
+          static_cast<GLsizeiptr>(pData->size() * sizeof(Type_t)));
       }
 
-      Render();
+      pBuffer->SetVertexInputData();
+      pBuffer->Bind(false);
     };
   };
 
   return CreateVertexBuffer();
+}
+
+auto OpenGLCommonShader::CreateTransform(const ComponentPtr_t & _pComponent) -> Render_t /*override*/
+{
+  using TransformRender_t = ::std::function<void(void)>;
+
+  const auto GetPreRenderDefaultGeometry = [&](void) -> TransformRender_t
+  {
+    const auto TransformRender = GetPreRenderGeometry();
+
+    return [=](void)
+    {
+      auto & World = m_pConstants->Get<::Object>().World;
+      World = ::glm::identity<::glm::mat4>();
+      TransformRender(World);
+      World = ::glm::transpose(World);
+    };
+  };
+
+  const auto GetPreRenderStaticGeometry = [&](void) -> TransformRender_t
+  {
+    ::glm::mat4 World = ::glm::identity<::glm::mat4>();
+    GetPreRenderGeometry()(World);
+    World = ::glm::transpose(World);
+
+    return [=](void)
+    {
+      m_pConstants->Get<::Object>().World = World;
+    };
+  };
+
+  const auto GetPreRenderBillboardGeometry = [&](void) -> TransformRender_t
+  {
+    const auto TransformRender = 
+      OpenGLCommonShader::GetPreRenderBillboardGeometry();
+
+    return [=](void)
+    {
+      auto & World = m_pConstants->Get<::Object>().World;
+      World = m_pConstants->Get<::Camera>().View;
+      TransformRender(World);
+      World = ::glm::transpose(World);
+    };
+  };
+
+  // 17 Сентябрь 2019 12:58 (unicornum.verum@gmail.com)
+  TODO("Тест Transform.Static не проверяет, что матрица меняется у РАЗНЫХ объектов");
+
+  const auto TransformRender =
+    (_pComponent->Kind == uT("Unknown")) ? GetPreRenderDefaultGeometry() :
+    (_pComponent->Kind == uT("Static")) ? GetPreRenderStaticGeometry() :
+    (_pComponent->Kind == uT("Billboard")) ? GetPreRenderBillboardGeometry() :
+      throw STD_EXCEPTION << "Unexpected transform component: " <<
+        " [id=" << _pComponent->Id << ", kind=" << _pComponent->Kind << "].";
+
+  return [=](void)
+  {
+    TransformRender();
+    m_pConstants->Update<::Object>();
+  };
+}
+
+auto OpenGLCommonShader::CreatePresentBuffer(const ComponentPtr_t & _pComponent) -> Render_t /*override*/
+{
+  using BufferMapper_t = cbBufferMap_t<void>;
+  using BufferData_t = ::std::vector<uint8_t>;
+
+  ComponentPtr_t pIndexBufferData = _pComponent;
+  ComponentPtr_t pInstanceBufferData = nullptr;
+
+  const auto SaveBuffer = [&](const ComponentPtr_t & _pBufferData)
+  {
+    if (_pBufferData->IsType<const int *>(uT("data")))
+    {
+      pIndexBufferData = _pBufferData;
+    }
+    else if (_pBufferData->IsType<const BufferMapper_t &>(uT("mapper")))
+    {
+      pInstanceBufferData = _pBufferData;
+    }
+    else
+    {
+      // 23 Сентябрь 2019 13:26 (unicornum.verum@gmail.com)
+      TODO("Здесь требуется диагностика (warning) компонента буфера, содержащего данные неожиданного типа");
+    }
+  };
+
+  m_ServiceComponents.Process(
+    {
+      { uT("Buffer"), SaveBuffer },
+    });
+
+  const Component::Buffer<int> IndexBufferData{ pIndexBufferData };
+
+  const auto pIndexBuffer = ::std::make_shared<Buffer>(GL_ELEMENT_ARRAY_BUFFER,
+    IndexBufferData.pData, IndexBufferData.Count * sizeof(int), GL_STATIC_DRAW);
+  const auto IndexCount = static_cast<GLsizei>(IndexBufferData.Count);
+
+  if (pInstanceBufferData == nullptr)
+  {
+    return [=](void)
+    {
+      pIndexBuffer->Bind();
+      glDrawElements(GL_TRIANGLES, IndexCount, GL_UNSIGNED_INT, nullptr);
+      pIndexBuffer->Bind(false);
+    };
+  }
+
+  const auto cbBufferMapper =
+    pInstanceBufferData->GetValue<const BufferMapper_t &>(uT("mapper"), nullptr);
+  const auto BufferSize =
+    pInstanceBufferData->GetValue(uT("size"), (::std::size_t)16);
+  const auto InstanceCount = static_cast<GLint>(
+    pInstanceBufferData->GetValue(uT("count"), (::std::size_t)1));
+  const auto Stride = static_cast<GLsizei>(
+    BufferSize / InstanceCount);
+
+  // 23 Сентябрь 2019 18:53 (unicornum.verum@gmail.com)
+  TODO("Проверка делимости BufferSize / InstanceCount без остатка");
+
+  // 23 Сентябрь 2019 18:53 (unicornum.verum@gmail.com)
+  TODO("Проверка того, что Stride кратно 16");
+
+  const auto pData =
+    ::std::make_shared<BufferData_t>(BufferSize, (uint8_t)0x00);
+  const auto pInstanceBuffer = ::std::make_shared<Buffer>(GL_ARRAY_BUFFER,
+    nullptr, BufferSize, GL_DYNAMIC_DRAW);
+
+  return [=](void)
+  {
+    const auto IsDirty = cbBufferMapper(nullptr);
+    if (IsDirty)
+    {
+      cbBufferMapper(pData->data());
+      pInstanceBuffer->SetInstanceData(pData->data(), pData->size(), Stride);
+    }
+
+    pIndexBuffer->Bind();
+    glDrawElementsInstanced(GL_TRIANGLES, IndexCount, GL_UNSIGNED_INT, nullptr, 
+      InstanceCount);
+    pIndexBuffer->Bind(false);
+  };
 }
 
 auto OpenGLCommonShader::CreateGeometry(const ComponentPtr_t & _pComponent) -> Render_t /*override*/
@@ -703,18 +1406,19 @@ auto OpenGLCommonShader::CreateGeometry(const ComponentPtr_t & _pComponent) -> R
       auto & World = m_pConstants->Get<::Matrices>().World;
       World = ::glm::identity<::glm::mat4>();
       PreRender(World);
+      World = ::glm::transpose(World);
     };
   };
 
   const auto GetPreRenderStaticGeometry = [&](void) -> PreRender_t
   {
-    ::glm::mat4 MatrixWorld = ::glm::identity<::glm::mat4>();
-    GetPreRenderGeometry()(MatrixWorld);
+    ::glm::mat4 World = ::glm::identity<::glm::mat4>();
+    GetPreRenderGeometry()(World);
+    World = ::glm::transpose(World);
 
     return [=](void)
     {
-      auto & World = m_pConstants->Get<::Matrices>().World;
-      World = MatrixWorld;
+      m_pConstants->Get<::Matrices>().World = World;
     };
   };
 
@@ -727,6 +1431,7 @@ auto OpenGLCommonShader::CreateGeometry(const ComponentPtr_t & _pComponent) -> R
       auto & World = m_pConstants->Get<::Matrices>().World;
       World = m_pConstants->Get<::Camera>().View;
       PreRender(World);
+      World = ::glm::transpose(World);
     };
   };
 
@@ -755,6 +1460,8 @@ auto OpenGLCommonShader::GetCameraCommon(void) -> Render_t
 
   return [=](void)
   {
+    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+
     DisableDepthRender();
 
     glDisable(GL_BLEND);
@@ -766,7 +1473,8 @@ auto OpenGLCommonShader::GetCameraCommon(void) -> Render_t
   };
 }
 
-auto OpenGLCommonShader::GetCameraOrthographic(const ComponentPtr_t &) -> Render_t
+auto OpenGLCommonShader::GetCameraOrthographic(
+  const ComponentPtr_t & _pComponent) -> Render_t
 {
   const auto CommonRender = GetCameraCommon();
 
@@ -787,18 +1495,24 @@ auto OpenGLCommonShader::GetCameraOrthographic(const ComponentPtr_t &) -> Render
     const Component::Position Offset{ ServiceComponents[0] };
 
     auto & Matrix = m_pConstants->Get<::Camera>();
-    Matrix.Projection = ::glm::identity<::glm::mat4>();
-    Matrix.View = ::glm::ortho(
+
+    Matrix.Projection = ::glm::transpose(::glm::ortho(
       Viewport[0] + Offset.X,
       Viewport[0] + Viewport[2] + Offset.X,
       Viewport[1] + Viewport[3] + Offset.Y,
       Viewport[1] + Offset.Y,
-      -1.0f, 1.0f);
-    Matrix.ViewInverse = ::glm::inverse(Matrix.View);
+      1.0f, -1.0f));
+    Matrix.View = ::glm::transpose(::glm::identity<::glm::mat4>());
+    Matrix.ViewInverse = ::glm::transpose(
+      ::glm::inverse(::glm::identity<::glm::mat4>()));
+
+    _pComponent->SetValue(uT("view"), Matrix.View);
+    _pComponent->SetValue(uT("projection"), Matrix.Projection);
   };
 }
 
-auto OpenGLCommonShader::GetCameraPerspective(const ComponentPtr_t & _pComponent) -> Render_t
+auto OpenGLCommonShader::GetCameraPerspective(
+  const ComponentPtr_t & _pComponent) -> Render_t
 {
   const auto CommonRender = GetCameraCommon();
 
@@ -821,10 +1535,11 @@ auto OpenGLCommonShader::GetCameraPerspective(const ComponentPtr_t & _pComponent
 
     const auto AngleY = _pComponent->GetValue(uT("fov"), 90.0f) *
       static_cast<float>(::alicorn::extension::cpp::math::GreedToRadian);
-    const float zFar = 200.0f;
+    const auto zNear = _pComponent->GetValue(uT("znear"), 0.01f);
+    const auto zFar = _pComponent->GetValue(uT("zfar"), 200.0f);
 
-    Matrix.Projection = ::glm::perspectiveFovRH(AngleY,
-      Viewport[2], Viewport[3], 0.01f, zFar);
+    Matrix.Projection = ::glm::transpose(::glm::perspectiveFovRH(AngleY,
+      Viewport[2], Viewport[3], zFar, zNear));
 
     // **************************** Матрица вида **************************** //
 
@@ -855,12 +1570,16 @@ auto OpenGLCommonShader::GetCameraPerspective(const ComponentPtr_t & _pComponent
       return Transform * ::glm::vec4{ Distance, 0.0f, 0.0f, 1.0f };
     };
 
-    Matrix.View = ::glm::lookAtRH(
+    const auto View = ::glm::lookAtRH(
       GetEye(),
       ::glm::vec3{ Look.X, Look.Y, Look.Z },
       ::glm::vec3{ 0.0f, 0.0f, 1.0f }); // Up
 
-    Matrix.ViewInverse = ::glm::inverse(Matrix.View);
+    Matrix.View = ::glm::transpose(View);
+    Matrix.ViewInverse = ::glm::transpose(::glm::inverse(View));
+
+    _pComponent->SetValue(uT("view"), Matrix.View);
+    _pComponent->SetValue(uT("projection"), Matrix.Projection);
   };
 }
 

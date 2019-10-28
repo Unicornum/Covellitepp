@@ -1,7 +1,7 @@
 
 #include "stdafx.h"
 #include "DirectX11.hpp"
-#include <directxmath.h>
+#include <GLMath.hpp>
 #include <alicorn/std/vector.hpp>
 #include <alicorn/boost/lexical-cast.hpp>
 #include "DxCheck.hpp"
@@ -20,45 +20,69 @@
 #include "Component.hpp"
 #include "GraphicApi.Constants.hpp"
 
-using namespace covellite::api::renderer;
+namespace std
+{
+
+template<class T>
+istream & operator>>(istream &, shared_ptr<T> &)
+{
+  throw STD_EXCEPTION << "Это не должно вызываться, нужно для компилируемости";
+}
+
+} // namespace std
+
+namespace covellite
+{
+
+namespace api
+{
+
+namespace renderer
+{
 
 // ************************************************************************** //
 
 class DirectX11::Buffer final
 {
-private:
+public:
   template<class T>
   class Support
   {
   public:
-    static UINT GetFlag(void) { return D3D11_BIND_VERTEX_BUFFER; }
+    static constexpr UINT Flag = D3D11_BIND_VERTEX_BUFFER;
   };
 
   template<UINT TIndex>
   class Constant
   {
   public:
-    inline static UINT GetFlag(void) { return D3D11_BIND_CONSTANT_BUFFER; }
-    inline static UINT GetIndex(void) { return TIndex; }
+    static constexpr UINT Flag = D3D11_BIND_CONSTANT_BUFFER;
+    static constexpr UINT Index = TIndex;
   };
 
   template<>
-  class Support<::Camera> : public Constant<CAMERA_BUFFER_INDEX> { };
+  class Support<::Camera> : public Constant<COVELLITE_BUFFER_INDEX_CAMERA> { };
 
   template<>
-  class Support<::Matrices> : public Constant<MATRICES_BUFFER_INDEX> { };
+  class Support<::Fog> : public Constant<COVELLITE_BUFFER_INDEX_FOG> { };
 
   template<>
-  class Support<::Lights> : public Constant<LIGHTS_BUFFER_INDEX> { };
+  class Support<::Object> : public Constant<COVELLITE_BUFFER_INDEX_OBJECT> { };
 
   template<>
-  class Support<::Fog> : public Constant<FOG_BUFFER_INDEX> { };
+  class Support<uint8_t> : public Constant<COVELLITE_BUFFER_INDEX_USER> { };
+
+  template<>
+  class Support<::Matrices> : public Constant<COVELLITE_BUFFER_INDEX_MATRICES> { };
+
+  template<>
+  class Support<::SceneLights> : public Constant<COVELLITE_BUFFER_INDEX_LIGHTS> { };
 
   template<>
   class Support<int>
   {
   public:
-    static UINT GetFlag(void) { return D3D11_BIND_INDEX_BUFFER; }
+    static constexpr UINT Flag = D3D11_BIND_INDEX_BUFFER;
   };
 
 public:
@@ -73,13 +97,15 @@ public:
     Desc.Usage = _IsDynamic ? D3D11_USAGE_DYNAMIC : D3D11_USAGE_DEFAULT;
     Desc.CPUAccessFlags = _IsDynamic ? D3D11_CPU_ACCESS_WRITE : 0;
     Desc.ByteWidth = static_cast<decltype(Desc.ByteWidth)>(sizeof(T) * _Count);
-    Desc.BindFlags = Support<T>::GetFlag();
+    Desc.BindFlags = Support<T>::Flag;
 
     D3D11_SUBRESOURCE_DATA InitData = { 0 };
     InitData.pSysMem = _pData;
 
+    auto * pInitData = (_pData == nullptr) ? nullptr : &InitData;
+
     ComPtr_t<ID3D11Buffer> pBuffer;
-    DX_CHECK _pDevice->CreateBuffer(&Desc, &InitData, &pBuffer);
+    DX_CHECK _pDevice->CreateBuffer(&Desc, pInitData, &pBuffer);
     return pBuffer;
   }
 
@@ -91,8 +117,7 @@ public:
   {
     const auto pResult = Create(_pDevice, false, _pData, 1);
 
-    const auto Index = Support<T>::GetIndex();
-
+    constexpr auto Index = Support<T>::Index;
     _pImmediateContext->VSSetConstantBuffers(Index, 1, pResult.GetAddressOf());
     _pImmediateContext->PSSetConstantBuffers(Index, 1, pResult.GetAddressOf());
 
@@ -150,6 +175,7 @@ void DirectX11::PresentFrame(void) /*override*/
 
 void DirectX11::ResizeWindow(int32_t _Width, int32_t _Height) /*override*/
 {
+  m_IsResizeWindow = true;
   SetViewport(_Width, _Height);
 }
 
@@ -208,9 +234,9 @@ void DirectX11::SetViewport(int _Width, int _Height)
 
 void DirectX11::CreateRenderTargetView(int _Width, int _Height)
 {
-  if (m_pRenderTargetView != nullptr)
+  if (m_pScreenRenderTargetView != nullptr)
   {
-    m_pRenderTargetView.Reset();
+    m_pScreenRenderTargetView.Reset();
 
     DX_CHECK m_pSwapChain->ResizeBuffers(2, _Width, _Height,
       DXGI_FORMAT_R8G8B8A8_UNORM, DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH);
@@ -221,12 +247,12 @@ void DirectX11::CreateRenderTargetView(int _Width, int _Height)
     (void **)pBackBuffer.GetAddressOf());
 
   DX_CHECK m_pDevice->CreateRenderTargetView(pBackBuffer.Get(), NULL,
-    &m_pRenderTargetView);
+    &m_pScreenRenderTargetView);
 }
 
 void DirectX11::CreateDepthStencilView(int _Width, int _Height)
 {
-  m_pDepthStencilView.Reset();
+  m_pScreenDepthStencilView.Reset();
 
   const DXGI_FORMAT DeptBufferFormat = DXGI_FORMAT_D32_FLOAT;
 
@@ -249,12 +275,18 @@ void DirectX11::CreateDepthStencilView(int _Width, int _Height)
   DeptStencilViewDesc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
 
   DX_CHECK m_pDevice->CreateDepthStencilView(pDepthBuffer.Get(),
-    &DeptStencilViewDesc, &m_pDepthStencilView);
+    &DeptStencilViewDesc, &m_pScreenDepthStencilView);
 }
 
 auto DirectX11::CreateCamera(const ComponentPtr_t & _pComponent) -> Render_t /*override*/
 {
   const auto CameraId = _pComponent->Id;
+
+  const auto SetDefaultRenderTarget = [=](void)
+  {
+    m_CurrentRenderTargets = { m_pScreenRenderTargetView.Get() };
+    m_pCurrentDepthStencilView = m_pScreenDepthStencilView;
+  };
 
   const auto DisabledBlendRender = CreateBlendState(false);
   const auto DisableDepthRender = GetDepthState(false, false, false);
@@ -274,6 +306,7 @@ auto DirectX11::CreateCamera(const ComponentPtr_t & _pComponent) -> Render_t /*o
   {
     const Component::Position Pos{ ServiceComponents[0] };
 
+    SetDefaultRenderTarget();
     DisabledBlendRender();
     DisableDepthRender();
     LightsRender();
@@ -282,22 +315,29 @@ auto DirectX11::CreateCamera(const ComponentPtr_t & _pComponent) -> Render_t /*o
     D3D11_VIEWPORT Viewport = { 0 };
     m_pImmediateContext->RSGetViewports(&ViewportCount, &Viewport);
 
-    m_pConstants->Get<::Matrices>().Projection = ::DirectX::XMMatrixTranspose(
-      ::DirectX::XMMatrixOrthographicOffCenterLH(
-        Pos.X, Pos.X + Viewport.Width,
-        Pos.Y + Viewport.Height, Pos.Y,
-        1.0f, -1.0f));
+    auto & CameraMatrices = m_pConstants->Get<::Camera>();
 
-    m_pConstants->Get<::Matrices>().View = ::DirectX::XMMatrixTranspose(
-      ::DirectX::XMMatrixIdentity());
+    CameraMatrices.Projection = ::glm::transpose(::glm::ortho(
+      Pos.X, Pos.X + Viewport.Width,
+      Pos.Y + Viewport.Height, Pos.Y,
+      1.0f, -1.0f));
 
-    ::DirectX::XMVECTOR Determinant;
-    m_pConstants->Get<::Matrices>().ViewInverse = ::DirectX::XMMatrixTranspose(
-      ::DirectX::XMMatrixInverse(&Determinant, ::DirectX::XMMatrixIdentity()));
+    const auto View = ::glm::identity<::glm::mat4>();
+    CameraMatrices.View = ::glm::transpose(View);
+    CameraMatrices.ViewInverse = ::glm::transpose(::glm::inverse(View));
+    m_pConstants->Update<::Camera>();
+
+    m_pConstants->Get<::Matrices>().Projection = CameraMatrices.Projection;
+    m_pConstants->Get<::Matrices>().View = CameraMatrices.View;
+    m_pConstants->Get<::Matrices>().ViewInverse = CameraMatrices.ViewInverse;
+
+    _pComponent->SetValue(uT("view"), CameraMatrices.View);
+    _pComponent->SetValue(uT("projection"), CameraMatrices.Projection);
   };
 
   const Render_t CameraPerspective = [=](void)
   {
+    SetDefaultRenderTarget();
     DisabledBlendRender();
     DisableDepthRender();
     LightsRender();
@@ -306,48 +346,389 @@ auto DirectX11::CreateCamera(const ComponentPtr_t & _pComponent) -> Render_t /*o
     D3D11_VIEWPORT Viewport = { 0 };
     m_pImmediateContext->RSGetViewports(&ViewportCount, &Viewport);
 
-    const auto AngleY = (float)::alicorn::extension::cpp::math::GreedToRadian *
-      _pComponent->GetValue(uT("fov"), 90.0f);
-    const auto AspectRatio = Viewport.Width / Viewport.Height;
+    auto & CameraMatrices = m_pConstants->Get<::Camera>();
 
-    m_pConstants->Get<::Matrices>().Projection = ::DirectX::XMMatrixTranspose(
-      ::DirectX::XMMatrixPerspectiveFovRH(
-        AngleY, AspectRatio, 0.01f, 200.0f));
+    // ************************** Матрица проекции ************************** //
 
-    // Точка, куда смотрит камера - задается как компонент 
-    // Transform.Position.
-    const Component::Position Pos{ ServiceComponents[0] };
-    const auto Look = ::DirectX::XMVectorSet(Pos.X, Pos.Y, Pos.Z, 1.0f);
+    const auto AngleY = _pComponent->GetValue(uT("fov"), 90.0f) *
+      static_cast<float>(::alicorn::extension::cpp::math::GreedToRadian);
+    const auto zNear = _pComponent->GetValue(uT("znear"), 0.01f);
+    const auto zFar = _pComponent->GetValue(uT("zfar"), 200.0f);
 
-    // Расстояние от камеры до Look.
-    const auto Distance =
-      _pComponent->GetValue(uT("distance"), 0.0f) + 0.1f;
+    CameraMatrices.Projection = ::glm::transpose(::glm::perspectiveFovRH(AngleY,
+      (float)Viewport.Width, (float)Viewport.Height, zFar, zNear));
 
-    // Точка, где расположена камера - вычисляется на основе Look, Distance и
-    // компонента Transform.Rotation.
-    const Component::Position Rot{ ServiceComponents[1] };
+    // **************************** Матрица вида **************************** //
 
-    auto Transform =
-      ::DirectX::XMMatrixRotationX(Rot.X) *
-      ::DirectX::XMMatrixRotationY(Rot.Y) *
-      ::DirectX::XMMatrixRotationZ(Rot.Z) *
-      ::DirectX::XMMatrixTranslation(Pos.X, Pos.Y, Pos.Z);
-    auto Eye = ::DirectX::XMVector3TransformCoord(
-      ::DirectX::XMVectorSet(Distance, 0.0f, 0.0f, 1.0f),
-      Transform);
+    // Точка, куда смотрит камера - задается как компонент Data.Position.
+    const Component::Position Look{ ServiceComponents[0] };
 
-    const auto View = ::DirectX::XMMatrixLookAtRH(Eye, Look,
-      ::DirectX::XMVectorSet(0.0f, 0.0f, 1.0f, 0.0f));
+    auto GetEye = [&](void) -> ::glm::vec3
+    {
+      // Расстояние от камеры до Look.
+      const auto Distance = _pComponent->GetValue(uT("distance"), 0.0f) + 0.1f;
 
-    m_pConstants->Get<::Matrices>().View = ::DirectX::XMMatrixTranspose(View);
+      // Точка, где расположена камера - вычисляется на основе Look, Distance и
+      // компонента Data.Rotation.
 
-    ::DirectX::XMVECTOR Determinant;
-    m_pConstants->Get<::Matrices>().ViewInverse = ::DirectX::XMMatrixTranspose(
-      ::DirectX::XMMatrixInverse(&Determinant, View));
+      const Component::Position Rot{ ServiceComponents[1] };
+
+      ::glm::mat4 Transform = ::glm::identity<::glm::mat4>();
+
+      Transform = ::glm::translate(Transform,
+        ::glm::vec3{ Look.X, Look.Y, Look.Z });
+      Transform = ::glm::rotate(Transform,
+        Rot.Z, ::glm::vec3{ 0.0f, 0.0f, 1.0f });
+      Transform = ::glm::rotate(Transform,
+        Rot.Y, ::glm::vec3{ 0.0f, 1.0f, 0.0f });
+      Transform = ::glm::rotate(Transform,
+        Rot.X, ::glm::vec3{ 1.0f, 0.0f, 0.0f });
+
+      return Transform * ::glm::vec4{ Distance, 0.0f, 0.0f, 1.0f };
+    };
+
+    const auto View = ::glm::lookAtRH(
+      GetEye(),
+      ::glm::vec3{ Look.X, Look.Y, Look.Z },
+      ::glm::vec3{ 0.0f, 0.0f, 1.0f }); // Up
+
+    CameraMatrices.View = ::glm::transpose(View);
+    CameraMatrices.ViewInverse = ::glm::transpose(::glm::inverse(View));
+    m_pConstants->Update<::Camera>();
+
+    _pComponent->SetValue(uT("view"), CameraMatrices.View);
+    _pComponent->SetValue(uT("projection"), CameraMatrices.Projection);
+
+    m_pConstants->Get<::Matrices>().Projection = CameraMatrices.Projection;
+    m_pConstants->Get<::Matrices>().View = CameraMatrices.View;
+    m_pConstants->Get<::Matrices>().ViewInverse = CameraMatrices.ViewInverse;
   };
 
   return (_pComponent->Kind == uT("Perspective")) ? 
     CameraPerspective : CameraOptographic;
+}
+
+class DirectX11::Texture final
+{
+public:
+  using Ptr_t = ::std::shared_ptr<Texture>;
+  using ComponentWeakPtr_t = ::std::weak_ptr<::covellite::api::Component>;
+
+public:
+  const ComponentWeakPtr_t  m_pDataTexture;
+  const String_t            m_Destination;
+  const UINT                m_iDestination;
+  ComPtr_t<ID3D11Texture2D>          m_pTexture;
+  ComPtr_t<ID3D11Texture2D>          m_pReadDataTexture;
+  ComPtr_t<ID3D11RenderTargetView>   m_pRenderTargetView;
+  ComPtr_t<ID3D11DepthStencilView>   m_pDepthStencilView;
+  ComPtr_t<ID3D11ShaderResourceView> m_pShaderResourceView;
+
+public:
+  void MakeTarget(
+    ComPtr_t<ID3D11Device> _pDevice,
+    const UINT _Width,
+    const UINT _Height)
+  {
+    m_pTexture = (m_Destination != uT("depth")) ?
+      MakeRGBATarget(_pDevice, _Width, _Height) :
+      MakeDepthTarget(_pDevice, _Width, _Height);
+
+    const auto pDataTexture = m_pDataTexture.lock();
+    if (pDataTexture)
+    {
+      pDataTexture->SetValue(uT("width"), static_cast<int>(_Width));
+      pDataTexture->SetValue(uT("height"), static_cast<int>(_Height));
+
+      if (pDataTexture->IsType<const cbBufferMap_t<const void> &>(uT("mapper")))
+      {
+        m_pReadDataTexture = MakeRGBACopy(_pDevice, _Width, _Height);
+      }
+    }
+  }
+
+  void MakeSource(
+    const ComPtr_t<ID3D11Device> & _pDevice,
+    const ComPtr_t<ID3D11DeviceContext> & _pImmediateContext,
+    const UINT _Width,
+    const UINT _Height,
+    const void * _pData,
+    const bool _IsMipmapping)
+  {
+    m_pTexture = (_IsMipmapping) ?
+      MakeRGBAMipSource(_pDevice, _pImmediateContext, _Width, _Height, _pData) :
+      MakeRGBASource(_pDevice, _pImmediateContext, _Width, _Height, _pData);
+  }
+
+  static ComPtr_t<ID3D11Texture2D> MakeRGBACopy(
+    ComPtr_t<ID3D11Device> _pDevice,
+    const UINT _Width, const UINT _Height)
+  {
+    D3D11_TEXTURE2D_DESC textureDesc = { 0 };
+    textureDesc.Width = _Width;
+    textureDesc.Height = _Height;
+    textureDesc.MipLevels = 1;
+    textureDesc.ArraySize = 1;
+    textureDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+    textureDesc.Usage = D3D11_USAGE_STAGING;
+    textureDesc.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
+    textureDesc.SampleDesc.Count = 1;
+
+    ComPtr_t<ID3D11Texture2D> pTexture;
+    DX_CHECK _pDevice->CreateTexture2D(&textureDesc, nullptr, &pTexture);
+    return pTexture;
+  }
+
+private:
+  ComPtr_t<ID3D11Texture2D> MakeRGBASource(
+    const ComPtr_t<ID3D11Device> & _pDevice,
+    const ComPtr_t<ID3D11DeviceContext> & _pImmediateContext,
+    const UINT _Width,
+    const UINT _Height,
+    const void * _pData)
+  {
+    D3D11_TEXTURE2D_DESC TextureDesc = { 0 };
+    TextureDesc.Width = _Width;
+    TextureDesc.Height = _Height;
+    TextureDesc.MipLevels = 1;
+    TextureDesc.ArraySize = 1;
+    TextureDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+    TextureDesc.Usage = D3D11_USAGE_DEFAULT;
+    TextureDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+    TextureDesc.MiscFlags = 0;
+    TextureDesc.SampleDesc.Count = 1;
+    TextureDesc.SampleDesc.Quality = 0;
+
+    ComPtr_t<ID3D11Texture2D> pTexture2D;
+    DX_CHECK _pDevice->CreateTexture2D(&TextureDesc, nullptr, &pTexture2D);
+
+    _pImmediateContext->UpdateSubresource(pTexture2D.Get(), 0, NULL,
+      _pData, _Width * 4, 0);
+
+    D3D11_SHADER_RESOURCE_VIEW_DESC SrvDesc = { 0 };
+    SrvDesc.Format = TextureDesc.Format;
+    SrvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+    SrvDesc.Texture2D.MipLevels = TextureDesc.MipLevels;
+
+    DX_CHECK _pDevice->CreateShaderResourceView(pTexture2D.Get(), &SrvDesc,
+      &m_pShaderResourceView);
+
+    return pTexture2D;
+  }
+
+  ComPtr_t<ID3D11Texture2D> MakeRGBAMipSource(
+    const ComPtr_t<ID3D11Device> & _pDevice,
+    const ComPtr_t<ID3D11DeviceContext> & _pImmediateContext,
+    const UINT _Width,
+    const UINT _Height,
+    const void * _pData)
+  {
+    D3D11_TEXTURE2D_DESC TextureDesc = { 0 };
+    TextureDesc.Width = _Width;
+    TextureDesc.Height = _Height;
+    TextureDesc.MipLevels = 0;
+    TextureDesc.ArraySize = 1;
+    TextureDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+    TextureDesc.Usage = D3D11_USAGE_DEFAULT;
+    TextureDesc.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
+    TextureDesc.MiscFlags = D3D11_RESOURCE_MISC_GENERATE_MIPS;
+    TextureDesc.SampleDesc.Count = 1;
+    TextureDesc.SampleDesc.Quality = 0;
+
+    ComPtr_t<ID3D11Texture2D> pTexture2D;
+    DX_CHECK _pDevice->CreateTexture2D(&TextureDesc, nullptr, &pTexture2D);
+
+    _pImmediateContext->UpdateSubresource(pTexture2D.Get(), 0, NULL,
+      _pData, _Width * 4, 0);
+
+    D3D11_SHADER_RESOURCE_VIEW_DESC SrvDesc = { 0 };
+    SrvDesc.Format = TextureDesc.Format;
+    SrvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+    SrvDesc.Texture2D.MipLevels = static_cast<UINT>(-1);
+
+    DX_CHECK _pDevice->CreateShaderResourceView(pTexture2D.Get(), &SrvDesc,
+      &m_pShaderResourceView);
+
+    _pImmediateContext->GenerateMips(m_pShaderResourceView.Get());
+
+    return pTexture2D;
+  }
+
+private:
+  ComPtr_t<ID3D11Texture2D> MakeRGBATarget(
+    const ComPtr_t<ID3D11Device> & _pDevice,
+    const UINT _Width, const UINT _Height)
+  {
+    D3D11_TEXTURE2D_DESC TextureDesc = { 0 };
+    TextureDesc.Width = _Width;
+    TextureDesc.Height = _Height;
+    TextureDesc.MipLevels = 1;
+    TextureDesc.ArraySize = 1;
+    TextureDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+    TextureDesc.Usage = D3D11_USAGE_DEFAULT;
+    TextureDesc.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
+    TextureDesc.MiscFlags = 0;
+    TextureDesc.SampleDesc.Count = 1;
+    TextureDesc.SampleDesc.Quality = 0;
+
+    ComPtr_t<ID3D11Texture2D> pTexture2D;
+    DX_CHECK _pDevice->CreateTexture2D(&TextureDesc, nullptr, &pTexture2D);
+
+    D3D11_SHADER_RESOURCE_VIEW_DESC SrvDesc = { 0 };
+    SrvDesc.Format = TextureDesc.Format;
+    SrvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+    SrvDesc.Texture2D.MipLevels = TextureDesc.MipLevels;
+
+    DX_CHECK _pDevice->CreateShaderResourceView(pTexture2D.Get(), &SrvDesc,
+      &m_pShaderResourceView);
+
+    D3D11_RENDER_TARGET_VIEW_DESC TargetDesc = { 0 };
+    TargetDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+    TargetDesc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2D;
+
+    ComPtr_t<ID3D11RenderTargetView> pRenderTargetView;
+    DX_CHECK _pDevice->CreateRenderTargetView(pTexture2D.Get(),
+      &TargetDesc, &m_pRenderTargetView);
+
+    return pTexture2D;
+  }
+
+  ComPtr_t<ID3D11Texture2D> MakeDepthTarget(
+    const ComPtr_t<ID3D11Device> & _pDevice,
+    const UINT _Width, const UINT _Height)
+  {
+    D3D11_TEXTURE2D_DESC TextureDesc = { 0 };
+    TextureDesc.Width = _Width;
+    TextureDesc.Height = _Height;
+    TextureDesc.MipLevels = 1;
+    TextureDesc.ArraySize = 1;
+    TextureDesc.Format = DXGI_FORMAT_R24G8_TYPELESS;
+    TextureDesc.Usage = D3D11_USAGE_DEFAULT;
+    TextureDesc.BindFlags = D3D11_BIND_DEPTH_STENCIL | D3D11_BIND_SHADER_RESOURCE;
+    TextureDesc.MiscFlags = 0;
+    TextureDesc.SampleDesc.Count = 1;
+    TextureDesc.SampleDesc.Quality = 0;
+
+    ComPtr_t<ID3D11Texture2D> pTexture2D;
+    DX_CHECK _pDevice->CreateTexture2D(&TextureDesc, nullptr, &pTexture2D);
+
+    D3D11_SHADER_RESOURCE_VIEW_DESC SrvDesc = { 0 };
+    SrvDesc.Format = DXGI_FORMAT_R24_UNORM_X8_TYPELESS;
+    SrvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+    SrvDesc.Texture2D.MipLevels = TextureDesc.MipLevels;
+
+    DX_CHECK _pDevice->CreateShaderResourceView(pTexture2D.Get(), &SrvDesc,
+      &m_pShaderResourceView);
+
+    D3D11_DEPTH_STENCIL_VIEW_DESC Desc = { 0 };
+    Desc.Format = DXGI_FORMAT_D24_UNORM_S8_UINT;
+    Desc.ViewDimension = D3D11_DSV_DIMENSION_TEXTURE2D;
+
+    ComPtr_t<ID3D11DepthStencilView> pDepthStencilView;
+    DX_CHECK _pDevice->CreateDepthStencilView(pTexture2D.Get(),
+      &Desc, &m_pDepthStencilView);
+
+    return pTexture2D;
+  }
+
+private:
+  static UINT GetDestinationIndex(const String_t & _Destination)
+  {
+    static const ::std::vector<String_t> Destinations =
+    {
+      uT("albedo"),
+      uT("metalness"),
+      uT("roughness"),
+      uT("normal"),
+      uT("occlusion"),
+      uT("depth"),
+    };
+
+    const auto itDestination =
+      ::std::find(Destinations.cbegin(), Destinations.cend(), _Destination);
+    if (itDestination == Destinations.cend())
+    {
+      throw STD_EXCEPTION << "Unexpected destination texture: " << _Destination;
+    }
+
+    return static_cast<UINT>(
+      ::std::distance(Destinations.cbegin(), itDestination));
+  };
+
+public:
+  explicit Texture(const ComponentPtr_t & _pDataTexture) :
+    m_pDataTexture{ _pDataTexture },
+    m_Destination{ _pDataTexture->GetValue(uT("destination"), uT("albedo")) },
+    m_iDestination{ GetDestinationIndex(m_Destination) }
+  {
+
+  }
+};
+
+auto DirectX11::CreateBkSurface(const ComponentPtr_t &) -> Render_t /*override*/
+{
+  const auto pBkSurfaceTextures =
+    ::std::make_shared<::std::vector<Texture::Ptr_t>>();
+
+  DXGI_SWAP_CHAIN_DESC Desc = { 0 };
+  DX_CHECK m_pSwapChain->GetDesc(&Desc);
+
+  const auto DoDataTexture = [&](const ComponentPtr_t & _pDataTexture)
+  {
+    auto pTexture = ::std::make_shared<Texture>(_pDataTexture);
+    pTexture->MakeTarget(m_pDevice, 
+      Desc.BufferDesc.Width, Desc.BufferDesc.Height);
+    _pDataTexture->SetValue(uT("entity"), pTexture);
+    pBkSurfaceTextures->push_back(pTexture);
+  };
+
+  m_ServiceComponents.Process(
+    {
+      { uT("Texture"), DoDataTexture },
+    });
+
+  return [=](void)
+  {
+    if (m_IsResizeWindow)
+    {
+      DXGI_SWAP_CHAIN_DESC Desc = { 0 };
+      DX_CHECK m_pSwapChain->GetDesc(&Desc);
+
+      for (auto & pTexture : *pBkSurfaceTextures)
+      {
+        pTexture->MakeTarget(m_pDevice,
+          Desc.BufferDesc.Width, Desc.BufferDesc.Height);
+      }
+    }
+
+    m_CurrentRenderTargets.clear();
+
+    for (auto & pTexture : *pBkSurfaceTextures)
+    {
+      if (pTexture->m_pRenderTargetView)
+      {
+        m_CurrentRenderTargets.push_back(pTexture->m_pRenderTargetView.Get());
+      }
+
+      if (pTexture->m_pDepthStencilView)
+      {
+        m_pCurrentDepthStencilView = pTexture->m_pDepthStencilView;
+      }
+
+      static ID3D11ShaderResourceView * NullResourceView[1] = { nullptr };
+      m_pImmediateContext->PSSetShaderResources(
+        pTexture->m_iDestination, 1, NullResourceView);
+    }
+
+    if (m_CurrentRenderTargets.empty())
+    {
+      m_CurrentRenderTargets = { nullptr };
+    }
+
+    m_pImmediateContext->OMSetRenderTargets(
+      static_cast<UINT>(m_CurrentRenderTargets.size()),
+      &m_CurrentRenderTargets[0], nullptr);
+  };
 }
 
 auto DirectX11::CreateState(const ComponentPtr_t & _pComponent) -> Render_t /*override*/
@@ -435,8 +816,11 @@ auto DirectX11::CreateState(const ComponentPtr_t & _pComponent) -> Render_t /*ov
 
     return [=](void)
     {
-      m_pImmediateContext->ClearRenderTargetView(
-        m_pRenderTargetView.Get(), BackgroundColor.data());
+      for (auto * pRenderTargetView : m_CurrentRenderTargets)
+      {
+        m_pImmediateContext->ClearRenderTargetView(
+          pRenderTargetView, BackgroundColor.data());
+      }
     };
   };
 
@@ -460,84 +844,64 @@ auto DirectX11::CreateState(const ComponentPtr_t & _pComponent) -> Render_t /*ov
 
 auto DirectX11::CreateFog(const ComponentPtr_t & _pComponent) -> Render_t /*override*/
 {
-  return DoCreateFog<::Fog>(_pComponent);
-}
-
-auto DirectX11::CreateMaterial(const ComponentPtr_t &) -> Render_t /*override*/
-{
-  return nullptr;
+  return DoCreateFog<::Fog>(_pComponent, true);
 }
 
 auto DirectX11::CreateLight(const ComponentPtr_t & _pComponent) -> Render_t /*override*/
 {
-  return DoCreateLight<::Lights>(_pComponent);
+  return DoCreateLight<::SceneLights>(_pComponent);
 }
 
 auto DirectX11::CreateTexture(const ComponentPtr_t & _pComponent) -> Render_t /*override*/
 {
-  const auto GetDestinationIndex = [&](const String_t & _Destination)
-  {
-    static const ::std::vector<String_t> Destinations =
-    {
-      uT("albedo"),
-      uT("metalness"),
-      uT("roughness"),
-      uT("normal"),
-      uT("occlusion"),
-    };
-
-    const auto itDestination = 
-      ::std::find(Destinations.cbegin(), Destinations.cend(), _Destination);
-    if (itDestination == Destinations.cend())
-    {
-      throw STD_EXCEPTION << "Unexpected destination texture: " << _Destination
-        << " [id=" << _pComponent->Id << "].";
-    }
-
-    return static_cast<UINT>(
-      ::std::distance(Destinations.cbegin(), itDestination));
-  };
+  using BufferMapper_t = cbBufferMap_t<const void>;
 
   const auto pTextureData =
     m_ServiceComponents.Get({ { uT("Texture"), _pComponent } })[0];
 
-  const auto iDestination = GetDestinationIndex(
-    pTextureData->GetValue(uT("destination"), uT("albedo")));
-
   const Component::Texture TextureData{ pTextureData };
 
-  D3D11_TEXTURE2D_DESC TextureDesc = { 0 };
-  TextureDesc.Width = TextureData.Width;
-  TextureDesc.Height = TextureData.Height;
-  TextureDesc.MipLevels = 1;
-  TextureDesc.ArraySize = 1;
-  TextureDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
-  TextureDesc.Usage = D3D11_USAGE_DEFAULT;
-  TextureDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
-  TextureDesc.MiscFlags = 0;
-  TextureDesc.SampleDesc.Count = 1;
-  TextureDesc.SampleDesc.Quality = 0;
+  auto pTexture = pTextureData->GetValue(uT("entity"), Texture::Ptr_t{});
+  if (pTexture == nullptr)
+  {
 
-  D3D11_SUBRESOURCE_DATA Init = { 0 };
-  Init.pSysMem = TextureData.pData;
-  Init.SysMemPitch = TextureData.Width * 4;
+    pTexture = ::std::make_shared<Texture>(pTextureData);
+    pTexture->MakeSource(m_pDevice, m_pImmediateContext, TextureData.Width, 
+      TextureData.Height, TextureData.pData, TextureData.IsUsingMipmapping);
+  }
+  else
+  {
+    pTextureData->SetValue(uT("entity"), Texture::Ptr_t{});
+  }
 
-  ComPtr_t<ID3D11Texture2D> pTexture;
-  DX_CHECK m_pDevice->CreateTexture2D(&TextureDesc, &Init, &pTexture);
+  if (pTexture->m_pReadDataTexture == nullptr)
+  {
+    return [=](void)
+    {
+      m_pImmediateContext->PSSetShaderResources(pTexture->m_iDestination, 1,
+        pTexture->m_pShaderResourceView.GetAddressOf());
+    };
+  }
 
-  D3D11_SHADER_RESOURCE_VIEW_DESC SrvDesc = { 0 };
-  SrvDesc.Format = TextureDesc.Format;
-  SrvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
-  SrvDesc.Texture2D.MipLevels = TextureDesc.MipLevels;
-
-  ComPtr_t<ID3D11ShaderResourceView> pShaderResourceView;
-  DX_CHECK m_pDevice->CreateShaderResourceView(pTexture.Get(), &SrvDesc,
-    &pShaderResourceView);
+  const auto cbBufferMapper =
+    pTextureData->GetValue<const BufferMapper_t &>(uT("mapper"), BufferMapper_t{});
 
   return [=](void)
   {
-    m_pImmediateContext->PSSetShaderResources(iDestination, 1,
-      pShaderResourceView.GetAddressOf());
+    if (cbBufferMapper(nullptr))
+    {
+      m_pImmediateContext->CopyResource(
+        pTexture->m_pReadDataTexture.Get(), pTexture->m_pTexture.Get());
+
+      D3D11_MAPPED_SUBRESOURCE Resource = { 0 };
+      DX_CHECK m_pImmediateContext->Map(pTexture->m_pReadDataTexture.Get(), 0,
+        D3D11_MAP_READ, 0, &Resource);
+      cbBufferMapper(Resource.pData);
+      m_pImmediateContext->Unmap(pTexture->m_pReadDataTexture.Get(), 0);
+    }
+
+    m_pImmediateContext->PSSetShaderResources(pTexture->m_iDestination, 1,
+      pTexture->m_pShaderResourceView.GetAddressOf());
   };
 }
 
@@ -565,8 +929,9 @@ auto DirectX11::CreateShader(const ComponentPtr_t & _pComponent) -> Render_t /*o
     "#define COVELLITE_SHADER_DESKTOP\r\n"
     "#define COVELLITE_SHADER_HLSL\r\n"
     "#define COVELLITE_SHADER_VERTEX\r\n";
-  auto ShaderText = ::Predefined + ::Data + ::Input + ::std::vector<uint8_t>{
-    ShaderData.pData, ShaderData.pData + ShaderData.Count };
+  const auto HeaderShaderText = ::Predefined + ::Data +
+    ShaderData.GetInstanceInput(::Input);
+  auto ShaderText = ShaderData.GetBody();
   ::std::string Entry = ShaderData.Entry;
 
   if (ShaderData.Kind == uT("Pixel"))
@@ -576,19 +941,21 @@ auto DirectX11::CreateShader(const ComponentPtr_t & _pComponent) -> Render_t /*o
       "#define COVELLITE_SHADER_HLSL\r\n"
       "#define COVELLITE_SHADER_PIXEL\r\n";
 
-    const auto PixelMain =
-      "float4 psMain(Pixel _Value) : SV_Target\r\n"
-      "{\r\n"
-      "  return " + Entry + "(_Value);\r\n"
-      "}\r\n";
-
-    ShaderText += DirectX::Shader::Convert(PixelMain);
-    Entry = "psMain";
+    if (ShaderData.ReturnType == "float4" || 
+      ShaderData.ReturnType == "vec4")
+    {
+      ShaderText += DirectX::Shader::Convert(
+        "float4 psMain(Pixel _Value) : SV_Target\r\n"
+        "{\r\n"
+        "  return " + Entry + "(_Value);\r\n"
+        "}\r\n");
+      Entry = "psMain";
+    }
   }
 
-  const auto pCompiledShader = 
-    DirectX::Shader::Compile(DirectX::Shader::Convert(Define) + ShaderText,
-      Entry.c_str(), DirectX::Shader::GetVersion(ShaderData.Kind).c_str());
+  const auto pCompiledShader = DirectX::Shader::Compile(
+    DirectX::Shader::Convert(Define) + HeaderShaderText, ShaderText, 
+    Entry.c_str(), DirectX::Shader::GetVersion(ShaderData.Kind).c_str());
 
   const auto VertexShader = 
     [&](const ::std::vector<D3D11_INPUT_ELEMENT_DESC> & _LayoutDesc)
@@ -634,12 +1001,32 @@ auto DirectX11::CreateShader(const ComponentPtr_t & _pComponent) -> Render_t /*o
   }
   else if (ShaderData.Kind == uT("Vertex"))
   {
-    return VertexShader(
-      {
+    ::std::vector<D3D11_INPUT_ELEMENT_DESC> LayoutDesc =
+    {
         { "POSITION", 0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 0, D3D11_INPUT_PER_VERTEX_DATA, 0 },
         { "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 16, D3D11_INPUT_PER_VERTEX_DATA, 0 },
         { "NORMAL",   0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 24, D3D11_INPUT_PER_VERTEX_DATA, 0 },
-      });
+    };
+
+    for (UINT i = 0; i < static_cast<UINT>(ShaderData.Instance.size()); i++)
+    {
+      const auto Type = ShaderData.Instance[i];
+      const auto Format =
+        (Type == uT("f")) ? DXGI_FORMAT_R32G32B32A32_FLOAT :
+        (Type == uT("i")) ? DXGI_FORMAT_R32G32B32A32_SINT :
+        DXGI_FORMAT_UNKNOWN;
+      const auto Size = i * 4 * static_cast<UINT>(
+        (Type == uT("f")) ? sizeof(float) :
+        (Type == uT("i")) ? sizeof(int) :
+        0);
+
+      LayoutDesc.push_back(
+        {
+          "TEXCOORD", i + 1, Format, 1, Size, D3D11_INPUT_PER_INSTANCE_DATA, 1
+        });
+    }
+
+    return VertexShader(LayoutDesc);
   }
 
   ComPtr_t<ID3D11PixelShader> pPixelShader;
@@ -650,8 +1037,7 @@ auto DirectX11::CreateShader(const ComponentPtr_t & _pComponent) -> Render_t /*o
   return [=](void)
   {
     m_pImmediateContext->PSSetShader(pPixelShader.Get(), NULL, 0);
-    m_pConstants->Update<::Lights>();
-    m_pConstants->Update<::Fog>();
+    m_pConstants->Update<::SceneLights>();
   };
 }
 
@@ -754,6 +1140,63 @@ auto DirectX11::CreateBuffer(const ComponentPtr_t & _pComponent) -> Render_t /*o
 
     return (cbBufferMapper == nullptr) ? StaticRender : DynamicRender;
   }
+  else if (_pComponent->IsType<const cbBufferMap_t<::Lights_t> &>(uT("mapper")))
+  {
+    using BufferMapper_t = cbBufferMap_t<::Lights_t>;
+
+    const auto cbBufferMapper = 
+      _pComponent->GetValue(uT("mapper"), BufferMapper_t{});
+    if (!cbBufferMapper)
+    {
+      throw STD_EXCEPTION << "Unexpected empty mapper: " << _pComponent->Id;
+    }
+
+    return [=](void)
+    {
+      cbBufferMapper(&m_pConstants->Get<::Object>().Lights);
+    };
+  }
+  else if (_pComponent->IsType<const cbBufferMap_t<void> &>(uT("mapper")))
+  {
+    using BufferMap_t = cbBufferMap_t<void>;
+    using BufferData_t = ::std::vector<uint8_t>;
+
+    const auto cbBufferMapper =
+      _pComponent->GetValue<const BufferMap_t &>(uT("mapper"), BufferMap_t{});
+    if (!cbBufferMapper)
+    {
+      throw STD_EXCEPTION << "Unexpected empty mapper: " << _pComponent->Id;
+    }
+
+    const auto BufferSize = pBufferData->GetValue(uT("size"), (::std::size_t)0);
+    if (BufferSize == 0)
+    {
+      throw STD_EXCEPTION << "Unexpected zero size: " << _pComponent->Id;
+    }
+
+    const auto pData = 
+      ::std::make_shared<BufferData_t>(BufferSize, (uint8_t)0x00);
+    const auto pBuffer = Buffer::Create(
+      m_pDevice, false, pData->data(), pData->size());
+    constexpr auto BufferIndex = 
+      Buffer::Support<BufferData_t::value_type>::Index;
+
+    return [=](void)
+    {
+      // Получение константного буфера по имени: https://docs.microsoft.com/en-us/windows/win32/api/d3d11shader/nf-d3d11shader-id3d11shaderreflection-getconstantbufferbyname
+      cbBufferMapper(pData->data());
+
+      // Поскольку каждый буфер индивидуален, но работает через один и тот же
+      // слот, то и активировать его нужно каждый раз.
+      m_pImmediateContext->VSSetConstantBuffers(
+        BufferIndex, 1, pBuffer.GetAddressOf());
+      m_pImmediateContext->PSSetConstantBuffers(
+        BufferIndex, 1, pBuffer.GetAddressOf());
+
+      m_pImmediateContext->UpdateSubresource(
+        pBuffer.Get(), 0, NULL, pData->data(), 0, 0);
+    };
+  }
 
   const Component::Buffer<int> IndexData{ pBufferData };
 
@@ -769,32 +1212,128 @@ auto DirectX11::CreateBuffer(const ComponentPtr_t & _pComponent) -> Render_t /*o
 
 #pragma warning(pop)
 
-auto DirectX11::CreateGeometry(const ComponentPtr_t & _pComponent) -> Render_t /*override*/
+auto DirectX11::CreateTransform(const ComponentPtr_t & _pComponent) -> Render_t /*override*/
 {
-  const auto GetPreRenderStaticGeometry = [&](void) -> Render_t
-  {
-    GetPreRenderGeometry(true)();
-    const auto World = m_pConstants->Get<::Matrices>().World;
+  const auto BuildTransformMatrix =
+    (_pComponent->Kind == uT("Unknown")) ? CreateDefaultTransformRender<::Object>() :
+    (_pComponent->Kind == uT("Static")) ? CreateStaticTransformRender<::Object>() :
+    (_pComponent->Kind == uT("Billboard")) ? CreateBillboardTransformRender<::Camera, ::Object>() :
+      throw STD_EXCEPTION << "Unexpected transform component: " <<
+        " [id=" << _pComponent->Id << ", kind=" << _pComponent->Kind << "].";
 
-    return [=](void)
+  return [=](void)
+  {
+    BuildTransformMatrix();
+    m_pConstants->Update<::Object>();
+  };
+}
+
+auto DirectX11::CreatePresentBuffer(const ComponentPtr_t & _pComponent) ->Render_t /*override*/
+{
+  using BufferMapper_t = cbBufferMap_t<void>;
+
+  ComponentPtr_t pIndexBufferData = _pComponent;
+  ComponentPtr_t pInstanceBufferData = nullptr;
+
+  const auto SaveBuffer = [&](const ComponentPtr_t & _pBufferData)
+  {
+    if (_pBufferData->IsType<const int *>(uT("data")))
     {
-      m_pConstants->Get<::Matrices>().World = World;
-      m_pConstants->Update<::Matrices>();
-    };
+      pIndexBufferData = _pBufferData;
+    }
+    else if (_pBufferData->IsType<const BufferMapper_t &>(uT("mapper")))
+    {
+      pInstanceBufferData = _pBufferData;
+    }
+    else
+    {
+      throw STD_EXCEPTION << "Unexpected buffer data component.";
+    }
   };
 
+  m_ServiceComponents.Process(
+    {
+      { uT("Buffer"), SaveBuffer },
+    });
+
+  const Component::Buffer<int> IndexBufferData{ pIndexBufferData };
+
+  const auto pIndexBuffer = Buffer::Create(m_pDevice, false, 
+    IndexBufferData.pData, IndexBufferData.Count);
+  const auto IndexCount = static_cast<DWORD>(IndexBufferData.Count);
+
+  if (pInstanceBufferData == nullptr)
+  {
+    return [=](void)
+    {
+      m_pImmediateContext->IASetIndexBuffer(
+        pIndexBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);
+      m_pImmediateContext->IASetPrimitiveTopology(
+        D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+      m_pImmediateContext->DrawIndexed(IndexCount, 0, 0);
+    };
+  }
+
+  const auto cbBufferMapper =
+    pInstanceBufferData->GetValue<const BufferMapper_t &>(uT("mapper"), nullptr);
+
+  // 23 Сентябрь 2019 22:29 (unicornum.verum@gmail.com)
+  TODO("Тест значений size и count по умолчанию");
+  const auto BufferSize =
+    pInstanceBufferData->GetValue(uT("size"), (::std::size_t)16);
+
+  // 24 Сентябрь 2019 08:00 (unicornum.verum@gmail.com)
+  TODO("Перенести чтение параметра внутрь рендера для возможности его изменения");
+  const auto InstanceCount = static_cast<UINT>(
+    pInstanceBufferData->GetValue(uT("count"), (::std::size_t)1));
+
+  // 24 Сентябрь 2019 08:27 (unicornum.verum@gmail.com)
+  TODO("Проверки выравнивания BufferSize в 16 байт и делимости без остатка BufferSize / InstanceCount");
+  const auto Stride = static_cast<UINT>(
+    BufferSize / InstanceCount);
+
+  const auto pInstanceBuffer = 
+    Buffer::Create<int8_t>(m_pDevice, true, nullptr, BufferSize);
+
+  return [=](void)
+  {
+    const auto IsDirty = cbBufferMapper(nullptr);
+    if (IsDirty)
+    {
+      D3D11_MAPPED_SUBRESOURCE Resource = { 0 };
+      DX_CHECK m_pImmediateContext->Map(pInstanceBuffer.Get(), 0,
+        D3D11_MAP_WRITE_NO_OVERWRITE, 0, &Resource);
+      cbBufferMapper(Resource.pData);
+      m_pImmediateContext->Unmap(pInstanceBuffer.Get(), 0);
+    }
+
+    const UINT offset = 0;
+    m_pImmediateContext->IASetVertexBuffers(1, 1,
+      pInstanceBuffer.GetAddressOf(), &Stride, &offset);
+    m_pImmediateContext->IASetIndexBuffer(
+      pIndexBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);
+    m_pImmediateContext->IASetPrimitiveTopology(
+      D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+    m_pImmediateContext->DrawIndexedInstanced(
+      IndexCount, InstanceCount, 0, 0, 0);
+  };
+}
+
+auto DirectX11::CreateGeometry(const ComponentPtr_t & _pComponent) -> Render_t /*override*/
+{
   const auto Variety = _pComponent->GetValue(uT("variety"), uT("Default"));
 
-  const auto PreRenderGeometry = 
-    (Variety == uT("Default")) ? GetPreRenderGeometry(false) :
-    (Variety == uT("Static")) ? GetPreRenderStaticGeometry() :
-    (Variety == uT("Billboard")) ? GetPreRenderBillboardGeometry() :
+  const auto BuildTransformMatrix =
+    (Variety == uT("Default")) ? CreateDefaultTransformRender<::Matrices>() :
+    (Variety == uT("Static")) ? CreateStaticTransformRender<::Matrices>() :
+    (Variety == uT("Billboard")) ? CreateBillboardTransformRender<::Matrices, ::Matrices>() :
       throw STD_EXCEPTION << "Unknown variety: " << Variety <<
         " [id=" << _pComponent->Id << "].";
 
   return [=](void)
   {
-    PreRenderGeometry();
+    BuildTransformMatrix();
+    m_pConstants->Update<::Matrices>();
 
     ComPtr_t<ID3D11Buffer> pIndexBuffer;
     DXGI_FORMAT Format = DXGI_FORMAT_UNKNOWN;
@@ -818,14 +1357,18 @@ auto DirectX11::CreateBlendState(bool _IsEnabled) -> Render_t
     D3D11_BLEND_DESC BlendDesc = { 0 };
     BlendDesc.AlphaToCoverageEnable = FALSE;
     BlendDesc.IndependentBlendEnable = FALSE;
-    BlendDesc.RenderTarget[0].BlendEnable = TRUE;
-    BlendDesc.RenderTarget[0].SrcBlend = D3D11_BLEND_SRC_ALPHA;
-    BlendDesc.RenderTarget[0].DestBlend = D3D11_BLEND_INV_SRC_ALPHA;
-    BlendDesc.RenderTarget[0].BlendOp = D3D11_BLEND_OP_ADD;
-    BlendDesc.RenderTarget[0].SrcBlendAlpha = D3D11_BLEND_ONE;
-    BlendDesc.RenderTarget[0].DestBlendAlpha = D3D11_BLEND_ZERO;
-    BlendDesc.RenderTarget[0].BlendOpAlpha = D3D11_BLEND_OP_ADD;
-    BlendDesc.RenderTarget[0].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
+
+    for (int i = 0; i < 8; i++)
+    {
+      BlendDesc.RenderTarget[i].BlendEnable = TRUE;
+      BlendDesc.RenderTarget[i].SrcBlend = D3D11_BLEND_SRC_ALPHA;
+      BlendDesc.RenderTarget[i].DestBlend = D3D11_BLEND_INV_SRC_ALPHA;
+      BlendDesc.RenderTarget[i].BlendOp = D3D11_BLEND_OP_ADD;
+      BlendDesc.RenderTarget[i].SrcBlendAlpha = D3D11_BLEND_ONE;
+      BlendDesc.RenderTarget[i].DestBlendAlpha = D3D11_BLEND_ZERO;
+      BlendDesc.RenderTarget[i].BlendOpAlpha = D3D11_BLEND_OP_ADD;
+      BlendDesc.RenderTarget[i].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
+    }
 
     DX_CHECK m_pDevice->CreateBlendState(&BlendDesc, &pBlendState);
   }
@@ -847,8 +1390,9 @@ auto DirectX11::GetDepthState(
   {
     return [=](void)
     {
-      m_pImmediateContext->OMSetRenderTargets(1,
-        m_pRenderTargetView.GetAddressOf(), nullptr);
+      m_pImmediateContext->OMSetRenderTargets(
+        static_cast<UINT>(m_CurrentRenderTargets.size()),
+        &m_CurrentRenderTargets[0], nullptr);
     };
   }
 
@@ -856,7 +1400,7 @@ auto DirectX11::GetDepthState(
   DeptStencilDesc.DepthEnable = true;
   DeptStencilDesc.DepthWriteMask = _IsOverwrite ? 
     D3D11_DEPTH_WRITE_MASK_ALL : D3D11_DEPTH_WRITE_MASK_ZERO;
-  DeptStencilDesc.DepthFunc = D3D11_COMPARISON_LESS;
+  DeptStencilDesc.DepthFunc = D3D11_COMPARISON_GREATER;
   DeptStencilDesc.StencilEnable = false;
 
   ComPtr_t<ID3D11DepthStencilState> pDSState;
@@ -864,65 +1408,80 @@ auto DirectX11::GetDepthState(
 
   Render_t RenderDepthEnabled = [=](void)
   {
+    // 12 Октябрь 2019 16:04 (unicornum.verum@gmail.com)
+    TODO("Тест того, что если BkSurface не устанавливает буфер глубины, то используется буфер глубины экрана");
+
     m_pImmediateContext->OMSetDepthStencilState(pDSState.Get(), 1);
-    m_pImmediateContext->OMSetRenderTargets(1, 
-      m_pRenderTargetView.GetAddressOf(), m_pDepthStencilView.Get());
+    m_pImmediateContext->OMSetRenderTargets(
+      static_cast<UINT>(m_CurrentRenderTargets.size()),
+      &m_CurrentRenderTargets[0], m_pCurrentDepthStencilView.Get());
   };
 
   Render_t RenderDepthClear = [=](void)
   {
+    // 12 Октябрь 2019 16:04 (unicornum.verum@gmail.com)
+    TODO("Тест того, что если BkSurface не устанавливает буфер глубины, то используется буфер глубины экрана");
+
     m_pImmediateContext->OMSetDepthStencilState(pDSState.Get(), 1);
-    m_pImmediateContext->OMSetRenderTargets(1,
-      m_pRenderTargetView.GetAddressOf(), m_pDepthStencilView.Get());
-    m_pImmediateContext->ClearDepthStencilView(m_pDepthStencilView.Get(),
-      D3D11_CLEAR_DEPTH, 1.0f, 0);
+    m_pImmediateContext->OMSetRenderTargets(
+      static_cast<UINT>(m_CurrentRenderTargets.size()),
+      &m_CurrentRenderTargets[0], m_pCurrentDepthStencilView.Get());
+    m_pImmediateContext->ClearDepthStencilView(m_pCurrentDepthStencilView.Get(),
+      D3D11_CLEAR_DEPTH, 0.0f, 0);
   };
 
   return _IsClear ? RenderDepthClear : RenderDepthEnabled;
 }
 
-auto DirectX11::GetPreRenderGeometry(const bool _IsStatic) -> Render_t
+template<class TConstantBuffer>
+auto DirectX11::CreateDefaultTransformRender(void) -> Render_t
 {
-  Renders_t Result;
-
-  Result.push_back([=](void)
-  {
-    m_pConstants->Get<::Matrices>().World = ::DirectX::XMMatrixIdentity();
-  });
+  ::std::deque<Render_t> PreRenders;
 
   auto CreatePosition = [&](const ComponentPtr_t & _pPosition)
   {
-    Result.push_back([=](void)
+    PreRenders.push_front([=](void)
     {
+      auto & World = m_pConstants->Get<TConstantBuffer>().World;
+
       const Component::Position Position{ _pPosition };
 
-      m_pConstants->Get<::Matrices>().World *=
-        ::DirectX::XMMatrixTranslation(Position.X, Position.Y, Position.Z);
+      World = ::glm::translate(World,
+        ::glm::vec3{ Position.X, Position.Y, Position.Z });
     });
   };
 
   auto CreateRotation = [&](const ComponentPtr_t & _pRotation)
   {
-    Result.push_back([=](void)
+    PreRenders.push_front([=](void)
     {
+      auto & World = m_pConstants->Get<::Object>().World;
+
       const Component::Rotation Rotation{ _pRotation };
 
-      m_pConstants->Get<::Matrices>().World *= ::DirectX::XMMatrixRotationX(Rotation.X);
-      m_pConstants->Get<::Matrices>().World *= ::DirectX::XMMatrixRotationY(Rotation.Y);
-      m_pConstants->Get<::Matrices>().World *= ::DirectX::XMMatrixRotationZ(Rotation.Z);
+      World = ::glm::rotate(World, Rotation.Z, ::glm::vec3{ 0.0f, 0.0f, 1.0f });
+      World = ::glm::rotate(World, Rotation.Y, ::glm::vec3{ 0.0f, 1.0f, 0.0f });
+      World = ::glm::rotate(World, Rotation.X, ::glm::vec3{ 1.0f, 0.0f, 0.0f });
     });
   };
 
   auto CreateScale = [&](const ComponentPtr_t & _pScale)
   {
-    Result.push_back([=](void)
+    PreRenders.push_front([=](void)
     {
+      auto & World = m_pConstants->Get<::Object>().World;
+
       const Component::Scale Scale{ _pScale };
 
-      m_pConstants->Get<::Matrices>().World *=
-        ::DirectX::XMMatrixScaling(Scale.X, Scale.Y, Scale.Z);
+      World = ::glm::scale(World, ::glm::vec3{ Scale.X, Scale.Y, Scale.Z });
     });
   };
+
+  PreRenders.push_front([=](void)
+  {
+    m_pConstants->Get<::Object>().World =
+      ::glm::transpose(m_pConstants->Get<::Object>().World);
+  });
 
   m_ServiceComponents.Process(
     {
@@ -931,74 +1490,79 @@ auto DirectX11::GetPreRenderGeometry(const bool _IsStatic) -> Render_t
       { uT("Scale"), CreateScale },
     });
 
-  Result.push_back([this](void)
+  PreRenders.push_front([=](void)
   {
-    m_pConstants->Get<::Matrices>().World =
-      ::DirectX::XMMatrixTranspose(m_pConstants->Get<::Matrices>().World);
+    m_pConstants->Get<::Object>().World = ::glm::identity<::glm::mat4>();
   });
 
-  if (!_IsStatic)
+  return [PreRenders](void)
   {
-    Result.push_back([this](void)
-    {
-      m_pConstants->Update<::Matrices>();
-    });
-  }
-
-  return [Result](void)
-  {
-    for (const auto & Render : Result) Render();
+    for (auto & Render : PreRenders) Render();
   };
 }
 
-auto DirectX11::GetPreRenderBillboardGeometry(void) -> Render_t
+template<class TConstantBuffer>
+auto DirectX11::CreateStaticTransformRender(void) -> Render_t
 {
-  Renders_t Result;
+  CreateDefaultTransformRender<TConstantBuffer>()();
+  const auto World = m_pConstants->Get<TConstantBuffer>().World;
 
-  Result.push_back([=](void)
+  return [=](void)
   {
-    ::DirectX::XMFLOAT4X4 Matrix;
-    // Матрица View уже траспонированная!
-    XMStoreFloat4x4(&Matrix, m_pConstants->Get<::Matrices>().View);
+    m_pConstants->Get<TConstantBuffer>().World = World;
+  };
+}
 
-    Matrix._14 = 0.0f;
-    Matrix._24 = 0.0f;
-    Matrix._34 = 0.0f;
-
-    // Уже!
-    Matrix._41 = 0.0f;
-    Matrix._42 = 0.0f;
-    Matrix._43 = 0.0f;
-    Matrix._44 = 1.0f;
-
-    m_pConstants->Get<::Matrices>().World = XMLoadFloat4x4(&Matrix);
-  });
+template<class TCamera, class TConstantBuffer>
+auto DirectX11::CreateBillboardTransformRender(void) -> Render_t
+{
+  ::std::deque<Render_t> PreRenders;
 
   auto CreatePosition = [&](const ComponentPtr_t & _pPosition)
   {
-    Result.push_back([=](void)
+    PreRenders.push_front([=](void)
     {
+      auto & World = m_pConstants->Get<TConstantBuffer>().World;
+
       const Component::Position Position{ _pPosition };
 
-      m_pConstants->Get<::Matrices>().World *=
-        ::DirectX::XMMatrixTranslation(Position.X, Position.Y, Position.Z);
+      World = ::glm::translate(World,
+        ::glm::vec3{ Position.X, Position.Y, Position.Z });
     });
   };
 
-  m_ServiceComponents.Process(
-    {
-      { uT("Position"), CreatePosition },
-    });
-
-  Result.push_back([this](void)
+  PreRenders.push_front([=](void)
   {
-    m_pConstants->Get<::Matrices>().World =
-      ::DirectX::XMMatrixTranspose(m_pConstants->Get<::Matrices>().World);
-    m_pConstants->Update<::Matrices>();
+    m_pConstants->Get<TConstantBuffer>().World =
+      ::glm::transpose(m_pConstants->Get<TConstantBuffer>().World);
   });
 
-  return [Result](void)
+  m_ServiceComponents.Process({ { uT("Position"), CreatePosition } });
+
+  PreRenders.push_front([=](void)
   {
-    for (const auto & Render : Result) Render();
+    auto & World = m_pConstants->Get<TConstantBuffer>().World;
+
+    // Матрица View уже траспонированная!
+    World = m_pConstants->Get<::Camera>().View;
+
+    World[0][3] = 0.0f;
+    World[1][3] = 0.0f;
+    World[2][3] = 0.0f;
+    World[3][0] = 0.0f;
+    World[3][1] = 0.0f;
+    World[3][2] = 0.0f;
+    World[3][3] = 1.0f;
+  });
+
+  return [PreRenders](void)
+  {
+    for (auto & Render : PreRenders) Render();
   };
 }
+
+} // namespace renderer
+
+} // namespace api
+
+} // namespace covellite

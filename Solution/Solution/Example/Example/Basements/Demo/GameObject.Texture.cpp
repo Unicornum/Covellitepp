@@ -57,7 +57,7 @@ Object_t GameObject::Texture::GetObject(void) const
   const auto & ImageData = m_pImage->m_Image.GetData();
 
   // Компонент Data.Texture не используется, т.к. это приводит к глюкам
-  // на экране загрузки при использовании общего Present'a lk яразных уровней
+  // на экране загрузки при использовании общего Present'a для разных уровней
   // LOD.
 
   return
@@ -66,6 +66,7 @@ Object_t GameObject::Texture::GetObject(void) const
     {
       { uT("id"), m_Id },
       { uT("type"), uT("Texture") },
+      { uT("mipmapping"), true },
       { uT("data"), ImageData.Buffer.data() },
       { uT("width"), static_cast<int>(ImageData.Width) },
       { uT("height"), static_cast<int>(ImageData.Height) },

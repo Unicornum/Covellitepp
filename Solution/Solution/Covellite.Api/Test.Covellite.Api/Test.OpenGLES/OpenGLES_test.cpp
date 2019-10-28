@@ -89,6 +89,25 @@ protected:
 // FRIEND_TEST(OpenGLES_test, Test_Function);
 
 // ************************************************************************** //
+TEST_F(OpenGLES_test, /*DISABLED_*/Test_Destructor)
+{
+  EXPECT_TRUE(::std::has_virtual_destructor<Tested_t>::value);
+  EXPECT_TRUE(::std::is_nothrow_destructible<Tested_t>::value);
+}
+
+// ************************************************************************** //
+TEST_F(OpenGLES_test, /*DISABLED_*/Test_RegisterIntoFactory)
+{
+  using namespace ::alicorn::modules::patterns;
+
+  const Data_t oData;
+  const ::covellite::api::renderer::SettingsData & Data = oData;
+
+  auto pExample = factory::make_unique<ITested_t>(uT("OpenGLES"), Data);
+  EXPECT_NO_THROW(dynamic_cast<Tested_t &>(*pExample));
+}
+
+// ************************************************************************** //
 TEST_F(OpenGLES_test, /*DISABLED_*/Test_Constructor_Destructor)
 {
   using DisplayProxy_t = ::mock::covellite::egl::Display::Proxy;

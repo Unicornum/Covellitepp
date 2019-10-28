@@ -6,6 +6,104 @@
 *  =================
 *  <table frame=void><tr><td></td></tr></table>
 *  
+*  Version: 2.2.3.2191 Unknown
+*  -----
+*  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект \ref CovelliteApiPage : </td></tr></table>
+*  <table frame=void border=1 bordercolor=#FFFFFF cellpadding=5 cellspacing=0 width=98%><tr>
+*    <td width=10px></td>
+*    <td bgcolor=#B8CCE4 width=125px align=center> 27.10.2019 19:03 </td>
+*    <td bgcolor=#FFC0C0> fix: Некорректное отображение освещения на некоторых конфигурациях, удаляющих при компиляции шейдера неиспользуемые переменные. </td>
+*  </tr></table>
+*  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект \ref CovelliteGuiPage : </td></tr></table>
+*  <table frame=void border=1 bordercolor=#FFFFFF cellpadding=5 cellspacing=0 width=98%><tr>
+*    <td width=10px></td>
+*    <td bgcolor=#B8CCE4 width=125px align=center> 26.10.2019 21:41 </td>
+*    <td bgcolor=#FFC0C0> fix: Некорректная работа кнопки BACKSPACE на Android'e. </td>
+*  </tr></table>
+*  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект \ref CovelliteApiPage : </td></tr></table>
+*  <table frame=void border=1 bordercolor=#FFFFFF cellpadding=5 cellspacing=0 width=98%><tr>
+*    <td width=10px></td>
+*    <td bgcolor=#B8CCE4 width=125px align=center> 26.10.2019 19:22 </td>
+*    <td bgcolor=#FFC0C0> fix: Падение программы при выборе объекта после изменения размеров окна программы. </td>
+*  </tr></table>
+*  <table frame=void border=1 bordercolor=#FFFFFF cellpadding=5 cellspacing=0 width=98%><tr>
+*    <td width=10px></td>
+*    <td bgcolor=#B8CCE4 width=125px align=center> 26.10.2019 13:13 </td>
+*    <td bgcolor=#C0FFC0> Камера: параметры znear и zfar. </td>
+*  </tr></table>
+*  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект \ref ExamplePage : </td></tr></table>
+*  <table frame=void border=1 bordercolor=#FFFFFF cellpadding=5 cellspacing=0 width=98%><tr>
+*    <td width=10px></td>
+*    <td bgcolor=#B8CCE4 width=125px align=center> 23.10.2019 12:58 </td>
+*    <td bgcolor=#FFC0C0> fix: Дубли компонентов данных трансформации объектов при отрисовке теней. </td>
+*  </tr></table>
+*  <table frame=void border=1 bordercolor=#FFFFFF cellpadding=5 cellspacing=0 width=98%><tr>
+*    <td width=10px></td>
+*    <td bgcolor=#B8CCE4 width=125px align=center> 22.10.2019 21:28 </td>
+*    <td bgcolor=#FFC0C0> fix: Сдвиг панели при рендеринге теней. </td>
+*  </tr></table>
+*  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект \ref CovelliteApiPage : </td></tr></table>
+*  <table frame=void border=1 bordercolor=#FFFFFF cellpadding=5 cellspacing=0 width=98%><tr>
+*    <td width=10px></td>
+*    <td bgcolor=#B8CCE4 width=125px align=center> 22.10.2019 20:19 </td>
+*    <td bgcolor=#C0FFC0> Чтение данных из текстуры. </td>
+*  </tr></table>
+*  <table frame=void border=1 bordercolor=#FFFFFF cellpadding=5 cellspacing=0 width=98%><tr>
+*    <td width=10px></td>
+*    <td bgcolor=#B8CCE4 width=125px align=center> 20.10.2019 14:18 </td>
+*    <td bgcolor=#C0FFC0> Мипмаппинг для текстур, не используемых как внеэкранные поверхности. </td>
+*  </tr></table>
+*  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект \ref ExamplePage : </td></tr></table>
+*  <table frame=void border=1 bordercolor=#FFFFFF cellpadding=5 cellspacing=0 width=98%><tr>
+*    <td width=10px></td>
+*    <td bgcolor=#B8CCE4 width=125px align=center> 17.10.2019 12:59 </td>
+*    <td bgcolor=#FFC0C0> fix: Неверное отображение PBR материала при использовании реализации OpenGL. </td>
+*  </tr></table>
+*  <table frame=void border=1 bordercolor=#FFFFFF cellpadding=5 cellspacing=0 width=98%><tr>
+*    <td width=10px></td>
+*    <td bgcolor=#B8CCE4 width=125px align=center> 17.10.2019 12:12 </td>
+*    <td bgcolor=#FFC0C0> fix: Ошибка при отключении режима PBR в реализации OpenGL. </td>
+*  </tr></table>
+*  <table frame=void border=1 bordercolor=#FFFFFF cellpadding=5 cellspacing=0 width=98%><tr>
+*    <td width=10px></td>
+*    <td bgcolor=#B8CCE4 width=125px align=center> 16.10.2019 15:48 </td>
+*    <td bgcolor=#C0FFC0> Подсветка объекта под курсором. </td>
+*  </tr></table>
+*  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект \ref CovelliteApiPage : </td></tr></table>
+*  <table frame=void border=1 bordercolor=#FFFFFF cellpadding=5 cellspacing=0 width=98%><tr>
+*    <td width=10px></td>
+*    <td bgcolor=#B8CCE4 width=125px align=center> 13.10.2019 22:43 </td>
+*    <td bgcolor=#C0FFC0> Вывод количества строк в заголовке при ошибке компиляции шейдера. </td>
+*  </tr></table>
+*  <table frame=void border=1 bordercolor=#FFFFFF cellpadding=5 cellspacing=0 width=98%><tr>
+*    <td width=10px></td>
+*    <td bgcolor=#B8CCE4 width=125px align=center> 12.10.2019 16:50 </td>
+*    <td bgcolor=#C0FFC0> Рендеринг во внеэкранную поверхность. </td>
+*  </tr></table>
+*  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект \ref ExamplePage : </td></tr></table>
+*  <table frame=void border=1 bordercolor=#FFFFFF cellpadding=5 cellspacing=0 width=98%><tr>
+*    <td width=10px></td>
+*    <td bgcolor=#B8CCE4 width=125px align=center> 29.09.2019 00:46 </td>
+*    <td bgcolor=#C0FFC0> Постпроцессинг и тени. </td>
+*  </tr></table>
+*  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект \ref CovelliteApiPage : </td></tr></table>
+*  <table frame=void border=1 bordercolor=#FFFFFF cellpadding=5 cellspacing=0 width=98%><tr>
+*    <td width=10px></td>
+*    <td bgcolor=#B8CCE4 width=125px align=center> 24.09.2019 09:37 </td>
+*    <td bgcolor=#C0FFC0> Инстансинг: реализация DirectX11. </td>
+*  </tr></table>
+*  <table frame=void border=1 bordercolor=#FFFFFF cellpadding=5 cellspacing=0 width=98%><tr>
+*    <td width=10px></td>
+*    <td bgcolor=#B8CCE4 width=125px align=center> 23.09.2019 20:23 </td>
+*    <td bgcolor=#C0FFC0> Инстансинг: реализация OpenGL/ES3. </td>
+*  </tr></table>
+*  <table frame=void border=1 bordercolor=#FFFFFF cellpadding=5 cellspacing=0 width=98%><tr>
+*    <td width=10px></td>
+*    <td bgcolor=#B8CCE4 width=125px align=center> 21.09.2019 15:05 </td>
+*    <td bgcolor=#C0FFC0> Пользовательский константный буфер. </td>
+*  </tr></table>
+*  <table frame=void><tr><td></td></tr></table>
+*  
 *  Version: 2.2.2.1960 Unknown
 *  -----
 *  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект \ref CovelliteApiPage : </td></tr></table>

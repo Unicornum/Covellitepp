@@ -3,6 +3,7 @@
 #include <chrono>
 #include <alicorn/cpp/math.hpp>
 #include <alicorn/std/string.hpp>
+#include <Covellite/App/Settings.hpp>
 
 namespace alicorn
 {
@@ -97,6 +98,13 @@ public:
   static constexpr auto TimeStepSecond = 0.5f;
   static const int CellRadius;
   static const int CellSize;
+
+public:
+  template<class T>
+  inline static T GetSettings(const ::alicorn::extension::std::String & _Name)
+  {
+    return ::covellite::app::Settings_t::GetInstance()[uT("Demo")].Get<T>(_Name);
+  }
 };
 
 namespace math = ::alicorn::extension::cpp::math;

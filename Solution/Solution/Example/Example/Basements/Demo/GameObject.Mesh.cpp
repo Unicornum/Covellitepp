@@ -38,8 +38,8 @@ GameObject::Mesh::Mesh(const ::std::vector<Triangle_t> & _Data) :
     }),
     Component_t::Make(
     {
-      { uT("id"), m_MeshId + uT(".Index") },
-      { uT("type"), uT("Buffer") },
+      { uT("id"), m_MeshId + uT(".Present") },
+      { uT("type"), uT("Present") },
       { uT("data"), static_cast<const int *>(Indices.data()) },
       { uT("count"), Indices.size() },
     }),

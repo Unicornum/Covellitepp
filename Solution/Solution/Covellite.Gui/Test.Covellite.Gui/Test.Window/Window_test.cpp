@@ -959,6 +959,42 @@ TEST_F(Window_test, /*DISABLED_*/Test_OnKeyDown)
 }
 
 // ************************************************************************** //
+TEST_F(Window_test, /*DISABLED_*/Test_OnKeyPressed_ControlCodes)
+{
+  using RocketCoreProxy_t = ::mock::Rocket::Core::Proxy;
+  RocketCoreProxy_t RocketCoreProxy;
+  RocketCoreProxy_t::GetInstance() = &RocketCoreProxy;
+
+  using namespace ::testing;
+
+  ::mock::Rocket::Core::Context Context;
+
+  InSequence Dummy;
+
+  const WindowOs_t WindowOs{ m_App };
+  const WindowApi_t WindowApi{ WindowOs };
+  const IWindowApi_t & IWindowApi = WindowApi;
+
+  EXPECT_CALL(RocketCoreProxy, CreateContext(_, _, _))
+    .Times(1)
+    .WillOnce(Return(&Context));
+
+  Tested_t Example{ IWindowApi };
+
+  using namespace ::covellite::events;
+
+  Events Events = IWindowApi;
+
+  for (int i = 0; i < 0x20; i++)
+  {
+    EXPECT_CALL(Context, ProcessTextInput(_))
+      .Times(0);
+
+    Events[::covellite::events::Key.Pressed](i);
+  }
+}
+
+// ************************************************************************** //
 TEST_F(Window_test, /*DISABLED_*/Test_OnKeyPressed)
 {
   using RocketCoreProxy_t = ::mock::Rocket::Core::Proxy;

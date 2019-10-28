@@ -138,9 +138,6 @@
     <ClInclude Include="Basements\Demo\CubeCoords.hpp">
       <Filter>Basements\Demo</Filter>
     </ClInclude>
-    <ClInclude Include="Basements\Demo\Compass.hpp">
-      <Filter>Basements\Demo</Filter>
-    </ClInclude>
     <ClInclude Include="Basements\Demo\Landscape.hpp">
       <Filter>Basements\Demo</Filter>
     </ClInclude>
@@ -166,6 +163,12 @@
       <Filter>Basements\Demo</Filter>
     </ClInclude>
     <ClInclude Include="Basements\Demo\Particles.hpp">
+      <Filter>Basements\Demo</Filter>
+    </ClInclude>
+    <ClInclude Include="Basements\Demo\PointLights.hpp">
+      <Filter>Basements\Demo</Filter>
+    </ClInclude>
+    <ClInclude Include="Basements\Demo\Shadows.hpp">
       <Filter>Basements\Demo</Filter>
     </ClInclude>
   </ItemGroup>
@@ -253,9 +256,6 @@
     <ClCompile Include="Basements\Demo\Camera.cpp">
       <Filter>Basements\Demo</Filter>
     </ClCompile>
-    <ClCompile Include="Basements\Demo\Compass.cpp">
-      <Filter>Basements\Demo</Filter>
-    </ClCompile>
     <ClCompile Include="Basements\Demo\Landscape.cpp">
       <Filter>Basements\Demo</Filter>
     </ClCompile>
@@ -299,6 +299,12 @@
       <Filter>Basements\Demo</Filter>
     </ClCompile>
     <ClCompile Include="Basements\Demo\Particles.cpp">
+      <Filter>Basements\Demo</Filter>
+    </ClCompile>
+    <ClCompile Include="Basements\Demo\PointLights.cpp">
+      <Filter>Basements\Demo</Filter>
+    </ClCompile>
+    <ClCompile Include="Basements\Demo\Shadows.cpp">
       <Filter>Basements\Demo</Filter>
     </ClCompile>
   </ItemGroup>

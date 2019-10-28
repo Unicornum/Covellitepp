@@ -9,6 +9,7 @@ struct IDXGISwapChain;
 struct ID3D11RenderTargetView;
 struct ID3D11Buffer;
 struct ID3D11DepthStencilView;
+class DirectX11_test;
 
 namespace covellite
 {
@@ -61,13 +62,18 @@ public:
 protected:
   // Èםעונפויס GraphicApi:
   Render_t CreateCamera(const ComponentPtr_t &) override;
+  Render_t CreateBkSurface(const ComponentPtr_t &) override;
   Render_t CreateState(const ComponentPtr_t &) override;
   Render_t CreateFog(const ComponentPtr_t &) override;
-  Render_t CreateMaterial(const ComponentPtr_t &) override;
-  Render_t CreateLight(const ComponentPtr_t &) override;
   Render_t CreateTexture(const ComponentPtr_t &) override;
   Render_t CreateShader(const ComponentPtr_t &) override;
   Render_t CreateBuffer(const ComponentPtr_t &) override;
+  Render_t CreateTransform(const ComponentPtr_t &) override;
+  Render_t CreatePresentBuffer(const ComponentPtr_t &) override;
+
+private:
+  // deprecated
+  Render_t CreateLight(const ComponentPtr_t &) override;
   Render_t CreateGeometry(const ComponentPtr_t &) override;
 
 private:
@@ -79,15 +85,24 @@ private:
 private:
   Render_t CreateBlendState(bool);
   Render_t GetDepthState(const bool, const bool, const bool);
-  Render_t GetPreRenderGeometry(const bool);
-  Render_t GetPreRenderBillboardGeometry(void);
+  template<class>
+  Render_t CreateDefaultTransformRender(void);
+  template<class>
+  Render_t CreateStaticTransformRender(void);
+  template<class, class>
+  Render_t CreateBillboardTransformRender(void);
 
 private:
-  ComPtr_t<ID3D11Device>            m_pDevice;
-  ComPtr_t<ID3D11DeviceContext>     m_pImmediateContext;
-  ComPtr_t<IDXGISwapChain>          m_pSwapChain;
-  ComPtr_t<ID3D11RenderTargetView>  m_pRenderTargetView;
-  ComPtr_t<ID3D11DepthStencilView>  m_pDepthStencilView;
+  ComPtr_t<ID3D11Device>                  m_pDevice;
+  ComPtr_t<ID3D11DeviceContext>           m_pImmediateContext;
+  ComPtr_t<IDXGISwapChain>                m_pSwapChain;
+  ComPtr_t<ID3D11RenderTargetView>        m_pScreenRenderTargetView;
+  ComPtr_t<ID3D11DepthStencilView>        m_pScreenDepthStencilView;
+  ::std::vector<ID3D11RenderTargetView *> m_CurrentRenderTargets;
+  ComPtr_t<ID3D11DepthStencilView>        m_pCurrentDepthStencilView;
+
+public:
+  class Texture;
 
 private:
   class Buffer;
@@ -99,8 +114,7 @@ public:
   ~DirectX11(void);
 
 private:
-  FRIEND_TEST(DirectX11_test, Test_Present_Geometry_Billboard);
-  FRIEND_TEST(DirectX11_test, Test_Present_Geometry_CombineTransform);
+  friend DirectX11_test;
 };
 
 FACTORY_REGISTER_STRING_NAME(DirectX11);

@@ -14,7 +14,7 @@ Demo::Demo(const Events_t & _Events, const RendersPtr_t & _pRenders) :
   controller::Controller{ (model::IGameWorld &)m_Model, m_View };
 }
 
-Demo::~Demo(void)
+Demo::~Demo(void) noexcept
 {
   LOGGER(Info) << "Basements Demo destoyed.";
 }

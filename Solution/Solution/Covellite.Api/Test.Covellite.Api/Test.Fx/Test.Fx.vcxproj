@@ -72,9 +72,11 @@
     <ResourceCompile Include="Resources.rc" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Fx.Data_test.cpp" />
+    <ClCompile Include="Fx.Default.Pixel_test.cpp" />
+    <ClCompile Include="Fx.Default.Vertex_test.cpp" />
     <ClCompile Include="Fx.Predefined.Glsl_test.cpp" />
     <ClCompile Include="Fx.Predefined.Hlsl_test.cpp" />
-    <ClCompile Include="Fx_test.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>

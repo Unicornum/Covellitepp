@@ -10,6 +10,9 @@
 #define GL_CURRENT_PROGRAM                0x8B8D
 #define GL_SHADING_LANGUAGE_VERSION       0x8B8C
 #define GL_NUM_EXTENSIONS                 0x821D
+#define GL_INVALID_INDEX                  0xFFFFFFFFu
+#define GL_FLOAT_VEC4                     0x8B52
+#define GL_INT_VEC4                       0x8B55
 
 /* TextureUnit */
 #define GL_TEXTURE0                       0x84C0
@@ -51,10 +54,31 @@
 #define GL_ELEMENT_ARRAY_BUFFER           0x8893
 #define GL_ARRAY_BUFFER_BINDING           0x8894
 #define GL_ELEMENT_ARRAY_BUFFER_BINDING   0x8895
+#define GL_UNIFORM_BUFFER                 0x8A11
 
 #define GL_STREAM_DRAW                    0x88E0
 #define GL_STATIC_DRAW                    0x88E4
 #define GL_DYNAMIC_DRAW                   0x88E8
+
+#define GL_FRAMEBUFFER                    0x8D40
+#define GL_RENDERBUFFER                   0x8D41
+#define GL_FRAMEBUFFER_BINDING            0x8CA6
+#define GL_DRAW_FRAMEBUFFER               0x8CA9
+#define GL_FRAMEBUFFER_COMPLETE           0x8CD5
+#define GL_COLOR_ATTACHMENT0              0x8CE0
+#define GL_DEPTH_ATTACHMENT               0x8D00
+#define GL_STENCIL_ATTACHMENT             0x8D20
+#define GL_DEPTH_STENCIL_ATTACHMENT       0x821A
+#define GL_DEPTH_STENCIL                  0x84F9
+#define GL_UNSIGNED_INT_24_8              0x84FA
+#define GL_DEPTH24_STENCIL8               0x88F0
+#define GL_DEPTH_COMPONENT                0x1902
+#define GL_DEPTH_COMPONENT16              0x81A5
+#define GL_DEPTH_COMPONENT24              0x81A6
+#define GL_DEPTH_COMPONENT32F             0x8CAC
+#define GL_TEXTURE_COMPARE_MODE           0x884C
+#define GL_TEXTURE_COMPARE_FUNC           0x884D
+#define GL_COMPARE_REF_TO_TEXTURE         0x884E
 
 using GLchar = char;
 typedef signed   long  int     khronos_ssize_t;
@@ -201,6 +225,14 @@ inline void glBindBuffer(GLenum target, GLuint buffer)
   glCall(target, buffer);
 }
 
+inline void glBindBufferBase(GLenum target, GLuint index, GLuint buffer)
+{
+  using Call_t = void(*)(GLenum, GLuint, GLuint);
+  static auto glCall = GetProcAddress<Call_t>("glBindBufferBase");
+
+  glCall(target, index, buffer);
+}
+
 inline void glGenBuffers(GLsizei n, GLuint * buffers)
 {
   using Call_t = void(*)(GLsizei, GLuint *);
@@ -301,10 +333,166 @@ inline void glUniformMatrix4fv(GLint location, GLsizei count,
   glCall(location, count, transpose, value);
 }
 
+inline GLuint glGetUniformBlockIndex(GLuint program, const GLchar *uniformBlockName)
+{
+  using Call_t = GLuint(*)(GLuint, const GLchar *);
+  static auto glCall = GetProcAddress<Call_t>("glGetUniformBlockIndex");
+
+  return glCall(program, uniformBlockName);
+}
+
+inline void glUniformBlockBinding(GLuint program, GLuint uniformBlockIndex,
+  GLuint uniformBlockBinding)
+{
+  using Call_t = void(*)(GLuint, GLuint, GLuint);
+  static auto glCall = GetProcAddress<Call_t>("glUniformBlockBinding");
+
+  glCall(program, uniformBlockIndex, uniformBlockBinding);
+}
+
 inline const GLubyte * glGetStringi(GLenum name, GLuint index)
 {
   using Call_t = const GLubyte *(*)(GLenum, GLuint);
   static auto glCall = GetProcAddress<Call_t>("glGetStringi");
 
   return glCall(name, index);
+}
+
+inline void glDrawArraysInstanced(GLenum mode, GLint first, GLsizei count,
+  GLsizei instancecount)
+{
+  using Call_t = void(*)(GLenum, GLint, GLsizei, GLsizei);
+  static auto glCall = GetProcAddress<Call_t>("glDrawArraysInstanced");
+
+  glCall(mode, first, count, instancecount);
+}
+
+inline void glDrawElementsInstanced(GLenum mode, GLsizei count, GLenum type,
+  const void * indices, GLsizei instancecount)
+{
+  using Call_t = void(*)(GLenum, GLsizei, GLenum, const void *, GLsizei);
+  static auto glCall = GetProcAddress<Call_t>("glDrawElementsInstanced");
+
+  glCall(mode, count, type, indices, instancecount);
+}
+
+inline void glVertexAttribDivisor(GLuint index, GLuint divisor)
+{
+  using Call_t = void(*)(GLuint, GLuint);
+  static auto glCall = GetProcAddress<Call_t>("glVertexAttribDivisor");
+
+  glCall(index, divisor);
+}
+
+inline void glGetActiveAttrib(GLuint program, GLuint index, GLsizei bufSize,
+  GLsizei *length, GLint *size, GLenum *type, GLchar *name)
+{
+  using Call_t = void(*)(GLuint, GLuint, GLsizei, GLsizei *, GLint *, 
+    GLenum *, GLchar *);
+  static auto glCall = GetProcAddress<Call_t>("glGetActiveAttrib");
+
+  glCall(program, index, bufSize, length, size, type, name);
+}
+
+inline void glGenFramebuffers(GLsizei n, GLuint *ids)
+{
+  using Call_t = void(*)(GLsizei, GLuint *);
+  static auto glCall = GetProcAddress<Call_t>("glGenFramebuffers");
+
+  glCall(n, ids);
+}
+
+inline void glBindFramebuffer(GLenum target, GLuint framebuffer)
+{
+  using Call_t = void(*)(GLenum, GLuint);
+  static auto glCall = GetProcAddress<Call_t>("glBindFramebuffer");
+
+  glCall(target, framebuffer);
+}
+
+inline GLenum glCheckFramebufferStatus(GLenum target)
+{
+  using Call_t = GLenum(*)(GLenum);
+  static auto glCall = GetProcAddress<Call_t>("glCheckFramebufferStatus");
+
+  return glCall(target);
+}
+
+inline void glDeleteFramebuffers(GLsizei n, const GLuint * framebuffers)
+{
+  using Call_t = void(*)(GLsizei, const GLuint *);
+  static auto glCall = GetProcAddress<Call_t>("glDeleteFramebuffers");
+
+  glCall(n, framebuffers);
+}
+
+inline void glFramebufferTexture2D(GLenum target, GLenum attachment,
+  GLenum textarget, GLuint texture, GLint level)
+{
+  using Call_t = void(*)(GLenum, GLenum, GLenum, GLuint, GLint);
+  static auto glCall = GetProcAddress<Call_t>("glFramebufferTexture2D");
+
+  glCall(target, attachment, textarget, texture, level);
+}
+
+inline void glDepthRangef(GLfloat n, GLfloat f)
+{
+  using Call_t = void(*)(GLfloat, GLfloat);
+  static auto glCall = GetProcAddress<Call_t>("glDepthRangef");
+
+  glCall(n, f);
+}
+
+inline void glDrawBuffers(GLsizei n, const GLenum *bufs)
+{
+  using Call_t = void(*)(GLsizei, const GLenum *);
+  static auto glCall = GetProcAddress<Call_t>("glDrawBuffers");
+
+  glCall(n, bufs);
+}
+
+inline void glGenerateMipmap(GLenum target)
+{
+  using Call_t = void(*)(GLenum);
+  static auto glCall = GetProcAddress<Call_t>("glGenerateMipmap");
+
+  glCall(target);
+}
+
+#define GL_DEBUG_OUTPUT_SYNCHRONOUS       0x8242
+#define GL_DEBUG_OUTPUT                   0x92E0
+
+#define GL_DEBUG_TYPE_ERROR               0x824C
+#define GL_DEBUG_TYPE_DEPRECATED_BEHAVIOR 0x824D
+#define GL_DEBUG_TYPE_UNDEFINED_BEHAVIOR  0x824E
+#define GL_DEBUG_TYPE_PORTABILITY         0x824F
+#define GL_DEBUG_TYPE_PERFORMANCE         0x8250
+#define GL_DEBUG_TYPE_OTHER               0x8251
+#define GL_DEBUG_TYPE_MARKER              0x8268
+#define GL_DEBUG_TYPE_PUSH_GROUP          0x8269
+#define GL_DEBUG_TYPE_POP_GROUP           0x826A
+
+#define GL_DEBUG_SEVERITY_HIGH            0x9146
+#define GL_DEBUG_SEVERITY_MEDIUM          0x9147
+#define GL_DEBUG_SEVERITY_LOW             0x9148
+#define GL_DEBUG_SEVERITY_NOTIFICATION    0x826B
+
+typedef void (APIENTRY * DEBUGPROC)(GLenum source, GLenum type, GLuint id,
+  GLenum severity, GLsizei length, const GLchar *message, const void *userParam);
+
+inline void glDebugMessageCallback(DEBUGPROC callback, const void * userParam)
+{
+  using Call_t = void(*)(DEBUGPROC, const void *);
+  static auto glCall = GetProcAddress<Call_t>("glDebugMessageCallback");
+
+  glCall(callback, userParam);
+}
+
+inline void glDebugMessageControl(GLenum source, GLenum type, GLenum severity,
+  GLsizei count, const GLuint *ids, GLboolean enabled)
+{
+  using Call_t = void(*)(GLenum, GLenum, GLenum, GLsizei, const GLuint *, GLboolean);
+  static auto glCall = GetProcAddress<Call_t>("glDebugMessageControl");
+
+  glCall(source, type, severity, count, ids, enabled);
 }

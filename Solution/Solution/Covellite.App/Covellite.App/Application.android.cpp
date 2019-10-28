@@ -138,7 +138,7 @@ Application::Application(EventBased) :
 {
 }
 
-/*virtual*/ Application::~Application(void)
+/*virtual*/ Application::~Application(void) noexcept
 {
   auto & App = AppInfo_t::Get<android_app>();
 

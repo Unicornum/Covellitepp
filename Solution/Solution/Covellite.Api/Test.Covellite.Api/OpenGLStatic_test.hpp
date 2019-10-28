@@ -1402,7 +1402,7 @@ TEST_F(OpenGLStatic_test, /*DISABLED_*/Test_Camera_Orthographic_DefaultPosition)
       .Times(1);
 
     EXPECT_CALL(GLProxy, Ortho(Viewport[0], Viewport[0] + Viewport[2],
-      Viewport[1] + Viewport[3], Viewport[1], -1, 1))
+      Viewport[1] + Viewport[3], Viewport[1], 1, -1))
       .Times(1);
 
     EXPECT_CALL(GLProxy, Disable(_))
@@ -1518,7 +1518,7 @@ TEST_F(OpenGLStatic_test, /*DISABLED_*/Test_Camera_Orthographic)
     EXPECT_CALL(GLProxy, Ortho(
       SourceViewport[0] + X, SourceViewport[0] + SourceViewport[2] + X,
       SourceViewport[1] + SourceViewport[3] + Y, SourceViewport[1] + Y, 
-      -1, 1))
+      1, -1))
       .Times(1);
 
     EXPECT_CALL(GLProxy, Disable(_))
@@ -1569,7 +1569,7 @@ TEST_F(OpenGLStatic_test, /*DISABLED_*/Test_Camera_Perspective)
       static_cast<float>(::alicorn::extension::cpp::math::GreedToRadian);
 
     const auto Projection = ::glm::perspectiveFovRH(AngleYRadians,
-      Viewport[2], Viewport[3], 0.01f, _zFar);
+      Viewport[2], Viewport[3], _zFar, 0.01f);
 
     auto GetEye = [&](void) -> ::glm::vec3
     {
@@ -1771,7 +1771,991 @@ TEST_F(OpenGLStatic_test, /*DISABLED_*/Test_Camera_Perspective)
 }
 
 // ************************************************************************** //
-TEST_F(OpenGLStatic_test, /*DISABLED_*/Test_Present_Geometry)
+TEST_F(OpenGLStatic_test, /*DISABLED_*/Test_Fog)
+{
+  using GLProxy_t = ::mock::GLProxy;
+  GLProxy_t GLProxy;
+  GLProxy_t::GetInstance() = &GLProxy;
+
+  const Tested_t Example{ Data_t{} };
+  const ITested_t & IExample = Example;
+
+  auto itDataCreator = IExample.GetCreators().find(uT("Data"));
+  ASSERT_NE(IExample.GetCreators().end(), itDataCreator);
+
+  auto itCreator = IExample.GetCreators().find(uT("Fog"));
+  ASSERT_NE(IExample.GetCreators().end(), itCreator);
+
+  const auto TestCall = [&](
+    const Component_t::ComponentPtr_t & _pData,
+    const Component_t::ComponentPtr_t & _pFog,
+    const int _Type, const uint32_t _Color, const float _Near, 
+    const float _Far, const float _Density)
+  {
+    if (_pData != nullptr)
+    {
+      const auto Render = itDataCreator->second(_pData);
+      EXPECT_EQ(nullptr, Render);
+    }
+
+    const auto Render = itCreator->second(_pFog);
+    ASSERT_NE(nullptr, Render);
+
+    for (int i = 0; i < 5; i++)
+    {
+      using namespace ::testing;
+
+      InSequence Dummy;
+
+      EXPECT_CALL(GLProxy, Enable(GL_FOG))
+        .Times(1);
+
+      EXPECT_CALL(GLProxy, Hint(GL_FOG_HINT, GL_NICEST))
+        .Times(1);
+
+      EXPECT_CALL(GLProxy, Fogfv(GL_FOG_COLOR, ARGBtoFloat4(_Color + i)))
+        .Times(1);
+
+      EXPECT_CALL(GLProxy, Fogi(GL_FOG_MODE, _Type))
+        .Times(1);
+
+      EXPECT_CALL(GLProxy, Fogf(GL_FOG_START, _Near + i))
+        .Times(1);
+
+      EXPECT_CALL(GLProxy, Fogf(GL_FOG_END, _Far + i))
+        .Times(1);
+
+      EXPECT_CALL(GLProxy, Fogf(GL_FOG_DENSITY, _Density + i))
+        .Times(1);
+
+      Render();
+
+      const Component_t::ComponentPtr_t pData =
+        (_pData != nullptr) ? _pData : _pFog;
+
+      pData->SetValue(uT("color"), _Color + i + 1);
+      pData->SetValue(uT("near"), _Near + i + 1);
+      pData->SetValue(uT("far"), _Far + i + 1);
+      pData->SetValue(uT("density"), _Density + i + 1);
+    }
+  };
+
+  {
+    const auto pFog = Component_t::Make(
+      {
+        { uT("style"), uT("unknown") },
+      });
+
+    EXPECT_THROW(itCreator->second(pFog), ::std::exception);
+  }
+
+  {
+    const auto pDefaultFog = Component_t::Make({ });
+
+    TestCall(nullptr, pDefaultFog, GL_LINEAR, 0xFFFFFFFF, 10.0f, 100.0f, 1.0f);
+  }
+
+  {
+    const uint32_t Color = 0x19072916;
+    const auto Near = 1907291728.0f;
+    const auto Far = 1907291729.0f;
+
+    const auto pFog = Component_t::Make(
+      {
+        { uT("style"), uT("linear") },
+        { uT("color"), Color },
+        { uT("near"), Near },
+        { uT("far"), Far },
+      });
+
+    TestCall(nullptr, pFog, GL_LINEAR, Color, Near, Far, 1.0f);
+  }
+
+  {
+    const uint32_t Color = 0x19073010;
+    const auto Near = 1907301018.0f;
+    const auto Far = 1907301019.0f;
+
+    const auto pData = Component_t::Make(
+      {
+        { uT("kind"), uT("Fog") },
+        { uT("color"), Color },
+        { uT("near"), Near },
+        { uT("far"), Far },
+      });
+
+    const auto pFog = Component_t::Make(
+      {
+        { uT("style"), uT("linear") },
+      });
+
+    TestCall(pData, pFog, GL_LINEAR, Color, Near, Far, 1.0f);
+  }
+
+  {
+    const uint32_t Color = 0x19072917;
+    const auto Density = 1907291800.0f;
+
+    const auto pFog = Component_t::Make(
+      {
+        { uT("style"), uT("exp") },
+        { uT("color"), Color },
+        { uT("density"), Density },
+      });
+
+    TestCall(nullptr, pFog, GL_EXP, Color, 10.0f, 100.0f, Density);
+  }
+
+  {
+    const uint32_t Color = 0x7301020;
+    const auto Density = 1907301021.0f;
+
+    const auto pData = Component_t::Make(
+      {
+        { uT("kind"), uT("Fog") },
+        { uT("color"), Color },
+        { uT("density"), Density },
+      });
+
+    const auto pFog = Component_t::Make(
+      {
+        { uT("style"), uT("exp") },
+      });
+
+    TestCall(pData, pFog, GL_EXP, Color, 10.0f, 100.0f, Density);
+  }
+
+  {
+    const uint32_t Color = 0x19072918;
+    const auto Density = 1907291802.0f;
+
+    const auto pFog = Component_t::Make(
+      {
+        { uT("style"), uT("exp2") },
+        { uT("color"), Color },
+        { uT("density"), Density },
+      });
+
+    TestCall(nullptr, pFog, GL_EXP2, Color, 10.0f, 100.0f, Density);
+  }
+
+  {
+    const uint32_t Color = 0x7301022;
+    const auto Density = 1907301023.0f;
+
+    const auto pData = Component_t::Make(
+      {
+        { uT("kind"), uT("Fog") },
+        { uT("color"), Color },
+        { uT("density"), Density },
+      });
+
+    const auto pFog = Component_t::Make(
+      {
+        { uT("style"), uT("exp2") },
+      });
+
+    TestCall(pData, pFog, GL_EXP2, Color, 10.0f, 100.0f, Density);
+  }
+}
+
+// ************************************************************************** //
+TEST_F(OpenGLStatic_test, /*DISABLED_*/Test_Shader)
+{
+  const Tested_t Example{ Data_t{} };
+  const ITested_t & IExample = Example;
+
+  auto itCreator = IExample.GetCreators().find(uT("Shader"));
+  ASSERT_NE(IExample.GetCreators().end(), itCreator);
+
+  auto Render = itCreator->second(Component_t::Make({ }));
+  EXPECT_EQ(nullptr, Render);
+}
+
+// ************************************************************************** //
+TEST_F(OpenGLStatic_test, /*DISABLED_*/Test_Transform_UnknownKind)
+{
+  const Tested_t oExample{ Data_t{} };
+  const ITested_t & IExample = oExample;
+
+  auto itCreator = IExample.GetCreators().find(uT("Transform"));
+  ASSERT_NE(IExample.GetCreators().end(), itCreator);
+
+  const auto pComponent = Component_t::Make(
+    {
+      { uT("kind"), uT("Unknow1908061947") },
+    });
+
+  EXPECT_THROW(itCreator->second(pComponent), ::std::exception);
+}
+
+// ************************************************************************** //
+TEST_F(OpenGLStatic_test, /*DISABLED_*/Test_Transform_Default)
+{
+  using GLProxy_t = ::mock::GLProxy;
+  GLProxy_t GLProxy;
+  GLProxy_t::GetInstance() = &GLProxy;
+
+  const Tested_t Example{ Data_t{} };
+  const ITested_t & IExample = Example;
+
+  auto itDataCreator = IExample.GetCreators().find(uT("Data"));
+  ASSERT_NE(IExample.GetCreators().end(), itDataCreator);
+
+  auto itCreator = IExample.GetCreators().find(uT("Transform"));
+  ASSERT_NE(IExample.GetCreators().end(), itCreator);
+
+  auto pPosition = Component_t::Make({ { uT("kind"), uT("Position") } });
+  auto pRotation = Component_t::Make({ { uT("kind"), uT("Rotation") } });
+  auto pScale = Component_t::Make({ { uT("kind"), uT("Scale") } });
+
+  auto TestCallRender = [&](Render_t & _Render,
+    float _X, float _Y, float _Z,
+    float _A, float _B, float _C,
+    float _Sx, float _Sy, float _Sz)
+  {
+    ASSERT_NE(nullptr, _Render);
+
+    pPosition->SetValue(uT("x"), _X);
+    pPosition->SetValue(uT("y"), _Y);
+    pPosition->SetValue(uT("z"), _Z);
+
+    pRotation->SetValue(uT("x"), _A);
+    pRotation->SetValue(uT("y"), _B);
+    pRotation->SetValue(uT("z"), _C);
+
+    pScale->SetValue(uT("x"), _Sx);
+    pScale->SetValue(uT("y"), _Sy);
+    pScale->SetValue(uT("z"), _Sz);
+
+    const auto ViewMatrix = ::glm::lookAtRH(
+      ::glm::vec3{ 1.0f, 2.0f, 3.0f },
+      ::glm::vec3{ 4.0f, 5.0f, 6.0f },
+      ::glm::vec3{ 0.0f, 0.0f, 1.0f });
+
+    auto WorldMatrix = ViewMatrix;
+    WorldMatrix = ::glm::scale(WorldMatrix, { _Sx, _Sy, _Sz });
+    WorldMatrix = ::glm::rotate(WorldMatrix, _C, { 0.0f, 0.0f, 1.0f });
+    WorldMatrix = ::glm::rotate(WorldMatrix, _B, { 0.0f, 1.0f, 0.0f });
+    WorldMatrix = ::glm::rotate(WorldMatrix, _A, { 1.0f, 0.0f, 0.0f });
+    WorldMatrix = ::glm::translate(WorldMatrix, { _X, _Y, _Z });
+
+    using namespace ::testing;
+
+    InSequence Dummy;
+
+    EXPECT_CALL(GLProxy, PushMatrix())
+      .Times(1);
+
+    EXPECT_CALL(GLProxy, GetFloatv(GL_MODELVIEW_MATRIX))
+      .Times(1)
+      .WillOnce(Return(::glm::value_ptr(ViewMatrix)));
+
+    EXPECT_CALL(GLProxy, LoadMatrixf(WorldMatrix))
+      .Times(1);
+
+    _Render();
+  };
+
+  auto PositionRender = itDataCreator->second(pPosition);
+  EXPECT_EQ(nullptr, PositionRender);
+
+  auto RotationRender = itDataCreator->second(pRotation);
+  EXPECT_EQ(nullptr, RotationRender);
+
+  auto ScaleRender = itDataCreator->second(pScale);
+  EXPECT_EQ(nullptr, ScaleRender);
+
+  auto Render = itCreator->second(Component_t::Make({ }));
+
+  // Два вызова, чтобы убедиться, что изменение исходных данных приводит 
+  // к изменению результата рендеринга.
+
+  TestCallRender(Render,
+    1956.0f, 1957.0f, 1958.0f,
+    1204.0f, 1205.0f, 1206.0f,
+    1152.0f, 1153.0f, 1154.0f);
+
+  TestCallRender(Render,
+    1959.0f, 1960.0f, 1961.0f,
+    1145.0f, 1146.0f, 1147.0f,
+    1155.0f, 1157.0f, 1158.0f);
+}
+
+// ************************************************************************** //
+TEST_F(OpenGLStatic_test, /*DISABLED_*/Test_Transform_Static)
+{
+  using GLProxy_t = ::mock::GLProxy;
+  GLProxy_t GLProxy;
+  GLProxy_t::GetInstance() = &GLProxy;
+
+  const Tested_t Example{ Data_t{} };
+  const ITested_t & IExample = Example;
+
+  auto itDataCreator = IExample.GetCreators().find(uT("Data"));
+  ASSERT_NE(IExample.GetCreators().end(), itDataCreator);
+
+  auto itCreator = IExample.GetCreators().find(uT("Transform"));
+  ASSERT_NE(IExample.GetCreators().end(), itCreator);
+
+  auto pPosition = Component_t::Make({ { uT("kind"), uT("Position") } });
+  auto pRotation = Component_t::Make({ { uT("kind"), uT("Rotation") } });
+  auto pScale = Component_t::Make({ { uT("kind"), uT("Scale") } });
+
+  Render_t Render;
+  ::glm::mat4 LastWorldMatrix;
+
+  auto TestCallRender = [&](
+    float _X, float _Y, float _Z,
+    float _A, float _B, float _C,
+    float _Sx, float _Sy, float _Sz,
+    const bool _IsExpectLastMatrix)
+  {
+    pPosition->SetValue(uT("x"), _X);
+    pPosition->SetValue(uT("y"), _Y);
+    pPosition->SetValue(uT("z"), _Z);
+
+    pRotation->SetValue(uT("x"), _A);
+    pRotation->SetValue(uT("y"), _B);
+    pRotation->SetValue(uT("z"), _C);
+
+    pScale->SetValue(uT("x"), _Sx);
+    pScale->SetValue(uT("y"), _Sy);
+    pScale->SetValue(uT("z"), _Sz);
+
+    if (!_IsExpectLastMatrix)
+    {
+      auto PositionRender = itDataCreator->second(pPosition);
+      EXPECT_EQ(nullptr, PositionRender);
+
+      auto RotationRender = itDataCreator->second(pRotation);
+      EXPECT_EQ(nullptr, RotationRender);
+
+      auto ScaleRender = itDataCreator->second(pScale);
+      EXPECT_EQ(nullptr, ScaleRender);
+
+      Render = itCreator->second(Component_t::Make(
+        {
+          { uT("kind"), uT("Static") },
+        }));
+    }
+
+    ASSERT_NE(nullptr, Render);
+
+    const auto ViewMatrix = ::glm::lookAtRH(
+      ::glm::vec3{ 1.0f, 2.0f, 3.0f },
+      ::glm::vec3{ 4.0f, 5.0f, 6.0f },
+      ::glm::vec3{ 0.0f, 0.0f, 1.0f });
+
+    if (!_IsExpectLastMatrix)
+    {
+      auto WorldMatrix = ::glm::identity<::glm::mat4>();
+      WorldMatrix = ::glm::scale(WorldMatrix, { _Sx, _Sy, _Sz });
+      WorldMatrix = ::glm::rotate(WorldMatrix, _C, { 0.0f, 0.0f, 1.0f });
+      WorldMatrix = ::glm::rotate(WorldMatrix, _B, { 0.0f, 1.0f, 0.0f });
+      WorldMatrix = ::glm::rotate(WorldMatrix, _A, { 1.0f, 0.0f, 0.0f });
+      WorldMatrix = ::glm::translate(WorldMatrix, { _X, _Y, _Z });
+
+      LastWorldMatrix = ViewMatrix * WorldMatrix;
+    }
+
+    const auto RawWorldMatrix = LastWorldMatrix;
+
+    using namespace ::testing;
+
+    InSequence Dummy;
+
+    EXPECT_CALL(GLProxy, PushMatrix())
+      .Times(1);
+
+    EXPECT_CALL(GLProxy, GetFloatv(GL_MODELVIEW_MATRIX))
+      .Times(1)
+      .WillOnce(Return(::glm::value_ptr(ViewMatrix)));
+
+    EXPECT_CALL(GLProxy, LoadMatrixf(RawWorldMatrix))
+      .Times(1);
+
+    Render();
+  };
+
+  // Два вызова, чтобы убедиться, что изменение исходных данных не приводит 
+  // к изменению результата рендеринга.
+
+  TestCallRender(
+    1956.0f, 1957.0f, 1958.0f,
+    1204.0f, 1205.0f, 1206.0f,
+    1152.0f, 1153.0f, 1154.0f,
+    false);
+
+  TestCallRender(
+    1959.0f, 1960.0f, 1961.0f,
+    1145.0f, 1146.0f, 1147.0f,
+    1155.0f, 1157.0f, 1158.0f,
+    true);
+}
+
+// ************************************************************************** //
+TEST_F(OpenGLStatic_test, /*DISABLED_*/Test_Transform_Billboard)
+{
+  using GLProxy_t = ::mock::GLProxy;
+  GLProxy_t GLProxy;
+  GLProxy_t::GetInstance() = &GLProxy;
+
+  const Tested_t Example{ Data_t{} };
+  const ITested_t & IExample = Example;
+
+  auto itDataCreator = IExample.GetCreators().find(uT("Data"));
+  ASSERT_NE(IExample.GetCreators().end(), itDataCreator);
+
+  auto itCreator = IExample.GetCreators().find(uT("Transform"));
+  ASSERT_NE(IExample.GetCreators().end(), itCreator);
+
+  auto pPosition = Component_t::Make({ { uT("kind"), uT("Position") } });
+
+  Render_t Render;
+
+  auto WorldMatrix = ::glm::identity<::glm::mat4>();
+
+  auto TestCallRender = [&](
+    float _X, float _Y, float _Z, const bool _IsCreateRender)
+  {
+    pPosition->SetValue(uT("x"), _X);
+    pPosition->SetValue(uT("y"), _Y);
+    pPosition->SetValue(uT("z"), _Z);
+
+    if (_IsCreateRender)
+    {
+      auto PositionRender = itDataCreator->second(pPosition);
+      EXPECT_EQ(nullptr, PositionRender);
+
+      Render = itCreator->second(Component_t::Make(
+        {
+          { uT("kind"), uT("Billboard") },
+        }));
+    }
+
+    ASSERT_NE(nullptr, Render);
+
+    WorldMatrix = ::glm::identity<::glm::mat4>();
+    WorldMatrix = ::glm::translate(WorldMatrix, { _X, _Y, _Z });
+
+    const auto ViewMatrix = ::glm::mat4
+    {
+      { 1.0f, 2.0f, 3.0f, 4.0f },
+      { 5.0f, 6.0f, 7.0f, 8.0f },
+      { 9.0f, 10.0f, 11.0f, 12.0f },
+      { 13.0f, 14.0f, 15.0f, 16.0f },
+    };
+
+    auto TransposeViewMatrix = ::glm::transpose(ViewMatrix);
+    TransposeViewMatrix[0][3] = 0.0f;
+    TransposeViewMatrix[1][3] = 0.0f;
+    TransposeViewMatrix[2][3] = 0.0f;
+    TransposeViewMatrix[3][0] = 0.0f;
+    TransposeViewMatrix[3][1] = 0.0f;
+    TransposeViewMatrix[3][2] = 0.0f;
+    TransposeViewMatrix[3][3] = 1.0f;
+
+    WorldMatrix = ViewMatrix * TransposeViewMatrix *
+      ::glm::translate(::glm::identity<::glm::mat4>(), { _X, _Y, _Z });
+
+    using namespace ::testing;
+
+    InSequence Dummy;
+
+    EXPECT_CALL(GLProxy, PushMatrix())
+      .Times(1);
+
+    EXPECT_CALL(GLProxy, GetFloatv(GL_MODELVIEW_MATRIX))
+      .Times(1)
+      .WillOnce(Return(::glm::value_ptr(ViewMatrix)));
+
+    EXPECT_CALL(GLProxy, LoadMatrixf(WorldMatrix))
+      .Times(1);
+
+    Render();
+  };
+
+  // Два вызова, чтобы убедиться, что изменение исходных данных не приводит 
+  // к изменению результата рендеринга.
+
+  TestCallRender(1956.0f, 1957.0f, 1958.0f,
+    true);
+
+  TestCallRender(1959.0f, 1960.0f, 1961.0f,
+    false);
+}
+
+// ************************************************************************** //
+TEST_F(OpenGLStatic_test, /*DISABLED_*/Test_Transform_DefaultValues)
+{
+  using GLProxy_t = ::mock::GLProxy;
+  GLProxy_t GLProxy;
+  GLProxy_t::GetInstance() = &GLProxy;
+
+  const Tested_t Example{ Data_t{} };
+  const ITested_t & IExample = Example;
+
+  auto itDataCreator = IExample.GetCreators().find(uT("Data"));
+  ASSERT_NE(IExample.GetCreators().end(), itDataCreator);
+
+  auto itCreator = IExample.GetCreators().find(uT("Transform"));
+  ASSERT_NE(IExample.GetCreators().end(), itCreator);
+
+  auto pPosition = Component_t::Make({ { uT("kind"), uT("Position") } });
+  auto pRotation = Component_t::Make({ { uT("kind"), uT("Rotation") } });
+  auto pScale = Component_t::Make({ { uT("kind"), uT("Scale") } });
+
+  auto TestCallRender = [&](const Component_t::ComponentPtr_t & _pComponent,
+    const bool _IsFullTransform = true)
+  {
+    auto PositionRender = itDataCreator->second(pPosition);
+    EXPECT_EQ(nullptr, PositionRender);
+
+    if (_IsFullTransform)
+    {
+      auto RotationRender = itDataCreator->second(pRotation);
+      EXPECT_EQ(nullptr, RotationRender);
+
+      auto ScaleRender = itDataCreator->second(pScale);
+      EXPECT_EQ(nullptr, ScaleRender);
+    }
+
+    const auto Render = itCreator->second(_pComponent);
+    ASSERT_NE(nullptr, Render);
+
+    const auto ViewMatrix = ::glm::mat4
+    {
+      { 1.0f, 2.0f, 3.0f, 4.0f },
+      { 5.0f, 6.0f, 7.0f, 8.0f },
+      { 9.0f, 10.0f, 11.0f, 12.0f },
+      { 13.0f, 14.0f, 15.0f, 16.0f },
+    };
+
+    auto WorldMatrix = ::glm::identity<::glm::mat4>();
+
+    if (_IsFullTransform)
+    {
+      WorldMatrix = ::glm::scale(WorldMatrix, { 1.0f, 1.0f, 1.0f });
+    }
+    else
+    {
+      auto TransposeViewMatrix = ::glm::transpose(ViewMatrix);
+      TransposeViewMatrix[0][3] = 0.0f;
+      TransposeViewMatrix[1][3] = 0.0f;
+      TransposeViewMatrix[2][3] = 0.0f;
+      TransposeViewMatrix[3][0] = 0.0f;
+      TransposeViewMatrix[3][1] = 0.0f;
+      TransposeViewMatrix[3][2] = 0.0f;
+      TransposeViewMatrix[3][3] = 1.0f;
+
+      WorldMatrix = TransposeViewMatrix;
+    }
+
+    const auto RawWorldMatrix = ViewMatrix * WorldMatrix;
+
+    using namespace ::testing;
+
+    InSequence Dummy;
+
+    EXPECT_CALL(GLProxy, GetFloatv(GL_MODELVIEW_MATRIX))
+      .Times(1)
+      .WillOnce(Return(::glm::value_ptr(ViewMatrix)));
+
+    EXPECT_CALL(GLProxy, LoadMatrixf(RawWorldMatrix))
+      .Times(1);
+
+    Render();
+  };
+
+  TestCallRender(Component_t::Make({ }));
+
+  TestCallRender(Component_t::Make(
+    {
+      { uT("kind"), uT("Static") },
+    }));
+
+  TestCallRender(Component_t::Make(
+    {
+      { uT("kind"), uT("Billboard") },
+    }), false);
+}
+
+// ************************************************************************** //
+TEST_F(OpenGLStatic_test, /*DISABLED_*/Test_Transform_Combine)
+{
+  using GLProxy_t = ::mock::GLProxy;
+  GLProxy_t GLProxy;
+  GLProxy_t::GetInstance() = &GLProxy;
+
+  const Tested_t Example{ Data_t{} };
+  const ITested_t & IExample = Example;
+
+  auto itDataCreator = IExample.GetCreators().find(uT("Data"));
+  ASSERT_NE(IExample.GetCreators().end(), itDataCreator);
+
+  auto itCreator = IExample.GetCreators().find(uT("Transform"));
+  ASSERT_NE(IExample.GetCreators().end(), itCreator);
+
+  auto MatrixIdentity = ::glm::identity<::glm::mat4>();
+
+  ::std::deque<Component_t::ComponentPtr_t> Components;
+
+  const auto SetPosition = [&](float _X, float _Y, float _Z)
+  {
+    Components.push_front(Component_t::Make(
+      {
+        { uT("kind"), uT("Position") },
+        { uT("x"), _X },
+        { uT("y"), _Y },
+        { uT("z"), _Z },
+      }));
+
+    MatrixIdentity = ::glm::translate(MatrixIdentity, { _X, _Y, _Z });
+  };
+
+  const auto SetRotation = [&](float _X, float _Y, float _Z)
+  {
+    Components.push_front(Component_t::Make(
+      {
+        { uT("kind"), uT("Rotation") },
+        { uT("x"), _X },
+        { uT("y"), _Y },
+        { uT("z"), _Z },
+      }));
+
+    MatrixIdentity = ::glm::rotate(MatrixIdentity, _Z, { 0.0f, 0.0f, 1.0f });
+    MatrixIdentity = ::glm::rotate(MatrixIdentity, _Y, { 0.0f, 1.0f, 0.0f });
+    MatrixIdentity = ::glm::rotate(MatrixIdentity, _X, { 1.0f, 0.0f, 0.0f });
+  };
+
+  const auto SetScale = [&](float _X, float _Y, float _Z)
+  {
+    Components.push_front(Component_t::Make(
+      {
+        { uT("kind"), uT("Scale") },
+        { uT("x"), _X },
+        { uT("y"), _Y },
+        { uT("z"), _Z },
+      }));
+
+    MatrixIdentity = ::glm::scale(MatrixIdentity, { _X, _Y, _Z });
+  };
+
+  {
+    MatrixIdentity = ::glm::identity<::glm::mat4>();
+    const auto ViewMatrix = MatrixIdentity;
+    Components.clear();
+
+    SetPosition(1.0f, 2.0f, 3.0f);
+    SetRotation(4.0f, 5.0f, 6.0f);
+    SetScale(7.0f, 8.0f, 9.0f);
+
+    SetPosition(11.0f, 22.0f, 33.0f);
+    SetRotation(44.0f, 55.0f, 66.0f);
+    SetScale(77.0f, 88.0f, 99.0f);
+
+    for (const auto & pComponent : Components)
+    {
+      auto ScaleRender = itDataCreator->second(pComponent);
+      EXPECT_EQ(nullptr, ScaleRender);
+    }
+
+    auto Render = itCreator->second(Component_t::Make({ }));
+    ASSERT_NE(nullptr, Render);
+
+    using namespace ::testing;
+
+    InSequence Dummy;
+
+    EXPECT_CALL(GLProxy, GetFloatv(GL_MODELVIEW_MATRIX))
+      .Times(1)
+      .WillOnce(Return(::glm::value_ptr(ViewMatrix)));
+
+    EXPECT_CALL(GLProxy, LoadMatrixf(MatrixIdentity))
+      .Times(1);
+
+    Render();
+  }
+
+  {
+    Components.clear();
+    MatrixIdentity = ::glm::identity<::glm::mat4>();
+    const auto ViewMatrix = MatrixIdentity;
+
+    SetPosition(1.0f, 2.0f, 3.0f);
+    SetRotation(4.0f, 5.0f, 6.0f);
+    SetScale(7.0f, 8.0f, 9.0f);
+
+    SetPosition(11.0f, 22.0f, 33.0f);
+    SetRotation(44.0f, 55.0f, 66.0f);
+    SetScale(77.0f, 88.0f, 99.0f);
+
+    for (const auto & pComponent : Components)
+    {
+      auto ScaleRender = itDataCreator->second(pComponent);
+      EXPECT_EQ(nullptr, ScaleRender);
+    }
+
+    auto Render = itCreator->second(Component_t::Make(
+      {
+        { uT("kind"), uT("Static") },
+      }));
+    ASSERT_NE(nullptr, Render);
+
+    using namespace ::testing;
+
+    InSequence Dummy;
+
+    EXPECT_CALL(GLProxy, GetFloatv(GL_MODELVIEW_MATRIX))
+      .Times(1)
+      .WillOnce(Return(::glm::value_ptr(ViewMatrix)));
+
+    EXPECT_CALL(GLProxy, LoadMatrixf(MatrixIdentity))
+      .Times(1);
+
+    Render();
+  }
+
+  {
+    Components.clear();
+    MatrixIdentity = ::glm::identity<::glm::mat4>();
+
+    const auto ViewMatrix = ::glm::mat4
+    {
+      { 1.0f, 2.0f, 3.0f, 4.0f },
+      { 5.0f, 6.0f, 7.0f, 8.0f },
+      { 9.0f, 10.0f, 11.0f, 12.0f },
+      { 13.0f, 14.0f, 15.0f, 16.0f },
+    };
+
+    auto TransposeViewMatrix = ::glm::transpose(ViewMatrix);
+    TransposeViewMatrix[0][3] = 0.0f;
+    TransposeViewMatrix[1][3] = 0.0f;
+    TransposeViewMatrix[2][3] = 0.0f;
+    TransposeViewMatrix[3][0] = 0.0f;
+    TransposeViewMatrix[3][1] = 0.0f;
+    TransposeViewMatrix[3][2] = 0.0f;
+    TransposeViewMatrix[3][3] = 1.0f;
+
+    SetPosition(1.0f, 2.0f, 3.0f);
+    SetPosition(11.0f, 22.0f, 33.0f);
+
+    for (const auto & pComponent : Components)
+    {
+      auto ScaleRender = itDataCreator->second(pComponent);
+      EXPECT_EQ(nullptr, ScaleRender);
+    }
+
+    const auto RawWorldMatrix =
+      ViewMatrix * TransposeViewMatrix * MatrixIdentity;
+
+    auto Render = itCreator->second(Component_t::Make(
+      {
+        { uT("kind"), uT("Billboard") },
+      }));
+    ASSERT_NE(nullptr, Render);
+
+    using namespace ::testing;
+
+    InSequence Dummy;
+
+    EXPECT_CALL(GLProxy, GetFloatv(GL_MODELVIEW_MATRIX))
+      .Times(1)
+      .WillOnce(Return(::glm::value_ptr(ViewMatrix)));
+
+    EXPECT_CALL(GLProxy, LoadMatrixf(RawWorldMatrix))
+      .Times(1);
+
+    Render();
+  }
+}
+
+// ************************************************************************** //
+TEST_F(OpenGLStatic_test, /*DISABLED_*/Test_Buffer_Constant_ObjectLights_NoMapper)
+{
+  using BufferMapper_t = ::covellite::api::cbBufferMap_t<::Lights_t>;
+
+  const Tested_t oExample{ Data_t{} };
+  const ITested_t & IExample = oExample;
+
+  auto itCreator = IExample.GetCreators().find(uT("Buffer"));
+  ASSERT_NE(IExample.GetCreators().end(), itCreator);
+
+  // Тип буфера выводится из переданного mapper'a
+  //EXPECT_THROW(itCreator->second(Component_t::Make({ })), ::std::exception);
+
+  const auto pComponent1 = Component_t::Make(
+    {
+      { uT("mapper"), BufferMapper_t{ } },
+    });
+
+  EXPECT_THROW(itCreator->second(pComponent1), ::std::exception);
+
+  const auto pComponent2 = Component_t::Make(
+    {
+      { uT("mapper"), BufferMapper_t{ nullptr } },
+    });
+
+  EXPECT_THROW(itCreator->second(pComponent2), ::std::exception);
+}
+
+// ************************************************************************** //
+TEST_F(OpenGLStatic_test, DISABLED_Test_Buffer_Constant_ObjectLights)
+{
+  using BufferMapper_t = ::covellite::api::cbBufferMap_t<::Lights_t>;
+
+  using GLProxy_t = ::mock::GLProxy;
+  GLProxy_t GLProxy;
+  GLProxy_t::GetInstance() = &GLProxy;
+
+  const ::mock::GLint ProgramId = 1908261929;
+  const ::mock::GLint IsValidLocationId = 1908261935;
+  const ::mock::GLint ColorLocationId = 1908261936;
+
+  Lights_t Lights;
+  memset(&Lights, 0x00, sizeof(Lights));
+
+  Lights.Ambient.IsValid = 1909161807;
+  Lights.Ambient.Color = color_t{ 0.1f, 9.09f, 1.61f, 8.08f };
+
+  Lights.Direction.IsValid = 1909161809;
+  Lights.Direction.Color = color_t{ 1.9f, 0.91f, 6.18f, 1.1f };
+  Lights.Direction.Direction = float4{ 19.0f, 0.9f, 16.1f, 812.0f };
+
+  Lights.Points.UsedSlotCount = COVELLITE_MAX_LIGHT_POINT_OBJECT_COUNT;
+
+  for (int i = 0; i < Lights.Points.UsedSlotCount; i++)
+  {
+    Lights.Points.Lights[i].Color = color_t{ 1.9f, 0.91f, 6.18f, 1.4f };
+    Lights.Points.Lights[i].Position = float4{ 1.9f, 0.91f, 6.18f, 1.5f };
+    Lights.Points.Lights[i].Attenuation = float4{ 1.9f, 0.91f, 6.18f, 1.6f };
+  }
+
+  const Tested_t oExample{ Data_t{} };
+  const ITested_t & IExample = oExample;
+
+  auto itConstBufferCreator = IExample.GetCreators().find(uT("Buffer"));
+  ASSERT_NE(IExample.GetCreators().end(), itConstBufferCreator);
+
+  const BufferMapper_t BufferMapper = [&](Lights_t * _pLights)
+  {
+    *_pLights = Lights;
+    return false;
+  };
+
+  auto ConstBufferRender = itConstBufferCreator->second(Component_t::Make(
+    {
+      { uT("mapper"), BufferMapper },
+    }));
+  ASSERT_NE(nullptr, ConstBufferRender);
+
+  using namespace ::testing;
+
+  InSequence Dummy;
+
+  // ...
+
+  ConstBufferRender(); // Вызывается BufferMapper
+}
+
+// ************************************************************************** //
+TEST_F(OpenGLStatic_test, /*DISABLED_*/Test_Present_Index)
+{
+  using GLProxy_t = ::mock::GLProxy;
+  GLProxy_t GLProxy;
+  GLProxy_t::GetInstance() = &GLProxy;
+
+  const Tested_t Example{ Data_t{} };
+  const ITested_t & IExample = Example;
+
+  const ::std::vector<int> Indices =
+  {
+    1808261927,
+    1808261928,
+    1808261929,
+    1808261930,
+    1808261931
+  };
+
+  auto itDataCreator = IExample.GetCreators().find(uT("Data"));
+  ASSERT_NE(IExample.GetCreators().end(), itDataCreator);
+
+  auto TestCallRender = [&](Render_t & _Render)
+  {
+    ASSERT_NE(nullptr, _Render);
+
+    using namespace ::testing;
+
+    InSequence Dummy;
+
+    EXPECT_CALL(GLProxy, DrawElements(GL_TRIANGLES, (int)Indices.size(),
+      GL_UNSIGNED_INT, Indices))
+      .Times(1);
+
+    EXPECT_CALL(GLProxy, BindTexture(GL_TEXTURE_2D, 0))
+      .Times(1);
+
+    EXPECT_CALL(GLProxy, PopMatrix())
+      .Times(1);
+
+    _Render();
+  };
+
+  auto itPresentCreator = IExample.GetCreators().find(uT("Present"));
+  ASSERT_NE(IExample.GetCreators().end(), itPresentCreator);
+
+  {
+    // Индексный буфер в компоненте
+
+    Render_t Render;
+
+    {
+      // Передача локальной копии, чтобы убедиться, что рендер копирует
+      // переданные ему данные.
+      const auto IndicesCopy = Indices;
+
+      Render = itPresentCreator->second(Component_t::Make(
+        {
+            { uT("data"), IndicesCopy.data() },
+            { uT("count"), IndicesCopy.size() },
+        }));
+    }
+
+    TestCallRender(Render);
+  }
+
+  {
+    // Индексный буфер через компонент Data
+
+    Render_t Render;
+
+    {
+      // Передача локальной копии, чтобы убедиться, что рендер копирует
+      // переданные ему данные.
+      const auto IndicesCopy = Indices;
+
+      auto IndexBufferDataRender = itDataCreator->second(Component_t::Make(
+        {
+          { uT("kind"), uT("Buffer") },
+          { uT("data"), IndicesCopy.data() },
+          { uT("count"), IndicesCopy.size() },
+        }));
+      EXPECT_EQ(nullptr, IndexBufferDataRender);
+
+      Render = itPresentCreator->second(Component_t::Make({ }));
+    }
+
+    TestCallRender(Render);
+  }
+}
+
+
+////////////////////////////////////////////////////////////////////////////////
+
+
+// ************************************************************************** //
+TEST_F(OpenGLStatic_test, /*DISABLED_*/Test_Present_Geometry_deprecated)
 {
   using GLProxy_t = ::mock::GLProxy;
   GLProxy_t GLProxy;
@@ -1963,7 +2947,7 @@ TEST_F(OpenGLStatic_test, /*DISABLED_*/Test_Present_Geometry)
 }
 
 // ************************************************************************** //
-TEST_F(OpenGLStatic_test, /*DISABLED_*/Test_Present_Geometry_Static)
+TEST_F(OpenGLStatic_test, /*DISABLED_*/Test_Present_Geometry_Static_deprectaed)
 {
   using GLProxy_t = ::mock::GLProxy;
   GLProxy_t GLProxy;
@@ -2160,7 +3144,7 @@ TEST_F(OpenGLStatic_test, /*DISABLED_*/Test_Present_Geometry_Static)
 }
 
 // ************************************************************************** //
-TEST_F(OpenGLStatic_test, /*DISABLED_*/Test_Present_Geometry_Billboard)
+TEST_F(OpenGLStatic_test, /*DISABLED_*/Test_Present_Geometry_Billboard_deprecated)
 {
   using GLProxy_t = ::mock::GLProxy;
   GLProxy_t GLProxy;
@@ -2335,7 +3319,7 @@ TEST_F(OpenGLStatic_test, /*DISABLED_*/Test_Present_Geometry_Billboard)
 }
 
 // ************************************************************************** //
-TEST_F(OpenGLStatic_test, /*DISABLED_*/Test_Present_Geometry_DefaultTransformValues)
+TEST_F(OpenGLStatic_test, /*DISABLED_*/Test_Present_Geometry_DefaultTransformValues_deprecated)
 {
   using GLProxy_t = ::mock::GLProxy;
   GLProxy_t GLProxy;
@@ -2435,7 +3419,7 @@ TEST_F(OpenGLStatic_test, /*DISABLED_*/Test_Present_Geometry_DefaultTransformVal
 }
 
 // ************************************************************************** //
-TEST_F(OpenGLStatic_test, /*DISABLED_*/Test_Present_Geometry_CombineTransform)
+TEST_F(OpenGLStatic_test, /*DISABLED_*/Test_Present_Geometry_CombineTransform_deprecated)
 {
   using GLProxy_t = ::mock::GLProxy;
   GLProxy_t GLProxy;
@@ -2604,7 +3588,7 @@ TEST_F(OpenGLStatic_test, /*DISABLED_*/Test_Present_Geometry_CombineTransform)
       EXPECT_EQ(nullptr, ScaleRender);
     }
 
-    const auto RawWorldMatrix = 
+    const auto RawWorldMatrix =
       ViewMatrix * TransposeViewMatrix * MatrixIdentity;
 
     auto Render = itCreator->second(Component_t::Make(
@@ -2630,7 +3614,7 @@ TEST_F(OpenGLStatic_test, /*DISABLED_*/Test_Present_Geometry_CombineTransform)
 }
 
 // ************************************************************************** //
-TEST_F(OpenGLStatic_test, /*DISABLED_*/Test_Light_ComplexUsing)
+TEST_F(OpenGLStatic_test, /*DISABLED_*/Test_Light_ComplexUsing_deprecated)
 {
   using GLProxy_t = ::mock::GLProxy;
   GLProxy_t GLProxy;
@@ -2704,7 +3688,7 @@ TEST_F(OpenGLStatic_test, /*DISABLED_*/Test_Light_ComplexUsing)
     const Component_t::ComponentPtr_t & _pCamera1,
     const Component_t::ComponentPtr_t & _pCamera2,
     bool _IsDefault,
-    const ::std::vector<Light> & _Lights, 
+    const ::std::vector<Light> & _Lights,
     bool _IsTestDeleteOverMax = false)
   {
     auto Camera1Render = itCameraCreator->second(_pCamera1);
@@ -2814,11 +3798,11 @@ TEST_F(OpenGLStatic_test, /*DISABLED_*/Test_Light_ComplexUsing)
 
     if (_IsTestDeleteOverMax)
     {
-      TestDeleteLights(MAX_LIGHT_POINT_COUNT - _Lights.size(), true);
+      TestDeleteLights(COVELLITE_MAX_LIGHT_POINT_SCENE_COUNT - _Lights.size(), true);
     }
     else
     {
-      TestDeleteLights(MAX_LIGHT_POINT_COUNT / 2, false);
+      TestDeleteLights(COVELLITE_MAX_LIGHT_POINT_SCENE_COUNT / 2, false);
     }
 
     EXPECT_CALL(GLProxy, Enable(_))
@@ -3133,195 +4117,6 @@ TEST_F(OpenGLStatic_test, /*DISABLED_*/Test_Light_ComplexUsing)
     TestUsingLights(pCamera1, pCamera2, false, LightDirection);
     TestUsingLights(pCamera1, pCamera2, false, LightPoint);
     TestUsingLights(pCamera1, pCamera2, false, Lights);
-  }
-}
-
-// ************************************************************************** //
-TEST_F(OpenGLStatic_test, /*DISABLED_*/Test_Fog)
-{
-  using GLProxy_t = ::mock::GLProxy;
-  GLProxy_t GLProxy;
-  GLProxy_t::GetInstance() = &GLProxy;
-
-  const Tested_t Example{ Data_t{} };
-  const ITested_t & IExample = Example;
-
-  auto itDataCreator = IExample.GetCreators().find(uT("Data"));
-  ASSERT_NE(IExample.GetCreators().end(), itDataCreator);
-
-  auto itCreator = IExample.GetCreators().find(uT("Fog"));
-  ASSERT_NE(IExample.GetCreators().end(), itCreator);
-
-  const auto TestCall = [&](
-    const Component_t::ComponentPtr_t & _pData,
-    const Component_t::ComponentPtr_t & _pFog,
-    const int _Type, const uint32_t _Color, const float _Near, 
-    const float _Far, const float _Density)
-  {
-    if (_pData != nullptr)
-    {
-      const auto Render = itDataCreator->second(_pData);
-      EXPECT_EQ(nullptr, Render);
-    }
-
-    const auto Render = itCreator->second(_pFog);
-    ASSERT_NE(nullptr, Render);
-
-    for (int i = 0; i < 5; i++)
-    {
-      using namespace ::testing;
-
-      InSequence Dummy;
-
-      EXPECT_CALL(GLProxy, Enable(GL_FOG))
-        .Times(1);
-
-      EXPECT_CALL(GLProxy, Hint(GL_FOG_HINT, GL_NICEST))
-        .Times(1);
-
-      EXPECT_CALL(GLProxy, Fogfv(GL_FOG_COLOR, ARGBtoFloat4(_Color + i)))
-        .Times(1);
-
-      EXPECT_CALL(GLProxy, Fogi(GL_FOG_MODE, _Type))
-        .Times(1);
-
-      EXPECT_CALL(GLProxy, Fogf(GL_FOG_START, _Near + i))
-        .Times(1);
-
-      EXPECT_CALL(GLProxy, Fogf(GL_FOG_END, _Far + i))
-        .Times(1);
-
-      EXPECT_CALL(GLProxy, Fogf(GL_FOG_DENSITY, _Density + i))
-        .Times(1);
-
-      Render();
-
-      const Component_t::ComponentPtr_t pData =
-        (_pData != nullptr) ? _pData : _pFog;
-
-      pData->SetValue(uT("color"), _Color + i + 1);
-      pData->SetValue(uT("near"), _Near + i + 1);
-      pData->SetValue(uT("far"), _Far + i + 1);
-      pData->SetValue(uT("density"), _Density + i + 1);
-    }
-  };
-
-  {
-    const auto pFog = Component_t::Make(
-      {
-        { uT("style"), uT("unknown") },
-      });
-
-    EXPECT_THROW(itCreator->second(pFog), ::std::exception);
-  }
-
-  {
-    const auto pDefaultFog = Component_t::Make({ });
-
-    TestCall(nullptr, pDefaultFog, GL_LINEAR, 0xFFFFFFFF, 10.0f, 100.0f, 1.0f);
-  }
-
-  {
-    const uint32_t Color = 0x19072916;
-    const auto Near = 1907291728.0f;
-    const auto Far = 1907291729.0f;
-
-    const auto pFog = Component_t::Make(
-      {
-        { uT("style"), uT("linear") },
-        { uT("color"), Color },
-        { uT("near"), Near },
-        { uT("far"), Far },
-      });
-
-    TestCall(nullptr, pFog, GL_LINEAR, Color, Near, Far, 1.0f);
-  }
-
-  {
-    const uint32_t Color = 0x19073010;
-    const auto Near = 1907301018.0f;
-    const auto Far = 1907301019.0f;
-
-    const auto pData = Component_t::Make(
-      {
-        { uT("kind"), uT("Fog") },
-        { uT("color"), Color },
-        { uT("near"), Near },
-        { uT("far"), Far },
-      });
-
-    const auto pFog = Component_t::Make(
-      {
-        { uT("style"), uT("linear") },
-      });
-
-    TestCall(pData, pFog, GL_LINEAR, Color, Near, Far, 1.0f);
-  }
-
-  {
-    const uint32_t Color = 0x19072917;
-    const auto Density = 1907291800.0f;
-
-    const auto pFog = Component_t::Make(
-      {
-        { uT("style"), uT("exp") },
-        { uT("color"), Color },
-        { uT("density"), Density },
-      });
-
-    TestCall(nullptr, pFog, GL_EXP, Color, 10.0f, 100.0f, Density);
-  }
-
-  {
-    const uint32_t Color = 0x7301020;
-    const auto Density = 1907301021.0f;
-
-    const auto pData = Component_t::Make(
-      {
-        { uT("kind"), uT("Fog") },
-        { uT("color"), Color },
-        { uT("density"), Density },
-      });
-
-    const auto pFog = Component_t::Make(
-      {
-        { uT("style"), uT("exp") },
-      });
-
-    TestCall(pData, pFog, GL_EXP, Color, 10.0f, 100.0f, Density);
-  }
-
-  {
-    const uint32_t Color = 0x19072918;
-    const auto Density = 1907291802.0f;
-
-    const auto pFog = Component_t::Make(
-      {
-        { uT("style"), uT("exp2") },
-        { uT("color"), Color },
-        { uT("density"), Density },
-      });
-
-    TestCall(nullptr, pFog, GL_EXP2, Color, 10.0f, 100.0f, Density);
-  }
-
-  {
-    const uint32_t Color = 0x7301022;
-    const auto Density = 1907301023.0f;
-
-    const auto pData = Component_t::Make(
-      {
-        { uT("kind"), uT("Fog") },
-        { uT("color"), Color },
-        { uT("density"), Density },
-      });
-
-    const auto pFog = Component_t::Make(
-      {
-        { uT("style"), uT("exp2") },
-      });
-
-    TestCall(pData, pFog, GL_EXP2, Color, 10.0f, 100.0f, Density);
   }
 }
 

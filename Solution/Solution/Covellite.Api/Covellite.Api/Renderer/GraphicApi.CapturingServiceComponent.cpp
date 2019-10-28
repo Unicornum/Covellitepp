@@ -3,7 +3,14 @@
 #include "GraphicApi.hpp"
 #include "Component.hpp"
 
-using namespace covellite::api::renderer;
+namespace covellite
+{
+
+namespace api
+{
+
+namespace renderer
+{
 
 GraphicApi::CapturingServiceComponent::CapturingServiceComponent(
   Components_t & _Components) :
@@ -20,13 +27,13 @@ GraphicApi::CapturingServiceComponent::CapturingServiceComponent(
 *  требуемое количество вспомогательных компонент.
 *  - Найденные компоненты (добавленные в выходной набор) удаляются из очереди.
 *  - После вызова функции очередь компонентов будет пустой.
-*  
+*
 * \param [in] _Expected
 *  Информация об ожидаемом наборе компонентов, в котором каждый элемент
 *  должен содержать значение \b kind искомого компонента и компонент, который
 *  будет помещен в выходной набор, если компонента с указанным \b kind
 *  в очереди вспомогательных компонентов не существует.
-*  
+*
 * \return
 *  Набор компонентов, в котором:
 *  - Количество компонентов в точности совпадает с количеством элементов
@@ -42,8 +49,8 @@ auto GraphicApi::CapturingServiceComponent::Get(
   for (const auto & Info : _Expected)
   {
     auto itResult = ::std::find_if(m_Components.rbegin(), m_Components.rend(),
-      [&](const ComponentPtr_t & _pComponent) 
-        { return Info.first == _pComponent->Kind; });
+      [&](const ComponentPtr_t & _pComponent)
+    { return Info.first == _pComponent->Kind; });
 
     if (itResult != m_Components.rend())
     {
@@ -71,13 +78,13 @@ auto GraphicApi::CapturingServiceComponent::Get(
 * \brief
 *  Функция для последовательной обработки очереди вспомогательных компонентов.
 * \details
-*  - Функция проходит по очереди вспомогательных компонентов и для каждого 
+*  - Функция проходит по очереди вспомогательных компонентов и для каждого
 *  компонента вызывает указанный для него (по параметру \b kind) обработчик,
 *  передавая ему в качестве параметра этот компонент.
-*  - Обработчики будут вызываться в том порядке, в котором вспомогательные 
+*  - Обработчики будут вызываться в том порядке, в котором вспомогательные
 *  компоненты были добавлены в очередь.
 *  - После вызова функции очередь компонентов будет пустой.
-*  
+*
 * \param [in] _PreRenders
 *  Исходный набор обработчиков компонентов.
 */
@@ -100,3 +107,9 @@ void GraphicApi::CapturingServiceComponent::Process(
     }
   }
 }
+
+} // namespace renderer
+
+} // namespace api
+
+} // namespace covellite

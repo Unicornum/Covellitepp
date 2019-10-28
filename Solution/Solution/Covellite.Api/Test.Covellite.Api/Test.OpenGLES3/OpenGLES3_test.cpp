@@ -69,7 +69,6 @@ protected:
   }
 
 protected:
-  const String_t m_UsingApi = uT("OpenGLES3");
   static ::Camera & GetCameraMartix(Tested_t & _Example)
   {
     return _Example.m_pConstants->Get<::Camera>();
@@ -233,7 +232,7 @@ TEST_F(OpenGLES3_test, /*DISABLED_*/Test_PresentFrame)
 #define OpenGLCommon_test OpenGLES3_test
 #include "../OpenGLCommon_test.hpp"
 
-const ::std::string ShaderHeader = 
+static const ::std::string ShaderHeader = 
   "#version 300 es\r\n"
   "#define COVELLITE_SHADER_MOBILE\r\n";
 
@@ -242,3 +241,8 @@ const ::std::string ShaderHeader =
 
 #define Updater_test OpenGLES3_test
 #include "../Updater_test.hpp"
+
+static const auto ImplClassName = uT("OpenGLES3");
+
+#define Common_test OpenGLES3_test
+#include "../Common_test.hpp"

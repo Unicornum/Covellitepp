@@ -15,7 +15,7 @@ DbRenders::DbRenders(const RendersPtr_t & _pRenders) :
   LOGGER(Trace) << "Create DbRenders.";
 }
 
-DbRenders::~DbRenders(void)
+DbRenders::~DbRenders(void) noexcept
 {
   LOGGER(Trace) << "Destroy DbRenders.";
 }

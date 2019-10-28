@@ -1,6 +1,8 @@
 ﻿
 #pragma once
 #include <alicorn/std/string.hpp>
+#include <alicorn/std/regex.hpp>
+#include <boost/algorithm/string/replace.hpp>
 #include <Covellite/Api/Component.inl>
 #include <Covellite/Api/Defines.hpp>
 
@@ -34,6 +36,7 @@ class Component final
   using ComponentPtr_t = ::std::shared_ptr<::covellite::api::Component>;
 
 public:
+  class Rasterizer;
   class Scissor;
   template<class>
   class Buffer;
@@ -45,6 +48,19 @@ public:
   class Rotation;
   class Scale;
   class Fog;
+};
+
+class Component::Rasterizer
+{
+public:
+  const String_t CullMode;
+
+public:
+  explicit Rasterizer(const ComponentPtr_t & _pComponent) :
+    CullMode(_pComponent->GetValue(uT("cull"), uT("Back")))
+  {
+
+  }
 };
 
 class Component::Scissor
@@ -75,6 +91,9 @@ private:
   ::std::vector<T> m_Data;
 
 public:
+  inline ::std::vector<T> GetBody(void) const { return { pData, pData + Count }; }
+
+public:
   const T * const pData;
   const size_t Count;
   const int Dimension;
@@ -98,16 +117,22 @@ class Component::Texture :
   public Buffer<uint8_t>
 {
 public:
+  const uint8_t * const pTextureData; // может быть nullptr 
   const int Width;
   const int Height;
   const String_t Destination;
+  const bool IsUsingMipmapping;
+  const bool IsMapping;
 
 public:
   explicit Texture(const ComponentPtr_t & _pComponent) :
     Buffer(_pComponent),
+    pTextureData(_pComponent->GetValue<const uint8_t *>(uT("data"), nullptr)),
     Width(_pComponent->GetValue(uT("width"), 0)),
     Height(_pComponent->GetValue(uT("height"), 0)),
-    Destination(_pComponent->GetValue(uT("destination"), uT("diffuse")))
+    Destination(_pComponent->GetValue(uT("destination"), uT("diffuse"))),
+    IsUsingMipmapping(_pComponent->GetValue(uT("mipmapping"), false)),
+    IsMapping(_pComponent->IsType<const cbBufferMap_t<const void> &>(uT("mapper")))
   {
 
   }
@@ -118,11 +143,14 @@ class Component::Shader :
 {
 public:
   const ::std::string Entry;
+  ::std::string ReturnType;
   const String_t Kind;
+  const ::std::vector<String_t> Instance;
 
 private:
   static String_t GetShaderType(const ::std::string & _Entry,
-    const uint8_t * _pBegin, const uint8_t * _pEnd)
+    const uint8_t * _pBegin, const uint8_t * _pEnd,
+    ::std::string & _ReturnType)
   {
     // Определение типа шейдера, функция вернет строку типа параметра 
     // функции точки входа шейдера.
@@ -141,6 +169,8 @@ private:
       const auto EntryPosition = Line.find(_Entry, 0);
       if (EntryPosition != ::std::string::npos)
       {
+        _ReturnType = Line.substr(0, Line.find(" ", 0));
+
         const auto TypeBegin = EntryPosition + _Entry.length() + 1;
         const auto TypeEnd = Line.find(" ", TypeBegin);
 
@@ -154,11 +184,88 @@ private:
     }
   }
 
+  static ::std::vector<String_t> GetInstance(const String_t _Value)
+  {
+    ::std::vector<String_t> Result;
+
+    if (_Value == uT("")) return Result;
+
+    namespace regex = ::alicorn::extension::std::regex;
+
+    regex::Match mInstanceDataStruct{ uT("(?:[if]4)*") };
+    if (!mInstanceDataStruct.IsMatch(_Value))
+    {
+      throw STD_EXCEPTION << "Unexpected instance value: " << _Value;
+    }
+
+    regex::Search sInstanceDataStruct{ uT("(?:([if])4)") };
+    if (!sInstanceDataStruct.IsSearch(_Value)) return Result;
+
+    const auto & Elements = sInstanceDataStruct.GetCoincided();
+
+    for (::std::size_t i = 0; i < Elements.size(); i++)
+    {
+      Result.push_back(Elements[i].second[0]);
+    }
+
+    return Result;
+  };
+
+  ::std::string GetInstanceInput(const ::std::string & _Input) const
+  {
+    static const ::std::string InstanceBlockDeclaration =
+      "/* place for instance variables */";
+    ::std::string InstanceBlockImplementation;
+
+    for (::std::size_t i = 0; i < Instance.size(); i++)
+    {
+      const auto Index = ::std::to_string(i + 1);
+      const auto Type =
+        (Instance[i] == uT("f")) ? "float4" :
+        (Instance[i] == uT("i")) ? "int4" :
+        nullptr;
+
+      InstanceBlockImplementation += ::std::string{ "COVELLITE_IN " } +
+        Type + " iValue" + Index + " COVELLITE_INPUT_SEMANTIC(TEXCOORD" +
+        Index + ");" + (char)0x5C + "\r\n";
+    }
+
+    return ::boost::algorithm::replace_first_copy(_Input,
+      InstanceBlockDeclaration, InstanceBlockImplementation);
+  };
+
+public:
+  inline ::std::vector<uint8_t> GetInstanceInput(
+    const ::std::vector<uint8_t> & _Input) const
+  {
+    if (Instance.empty()) return _Input;
+
+    const auto strInput = 
+      GetInstanceInput(::std::string{ _Input.cbegin(), _Input.cend() });
+    return ::std::vector<uint8_t>{ strInput.cbegin(), strInput.cend() };
+  }
+
+  ::std::string GetInstanceCopyData(void) const
+  {
+    ::std::string InstanceCopyDataImplementation;
+
+    for (::std::size_t i = 0; i < Instance.size(); i++)
+    {
+      const auto iValue = "iValue" + ::std::to_string(i + 1);
+
+      InstanceCopyDataImplementation += 
+        "  InputData." + iValue + " = " + iValue + ";\r\n";
+    }
+
+    return InstanceCopyDataImplementation;
+  }
+
 public:
   Shader(const ComponentPtr_t & _pComponent, const ::std::vector<uint8_t> & _Data) :
     Buffer(_pComponent, _Data),
     Entry(_pComponent->GetValue<::std::string>(uT("entry"), "Unknown")),
-    Kind(GetShaderType(Entry, pData, pData + Count))
+    Kind(GetShaderType(Entry, pData, pData + Count, ReturnType)),
+    Instance{ GetInstance(_pComponent->GetValue(uT("instance"), uT(""))) }
   {
   }
 };

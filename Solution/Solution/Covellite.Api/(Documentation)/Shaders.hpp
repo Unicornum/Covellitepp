@@ -33,6 +33,10 @@
 *
 * \include ./Solution/Covellite.Api/Covellite.Api/Renderer/Shaders/Input.fx
 *  
+* \note
+*  В случае ошибки компиляции шейдера описание исключения будет содержать
+*  количество строк, добавленных фреймворком к переданному телу шейдера.
+*  
 *  Тело шейдера
 *  ------------
 *  
@@ -87,9 +91,9 @@ out Pixel PixelValue;
 void main()
 {
   Vertex InputData;
-  InputData.Position = CovelliteVertexPosition;
-  InputData.TexCoord = CovellteVertexTexCoord;
-  InputData.Extra = CovelliteVertexExtra;
+  InputData.Position = Covellite_VertexPosition;
+  InputData.TexCoord = Covellite_VertexTexCoord;
+  InputData.Extra = Covellite_VertexExtra;
   PixelValue = entry(InputData);
   gl_Position = PixelValue.ScreenPos;
 }
@@ -101,10 +105,10 @@ void main()
 * \code
 
 in Pixel PixelValue;
-out vec4 OutPixelColor;
+out vec4 Covellite_OutPixelColor;
 void main()
 {
-  OutPixelColor = entry(PixelValue);
+  Covellite_OutPixelColor = entry(PixelValue);
 }
 
 * \endcode

@@ -36,7 +36,7 @@ namespace renderer
 class OpenGLCommon :
   public GraphicApi
 {
-protected:
+public:
   class Texture;
   using MatrixBuilder_t = ::std::function<void(::glm::mat4 &)>;
 
@@ -55,7 +55,16 @@ protected:
   MatrixBuilder_t GetPreRenderBillboardGeometry(void);
 
 protected:
-  Render_t        m_SamplerState = [](void) {};
+  class TexParameters final
+  {
+  public:
+    GLint MinFilter = 0;
+    GLint MagFilter = 0;
+    GLint WrapS = 0;
+    GLint WrapT = 0;
+  };
+
+  TexParameters m_TexParameters;
 
 private:
   const int       m_Top;

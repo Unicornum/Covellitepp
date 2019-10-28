@@ -17,8 +17,8 @@
     <selector class="fbutton">
       <button id="id_controls"/>
       <button id="id_text"/>
-      <button id="id_draw3dobject"/>
       <button id="id_simple2dgame"/>
+      <button id="id_draw3dobject"/>
       <button id="id_demo"/>
     </selector>
   </body>

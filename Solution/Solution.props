@@ -6,6 +6,7 @@
     <Import Project="Solution\Externals.doxygen.ignore\CircularBar\CircularBar.props" />
     <Import Project="Solution\Externals.doxygen.ignore\TinyObjLoader\TinyObjLoader.props" />
     <Import Project="Solution\Externals.doxygen.ignore\Assimp\Assimp.props" />
+    <Import Project="Solution\Externals.doxygen.ignore\MiniAudio\MiniAudio.props" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup />

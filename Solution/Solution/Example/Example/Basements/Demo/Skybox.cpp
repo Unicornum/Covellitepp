@@ -2,9 +2,12 @@
 #include "stdafx.h"
 #include "Skybox.hpp"
 #include <alicorn/std/vector.hpp>
+#include <SoundDevice.hpp>
 #include <Covellite/Api/Component.inl>
+#include <Covellite/Api/Constant.hpp>
 #include "Constants.hpp"
 #include "IDbComponents.hpp"
+#include "IGameWorld.hpp"
 
 namespace basement
 {
@@ -13,9 +16,10 @@ namespace model
 {
 
 Skybox::Skybox(void) :
-  GameObject(Support::Skybox)
+  GameObject(Support::Skybox),
+  m_IsNightMode{ Constant::GetSettings<bool>(uT("IsNightMode")) }
 {
-  AddTexture("demo.skybox.png");
+  AddTexture(m_IsNightMode ? "demo.skybox.night.jpg" : "demo.skybox.day.jpg");
 
   const ::std::vector<Vertex_t> Vertexes =
   {
@@ -73,8 +77,39 @@ auto Skybox::GetObject(const Any_t & _Value) const /*override*/ -> Objects_t
 {
   namespace math = ::alicorn::extension::cpp::math;
   using namespace ::alicorn::extension::std;
+  using BufferMapper_t = ::covellite::api::cbBufferMap_t<::Lights_t>;
 
-  auto & DbComponents = *::boost::any_cast<const IDbComponents *>(_Value);
+  auto & GameWorld = *::boost::any_cast<IGameWorld *>(_Value);
+  auto & DbComponents = GameWorld.GetDbComponents();
+
+  const auto GetAmbientSound = [&](void)
+  {
+    using Path_t = ::boost::filesystem::path;
+    using ::covellite::app::Settings_t;
+
+    const auto PathToSoundsDirectory =
+      Settings_t::GetInstance().Get<Path_t>(uT("PathToSoundsDirectory"));
+    const auto PathToAmbientFile = PathToSoundsDirectory / 
+      (m_IsNightMode ? "Ambient.night.mp3" : "Ambient.day.mp3");
+
+    return GameWorld.GetSoundDevice().Make(
+      ::covellite::app::Vfs_t::GetInstance().GetData(PathToAmbientFile));
+  };
+
+  const auto pAmbient = GetAmbientSound();
+
+  const BufferMapper_t LightMapper = [=](Lights_t * _pLights)
+  {
+    pAmbient->Dummy();
+
+    _pLights->Ambient.IsValid = 1;
+    _pLights->Ambient.Color = { 1.0f, 1.0f, 1.0f, 1.0f };
+
+    _pLights->Direction.IsValid = 0;
+    _pLights->Points.UsedSlotCount = 0;
+
+    return false;
+  };
 
   return
   {
@@ -92,9 +127,8 @@ auto Skybox::GetObject(const Any_t & _Value) const /*override*/ -> Objects_t
       Component_t::Make(
       {
         { uT("id"), uT("Demo.Light.Skybox") },
-        { uT("type"), uT("Light") },
-        { uT("kind"), uT("Ambient") },
-        { uT("color"), 0xFFFFFFFF }, // ARGB
+        { uT("type"), uT("Buffer") },
+        { uT("mapper"), LightMapper },
       }),
       Component_t::Make(
       {
@@ -113,26 +147,22 @@ auto Skybox::GetObject(const Any_t & _Value) const /*override*/ -> Objects_t
       {
         { uT("id"), uT("Demo.Shader.Vertex.Skybox") },
         { uT("type"), uT("Shader") },
-        { uT("entry"), uT("vsLights") },
+        { uT("entry"), uT("vsVolume") },
       }),
       Component_t::Make(
       {
         { uT("id"), uT("Demo.Shader.Pixel.Skybox") },
         { uT("type"), uT("Shader") },
-        { uT("entry"), uT("psTextured") },
+        { uT("entry"), uT("psLightened") },
+      }),
+      Component_t::Make(
+      {
+        { uT("id"), uT("Example.Transform.Skybox") },
+        { uT("type"), uT("Transform") },
       }),
     } +
     GetTexture(0).GetObject() +
-    GetMesh(0).GetObject() +
-    Object_t
-    {
-      Component_t::Make(
-      {
-        { uT("id"), uT("Demo.Present.Skybox") },
-        { uT("type"), uT("Present") },
-        { uT("kind"), uT("Geometry") },
-      })
-    }
+    GetMesh(0).GetObject()
   };
 }
 

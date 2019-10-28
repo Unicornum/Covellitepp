@@ -44,10 +44,14 @@ public:
   GameScenePtr_t CreateGameScene(void) override;
   float GetLandscapeHeight(const CubeCoords &) const override;
   IGameObject::Landscape::Value GetGameObjectType(const CubeCoords &) const override;
+  const PointLights & GetPointLights(void) const override;
+  SoundDevice & GetSoundDevice(void) override;
+  const IDbComponents & GetDbComponents(void) const override;
 
 private:
-  void PrepareScene(const IntPtr_t &);
+  void PrepareLanscapeScene(const IntPtr_t &);
   void PrepareAnimationScene(const IntPtr_t &);
+  void PrepareShadowsScene(const IntPtr_t &);
   void RemoveAllObjects(void);
   Updater_t GetAutoProcessMoving(void);
   Updater_t GetManualProcessMoving(void);
@@ -72,6 +76,12 @@ private:
   GameScenePtr_t          m_pGameScene;
   ::std::queue<Updater_t> m_LoadingQueue;
   Updater_t               m_ProcessingMode = [](const float) {};
+  float m_WindowX = 100.0f;
+  float m_WindowY = 100.0f;
+
+private:
+  ::std::shared_ptr<PointLights> m_pPointLights;
+  ::std::shared_ptr<SoundDevice> m_pSoundDevice;
 
 private:
   class Step final
@@ -91,7 +101,7 @@ private:
 
 public:
   GameWorld(const Events_t &, DbComponents &);
-  ~GameWorld(void);
+  ~GameWorld(void) noexcept;
 };
 
 } // namespace model

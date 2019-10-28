@@ -11,19 +11,21 @@ TODO("Недопустимая ссылка на заголовочный фай
 using namespace layers;
 
 const auto LayerDescription =
-  uT("Демонстрационный режим предназначен для демонстрации возможностей ") +
-  uT("отрисовки бесконечного ландшафта, состоящего из полноценных ") +
-  uT("3D объектов (а также тестирования его работы в течении длительного ") +
-  uT("времени) и рендеринга анимированных объектов.<br/>") +
+  uT("Демонстрационный режим предназначен для демонстрации различных ") +
+  uT("возможностей, предоставляемых базовым функционалом фреймворка ") +
+  uT("(а также тестирования его работы в течении длительного времени).<br/> ") +
   uT("<br/>") +
   uT("Главное меню:<br/>") +
-  uT("- <b>Auto</b> - режим работы, при котором камера перемещается по ") +
-  uT("виртуальному миру в автоматическом режиме.<br/>") +
-  uT("- <b>Manual</b> - режим работы, в котором можно перемещаться ") +
-  uT("по виртуальному при помощи кнопок клавиатуры и жестов мышью ") +
-  uT("с нажатой левой кнопкой.<br/>") +
+  uT("- <b>Lanscape</b> - бесконечный ландшафт, генерируемый случайным образом ") +
+  uT("(режимы дня/ночи и автоматического/ручного движения указывается ") +
+  uT("в настройках; ручное управление осуществляется при помощи кнопок ") + 
+  uT("клавиатуры QWEASDZXC или жестов мышью с нажатой левой кнопкой).<br/>") +
+  uT("Ночной режим демонстрирует рендеринг с использованием большого ") +
+  uT("количества (100+) точечных источников с сцене.<br/>") +
   uT("- <b>Animation</b> - рендеринг анимированной модели, поверхность ") +
   uT("которой отображается при помощи нескольких текстур.<br/>") +
+  uT("- <b>Shadows</b> - демонстрация использования рендеринга во внеэкранную ") +
+  uT("поверхность (динамичесткие тени и глубина резкости).<br/>") +
   uT("- <b>Help</b> - отображение окна с этим описанием.<br/>") +
   uT("- <b>Exit</b> - возврат на главное окно программы-примера ") +
   uT("использования фреймворка.<br/>") +
@@ -72,22 +74,22 @@ void Demo::ActivateProcessMainMenuEvents(void)
 
   using namespace ::covellite::events;
 
-  m_Events[Click.DocumentId(GetId()).ElementId("id_auto")]
+  m_Events[Click.DocumentId(GetId()).ElementId("id_landscape")]
     .Connect([=](void)
   {
-    RunLoadScene(::events::Demo.Auto);
-  });
-
-  m_Events[Click.DocumentId(GetId()).ElementId("id_manual")]
-    .Connect([=](void)
-  {
-    RunLoadScene(::events::Demo.Manual);
+    RunLoadScene(::events::Demo.Landscape);
   });
 
   m_Events[Click.DocumentId(GetId()).ElementId("id_animation")]
     .Connect([=](void)
   {
     RunLoadScene(::events::Demo.Animation);
+  });
+
+  m_Events[Click.DocumentId(GetId()).ElementId("id_shadows")]
+    .Connect([=](void)
+  {
+    RunLoadScene(::events::Demo.Shadows);
   });
 
   m_Events[Click.DocumentId(GetId()).ElementId("id_help")]

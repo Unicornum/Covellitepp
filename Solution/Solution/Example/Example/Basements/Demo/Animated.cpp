@@ -6,6 +6,7 @@
 #include <alicorn/std/vector.hpp>
 #include <alicorn/logger.hpp>
 #include <Covellite/Covellite.hpp>
+#include <Covellite/Api/Constant.hpp>
 #include "Constants.hpp"
 #include "GameScene.hpp"
 
@@ -79,15 +80,16 @@ auto Animated::GetObject(const Any_t & _Value) const /*override*/ -> Objects_t
   auto & Human = GetMesh(0);
   const auto CellPosition = ::boost::any_cast<const CubeCoords &>(_Value);
 
-  const cbMaterial_t MaterialProcess = [=](const String_t & _MaterialName)
+  const cbMaterial_t MaterialProcess = 
+    [=](const Material_t::value_type & _Material)
   {
-    const auto TextureName = (_MaterialName == uT("Unknown")) ?
+    const auto TextureName = (_Material.first == uT("Unknown")) ?
       ::std::string{ "demo.stone.jpg" } :
-      string_cast<::std::string, Locale::UTF8>(_MaterialName);
+      string_cast<::std::string, Locale::UTF8>(_Material.first);
 
     return
       GetTexture(m_Textures[TextureName]).GetObject() +
-      GetPresentObject(CellPosition);
+      GetPresentObject(CellPosition, _Material.second);
   };
 
   return 
@@ -178,45 +180,58 @@ auto Animated::GetObject(const Any_t & _Value) const /*override*/ -> Objects_t
 
 /*static*/ Object_t Animated::GetLightsObject(void)
 {
+  using BufferMapper_t = ::covellite::api::cbBufferMap_t<::Lights_t>;
+
+  const auto ARGBtoFloat4 = [](uint32_t _HexColor)
+  {
+    return ::glm::vec4
+    {
+      ((_HexColor & 0x00FF0000) >> 16) / 255.0f,
+      ((_HexColor & 0x0000FF00) >> 8) / 255.0f,
+      ((_HexColor & 0x000000FF) >> 0) / 255.0f,
+      ((_HexColor & 0xFF000000) >> 24) / 255.0f
+    };
+  };
+
+  const BufferMapper_t Mapper = [=](Lights_t * _pLights)
+  {
+    // «ахватывать здесь ::glm::vec4 нельз€, программа упадет в Release версии
+
+    _pLights->Ambient.IsValid = 1;
+    _pLights->Ambient.Color = ARGBtoFloat4(0xFF8080A0);
+
+    _pLights->Direction.IsValid = 1;
+    _pLights->Direction.Color = ARGBtoFloat4(0xFFF0F0B0);
+    _pLights->Direction.Direction = ::glm::vec4{ 0.0f, 1.0f, 0.33f, 1.0f };
+
+    _pLights->Points.UsedSlotCount = 0;
+
+    return false;
+  };
+
   return
   {
     Component_t::Make(
     {
-      { uT("id"), uT("Demo.Animated.Light.Ambient") },
-      { uT("type"), uT("Light") },
-      { uT("kind"), uT("Ambient") },
-      { uT("color"), 0xFF8080A0 }, // ARGB
+      { uT("id"), uT("Demo.Animated.Lights") },
+      { uT("type"), uT("Buffer") },
+      { uT("mapper"), Mapper },
     }),
-    Component_t::Make(
-    {
-      { uT("type"), uT("Data") },
-      { uT("kind"), uT("Direction") },
-      { uT("x"), 0.0f },
-      { uT("y"), 1.0f },
-      { uT("z"), 0.33f },
-    }),
-    Component_t::Make(
-    {
-      { uT("id"), uT("Demo.Animated.Light.Direction") },
-      { uT("type"), uT("Light") },
-      { uT("kind"), uT("Direction") },
-      { uT("color"), 0xFFF0F0B0 }, // ARGB
-    })
   };
 }
 
-/*static*/ Object_t Animated::GetPresentObject(const CubeCoords & _Coords)
+/*static*/ Object_t Animated::GetPresentObject(
+  const CubeCoords & _Coords,
+  const ::std::vector<Index_t> & _IndexBuffer)
 {
   static int Index = 0;
-  Index++;
 
   using ::alicorn::extension::boost::Format;
 
   // »спользование здесь String::Replace() увеличивает врем€ формировани€
   // идентификатора в 10(!) раз, что существенно сказываетс€
   // на производительности.
-  const auto Id =
-    (Format{ uT("Demo.Animated.Present.%1%") } % Index).ToString();
+  const auto Id = (Format{ uT("%1%") } % Index++).ToString();
 
   return     
   {
@@ -229,9 +244,15 @@ auto Animated::GetObject(const Any_t & _Value) const /*override*/ -> Objects_t
     }),
     Component_t::Make(
     {
-      { uT("id"), Id },
+      { uT("id"), uT("Demo.Animated.Transform.") + Id },
+      { uT("type"), uT("Transform") },
+    }),
+    Component_t::Make(
+    {
+      { uT("id"), uT("Demo.Animated.Present.") + Id },
       { uT("type"), uT("Present") },
-      { uT("kind"), uT("Geometry") },
+      { uT("data"), _IndexBuffer.data() },
+      { uT("count"), _IndexBuffer.size() },
     })
   };
 }

@@ -79,7 +79,6 @@
     <ClInclude Include="Basements\Demo\Animations.hpp" />
     <ClInclude Include="Basements\Demo\Assimp.hpp" />
     <ClInclude Include="Basements\Demo\Camera.hpp" />
-    <ClInclude Include="Basements\Demo\Compass.hpp" />
     <ClInclude Include="Basements\Demo\Constants.hpp" />
     <ClInclude Include="Basements\Demo\Controller.hpp" />
     <ClInclude Include="Basements\Demo\CubeCoords.hpp" />
@@ -98,6 +97,8 @@
     <ClInclude Include="Basements\Demo\Loader.hpp" />
     <ClInclude Include="Basements\Demo\Model.hpp" />
     <ClInclude Include="Basements\Demo\Particles.hpp" />
+    <ClInclude Include="Basements\Demo\PointLights.hpp" />
+    <ClInclude Include="Basements\Demo\Shadows.hpp" />
     <ClInclude Include="Basements\Demo\Skybox.hpp" />
     <ClInclude Include="Basements\Demo\stdafx.h" />
     <ClInclude Include="Basements\Demo\View.hpp" />
@@ -146,7 +147,6 @@
     <ClCompile Include="Basements\Demo\Animation.cpp" />
     <ClCompile Include="Basements\Demo\Assimp.cpp" />
     <ClCompile Include="Basements\Demo\Camera.cpp" />
-    <ClCompile Include="Basements\Demo\Compass.cpp" />
     <ClCompile Include="Basements\Demo\Controller.cpp" />
     <ClCompile Include="Basements\Demo\CubeCoords.cpp" />
     <ClCompile Include="Basements\Demo\DbComponents.cpp" />
@@ -161,6 +161,8 @@
     <ClCompile Include="Basements\Demo\Loader.cpp" />
     <ClCompile Include="Basements\Demo\Model.cpp" />
     <ClCompile Include="Basements\Demo\Particles.cpp" />
+    <ClCompile Include="Basements\Demo\PointLights.cpp" />
+    <ClCompile Include="Basements\Demo\Shadows.cpp" />
     <ClCompile Include="Basements\Demo\Skybox.cpp" />
     <ClCompile Include="Basements\Demo\View.cpp" />
     <ClCompile Include="Basements\Demo\Water.cpp" />

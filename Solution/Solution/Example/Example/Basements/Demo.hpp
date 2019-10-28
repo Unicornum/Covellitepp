@@ -45,7 +45,7 @@ private:
 
 public:
   Demo(const Events_t &, const RendersPtr_t &);
-  ~Demo(void);
+  ~Demo(void) noexcept;
 };
 
 } // namespace basement

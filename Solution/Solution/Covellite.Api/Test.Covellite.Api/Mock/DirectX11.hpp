@@ -2,7 +2,7 @@
 #pragma once
 #include <string>
 #include <vector>
-#include <directxmath.h>
+#include <GLMath.hpp>
 #include <d3d11.h>
 #include <d3dcompiler.h>
 #include "../../Covellite.Api/Renderer/Shaders/Shaders.hpp"
@@ -32,6 +32,13 @@ inline bool operator== (const T & _Left, const T & _Right)
 inline bool operator== (
   const DXGI_SWAP_CHAIN_DESC & _Left,
   const DXGI_SWAP_CHAIN_DESC & _Right)
+{
+  return DirectX::operator== (_Left, _Right);
+}
+
+inline bool operator== (
+  const D3D11_RENDER_TARGET_VIEW_DESC & _Left,
+  const D3D11_RENDER_TARGET_VIEW_DESC & _Right)
 {
   return DirectX::operator== (_Left, _Right);
 }
@@ -115,24 +122,6 @@ inline bool operator== (
 }
 
 inline bool operator== (
-  const ::Fog & _Left,
-  const ::Fog & _Right)
-{
-  if (!(_Left.Color == _Right.Color)) return false;
-  if (!(_Left.Density == _Right.Density)) return false;
-  if (!(_Left.Far == _Right.Far)) return false;
-  if (!(_Left.Near == _Right.Near)) return false;
-  return true;
-}
-
-inline bool operator== (
-  const ::Matrices & _Left,
-  const ::Matrices & _Right)
-{
-  return DirectX::operator== (_Left, _Right);
-}
-
-inline bool operator== (
   const ::float4 & _Left,
   const ::float4 & _Right)
 {
@@ -169,14 +158,59 @@ inline bool operator== (
 }
 
 inline bool operator== (
-  const ::Lights & _Left,
-  const ::Lights & _Right)
+  const ::Camera & _Left,
+  const ::Camera & _Right)
+{
+  if (!(_Left.Projection == _Right.Projection)) return false;
+  if (!(_Left.View == _Right.View)) return false;
+  if (!(_Left.ViewInverse == _Right.ViewInverse)) return false;
+  return true;
+}
+
+inline bool operator== (
+  const ::Fog & _Left,
+  const ::Fog & _Right)
+{
+  if (!(_Left.Color == _Right.Color)) return false;
+  if (!(_Left.Density == _Right.Density)) return false;
+  if (!(_Left.Far == _Right.Far)) return false;
+  if (!(_Left.Near == _Right.Near)) return false;
+  return true;
+}
+
+inline bool operator== (
+  const ::Object & _Left,
+  const ::Object & _Right)
+{
+  if (!(_Left.World == _Right.World)) return false;
+  if (!(_Left.Lights.Ambient == _Right.Lights.Ambient)) return false;
+  if (!(_Left.Lights.Direction == _Right.Lights.Direction)) return false;
+  if (_Left.Lights.Points.UsedSlotCount != _Right.Lights.Points.UsedSlotCount) return false;
+
+  for (int i = 0; i < COVELLITE_MAX_LIGHT_POINT_OBJECT_COUNT; i++)
+  {
+    if (!(_Left.Lights.Points.Lights[i] == _Right.Lights.Points.Lights[i])) return false;
+  }
+
+  return true;
+}
+
+inline bool operator== (
+  const ::Matrices & _Left,
+  const ::Matrices & _Right)
+{
+  return DirectX::operator== (_Left, _Right);
+}
+
+inline bool operator== (
+  const ::SceneLights & _Left,
+  const ::SceneLights & _Right)
 {
   if (!(_Left.Ambient == _Right.Ambient)) return false;
   if (!(_Left.Direction == _Right.Direction)) return false;
   if (_Left.Points.UsedSlotCount != _Right.Points.UsedSlotCount) return false;
 
-  for (int i = 0; i < MAX_LIGHT_POINT_COUNT; i++)
+  for (int i = 0; i < COVELLITE_MAX_LIGHT_POINT_SCENE_COUNT; i++)
   {
     if (!(_Left.Points.Lights[i] == _Right.Points.Lights[i])) return false;
   }
@@ -259,10 +293,12 @@ public:
   }
 };
 
-class MatricesBuffer : public Buffer { };
-class MaterialBuffer : public Buffer { };
-class LightsBuffer : public Buffer { };
+class CameraBuffer : public Buffer { };
 class FogBuffer : public Buffer { };
+class ObjectBuffer : public Buffer { };
+class MatricesBuffer : public Buffer { };
+class LightsBuffer : public Buffer { };
+class Uint8Buffer : public Buffer { };
 
 class Device :
   public ID3D11Device
@@ -282,6 +318,7 @@ public:
 
 public:
   MOCK_METHOD2(CreateBuffer, ID3D11Buffer *(D3D11_BUFFER_DESC, D3D11_SUBRESOURCE_DATA));
+  MOCK_METHOD1(CreateBuffer, ID3D11Buffer *(D3D11_BUFFER_DESC));
 
   virtual HRESULT STDMETHODCALLTYPE CreateBuffer(
     /* [annotation] */
@@ -291,12 +328,8 @@ public:
     /* [annotation] */
     _Out_opt_  ID3D11Buffer ** ppBuffer) 
   {
-    const D3D11_SUBRESOURCE_DATA EmptyInitData = { 0 };
-
-    const auto * pInitialData = (_pInitialData != nullptr) ?
-      _pInitialData : &EmptyInitData;
-
-    *ppBuffer = CreateBuffer(*pDesc, *pInitialData);
+    *ppBuffer = (_pInitialData == nullptr) ? 
+      CreateBuffer(*pDesc) : CreateBuffer(*pDesc, *_pInitialData);
     return GetResult("CreateBuffer");
   }
 
@@ -311,6 +344,7 @@ public:
   }
 
   MOCK_METHOD2(CreateTexture2D, ID3D11Texture2D *(D3D11_TEXTURE2D_DESC, D3D11_SUBRESOURCE_DATA));
+  MOCK_METHOD2(CreateTexture2DSize, void(UINT, UINT));
 
   virtual HRESULT STDMETHODCALLTYPE CreateTexture2D(
     /* [annotation] */
@@ -324,6 +358,7 @@ public:
 
     *ppTexture2D = CreateTexture2D(*pDesc, 
       (pInitialData == nullptr) ? ZeroData : *pInitialData);
+    CreateTexture2DSize(pDesc->Width, pDesc->Height);
     return GetResult("CreateTexture2D");
   }
 
@@ -362,14 +397,19 @@ public:
     return E_FAIL;
   }
 
-  MOCK_METHOD2(CreateRenderTargetView, ID3D11RenderTargetView *(ID3D11Resource *, const void *));
+  MOCK_METHOD2(CreateRenderTargetView, 
+    ID3D11RenderTargetView *(ID3D11Resource *, D3D11_RENDER_TARGET_VIEW_DESC));
 
   virtual HRESULT STDMETHODCALLTYPE CreateRenderTargetView(
     ID3D11Resource * pResource,
     const D3D11_RENDER_TARGET_VIEW_DESC * pDesc,
     ID3D11RenderTargetView ** ppRTView) 
   {
-    *ppRTView = CreateRenderTargetView(pResource, pDesc);
+    static const D3D11_RENDER_TARGET_VIEW_DESC ZeroData = { 0 };
+
+    *ppRTView = CreateRenderTargetView(pResource,
+      (pDesc == nullptr) ? ZeroData : *pDesc);
+
     return GetResult("CreateRenderTargetView");
   }
 
@@ -779,7 +819,7 @@ public:
     VSSetConstantBuffers(StartSlot, NumBuffers, *ppConstantBuffers);
   }
 
-  MOCK_METHOD3(PSSetShaderResources, void(UINT, UINT, ID3D11ShaderResourceView *));
+  MOCK_METHOD2(PSSetShaderResources, void(UINT, ::std::vector<ID3D11ShaderResourceView *>));
 
   virtual void STDMETHODCALLTYPE PSSetShaderResources(
     /* [annotation] */
@@ -789,7 +829,9 @@ public:
     /* [annotation] */
     _In_reads_opt_(NumViews)  ID3D11ShaderResourceView *const *ppShaderResourceViews) 
   {
-    PSSetShaderResources(StartSlot, NumViews, *ppShaderResourceViews);
+    ::std::vector<ID3D11ShaderResourceView *> ShaderResourceViews{
+      ppShaderResourceViews, ppShaderResourceViews + NumViews };
+    PSSetShaderResources(StartSlot, ShaderResourceViews);
   }
 
   MOCK_METHOD3(PSSetShader, void(ID3D11PixelShader *, 
@@ -888,17 +930,19 @@ public:
     /* [annotation] */
     _In_  UINT /*Offset*/));
 
-  virtual void STDMETHODCALLTYPE DrawIndexedInstanced(
-    /* [annotation] */
-    _In_  UINT IndexCountPerInstance,
-    /* [annotation] */
-    _In_  UINT InstanceCount,
-    /* [annotation] */
-    _In_  UINT StartIndexLocation,
-    /* [annotation] */
-    _In_  INT BaseVertexLocation,
-    /* [annotation] */
-    _In_  UINT StartInstanceLocation) {}
+  MOCK_METHOD5(DrawIndexedInstanced, void(UINT, UINT, UINT, INT, UINT));
+
+  //virtual void STDMETHODCALLTYPE DrawIndexedInstanced(
+  //  /* [annotation] */
+  //  _In_  UINT IndexCountPerInstance,
+  //  /* [annotation] */
+  //  _In_  UINT InstanceCount,
+  //  /* [annotation] */
+  //  _In_  UINT StartIndexLocation,
+  //  /* [annotation] */
+  //  _In_  INT BaseVertexLocation,
+  //  /* [annotation] */
+  //  _In_  UINT StartInstanceLocation) {}
 
   virtual void STDMETHODCALLTYPE DrawInstanced(
     /* [annotation] */
@@ -985,7 +1029,7 @@ public:
     /* [annotation] */
     _In_reads_opt_(NumSamplers)  ID3D11SamplerState *const *ppSamplers) {}
 
-  MOCK_METHOD3(OMSetRenderTargets, void(UINT, ID3D11RenderTargetView *,
+  MOCK_METHOD2(OMSetRenderTargets, void(::std::vector<ID3D11RenderTargetView *>,
     ID3D11DepthStencilView *));
 
   virtual void STDMETHODCALLTYPE OMSetRenderTargets(
@@ -996,7 +1040,9 @@ public:
     /* [annotation] */
     _In_opt_  ID3D11DepthStencilView *pDepthStencilView) 
   {
-    OMSetRenderTargets(NumViews, *ppRenderTargetViews, pDepthStencilView);
+    ::std::vector<ID3D11RenderTargetView *> RenderTargetViews(
+      ppRenderTargetViews, ppRenderTargetViews + NumViews);
+    OMSetRenderTargets(RenderTargetViews, pDepthStencilView);
   }
 
   virtual void STDMETHODCALLTYPE OMSetRenderTargetsAndUnorderedAccessViews(
@@ -1124,18 +1170,22 @@ public:
     /* [annotation] */
     _In_opt_  const D3D11_BOX *pSrcBox) {}
 
-  virtual void STDMETHODCALLTYPE CopyResource(
-    /* [annotation] */
-    _In_  ID3D11Resource *pDstResource,
-    /* [annotation] */
-    _In_  ID3D11Resource *pSrcResource) {}
+  MOCK_METHOD2(CopyResource, void (ID3D11Resource *, ID3D11Resource *));
 
+  MOCK_METHOD6(UpdateSubresource, void(ID3D11Resource *, UINT,
+    const D3D11_BOX *, ::Camera, UINT, UINT));
+  MOCK_METHOD6(UpdateSubresource, void(ID3D11Resource *, UINT,
+    const D3D11_BOX *, ::Object, UINT, UINT));
   MOCK_METHOD6(UpdateSubresource, void(ID3D11Resource *, UINT,
     const D3D11_BOX *, ::Fog, UINT, UINT));
   MOCK_METHOD6(UpdateSubresource, void(ID3D11Resource *, UINT,
-    const D3D11_BOX *, ::Lights, UINT, UINT));
+    const D3D11_BOX *, ::SceneLights, UINT, UINT));
   MOCK_METHOD6(UpdateSubresource, void(ID3D11Resource *, UINT, 
     const D3D11_BOX *, ::Matrices, UINT, UINT));
+  MOCK_METHOD6(UpdateSubresource, void(ID3D11Resource *, UINT,
+    const D3D11_BOX *, ::std::vector<uint8_t>, UINT, UINT));
+  MOCK_METHOD7(UpdateSubresource, void(ID3D11Resource *, UINT,
+    const D3D11_BOX *, const void *, UINT, UINT, int));
 
   virtual void UpdateSubresource(
     /* [annotation] */
@@ -1151,10 +1201,15 @@ public:
     /* [annotation] */
     _In_  UINT SrcDepthPitch)
   {
-    if (dynamic_cast<LightsBuffer *>(pDstResource) != nullptr)
+    if (dynamic_cast<ID3D11Texture2D *>(pDstResource) != nullptr)
     {
       UpdateSubresource(pDstResource, DstSubresource, pDstBox,
-        *reinterpret_cast<const ::Lights *>(pSrcData),
+        pSrcData, SrcRowPitch, SrcDepthPitch, 0);
+    }
+    else if (dynamic_cast<CameraBuffer *>(pDstResource) != nullptr)
+    {
+      UpdateSubresource(pDstResource, DstSubresource, pDstBox,
+        *reinterpret_cast<const ::Camera *>(pSrcData),
         SrcRowPitch, SrcDepthPitch);
     }
     else if (dynamic_cast<FogBuffer *>(pDstResource) != nullptr)
@@ -1163,8 +1218,38 @@ public:
         *reinterpret_cast<const ::Fog *>(pSrcData),
         SrcRowPitch, SrcDepthPitch);
     }
+    else if (dynamic_cast<ObjectBuffer *>(pDstResource) != nullptr)
+    {
+      UpdateSubresource(pDstResource, DstSubresource, pDstBox,
+        *reinterpret_cast<const ::Object *>(pSrcData),
+        SrcRowPitch, SrcDepthPitch);
+    }
+    else if (dynamic_cast<Uint8Buffer *>(pDstResource) != nullptr)
+    {
+      ::std::vector<uint8_t> Uint8Data;
+
+      auto * pData = reinterpret_cast<const uint8_t *>(pSrcData);
+      while (*pData != 0x00)
+      {
+        Uint8Data.push_back(*pData);
+        pData++;
+      }
+
+      UpdateSubresource(pDstResource, DstSubresource, pDstBox,
+        Uint8Data, SrcRowPitch, SrcDepthPitch);
+    }
+    else if (dynamic_cast<LightsBuffer *>(pDstResource) != nullptr)
+    {
+      UpdateSubresource(pDstResource, DstSubresource, pDstBox,
+        *reinterpret_cast<const ::SceneLights *>(pSrcData),
+        SrcRowPitch, SrcDepthPitch);
+    }
     else
     {
+      UpdateSubresource(pDstResource, DstSubresource, pDstBox,
+        *reinterpret_cast<const ::Object *>(pSrcData),
+        SrcRowPitch, SrcDepthPitch);
+
       UpdateSubresource(pDstResource, DstSubresource, pDstBox,
         *reinterpret_cast<const ::Matrices *>(pSrcData),
         SrcRowPitch, SrcDepthPitch);
@@ -1215,9 +1300,7 @@ public:
     /* [annotation] */
     _In_  UINT8));
 
-  virtual void STDMETHODCALLTYPE GenerateMips(
-    /* [annotation] */
-    _In_  ID3D11ShaderResourceView *pShaderResourceView) {}
+  MOCK_METHOD1(GenerateMips, void (ID3D11ShaderResourceView *));
 
   virtual void STDMETHODCALLTYPE SetResourceMinLOD(
     /* [annotation] */

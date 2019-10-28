@@ -46,7 +46,7 @@ private:
 
 public:
   DbComponents(void);
-  ~DbComponents(void);
+  ~DbComponents(void) noexcept;
 };
 
 } // namespace model

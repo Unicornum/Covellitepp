@@ -16,10 +16,162 @@
 <tr>
 <td width=20px></td>
 <td bgcolor=#B8CCE4 width=10px></td>
-<td bgcolor=#B8CCE4 width=10px><font size=1>468</font></td>
+<td bgcolor=#B8CCE4 width=10px><font size=1>29</font></td>
 <td bgcolor=#B8CCE4 width=10px></td>
 <td bgcolor=#FFC0C0 width=10px></td>
-<td bgcolor=#FFC0C0><code>  return nullptr;</code></td>
+<td bgcolor=#FFC0C0><code>  throw STD_EXCEPTION << "Это не должно вызываться, нужно для компилируемости";</code></td>
+</tr>
+<tr>
+<td width=20px></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#B8CCE4 width=10px><font size=1></font></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#FFC0C0 width=10px></td>
+<td bgcolor=#FFC0C0><code>...</code></td>
+</tr>
+<tr>
+<td width=20px></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#B8CCE4 width=10px><font size=1>1250</font></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#FFC0C0 width=10px></td>
+<td bgcolor=#FFC0C0><code>      throw STD_EXCEPTION << "Unexpected buffer data component.";</code></td>
+</tr>
+<tr>
+<td width=20px></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#B8CCE4 width=10px><font size=1></font></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#FFC0C0 width=10px></td>
+<td bgcolor=#FFC0C0><code>...</code></td>
+</tr>
+<tr>
+<td width=20px></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#B8CCE4 width=10px><font size=1>1333</font></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#FFC0C0 width=10px></td>
+<td bgcolor=#FFC0C0><code>  return [=](void)</code></td>
+</tr>
+<tr>
+<td width=20px></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#B8CCE4 width=10px><font size=1></font></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#FFC0C0 width=10px></td>
+<td bgcolor=#FFC0C0><code>...</code></td>
+</tr>
+<tr>
+<td width=20px></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#B8CCE4 width=10px><font size=1>1335</font></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#FFC0C0 width=10px></td>
+<td bgcolor=#FFC0C0><code>    BuildTransformMatrix();</code></td>
+</tr>
+<tr>
+<td width=20px></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#B8CCE4 width=10px><font size=1>1336</font></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#FFC0C0 width=10px></td>
+<td bgcolor=#FFC0C0><code>    m_pConstants->Update<::Matrices>();</code></td>
+</tr>
+<tr>
+<td width=20px></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#B8CCE4 width=10px><font size=1></font></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#FFC0C0 width=10px></td>
+<td bgcolor=#FFC0C0><code>...</code></td>
+</tr>
+<tr>
+<td width=20px></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#B8CCE4 width=10px><font size=1>1338</font></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#FFC0C0 width=10px></td>
+<td bgcolor=#FFC0C0><code>    ComPtr_t<ID3D11Buffer> pIndexBuffer;</code></td>
+</tr>
+<tr>
+<td width=20px></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#B8CCE4 width=10px><font size=1>1339</font></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#FFC0C0 width=10px></td>
+<td bgcolor=#FFC0C0><code>    DXGI_FORMAT Format = DXGI_FORMAT_UNKNOWN;</code></td>
+</tr>
+<tr>
+<td width=20px></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#B8CCE4 width=10px><font size=1>1340</font></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#FFC0C0 width=10px></td>
+<td bgcolor=#FFC0C0><code>    UINT Offset = 0;</code></td>
+</tr>
+<tr>
+<td width=20px></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#B8CCE4 width=10px><font size=1>1341</font></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#FFC0C0 width=10px></td>
+<td bgcolor=#FFC0C0><code>    m_pImmediateContext->IAGetIndexBuffer(&pIndexBuffer, &Format, &Offset);</code></td>
+</tr>
+<tr>
+<td width=20px></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#B8CCE4 width=10px><font size=1></font></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#FFC0C0 width=10px></td>
+<td bgcolor=#FFC0C0><code>...</code></td>
+</tr>
+<tr>
+<td width=20px></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#B8CCE4 width=10px><font size=1>1343</font></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#FFC0C0 width=10px></td>
+<td bgcolor=#FFC0C0><code>    D3D11_BUFFER_DESC Desc = { 0 };</code></td>
+</tr>
+<tr>
+<td width=20px></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#B8CCE4 width=10px><font size=1>1344</font></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#FFC0C0 width=10px></td>
+<td bgcolor=#FFC0C0><code>    pIndexBuffer->GetDesc(&Desc);</code></td>
+</tr>
+<tr>
+<td width=20px></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#B8CCE4 width=10px><font size=1></font></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#FFC0C0 width=10px></td>
+<td bgcolor=#FFC0C0><code>...</code></td>
+</tr>
+<tr>
+<td width=20px></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#B8CCE4 width=10px><font size=1>1346</font></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#FFC0C0 width=10px></td>
+<td bgcolor=#FFC0C0><code>    m_pImmediateContext->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);</code></td>
+</tr>
+<tr>
+<td width=20px></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#B8CCE4 width=10px><font size=1>1347</font></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#FFC0C0 width=10px></td>
+<td bgcolor=#FFC0C0><code>    m_pImmediateContext->DrawIndexed((DWORD)(Desc.ByteWidth / sizeof(int)), 0, 0);</code></td>
+</tr>
+<tr>
+<td width=20px></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#B8CCE4 width=10px><font size=1>1348</font></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#FFC0C0 width=10px></td>
+<td bgcolor=#FFC0C0><code>  };</code></td>
 </tr>
 <tr>
 <td width=20px></td>
@@ -48,10 +200,98 @@
 <tr>
 <td width=20px></td>
 <td bgcolor=#B8CCE4 width=10px></td>
-<td bgcolor=#B8CCE4 width=10px><font size=1>104</font></td>
+<td bgcolor=#B8CCE4 width=10px><font size=1>109</font></td>
 <td bgcolor=#B8CCE4 width=10px></td>
 <td bgcolor=#FFC0C0 width=10px></td>
 <td bgcolor=#FFC0C0><code>    throw STD_EXCEPTION << "Unexpected type: " << typeid(T).name();</code></td>
+</tr>
+<tr>
+<td width=20px></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#B8CCE4 width=10px><font size=1></font></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#FFC0C0 width=10px></td>
+<td bgcolor=#FFC0C0><code></code></td>
+</tr>
+</table>
+<hr width=98%>
+<table frame=void border=0 bordercolor=#FFFFFF cellpadding=10 cellspacing=0 width=98%>
+<tr>
+<td><b> solution\solution\covellite.api\covellite.api\renderer\graphicapi.hpp: </b></td>
+</tr>
+</table>
+<table frame=void border=0 bordercolor=#FFFFFF cellpadding=2 cellspacing=0 width=98%>
+<tr>
+<td width=20px></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#B8CCE4 width=10px><font size=1></font></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#FFC0C0 width=10px></td>
+<td bgcolor=#FFC0C0><code></code></td>
+</tr>
+<tr>
+<td width=20px></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#B8CCE4 width=10px><font size=1>48</font></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#FFC0C0 width=10px></td>
+<td bgcolor=#FFC0C0><code>  virtual Render_t CreateBkSurface(const ComponentPtr_t &) { return nullptr; }</code></td>
+</tr>
+<tr>
+<td width=20px></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#B8CCE4 width=10px><font size=1></font></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#FFC0C0 width=10px></td>
+<td bgcolor=#FFC0C0><code>...</code></td>
+</tr>
+<tr>
+<td width=20px></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#B8CCE4 width=10px><font size=1>59</font></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#FFC0C0 width=10px></td>
+<td bgcolor=#FFC0C0><code>  virtual Render_t CreateTransform(const ComponentPtr_t &) { return nullptr; }</code></td>
+</tr>
+<tr>
+<td width=20px></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#B8CCE4 width=10px><font size=1></font></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#FFC0C0 width=10px></td>
+<td bgcolor=#FFC0C0><code>...</code></td>
+</tr>
+<tr>
+<td width=20px></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#B8CCE4 width=10px><font size=1>61</font></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#FFC0C0 width=10px></td>
+<td bgcolor=#FFC0C0><code>  virtual Render_t CreatePresentBuffer(const ComponentPtr_t &) { return nullptr; }</code></td>
+</tr>
+<tr>
+<td width=20px></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#B8CCE4 width=10px><font size=1></font></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#FFC0C0 width=10px></td>
+<td bgcolor=#FFC0C0><code>...</code></td>
+</tr>
+<tr>
+<td width=20px></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#B8CCE4 width=10px><font size=1>66</font></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#FFC0C0 width=10px></td>
+<td bgcolor=#FFC0C0><code>  virtual Render_t CreateLight(const ComponentPtr_t &) { return nullptr; }</code></td>
+</tr>
+<tr>
+<td width=20px></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#B8CCE4 width=10px><font size=1>67</font></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#FFC0C0 width=10px></td>
+<td bgcolor=#FFC0C0><code>  virtual Render_t CreateGeometry(const ComponentPtr_t &) { return nullptr; }</code></td>
 </tr>
 <tr>
 <td width=20px></td>
@@ -80,7 +320,23 @@
 <tr>
 <td width=20px></td>
 <td bgcolor=#B8CCE4 width=10px></td>
-<td bgcolor=#B8CCE4 width=10px><font size=1>223</font></td>
+<td bgcolor=#B8CCE4 width=10px><font size=1>32</font></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#FFC0C0 width=10px></td>
+<td bgcolor=#FFC0C0><code>  throw STD_EXCEPTION << "Р?С?Р? Р?Р? Р?Р?Р?Р?Р?Р? Р?С?Р?С?Р?Р?С?С?С?С?, Р?С?Р?Р?Р? Р?Р?С? Р?Р?Р?Р?РёР?РёС?С?Р?Р?Р?С?С?Рё";</code></td>
+</tr>
+<tr>
+<td width=20px></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#B8CCE4 width=10px><font size=1></font></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#FFC0C0 width=10px></td>
+<td bgcolor=#FFC0C0><code>...</code></td>
+</tr>
+<tr>
+<td width=20px></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#B8CCE4 width=10px><font size=1>564</font></td>
 <td bgcolor=#B8CCE4 width=10px></td>
 <td bgcolor=#FFC0C0 width=10px></td>
 <td bgcolor=#FFC0C0><code>    LOGGER(Info) << "GL_EXTENSIONS: " <<</code></td>
@@ -112,10 +368,10 @@
 <tr>
 <td width=20px></td>
 <td bgcolor=#B8CCE4 width=10px></td>
-<td bgcolor=#B8CCE4 width=10px><font size=1>37</font></td>
+<td bgcolor=#B8CCE4 width=10px><font size=1>43</font></td>
 <td bgcolor=#B8CCE4 width=10px></td>
 <td bgcolor=#FFC0C0 width=10px></td>
-<td bgcolor=#FFC0C0><code>  static void Update(const TData &) {}</code></td>
+<td bgcolor=#FFC0C0><code>  static void Update(const ::Camera &) {}</code></td>
 </tr>
 <tr>
 <td width=20px></td>
@@ -128,10 +384,90 @@
 <tr>
 <td width=20px></td>
 <td bgcolor=#B8CCE4 width=10px></td>
-<td bgcolor=#B8CCE4 width=10px><font size=1>272</font></td>
+<td bgcolor=#B8CCE4 width=10px><font size=1>50</font></td>
 <td bgcolor=#B8CCE4 width=10px></td>
 <td bgcolor=#FFC0C0 width=10px></td>
-<td bgcolor=#FFC0C0><code>  return nullptr;</code></td>
+<td bgcolor=#FFC0C0><code>  static void Update(const ::Fog &) {}</code></td>
+</tr>
+<tr>
+<td width=20px></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#B8CCE4 width=10px><font size=1></font></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#FFC0C0 width=10px></td>
+<td bgcolor=#FFC0C0><code>...</code></td>
+</tr>
+<tr>
+<td width=20px></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#B8CCE4 width=10px><font size=1>129</font></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#FFC0C0 width=10px></td>
+<td bgcolor=#FFC0C0><code>    Support<::Object>::Update(</code></td>
+</tr>
+<tr>
+<td width=20px></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#B8CCE4 width=10px><font size=1></font></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#FFC0C0 width=10px></td>
+<td bgcolor=#FFC0C0><code>...</code></td>
+</tr>
+<tr>
+<td width=20px></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#B8CCE4 width=10px><font size=1>138</font></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#FFC0C0 width=10px></td>
+<td bgcolor=#FFC0C0><code>  static void Update(const ::Matrices &) {}</code></td>
+</tr>
+<tr>
+<td width=20px></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#B8CCE4 width=10px><font size=1></font></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#FFC0C0 width=10px></td>
+<td bgcolor=#FFC0C0><code>...</code></td>
+</tr>
+<tr>
+<td width=20px></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#B8CCE4 width=10px><font size=1>342</font></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#FFC0C0 width=10px></td>
+<td bgcolor=#FFC0C0><code>    return [=](void)</code></td>
+</tr>
+<tr>
+<td width=20px></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#B8CCE4 width=10px><font size=1></font></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#FFC0C0 width=10px></td>
+<td bgcolor=#FFC0C0><code>...</code></td>
+</tr>
+<tr>
+<td width=20px></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#B8CCE4 width=10px><font size=1>344</font></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#FFC0C0 width=10px></td>
+<td bgcolor=#FFC0C0><code>      cbBufferMapper(&m_pConstants->Get<::Object>().Lights);</code></td>
+</tr>
+<tr>
+<td width=20px></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#B8CCE4 width=10px><font size=1>345</font></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#FFC0C0 width=10px></td>
+<td bgcolor=#FFC0C0><code>      m_pConstants->Update<::Object>();</code></td>
+</tr>
+<tr>
+<td width=20px></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#B8CCE4 width=10px><font size=1>346</font></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#FFC0C0 width=10px></td>
+<td bgcolor=#FFC0C0><code>    };</code></td>
 </tr>
 <tr>
 <td width=20px></td>
@@ -160,7 +496,7 @@
 <tr>
 <td width=20px></td>
 <td bgcolor=#B8CCE4 width=10px></td>
-<td bgcolor=#B8CCE4 width=10px><font size=1>8</font></td>
+<td bgcolor=#B8CCE4 width=10px><font size=1>72</font></td>
 <td bgcolor=#B8CCE4 width=10px></td>
 <td bgcolor=#FFC0C0 width=10px></td>
 <td bgcolor=#FFC0C0><code>  float4 Direction = _Light.Position - _Position;</code></td>
@@ -176,7 +512,7 @@
 <tr>
 <td width=20px></td>
 <td bgcolor=#B8CCE4 width=10px></td>
-<td bgcolor=#B8CCE4 width=10px><font size=1>10</font></td>
+<td bgcolor=#B8CCE4 width=10px><font size=1>74</font></td>
 <td bgcolor=#B8CCE4 width=10px></td>
 <td bgcolor=#FFC0C0 width=10px></td>
 <td bgcolor=#FFC0C0><code>  float LightFactor = max(dot(_Normal, normalize(ToFloat3(Direction))), 0.0f);</code></td>
@@ -184,7 +520,7 @@
 <tr>
 <td width=20px></td>
 <td bgcolor=#B8CCE4 width=10px></td>
-<td bgcolor=#B8CCE4 width=10px><font size=1>11</font></td>
+<td bgcolor=#B8CCE4 width=10px><font size=1>75</font></td>
 <td bgcolor=#B8CCE4 width=10px></td>
 <td bgcolor=#FFC0C0 width=10px></td>
 <td bgcolor=#FFC0C0><code>  float4 Color = LightFactor * _Light.Color;</code></td>
@@ -192,7 +528,7 @@
 <tr>
 <td width=20px></td>
 <td bgcolor=#B8CCE4 width=10px></td>
-<td bgcolor=#B8CCE4 width=10px><font size=1>12</font></td>
+<td bgcolor=#B8CCE4 width=10px><font size=1>76</font></td>
 <td bgcolor=#B8CCE4 width=10px></td>
 <td bgcolor=#FFC0C0 width=10px></td>
 <td bgcolor=#FFC0C0><code>  float Distance = length(Direction);</code></td>
@@ -208,7 +544,7 @@
 <tr>
 <td width=20px></td>
 <td bgcolor=#B8CCE4 width=10px></td>
-<td bgcolor=#B8CCE4 width=10px><font size=1>16</font></td>
+<td bgcolor=#B8CCE4 width=10px><font size=1>80</font></td>
 <td bgcolor=#B8CCE4 width=10px></td>
 <td bgcolor=#FFC0C0 width=10px></td>
 <td bgcolor=#FFC0C0><code>    _Light.Attenuation.y * Distance +</code></td>
@@ -224,7 +560,7 @@
 <tr>
 <td width=20px></td>
 <td bgcolor=#B8CCE4 width=10px></td>
-<td bgcolor=#B8CCE4 width=10px><font size=1>19</font></td>
+<td bgcolor=#B8CCE4 width=10px><font size=1>83</font></td>
 <td bgcolor=#B8CCE4 width=10px></td>
 <td bgcolor=#FFC0C0 width=10px></td>
 <td bgcolor=#FFC0C0><code>  return Color / Attenuation;</code></td>
@@ -240,66 +576,10 @@
 <tr>
 <td width=20px></td>
 <td bgcolor=#B8CCE4 width=10px></td>
-<td bgcolor=#B8CCE4 width=10px><font size=1>27</font></td>
+<td bgcolor=#B8CCE4 width=10px><font size=1>100</font></td>
 <td bgcolor=#B8CCE4 width=10px></td>
 <td bgcolor=#FFC0C0 width=10px></td>
-<td bgcolor=#FFC0C0><code>  return _Color / MaxXYZ;</code></td>
-</tr>
-<tr>
-<td width=20px></td>
-<td bgcolor=#B8CCE4 width=10px></td>
-<td bgcolor=#B8CCE4 width=10px><font size=1></font></td>
-<td bgcolor=#B8CCE4 width=10px></td>
-<td bgcolor=#FFC0C0 width=10px></td>
-<td bgcolor=#FFC0C0><code>...</code></td>
-</tr>
-<tr>
-<td width=20px></td>
-<td bgcolor=#B8CCE4 width=10px></td>
-<td bgcolor=#B8CCE4 width=10px><font size=1>38</font></td>
-<td bgcolor=#B8CCE4 width=10px></td>
-<td bgcolor=#FFC0C0 width=10px></td>
-<td bgcolor=#FFC0C0><code>    Result += LightsData.Ambient.Color;</code></td>
-</tr>
-<tr>
-<td width=20px></td>
-<td bgcolor=#B8CCE4 width=10px></td>
-<td bgcolor=#B8CCE4 width=10px><font size=1></font></td>
-<td bgcolor=#B8CCE4 width=10px></td>
-<td bgcolor=#FFC0C0 width=10px></td>
-<td bgcolor=#FFC0C0><code>...</code></td>
-</tr>
-<tr>
-<td width=20px></td>
-<td bgcolor=#B8CCE4 width=10px></td>
-<td bgcolor=#B8CCE4 width=10px><font size=1>43</font></td>
-<td bgcolor=#B8CCE4 width=10px></td>
-<td bgcolor=#FFC0C0 width=10px></td>
-<td bgcolor=#FFC0C0><code>    float3 Direction = normalize(ToFloat3(LightsData.Direction.Direction));</code></td>
-</tr>
-<tr>
-<td width=20px></td>
-<td bgcolor=#B8CCE4 width=10px></td>
-<td bgcolor=#B8CCE4 width=10px><font size=1>44</font></td>
-<td bgcolor=#B8CCE4 width=10px></td>
-<td bgcolor=#FFC0C0 width=10px></td>
-<td bgcolor=#FFC0C0><code>    Result += max(dot(_Normal, Direction), 0.0f) * LightsData.Direction.Color;</code></td>
-</tr>
-<tr>
-<td width=20px></td>
-<td bgcolor=#B8CCE4 width=10px></td>
-<td bgcolor=#B8CCE4 width=10px><font size=1></font></td>
-<td bgcolor=#B8CCE4 width=10px></td>
-<td bgcolor=#FFC0C0 width=10px></td>
-<td bgcolor=#FFC0C0><code>...</code></td>
-</tr>
-<tr>
-<td width=20px></td>
-<td bgcolor=#B8CCE4 width=10px></td>
-<td bgcolor=#B8CCE4 width=10px><font size=1>54</font></td>
-<td bgcolor=#B8CCE4 width=10px></td>
-<td bgcolor=#FFC0C0 width=10px></td>
-<td bgcolor=#FFC0C0><code>    Result += CalcPointLight(LightsData.Points.Lights[i], _WorldPos, _Normal);</code></td>
+<td bgcolor=#FFC0C0><code>    LightColor += CalcPointLight(ObjectData.Lights.Points.Lights[i],</code></td>
 </tr>
 <tr>
 <td width=20px></td>
@@ -328,74 +608,50 @@
 <tr>
 <td width=20px></td>
 <td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#B8CCE4 width=10px><font size=1>12</font></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#FFC0C0 width=10px></td>
+<td bgcolor=#FFC0C0><code>			return sqrt(dot(v, v));</code></td>
+</tr>
+<tr>
+<td width=20px></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#B8CCE4 width=10px><font size=1></font></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#FFC0C0 width=10px></td>
+<td bgcolor=#FFC0C0><code>...</code></td>
+</tr>
+<tr>
+<td width=20px></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#B8CCE4 width=10px><font size=1>62</font></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#FFC0C0 width=10px></td>
+<td bgcolor=#FFC0C0><code>			vec<4, T, Q> tmp(a * b);</code></td>
+</tr>
+<tr>
+<td width=20px></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#B8CCE4 width=10px><font size=1>63</font></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#FFC0C0 width=10px></td>
+<td bgcolor=#FFC0C0><code>			return (tmp.x + tmp.y) + (tmp.z + tmp.w);</code></td>
+</tr>
+<tr>
+<td width=20px></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#B8CCE4 width=10px><font size=1></font></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#FFC0C0 width=10px></td>
+<td bgcolor=#FFC0C0><code>...</code></td>
+</tr>
+<tr>
+<td width=20px></td>
+<td bgcolor=#B8CCE4 width=10px></td>
 <td bgcolor=#B8CCE4 width=10px><font size=1>140</font></td>
 <td bgcolor=#B8CCE4 width=10px></td>
 <td bgcolor=#FFC0C0 width=10px></td>
 <td bgcolor=#FFC0C0><code>		return detail::compute_length<L, T, Q, detail::is_aligned<Q>::value>::call(v);</code></td>
-</tr>
-<tr>
-<td width=20px></td>
-<td bgcolor=#B8CCE4 width=10px></td>
-<td bgcolor=#B8CCE4 width=10px><font size=1></font></td>
-<td bgcolor=#B8CCE4 width=10px></td>
-<td bgcolor=#FFC0C0 width=10px></td>
-<td bgcolor=#FFC0C0><code></code></td>
-</tr>
-</table>
-<hr width=98%>
-<table frame=void border=0 bordercolor=#FFFFFF cellpadding=10 cellspacing=0 width=98%>
-<tr>
-<td><b> solution\solution\externals.doxygen.ignore\glm\include\glm\detail\func_geometric_simd.inl: </b></td>
-</tr>
-</table>
-<table frame=void border=0 bordercolor=#FFFFFF cellpadding=2 cellspacing=0 width=98%>
-<tr>
-<td width=20px></td>
-<td bgcolor=#B8CCE4 width=10px></td>
-<td bgcolor=#B8CCE4 width=10px><font size=1></font></td>
-<td bgcolor=#B8CCE4 width=10px></td>
-<td bgcolor=#FFC0C0 width=10px></td>
-<td bgcolor=#FFC0C0><code></code></td>
-</tr>
-<tr>
-<td width=20px></td>
-<td bgcolor=#B8CCE4 width=10px></td>
-<td bgcolor=#B8CCE4 width=10px><font size=1>16</font></td>
-<td bgcolor=#B8CCE4 width=10px></td>
-<td bgcolor=#FFC0C0 width=10px></td>
-<td bgcolor=#FFC0C0><code>			return _mm_cvtss_f32(glm_vec4_length(v.data));</code></td>
-</tr>
-<tr>
-<td width=20px></td>
-<td bgcolor=#B8CCE4 width=10px></td>
-<td bgcolor=#B8CCE4 width=10px><font size=1></font></td>
-<td bgcolor=#B8CCE4 width=10px></td>
-<td bgcolor=#FFC0C0 width=10px></td>
-<td bgcolor=#FFC0C0><code></code></td>
-</tr>
-</table>
-<hr width=98%>
-<table frame=void border=0 bordercolor=#FFFFFF cellpadding=10 cellspacing=0 width=98%>
-<tr>
-<td><b> solution\solution\externals.doxygen.ignore\glm\include\glm\detail\type_vec3.inl: </b></td>
-</tr>
-</table>
-<table frame=void border=0 bordercolor=#FFFFFF cellpadding=2 cellspacing=0 width=98%>
-<tr>
-<td width=20px></td>
-<td bgcolor=#B8CCE4 width=10px></td>
-<td bgcolor=#B8CCE4 width=10px><font size=1></font></td>
-<td bgcolor=#B8CCE4 width=10px></td>
-<td bgcolor=#FFC0C0 width=10px></td>
-<td bgcolor=#FFC0C0><code></code></td>
-</tr>
-<tr>
-<td width=20px></td>
-<td bgcolor=#B8CCE4 width=10px></td>
-<td bgcolor=#B8CCE4 width=10px><font size=1>717</font></td>
-<td bgcolor=#B8CCE4 width=10px></td>
-<td bgcolor=#FFC0C0 width=10px></td>
-<td bgcolor=#FFC0C0><code>		return vec<3, T, Q>(</code></td>
 </tr>
 <tr>
 <td width=20px></td>
@@ -424,6 +680,22 @@
 <tr>
 <td width=20px></td>
 <td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#B8CCE4 width=10px><font size=1>40</font></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#FFC0C0 width=10px></td>
+<td bgcolor=#FFC0C0><code>			return vec<4, T, Q>(a.x / b.x, a.y / b.y, a.z / b.z, a.w / b.w);</code></td>
+</tr>
+<tr>
+<td width=20px></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#B8CCE4 width=10px><font size=1></font></td>
+<td bgcolor=#B8CCE4 width=10px></td>
+<td bgcolor=#FFC0C0 width=10px></td>
+<td bgcolor=#FFC0C0><code>...</code></td>
+</tr>
+<tr>
+<td width=20px></td>
+<td bgcolor=#B8CCE4 width=10px></td>
 <td bgcolor=#B8CCE4 width=10px><font size=1>604</font></td>
 <td bgcolor=#B8CCE4 width=10px></td>
 <td bgcolor=#FFC0C0 width=10px></td>
@@ -440,90 +712,10 @@
 <tr>
 <td width=20px></td>
 <td bgcolor=#B8CCE4 width=10px></td>
-<td bgcolor=#B8CCE4 width=10px><font size=1>878</font></td>
-<td bgcolor=#B8CCE4 width=10px></td>
-<td bgcolor=#FFC0C0 width=10px></td>
-<td bgcolor=#FFC0C0><code>		return vec<4, T, Q>(v) *= scalar;</code></td>
-</tr>
-<tr>
-<td width=20px></td>
-<td bgcolor=#B8CCE4 width=10px></td>
-<td bgcolor=#B8CCE4 width=10px><font size=1></font></td>
-<td bgcolor=#B8CCE4 width=10px></td>
-<td bgcolor=#FFC0C0 width=10px></td>
-<td bgcolor=#FFC0C0><code>...</code></td>
-</tr>
-<tr>
-<td width=20px></td>
-<td bgcolor=#B8CCE4 width=10px></td>
 <td bgcolor=#B8CCE4 width=10px><font size=1>896</font></td>
 <td bgcolor=#B8CCE4 width=10px></td>
 <td bgcolor=#FFC0C0 width=10px></td>
 <td bgcolor=#FFC0C0><code>		return vec<4, T, Q>(v) /= scalar;</code></td>
-</tr>
-<tr>
-<td width=20px></td>
-<td bgcolor=#B8CCE4 width=10px></td>
-<td bgcolor=#B8CCE4 width=10px><font size=1></font></td>
-<td bgcolor=#B8CCE4 width=10px></td>
-<td bgcolor=#FFC0C0 width=10px></td>
-<td bgcolor=#FFC0C0><code></code></td>
-</tr>
-</table>
-<hr width=98%>
-<table frame=void border=0 bordercolor=#FFFFFF cellpadding=10 cellspacing=0 width=98%>
-<tr>
-<td><b> solution\solution\externals.doxygen.ignore\glm\include\glm\detail\type_vec4_simd.inl: </b></td>
-</tr>
-</table>
-<table frame=void border=0 bordercolor=#FFFFFF cellpadding=2 cellspacing=0 width=98%>
-<tr>
-<td width=20px></td>
-<td bgcolor=#B8CCE4 width=10px></td>
-<td bgcolor=#B8CCE4 width=10px><font size=1></font></td>
-<td bgcolor=#B8CCE4 width=10px></td>
-<td bgcolor=#FFC0C0 width=10px></td>
-<td bgcolor=#FFC0C0><code></code></td>
-</tr>
-<tr>
-<td width=20px></td>
-<td bgcolor=#B8CCE4 width=10px></td>
-<td bgcolor=#B8CCE4 width=10px><font size=1>81</font></td>
-<td bgcolor=#B8CCE4 width=10px></td>
-<td bgcolor=#FFC0C0 width=10px></td>
-<td bgcolor=#FFC0C0><code>			Result.data = _mm_sub_ps(a.data, b.data);</code></td>
-</tr>
-<tr>
-<td width=20px></td>
-<td bgcolor=#B8CCE4 width=10px></td>
-<td bgcolor=#B8CCE4 width=10px><font size=1>82</font></td>
-<td bgcolor=#B8CCE4 width=10px></td>
-<td bgcolor=#FFC0C0 width=10px></td>
-<td bgcolor=#FFC0C0><code>			return Result;</code></td>
-</tr>
-<tr>
-<td width=20px></td>
-<td bgcolor=#B8CCE4 width=10px></td>
-<td bgcolor=#B8CCE4 width=10px><font size=1></font></td>
-<td bgcolor=#B8CCE4 width=10px></td>
-<td bgcolor=#FFC0C0 width=10px></td>
-<td bgcolor=#FFC0C0><code>...</code></td>
-</tr>
-<tr>
-<td width=20px></td>
-<td bgcolor=#B8CCE4 width=10px></td>
-<td bgcolor=#B8CCE4 width=10px><font size=1>129</font></td>
-<td bgcolor=#B8CCE4 width=10px></td>
-<td bgcolor=#FFC0C0 width=10px></td>
-<td bgcolor=#FFC0C0><code>			Result.data = _mm_div_ps(a.data, b.data);</code></td>
-</tr>
-<tr>
-<td width=20px></td>
-<td bgcolor=#B8CCE4 width=10px></td>
-<td bgcolor=#B8CCE4 width=10px><font size=1>130</font></td>
-<td bgcolor=#B8CCE4 width=10px></td>
-<td bgcolor=#FFC0C0 width=10px></td>
-<td bgcolor=#FFC0C0><code>			return Result;</code></td>
 </tr>
 <tr>
 <td width=20px></td>
@@ -956,94 +1148,6 @@
 <td bgcolor=#B8CCE4 width=10px></td>
 <td bgcolor=#FFC0C0 width=10px></td>
 <td bgcolor=#FFC0C0><code>			return perspectiveFovRH_NO(fov, width, height, zNear, zFar);</code></td>
-</tr>
-<tr>
-<td width=20px></td>
-<td bgcolor=#B8CCE4 width=10px></td>
-<td bgcolor=#B8CCE4 width=10px><font size=1></font></td>
-<td bgcolor=#B8CCE4 width=10px></td>
-<td bgcolor=#FFC0C0 width=10px></td>
-<td bgcolor=#FFC0C0><code></code></td>
-</tr>
-</table>
-<hr width=98%>
-<table frame=void border=0 bordercolor=#FFFFFF cellpadding=10 cellspacing=0 width=98%>
-<tr>
-<td><b> solution\solution\externals.doxygen.ignore\glm\include\glm\simd\geometric.h: </b></td>
-</tr>
-</table>
-<table frame=void border=0 bordercolor=#FFFFFF cellpadding=2 cellspacing=0 width=98%>
-<tr>
-<td width=20px></td>
-<td bgcolor=#B8CCE4 width=10px></td>
-<td bgcolor=#B8CCE4 width=10px><font size=1></font></td>
-<td bgcolor=#B8CCE4 width=10px></td>
-<td bgcolor=#FFC0C0 width=10px></td>
-<td bgcolor=#FFC0C0><code></code></td>
-</tr>
-<tr>
-<td width=20px></td>
-<td bgcolor=#B8CCE4 width=10px></td>
-<td bgcolor=#B8CCE4 width=10px><font size=1>15</font></td>
-<td bgcolor=#B8CCE4 width=10px></td>
-<td bgcolor=#FFC0C0 width=10px></td>
-<td bgcolor=#FFC0C0><code>	glm_vec4 const dot0 = glm_vec4_dot(x, x);</code></td>
-</tr>
-<tr>
-<td width=20px></td>
-<td bgcolor=#B8CCE4 width=10px></td>
-<td bgcolor=#B8CCE4 width=10px><font size=1>16</font></td>
-<td bgcolor=#B8CCE4 width=10px></td>
-<td bgcolor=#FFC0C0 width=10px></td>
-<td bgcolor=#FFC0C0><code>	glm_vec4 const sqt0 = _mm_sqrt_ps(dot0);</code></td>
-</tr>
-<tr>
-<td width=20px></td>
-<td bgcolor=#B8CCE4 width=10px></td>
-<td bgcolor=#B8CCE4 width=10px><font size=1>17</font></td>
-<td bgcolor=#B8CCE4 width=10px></td>
-<td bgcolor=#FFC0C0 width=10px></td>
-<td bgcolor=#FFC0C0><code>	return sqt0;</code></td>
-</tr>
-<tr>
-<td width=20px></td>
-<td bgcolor=#B8CCE4 width=10px></td>
-<td bgcolor=#B8CCE4 width=10px><font size=1></font></td>
-<td bgcolor=#B8CCE4 width=10px></td>
-<td bgcolor=#FFC0C0 width=10px></td>
-<td bgcolor=#FFC0C0><code>...</code></td>
-</tr>
-<tr>
-<td width=20px></td>
-<td bgcolor=#B8CCE4 width=10px></td>
-<td bgcolor=#B8CCE4 width=10px><font size=1>32</font></td>
-<td bgcolor=#B8CCE4 width=10px></td>
-<td bgcolor=#FFC0C0 width=10px></td>
-<td bgcolor=#FFC0C0><code>		glm_vec4 const mul0 = _mm_mul_ps(v1, v2);</code></td>
-</tr>
-<tr>
-<td width=20px></td>
-<td bgcolor=#B8CCE4 width=10px></td>
-<td bgcolor=#B8CCE4 width=10px><font size=1>33</font></td>
-<td bgcolor=#B8CCE4 width=10px></td>
-<td bgcolor=#FFC0C0 width=10px></td>
-<td bgcolor=#FFC0C0><code>		glm_vec4 const hadd0 = _mm_hadd_ps(mul0, mul0);</code></td>
-</tr>
-<tr>
-<td width=20px></td>
-<td bgcolor=#B8CCE4 width=10px></td>
-<td bgcolor=#B8CCE4 width=10px><font size=1>34</font></td>
-<td bgcolor=#B8CCE4 width=10px></td>
-<td bgcolor=#FFC0C0 width=10px></td>
-<td bgcolor=#FFC0C0><code>		glm_vec4 const hadd1 = _mm_hadd_ps(hadd0, hadd0);</code></td>
-</tr>
-<tr>
-<td width=20px></td>
-<td bgcolor=#B8CCE4 width=10px></td>
-<td bgcolor=#B8CCE4 width=10px><font size=1>35</font></td>
-<td bgcolor=#B8CCE4 width=10px></td>
-<td bgcolor=#FFC0C0 width=10px></td>
-<td bgcolor=#FFC0C0><code>		return hadd1;</code></td>
 </tr>
 <tr>
 <td width=20px></td>

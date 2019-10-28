@@ -63,7 +63,8 @@
       <SubSystem>Console</SubSystem>
     </Link>
     <PostBuildEvent>
-      <Command>$(ResultDir)Resource.exe --path=$(ProjectDir)Renderer\shaders
+      <Command>$(ResultDir)Resource.exe --path="$(ProjectDir)Renderer\shaders"
+copy "$(ProjectDir)Renderer\shaders\Data.h" "$(ProjectDir)\Constant.hpp" /Y
 %(Command)</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
@@ -83,7 +84,8 @@
       <SubSystem>Console</SubSystem>
     </Link>
     <PostBuildEvent>
-      <Command>$(ResultDir)Resource.exe --path=$(ProjectDir)Renderer\shaders
+      <Command>$(ResultDir)Resource.exe --path="$(ProjectDir)Renderer\shaders"
+copy "$(ProjectDir)Renderer\shaders\Data.h" "$(ProjectDir)\Constant.hpp" /Y
 %(Command)</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>

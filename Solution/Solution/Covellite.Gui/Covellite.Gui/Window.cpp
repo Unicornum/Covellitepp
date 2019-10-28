@@ -94,7 +94,11 @@ Window::Window(const WindowApi_t & _Window) :
   });
   m_Events[events::Key.Pressed]
     .Connect([&](const events::Key_t::Code & _Code) 
-  { 
+  {
+    // На Android'e при нажатии управляющих кнопок генерируется событие
+    // Key.Pressed с нулем в качестве кода нажатой кнопки.
+    if (_Code < 0x20) return;
+
     m_pContext->ProcessTextInput(static_cast<Rocket::Core::word>(_Code));  
   });
 

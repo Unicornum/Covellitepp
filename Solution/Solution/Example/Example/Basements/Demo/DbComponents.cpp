@@ -37,7 +37,7 @@ private:
   ::std::queue<Id_t> m_FreeIds;
 
 public:
-  ~Id(void)
+  ~Id(void) noexcept
   {
     LOGGER(Info) << "Maximum number of objects: " << m_NextId;
   }
@@ -49,7 +49,7 @@ DbComponents::DbComponents(void) :
   LOGGER(Trace) << "Create DbComponents.";
 }
 
-DbComponents::~DbComponents(void)
+DbComponents::~DbComponents(void) noexcept
 {
   LOGGER(Trace) << "Destroy DbComponents.";
 }

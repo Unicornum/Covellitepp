@@ -130,7 +130,7 @@ private:
 
 public:
   Simple2DGame(const Events_t &, const RendersPtr_t &, const Rect &);
-  ~Simple2DGame(void);
+  ~Simple2DGame(void) noexcept;
 };
 
 } // namespace basement

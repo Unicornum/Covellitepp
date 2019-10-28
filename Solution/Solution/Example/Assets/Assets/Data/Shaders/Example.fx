@@ -1,27 +1,13 @@
 
-#ifdef COVELLITE_SHADER_VERTEX /////////////////////////////////////////////////
-
-Pixel vsParticles(Vertex _Value)
+struct UserPointLights
 {
-  float4 LocalPosition = float4(
-    _Value.Position.x,
-    _Value.Position.y,
-    0.0f, 
-    1.0f);
+  Point_t Lights[8];
+  int     UsedSlotCount;
+};
 
-  float4 WorldPos = mul(LocalPosition, MatricesData.World) + _Value.Extra;
+COVELLITE_DECLARE_CONST_USER_BUFFER(UserPointLights, cbUserData, UserData);
 
-  Pixel Result;
-  Result.ScreenPos = mul(WorldPos, mul(MatricesData.View, MatricesData.Projection));
-  Result.Color = float4(1.0f, 1.0f, 1.0f, 1.0f);
-  Result.Normal = float3(0.0f, 0.0f, 1.0f);
-  Result.TexCoord = _Value.TexCoord;
-  Result.WorldPos = WorldPos;
-
-  return Result;
-}
-
-#elif defined COVELLITE_SHADER_PIXEL ///////////////////////////////////////////
+#ifdef COVELLITE_SHADER_PIXEL //////////////////////////////////////////////////
 
 COVELLITE_DECLARE_TEX2D(TexDiffuse, 0);
 
@@ -31,9 +17,47 @@ float4 DiscardTransparentPixel(Pixel _Value, float4 _Color)
   return _Color;
 }
 
+float4 CalcPointLight(Point_t _Light, float4 _Position, float3 _Normal)
+{
+  float3 Direction = _Light.Position.xyz - _Position.xyz;
+
+  float LightFactor = dot(_Normal, normalize(Direction));
+  if (LightFactor <= 0.0f) return float4(0.0f, 0.0f, 0.0f, 1.0f);
+
+  float4 Color = LightFactor * _Light.Color;
+  float Distance = length(Direction);
+
+  float Attenuation =
+    _Light.Attenuation.x +
+    _Light.Attenuation.y * Distance +
+    _Light.Attenuation.z * Distance * Distance;
+
+  return Color / Attenuation;
+}
+
+float3 SyncSaturate(float3 _Color)
+{
+  float MaxXYZ = max(max(_Color.x, _Color.y), _Color.z);
+  if (MaxXYZ < 1.0f) return _Color;
+
+  return _Color / MaxXYZ;
+}
+
 float4 CalculateLights(Pixel _Value, float4 _Color)
 {
-  return _Value.Color * _Color;
+  float4 LightColor = _Value.Color; // Ambient + Direction
+
+  // Points
+
+  for (int i = 0; i < UserData.UsedSlotCount; i++)
+  {
+    LightColor += CalcPointLight(UserData.Lights[i],
+      _Value.WorldPos, _Value.Normal);
+  }
+
+  LightColor = float4(SyncSaturate(LightColor.rgb), 1.0f);
+
+  return LightColor * _Color;
 }
 
 float CalculateFogLinear(float _Distance)
@@ -54,7 +78,7 @@ float CalculateFogExp2(float _Distance)
 
 float4 CalculateFog(Pixel _Value, float4 _Color)
 {
-  float3 CameraPosition = MatricesData.ViewInverse[3].xyz;
+  float3 CameraPosition = COVELLITE_MATRIX_ROW(CameraData.ViewInverse, 3).xyz;
 
   float Distance = length(_Value.WorldPos.xyz - CameraPosition);
   float FogFactor = CalculateFogLinear(Distance);
@@ -68,14 +92,6 @@ float4 psExample(Pixel _Value)
   Color = DiscardTransparentPixel(_Value, Color);
   Color = CalculateLights(_Value, Color);
   Color = CalculateFog(_Value, Color);
-
-  return Color;
-}
-
-float4 psParticles(Pixel _Value)
-{
-  float4 Color = COVELLITE_TEX2D_COLOR(TexDiffuse, _Value.TexCoord);
-  if (Color.a < 0.05f) discard;
 
   return Color;
 }

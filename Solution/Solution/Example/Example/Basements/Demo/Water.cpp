@@ -43,26 +43,22 @@ auto Water::GetObject(const Any_t &) const /*override*/ -> Objects_t
       {
         { uT("id"), uT("Demo.Shader.Vertex.Water") },
         { uT("type"), uT("Shader") },
-        { uT("entry"), uT("vsLights") },
+        { uT("entry"), uT("vsVolume") },
       }),
       Component_t::Make(
       {
         { uT("id"), uT("Demo.Shader.Pixel.Water") },
         { uT("type"), uT("Shader") },
-        { uT("entry"), uT("psTextured") },
+        { uT("entry"), uT("psLightened") },
+      }),
+      Component_t::Make(
+      {
+        { uT("id"), uT("Example.Transform.Skybox") },
+        { uT("type"), uT("Transform") },
       }),
     } +
     GetTexture(0).GetObject() +
-    GetMesh(0).GetObject() +
-    Object_t
-    {
-      Component_t::Make(
-      {
-        { uT("id"), uT("Demo.Present.Water") },
-        { uT("type"), uT("Present") },
-        { uT("kind"), uT("Geometry") },
-      })
-    }
+    GetMesh(0).GetObject()
   };
 }
 

@@ -180,7 +180,6 @@ Object_t Animated::Mesh::GetObject(const Any_t & _Value) const /*override*/
     m_pTransformBones = Component_t::Make(
       {
         { uT("type"), uT("Data") },
-        { uT("kind"), uT("Transform") },
         { uT("bones"), BoneTransforms_t { { HoldInBoneName, ::glm::mat4{ 1.0f } } } },
       });
   }
@@ -208,18 +207,7 @@ Object_t Animated::Mesh::GetObject(const Any_t & _Value) const /*override*/
 
   for (const auto & Material : m_MaterialIndices)
   {
-    Result += Object_t
-    {
-      Component_t::Make(
-      {
-        { uT("id"), m_MeshId + uT(".Index.") + Material.first },
-        { uT("type"), uT("Buffer") },
-        { uT("data"), static_cast<const int *>(Material.second.data()) },
-        { uT("count"), Material.second.size() },
-      }),
-    };
-
-    Result += Value.Material(Material.first);
+    Result += Value.Material(Material);
   }
 
   if (::alicorn::extension::cpp::IS_DEBUG_CONFIGURATION)
@@ -301,13 +289,6 @@ Object_t Animated::Mesh::GetHoldInHandObject(
     }),
     Component_t::Make(
     {
-      { uT("id"), m_MeshId + uT(".Index.HoldInHand") },
-      { uT("type"), uT("Buffer") },
-      { uT("data"), static_cast<const int *>(HoldInHand.data()) },
-      { uT("count"), HoldInHand.size() },
-    }),
-    Component_t::Make(
-    {
       { uT("type"), uT("Data") },
       { uT("kind"), uT("Position") },
       { uT("x"), 0.0f },
@@ -326,9 +307,15 @@ Object_t Animated::Mesh::GetHoldInHandObject(
     pHolInHandPosition,
     Component_t::Make(
     {
+      { uT("id"), m_MeshId + uT(".Transform.HoldInHand") },
+      { uT("type"), uT("Transform") },
+    }),
+    Component_t::Make(
+    {
       { uT("id"), m_MeshId + uT(".Present.HoldInHand") },
       { uT("type"), uT("Present") },
-      { uT("kind"), uT("Geometry") },
+      { uT("data"), static_cast<const int *>(HoldInHand.data()) },
+      { uT("count"), HoldInHand.size() },
     })
   };
 }
