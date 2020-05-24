@@ -32,7 +32,7 @@
 *
 *  Используемый формат вершин:
 *
-* \snippet .\Solution\Example\Example\Basements\Simple3DObject.cpp Vertex format
+* \snippet .\Solution\Example\Example\Basements\Simple3DObject.hpp Vertex format
 *
 *  Отрисовка производится при помощи формирования \b сцены, содержащей рендеры:
 *  - \b Камеры - уникальный объект, определяющий способ отрисовки сцены.

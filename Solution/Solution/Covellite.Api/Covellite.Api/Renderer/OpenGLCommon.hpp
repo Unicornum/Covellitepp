@@ -1,6 +1,6 @@
 
 #pragma once
-#include <GLMath.hpp>
+#include <glm/glm.force.hpp>
 #include "GraphicApi.hpp"
 
 namespace covellite
@@ -66,7 +66,7 @@ protected:
 
   TexParameters m_TexParameters;
 
-private:
+protected:
   const int       m_Top;
   const String_t  m_PreVersion;
 

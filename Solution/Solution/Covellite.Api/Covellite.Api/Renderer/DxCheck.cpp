@@ -3,6 +3,7 @@
 #include "DxCheck.hpp"
 #include <comdef.h>
 #include <alicorn/std/string.hpp>
+#include <alicorn/std/string/encoding.hpp>
 
 using namespace covellite::api::renderer;
 
@@ -17,6 +18,6 @@ using namespace covellite::api::renderer;
 {
   using namespace ::alicorn::extension::std;
 
-  return string_cast<::std::string, Locale::System>(
+  return string_cast<::std::string, Encoding::UTF8>(
     String::GetString(_com_error{ _hResult }.ErrorMessage()));
 }

@@ -2,7 +2,7 @@
 #pragma once
 #include <string>
 #include <vector>
-#include <GLMath.hpp>
+#include <glm/glm.force.hpp>
 #include <d3d11.h>
 #include <d3dcompiler.h>
 #include "../../Covellite.Api/Renderer/Shaders/Shaders.hpp"

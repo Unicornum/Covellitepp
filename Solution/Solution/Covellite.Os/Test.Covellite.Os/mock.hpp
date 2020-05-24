@@ -7,6 +7,7 @@
 */
 
 #include <memory>
+#include <alicorn/std/chrono.mock.hpp>
 #include <alicorn/std/string.hpp>
 #include <alicorn/platform/app-info.hpp>
 #include <alicorn/version.mock.hpp>

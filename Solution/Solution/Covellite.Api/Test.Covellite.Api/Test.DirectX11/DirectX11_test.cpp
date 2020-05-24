@@ -1,6 +1,7 @@
 
 #include "stdafx.h"
 #include <alicorn/std/vector.hpp>
+#include <alicorn/std/string/encoding.hpp>
 #include "../Mock/DirectX11.hpp"
 
 // Примеры макросов библиотеки Google Test
@@ -5490,7 +5491,7 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Shader_DefaultData_Deprecated)
   {
     using namespace ::alicorn::extension::std;
 
-    const auto strEntry = string_cast<::std::string, Locale::Ascii128>(Entry);
+    const auto strEntry = string_cast<::std::string, Encoding::Ascii128>(Entry);
 
     {
       const auto pComponent = Component_t::Make(
@@ -5599,7 +5600,7 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Shader_DefaultData)
   {
     using namespace ::alicorn::extension::std;
 
-    const auto strEntry = string_cast<::std::string, Locale::Ascii128>(Entry);
+    const auto strEntry = string_cast<::std::string, Encoding::Ascii128>(Entry);
 
     {
       const auto pComponent = Component_t::Make(
@@ -5629,7 +5630,7 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Shader_DefaultData)
   {
     using namespace ::alicorn::extension::std;
 
-    const auto strEntry = string_cast<::std::string, Locale::Ascii128>(Entry);
+    const auto strEntry = string_cast<::std::string, Encoding::Ascii128>(Entry);
 
     const ::std::string PixelShaderPostfix =
       "float4 psMain(Pixel _Value) : SV_Target\r\n"
@@ -6236,7 +6237,7 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Shader_Pixel)
   {
     using namespace ::alicorn::extension::std;
 
-    const auto strEntry = string_cast<::std::string, Locale::Ascii128>(Entry);
+    const auto strEntry = string_cast<::std::string, Encoding::Ascii128>(Entry);
 
     {
       const auto pComponent = Component_t::Make(
@@ -6374,7 +6375,7 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Shader_Pixel_NoReturn)
   {
     using namespace ::alicorn::extension::std;
 
-    const auto strEntry = string_cast<::std::string, Locale::Ascii128>(Entry);
+    const auto strEntry = string_cast<::std::string, Encoding::Ascii128>(Entry);
 
     {
       const auto pComponent = Component_t::Make(
@@ -6514,7 +6515,7 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Shader_Pixel_Multitarget)
   {
     using namespace ::alicorn::extension::std;
 
-    const auto strEntry = string_cast<::std::string, Locale::Ascii128>(Entry);
+    const auto strEntry = string_cast<::std::string, Encoding::Ascii128>(Entry);
 
     {
       const auto pComponent = Component_t::Make(

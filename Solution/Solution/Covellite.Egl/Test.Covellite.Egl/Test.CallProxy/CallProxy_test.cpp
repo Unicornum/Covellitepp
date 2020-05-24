@@ -76,5 +76,5 @@ TEST_F(CallProxy_test, /*DISABLED_*/Test_Fail)
     .WillOnce(Return(12345));
 
   EXPECT_STDEXCEPTION(EGL_CALL Test(0), 
-    ".*callproxy_test.cpp \\(79\\): EGL error: 12345"); // 79 - это эта строка
+    ".*[Cc]all[Pp]roxy_test.cpp \\(79\\): EGL error: 12345"); // 79 - это эта строка
 }

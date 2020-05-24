@@ -12,7 +12,7 @@ using namespace covellite::os;
 
 Window::Window(const ::covellite::app::IApplication & _Application) :
   m_Events(_Application),
-  m_Handle(AppInfo_t::Get<ANativeWindow *>()),
+  m_Handle(AppInfo_t::Get<android_app>().window),
   m_LastTypeSizeMessage(0)
 {
   ActivateResizeEvents();

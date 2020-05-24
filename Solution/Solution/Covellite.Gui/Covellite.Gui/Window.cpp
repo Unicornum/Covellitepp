@@ -21,9 +21,7 @@
 # include <alicorn\logger.hpp>
 #endif
 
-#if BOOST_COMP_MSVC
-# pragma comment(lib, "freetype.lib")
-#endif
+#include <FreeType/FreeType.lib.hpp>
 
 using namespace covellite::gui;
 
@@ -239,7 +237,7 @@ void Window::DoDrawWindow(void)
         _fnCallBack(itPathToFont->path());
       }
 
-# elif BOOST_OS_ANDROID
+# elif BOOST_PLAT_ANDROID
 
       // 07 Ноябрь 2017 12:03 (unicornum.verum@gmail.com)
       TODO("Тест Android версии чтения шрифтов.");

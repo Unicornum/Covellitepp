@@ -3,7 +3,7 @@
 #include <Covellite\Gui\System.hpp>
 #include <alicorn\platform\app-info.hpp>
 #include <alicorn\platform\environment.hpp>
-#include <alicorn\std\memory\trivial-ptr.inl>
+#include <alicorn\std.memory\trivial-ptr.inl>
 
 namespace covellite
 {
@@ -43,7 +43,7 @@ void System::ActivateKeyboard(void) /*override*/
 void System::DeactivateKeyboard(void) /*override*/
 {
   using AppInfo_t = ::alicorn::system::platform::AppInfo;
-  ANativeActivity_hideSoftInput(AppInfo_t::Get<ANativeActivity *>(), 0);
+  ANativeActivity_hideSoftInput(&AppInfo_t::Get<ANativeActivity>(), 0);
 }
 
 } // namespace gui

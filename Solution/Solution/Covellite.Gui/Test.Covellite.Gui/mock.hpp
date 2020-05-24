@@ -3,14 +3,15 @@
 #include <memory>
 #include <vector>
 #include <map>
-#define WIN32_LEAN_AND_MEAN
-#include <windows.h>
 #include <boost/filesystem.hpp>
+#include <alicorn/std/chrono.mock.hpp>
 #include <alicorn/std/exception.hpp>
 #include <alicorn/std/string.hpp>
-#include <alicorn/std/chrono.mock.hpp>
 #include <alicorn/platform/app-info.hpp>
 #include <alicorn/platform/environment.mock.hpp>
+#include <alicorn/platform/windows.hpp>
+#include <windef.h>
+#include <winuser.h>
 #include <alicorn/logger.mock.hpp>
 #include <alicorn/settings.mock.hpp>
 #include <Platform/Android.mock.hpp>
@@ -40,21 +41,7 @@ inline /*static*/ VfsPtr_t Singleton<VfsCore_t>::Make(void)
 
 //! @endcond
 
-// 06 Февраль 2019 13:08 (unicornum.verum@gmail.com)
-TODO("Заменить файл в Externals и вернуть ссылку на него.");
-#include "Mock/Rocket.mock.hpp"
-//#include <Rocket/Rocket.mock.hpp>
-
-namespace testing { namespace internal {
-
-// Это чтобы не падал gmock при возврате boost::filesystem::path.
-inline void PrintTo(const ::boost::filesystem::path & p, ::std::ostream * os)
-{
-  *os << p;
-}
-
-} }
-
+#include <Rocket/Rocket.mock.hpp>
 #include <alicorn/application/current-module.mock.hpp>
 
 /**

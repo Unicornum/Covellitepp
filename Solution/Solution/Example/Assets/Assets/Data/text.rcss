@@ -37,7 +37,6 @@ form#id_content {
 scrollbarvertical sliderbar {
   margin: 0;
   padding: 0;
-  width: 12px;
   min-height: 20px;
   border-width: 2px;
   border-left-color: #A0A0A0;

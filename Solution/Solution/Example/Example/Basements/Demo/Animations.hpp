@@ -2,7 +2,7 @@
 #pragma once
 #include "Animated.hpp"
 #include <random>
-#include <alicorn/std/memory.hpp>
+#include <alicorn/std.memory.hpp>
 #include <Covellite/Covellite.hpp>
 
 namespace basement

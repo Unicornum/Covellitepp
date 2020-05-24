@@ -3,7 +3,6 @@
 #include "Particles.hpp"
 #include <random>
 #include <alicorn/std/vector.hpp>
-#include <alicorn/boost/format.inl>
 #include <Covellite/Covellite.hpp>
 #include "Constants.hpp"
 
@@ -247,12 +246,9 @@ auto Particles::GetVertexesObject(void) const -> Objects_t
   for (::std::size_t i = 0; i < m_Indices.size(); i++)
   {
     using namespace ::alicorn::extension::std;
-    using ::alicorn::extension::boost::Format;
 
-    // Использование здесь String::Replace() увеличивает время формирования
-    // идентификатора в 10(!) раз, что существенно сказывается
-    // на производительности.
-    const auto Id = (Format{ uT("%1%") } % i).ToString();
+    const auto Id = String_t{ uT("%ID%") }
+      .Replace(uT("%ID%"), i);
 
     Result += Object_t
     {

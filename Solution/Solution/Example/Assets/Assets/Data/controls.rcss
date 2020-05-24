@@ -44,7 +44,6 @@ settings {
 
 scrollbarvertical sliderbar {
   margin-left: 1px;
-  width: 14px;
   min-height: 20px;
   background-color: rgba(255, 255, 255, 64);
   background-decorator: image;
@@ -193,8 +192,11 @@ select {
 
 /********************************* Ползунок ***********************************/
 
-input.range {
+div.sound {
+}
 
+input.range {
+  width: 60%;
 }
 
   input.range sliderarrowdec,
@@ -205,13 +207,13 @@ input.range {
 
   input.range slidertrack {
     background-color: rgba(255, 255, 255, 64);
-    height: 1 em;
+    height: 1.5 em;
   }
 
   input.range sliderbar {
     background-color: #1E90FF;
     width: 2 em;
-    height: 1 em;
+    height: 1.5 em;
     border-width: 2px;
     margin-top: -2px;
     border-left-color: #b6b6b6;

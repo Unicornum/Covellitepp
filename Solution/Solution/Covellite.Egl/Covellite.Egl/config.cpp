@@ -1,7 +1,7 @@
 
 #include "stdafx.h"
 #include "Config.hpp"
-#include <alicorn\std\exception.hpp>
+#include <alicorn/std/exception.hpp>
 #include "Display.hpp"
 #include "CallProxy.hpp"
 

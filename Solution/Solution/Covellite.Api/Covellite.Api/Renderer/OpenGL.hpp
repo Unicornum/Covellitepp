@@ -1,7 +1,6 @@
 
 #pragma once
-#define WIN32_LEAN_AND_MEAN
-#include <windows.h>
+#include <alicorn/platform/windows.hpp>
 #include "OpenGLCommonShader.hpp"
 
 class OpenGL_test;

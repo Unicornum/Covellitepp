@@ -52,8 +52,8 @@ const auto BaseIndex = __COUNTER__;
 TEST_F(FxPredefinedGlsl_test, /*DISABLED_*/Test_Predefined)
 {
   //EXPECT_EQ(2, BaseIndex);
-  EXPECT_EQ(typeid(float), typeid(highp20));
-  EXPECT_EQ(typeid(int), typeid(highp21));
+  //EXPECT_EQ(typeid(float), typeid(highp20));
+  //EXPECT_EQ(typeid(int), typeid(highp21));
 
   EXPECT_STREQ("ivec4", __TO_STR(int4));
   EXPECT_STREQ("vec4", __TO_STR(float4));

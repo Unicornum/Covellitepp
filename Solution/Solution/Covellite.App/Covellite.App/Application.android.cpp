@@ -170,14 +170,15 @@ Application::Application(EventBased) :
 
     Logcat::Info("Application::Main(): init.");
 
+    // При переходе на Clang:
+    // - Для pApp->window код не компилируется.
+    // - Для &pApp->window вызов AppInfo_t::Get<ANativeWindow *>() бросает
+    //   исключение для несуществующего значения.
     const AppInfo_t Info
     {
       pApp, 
       pApp->activity,
       pApp->activity->vm,
-      &pApp->activity, 
-      &pApp->window, 
-      &pApp->config,
     };
 
     Logcat::Info("Application::Main(): create app object.");

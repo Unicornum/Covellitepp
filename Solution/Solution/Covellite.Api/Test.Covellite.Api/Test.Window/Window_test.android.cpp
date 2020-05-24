@@ -1,6 +1,12 @@
 
 #include "stdafx.h"
 #include <unordered_map>
+#include <alicorn/std/chrono.mock.hpp>
+#include <alicorn/std/string.hpp>
+#include <alicorn/logger.mock.hpp>
+#include <Platform/Windows.mock.hpp>
+#include <Platform/Android.mock.hpp>
+#include <Covellite/App/Settings.mock.hpp>
 
 // Примеры макросов библиотеки Google Test
 #include <alicorn\google\test\example.hpp>

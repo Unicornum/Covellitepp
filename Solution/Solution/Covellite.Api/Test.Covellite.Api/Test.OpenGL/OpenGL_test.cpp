@@ -1,5 +1,7 @@
 
 #include "stdafx.h"
+#include <alicorn/std/string/encoding.hpp>
+#include <Platform/Windows.mock.hpp>
 #include "../Mock/OpenGL.hpp"
 
 // Примеры макросов библиотеки Google Test
@@ -77,16 +79,14 @@ protected:
   }
 
 protected:
-  static const int m_Top = 0;
-
   class Data :
     public ::covellite::api::renderer::SettingsData
   {
   public:
-    Data(void)
+    explicit Data(int _Top = 0)
     {
       Handle = (HWND)0;
-      Top = m_Top;
+      Top = _Top;
       IsFullScreen = false;
     }
   };
@@ -385,7 +385,7 @@ TEST_F(OpenGL_test, /*DISABLED_*/Test_GetUsingApi)
   const char * const Unknown = "Unknown1908291913";
   const char * Version = "Version1710311100";
   const auto Expected = uT("OpenGL %VERSION%").Replace(uT("%VERSION%"), 
-    string_cast<String, Locale::Default>(::std::string{ Version }));
+    string_cast<String, Encoding::Ascii128>(::std::string{ Version }));
 
   using namespace ::testing;
 

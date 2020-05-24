@@ -1,6 +1,7 @@
 ﻿
 #pragma once
 #include <alicorn/std/string.hpp>
+#include <alicorn/std/string/encoding.hpp>
 #include <alicorn/std/regex.hpp>
 #include <boost/algorithm/string/replace.hpp>
 #include <Covellite/Api/Component.inl>
@@ -176,7 +177,7 @@ private:
 
         using namespace ::alicorn::extension::std;
 
-        return string_cast<String, Locale::Ascii128>(
+        return string_cast<String, Encoding::Ascii128>(
           Line.substr(TypeBegin, TypeEnd - TypeBegin));
       }
 

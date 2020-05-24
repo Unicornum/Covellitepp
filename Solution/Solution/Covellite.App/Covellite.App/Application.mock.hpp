@@ -1,5 +1,7 @@
 
 #pragma once
+#include <stack>
+#include <functional>
 #include <Covellite/Events/Events.hpp>
 #include <Covellite/App/IApplication.hpp>
 #include <Covellite/App/IWindow.hpp>

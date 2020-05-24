@@ -14,8 +14,8 @@
 */
 
 #undef BOOST_OS_WINDOWS
-#undef BOOST_OS_ANDROID
-#define BOOST_OS_ANDROID 1
+#undef BOOST_PLAT_ANDROID
+#define BOOST_PLAT_ANDROID 1
 #define Window_test Window_android_test
 #define Window Window_android
 #define Configuration Configuration_android
@@ -106,9 +106,11 @@ protected:
 TEST_F(Window_test, /*DISABLED_*/Test_GetHandle)
 {
   ANativeWindow Window;
-  auto * pWindow = &Window;
 
-  const AppInfo_t Info{ &pWindow };
+  android_app App;
+  App.window = &Window;
+
+  const AppInfo_t Info{ &App };
 
   const Application Application;
   const Tested_t Example{ Application };
@@ -122,9 +124,11 @@ TEST_F(Window_test, /*DISABLED_*/Test_GetHandle)
 TEST_F(Window_test, /*DISABLED_*/Test_Resize)
 {
   ANativeWindow Window;
-  auto * pWindow = &Window;
 
-  const AppInfo_t Info{ &pWindow };
+  android_app App;
+  App.window = &Window;
+
+  const AppInfo_t Info{ &App };
 
   Application Application;
   Tested_t Example{ Application };
@@ -153,9 +157,11 @@ TEST_F(Window_test, /*DISABLED_*/Test_Motion)
 
   AInputEvent InputEvent;
   ANativeWindow Window;
-  auto * pWindow = &Window;
 
-  const AppInfo_t Info{ &pWindow };
+  android_app App;
+  App.window = &Window;
+
+  const AppInfo_t Info{ &App };
 
   Application Application;
   Tested_t Example{ Application };
@@ -192,9 +198,11 @@ TEST_F(Window_test, /*DISABLED_*/Test_Touch)
 
   AInputEvent InputEvent;
   ANativeWindow Window;
-  auto * pWindow = &Window;
 
-  const AppInfo_t Info{ &pWindow };
+  android_app App;
+  App.window = &Window;
+
+  const AppInfo_t Info{ &App };
 
   Application Application;
   Tested_t Example{ Application };
@@ -236,9 +244,11 @@ TEST_F(Window_test, /*DISABLED_*/Test_Release)
 
   AInputEvent InputEvent;
   ANativeWindow Window;
-  auto * pWindow = &Window;
 
-  const AppInfo_t Info{ &pWindow };
+  android_app App;
+  App.window = &Window;
+
+  const AppInfo_t Info{ &App };
 
   Application Application;
   Tested_t Example{ Application };
@@ -279,9 +289,11 @@ TEST_F(Window_test, /*DISABLED_*/Test_Pressed)
 
   AInputEvent InputEvent;
   ANativeWindow Window;
-  auto * pWindow = &Window;
 
-  const AppInfo_t Info{ &pWindow };
+  android_app App;
+  App.window = &Window;
+
+  const AppInfo_t Info{ &App };
 
   Application Application;
   Tested_t Example{ Application };
@@ -313,9 +325,11 @@ TEST_F(Window_test, /*DISABLED_*/Test_Down)
 
   AInputEvent InputEvent;
   ANativeWindow Window;
-  auto * pWindow = &Window;
 
-  const AppInfo_t Info{ &pWindow };
+  android_app App;
+  App.window = &Window;
+
+  const AppInfo_t Info{ &App };
 
   Application Application;
   Tested_t Example{ Application };
@@ -347,9 +361,11 @@ TEST_F(Window_test, /*DISABLED_*/Test_Up)
 
   AInputEvent InputEvent;
   ANativeWindow Window;
-  auto * pWindow = &Window;
 
-  const AppInfo_t Info{ &pWindow };
+  android_app App;
+  App.window = &Window;
+
+  const AppInfo_t Info{ &App };
 
   Application Application;
   Tested_t Example{ Application };
@@ -384,9 +400,11 @@ TEST_F(Window_test, /*DISABLED_*/Test_Back)
 
   AInputEvent InputEvent;
   ANativeWindow Window;
-  auto * pWindow = &Window;
 
-  const AppInfo_t Info{ &pWindow };
+  android_app App;
+  App.window = &Window;
+
+  const AppInfo_t Info{ &App };
 
   Application Application;
   Tested_t Example{ Application };
@@ -424,9 +442,11 @@ TEST_F(Window_test, /*DISABLED_*/Test_Menu)
 
   AInputEvent InputEvent;
   ANativeWindow Window;
-  auto * pWindow = &Window;
 
-  const AppInfo_t Info{ &pWindow };
+  android_app App;
+  App.window = &Window;
+
+  const AppInfo_t Info{ &App };
 
   Application Application;
   Tested_t Example{ Application };
@@ -467,9 +487,12 @@ TEST_F(Window_test, /*DISABLED_*/Test_GetClientRect)
   const ::mock::Id_t EnvironmentId = 1808221200;
 
   ANativeWindow Window;
+
+  android_app App;
+  App.window = &Window;
   auto * pWindow = &Window;
 
-  const AppInfo_t Info{ &pWindow };
+  const AppInfo_t Info{ &App };
 
   const Application Application;
   const Tested_t Example{ Application };
@@ -508,12 +531,13 @@ TEST_F(Window_test, /*DISABLED_*/Test_GetSystemLanguage)
   AEventProxy_t::GetInstance() = &AEventProxy;
 
   ANativeWindow Window;
-  auto * pWindow = &Window;
-
   AConfiguration Config;
-  auto * pConfig = &Config;
 
-  const AppInfo_t Info{ &pWindow, &pConfig };
+  android_app App;
+  App.window = &Window;
+  App.config = &Config;
+
+  const AppInfo_t Info{ &App };
 
   const Application Application;
   const Tested_t Example{ Application };

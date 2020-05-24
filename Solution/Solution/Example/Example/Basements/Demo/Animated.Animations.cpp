@@ -1,6 +1,7 @@
 
 #include "stdafx.h"
 #include "Animations.hpp"
+#include <alicorn/std/string/encoding.hpp>
 
 namespace basement
 {
@@ -157,7 +158,7 @@ auto Animated::Animations::Get(
     using namespace ::alicorn::extension::std;
 
     const auto BoneName =
-      string_cast<String, Locale::UTF8>(_Skeleton[i].Name);
+      string_cast<String, Encoding::UTF8>(_Skeleton[i].Name);
 
     if (_TransformBones.find(BoneName) != _TransformBones.end())
     {

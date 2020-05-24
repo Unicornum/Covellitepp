@@ -14,9 +14,8 @@ using float4x4 = ::glm::mat4;
 #define color_t float4
   
 #define COVELLITE_BUFFER_INDEX_CAMERA 0
-#define COVELLITE_BUFFER_INDEX_FOG 1
-#define COVELLITE_BUFFER_INDEX_OBJECT 2
-#define COVELLITE_BUFFER_INDEX_USER 3
+#define COVELLITE_BUFFER_INDEX_OBJECT 1
+#define COVELLITE_BUFFER_INDEX_USER 2
   
 #define COVELLITE_MAX_LIGHT_POINT_OBJECT_COUNT 4
     
@@ -26,15 +25,7 @@ struct Camera
   float4x4 View;
   float4x4 ViewInverse;
 };
-  
-struct Fog
-{
-  color_t Color;
-  float   Near;
-  float   Far;
-  float   Density;
-};
-  
+    
 struct Ambient_t
 {
   color_t  Color;
@@ -76,10 +67,19 @@ struct Object
   
 // **************************** deprecated ********************************** //
   
+#define COVELLITE_BUFFER_INDEX_FOG 3
 #define COVELLITE_BUFFER_INDEX_MATRICES 4
 #define COVELLITE_BUFFER_INDEX_LIGHTS 5
   
 #define COVELLITE_MAX_LIGHT_POINT_SCENE_COUNT 16
+
+struct Fog
+{
+  color_t Color;
+  float   Near;
+  float   Far;
+  float   Density;
+};
   
 struct ScenePoints
 {

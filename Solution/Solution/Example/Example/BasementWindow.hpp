@@ -1,8 +1,8 @@
 ﻿
 #pragma once
 #include <Covellite/Covellite.hpp>
+#include <memory>
 
-namespace std { template<class> class shared_ptr; }
 namespace basement { class IBasement; }
 
 /**

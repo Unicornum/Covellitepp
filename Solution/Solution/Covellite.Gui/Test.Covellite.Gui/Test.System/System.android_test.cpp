@@ -13,8 +13,8 @@
 */
 
 #undef BOOST_OS_WINDOWS
-#undef BOOST_OS_ANDROID
-#define BOOST_OS_ANDROID 1
+#undef BOOST_PLAT_ANDROID
+#define BOOST_PLAT_ANDROID 1
 #define System_test System_android_test
 #define System System_android
 
@@ -132,7 +132,7 @@ TEST_F(System_test, /*DISABLED_*/Test_DeactivateKeyboard)
   ANativeActivity Activity;
   auto * pActivity = &Activity;
 
-  const AppInfo_t Info{ &pActivity };
+  const AppInfo_t Info{ pActivity };
 
   const auto pStringTranslator = ::std::make_shared<StringTranslator>();
 

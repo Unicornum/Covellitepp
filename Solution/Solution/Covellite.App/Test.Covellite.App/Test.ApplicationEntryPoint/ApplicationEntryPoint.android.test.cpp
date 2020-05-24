@@ -15,8 +15,8 @@
 #include <Covellite\App.mock.hpp>
 
 #undef BOOST_OS_WINDOWS
-#undef BOOST_OS_ANDROID
-#define BOOST_OS_ANDROID 1
+#undef BOOST_PLAT_ANDROID
+#define BOOST_PLAT_ANDROID 1
 #define ApplicationEntryPoint_test ApplicationEntryPoint_android_test
 #undef APPLICATION_ENTRY_POINT
 

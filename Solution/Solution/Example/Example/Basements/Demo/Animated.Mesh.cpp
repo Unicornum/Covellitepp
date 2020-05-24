@@ -2,7 +2,6 @@
 #include "stdafx.h"
 #include "Animated.hpp"
 #include "Animations.hpp"
-#include <alicorn/boost/format.inl>
 #include <alicorn/std/vector.hpp>
 #include <alicorn/logger.hpp>
 #include "Assimp.hpp"
@@ -142,14 +141,8 @@ Object_t Animated::Mesh::GetObject(const Any_t & _Value) const /*override*/
     (SquareDistance <= 25.0f) ? 4 : 8;
 
   static size_t Index = 0;
-  Index++;
 
-  using ::alicorn::extension::boost::Format;
-
-  // »спользование здесь String::Replace() увеличивает врем€ формировани€
-  // идентификатора в 10(!) раз, что существенно сказываетс€
-  // на скорости загрузки сцены.
-  const auto Id = (Format{ uT(".Vertex.%1%") } % Index).ToString();
+  const auto Id = String_t{ uT(".Vertex.%ID%") }.Replace(uT("%ID%"), Index++);
 
   const auto HoldInBoneName = uT("mixamorig:RightHandIndex2");
 

@@ -1,6 +1,6 @@
 
 #pragma once
-#include <GLMath.hpp>
+#include <glm/glm.force.hpp>
 #include <alicorn/boost/filesystem.forward.hpp>
 #include <Covellite/Api/Vertex.hpp>
 #include "IGameObject.hpp"

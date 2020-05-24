@@ -1,5 +1,9 @@
 
 #include "stdafx.h"
+#include <alicorn/std/chrono.mock.hpp>
+#include <alicorn/std/string/encoding.hpp>
+#include <alicorn/platform/app-info.hpp>
+#include <Platform/Android.mock.hpp>
 #include "../Mock/OpenGL.hpp"
 
 // Примеры макросов библиотеки Google Test
@@ -65,16 +69,14 @@ protected:
   const String_t m_UsingApi = uT("OpenGLES");
 
 protected:
-  static const int m_Top = 1812271210;
-
   class Data :
     public ::covellite::api::renderer::SettingsData
   {
   public:
-    Data(void)
+    explicit Data(int _Top = 0)
     {
       Handle = (ANativeWindow *)nullptr;
-      Top = m_Top;
+      Top = _Top;
       IsFullScreen = false;
     }
   };
@@ -192,7 +194,7 @@ TEST_F(OpenGLES_test, /*DISABLED_*/Test_GetUsingApi)
 
   const char * Version = "Version1710311111";
   const auto Expected =
-    string_cast<String, Locale::Default>(::std::string{ Version });
+    string_cast<String, Encoding::Ascii128>(::std::string{ Version });
 
   using namespace ::testing;
 

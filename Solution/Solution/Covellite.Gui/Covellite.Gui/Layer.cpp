@@ -3,13 +3,9 @@
 #include <Covellite/Gui/Layer.hpp>
 #include <boost/format.hpp>
 #include <alicorn/std/string.hpp>
+#include <alicorn/std/string/encoding.hpp>
 #include <alicorn/std/string-cast.hpp>
 #include <alicorn/boost/lexical-cast.hpp>
-#include <Rocket/ProgressBar/ElementProgressBar.h>
-
-#ifdef max
-# undef max
-#endif
 
 using namespace covellite::gui;
 
@@ -73,12 +69,12 @@ void Layer::Element::SetMeaning(const String_t & _Meaning)
     // выглядит так, как будто список строк просто удаляется), как устанавливать 
     // значение по умолчанию, см. в примере работы с элементами управления.
 
-    Control.SetValue(string_cast<::std::string, Locale::UTF8>(_Meaning).c_str());
+    Control.SetValue(string_cast<::std::string, Encoding::UTF8>(_Meaning).c_str());
     return;
   }
 
   m_pElement->SetInnerRML(
-    string_cast<::std::string, Locale::UTF8>(_Meaning).c_str());
+    string_cast<::std::string, Encoding::UTF8>(_Meaning).c_str());
 }
 
 /**
@@ -112,10 +108,10 @@ auto Layer::Element::GetMeaning(void) const -> String_t
     const auto & Control =
       dynamic_cast<Rocket::Controls::ElementFormControl &>(*m_pElement);
 
-    return string_cast<String, Locale::UTF8>(Control.GetValue().CString());
+    return string_cast<String, Encoding::UTF8>(Control.GetValue().CString());
   }
 
-  return string_cast<String, Locale::UTF8>(
+  return string_cast<String, Encoding::UTF8>(
     m_pElement->GetInnerRML().CString());
 }
 
@@ -136,7 +132,7 @@ void Layer::Element::SetClassStyle(const String_t & _Class)
   using namespace ::alicorn::extension::std;
 
   m_pElement->SetAttribute("class", 
-    string_cast<::std::string, Locale::UTF8>(_Class).c_str());
+    string_cast<::std::string, Encoding::UTF8>(_Class).c_str());
 }
 
 // ************************************************************************** //

@@ -1,16 +1,16 @@
 
 #pragma once
-#include <GLMath.hpp>
-
-#ifdef min
-#undef min
-#endif
+#include <glm/glm.force.hpp>
 
 #define GL_NONE                           0
 #define GL_TRUE                           1
 #define GL_FALSE                          0
 #define GL_INVALID_INDEX                  0xFFFFFFFFu
+#define GL_FLOAT_VEC2                     0x8B50
+#define GL_FLOAT_VEC3                     0x8B51
 #define GL_FLOAT_VEC4                     0x8B52
+#define GL_INT_VEC2                       0x8B53
+#define GL_INT_VEC3                       0x8B54
 #define GL_INT_VEC4                       0x8B55
 #define GL_INT                            0x1404
 
@@ -101,6 +101,7 @@
 #define GL_ARRAY_BUFFER_BINDING           0x8894
 #define GL_ELEMENT_ARRAY_BUFFER_BINDING   0x8895
 #define GL_UNIFORM_BUFFER                 0x8A11
+#define GL_ACTIVE_ATTRIBUTES              0x8B89
 
 #define GL_STREAM_DRAW                    0x88E0
 #define GL_STATIC_DRAW                    0x88E4
@@ -234,6 +235,7 @@ public:
     const void *, GLsizei));
   MOCK_METHOD2(VertexAttribDivisor, void(GLuint, GLuint));
   MOCK_METHOD2(GetActiveAttribType, GLenum(GLuint, GLuint));
+  MOCK_METHOD3(GetActiveAttribName, ::std::string(GLuint, GLuint, GLsizei));
   MOCK_METHOD1(ClearDepth, void(GLclampd));
   MOCK_METHOD1(DepthFunc, void(GLenum));
   MOCK_METHOD1(GenFramebuffers, GLuint(GLsizei));
@@ -347,13 +349,19 @@ void glDepthFunc(GLenum func)
 void glGetActiveAttrib(
   GLuint program,
   GLuint index,
-  GLsizei /*bufSize*/,
-  GLsizei * /*length*/,
+  GLsizei bufSize,
+  GLsizei * length,
   GLint * /*size*/,
   GLenum * type,
-  GLchar * /*name*/)
+  GLchar * name)
 {
-  *type = GLProxy::GetInstance()->GetActiveAttribType(program, index);
+  *type = 
+    GLProxy::GetInstance()->GetActiveAttribType(program, index);
+
+  const auto Name = 
+    GLProxy::GetInstance()->GetActiveAttribName(program, index, bufSize);
+  *length = Name.length();
+  strncpy(name, Name.c_str(), ::std::min(bufSize , *length + 1));
 }
 
 void glVertexAttribDivisor(GLuint index, GLuint divisor)

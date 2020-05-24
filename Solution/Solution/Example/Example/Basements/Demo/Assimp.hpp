@@ -1,10 +1,10 @@
 
 #pragma once
-#include <GLMath.hpp>
+#include <glm/glm.force.hpp>
 #include <alicorn/std/string.hpp>
+#include <alicorn/std.fast/unordered-map.hpp>
 #include <alicorn/boost/filesystem.hpp>
 #include <assimp/importer.hpp>
-#include <Covellite/Api/robin_hood.hpp>
 
 struct aiNode;
 struct aiMesh;
@@ -21,7 +21,7 @@ class Assimp final
 {
   using Path_t = ::boost::filesystem::path;
   using String_t = ::alicorn::extension::std::String;
-  using BoneLocals_t = ::robin_hood::unordered_map<::std::string, aiMatrix4x4>;
+  using BoneLocals_t = ::alicorn::extension::std::fast::unordered_map<::std::string, aiMatrix4x4>;
   using VertexWeight_t = ::std::pair<::std::string, float>;
   using BoneWeights_t = ::std::map<unsigned int, ::std::vector<VertexWeight_t>>;
 

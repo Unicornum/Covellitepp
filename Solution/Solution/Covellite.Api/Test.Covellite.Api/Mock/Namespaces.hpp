@@ -20,3 +20,10 @@ namespace alicorn = ::mock::alicorn;
 namespace covellite = ::mock::covellite;
 
 } // namespace covellite
+
+namespace testing 
+{
+
+namespace std = ::std;
+
+}

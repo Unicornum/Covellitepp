@@ -2,7 +2,7 @@
 #pragma once
 #include <Covellite/Api/Component.hpp>
 #include <boost/core/ignore_unused.hpp>
-#include <alicorn/std/memory.hpp>
+#include <alicorn/std.memory.hpp>
 
 namespace covellite
 {

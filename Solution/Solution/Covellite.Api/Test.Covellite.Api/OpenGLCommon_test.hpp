@@ -1,5 +1,6 @@
 
 #pragma once
+#include <Platform/Windows.mock.hpp>
 
 inline static ::std::vector<float> ARGBtoFloat4(const uint32_t _HexColor)
 {
@@ -34,13 +35,14 @@ TEST_F(OpenGLCommon_test, /*DISABLED_*/Test_ResizeWindow)
 
   const int Width = 1710291059;
   const int Height = 1710291100;
+  const int Top = 1218;
 
-  Tested_t Example{ Data_t{} };
+  Tested_t Example{ Data_t{ Top } };
   ITested_t & IExample = Example;
 
   using namespace ::testing;
 
-  EXPECT_CALL(GLProxy, Viewport(0, 0, Width, Height - m_Top))
+  EXPECT_CALL(GLProxy, Viewport(0, 0, Width, Height - Top))
     .Times(1);
 
   IExample.ResizeWindow(Width, Height);
@@ -467,7 +469,7 @@ TEST_F(OpenGLCommon_test, /*DISABLED_*/Test_State_Clear)
   GLProxy_t GLProxy;
   GLProxy_t::GetInstance() = &GLProxy;
 
-  Tested_t Example{ Data_t{} };
+  Tested_t Example{ Data_t{ } };
   ITested_t & IExample = Example;
 
   auto itCreator = IExample.GetCreators().find(uT("State"));

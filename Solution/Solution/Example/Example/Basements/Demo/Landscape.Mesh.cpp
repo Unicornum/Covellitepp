@@ -8,19 +8,10 @@
 #include <alicorn/boost/filesystem.hpp>
 #include <alicorn/logger.hpp>
 
-#if BOOST_COMP_MSVC
-# pragma warning(push)
-# pragma warning(disable: 26498)
-# pragma warning(disable: 26495)
-# pragma warning(disable: 26451)
-#endif
-
 #define TINYOBJLOADER_IMPLEMENTATION
+#include <alicorn/cpp/disable-all-warnings.hpp>
 #include <tinyobj/tiny_obj_loader.h>
-
-#if BOOST_COMP_MSVC
-# pragma warning(pop)
-# endif
+#include <alicorn/cpp/restore-warnings.hpp>
 
 namespace basement
 {

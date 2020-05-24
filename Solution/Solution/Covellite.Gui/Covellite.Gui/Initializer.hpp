@@ -2,8 +2,7 @@
 #pragma once
 #include <Covellite\Gui\File.hpp>
 #include <Covellite\Gui\System.hpp>
-
-namespace std { template<class> class shared_ptr; }
+#include <memory>
 
 namespace covellite
 {

@@ -1,8 +1,7 @@
 
 #pragma once
 #include <vector>
-
-namespace std { template<class> class shared_ptr; }
+#include <memory>
 
 namespace covellite
 {

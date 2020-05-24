@@ -1,6 +1,8 @@
 
 #include "stdafx.h"
-#include <alicorn\std\string.hpp>
+#include <alicorn/std/chrono.mock.hpp>
+#include <alicorn/std/string.hpp>
+#include <Covellite/Os/Configuration.mock.hpp>
 
 // Примеры макросов библиотеки Google Test
 #include <alicorn\google\test\example.hpp>

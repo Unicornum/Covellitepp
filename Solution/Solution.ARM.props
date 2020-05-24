@@ -14,11 +14,13 @@
   <ItemDefinitionGroup>
     <ClCompile />
     <ClCompile>
+      <AdditionalOptions>-fopenmp -Wno-nonportable-include-path %(AdditionalOptions)</AdditionalOptions>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);__ANDROID__</PreprocessorDefinitions>
       <EnableNeonCodegen>true</EnableNeonCodegen>
-      <AdditionalOptions>-fopenmp %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <AdditionalOptions>-fopenmp %(AdditionalOptions)</AdditionalOptions>
+      <LibraryDependencies>unwind;OpenSLES;%(LibraryDependencies)</LibraryDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>

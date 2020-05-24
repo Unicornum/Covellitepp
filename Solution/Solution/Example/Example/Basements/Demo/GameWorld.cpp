@@ -10,13 +10,11 @@
 #include "GameScene.hpp"
 #include "PointLights.hpp"
 #include "Constants.hpp"
+#include "SoundDevice.hpp"
 
 // 17 Март 2019 11:45 (unicornum.verum@gmail.com)
 TODO("Недопустимая ссылка на заголовочный файл!");
 #include "../../Layers/Demo.hpp"
-
-#define SOUND_DEVICE_IMPLEMENTATION
-#include <SoundDevice.hpp>
 
 namespace basement
 {

@@ -3,7 +3,7 @@
 #include <vector>
 #include <functional>
 #include <alicorn/std/string.forward.hpp>
-#include <alicorn/std/memory/unique-ptr.hpp>
+#include <alicorn/std.memory/unique-ptr.hpp>
 #include <Covellite/Predefined.hpp>
 #include <Covellite/Api/Component.hpp>
 

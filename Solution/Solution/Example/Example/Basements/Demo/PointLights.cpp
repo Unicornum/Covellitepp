@@ -4,10 +4,6 @@
 #include <alicorn/logger.hpp>
 #include "CubeCoords.hpp"
 
-#ifdef max
-#undef max
-#endif
-
 using namespace basement::model;
 
 class PointLights::Data 

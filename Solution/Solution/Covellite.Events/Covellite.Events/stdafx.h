@@ -1,11 +1,20 @@
 ﻿
 #pragma once
 #include "targetver.h"
-#include <alicorn\requirements.hpp>
+#include <alicorn/requirements.hpp>
+
+#include <alicorn/cpp/warnings.hpp>
 
 #if BOOST_COMP_MSVC
-#pragma warning(push)
-#pragma warning(disable: 4996)
-#include <memory>
-#pragma warning(pop)
+
+# pragma warning(push, 0)
+# pragma warning(disable: ALICORN_ALL_WARNINGS)
+
 #endif
+
+// 16 Май 2020 17:56 (unicornum.verum@gmail.com)
+TODO("Почему не работает включение заголовочного файла и работает явное включение его содержимого???");
+//#include <alicorn/cpp/disable-all-warnings.hpp>
+
+#include <boost/signals2.hpp>
+#include <alicorn/cpp/restore-warnings.hpp>

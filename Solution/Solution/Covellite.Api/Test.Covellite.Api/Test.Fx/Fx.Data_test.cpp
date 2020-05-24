@@ -1,6 +1,6 @@
 
 #include "stdafx.h"
-#include <GLMath.hpp>
+#include <glm/glm.force.hpp>
 #include <alicorn/cpp/to-str.hpp>
 
 // Примеры макросов библиотеки Google Test

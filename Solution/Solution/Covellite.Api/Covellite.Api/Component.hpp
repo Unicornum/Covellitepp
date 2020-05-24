@@ -1,8 +1,8 @@
 
 #pragma once
 #include <alicorn/std/string.hpp>
+#include <alicorn/std.fast/unordered-map.hpp>
 #include <Covellite/Predefined.hpp>
-#include "robin_hood.hpp"
 
 namespace covellite
 {
@@ -48,7 +48,7 @@ public:
   using String_t = ::alicorn::extension::std::String;
   using Name_t = String_t;
   using Hasher_t = ::std::hash<Name_t>;
-  using Params_t = ::robin_hood::unordered_map<size_t, Data>;
+  using Params_t = ::alicorn::extension::std::fast::unordered_map<size_t, Data>;
   using SourceParams_t = ::std::map<Name_t, ::covellite::Any_t>;
   using Id_t = String_t;
   using Type_t = String_t;

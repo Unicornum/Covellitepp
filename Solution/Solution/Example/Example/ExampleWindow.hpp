@@ -34,6 +34,7 @@ class ExampleWindow final :
 private:
   WindowGui_t & m_WindowGui;
   Events_t m_Events;
+  int m_LayerCount = 0;
 
 public:
   explicit ExampleWindow(WindowGui_t &);

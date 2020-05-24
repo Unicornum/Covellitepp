@@ -1,10 +1,10 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Tasks>
   <Options>
-    <Width>1404</Width>
-    <Height>945</Height>
-    <X>325</X>
-    <Y>68</Y>
+    <Width>1951</Width>
+    <Height>970</Height>
+    <X>418</X>
+    <Y>44</Y>
   </Options>
   <Process>
     <Task1 Text="Вспомогательные." Type="Info" Version="None" ExternalProgram="Solution" Expanded="true" Completed="false" History="false" ParentTaskText="false">
@@ -13,32 +13,16 @@
     </Task1>
   </Process>
   <Complete>
-    <Week6251/>
-    <Week6250>
-      <Task7 Text="В режиме OpenGL неправильно (перевернуто) отображается выделение мышью." Type="Bug" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="false"/>
-      <Task8 Text="Артефакты при отображении теней." Type="Bug" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="false"/>
-      <Task9 Text="Сдвиг панели при рендеринге теней." Type="Bug" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="true" ParentTaskText="false"/>
-      <Task10 Text="Дубли компонентов данных трансформации объектов при отрисовке теней." Type="Bug" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="true" ParentTaskText="false"/>
-      <Task11 Text="Рабочий на Android вариант с тенями." Type="Red" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="false"/>
-    </Week6250>
-    <Week6249>
-      <Task13 Text="Рендеринг во внеэкранную поверхность." Type="Red" Version="None" ExternalProgram="None" Expanded="false" Completed="true" History="false" ParentTaskText="false">
-        <Task14 Text="Унификация линеаризации значений буфера глубины для всех реализаций." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
-        <Task15 Text="Исправление расчета теней." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
-        <Task16 Text="Разнесение кода шейдеров по отдельным файлам." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
-        <Task17 Text="Реализация для OpenGL." Type="None" Version="None" ExternalProgram="None" Expanded="false" Completed="true" History="false" ParentTaskText="true">
-          <Task18 Text="Визуализация буфера тени." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
-          <Task19 Text="Визуализация буфера глубины основной сцены." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
-        </Task17>
-      </Task13>
-      <Task20 Text="Подсветка объекта под курсором." Type="Red" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="true" ParentTaskText="false">
-        <Task21 Text="Основная реализация." Type="None" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
-        <Task22 Text="Обработка изменений размеров окна программы." Type="None" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
-      </Task20>
-      <Task23 Text="Ошибка при отключении режима PBR в реализации OpenGL." Type="Bug" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="true" ParentTaskText="false"/>
-      <Task24 Text="Реорганизация кода." Type="Red" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="false"/>
-      <Task25 Text="Неверное отображение PBR материала при использовании реализации OpenGL." Type="Bug" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="true" ParentTaskText="false"/>
-    </Week6249>
-    <Week6248/>
+    <Week6281/>
+    <Week6280>
+      <Task7 Text="Ширина scrollbar'a в процентах ширины экрана." Type="Red" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="true" ParentTaskText="false"/>
+      <Task8 Text="Увеличение размеров ползунка громкости звука." Type="Red" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="true" ParentTaskText="false"/>
+      <Task9 Text="Завершение работы программы по нажатию ESC в главном окне." Type="Red" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="true" ParentTaskText="false"/>
+      <Task10 Text="Перенос кода воспроизведения звука на новую версию MiniAudio." Type="Red" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="true" ParentTaskText="false"/>
+      <Task11 Text="Реализация тумана через пользовательский константный буфер." Type="Red" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="true" ParentTaskText="false"/>
+      <Task12 Text="Android: некорректное отображение вращающегося кубика при использовании инстансинга." Type="Bug" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="true" ParentTaskText="false"/>
+    </Week6280>
+    <Week6279/>
+    <Week6278/>
   </Complete>
 </Tasks>

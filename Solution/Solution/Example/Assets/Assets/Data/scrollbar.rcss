@@ -5,17 +5,15 @@ scrollbarhorizontal {
 }
 
 scrollbarvertical {
-  width: 16px;
+  width: 3%;
 }
 
   scrollbarvertical slidertrack {
-    width: 16px;
     border-width: 1px;
     border-color: grey;
   }
 
   scrollbarvertical sliderbar {
-    width: 16px;
     min-height: 20px;
     border-width: 1px;
     border-color: grey;

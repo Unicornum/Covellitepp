@@ -1,14 +1,12 @@
 
 #include "stdafx.h"
 #include "Common.hpp"
-#include <alicorn/boost/format.inl>
 #include <alicorn/image.hpp>
 #include <Covellite/App/Settings.hpp>
 #include <Covellite/App/Vfs.hpp>
 #include <Covellite/Api/Component.inl>
 
 using namespace basement;
-using ::alicorn::extension::boost::Format;
 
 /******************************************************************************/
 
@@ -19,8 +17,8 @@ Common::Id::Id(void) :
 }
 
 auto Common::Id::GetStringId(void) const -> String_t 
-{ 
-  return (Format{ uT("%1%") } % m_Id).ToString();
+{
+  return String_t{ uT("%ID%") }.Replace(uT("%ID%"), m_Id);
 }
 
 bool Common::Id::operator< (const Id & _Id) const

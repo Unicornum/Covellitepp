@@ -49,6 +49,7 @@ void ExampleApp::DoInitLogger(void)
   else
   {
     LOGGER(Filter) << LOGGER_MIN_LEVEL(Trace);
+    //LOGGER(Filter) << LOGGER_MIN_LEVEL(Info);
     LOGGER(report::DebugOutput_t);
   }
 }

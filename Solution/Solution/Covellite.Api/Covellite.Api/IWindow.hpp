@@ -1,11 +1,10 @@
 
 #pragma once
+#include <memory>
 #include <alicorn/std/string.forward.hpp>
 #include <Covellite/Events/IEvents.hpp>
 #include <Covellite/Os/IWindow.hpp>
 #include <Covellite/Api/Renders.hpp>
-
-namespace std { template<class> class shared_ptr; }
 
 namespace covellite
 {

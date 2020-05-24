@@ -1,16 +1,12 @@
 
 #include "stdafx.h"
 #include "DirectX11.hpp"
-#include <GLMath.hpp>
+#include <glm/glm.force.hpp>
 #include <alicorn/std/vector.hpp>
 #include <alicorn/boost/lexical-cast.hpp>
 #include "DxCheck.hpp"
 #include "DirectX.hpp"
-
-#pragma warning(push)
-#pragma warning(disable: 4996)
 #include <Covellite/Api/Vertex.hpp>
-#pragma warning(pop)
 
 #include <d3d11.h>
 #pragma comment(lib, "d3d11.lib")
@@ -1041,9 +1037,6 @@ auto DirectX11::CreateShader(const ComponentPtr_t & _pComponent) -> Render_t /*o
   };
 }
 
-#pragma warning(push)
-#pragma warning(disable: 4996)
-
 auto DirectX11::CreateBuffer(const ComponentPtr_t & _pComponent) -> Render_t /*override*/
 {
   namespace vertex = ::covellite::api::vertex;
@@ -1209,8 +1202,6 @@ auto DirectX11::CreateBuffer(const ComponentPtr_t & _pComponent) -> Render_t /*o
       pBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);
   };
 }
-
-#pragma warning(pop)
 
 auto DirectX11::CreateTransform(const ComponentPtr_t & _pComponent) -> Render_t /*override*/
 {

@@ -1,8 +1,9 @@
 ﻿
 #include "stdafx.h"
 #include "OpenGLCommonShader.hpp"
-#include <GLMath.hpp>
+#include <glm/glm.force.hpp>
 #include <alicorn/std/vector.hpp>
+#include <alicorn/std.fast/unordered-map.hpp>
 
 #if BOOST_COMP_MSVC 
 # pragma warning(push)
@@ -418,6 +419,9 @@ public:
     const GLsizeiptr _Size, 
     const GLsizei _Stride)
   {
+    using AttributeTypes_t = ::alicorn::extension::std::fast::unordered_map<
+      ::std::string, ::std::pair<GLint, GLenum>>;
+
     constexpr auto BlockSize = sizeof(float) * 4;
     const auto BlockCount = _Stride / BlockSize;
 
@@ -427,28 +431,52 @@ public:
     GLint ProgramId = 0;
     glGetIntegerv(GL_CURRENT_PROGRAM, &ProgramId);
 
-    for (::std::size_t i = 0; i < BlockCount; i++)
+    const auto GetAttributeTypes = [&](void) -> AttributeTypes_t
     {
-      const auto hInstance = glGetAttribLocation(ProgramId, 
-        ("iValue" + ::std::to_string(i + 1)).c_str());
-      if (hInstance == -1) continue;
+      // С одной стороны, список атрибутов достаточно формировать один раз
+      // для каждой шейдерной программы, с другой стороны - индексы могут быть
+      // изменены при помощи функции glBindAttribLocation().
 
       constexpr GLsizei NameBufferSize = 255;
       GLsizei NameLength = 0;
       GLint ValueSize = 0;
       GLchar ValueName[NameBufferSize] = { 0 };
 
-      GLenum iType = static_cast<GLenum>(-1);
-      glGetActiveAttrib(ProgramId, hInstance, NameBufferSize, &NameLength, 
-        &ValueSize, &iType, ValueName);
+      GLint AttributeCount = 0;
+      glGetProgramiv(ProgramId, GL_ACTIVE_ATTRIBUTES, &AttributeCount);
 
-      const GLenum Type = 
-        (iType == GL_FLOAT_VEC4) ? GL_FLOAT :
-        (iType == GL_INT_VEC4) ? GL_INT : 0;
+      AttributeTypes_t Result;
+
+      for (GLint i = 0; i < AttributeCount; i++)
+      {
+        auto iType = static_cast<GLenum>(-1);
+        glGetActiveAttrib(ProgramId, i, NameBufferSize, &NameLength, 
+          &ValueSize, &iType, ValueName);
+
+        Result[ValueName] = { i, // Индексы - для отладочных целей
+          (iType == GL_FLOAT_VEC4) ? GL_FLOAT :
+          (iType == GL_INT_VEC4) ? GL_INT : iType };
+      }
+
+      return Result;
+    };
+
+    // Работа через список всех атрибутов понадобилась из-за того, что функция
+    // glGetActiveAttrib() в Windows версии ожидает hInstance, а в Android
+    // версии - индекс атрибута (в Android версии при компиляции шейдера
+    // удаляются все неиспользуемые переменные и hInstance и индекс не совпадают).
+    auto AttributeTypes = GetAttributeTypes();
+
+    for (::std::size_t i = 0; i < BlockCount; i++)
+    {
+      const auto Name = "iValue" + ::std::to_string(i + 1);
+
+      const auto hInstance = glGetAttribLocation(ProgramId, Name.c_str());
+      if (hInstance == -1) continue;
 
       glEnableVertexAttribArray(hInstance);
-      glVertexAttribPointer(hInstance, 4, Type, GL_FALSE, _Stride,
-        (void*)(BlockSize * i));
+      glVertexAttribPointer(hInstance, 4, AttributeTypes[Name].second, 
+        GL_FALSE, _Stride, (void*)(BlockSize * i));
       glVertexAttribDivisor(hInstance, 1);
     }
 

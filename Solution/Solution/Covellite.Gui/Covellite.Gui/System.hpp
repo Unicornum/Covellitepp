@@ -2,8 +2,7 @@
 #pragma once
 #include <Rocket\Rocket.hpp>
 #include <Covellite\Gui\IStringTranslator.hpp>
-
-namespace std { template<class> class shared_ptr; }
+#include <memory>
 
 namespace covellite
 {

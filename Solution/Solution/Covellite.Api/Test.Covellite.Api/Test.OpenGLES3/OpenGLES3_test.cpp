@@ -1,5 +1,11 @@
 
 #include "stdafx.h"
+#include <alicorn/std/chrono.mock.hpp>
+#include <alicorn/std/string.hpp>
+#include <alicorn/std/string/encoding.hpp>
+#include <alicorn/platform/app-info.hpp>
+#include <alicorn/logger.mock.hpp>
+#include <Platform/Android.mock.hpp>
 #include "../Mock/OpenGL.hpp"
 
 #pragma comment(lib, "opengl32.lib")
@@ -75,16 +81,14 @@ protected:
   }
 
 protected:
-  static const int m_Top = 1908292107;
-
   class Data :
     public ::covellite::api::renderer::SettingsData
   {
   public:
-    Data(void)
+    explicit Data(int _Top = 0)
     {
       Handle = (ANativeWindow *)0;
-      Top = m_Top;
+      Top = _Top;
       IsFullScreen = false;
     }
   };
@@ -185,7 +189,7 @@ TEST_F(OpenGLES3_test, /*DISABLED_*/Test_GetUsingApi)
   const char * const Unknown = "Unknown1908291913";
   const char * Version = "Version1710311111";
   const auto Expected =
-    string_cast<String, Locale::Default>(::std::string{ Version });
+    string_cast<String, Encoding::Ascii128>(::std::string{ Version });
 
   using namespace ::testing;
 
@@ -206,8 +210,12 @@ TEST_F(OpenGLES3_test, /*DISABLED_*/Test_GetUsingApi)
 }
 
 // ************************************************************************** //
-TEST_F(OpenGLES3_test, /*DISABLED_*/Test_PresentFrame)
+TEST_F(OpenGLES3_test, /*DISABLED_*/Test_PresentFrame_FullScreen)
 {
+  using GLProxy_t = ::mock::GLProxy;
+  GLProxy_t GLProxy;
+  GLProxy_t::GetInstance() = &GLProxy;
+
   using SurfaceProxy_t = ::mock::covellite::egl::Surface::Proxy;
   SurfaceProxy_t SurfaceProxy;
   SurfaceProxy_t::GetInstance() = &SurfaceProxy;
@@ -220,8 +228,61 @@ TEST_F(OpenGLES3_test, /*DISABLED_*/Test_PresentFrame)
     .Times(1)
     .WillOnce(Return(SurfaceId));
 
-  Tested_t Example{ Data_t{} };
+  Tested_t Example{ Data_t{ 0 } };
   ITested_t & IExample = Example;
+
+  EXPECT_CALL(GLProxy, Clear(GL_COLOR_BUFFER_BIT))
+    .Times(0);
+
+  EXPECT_CALL(SurfaceProxy, SwapBuffers(SurfaceId))
+    .Times(1);
+
+  IExample.PresentFrame();
+}
+
+// ************************************************************************** //
+TEST_F(OpenGLES3_test, /*DISABLED_*/Test_PresentFrame_ClearHeader)
+{
+  using GLProxy_t = ::mock::GLProxy;
+  GLProxy_t GLProxy;
+  GLProxy_t::GetInstance() = &GLProxy;
+
+  using SurfaceProxy_t = ::mock::covellite::egl::Surface::Proxy;
+  SurfaceProxy_t SurfaceProxy;
+  SurfaceProxy_t::GetInstance() = &SurfaceProxy;
+
+  const ::mock::Id_t SurfaceId = 1808271225;
+  const int Top = 1221;
+
+  using namespace ::testing;
+
+  EXPECT_CALL(SurfaceProxy, Constructor(_, _, _))
+    .Times(1)
+    .WillOnce(Return(SurfaceId));
+
+  Tested_t Example{ Data_t{ Top } };
+  ITested_t & IExample = Example;
+
+  const int Viewport[4] = { 1213, 1214, 2005201215, 2005201216 };
+
+  EXPECT_CALL(GLProxy, GetIntegerv(GL_VIEWPORT))
+    .Times(1)
+    .WillOnce(Return(Viewport));
+
+  EXPECT_CALL(GLProxy, Enable(GL_SCISSOR_TEST))
+    .Times(1);
+
+  EXPECT_CALL(GLProxy, Scissor(Viewport[0], Viewport[3], Viewport[2], Top))
+    .Times(1);
+
+  EXPECT_CALL(GLProxy, ClearColor(0.0f, 0.0f, 0.0f, 1.0f))
+    .Times(1);
+
+  EXPECT_CALL(GLProxy, Clear(GL_COLOR_BUFFER_BIT))
+    .Times(1);
+
+  EXPECT_CALL(GLProxy, Disable(GL_SCISSOR_TEST))
+    .Times(1);
 
   EXPECT_CALL(SurfaceProxy, SwapBuffers(SurfaceId))
     .Times(1);

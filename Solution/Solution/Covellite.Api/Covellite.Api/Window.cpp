@@ -18,7 +18,7 @@
 #include "Renderer/DirectX10.hpp"
 #include "Renderer/DirectX11.hpp"
 
-# elif BOOST_OS_ANDROID
+# elif BOOST_PLAT_ANDROID
 
 #if __ANDROID_API__ >= 18
 #include "Renderer/OpenGLES3.hpp"
@@ -30,7 +30,11 @@
 
 #endif // __USING_GTEST
 
-using namespace covellite::api;
+namespace covellite
+{
+
+namespace api
+{
 
 Window::Window(const WindowOs_t & _Window) :
   m_WindowOs(_Window),
@@ -54,7 +58,7 @@ Window::Window(const WindowOs_t & _Window) :
 
 Window::~Window(void) = default;
 
-Window::operator Window::Events_t (void) const /*override*/
+Window::operator Window::Events_t(void) const /*override*/
 {
   return m_Events;
 }
@@ -72,7 +76,7 @@ auto Window::GetClientRect(void) const /*override*/ -> Rect_t
 *  несколько объектов одновременно, но при этом следует следить, чтобы
 *  удаление рендеров для компонентов производилось в том же объекте, в котором
 *  они создавались.
-*  
+*
 * \exception std::exception
 *  - Действие невозможно (подробнее см. описание исключения).
 */
@@ -100,3 +104,7 @@ auto Window::GetRenders(void) const /*override*/ -> RendersPtr_t
 
   return MakeImpl(NameOfApiClass, Data);
 }
+
+} // namespace api
+
+} // namespace covellite

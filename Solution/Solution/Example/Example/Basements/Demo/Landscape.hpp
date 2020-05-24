@@ -59,7 +59,7 @@ private:
   Object_t GetMaterial(const CubeCoords &) const;
   Object_t GetTransform(const CubeCoords &, String_t &) const;
   Object_t GetPointLight(const CubeCoords &) const;
-  Object_t GetUserConstantBufferPointLight(const CubeCoords &) const;
+  Object_t GetUserConstantBuffer(const CubeCoords &) const;
 
 private:
   bool m_IsUsingRotate = true;

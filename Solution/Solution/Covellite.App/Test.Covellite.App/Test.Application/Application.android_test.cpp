@@ -15,8 +15,8 @@
 #include <Covellite\App.mock.hpp>
 
 #undef BOOST_OS_WINDOWS
-#undef BOOST_OS_ANDROID
-#define BOOST_OS_ANDROID 1
+#undef BOOST_PLAT_ANDROID
+#define BOOST_PLAT_ANDROID 1
 #define Application_test Application_android_test
 #define Application Application_android
 
@@ -184,9 +184,6 @@ TEST_F(Application_test, /*DISABLED_*/Test_Main)
           EXPECT_EQ(&GetApp(), &AppInfo_t::Get<android_app>());
           EXPECT_EQ(GetApp().activity, &AppInfo_t::Get<ANativeActivity>());
           EXPECT_EQ(GetApp().activity->vm, &AppInfo_t::Get<JavaVM>());
-          EXPECT_EQ(GetApp().activity, AppInfo_t::Get<ANativeActivity *>());
-          EXPECT_EQ(GetApp().window, AppInfo_t::Get<ANativeWindow *>());
-          EXPECT_EQ(GetApp().config, AppInfo_t::Get<AConfiguration *>());
         })
     {
     }

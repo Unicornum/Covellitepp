@@ -1,11 +1,26 @@
 
-struct UserPointLights
+struct PointLights
 {
   Point_t Lights[8];
   int     UsedSlotCount;
 };
 
-COVELLITE_DECLARE_CONST_USER_BUFFER(UserPointLights, cbUserData, UserData);
+struct FogRecord
+{
+  float4 Color;
+  float Near;
+  float Far;
+  float Density;
+  float Dummy;
+};
+
+struct UserConstantBuffer
+{
+  FogRecord Fog;
+  PointLights Lights;
+};
+
+COVELLITE_DECLARE_CONST_USER_BUFFER(UserConstantBuffer, cbUserData, UserData);
 
 #ifdef COVELLITE_SHADER_PIXEL //////////////////////////////////////////////////
 
@@ -49,9 +64,9 @@ float4 CalculateLights(Pixel _Value, float4 _Color)
 
   // Points
 
-  for (int i = 0; i < UserData.UsedSlotCount; i++)
+  for (int i = 0; i < UserData.Lights.UsedSlotCount; i++)
   {
-    LightColor += CalcPointLight(UserData.Lights[i],
+    LightColor += CalcPointLight(UserData.Lights.Lights[i],
       _Value.WorldPos, _Value.Normal);
   }
 
@@ -62,17 +77,17 @@ float4 CalculateLights(Pixel _Value, float4 _Color)
 
 float CalculateFogLinear(float _Distance)
 {
-  return saturate((FogData.Far - _Distance) / (FogData.Far - FogData.Near));
+  return saturate((UserData.Fog.Far - _Distance) / (UserData.Fog.Far - UserData.Fog.Near));
 }
 
 float CalculateFogExp(float _Distance)
 {
-  return 1.0f / pow(2.71828f, _Distance * FogData.Density);
+  return 1.0f / pow(2.71828f, _Distance * UserData.Fog.Density);
 }
 
 float CalculateFogExp2(float _Distance)
 {
-  float Temp = _Distance * FogData.Density;
+  float Temp = _Distance * UserData.Fog.Density;
   return 1.0f / pow (2.71828f, Temp * Temp);
 }
 
@@ -82,7 +97,7 @@ float4 CalculateFog(Pixel _Value, float4 _Color)
 
   float Distance = length(_Value.WorldPos.xyz - CameraPosition);
   float FogFactor = CalculateFogLinear(Distance);
-  return FogFactor * _Color + (1.0f - FogFactor) * FogData.Color;
+  return FogFactor * _Color + (1.0f - FogFactor) * UserData.Fog.Color;
 }
 
 float4 psExample(Pixel _Value)

@@ -1,13 +1,9 @@
 ﻿
 #pragma once
-#include <alicorn/std/string.hpp>
 #include <alicorn/cpp/math.hpp>
+#include <alicorn/std/string.hpp>
+#include <alicorn/std.fast/unordered-map.hpp>
 #include "GraphicApi.hpp"
-#include "../robin_hood.hpp"
-
-#ifdef min
-#undef min
-#endif
 
 namespace covellite
 {
@@ -44,7 +40,7 @@ private:
   friend GraphicApi;
 
 private:
-  ::robin_hood::unordered_map<::std::size_t, ::covellite::Any_t> m_Data;
+  ::alicorn::extension::std::fast::unordered_map<::std::size_t, ::covellite::Any_t> m_Data;
   ::std::map<CameraId_t, ::SceneLights>  m_Lights;
   CameraId_t                        m_CurrentCameraId;
 };
@@ -117,10 +113,10 @@ void GraphicApi::MakeConstants(TArgs && ... _Args)
 {
   m_pConstants = ::std::make_shared<Constants>();
   m_pConstants->Create<::Camera, TBuffer>(_Args ...);
-  m_pConstants->Create<::Fog, TBuffer>(_Args ...);
   m_pConstants->Create<::Object, TBuffer>(_Args ...);
 
   // deprecated
+  m_pConstants->Create<::Fog, TBuffer>(_Args ...);
   m_pConstants->Create<::Matrices, TBuffer>(_Args ...);
   m_pConstants->Create<::SceneLights, TBuffer>(_Args ...);
 }

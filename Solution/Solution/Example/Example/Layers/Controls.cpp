@@ -134,7 +134,7 @@ Controls::Controls(IWindowGui_t & _Window) :
   // ************************************************************************ //
 
   AddParameter(uT("\uF027"), uT("Громкость звука"), 
-    uT("0 <input id=\"id_volume\" type=\"range\" min=\"0\" max=\"100\" value=\"50\" step=\"1\"/> 100"),
+    uT("<div class=\"sound\">0 <input id=\"id_volume\" type=\"range\" min=\"0\" max=\"100\" value=\"50\" step=\"1\"/> 100</div>"),
     uT(""), uT(""));
 
   m_Events[events::Click.DocumentId(GetId()).ElementId("id_volume")]

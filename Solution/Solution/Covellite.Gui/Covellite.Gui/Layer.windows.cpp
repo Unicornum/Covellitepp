@@ -23,6 +23,6 @@ using namespace covellite::gui;
 {
   using namespace ::alicorn::extension::std;
 
-  return string_cast<::std::string, Locale::System>(
+  return string_cast<::std::string, Encoding::UTF8>(
     string_cast<String>(_Path).Replace(uT("/"), uT("\\")));
 }

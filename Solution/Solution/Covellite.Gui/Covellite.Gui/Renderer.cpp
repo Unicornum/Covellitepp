@@ -3,7 +3,6 @@
 #include <Covellite/Gui/Renderer.hpp>
 #include <alicorn/std/vector.hpp>
 #include <alicorn/boost/filesystem.hpp>
-#include <alicorn/boost/format.inl>
 #include <alicorn/patterns/factory.hpp>
 #include <alicorn/image.hpp>
 #include <Covellite/App/Vfs.hpp>
@@ -29,8 +28,6 @@ namespace covellite
 
 namespace gui
 {
-
-using ::alicorn::extension::boost::Format;
 
 Renderer::Renderer(const RendersPtr_t & _pRenders) :
   m_pRenders(_pRenders),
@@ -97,10 +94,8 @@ Rocket::Core::CompiledGeometryHandle Renderer::CompileGeometry(
 {
   static size_t ObjectId = 0;
 
-  // Использование здесь String::Replace() увеличивает время формирования
-  // идентификатора в 10(!) раз, что существенно сказывается
-  // на производительности.
-  const auto strObjectId = (Format{ uT("%1%") } % (size_t)++ObjectId).ToString();
+  const auto strObjectId = String_t{ uT("%ID%") }
+    .Replace(uT("%ID%"), (size_t)++ObjectId);
 
   Object_t Object;
 
@@ -117,11 +112,8 @@ Rocket::Core::CompiledGeometryHandle Renderer::CompileGeometry(
   }
   else
   {
-    // Использование здесь String::Replace() увеличивает время формирования
-    // идентификатора в 10(!) раз, что существенно сказывается
-    // на производительности.
-    const auto strTextureId =
-      (Format{ uT("Covellite.Gui.Texture.%1%") } % (size_t)_hTexture).ToString();
+    const auto strTextureId = String_t{ uT("Covellite.Gui.Texture.%ID%") }
+      .Replace(uT("%ID%"), (size_t)_hTexture);
 
     Object += Object_t
     {
@@ -223,10 +215,8 @@ void Renderer::RenderCompiledGeometry(
 void Renderer::ReleaseCompiledGeometry(
   Rocket::Core::CompiledGeometryHandle _hGeometry) /*override*/
 {
-  // Использование здесь String::Replace() увеличивает время формирования
-  // идентификатора в 10(!) раз, что существенно сказывается
-  // на производительности.
-  const auto strObjectId = (Format{ uT("%1%") } % (size_t)_hGeometry).ToString();
+  const auto strObjectId = String_t{ uT("%ID%") }
+    .Replace(uT("%ID%"), (size_t)_hGeometry);
 
   m_pRenders->Remove({
     Component_t::Make(
@@ -328,11 +318,8 @@ bool Renderer::GenerateTexture(
 {
   static Rocket::Core::TextureHandle TextureId = 0;
 
-  // Использование здесь String::Replace() увеличивает время формирования
-  // идентификатора в 10(!) раз, что существенно сказывается
-  // на производительности.
-  const auto strTextureId =
-    (Format{ uT("Covellite.Gui.Texture.%1%") } % (size_t)++TextureId).ToString();
+  const auto strTextureId = String_t{ uT("Covellite.Gui.Texture.%ID%") }
+    .Replace(uT("%ID%"), (size_t)++TextureId);
 
   auto Render = m_pRenders->Obtain(
     {
@@ -355,11 +342,8 @@ bool Renderer::GenerateTexture(
 
 void Renderer::ReleaseTexture(Rocket::Core::TextureHandle _hTexture) /*override*/
 {
-  // Использование здесь String::Replace() увеличивает время формирования
-  // идентификатора в 10(!) раз, что существенно сказывается
-  // на производительности.
-  const auto strTextureId =
-    (Format{ uT("Covellite.Gui.Texture.%1%") } % (size_t)_hTexture).ToString();
+  const auto strTextureId = String_t{ uT("Covellite.Gui.Texture.%ID%") }
+    .Replace(uT("%ID%"), (size_t)_hTexture);
 
   m_pRenders->Remove(
     {

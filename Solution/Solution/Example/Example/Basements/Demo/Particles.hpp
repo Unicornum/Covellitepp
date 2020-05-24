@@ -1,7 +1,7 @@
 
 #pragma once
 #include <thread>
-#include <GLMath.hpp>
+#include <glm/glm.force.hpp>
 #include "Defines.hpp"
 #include "GameObject.hpp"
 

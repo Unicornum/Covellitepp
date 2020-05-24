@@ -1,7 +1,7 @@
 ﻿
 #include "stdafx.h"
 #include "OpenGLCommonStatic.hpp"
-#include <GLMath.hpp>
+#include <glm/glm.force.hpp>
 
 #if BOOST_COMP_MSVC 
 # pragma warning(push)

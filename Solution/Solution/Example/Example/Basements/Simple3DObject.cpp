@@ -3,7 +3,7 @@
 #include "Simple3DObject.hpp"
 #include <alicorn/std/vector.hpp>
 #include <alicorn/logger.hpp>
-#include <GLMath.hpp>
+#include <glm/glm.force.hpp>
 #include <Covellite/Api/Constant.hpp>
 #include "Demo/Constants.hpp"
 
@@ -436,12 +436,9 @@ void Simple3DObject::BuildInstanceCubes(
 
   const BufferMapper_t Mapper = [=](void * _pData)
   {
-    if (m_InstanceData.empty()) return false;
-
     if (_pData == nullptr) return true;
 
     memcpy(_pData, m_InstanceData.data(), m_InstanceData.size() * sizeof(float));
-    m_InstanceData.clear();
     return false;
   };
 

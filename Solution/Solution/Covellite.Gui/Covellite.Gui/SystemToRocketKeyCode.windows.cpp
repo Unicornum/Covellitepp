@@ -2,8 +2,9 @@
 #include "stdafx.h"
 #include <Covellite/Gui/Rocket.forward.hpp>
 #include <Rocket/Core/Input.h>
-#define WIN32_LEAN_AND_MEAN
-#include <windows.h>
+#include <alicorn/platform/windows.hpp>
+#include <windef.h>
+#include <winuser.h>
 
 namespace covellite
 {

@@ -1,7 +1,8 @@
 ﻿
 #include "stdafx.h"
 #include "OpenGLCommon.hpp"
-#include <GLMath.hpp>
+#include <glm/glm.force.hpp>
+#include <alicorn/std/string/encoding.hpp>
 #include "Component.hpp"
 #include "Shaders/Shaders.hpp"
 #include "GraphicApi.Constants.hpp"
@@ -28,7 +29,7 @@ OpenGLCommon::String_t OpenGLCommon::GetUsingApi(void) const /*override*/
   auto Version = reinterpret_cast<const char *>(glGetString(GL_VERSION));
 
   return m_PreVersion +
-    string_cast<String, Locale::Default>(::std::string{ Version });
+    string_cast<String, Encoding::Ascii128>(::std::string{ Version });
 }
 
 void OpenGLCommon::ResizeWindow(int32_t _Width, int32_t _Height) /*final*/

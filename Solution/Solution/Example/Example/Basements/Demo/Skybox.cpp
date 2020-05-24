@@ -2,12 +2,12 @@
 #include "stdafx.h"
 #include "Skybox.hpp"
 #include <alicorn/std/vector.hpp>
-#include <SoundDevice.hpp>
 #include <Covellite/Api/Component.inl>
 #include <Covellite/Api/Constant.hpp>
 #include "Constants.hpp"
 #include "IDbComponents.hpp"
 #include "IGameWorld.hpp"
+#include "SoundDevice.hpp"
 
 namespace basement
 {
@@ -122,7 +122,7 @@ auto Skybox::GetObject(const Any_t & _Value) const /*override*/ -> Objects_t
         { uT("type"), uT("Camera") },
         { uT("kind"), uT("Perspective") },
         { uT("distance"), 0.0f },
-        { uT("fov"), Constant::Camera::Fov * math::Constant<float>::RadianToGreed },
+        { uT("fov"), Constant::Camera::Fov * math::Constant<float>::RadianToDegree },
       }),
       Component_t::Make(
       {

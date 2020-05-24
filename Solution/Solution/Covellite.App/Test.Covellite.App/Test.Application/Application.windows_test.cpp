@@ -158,8 +158,8 @@ TEST_F(Application_test, /*DISABLED_*/Test_Main_StdException)
   using namespace ::testing;
 
   EXPECT_CALL(Proxy, MessageBoxA(NULL, 
-    Eq((::std::string{ "Exception: " } + Real::GetError() + ".").c_str()), 
-    Eq("Covellite++"), MB_OK))
+    ::std::string{ "Exception: " } + Real::GetError() + ".", 
+    ::std::string{ "Covellite++" }, MB_OK))
     .Times(1);
 
   Tested_t::Main<Real>("");

@@ -2,8 +2,8 @@
 #include "stdafx.h"
 #include "Animated.hpp"
 #include <omp.h>
-#include <alicorn/boost/format.inl>
 #include <alicorn/std/vector.hpp>
+#include <alicorn/std/string/encoding.hpp>
 #include <alicorn/logger.hpp>
 #include <Covellite/Covellite.hpp>
 #include <Covellite/Api/Constant.hpp>
@@ -85,7 +85,7 @@ auto Animated::GetObject(const Any_t & _Value) const /*override*/ -> Objects_t
   {
     const auto TextureName = (_Material.first == uT("Unknown")) ?
       ::std::string{ "demo.stone.jpg" } :
-      string_cast<::std::string, Locale::UTF8>(_Material.first);
+      string_cast<::std::string, Encoding::UTF8>(_Material.first);
 
     return
       GetTexture(m_Textures[TextureName]).GetObject() +
@@ -146,7 +146,7 @@ auto Animated::GetObject(const Any_t & _Value) const /*override*/ -> Objects_t
       { uT("type"), uT("Camera") },
       { uT("kind"), uT("Perspective") },
       { uT("distance"), Constant::Camera::Distance },
-      { uT("fov"), Constant::Camera::Fov * math::Constant<float>::RadianToGreed },
+      { uT("fov"), Constant::Camera::Fov * math::Constant<float>::RadianToDegree },
     }),
     Component_t::Make(
     {
@@ -224,14 +224,9 @@ auto Animated::GetObject(const Any_t & _Value) const /*override*/ -> Objects_t
   const CubeCoords & _Coords,
   const ::std::vector<Index_t> & _IndexBuffer)
 {
-  static int Index = 0;
+  static size_t Index = 0;
 
-  using ::alicorn::extension::boost::Format;
-
-  // Использование здесь String::Replace() увеличивает время формирования
-  // идентификатора в 10(!) раз, что существенно сказывается
-  // на производительности.
-  const auto Id = (Format{ uT("%1%") } % Index++).ToString();
+  const auto Id = String_t{ uT("%ID%") }.Replace(uT("%ID%"), Index++);
 
   return     
   {

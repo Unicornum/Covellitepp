@@ -1,5 +1,6 @@
 
 #include "stdafx.h"
+#include <alicorn/std/string/encoding.hpp>
 
 // Примеры макросов библиотеки Google Test
 #include <alicorn\google\test\example.hpp>
@@ -521,7 +522,7 @@ TEST_F(Layer_test, /*DISABLED_*/Test_Element_SetMeaning_Textarea)
 
   using namespace ::alicorn::extension::std;
 
-  Example.GetElement("").SetMeaning(string_cast<String, Locale::UTF8>(Value));
+  Example.GetElement("").SetMeaning(string_cast<String, Encoding::UTF8>(Value));
 }
 
 // ************************************************************************** //
@@ -563,7 +564,7 @@ TEST_F(Layer_test, /*DISABLED_*/Test_Element_SetMeaning_Input_Text)
 
   using namespace ::alicorn::extension::std;
 
-  Example.GetElement("").SetMeaning(string_cast<String, Locale::UTF8>(Value));
+  Example.GetElement("").SetMeaning(string_cast<String, Encoding::UTF8>(Value));
 }
 
 // ************************************************************************** //
@@ -605,7 +606,7 @@ TEST_F(Layer_test, /*DISABLED_*/Test_Element_SetMeaning_Input_Range)
 
   using namespace ::alicorn::extension::std;
 
-  Example.GetElement("").SetMeaning(string_cast<String, Locale::UTF8>(Value));
+  Example.GetElement("").SetMeaning(string_cast<String, Encoding::UTF8>(Value));
 }
 
 // ************************************************************************** //
@@ -647,7 +648,7 @@ TEST_F(Layer_test, /*DISABLED_*/Test_Element_SetMeaning_InnerRml)
 
   using namespace ::alicorn::extension::std;
 
-  Example.GetElement("").SetMeaning(string_cast<String, Locale::UTF8>(Value));
+  Example.GetElement("").SetMeaning(string_cast<String, Encoding::UTF8>(Value));
 }
 
 // ************************************************************************** //
@@ -691,7 +692,7 @@ TEST_F(Layer_test, /*DISABLED_*/Test_Element_GetMeaning_Textarea)
   using namespace ::alicorn::extension::std;
 
   const auto Result = Example.GetElement("").GetMeaning();
-  EXPECT_EQ((string_cast<String, Locale::UTF8>(Value)), Result);
+  EXPECT_EQ((string_cast<String, Encoding::UTF8>(Value)), Result);
 }
 
 // ************************************************************************** //
@@ -735,7 +736,7 @@ TEST_F(Layer_test, /*DISABLED_*/Test_Element_GetMeaning_Input_Text)
   using namespace ::alicorn::extension::std;
 
   const auto Result = Example.GetElement("").GetMeaning();
-  EXPECT_EQ((string_cast<String, Locale::UTF8>(Value)), Result);
+  EXPECT_EQ((string_cast<String, Encoding::UTF8>(Value)), Result);
 }
 
 // ************************************************************************** //
@@ -779,7 +780,7 @@ TEST_F(Layer_test, /*DISABLED_*/Test_Element_GetMeaning_Input_Range)
   using namespace ::alicorn::extension::std;
 
   const auto Result = Example.GetElement("").GetMeaning();
-  EXPECT_EQ((string_cast<String, Locale::UTF8>(Value)), Result);
+  EXPECT_EQ((string_cast<String, Encoding::UTF8>(Value)), Result);
 }
 
 // ************************************************************************** //
@@ -823,7 +824,7 @@ TEST_F(Layer_test, /*DISABLED_*/Test_Element_GetMeaning_Select)
   using namespace ::alicorn::extension::std;
 
   const auto Result = Example.GetElement("").GetMeaning();
-  EXPECT_EQ((string_cast<String, Locale::UTF8>(Value)), Result);
+  EXPECT_EQ((string_cast<String, Encoding::UTF8>(Value)), Result);
 }
 
 // ************************************************************************** //
@@ -867,7 +868,7 @@ TEST_F(Layer_test, /*DISABLED_*/Test_Element_GetMeaning_InnerRml)
   using namespace ::alicorn::extension::std;
 
   const auto Result = Example.GetElement("").GetMeaning();
-  EXPECT_EQ((string_cast<String, Locale::UTF8>(Value)), Result);
+  EXPECT_EQ((string_cast<String, Encoding::UTF8>(Value)), Result);
 }
 
 // ************************************************************************** //
@@ -899,5 +900,5 @@ TEST_F(Layer_test, /*DISABLED_*/Test_Element_SetClassStyle)
 
   using namespace ::alicorn::extension::std;
 
-  Example.GetElement("").SetClassStyle(string_cast<String, Locale::UTF8>(Value));
+  Example.GetElement("").SetClassStyle(string_cast<String, Encoding::UTF8>(Value));
 }

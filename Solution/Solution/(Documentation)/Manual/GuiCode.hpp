@@ -21,9 +21,10 @@
 *  Создание .rcss и .rml файлов описания отдельных экранов программы
 *  -----------------------------------------------------------------
 *
-*  Как это делается см. в документации/примерах [libRocket].
+*  Как это делается см. в документации/примерах
+*  [libRocket](https://asarium.github.io/libRocket/wiki/documentation.html).
 *
-*  [Доступные css свойства](https://barotto.github.io/libRocketDoc/pages/rcss/property_index.html).
+*  [Доступные css свойства](https://asarium.github.io/libRocket/wiki/documentation/RCSS/PropertyIndex.html).
 *
 * \note
 *  Внешний вид элементов управления можно задавать при помощи либо стилей css,
@@ -110,5 +111,4 @@ body
 *  (переход к другому слою или выход из программы).
 *
 *  [События](\ref CovelliteEventsIdGroup), которые может обрабатывать окно.
-*  [libRocket]: https://barotto.github.io/libRocketDoc/
 */

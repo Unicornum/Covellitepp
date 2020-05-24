@@ -1,14 +1,9 @@
 ﻿
 #include "stdafx.h"
 #include "DirectX10.hpp"
-#include <GLMath.hpp>
+#include <glm/glm.force.hpp>
 #include <alicorn/std/vector.hpp>
-
-#pragma warning(push)
-#pragma warning(disable: 4996)
 #include <Covellite/Api/Vertex.hpp>
-#pragma warning(pop)
-
 #include <Covellite/Api/Defines.hpp>
 #include "DxCheck.hpp"
 #include "DirectX.hpp"

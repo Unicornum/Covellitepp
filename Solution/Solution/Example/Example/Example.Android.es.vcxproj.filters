@@ -156,12 +156,6 @@
     <Filter Include="Basements\Demo">
       <UniqueIdentifier>{2b8831b9-4879-415f-a068-3a17c1fd09aa}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Layers\CircularBar">
-      <UniqueIdentifier>{8924a273-1c17-4aa4-97c7-684a6b43ff1d}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Layers\ProgressBar">
-      <UniqueIdentifier>{7d30afd2-92d7-449a-a5f1-86f5ae2f5fcf}</UniqueIdentifier>
-    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Version.rc">
@@ -205,18 +199,6 @@
     </ClCompile>
     <ClCompile Include="Basements\Common.cpp">
       <Filter>Basements</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Externals.doxygen.ignore\ProgressBar\Source\ProgressBar\ElementProgressBar.cpp">
-      <Filter>Layers\ProgressBar</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Externals.doxygen.ignore\ProgressBar\Source\ProgressBar\ProgressBar.cpp">
-      <Filter>Layers\ProgressBar</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Externals.doxygen.ignore\CircularBar\Source\CircularBar\CircularBar.cpp">
-      <Filter>Layers\CircularBar</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\Externals.doxygen.ignore\CircularBar\Source\CircularBar\ElementCircularBar.cpp">
-      <Filter>Layers\CircularBar</Filter>
     </ClCompile>
     <ClCompile Include="Basements\Demo.cpp">
       <Filter>Basements</Filter>

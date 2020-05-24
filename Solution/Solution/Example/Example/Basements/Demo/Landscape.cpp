@@ -2,7 +2,6 @@
 #include "stdafx.h"
 #include "Landscape.hpp"
 #include <random>
-#include <alicorn/boost/format.inl>
 #include <alicorn/std/exception.hpp>
 #include <alicorn/std/vector.hpp>
 #include <Covellite/Api/Component.inl>
@@ -171,7 +170,7 @@ auto Landscape::GetObject(const Any_t & _Value) const /*override*/ -> Objects_t
   //const auto Material = GetMaterial(CellPosition);
   const auto PointLights = 
     //GetPointLight(CellPosition);
-    GetUserConstantBufferPointLight(CellPosition);
+    GetUserConstantBuffer(CellPosition);
   String_t TransformId;
   const auto & LodModels = m_Models[Random(0, m_Models.size() - 1)];
 
@@ -239,13 +238,8 @@ Object_t Landscape::GetMaterial(const CubeCoords & _CellPosition) const
     | (Bright << 8)
     | (Bright << 0);
 
-  using ::alicorn::extension::boost::Format;
-
-  // Использование здесь String::Replace() увеличивает время формирования
-  // идентификатора в 10(!) раз, что существенно сказывается
-  // на производительности.
-  const auto Id = 
-    (Format{ uT("Demo.Material.Tile.%1%") } % MaterialColor).ToString();
+  const auto Id = String_t{ uT("Demo.Material.Tile.%ID%") }
+    .Replace(uT("%ID%"), (size_t)MaterialColor);
 
   return 
   {
@@ -263,15 +257,10 @@ Object_t Landscape::GetTransform(
   const CubeCoords & _CellPosition,
   String_t & _TransformComponentId) const
 {
-  using ::alicorn::extension::boost::Format;
-
   static size_t Index = 0;
 
-  // Использование здесь String::Replace() увеличивает время формирования
-  // идентификатора в 10(!) раз, что существенно сказывается
-  // на производительности.
-  _TransformComponentId = 
-    (Format{ uT("Demo.Transform.Tile.%1%") } % Index++).ToString();
+  _TransformComponentId = String_t{ uT("Demo.Transform.Tile.%ID%") }
+    .Replace(uT("%ID%"), Index++);
 
   const auto WorldPosition = _CellPosition.ToPlane();
 
@@ -316,12 +305,8 @@ Object_t Landscape::GetPointLight(const CubeCoords & _CellPosition) const
 
   static size_t Index = 0;
 
-  using ::alicorn::extension::boost::Format;
-
-  // Использование здесь String::Replace() увеличивает время формирования
-  // идентификатора в 10(!) раз, что существенно сказывается
-  // на производительности.
-  const auto Id = (Format{ uT("Demo.Light.Point.Tile.%1%") } % Index++).ToString();
+  const auto Id = String_t{ uT("Demo.Light.Point.Tile.%ID%") }
+    .Replace(uT("%ID%"), Index++);
 
   const auto WorldHeight = m_GameWorld.GetLandscapeHeight(_CellPosition);
 
@@ -344,26 +329,49 @@ Object_t Landscape::GetPointLight(const CubeCoords & _CellPosition) const
   };
 }
 
-Object_t Landscape::GetUserConstantBufferPointLight(const CubeCoords & _CellPosition) const
+Object_t Landscape::GetUserConstantBuffer(const CubeCoords & _CellPosition) const
 {
   using BufferMapper_t = ::covellite::api::cbBufferMap_t<void>;
 
+  struct Fog
+  {
+    float Color[4];
+    float Near;
+    float Far;
+    float Density;
+    float Dummy;
+  };
+
+  struct UserConstantBuffer
+  {
+    Fog Fog;
+    PointLights::Points PointLights;
+  };
+
+  const auto Far = 0.5f * math::Root<2>(Constant::Camera::FarClippingPlane);
+
   static size_t Index = 0;
 
-  using ::alicorn::extension::boost::Format;
-
-  // Использование здесь String::Replace() увеличивает время формирования
-  // идентификатора в 10(!) раз, что существенно сказывается
-  // на производительности.
-  const auto Id = (Format{ uT("Demo.Light.Point.Tile.%1%") } % Index++).ToString();
+  const auto Id = String_t{ uT("Demo.Light.Point.Tile.User.%ID%") }
+    .Replace(uT("%ID%"), Index++);
 
   const auto WorldHeight = m_GameWorld.GetLandscapeHeight(_CellPosition);
 
-  const BufferMapper_t Mapper = [=](void * _pLights)
+  const BufferMapper_t Mapper = [=](void * _pUserConstBuffer)
   {
-    const auto & Lights = m_GameWorld.GetPointLights()
+    auto * pUserConstBuffer = 
+      reinterpret_cast<UserConstantBuffer *>(_pUserConstBuffer);
+
+    pUserConstBuffer->Fog.Color[0] = 135.0f / 255.0f;
+    pUserConstBuffer->Fog.Color[1] = 206.0f / 255.0f;
+    pUserConstBuffer->Fog.Color[2] = 250.0f / 255.0f;
+    pUserConstBuffer->Fog.Color[3] = 1.0f;
+    pUserConstBuffer->Fog.Near = 0.75f * Far;
+    pUserConstBuffer->Fog.Far = Far;
+    pUserConstBuffer->Fog.Density = 0.1f;
+
+    pUserConstBuffer->PointLights = m_GameWorld.GetPointLights()
       .GetUserConstantBuffer(_CellPosition, WorldHeight);
-    memcpy(_pLights, &Lights, sizeof(PointLights::Points));
 
     return false;
   };
@@ -375,7 +383,7 @@ Object_t Landscape::GetUserConstantBufferPointLight(const CubeCoords & _CellPosi
       { uT("id"), Id },
       { uT("type"), uT("Buffer") },
       { uT("mapper"), Mapper },
-      { uT("size"), sizeof(PointLights::Points) },
+      { uT("size"), sizeof(UserConstantBuffer) },
     }),
   };
 }

@@ -2,9 +2,9 @@
 #pragma once
 #include <string>
 #include <vector>
-#include <GLMath.hpp>
+#include <glm/glm.force.hpp>
+#include <alicorn/std.fast/unordered-map.hpp>
 #include <Covellite/Covellite.hpp>
-#include <Covellite/Api/robin_hood.hpp>
 
 namespace basement
 {
@@ -136,7 +136,7 @@ public:
 *  © CTAPOBEP 2019
 */
 using Frames_t = ::std::vector<::std::pair<float,
-  ::robin_hood::unordered_map<::std::string, Mat4>>>;
+  ::alicorn::extension::std::fast::unordered_map<::std::string, Mat4>>>;
 
 } // namespace animation
 

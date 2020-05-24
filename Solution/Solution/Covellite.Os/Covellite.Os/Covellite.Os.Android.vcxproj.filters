@@ -14,9 +14,6 @@
     <ClInclude Include="Window.hpp" />
     <ClInclude Include="Window.mock.hpp" />
     <ClInclude Include="IWindow.hpp" />
-    <ClInclude Include="stdafx.h">
-      <Filter>Common</Filter>
-    </ClInclude>
     <ClInclude Include="Events.hpp" />
   </ItemGroup>
   <ItemGroup>

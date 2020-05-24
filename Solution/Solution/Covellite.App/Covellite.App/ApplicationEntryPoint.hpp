@@ -31,8 +31,7 @@
 
 #if BOOST_OS_WINDOWS
 
-#define WIN32_LEAN_AND_MEAN
-#include <windows.h>
+#include <alicorn/platform/windows.hpp>
 
 #define APPLICATION_ENTRY_POINT(MainApplicationClass) \
   int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR _pParams, _In_ int) \
@@ -41,7 +40,7 @@
     return 0; \
   }
 
-#elif BOOST_OS_ANDROID
+#elif BOOST_PLAT_ANDROID
 
 extern "C" 
 {

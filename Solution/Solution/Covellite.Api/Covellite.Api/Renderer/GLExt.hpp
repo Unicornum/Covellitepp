@@ -11,7 +11,11 @@
 #define GL_SHADING_LANGUAGE_VERSION       0x8B8C
 #define GL_NUM_EXTENSIONS                 0x821D
 #define GL_INVALID_INDEX                  0xFFFFFFFFu
+#define GL_FLOAT_VEC2                     0x8B50
+#define GL_FLOAT_VEC3                     0x8B51
 #define GL_FLOAT_VEC4                     0x8B52
+#define GL_INT_VEC2                       0x8B53
+#define GL_INT_VEC3                       0x8B54
 #define GL_INT_VEC4                       0x8B55
 
 /* TextureUnit */
@@ -55,6 +59,7 @@
 #define GL_ARRAY_BUFFER_BINDING           0x8894
 #define GL_ELEMENT_ARRAY_BUFFER_BINDING   0x8895
 #define GL_UNIFORM_BUFFER                 0x8A11
+#define GL_ACTIVE_ATTRIBUTES              0x8B89
 
 #define GL_STREAM_DRAW                    0x88E0
 #define GL_STATIC_DRAW                    0x88E4

@@ -1,6 +1,7 @@
 
 #include "stdafx.h"
 #include <alicorn/patterns/factory.hpp>
+#include <Platform/Windows.mock.hpp>
 
 // Примеры макросов библиотеки Google Test
 #include <alicorn\google\test\example.hpp>
@@ -374,7 +375,7 @@ TEST_F(Window_test, /*DISABLED_*/Test_GetClientRect)
 TEST_F(Window_test, /*DISABLED_*/Test_GetRenders)
 {
   using Render_t = ::std::function<void(void)>;
-  using ComponentPtr_t = ::std::shared_ptr<Component>;
+  using ComponentPtr_t = ::std::shared_ptr<::covellite::api::Component>;
   using Creator_t = ::std::function<Render_t(const ComponentPtr_t &)>;
   using Creators_t = ::std::map<String_t, Creator_t>;
 
@@ -423,7 +424,7 @@ TEST_F(Window_test, /*DISABLED_*/Test_GetRenders)
   const auto pResult1 = IExample.GetRenders();
   const auto Result1 = pResult1->Obtain(
     { 
-      Component::Make({ { uT("type"), uT("Type1") } }),
+      ::covellite::api::Component::Make({ { uT("type"), uT("Type1") } }),
     });
 
   EXPECT_CALL(RendererImplProxy, GetCreators(ImplId))
@@ -433,7 +434,7 @@ TEST_F(Window_test, /*DISABLED_*/Test_GetRenders)
   const auto pResult2 = IExample.GetRenders();
   const auto Result2 = pResult2->Obtain(
     { 
-      Component::Make({ { uT("type"), uT("Type2") } }),
+      ::covellite::api::Component::Make({ { uT("type"), uT("Type2") } }),
     });
 
   EXPECT_NE(pResult1, pResult2);

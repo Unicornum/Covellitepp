@@ -2,6 +2,7 @@
 #include "stdafx.h"
 #include <Covellite\Gui\Layer.hpp>
 #include <alicorn\std\string.hpp>
+#include <alicorn\std\string\encoding.hpp>
 #include <alicorn\boost\string-cast.hpp>
 
 using namespace covellite::gui;
@@ -24,6 +25,6 @@ using namespace covellite::gui;
 {
   using namespace ::alicorn::extension::std;
 
-  return string_cast<::std::string, Locale::System>(
+  return string_cast<::std::string, Encoding::UTF8>(
     string_cast<String>(_Path).Replace(uT("\\"), uT("/")));
 }

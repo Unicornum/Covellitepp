@@ -4,8 +4,6 @@
 #include <Covellite/Api/Component.inl>
 //#include <boost/thread/lock_guard.hpp>
 
-#undef max
-
 using namespace covellite::api;
 
 /**

@@ -1,12 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ImportGroup Label="PropertySheets">
-    <Import Project="Solution\Externals.doxygen.ignore\GLm\GLm.props" />
-    <Import Project="Solution\Externals.doxygen.ignore\ProgressBar\ProgressBar.props" />
-    <Import Project="Solution\Externals.doxygen.ignore\CircularBar\CircularBar.props" />
     <Import Project="Solution\Externals.doxygen.ignore\TinyObjLoader\TinyObjLoader.props" />
-    <Import Project="Solution\Externals.doxygen.ignore\Assimp\Assimp.props" />
-    <Import Project="Solution\Externals.doxygen.ignore\MiniAudio\MiniAudio.props" />
+    <Import Project="Solution\Externals\Assimp\Assimp.props" />
+    <Import Project="Solution\Externals\GLM\GLM.props" />
+    <Import Project="Solution\Externals\MiniAudio\MiniAudio.props" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup />

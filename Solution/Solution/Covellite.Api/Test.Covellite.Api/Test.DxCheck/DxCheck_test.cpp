@@ -1,5 +1,6 @@
 
 #include "stdafx.h"
+#include <Platform/Windows.mock.hpp>
 
 // Примеры макросов библиотеки Google Test
 #include <alicorn\google\test\example.hpp>
@@ -50,12 +51,12 @@ TEST_F(DxCheck_test, /*DISABLED_*/Test_Successfull)
 TEST_F(DxCheck_test, /*DISABLED_*/Test_Failed1)
 {
   EXPECT_STDEXCEPTION(DX_CHECK Test(DXGI_ERROR_INVALID_CALL),
-    ".+dxcheck_test\\.cpp \\([0-9]+\\): Unknown error 0x887A0001");
+    ".+[Dd]x[Cc]heck_test\\.cpp \\([0-9]+\\): Unknown error 0x887A0001");
 }
 
 // ************************************************************************** //
 TEST_F(DxCheck_test, /*DISABLED_*/Test_Failed2)
 {
   EXPECT_STDEXCEPTION(DX_CHECK Test(DXGI_ERROR_ACCESS_DENIED),
-    ".+dxcheck_test\\.cpp \\([0-9]+\\): Unknown error 0x887A002B");
+    ".+[Dd]x[Cc]heck_test\\.cpp \\([0-9]+\\): Unknown error 0x887A002B");
 }

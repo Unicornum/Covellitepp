@@ -13,8 +13,8 @@
 */
 
 #undef BOOST_OS_WINDOWS
-#undef BOOST_OS_ANDROID
-#define BOOST_OS_ANDROID 1
+#undef BOOST_PLAT_ANDROID
+#define BOOST_PLAT_ANDROID 1
 #define Layer_test Layer_android_test
 #define Layer Layer_android
 

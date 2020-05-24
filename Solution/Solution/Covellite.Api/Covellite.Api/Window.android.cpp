@@ -3,6 +3,7 @@
 #include <Covellite/Api/Window.hpp>
 #include <alicorn/std/string.hpp>
 #include <alicorn/patterns/factory.hpp>
+#include "Renderer/IGraphicApi.hpp"
 
 using namespace covellite::api;
 

@@ -2,6 +2,7 @@
 #pragma once
 #include <gmock/gmock.hpp>
 #include <alicorn/std/vector.hpp>
+#include <alicorn/std/string/encoding.hpp>
 #include <boost/algorithm/string/replace.hpp>
 
 #ifndef OpenGLShader_test
@@ -3131,8 +3132,8 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Texture_NoDeclaredInShader)
 
   const auto TestCall = [&](
     const Component_t::ComponentPtr_t & _pTexture,
-    const uint8_t * _pSource,
-    const int _Width, const int _Height,
+    const uint8_t * /*_pSource*/,
+    const int /*_Width*/, const int /*_Height*/,
     const ::std::size_t _Index,
     const ::std::string & _TexName)
   {
@@ -5082,7 +5083,7 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Buffer_Const_ObjectLights_Points)
 
     using namespace ::alicorn::extension::std;
 
-    const auto Point = string_cast<::std::string, Locale::Ascii128>(
+    const auto Point = string_cast<::std::string, Encoding::Ascii128>(
       uT("ObjectData.Lights.Points.Lights[<index>]").Replace(uT("<index>"), i));
 
     EXPECT_CALL(GLProxy,
@@ -6391,6 +6392,21 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Present_Instance)
 
       constexpr auto BlockSize = sizeof(float) * 4;
 
+      EXPECT_CALL(GLProxy, GetProgramiv(ProgramId, GL_ACTIVE_ATTRIBUTES))
+        .Times(1)
+        .WillOnce(Return(BlockSize));
+
+      for (int i = 0; i < BlockSize; i++)
+      {
+        EXPECT_CALL(GLProxy, GetActiveAttribType(ProgramId, i)) 
+          .Times(1)
+          .WillOnce(Return(_iType));
+
+        EXPECT_CALL(GLProxy, GetActiveAttribName(ProgramId, i, 255))
+          .Times(1)
+          .WillOnce(Return("iValue" + ::std::to_string(i + 1)));
+      }
+
       for (int i = 0; i < InstanceStride / BlockSize; i++)
       {
         EXPECT_CALL(GLProxy,
@@ -6400,16 +6416,11 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Present_Instance)
 
         if (_LocationIndex0 + i >= 0)
         {
-          EXPECT_CALL(GLProxy, 
-            GetActiveAttribType(ProgramId, _LocationIndex0 + i)) 
-            .Times(1)
-            .WillOnce(Return(_iType));
-
           EXPECT_CALL(GLProxy, EnableVertexAttribArray(_LocationIndex0 + i))
             .Times(1);
 
-          EXPECT_CALL(GLProxy, VertexAttribPointer(_LocationIndex0 + i, 4, _Type,
-            GL_FALSE, InstanceStride, (void*)(BlockSize * i)))
+          EXPECT_CALL(GLProxy, VertexAttribPointer(_LocationIndex0 + i, 4, 
+            _Type, GL_FALSE, InstanceStride, (void*)(BlockSize * i)))
             .Times(1);
 
           EXPECT_CALL(GLProxy, VertexAttribDivisor(_LocationIndex0 + i, 1))
@@ -6417,9 +6428,6 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Present_Instance)
         }
         else
         {
-          EXPECT_CALL(GLProxy, GetActiveAttribType(_, _))
-            .Times(0);
-
           EXPECT_CALL(GLProxy, EnableVertexAttribArray(_))
             .Times(0);
 
@@ -6446,6 +6454,10 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Present_Instance)
     Render();
 
     TestCallSetInstanceData(GL_INT_VEC4, GL_INT, 1909232005, pLocalData);
+    TestCallDraw();
+    Render();
+
+    TestCallSetInstanceData(2005221201, 2005221201, 2005221202, pLocalData);
     TestCallDraw();
     Render();
 
@@ -8673,7 +8685,7 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Light_Points_deprecated)
 
         using namespace ::alicorn::extension::std;
 
-        const auto Point = string_cast<::std::string, Locale::Ascii128>(
+        const auto Point = string_cast<::std::string, Encoding::Ascii128>(
           uT("LightsData.Points.Lights[<index>]").Replace(uT("<index>"), i));
 
         EXPECT_CALL(GLProxy,

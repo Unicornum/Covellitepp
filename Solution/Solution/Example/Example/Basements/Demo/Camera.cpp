@@ -46,7 +46,7 @@ auto Camera::GetObject(const Any_t &) const /*override*/ -> Objects_t
       { uT("type"), uT("Camera") },
       { uT("kind"), uT("Perspective") },
       { uT("distance"), Constant::Camera::Distance },
-      { uT("fov"), Constant::Camera::Fov * math::Constant<float>::RadianToGreed },
+      { uT("fov"), Constant::Camera::Fov * math::Constant<float>::RadianToDegree },
     }),
     Component_t::Make(
     {
@@ -79,16 +79,6 @@ auto Camera::GetObject(const Any_t &) const /*override*/ -> Objects_t
       { uT("id"), uT("Example.Shader.Pixel.Default") },
       { uT("type"), uT("Shader") },
       { uT("entry"), uT("psLightened") },
-    }),
-    Component_t::Make(
-    {
-      { uT("id"), uT("Demo.Fog") },
-      { uT("type"), uT("Fog") },
-      { uT("style"), uT("linear") },
-      { uT("color"), 0xFF87CEFA }, // ARGB
-      { uT("near"), 0.75f * Far },
-      { uT("far"), Far },
-      { uT("density"), 0.1f },
     }),
   };
 

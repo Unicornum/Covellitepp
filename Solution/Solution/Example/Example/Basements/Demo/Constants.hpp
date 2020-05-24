@@ -5,41 +5,6 @@
 #include <alicorn/std/string.hpp>
 #include <Covellite/App/Settings.hpp>
 
-namespace alicorn
-{
-
-namespace extension
-{
-
-namespace cpp
-{
-
-namespace math
-{
-
-namespace
-{
-
-// 22 Март 2019 18:04 (unicornum.verum@gmail.com)
-TODO("Перенести в alicorn/cpp/math.hpp");
-template<class T>
-class Constant final
-{
-public:
-  static constexpr T Pi = static_cast<T>(math::PI);
-  static constexpr T RadianToGreed = static_cast<T>(math::RadianToGreed);
-};
-
-} // unnamed namespace
-
-} // namespace math
-
-} // namespace cpp
-
-} // namespace extension
-
-} // namespace alicorn
-
 namespace basement
 {
 

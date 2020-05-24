@@ -3,15 +3,10 @@
 #include "Shadows.hpp"
 #include <random>
 #include <alicorn/std/vector.hpp>
-#include <alicorn/boost/format.inl>
 #include <alicorn/logger.hpp>
 #include <Covellite/Api/Constant.hpp>
 #include "Landscape.hpp"
 #include "Constants.hpp"
-
-#ifdef max
-#undef max
-#endif
 
 namespace basement
 {
@@ -476,7 +471,7 @@ Object_t Shadows::GetSceneCamera(void) const
         { uT("type"), uT("Camera") },
         { uT("kind"), uT("Perspective") },
         { uT("distance"), 6.0f },
-        { uT("fov"), Constant::Camera::Fov * math::Constant<float>::RadianToGreed },
+        { uT("fov"), Constant::Camera::Fov * math::Constant<float>::RadianToDegree },
         { uT("znear"), 0.5f },
         { uT("zfar"), 20.0f },
       })
@@ -520,7 +515,7 @@ Object_t Shadows::GetSceneCamera(void) const
     Vfs_t::GetInstance().GetData("Data\\Shaders\\Shadows.pass2.fx");
 
   return Object_t
-  {
+  { 
     Component_t::Make(
     {
       { uT("id"), uT("Demo.Shadows.Scene.Shader.Vertex") },
@@ -572,14 +567,10 @@ Object_t Shadows::GetSceneLights(void) const
 
 Object_t Shadows::GetShaderData(const CubeCoords & _CellPosition) const
 {
-  static int Index = 0;
+  static size_t Index = 0;
 
-  using ::alicorn::extension::boost::Format;
-
-  // Использование здесь String::Replace() увеличивает время формирования
-  // идентификатора в 10(!) раз, что существенно сказывается
-  // на производительности.
-  const auto Id = (Format{ uT("%1%") } % Index++).ToString();
+  const auto Id = String_t{ uT("%ID%") }
+    .Replace(uT("%ID%"), Index++);
 
   const auto pSrcShaderData = m_pShaderData;
   const auto ObjectColorIdX = (127 + _CellPosition.GetX()) / 255.0f;
@@ -641,14 +632,10 @@ Object_t Shadows::GetTransformData(const CubeCoords & _CellPosition) const
 
 /*static*/ Object_t Shadows::GetTransform(void)
 {
-  static int Index = 0;
+  static size_t Index = 0;
 
-  using ::alicorn::extension::boost::Format;
-
-  // Использование здесь String::Replace() увеличивает время формирования
-  // идентификатора в 10(!) раз, что существенно сказывается
-  // на производительности.
-  const auto Id = (Format{ uT("%1%") } % Index++).ToString();
+  const auto Id = String_t{ uT("%ID%") }
+    .Replace(uT("%ID%"), Index++);
 
   return
   {
@@ -741,14 +728,10 @@ Object_t Shadows::GetTextureObject(
   const String_t & _TextureId,
   const float _Offset) const
 {
-  static int Index = 0;
+  static size_t Index = 0;
 
-  using ::alicorn::extension::boost::Format;
-
-  // Использование здесь String::Replace() увеличивает время формирования
-  // идентификатора в 10(!) раз, что существенно сказывается
-  // на производительности.
-  const auto Id = (Format{ uT("%1%") } % Index++).ToString();
+  const auto Id = String_t{ uT("%ID%") }
+    .Replace(uT("%ID%"), Index++);
 
   const auto pScale = Component_t::Make(
     {
