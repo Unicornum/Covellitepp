@@ -24,11 +24,11 @@ class Renderer;
 * \ingroup CovelliteGuiGroup
 * \brief
 *  Класс входит в проект \ref CovelliteGuiPage \n
-*  Класс окна, отрисовывающий GUI при помощи libRocket.
+*  Класс окна, отрисовывающий GUI.
 * \details
-*  - Является оберткой для Rocket::Core::Context и инкапсулирет в себе
-*  взаимодействие libRocket и событий Android (касание экрана, ввод текста,
-*  отрисовка элементов управления, получение событий от libRocket).
+*  - Является оберткой для CovelliteGui::Core::Context и инкапсулирет в себе
+*  взаимодействие библиотеки GUI и событий Android (касание экрана, ввод текста,
+*  отрисовка элементов управления, получение событий библиотеки).
 *  - Событие OnClick() будет вызываться для всех элементов управления всех
 *  активных слоев (пользовательских экранов) окна.
 *  - При выборе текстовых полей ввода автоматически вызывает клавиатуру.
@@ -59,9 +59,9 @@ class Window final :
   using InitializerPtr_t = ::std::unique_ptr<Initializer_t>;
   using StringTranslator_t = covellite::gui::StringTranslator;
   using StringTranslatorPtr_t = ::std::shared_ptr<StringTranslator_t>;
-  using Context_t = Rocket::Core::Context;
+  using Context_t = CovelliteGui::Core::Context;
   using ContextPtr_t = ::std::unique_ptr<Context_t, void(*)(Context_t *)>;
-  using Vector_t = Rocket::Core::Vector2i;
+  using Vector_t = CovelliteGui::Core::Vector2i;
   using RendererPtr_t = ::std::shared_ptr<covellite::gui::Renderer>;
 
 public:
@@ -74,7 +74,7 @@ public:
 
 public:
   // Интерфейс gui::IWindow:
-  Document_t * LoadDocument(const PathToFile_t &) override;
+  DocumentPtr_t LoadDocument(const PathToFile_t &) override;
 
 public:
   void Set(const StringBank_t &);

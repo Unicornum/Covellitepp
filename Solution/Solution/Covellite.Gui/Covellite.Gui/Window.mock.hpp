@@ -86,7 +86,7 @@ public:
 
 public:
   // Èםעונפויס ::covellite::gui::IWindow
-  Document_t * LoadDocument(const PathToFile_t &) override { return nullptr; }
+  DocumentPtr_t LoadDocument(const PathToFile_t &) override { throw 1; }
 
 public:
   void Set(const StringBank_t & _Bank)

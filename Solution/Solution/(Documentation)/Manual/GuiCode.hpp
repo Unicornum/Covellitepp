@@ -22,9 +22,9 @@
 *  -----------------------------------------------------------------
 *
 *  Как это делается см. в документации/примерах
-*  [libRocket](https://asarium.github.io/libRocket/wiki/documentation.html).
+*  [библиотеки](https://mikke89.github.io/RmlUiDoc/).
 *
-*  [Доступные css свойства](https://asarium.github.io/libRocket/wiki/documentation/RCSS/PropertyIndex.html).
+*  [Доступные css свойства](https://mikke89.github.io/RmlUiDoc/pages/rcss/property_index.html).
 *
 * \note
 *  Внешний вид элементов управления можно задавать при помощи либо стилей css,

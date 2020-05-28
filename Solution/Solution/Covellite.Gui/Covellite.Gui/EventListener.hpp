@@ -12,7 +12,7 @@ namespace gui
 * \ingroup CovelliteGuiGroup
 * \brief
 *  Класс входит в \ref CovelliteGuiPage \n
-*  Вспомогательный класс для передачи событий libRocket классам окон/слоев.
+*  Вспомогательный класс для передачи событий библиотеки GUI классам окон/слоев.
 * \todo
 *  Класс используется для внутренней реализации и не должен попадать в Externals.
 *
@@ -28,9 +28,9 @@ namespace gui
 *  © CTAPOBEP 2016 - 2018
 */
 class Window::EventListener final :
-  public Rocket::Core::EventListener
+  public CovelliteGui::Core::EventListener
 {
-  using Event_t = Rocket::Core::Event;
+  using Event_t = CovelliteGui::Core::Event;
 
 public:
   // Интерфейс EventListener:

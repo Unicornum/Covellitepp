@@ -12,7 +12,7 @@ namespace gui
 {
 
 class Renderer final :
-  public Rocket::Core::RenderInterface
+  public CovelliteGui::Core::RenderInterface
 {
   using Component_t = ::covellite::api::Component;
   using RendersPtr_t = ::std::shared_ptr<Component_t::Renders>;
@@ -27,23 +27,23 @@ public:
   };
 
 public:
-  // Интерфейс Rocket::Core::RenderererInterface
-  void RenderGeometry(Rocket::Core::Vertex *, int, int *, int,
-    Rocket::Core::TextureHandle, const Rocket::Core::Vector2f &) override
+  // Интерфейс CovelliteGui::Core::RenderererInterface
+  void RenderGeometry(CovelliteGui::Core::Vertex *, int, int *, int,
+    CovelliteGui::Core::TextureHandle, const CovelliteGui::Core::Vector2f &) override
   {
     throw ::std::exception{};
   }
-  Rocket::Core::CompiledGeometryHandle CompileGeometry(Rocket::Core::Vertex *,
-    int, int *, int, Rocket::Core::TextureHandle) override
+  CovelliteGui::Core::CompiledGeometryHandle CompileGeometry(CovelliteGui::Core::Vertex *,
+    int, int *, int, CovelliteGui::Core::TextureHandle) override
   {
     throw ::std::exception{};
   }
-  void RenderCompiledGeometry(Rocket::Core::CompiledGeometryHandle,
-    const Rocket::Core::Vector2f &) override
+  void RenderCompiledGeometry(CovelliteGui::Core::CompiledGeometryHandle,
+    const CovelliteGui::Core::Vector2f &) override
   {
     throw ::std::exception{};
   }
-  void ReleaseCompiledGeometry(Rocket::Core::CompiledGeometryHandle) override
+  void ReleaseCompiledGeometry(CovelliteGui::Core::CompiledGeometryHandle) override
   {
     throw ::std::exception{};
   }
@@ -55,17 +55,17 @@ public:
   {
     throw ::std::exception{};
   }
-  bool LoadTexture(Rocket::Core::TextureHandle &, Rocket::Core::Vector2i &,
-    const Rocket::Core::String &) override
+  bool LoadTexture(CovelliteGui::Core::TextureHandle &, CovelliteGui::Core::Vector2i &,
+    const CovelliteGui::Core::String &) override
   {
     throw ::std::exception{};
   }
-  bool GenerateTexture(Rocket::Core::TextureHandle &,
-    const Rocket::Core::byte *, const Rocket::Core::Vector2i &) override
+  bool GenerateTexture(CovelliteGui::Core::TextureHandle &,
+    const CovelliteGui::Core::byte *, const CovelliteGui::Core::Vector2i &) override
   {
     throw ::std::exception{};
   }
-  void ReleaseTexture(Rocket::Core::TextureHandle) override
+  void ReleaseTexture(CovelliteGui::Core::TextureHandle) override
   {
     throw ::std::exception{};
   }

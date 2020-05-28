@@ -1,36 +1,26 @@
 
 #pragma once
 
+// 27 Май 2020 12:00 (unicornum.verum@gmail.com)
+TODO("Удалить файл и заменить ссылку, когда будет исправлен файл RmlUi/RmlUi.mock.hpp");
+
 namespace mock
 {
 
-namespace Rocket
+namespace Rml
 {
 
 namespace Core
 {
 
-class String 
-{
-public:
-  bool operator== (const char * _String) const { return (m_String == _String); }
-  bool operator!= (const char * _String) const { return (m_String != _String); }
-  const char * CString(void) const { return m_String.c_str(); }
-
-private:
-  ::std::string m_String;
-
-public:
-  // cppcheck-suppress noExplicitConstructor
-  String(const char * _String = "") : m_String(_String) {}
-};
+using String = ::std::string;
+enum class Character : char32_t { Null, Replacement = 0xfffd };
 
 class ElementDocument;
 
 class Element 
 {
 public:
-  MOCK_METHOD0(RemoveReference, void(void));
   MOCK_METHOD1(GetElementById, Element * (const String &));
   MOCK_METHOD1(SetInnerRML, void(const String &));
   MOCK_CONST_METHOD0(GetInnerRML, String(void));
@@ -38,7 +28,6 @@ public:
   MOCK_METHOD2(SetAttribute, void (String, String));
   MOCK_METHOD2(GetAttribute, String(String, String));
   MOCK_CONST_METHOD0(GetTagName, String (void));
-  MOCK_CONST_METHOD2(GetAttributeString, String(String, String));
   MOCK_METHOD0(Focus, bool(void));
   MOCK_METHOD0(GetOwnerDocument, ElementDocument *(void));
 
@@ -83,10 +72,11 @@ public:
   };
 
 public:
-  MOCK_METHOD0(GetTitle, String(void));
+  MOCK_CONST_METHOD0(GetTitle, String(void));
   MOCK_METHOD0(Show, void(void));
   MOCK_METHOD0(Hide, void(void));
   MOCK_METHOD0(GetContext, Context *(void));
+  MOCK_METHOD0(Close, void(void));
 };
 
 template < typename Type >
@@ -174,7 +164,6 @@ class Context :
   public EventListenerProxy
 {
 public:
-  MOCK_METHOD0(RemoveReference, void(void));
   MOCK_METHOD1(LoadDocument, ElementDocument * (String));
   MOCK_METHOD0(Update, bool(void));
   MOCK_METHOD0(Render, bool(void));
@@ -183,10 +172,12 @@ public:
   MOCK_METHOD2(ProcessMouseButtonDown, void (int, int));
   MOCK_METHOD2(ProcessMouseButtonUp, void (int, int));
   MOCK_METHOD2(ProcessKeyDown, bool (Input::KeyIdentifier, int));
-  MOCK_METHOD1(ProcessTextInput, bool (word));
+  MOCK_METHOD1(ProcessTextInput, bool (Character));
   MOCK_CONST_METHOD0(GetNumDocuments, int (void));
   MOCK_METHOD1(GetDocument, ElementDocument * (int));
+  MOCK_METHOD1(GetDocument, ElementDocument* (String));
   MOCK_CONST_METHOD0(GetDimensions, Vector2i(void));
+  MOCK_CONST_METHOD0(GetName, String(void));
 };
 
 class FileInterface
@@ -195,7 +186,7 @@ public:
   const ::mock::Id_t m_Id;
 
 public:
-  virtual ~FileInterface(void) {}
+  virtual ~FileInterface(void) = default;
   virtual FileHandle Open(const String &) = 0;
   virtual void Close(FileHandle) = 0;
   virtual size_t Read(void *, size_t, FileHandle) = 0;
@@ -213,10 +204,14 @@ public:
   const ::mock::Id_t m_Id;
 
 public:
-  virtual ~SystemInterface(void) {}
-  virtual float GetElapsedTime(void) = 0;
+  virtual ~SystemInterface(void) = default;
+  virtual double GetElapsedTime(void) = 0;
   virtual int TranslateString(String &, const String &) { return 0; }
+  virtual void JoinPath(String &, const String &, const String &) {}
   virtual bool LogMessage(Log::Type, const String &) { return false; }
+  virtual void SetMouseCursor(const String &) {}
+  virtual void SetClipboardText(const String &) {}
+  virtual void GetClipboardText(String &) {}
   virtual void ActivateKeyboard(void) {}
   virtual void DeactivateKeyboard(void) {};
 
@@ -230,17 +225,17 @@ public:
   const ::mock::Id_t m_Id;
 
 public:
-  virtual ~RenderInterface(void) {}
+  virtual ~RenderInterface(void) = default;
   virtual void RenderGeometry(Vertex *, int, int *, int, TextureHandle, const Vector2f &) {}
+  virtual CompiledGeometryHandle CompileGeometry(Vertex*, int, int*, int, TextureHandle) { throw ::std::exception{}; }
+  virtual void RenderCompiledGeometry(CompiledGeometryHandle, const Vector2f&) {}
+  virtual void ReleaseCompiledGeometry(CompiledGeometryHandle) {}
   virtual void EnableScissorRegion(bool) {}
   virtual void SetScissorRegion(int, int, int, int) {}
   virtual bool LoadTexture(TextureHandle &, Vector2i &, const String &) { return false; }
   virtual bool GenerateTexture(TextureHandle &, const byte *, const Vector2i &) { return false; }
   virtual void ReleaseTexture(TextureHandle) {}
-  virtual float GetVerticalTexelOffset(void) { throw ::std::exception(); }
-  virtual CompiledGeometryHandle CompileGeometry(Vertex *, int, int *, int, TextureHandle) { throw ::std::exception{}; }
-  virtual void RenderCompiledGeometry(CompiledGeometryHandle, const Vector2f &) {}
-  virtual void ReleaseCompiledGeometry(CompiledGeometryHandle) {}
+  //virtual void SetTransform(const Matrix4f *) {}
 
 public:
   explicit RenderInterface(::mock::Id_t _Id = 0) : m_Id(_Id) {}
@@ -249,25 +244,8 @@ public:
 class EventListener
 {
 public:
-  virtual ~EventListener() {}
+  virtual ~EventListener() = default;
   virtual void ProcessEvent(Event &) = 0;
-};
-
-class FontDatabase
-{
-public:
-  class Proxy :
-    public ::alicorn::extension::testing::Proxy<Proxy>
-  {
-  public:
-    MOCK_METHOD1(LoadFontFace, bool (String));
-  };
-
-public:
-  static bool LoadFontFace(const String & _Path)
-  {
-    return Proxy::GetInstance()->LoadFontFace(_Path);
-  }
 };
 
 class Proxy :
@@ -277,13 +255,30 @@ public:
   MOCK_METHOD1(SetFileInterface, void(Id_t));
   MOCK_METHOD1(SetSystemInterface, void(Id_t));
   MOCK_METHOD1(SetRenderInterface, void(Id_t));
-  MOCK_METHOD0(Initialise, void(void));
+  MOCK_METHOD0(Initialise, bool(void));
   MOCK_METHOD0(Shutdown, void(void));
   MOCK_METHOD3(CreateContext, Context * (String, Vector2i, RenderInterface *));
+  MOCK_METHOD1(RemoveContext, bool (String));
+};
+
+class FontDatabase
+{
+public:
+  class Proxy :
+    public ::alicorn::extension::testing::Proxy<Proxy>
+  {
+  public:
+    MOCK_METHOD1(LoadFontFace, bool(String));
+  };
 };
 
 namespace
 {
+
+bool LoadFontFace(const String& _Path)
+{
+  return FontDatabase::Proxy::GetInstance()->LoadFontFace(_Path);
+}
 
 void SetFileInterface(FileInterface * _pInterface)
 {
@@ -303,9 +298,9 @@ void SetRenderInterface(RenderInterface * _pInterface)
   Proxy::GetInstance()->SetRenderInterface(Id);
 }
 
-void Initialise(void) 
+bool Initialise(void) 
 {
-  Proxy::GetInstance()->Initialise();
+  return Proxy::GetInstance()->Initialise();
 }
 
 void Shutdown(void) 
@@ -319,9 +314,9 @@ Context * CreateContext(const String & _Name, const Vector2i & _Size,
   return Proxy::GetInstance()->CreateContext(_Name, _Size, _pRenderInterface);
 }
 
-FileInterface * GetFileInterface(void) 
-{ 
-  throw ::std::exception(); 
+bool RemoveContext(const String & _Name)
+{
+  return Proxy::GetInstance()->RemoveContext(_Name);
 }
 
 } // unnamed namespace
@@ -337,6 +332,13 @@ class ElementFormControl :
 public:
   MOCK_CONST_METHOD0(GetValue, Core::String(void));
   MOCK_METHOD1(SetValue, void(const Core::String &));
+};
+
+class ElementProgressBar :
+  public Core::Element
+{
+public:
+  MOCK_METHOD1(SetValue, void(float));
 };
 
 class Proxy :
@@ -386,6 +388,6 @@ bool SetContext(Core::Context * _pContext)
 
 } // namespace Debugger
 
-} // namespace Rocket
+} // namespace RmlUi
 
 } // namespace mock

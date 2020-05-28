@@ -10,19 +10,19 @@
 
 #define SUBVERSION 2
 
-#define SUBSUBVERSION 4
+#define SUBSUBVERSION 5
 
 // Устанавливается автоматически
-#define REVISION_SOLUTION 2247
+#define REVISION_SOLUTION 2281
 
 // Устанавливается автоматически
 #define __PLATFORM__ x64
 
 // Устанавливается автоматически
-#define TIME "02:42"
+#define TIME "00:21"
 
 // Устанавливается автоматически
-#define DAY 24
+#define DAY 29
 
 // Устанавливается автоматически
 #define MONTH 05
@@ -40,6 +40,6 @@
 
 #define __APPLICATION_NAME__ "Covellite++"
 
-#define __PRODUCT_DESCRIPTION__ "Кроссплатформенный (Windows/Android) GUI фреймворк для разработки приложений на С++"
+#define __PRODUCT_DESCRIPTION__ "Кроссплатформенный фреймворк для разработки приложений на С++"
 
 #define __FILE_NAME__ ""

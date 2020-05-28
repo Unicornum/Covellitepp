@@ -288,8 +288,6 @@ TEST_F(Window_test, /*DISABLED_*/Test_WindowMode_NoResized)
 
   const ::mock::Id_t InfoId = 1711032335;
   const auto Title = uT("Title1711032336");
-  const ::mock::Id_t RootSectionId = 1711091118;
-  const ::mock::Id_t MainSectionId = 1711091120;
   const ::mock::Id_t WindowSectionId = 1711091058;
   const ::mock::Id_t SizeSectionId = 1711091059;
   const auto ClientWidth = 1711091107;
@@ -508,7 +506,6 @@ TEST_F(Window_test, /*DISABLED_*/Test_FullScreenMode)
 
   const ::mock::Id_t InfoId = 1711091251;
   const auto Title = uT("Title1711091252");
-  const ::mock::Id_t MainSectionId = 1711091308;
   const ::mock::Id_t WindowSectionId = 1711091255;
   const HWND hWnd = (HWND)1711091257;
   const HMODULE hModule = (HMODULE)1711091258;

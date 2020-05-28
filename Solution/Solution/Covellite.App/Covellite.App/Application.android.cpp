@@ -41,6 +41,8 @@ Application::Application(const Run_t & _Run) :
   App.onAppCmd = [](android_app * _pApp, int32_t _Message) 
   {
     if (_pApp == nullptr || _pApp->userData == nullptr) return;
+
+    // cppcheck-suppress constVariable
     auto & Events = *(reinterpret_cast<Application *>(_pApp->userData));
 
     Events.m_Events[_Message]();
@@ -49,6 +51,8 @@ Application::Application(const Run_t & _Run) :
   App.onInputEvent = [](android_app * _pApp, AInputEvent * _pEvent) -> int32_t
   {
     if (_pApp == nullptr || _pApp->userData == nullptr) return 0;
+
+    // cppcheck-suppress constVariable
     auto & Events = *(reinterpret_cast<Application *>(_pApp->userData));
 
     const auto EventType = AInputEvent_getType(_pEvent);

@@ -8,18 +8,21 @@ body
 	height: 100%;
 }
 
+@spritesheet theme_body {
+  src: gradient.png;
+  gradient-body: 16px 16px 48px 48px;
+}
+
 body {
   min-width: 480px;
   min-height: 480px;
-  overflow-y: auto;
   color: white;
   background-color: #1E90FF;
-  background-decorator: image;
-  background-image: gradient.png 16px 16px 64px 64px;
+  decorator: image(gradient-body);
 }
 
-/* Пример класса для вывода сетки указанного размера на элементе */
-.grid {
+/* Пример (для Rocket) класса для вывода сетки указанного размера на элементе */
+/*.grid {
   background-decorator: tiled-box;
   background-top-left-image: gradient.png 0px 0px 0px 0px;
   background-top-right-image: gradient.png 0px 0px 0px 0px;
@@ -33,6 +36,6 @@ body {
   background-center-image-repeat: repeat-truncate;
   background-center-image-s-begin: 0;
   background-center-image-t-begin: 0;
-  background-center-image-s-end: 19px; /* Height / 40*/
-  background-center-image-t-end: 19px;
-}
+  background-center-image-s-end: 19px;*/ /* Height / 40*/
+  /*background-center-image-t-end: 19px;
+}*/

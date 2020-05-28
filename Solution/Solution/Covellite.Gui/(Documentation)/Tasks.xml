@@ -1,18 +1,30 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Tasks>
   <Options>
-    <Width>1398</Width>
-    <Height>942</Height>
-    <X>327</X>
-    <Y>71</Y>
+    <Width>1951</Width>
+    <Height>976</Height>
+    <X>418</X>
+    <Y>43</Y>
   </Options>
   <Process/>
   <Complete>
-    <Week6251>
-      <Task6 Text="Некорректная работа кнопки BACKSPACE на Android'e." Type="Bug" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="true" ParentTaskText="false"/>
-    </Week6251>
-    <Week6250/>
-    <Week6249/>
-    <Week6248/>
+    <Week6281>
+      <Task1 Text="Переход на использование RmlUi." Type="Red" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="true" ParentTaskText="false">
+        <Task2 Text="Инкапсуляция использования Rocket внутри проекта." Type="None" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="false"/>
+        <Task3 Text="Компилируемость кода с использованием RmlUi." Type="None" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+        <Task4 Text="Работоспособная Windows и Android версия." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+        <Task5 Text="Некорректно обрабатывается ввод русских букв." Type="Bug" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+        <Task6 Text="Восстановление тестов." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+        <Task7 Text="Обобщенный заголовочный файл для выбора используемой библиотеки GUI." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+        <Task8 Text="Отдельные тестовые проекты для тестирования логики работы разных библиотек." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+        <Task9 Text="Компилируемость тестового проекта для RmlUi." Type="None" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+        <Task10 Text="Адаптация тестов для RmlUi." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+        <Task11 Text="Класс Initializer: раздельные тесты реализаций для Windwos и Android." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+        <Task12 Text="Функция установки значения элемента 'progressbar'." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+      </Task1>
+    </Week6281>
+    <Week6280/>
+    <Week6279/>
+    <Week6278/>
   </Complete>
 </Tasks>

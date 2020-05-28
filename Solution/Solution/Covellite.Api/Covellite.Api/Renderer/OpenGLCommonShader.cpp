@@ -1325,6 +1325,7 @@ auto OpenGLCommonShader::CreateTransform(const ComponentPtr_t & _pComponent) -> 
   // 17 Сентябрь 2019 12:58 (unicornum.verum@gmail.com)
   TODO("Тест Transform.Static не проверяет, что матрица меняется у РАЗНЫХ объектов");
 
+  // cppcheck-suppress internalAstError
   const auto TransformRender =
     (_pComponent->Kind == uT("Unknown")) ? GetPreRenderDefaultGeometry() :
     (_pComponent->Kind == uT("Static")) ? GetPreRenderStaticGeometry() :

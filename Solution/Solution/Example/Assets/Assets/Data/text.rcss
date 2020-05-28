@@ -1,10 +1,21 @@
 
-/*dialog,*/
-/*dialog big,*/
-/*.speech,*/
-dummy {
+/*form,
+dialog,
+dialog big,
+.speech,
+*/dummy {
   border-width: 1px;
   border-color: red;
+}
+
+@spritesheet theme-text {
+  src: text.paper.png;
+  background: 0px 0px 479px 612px;
+}
+
+@spritesheet theme-text-npc {
+  src: text.npc.jpg;
+  icon-person: 140px 50px 220px 220px;
 }
 
 body {
@@ -15,23 +26,22 @@ body {
 form#id_bkimage {
   display: block;
   position: absolute;
-  top: 5 em;
+  top: 5em;
   bottom: 0;
   left: 0;
   right: 0;
-  background-decorator: image;
-  background-image: text.paper.png 0px 0px 479px 612px;
-  padding-left: 3 em;
-  padding-top: 4 em;
-  padding-right: 2 em;
-  padding-bottom: 4 em;
+  decorator: image(background);
+  padding-left: 3em;
+  padding-top: 4em;
+  padding-right: 2em;
+  padding-bottom: 4em;
 }
 
 form#id_content {
   display: block;
   max-height: 100%;
   overflow: hidden auto;
-  margin-top: 1 em;
+  margin-top: 1em;
 }
 
 scrollbarvertical sliderbar {
@@ -53,10 +63,9 @@ form#id_title {
 form#id_icon {
   display: inline-block;
   float: left;
-  width: 5 em;
-  height: 5 em;
-  background-decorator: image;
-  background-image: text.npc.jpg 140px 50px 360px 270px;
+  width: 5em;
+  height: 5em;
+  decorator: image(icon-person);
 }
 
 form#id_char {
@@ -70,22 +79,22 @@ p#id_status {
 }
 
 p#id_name {
-  font-size: 1.5 em;
+  font-size: 1.5em;
   color: #0c00b3;
-  margin-top: 0.15 em;
-  header-font-effect: shadow;
-  header-offset: 2px 2px;
-  header-color: #E9E9E9;
+  margin-top: 0.15em;
+  font-effect: shadow(2px 2px #E9E9E9);
 }
 
 dialog {
   display: inline-block;
-  font-size: 0.9 em;
+  font-size: 0.9em;
   color: black;
-  padding-left: 0.5 em;
-  padding-top: 1.5 em;
-  padding-right: 0.5 em;
-  padding-bottom: 0.5 em;
+  padding-left: 0.5em;
+  padding-top: 1.5em;
+  padding-right: 0.5em;
+  padding-bottom: 0.5em;
+  line-height: 1.6;
+  width: 90%;
 }
 
   dialog i {
@@ -99,29 +108,28 @@ dialog {
 
   dialog big {
     font-family: Country Western;
-    font-charset: U+0020-007F, U+0410-044F;
-    font-size: 3 em;
+    font-size: 3em;
     font-weight: bold;
-    max-width: 0.7 em;
+    max-width: 0.7em;
     padding: 0;
-    line-height: 0.85 em;
+    line-height: 0.85em;
     float: left;
     color: #6c4500;
   }
 
 form#id_speech {
   display: block;
-  font-size: 1.2 em;
+  font-size: 1.2em;
 }
 
 .speech {
   display: block;
-  margin-left: 1 em;
-  margin-right: 1 em;
-  padding-left: 1 em;
-  padding-right: 1 em;
-  padding-top: 0.25 em;
-  padding-bottom: 0.25 em;
+  margin-left: 1em;
+  margin-right: 1em;
+  padding-left: 1em;
+  padding-right: 1em;
+  padding-top: 0.25em;
+  padding-bottom: 0.25em;
 }
 
   .speech:hover {

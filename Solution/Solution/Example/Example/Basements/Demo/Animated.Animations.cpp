@@ -141,6 +141,7 @@ auto Animated::Animations::Get(
     using Animation_t = ::basement::model::Animation;
 
     m_Animations[_Name] = 
+      // cppcheck-suppress stlFindInsert
       ::std::make_shared<Animation_t>(_TicksPerSecond, _Frames);
   }
 

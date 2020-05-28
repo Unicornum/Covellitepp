@@ -1,6 +1,5 @@
 
 #pragma once
-#include <Rocket\Rocket.hpp>
 #include <Covellite\Gui\IStringTranslator.hpp>
 #include <memory>
 
@@ -14,7 +13,7 @@ namespace gui
 * \ingroup CovelliteGuiGroup
 * \brief
 *  Класс входит в проект \ref CovelliteGuiPage \n
-*  Класс реализации системного интерфейса libRocket.
+*  Класс реализации системного интерфейса.
 * \todo
 *  Класс используется для внутренней реализации и не должен попадать в Externals.
 *
@@ -32,15 +31,15 @@ namespace gui
 *  © CTAPOBEP 2016 - 2017
 */
 class System final :
-  public Rocket::Core::SystemInterface
+  public CovelliteGui::Core::SystemInterface
 {
-  using String_t = Rocket::Core::String;
+  using String_t = CovelliteGui::Core::String;
   using StringTranslatorPtr_t = ::std::shared_ptr<IStringTranslator>;
 
 public:
-  float GetElapsedTime(void) override;
+  CovelliteGuiTime_t GetElapsedTime(void) override;
   int TranslateString(String_t &, const String_t &) override;
-  bool LogMessage(Rocket::Core::Log::Type, const String_t &) override;
+  bool LogMessage(CovelliteGui::Core::Log::Type, const String_t &) override;
   void ActivateKeyboard(void) override;
   void DeactivateKeyboard(void) override;
 

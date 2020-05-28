@@ -1,101 +1,105 @@
 
-/*selector,*/
-/*button,*/
+/*header,
+description,
+selector,
+button,
+p,
+h1,*/
 dummy {
   border-width: 1px;
   border-color: red;
 }
 
 h1 {
-  display: inline-block;
-  font-size: 1.8 em;
-}
-
-header,
-description {
-  display: block;
-  margin-top: 0.3 em;
-  margin-bottom: 0.3 em;
+  font-size: 1.8em;
 }
 
 header {
+  display: block;
   color: white;
   text-align: center;
-  header-font-effect: outline;
-  header-width: 2px;
-  header-color: grey;
+  font-effect: outline(2px grey);
 }
 
 description {
+  display: block;
   border-width: 1px;
   border-color: grey;
-  margin-left: 0.5 em;
-  margin-right: 0.5 em;
-  padding-top: 1 em;
-  padding-bottom: 1 em;
-  padding-left: 1 em;
-  padding-right: 1 em;
+  margin: 0 0.5em;
   position: absolute;
   left: 0;
-  top: 5 em;
+  top: 5em;
   right: 0;
-  bottom: 6 em;
+  bottom: 6em;
   overflow-y: hidden;
   color: black;
   background-color: rgba(255, 255, 255, 64);
 }
 
-p#id_description,
-p#id_copyright {
-  display: inline-block;
-  font-size: 0.95 em;
+p {
+  display: block;
+  padding: 0.4em 0;
+  overflow: hidden;
 }
 
-p#id_description {
-  text-align: left;
-  font-weight: normal;
-}
+  p#id_version {
+    padding: 0;
+  }
 
-p#id_copyright {
-  text-align: center;
-  font-weight: bold;
-}
+  p#id_description,
+  p#id_copyright {
+    font-size: 0.975em;
+    margin: 0 0.75em;
+  }
+
+  p#id_description {
+    text-align: left;
+    font-weight: normal;
+    line-height: 1.4;
+    position: absolute;
+    bottom: 4em;
+    top: 0;
+  }
+
+  p#id_copyright {
+    text-align: center;
+    font-weight: bold;
+    position: absolute;
+    bottom: 0;
+    margin-bottom: 0.25em;
+  }
 
 selector {
   display: inline-block;
-  margin-top: 1 em;
-  margin-bottom: 1 em;
+  margin-top: 1em;
+  margin-bottom: 1em;
   text-align: center;
   position: fixed;
   bottom: 0;
 }
 
 button {
-  font-size: 3.5 em;
-  padding-top: 0.1 em;
-  padding-bottom: 0.1 em;
-  padding-left: 0.2 em;
-  padding-right: 0.2 em;
+  font-size: 3.5em;
+  padding-top: 0.1em;
+  padding-bottom: 0.1em;
+  padding-left: 0.2em;
+  padding-right: 0.2em;
   color: white;
-  header-font-effect: outline;
-  header-width: 2px;
-  header-color: grey;
+  font-effect: outline(2px grey);
 }
 
   button#id_text {
-    padding-left: 0.15 em;
-    padding-right: 0.15 em;
+    padding-left: 0.15em;
+    padding-right: 0.15em;
   }
 
   button#id_simple2dgame,
   button#id_demo {
-    padding-left: 0.3 em;
-    padding-right: 0.3 em;
+    padding-left: 0.3em;
+    padding-right: 0.3em;
   }
 
   button:active {
     color: grey;
-    header-font-effect: outline;
-    header-width: 2px;
-    header-color: white;
+    font-effect: outline(2px white);
   }

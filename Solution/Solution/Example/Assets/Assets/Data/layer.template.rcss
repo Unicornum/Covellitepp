@@ -1,21 +1,24 @@
 
+@spritesheet theme_template {
+  src: gradient.png;
+  gradient-template: 53px 0px 10px 64px;
+  gradient-controls-scroll: 32px 32px 32px 32px;
+  gradient-controls-part: 32px 0px 31px 63px;
+  gradient-controls-param: 50px 50px 13px 13px;
+}
+
 header,
 title {
   display: block;
-  padding-top: 0.2 em;
-  padding-bottom: 0.2 em;
+  padding-top: 0.2em;
+  padding-bottom: 0.2em;
   color: white;
-  header-font-effect: outline;
-  header-width: 2px;
-  header-color: grey;
-  /*border-width: 1px;
-  border-color: red;*/
+  font-effect: outline(2px grey);
 }
 
 header {
   background-color: #9ACD32;
-  background-decorator: image;
-  background-image: gradient.png 53px 0px 63px 64px;
+  decorator: image(gradient-template);
 }
 
 title {
@@ -27,32 +30,26 @@ title {
   display: inline-block;
   font-size: 200%;
   text-align: center;
-  max-width: 1.2 em;
-  padding-left: 0.1 em;
-  padding-right: 0.1 em;
-  padding-top: 0.1 em;
-  padding-bottom: 0.1 em;
-  /*border-width: 1px;
-  border-color: yellow;*/
+  max-width: 1.2em;
+  padding-left: 0.25em;
+  padding-right: 0.1em;
+  padding-top: 0.1em;
+  padding-bottom: 0.1em;
 }
 
 .help {
   float: right;
 }
 
-.help:active,
-.back:active {
-  color: grey;
-  header-font-effect: outline;
-  header-width: 2px;
-  header-color: white;
-}
+  .help:active,
+  .back:active {
+    color: grey;
+    font-effect: outline(2px white);
+  }
 
 text {
   display: inline-block;
   font-size: 180%;
   max-width: 10%;
-  padding-left: 0.5 em;
-  /*border-width: 1px;
-  border-color: yellow;*/
+  padding-left: 0.5em;
 }

@@ -19,7 +19,8 @@ File::Handle_t File::Open(const Path_t & _PathToFile) /*override*/
   {
     const auto Handle = File::MakeUniqueHandle();
 
-    m_Infos[Handle].Data = app::Vfs_t::GetInstance().GetData(_PathToFile.CString());
+    m_Infos[Handle].Data = app::Vfs_t::GetInstance().GetData(
+      CovelliteGuiStringToUtf8(_PathToFile));
     m_Infos[Handle].Position = 0;
     return Handle;
   }

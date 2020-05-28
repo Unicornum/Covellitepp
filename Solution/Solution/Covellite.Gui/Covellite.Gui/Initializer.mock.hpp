@@ -40,7 +40,7 @@ namespace gui
 class Initializer
 {
   using RenderInterfacePtr_t = 
-    ::std::shared_ptr<::mock::Rocket::Core::RenderInterface>;
+    ::std::shared_ptr<CovelliteGui::Core::RenderInterface>;
   using StringTranslatorPtr_t =
     ::std::shared_ptr<::mock::covellite::gui::IStringTranslator>;
 

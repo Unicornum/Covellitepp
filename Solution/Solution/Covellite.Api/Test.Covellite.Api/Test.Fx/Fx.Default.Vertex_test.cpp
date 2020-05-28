@@ -112,12 +112,10 @@ TEST_F(FxDefaultVertex_test, /*DISABLED_*/Test_GetAmbientDirectionColor)
   Result = GetAmbientDirectionColor(float3(1.0f, 1.0f, 1.0f));
   EXPECT_EQ(ObjectData.Lights.Ambient.Color, Result);
 
-  ObjectData.Lights.Direction.Direction = { 0.0f, 1.0f, 1.0f, 0.0f };
-  Result = GetAmbientDirectionColor(float3(0.0f, 0.0f, 1.0f));
-
   const auto ExpectedColor = ObjectData.Lights.Ambient.Color +
     ObjectData.Lights.Direction.Color * 0.7071067811865f;
 
+  ObjectData.Lights.Direction.Direction = { 0.0f, 1.0f, 1.0f, 0.0f };
   Result = GetAmbientDirectionColor(float3(0.0f, 0.0f, 1.0f));
   EXPECT_EQ(ExpectedColor, Result);
 }

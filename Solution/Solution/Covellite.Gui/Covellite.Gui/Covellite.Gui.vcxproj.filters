@@ -21,7 +21,6 @@
     <ClInclude Include="Layer.mock.hpp" />
     <ClInclude Include="Layers.hpp" />
     <ClInclude Include="Layers.mock.hpp" />
-    <ClInclude Include="Rocket.forward.hpp" />
     <ClInclude Include="StringTranslator.hpp" />
     <ClInclude Include="System.hpp" />
     <ClInclude Include="Window.hpp" />
@@ -32,13 +31,14 @@
     <ClInclude Include="Renderer.hpp" />
     <ClInclude Include="EventListener.hpp" />
     <ClInclude Include="Vfs.hpp" />
+    <ClInclude Include="SystemToGuiKeyCode.hpp" />
+    <ClInclude Include="External.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
       <Filter>Common</Filter>
     </ClCompile>
     <ClCompile Include="File.cpp" />
-    <ClCompile Include="Initializer.cpp" />
     <ClCompile Include="Layer.cpp" />
     <ClCompile Include="Layers.cpp" />
     <ClCompile Include="StringTranslator.cpp" />
@@ -46,9 +46,10 @@
     <ClCompile Include="System.cpp" />
     <ClCompile Include="Window.cpp" />
     <ClCompile Include="Layer.windows.cpp" />
-    <ClCompile Include="SystemToRocketKeyCode.windows.cpp" />
     <ClCompile Include="Renderer.cpp" />
     <ClCompile Include="EventListener.cpp" />
+    <ClCompile Include="Initializer.windows.cpp" />
+    <ClCompile Include="SystemToGuiKeyCode.windows.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Window.inl" />

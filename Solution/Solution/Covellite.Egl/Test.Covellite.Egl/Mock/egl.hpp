@@ -73,7 +73,7 @@ inline ::covellite::egl::EGLBoolean eglChooseConfig(::covellite::egl::EGLDisplay
   const ::covellite::egl::EGLint * _pAttributes, ::covellite::egl::EGLConfig * _pConfigs,
   ::covellite::egl::EGLint _ConfigSize, ::covellite::egl::EGLint * _pConfigCount)
 {
-  ::mock::EglProxy & Proxy = *::mock::EglProxy::GetInstance();
+  const auto & Proxy = *::mock::EglProxy::GetInstance();
 
   if (Proxy.m_pAttributes == nullptr)
   {

@@ -238,8 +238,7 @@ auto Demo::GetProcessLoading(void) -> Updater_t
 {
   return [=](void)
   {
-    const auto Value = uT("%VALUE%")
-      .Replace(uT("%VALUE%"), m_PercentLoading / 100.0f);
+    const auto Value = (m_PercentLoading * 0.85f + 15.0f) / 100.0f;
 
     GetElement("id_progress").SetMeaning(Value);
     //GetElement("id_circular").SetMeaning(Value);

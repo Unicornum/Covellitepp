@@ -15,7 +15,8 @@ public:
   class Sound final
   {
   public:
-    void Dummy(void) {};
+    // cppcheck-suppress functionStatic
+    void Dummy(void) const {};
 
   public:
     SoundDevice *           m_pDevice;

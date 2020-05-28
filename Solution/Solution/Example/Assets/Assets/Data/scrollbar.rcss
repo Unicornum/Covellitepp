@@ -18,6 +18,4 @@ scrollbarvertical {
     border-width: 1px;
     border-color: grey;
     background-color: rgba(255, 255, 255, 64);
-    /*background-decorator: image;
-    background-image: gradient.png 50px 50px 64px 64px;*/
   }

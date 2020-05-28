@@ -805,6 +805,7 @@ auto DirectX10::CreateState(const ComponentPtr_t & _pComponent) -> Render_t /*ov
     RasterizerDesc.FrontCounterClockwise = TRUE;
     RasterizerDesc.DepthClipEnable = TRUE;
 
+    // cppcheck-suppress internalAstError
     RasterizerDesc.CullMode = 
       (RasterizerData.CullMode == uT("None")) ? D3D10_CULL_NONE :
       (RasterizerData.CullMode == uT("Front")) ? D3D10_CULL_FRONT :

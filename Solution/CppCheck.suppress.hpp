@@ -10,17 +10,10 @@
 
 syntaxError:*\*test.cpp
 unusedFunction:*\*_test.cpp
-functionStatic:*\Covellite.Gui\Test.Covellite.Gui\Mock\*.hpp
-passedByValue:*\shaders\*.fx
+shadowFunction:*\Test.Covellite.Os\Test.Window\Window.android_test.cpp
+functionStatic:*\Test.Covellite.Gui\Mock\*.hpp
 
-functionConst:*\Externals.doxygen.ignore\Assimp\*
-functionStatic:*\Externals.doxygen.ignore\Assimp\*
-noExplicitConstructor:*\Externals.doxygen.ignore\Assimp\*
-variableScope:*\Externals.doxygen.ignore\Assimp\*
-ConfigurationNotChecked:*\Externals.doxygen.ignore\Assimp\*
-shiftTooManyBits:*\Externals.doxygen.ignore\Assimp\*
-clarifyCalculation:*\Externals.doxygen.ignore\Assimp\*
-funcArgNamesDifferent:*\Externals.doxygen.ignore\Assimp\*
-unreadVariable:*\Externals.doxygen.ignore\Assimp\*
-memleak:*\Externals.doxygen.ignore\Assimp\*
-unusedFunction:*\Externals.doxygen.ignore\Assimp\*
+passedByValue:*\shaders\*.fx
+pureVirtualCall:*\Covellite.Api\Renderer\GraphicApi.hpp
+virtualCallInConstructor:*\Covellite.Api\Renderer\GraphicApi.hpp
+constParameter:*\Covellite.Os\Window.android.cpp

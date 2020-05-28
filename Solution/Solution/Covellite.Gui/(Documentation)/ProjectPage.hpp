@@ -1,9 +1,9 @@
 
 /**
 * \page CovelliteGuiBriefPage
-*  ѕроект реализации работы с GUI при помощи [libRocket].
-*  
-*  [libRocket]: https://github.com/libRocket/libRocket "libRocket"
+*  ѕроект реализации работы с GUI при помощи
+*  [RmlUi](https://github.com/mikke89/RmlUi) или
+*  [Rocket](https://github.com/libRocket/libRocket).
 */
 
 /**
@@ -20,7 +20,5 @@
 *  ---------
 *
 *  -  лассы проекта представл€ют собой универсальный код, завис€щий только
-*  от кода [libRocket].
-*  
-*  [libRocket]: https://github.com/libRocket/libRocket "libRocket"
+*  от кода используемой библиотки GUI.
 */

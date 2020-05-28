@@ -30,7 +30,7 @@ class System_test :
 {
 protected:
   using Tested_t = ::covellite::gui::System;
-  using ITested_t = ::mock::Rocket::Core::SystemInterface;
+  using ITested_t = ::mock::CovelliteGui::Core::SystemInterface;
   using AppInfo_t = ::alicorn::system::platform::AppInfo;
 
   // Вызывается ПЕРЕД запуском каждого теста

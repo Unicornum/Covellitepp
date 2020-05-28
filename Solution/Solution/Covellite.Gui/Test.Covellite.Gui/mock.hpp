@@ -10,6 +10,7 @@
 #include <alicorn/platform/app-info.hpp>
 #include <alicorn/platform/environment.mock.hpp>
 #include <alicorn/platform/windows.hpp>
+#include <alicorn/application/current-module.mock.hpp>
 #include <windef.h>
 #include <winuser.h>
 #include <alicorn/logger.mock.hpp>
@@ -31,7 +32,7 @@ inline /*static*/ VfsPtr_t Singleton<VfsCore_t>::Make(void)
 
   return ::std::make_unique<VfsCore_t>(::std::vector<ImplPtr_t>
   {
-    // Ёто позвол€ет задавать как полный путь, так и путь оносительно
+    // Ёто позвол€ет задавать как полный путь, так и путь относительно
     // папки этого самого файла.
     ::std::make_shared<FileSystem>(""),
     ::std::make_shared<FileSystem>(THIS_DIRECTORY / "Test.File"),
@@ -41,9 +42,6 @@ inline /*static*/ VfsPtr_t Singleton<VfsCore_t>::Make(void)
 
 //! @endcond
 
-#include <Rocket/Rocket.mock.hpp>
-#include <alicorn/application/current-module.mock.hpp>
-
 /**
 * \file
 *  ќбъ€влени€ подставных классов.
@@ -52,10 +50,11 @@ inline /*static*/ VfsPtr_t Singleton<VfsCore_t>::Make(void)
 #include "Mock/Namespaces.hpp"
 
 #include <Covellite/App/Settings.mock.hpp>
+#include <Covellite/Gui/External.hpp>
 #include <Covellite/Gui.inside.mock.hpp>
 
 #include "Mock/Time.hpp"
 #include "Mock/StringTranslator.hpp"
-#include "Mock/RocketInterfaces.hpp"
-#include "Mock/SystemToRocketKeyCode.inl"
+#include "Mock/CovelliteGuiInterfaces.hpp"
+#include "Mock/SystemToGuiKeyCode.inl"
 #include "Mock/Renderer.hpp"

@@ -5,7 +5,10 @@
 #include <vector>
 #include <map>
 #include <functional>
+#include <alicorn/cpp/disable-warnings.hpp>
+ALICORN_DISABLE_ALL_WARNINGS
 #include <glm/glm.force.hpp>
+ALICORN_RESTORE_WARNINGS
 #include <alicorn/std/string.hpp>
 #include <alicorn/std/exception.hpp>
 

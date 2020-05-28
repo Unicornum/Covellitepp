@@ -71,15 +71,15 @@ public:
   void ProcessAll(const Callback_t &);
 
 public:
-  void Add(const size_t, const ::std::vector<Id_t>);
-  void Add(const size_t, const ::std::vector<Id_t>, const model::CubeCoords &);
+  void Add(const size_t, const ::std::vector<Id_t> &);
+  void Add(const size_t, const ::std::vector<Id_t> &, const model::CubeCoords &);
   ::std::vector<Id_t> Remove(const model::CubeCoords &);
   void CompleteReplace(void);
   void CompleteUpdate(void);
 
 private:
   void BuildRenderObjects(void);
-  void Add(const size_t, const ::std::vector<Id_t>, const uint64_t);
+  void Add(const size_t, const ::std::vector<Id_t> &, const uint64_t);
 
 private:
   ::std::vector<Scene>          m_Scenes;
@@ -93,14 +93,14 @@ private:
 // cppcheck-suppress passedByValue
 inline void GameScene::Add(
   const size_t _SceneId,
-  const ::std::vector<Id_t> _ObjectIds)
+  const ::std::vector<Id_t> & _ObjectIds)
 {
   Add(_SceneId, _ObjectIds, static_cast<uint64_t>(0));
 }
 
 inline void GameScene::Add(
   const size_t _SceneId,
-  const ::std::vector<Id_t> _ObjectIds,
+  const ::std::vector<Id_t> & _ObjectIds,
   const model::CubeCoords & _Position)
 {
   Add(_SceneId, _ObjectIds, _Position.GetHash());
@@ -108,7 +108,7 @@ inline void GameScene::Add(
 
 inline void GameScene::Add(
   const size_t _SceneId,
-  const ::std::vector<Id_t> _ObjectIds,
+  const ::std::vector<Id_t> & _ObjectIds,
   const uint64_t _CoordHash)
 {
   if (_SceneId >= m_BkScenes.size()) m_BkScenes.resize(_SceneId + 1);

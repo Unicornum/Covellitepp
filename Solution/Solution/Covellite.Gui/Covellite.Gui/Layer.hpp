@@ -2,7 +2,6 @@
 #pragma once
 #include <alicorn\std\string.forward.hpp>
 #include <alicorn\boost\filesystem.forward.hpp>
-#include <Covellite\Gui\Rocket.forward.hpp>
 #include <Covellite\Events\Events.hpp>
 #include <Covellite\Gui\ILayer.hpp>
 #include <Covellite\Gui\IWindow.hpp>
@@ -19,8 +18,8 @@ namespace gui
 *  Класс входит в проект \ref CovelliteGuiPage \n
 *  Класс одного слоя (пользовательского экрана) программы.
 * \details
-*  - Представляет собой обертку над документом libRocket и предназначен для
-*  работы с отдельным экраном программы.
+*  - Представляет собой обертку над документом используемой библиотеки GUI и
+*  предназначен для работы с отдельным экраном программы.
 *  - Класс-наследник указывается в качестве параметра шаблона функции 
 *  covellite::gui::Window::AddLayer<>(). 
 *  
@@ -44,9 +43,9 @@ class Layer :
 
 protected:
   using IWindowGui_t = gui::IWindow;
-  using Context_t = Rocket::Core::Context;
-  using Document_t = Rocket::Core::ElementDocument;
-  using Element_t = Rocket::Core::Element;
+  using Document_t = CovelliteGui::Core::ElementDocument;
+  using DocumentPtr_t = ::std::unique_ptr<Document_t, void(*)(Document_t *)>;
+  using Element_t = CovelliteGui::Core::Element;
   using Path_t = ::boost::filesystem::path;
   using String_t = ::alicorn::extension::std::String;
 
@@ -61,6 +60,7 @@ public:
   {
   public:
     void SetFocus(void);
+    void SetMeaning(const float);
     void SetMeaning(const String_t &);
     String_t GetMeaning(void) const;
     void SetClassStyle(const String_t &);
@@ -85,21 +85,18 @@ public:
   int GetHeight(void) const;
   float EmployFontSize(float);
 
-private:
+public:
   static ::std::string Convert(const Path_t &);
 
 protected:
   ::covellite::events::Events m_Events;
 
 private:
-  Document_t * const m_pDocument;
+  const DocumentPtr_t m_pDocument;
 
 protected:
   Layer(gui::IWindow &, const Path_t &);
   Layer(gui::IWindow &, const Path_t &, const ::std::string &);
-
-public:
-  ~Layer(void) noexcept;
 };
 
 } // namespace gui

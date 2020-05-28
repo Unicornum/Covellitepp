@@ -30,9 +30,9 @@ void Window::EventListener::ProcessEvent(Event_t & _Event) /*override*/
     }
 
     const auto Id = 
-      events::Gui{ _Event.GetType().CString() }
-      .DocumentId(pDocument->GetId().CString())
-      .ElementId(pTargetElement->GetId().CString());
+      events::Gui{ CovelliteGuiStringToUtf8(_Event.GetType()) }
+      .DocumentId(CovelliteGuiStringToUtf8(pDocument->GetId()))
+      .ElementId(CovelliteGuiStringToUtf8(pTargetElement->GetId()));
 
     m_Events[Id]();
   }

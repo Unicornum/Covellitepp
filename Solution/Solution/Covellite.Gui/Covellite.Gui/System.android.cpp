@@ -15,7 +15,7 @@ namespace gui
 * \brief
 *  Функция получения времени, прошедшего с момента запуска программы.
 */
-float System::GetElapsedTime(void) /*override*/
+CovelliteGuiTime_t System::GetElapsedTime(void) /*override*/
 {
   struct timeval Now;
   gettimeofday(&Now, nullptr);

@@ -1314,6 +1314,7 @@ auto DirectX11::CreateGeometry(const ComponentPtr_t & _pComponent) -> Render_t /
 {
   const auto Variety = _pComponent->GetValue(uT("variety"), uT("Default"));
 
+  // cppcheck-suppress internalAstError
   const auto BuildTransformMatrix =
     (Variety == uT("Default")) ? CreateDefaultTransformRender<::Matrices>() :
     (Variety == uT("Static")) ? CreateStaticTransformRender<::Matrices>() :

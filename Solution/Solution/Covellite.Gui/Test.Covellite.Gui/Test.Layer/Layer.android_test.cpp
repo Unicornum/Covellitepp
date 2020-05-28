@@ -42,7 +42,7 @@ TEST_F(Layer_test, /*DISABLED_*/Test_Constructor)
 
   using namespace ::testing;
 
-  EXPECT_CALL(Window, LoadDocument(Eq(ExpectedPathToFile)))
+  EXPECT_CALL(Window, DoLoadDocument(Eq(ExpectedPathToFile)))
     .Times(1)
     .WillOnce(Return(&Document));
 
@@ -55,14 +55,14 @@ TEST_F(Layer_test, /*DISABLED_*/Test_Constructor_Title)
   Window Window;
   ::covellite::gui::IWindow & IWindow = Window;
   Document_t Document;
-  ::mock::Rocket::Core::Element Title;
+  ::mock::CovelliteGui::Core::Element Title;
 
   const char * SourcePathToFile = "Path\\To\\File/1710301248";
   const char * ExpectedPathToFile = "Path/To/File/1710301248";
 
   using namespace ::testing;
 
-  EXPECT_CALL(Window, LoadDocument(Eq(ExpectedPathToFile)))
+  EXPECT_CALL(Window, DoLoadDocument(Eq(ExpectedPathToFile)))
     .Times(1)
     .WillOnce(Return(&Document));
 

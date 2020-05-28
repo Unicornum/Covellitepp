@@ -74,7 +74,7 @@ public:
   }
 
 public:
-  Any_t Window::GetHandle(void) const override
+  Any_t GetHandle(void) const override
   {
     return Proxy::GetInstance()->GetHandle(m_Id);
   }

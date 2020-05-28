@@ -12,14 +12,6 @@
 *  Тесты класса EventListener.
 */
 
-namespace mock {
-namespace Rocket {
-namespace Core {
-using EventListener_tested = EventListener;
-}
-}
-}
-
 #define EventListener EventListener_tested
 
 // Расположение класса EventListener
@@ -37,7 +29,7 @@ protected:
   using Tested_t = ::covellite::gui::Window::EventListener;
 # undef EventListener
 
-  using ITested_t = ::mock::Rocket::Core::EventListener;
+  using ITested_t = ::mock::CovelliteGui::Core::EventListener;
   using Events_t = ::covellite::events::Events;
 
   // Вызывается ПЕРЕД запуском каждого теста
@@ -150,7 +142,7 @@ TEST_F(EventListener_test, /*DISABLED_*/Test_ProcessEvent_TargetElementNullptr)
   auto pExample = Tested_t::Make(Events);
   ITested_t & IExample = *pExample;
 
-  ::mock::Rocket::Core::Event Event;
+  ::mock::CovelliteGui::Core::Event Event;
 
   using namespace ::testing;
 
@@ -184,8 +176,8 @@ TEST_F(EventListener_test, /*DISABLED_*/Test_ProcessEvent_OwnerDocument_Nullptr)
   auto pExample = Tested_t::Make(Events);
   ITested_t & IExample = *pExample;
 
-  ::mock::Rocket::Core::Element TargetElement;
-  ::mock::Rocket::Core::Event Event;
+  ::mock::CovelliteGui::Core::Element TargetElement;
+  ::mock::CovelliteGui::Core::Event Event;
 
   using namespace ::testing;
 
@@ -211,8 +203,8 @@ TEST_F(EventListener_test, /*DISABLED_*/Test_ProcessEvent_OwnerDocument_Nullptr)
 // ************************************************************************** //
 TEST_F(EventListener_test, /*DISABLED_*/Test_ProcessEvent_OnClick_Exception)
 {
-  ::mock::Rocket::Core::Element TargetElement;
-  ::mock::Rocket::Core::ElementDocument OwnerDocument;
+  ::mock::CovelliteGui::Core::Element TargetElement;
+  ::mock::CovelliteGui::Core::ElementDocument OwnerDocument;
   const char * Type = "click";
   const char * DocumentId = "Id1807271203";
   const char * TargetElementId = "Id1710112259";
@@ -230,7 +222,7 @@ TEST_F(EventListener_test, /*DISABLED_*/Test_ProcessEvent_OnClick_Exception)
   auto pExample = Tested_t::Make(Events);
   ITested_t & IExample = *pExample;
 
-  ::mock::Rocket::Core::Event Event;
+  ::mock::CovelliteGui::Core::Event Event;
 
   using namespace ::testing;
 
@@ -269,8 +261,8 @@ TEST_F(EventListener_test, /*DISABLED_*/Test_ProcessEvent_OnClick_Exception)
 // ************************************************************************** //
 TEST_F(EventListener_test, /*DISABLED_*/Test_ProcessEvent_OnChange_Exception)
 {
-  ::mock::Rocket::Core::Element TargetElement;
-  ::mock::Rocket::Core::ElementDocument OwnerDocument;
+  ::mock::CovelliteGui::Core::Element TargetElement;
+  ::mock::CovelliteGui::Core::ElementDocument OwnerDocument;
   const char * Type = "change";
   const char * DocumentId = "Id1807271203";
   const char * TargetElementId = "Id1710112259";
@@ -288,7 +280,7 @@ TEST_F(EventListener_test, /*DISABLED_*/Test_ProcessEvent_OnChange_Exception)
   auto pExample = Tested_t::Make(Events);
   ITested_t & IExample = *pExample;
 
-  ::mock::Rocket::Core::Event Event;
+  ::mock::CovelliteGui::Core::Event Event;
 
   using namespace ::testing;
 
@@ -327,8 +319,8 @@ TEST_F(EventListener_test, /*DISABLED_*/Test_ProcessEvent_OnChange_Exception)
 // ************************************************************************** //
 TEST_F(EventListener_test, /*DISABLED_*/Test_ProcessEvent_OnClick)
 {
-  ::mock::Rocket::Core::Element TargetElement;
-  ::mock::Rocket::Core::ElementDocument OwnerDocument;
+  ::mock::CovelliteGui::Core::Element TargetElement;
+  ::mock::CovelliteGui::Core::ElementDocument OwnerDocument;
   const char * Type = "click";
   const char * TargetElementId = "Id1710112311";
   const char * OwnerDocumentId = "Id1710112312";
@@ -345,7 +337,7 @@ TEST_F(EventListener_test, /*DISABLED_*/Test_ProcessEvent_OnClick)
   auto pExample = Tested_t::Make(Events);
   ITested_t & IExample = *pExample;
 
-  ::mock::Rocket::Core::Event Event;
+  ::mock::CovelliteGui::Core::Event Event;
 
   using namespace ::testing;
 
@@ -383,8 +375,8 @@ TEST_F(EventListener_test, /*DISABLED_*/Test_ProcessEvent_OnClick)
 // ************************************************************************** //
 TEST_F(EventListener_test, /*DISABLED_*/Test_ProcessEvent_OnChamge)
 {
-  ::mock::Rocket::Core::Element TargetElement;
-  ::mock::Rocket::Core::ElementDocument OwnerDocument;
+  ::mock::CovelliteGui::Core::Element TargetElement;
+  ::mock::CovelliteGui::Core::ElementDocument OwnerDocument;
   const char * Type = "change";
   const char * TargetElementId = "Id1710112311";
   const char * OwnerDocumentId = "Id1710112312";
@@ -401,7 +393,7 @@ TEST_F(EventListener_test, /*DISABLED_*/Test_ProcessEvent_OnChamge)
   auto pExample = Tested_t::Make(Events);
   ITested_t & IExample = *pExample;
 
-  ::mock::Rocket::Core::Event Event;
+  ::mock::CovelliteGui::Core::Event Event;
 
   using namespace ::testing;
 

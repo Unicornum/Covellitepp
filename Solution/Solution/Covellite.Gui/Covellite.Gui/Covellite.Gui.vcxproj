@@ -51,7 +51,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>COVELLITE_GUI_RMLUI;_DEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>false</SDLCheck>
     </ClCompile>
     <Link>
@@ -63,7 +63,7 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>COVELLITE_GUI_RMLUI;NDEBUG;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <SDLCheck>false</SDLCheck>
     </ClCompile>
     <Link>
@@ -75,6 +75,7 @@
   <ItemGroup>
     <ClInclude Include="EventListener.hpp" />
     <ClInclude Include="Events.hpp" />
+    <ClInclude Include="External.hpp" />
     <ClInclude Include="File.hpp" />
     <ClInclude Include="ILayer.hpp" />
     <ClInclude Include="Initializer.hpp" />
@@ -87,10 +88,10 @@
     <ClInclude Include="Layers.hpp" />
     <ClInclude Include="Layers.mock.hpp" />
     <ClInclude Include="Renderer.hpp" />
-    <ClInclude Include="Rocket.forward.hpp" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="StringTranslator.hpp" />
     <ClInclude Include="System.hpp" />
+    <ClInclude Include="SystemToGuiKeyCode.hpp" />
     <ClInclude Include="targetver.h" />
     <ClInclude Include="Vfs.hpp" />
     <ClInclude Include="Window.hpp" />
@@ -99,7 +100,7 @@
   <ItemGroup>
     <ClCompile Include="EventListener.cpp" />
     <ClCompile Include="File.cpp" />
-    <ClCompile Include="Initializer.cpp" />
+    <ClCompile Include="Initializer.windows.cpp" />
     <ClCompile Include="Layer.cpp" />
     <ClCompile Include="Layer.windows.cpp" />
     <ClCompile Include="Layers.cpp" />
@@ -111,7 +112,7 @@
     <ClCompile Include="StringTranslator.cpp" />
     <ClCompile Include="System.cpp" />
     <ClCompile Include="System.windows.cpp" />
-    <ClCompile Include="SystemToRocketKeyCode.windows.cpp" />
+    <ClCompile Include="SystemToGuiKeyCode.windows.cpp" />
     <ClCompile Include="Window.cpp" />
   </ItemGroup>
   <ItemGroup>

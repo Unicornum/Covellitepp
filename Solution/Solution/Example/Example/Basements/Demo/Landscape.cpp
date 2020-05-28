@@ -166,7 +166,7 @@ auto Landscape::GetObject(const Any_t & _Value) const /*override*/ -> Objects_t
     };
   }
 
-  auto & CellPosition = ::boost::any_cast<const CubeCoords &>(_Value);
+  const auto & CellPosition = ::boost::any_cast<const CubeCoords &>(_Value);
   //const auto Material = GetMaterial(CellPosition);
   const auto PointLights = 
     //GetPointLight(CellPosition);
@@ -200,6 +200,7 @@ auto Landscape::GetObject(const Any_t & _Value) const /*override*/ -> Objects_t
   return Result;
 }
 
+// cppcheck-suppress unusedFunction
 Object_t Landscape::GetMaterial(const CubeCoords & _CellPosition) const
 {
   const auto GetBright = [&](void)
@@ -299,6 +300,7 @@ Object_t Landscape::GetTransform(
   };
 }
 
+// cppcheck-suppress unusedFunction
 Object_t Landscape::GetPointLight(const CubeCoords & _CellPosition) const
 {
   using BufferMapper_t = ::covellite::api::cbBufferMap_t<::Lights_t>;
@@ -339,6 +341,7 @@ Object_t Landscape::GetUserConstantBuffer(const CubeCoords & _CellPosition) cons
     float Near;
     float Far;
     float Density;
+    // cppcheck-suppress unusedStructMember
     float Dummy;
   };
 

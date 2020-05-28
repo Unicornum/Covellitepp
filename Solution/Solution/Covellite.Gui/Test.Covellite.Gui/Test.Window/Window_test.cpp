@@ -36,13 +36,13 @@ protected:
   using IWindowApi_t = ::covellite::api::IWindow;
   using WindowApi_t = ::mock::covellite::api::Window;
   using RenderInterfacePtr_t = 
-    ::std::shared_ptr<::mock::Rocket::Core::RenderInterface>;
-  using Vector_t = ::mock::Rocket::Core::Vector2i;
-  using String_t = ::mock::Rocket::Core::String;
+    ::std::shared_ptr<::mock::CovelliteGui::Core::RenderInterface>;
+  using Vector_t = ::mock::CovelliteGui::Core::Vector2i;
+  using String_t = ::mock::CovelliteGui::Core::String;
   using Path_t = ::boost::filesystem::path;
   using Events_t = ::covellite::events::Events;
-  using Context_t = ::mock::Rocket::Core::Context;
-  using Document_t = ::mock::Rocket::Core::ElementDocument;
+  using Context_t = ::mock::CovelliteGui::Core::Context;
+  using Document_t = ::mock::CovelliteGui::Core::ElementDocument;
   using Renders_t = ::covellite::api::Component::Renders;
   using RendersPtr_t = ::std::shared_ptr<Renders_t>;
 
@@ -128,9 +128,9 @@ TEST_F(Window_test, /*DISABLED_*/Test_AppIWindow)
 // ************************************************************************** //
 TEST_F(Window_test, /*DISABLED_*/Test_Constructor_CreateContext_Fail)
 {
-  using RocketProxy_t = ::mock::Rocket::Core::Proxy;
-  RocketProxy_t RocketProxy;
-  RocketProxy_t::GetInstance() = &RocketProxy;
+  using CovelliteGuiProxy_t = ::mock::CovelliteGui::Core::Proxy;
+  CovelliteGuiProxy_t CovelliteGuiProxy;
+  CovelliteGuiProxy_t::GetInstance() = &CovelliteGuiProxy;
 
   const WindowOs_t WindowOs{ m_App };
   const WindowApi_t WindowApi{ WindowOs };
@@ -138,7 +138,7 @@ TEST_F(Window_test, /*DISABLED_*/Test_Constructor_CreateContext_Fail)
 
   using namespace ::testing;
 
-  EXPECT_CALL(RocketProxy, CreateContext(_, _, _))
+  EXPECT_CALL(CovelliteGuiProxy, CreateContext(_, _, _))
     .Times(1)
     .WillOnce(Return(nullptr));
 
@@ -168,19 +168,19 @@ TEST_F(Window_test, /*DISABLED_*/Test_Constructor)
   InitializerProxy_t InitializerProxy;
   InitializerProxy_t::GetInstance() = &InitializerProxy;
 
-  using RocketCoreProxy_t = ::mock::Rocket::Core::Proxy;
-  RocketCoreProxy_t RocketCoreProxy;
-  RocketCoreProxy_t::GetInstance() = &RocketCoreProxy;
+  using CovelliteGuiCoreProxy_t = ::mock::CovelliteGui::Core::Proxy;
+  CovelliteGuiCoreProxy_t CovelliteGuiCoreProxy;
+  CovelliteGuiCoreProxy_t::GetInstance() = &CovelliteGuiCoreProxy;
 
-  using RocketControlsProxy_t = ::mock::Rocket::Controls::Proxy;
-  RocketControlsProxy_t RocketControlsProxy;
-  RocketControlsProxy_t::GetInstance() = &RocketControlsProxy;
+  using CovelliteGuiControlsProxy_t = ::mock::CovelliteGui::Controls::Proxy;
+  CovelliteGuiControlsProxy_t CovelliteGuiControlsProxy;
+  CovelliteGuiControlsProxy_t::GetInstance() = &CovelliteGuiControlsProxy;
 
-  using RocketDebuggerProxy_t = ::mock::Rocket::Debugger::Proxy;
-  RocketDebuggerProxy_t RocketDebuggerProxy;
-  RocketDebuggerProxy_t::GetInstance() = &RocketDebuggerProxy;
+  using CovelliteGuiDebuggerProxy_t = ::mock::CovelliteGui::Debugger::Proxy;
+  CovelliteGuiDebuggerProxy_t CovelliteGuiDebuggerProxy;
+  CovelliteGuiDebuggerProxy_t::GetInstance() = &CovelliteGuiDebuggerProxy;
 
-  using FontDatabaseProxy_t = ::mock::Rocket::Core::FontDatabase::Proxy;
+  using FontDatabaseProxy_t = ::mock::CovelliteGui::Core::FontDatabase::Proxy;
   FontDatabaseProxy_t FontDatabaseProxy;
   FontDatabaseProxy_t::GetInstance() = &FontDatabaseProxy;
 
@@ -188,13 +188,12 @@ TEST_F(Window_test, /*DISABLED_*/Test_Constructor)
   const auto pRenders = ::std::make_shared<Renders_t>(Renders_t::Creators_t{});
   const ::mock::Id_t StringTranslatorId = 1612212313;
   const ::mock::Id_t WindowApiId = 1612202302;
-  const ::mock::Id_t IRenderId = 1709291347;
   const int StatusBarHeight = 1612202238;
   const int Width = 1612202303;
   const int Height = 1612202304;
   const Vector_t ContextSize(Width, Height - StatusBarHeight);
 
-  ::mock::Rocket::Core::Context Context;
+  ::mock::CovelliteGui::Core::Context Context;
 
   using namespace ::testing;
 
@@ -254,16 +253,16 @@ TEST_F(Window_test, /*DISABLED_*/Test_Constructor)
     .Times(1)
     .WillOnce(Return(WindowOs_t::Rect{ 0, StatusBarHeight, Width, Height }));
 
-  EXPECT_CALL(RocketCoreProxy, CreateContext(Eq("main"), ContextSize, nullptr))
+  EXPECT_CALL(CovelliteGuiCoreProxy, CreateContext(Eq("main"), ContextSize, nullptr))
     .Times(1)
     .WillOnce(Return(&Context));
 
-  EXPECT_CALL(RocketControlsProxy, Initialise())
+  EXPECT_CALL(CovelliteGuiControlsProxy, Initialise())
     .Times(1);
 
   if (::alicorn::extension::cpp::IS_DEBUG_CONFIGURATION)
   {
-    EXPECT_CALL(RocketDebuggerProxy, SetContext(_))
+    EXPECT_CALL(CovelliteGuiDebuggerProxy, SetContext(_))
       .Times(1);
   }
 
@@ -295,20 +294,41 @@ TEST_F(Window_test, /*DISABLED_*/Test_Constructor)
   EXPECT_CALL(Context,
     RemoveEventListener(Eq("change"), pEventListener.get(), false))
     .Times(1);
+
+# ifdef COVELLITE_GUI_ROCKET
+
+  EXPECT_CALL(Context, RemoveReference())
+    .Times(1);
+
+# elif defined COVELLITE_GUI_RMLUI
+
+  const CovelliteGui::Core::String Name = "Name2005271214";
+
+  EXPECT_CALL(Context, GetName())
+    .Times(1)
+    .WillOnce(Return(Name));
+
+  EXPECT_CALL(CovelliteGuiCoreProxy, RemoveContext(Name))
+    .Times(1);
+
+# else
+#   error "Need COVELLITE_GUI_ROCKET or COVELLITE_GUI_RMLUI."
+# endif
+
 }
 
 // ************************************************************************** //
 TEST_F(Window_test, /*DISABLED_*/Test_Constructor_DebuggerInitialise)
 {
-  using RocketCoreProxy_t = ::mock::Rocket::Core::Proxy;
-  RocketCoreProxy_t RocketCoreProxy;
-  RocketCoreProxy_t::GetInstance() = &RocketCoreProxy;
+  using CovelliteGuiCoreProxy_t = ::mock::CovelliteGui::Core::Proxy;
+  CovelliteGuiCoreProxy_t CovelliteGuiCoreProxy;
+  CovelliteGuiCoreProxy_t::GetInstance() = &CovelliteGuiCoreProxy;
 
-  using RocketDebuggerProxy_t = ::mock::Rocket::Debugger::Proxy;
-  RocketDebuggerProxy_t RocketDebuggerProxy;
-  RocketDebuggerProxy_t::GetInstance() = &RocketDebuggerProxy;
+  using CovelliteGuiDebuggerProxy_t = ::mock::CovelliteGui::Debugger::Proxy;
+  CovelliteGuiDebuggerProxy_t CovelliteGuiDebuggerProxy;
+  CovelliteGuiDebuggerProxy_t::GetInstance() = &CovelliteGuiDebuggerProxy;
 
-  ::mock::Rocket::Core::Context Context;
+  ::mock::CovelliteGui::Core::Context Context;
 
   const WindowOs_t WindowOs{ m_App };
   const WindowApi_t WindowApi{ WindowOs };
@@ -319,25 +339,25 @@ TEST_F(Window_test, /*DISABLED_*/Test_Constructor_DebuggerInitialise)
   {
     InSequence Dummy;
 
-    EXPECT_CALL(RocketCoreProxy, CreateContext(_, _, _))
+    EXPECT_CALL(CovelliteGuiCoreProxy, CreateContext(_, _, _))
       .Times(1)
       .WillOnce(Return(&Context));
 
     if (::alicorn::extension::cpp::IS_DEBUG_CONFIGURATION)
     {
-      EXPECT_CALL(RocketDebuggerProxy, SetContext(&Context))
+      EXPECT_CALL(CovelliteGuiDebuggerProxy, SetContext(&Context))
         .Times(1)
         .WillOnce(Return(false));
 
-      EXPECT_CALL(RocketDebuggerProxy, Initialise(&Context))
+      EXPECT_CALL(CovelliteGuiDebuggerProxy, Initialise(&Context))
         .Times(1);
     }
     else
     {
-      EXPECT_CALL(RocketDebuggerProxy, SetContext(_))
+      EXPECT_CALL(CovelliteGuiDebuggerProxy, SetContext(_))
         .Times(0);
 
-      EXPECT_CALL(RocketDebuggerProxy, Initialise(_))
+      EXPECT_CALL(CovelliteGuiDebuggerProxy, Initialise(_))
         .Times(0);
     }
 
@@ -347,25 +367,25 @@ TEST_F(Window_test, /*DISABLED_*/Test_Constructor_DebuggerInitialise)
   {
     InSequence Dummy;
 
-    EXPECT_CALL(RocketCoreProxy, CreateContext(_, _, _))
+    EXPECT_CALL(CovelliteGuiCoreProxy, CreateContext(_, _, _))
       .Times(1)
       .WillOnce(Return(&Context));
 
     if (::alicorn::extension::cpp::IS_DEBUG_CONFIGURATION)
     {
-      EXPECT_CALL(RocketDebuggerProxy, SetContext(&Context))
+      EXPECT_CALL(CovelliteGuiDebuggerProxy, SetContext(&Context))
         .Times(1)
         .WillOnce(Return(true));
 
-      EXPECT_CALL(RocketDebuggerProxy, Initialise(_))
+      EXPECT_CALL(CovelliteGuiDebuggerProxy, Initialise(_))
         .Times(0);
     }
     else
     {
-      EXPECT_CALL(RocketDebuggerProxy, SetContext(_))
+      EXPECT_CALL(CovelliteGuiDebuggerProxy, SetContext(_))
         .Times(0);
 
-      EXPECT_CALL(RocketDebuggerProxy, Initialise(_))
+      EXPECT_CALL(CovelliteGuiDebuggerProxy, Initialise(_))
         .Times(0);
     }
 
@@ -385,15 +405,13 @@ TEST_F(Window_test, /*DISABLED_*/Test_Constructor_LoadFontFace)
   CurrentModuleProxy_t CurrentModuleProxy;
   CurrentModuleProxy_t::GetInstance() = &CurrentModuleProxy;
 
-  using FontDatabaseProxy_t = ::mock::Rocket::Core::FontDatabase::Proxy;
+  using FontDatabaseProxy_t = ::mock::CovelliteGui::Core::FontDatabase::Proxy;
   FontDatabaseProxy_t FontDatabaseProxy;
   FontDatabaseProxy_t::GetInstance() = &FontDatabaseProxy;
 
   const WindowOs_t WindowOs{ m_App };
   const WindowApi_t WindowApi{ WindowOs };
   const IWindowApi_t & IWindowApi = WindowApi;
-
-  const auto AppRootPath = THIS_DIRECTORY;
 
   using namespace ::testing;
 
@@ -457,9 +475,9 @@ TEST_F(Window_test, /*DISABLED_*/Test_GetEvents)
 // ************************************************************************** //
 TEST_F(Window_test, /*DISABLED_*/Test_LoadDocument)
 {
-  using RocketCoreProxy_t = ::mock::Rocket::Core::Proxy;
-  RocketCoreProxy_t RocketCoreProxy;
-  RocketCoreProxy_t::GetInstance() = &RocketCoreProxy;
+  using CovelliteGuiCoreProxy_t = ::mock::CovelliteGui::Core::Proxy;
+  CovelliteGuiCoreProxy_t CovelliteGuiCoreProxy;
+  CovelliteGuiCoreProxy_t::GetInstance() = &CovelliteGuiCoreProxy;
 
   Context_t Context;
   const char * PathToFile = "Path1807231921";
@@ -471,7 +489,7 @@ TEST_F(Window_test, /*DISABLED_*/Test_LoadDocument)
 
   using namespace ::testing;
 
-  EXPECT_CALL(RocketCoreProxy, CreateContext(_, _, _))
+  EXPECT_CALL(CovelliteGuiCoreProxy, CreateContext(_, _, _))
     .Times(1)
     .WillOnce(Return(&Context));
 
@@ -483,10 +501,24 @@ TEST_F(Window_test, /*DISABLED_*/Test_LoadDocument)
     .WillOnce(Return(&Document));
 
   auto pDocument = IExample.LoadDocument(PathToFile);
-  EXPECT_EQ(nullptr, pDocument);
+  EXPECT_EQ(nullptr, pDocument.get());
 
   pDocument = IExample.LoadDocument(PathToFile);
-  EXPECT_EQ(&Document, pDocument);
+  EXPECT_EQ(&Document, pDocument.get());
+
+# ifdef COVELLITE_GUI_ROCKET
+
+  EXPECT_CALL(Document, RemoveReference())
+    .Times(1);
+
+# elif defined COVELLITE_GUI_RMLUI
+
+  EXPECT_CALL(Document, Close())
+    .Times(1);
+
+# else
+#   error "Need COVELLITE_GUI_ROCKET or COVELLITE_GUI_RMLUI."
+# endif
 }
 
 // ************************************************************************** //
@@ -667,11 +699,11 @@ TEST_F(Window_test, /*DISABLED_*/Test_OnDrawWindow)
   RendererProxy_t RendererProxy;
   RendererProxy_t::GetInstance() = &RendererProxy;
 
-  using RocketCoreProxy_t = ::mock::Rocket::Core::Proxy;
-  RocketCoreProxy_t RocketCoreProxy;
-  RocketCoreProxy_t::GetInstance() = &RocketCoreProxy;
+  using CovelliteGuiCoreProxy_t = ::mock::CovelliteGui::Core::Proxy;
+  CovelliteGuiCoreProxy_t CovelliteGuiCoreProxy;
+  CovelliteGuiCoreProxy_t::GetInstance() = &CovelliteGuiCoreProxy;
 
-  ::mock::Rocket::Core::Context Context;
+  ::mock::CovelliteGui::Core::Context Context;
   const ::mock::Id_t RendererId = 1811191434;
 
   const WindowOs_t WindowOs{ m_App };
@@ -686,7 +718,7 @@ TEST_F(Window_test, /*DISABLED_*/Test_OnDrawWindow)
     .Times(1)
     .WillOnce(Return(RendererId));
 
-  EXPECT_CALL(RocketCoreProxy, CreateContext(_, _, _))
+  EXPECT_CALL(CovelliteGuiCoreProxy, CreateContext(_, _, _))
     .Times(1)
     .WillOnce(Return(&Context));
 
@@ -714,16 +746,16 @@ TEST_F(Window_test, /*DISABLED_*/Test_OnResize)
   WindowApiProxy_t WindowApiProxy;
   WindowApiProxy_t::GetInstance() = &WindowApiProxy;
 
-  using RocketCoreProxy_t = ::mock::Rocket::Core::Proxy;
-  RocketCoreProxy_t RocketCoreProxy;
-  RocketCoreProxy_t::GetInstance() = &RocketCoreProxy;
+  using CovelliteGuiCoreProxy_t = ::mock::CovelliteGui::Core::Proxy;
+  CovelliteGuiCoreProxy_t CovelliteGuiCoreProxy;
+  CovelliteGuiCoreProxy_t::GetInstance() = &CovelliteGuiCoreProxy;
 
   const int Width = 1612211039;
   const int Height = 1612211040;
   const int StatusBarHeight = 1612211053;
   const Vector_t ContextSize(Width, Height - StatusBarHeight);
 
-  ::mock::Rocket::Core::Context Context;
+  ::mock::CovelliteGui::Core::Context Context;
 
   using namespace ::testing;
 
@@ -731,7 +763,7 @@ TEST_F(Window_test, /*DISABLED_*/Test_OnResize)
   const WindowApi_t WindowApi{ WindowOs };
   const IWindowApi_t & IWindowApi = WindowApi;
 
-  EXPECT_CALL(RocketCoreProxy, CreateContext(_, _, _))
+  EXPECT_CALL(CovelliteGuiCoreProxy, CreateContext(_, _, _))
     .Times(1)
     .WillOnce(Return(&Context));
 
@@ -757,15 +789,15 @@ TEST_F(Window_test, /*DISABLED_*/Test_OnMotion)
   WindowApiProxy_t WindowApiProxy;
   WindowApiProxy_t::GetInstance() = &WindowApiProxy;
 
-  using RocketCoreProxy_t = ::mock::Rocket::Core::Proxy;
-  RocketCoreProxy_t RocketCoreProxy;
-  RocketCoreProxy_t::GetInstance() = &RocketCoreProxy;
+  using CovelliteGuiCoreProxy_t = ::mock::CovelliteGui::Core::Proxy;
+  CovelliteGuiCoreProxy_t CovelliteGuiCoreProxy;
+  CovelliteGuiCoreProxy_t::GetInstance() = &CovelliteGuiCoreProxy;
 
   const int StatusBarHeight = 1612211053;
   const int X = 1711012105;
   const int Y = 1711012106;
 
-  ::mock::Rocket::Core::Context Context;
+  ::mock::CovelliteGui::Core::Context Context;
 
   using namespace ::testing;
 
@@ -773,7 +805,7 @@ TEST_F(Window_test, /*DISABLED_*/Test_OnMotion)
   const WindowApi_t WindowApi{ WindowOs };
   const IWindowApi_t & IWindowApi = WindowApi;
 
-  EXPECT_CALL(RocketCoreProxy, CreateContext(_, _, _))
+  EXPECT_CALL(CovelliteGuiCoreProxy, CreateContext(_, _, _))
     .Times(1)
     .WillOnce(Return(&Context));
 
@@ -795,11 +827,11 @@ TEST_F(Window_test, /*DISABLED_*/Test_OnMotion)
 // ************************************************************************** //
 TEST_F(Window_test, /*DISABLED_*/Test_OnTouch)
 {
-  using RocketCoreProxy_t = ::mock::Rocket::Core::Proxy;
-  RocketCoreProxy_t RocketCoreProxy;
-  RocketCoreProxy_t::GetInstance() = &RocketCoreProxy;
+  using CovelliteGuiCoreProxy_t = ::mock::CovelliteGui::Core::Proxy;
+  CovelliteGuiCoreProxy_t CovelliteGuiCoreProxy;
+  CovelliteGuiCoreProxy_t::GetInstance() = &CovelliteGuiCoreProxy;
 
-  ::mock::Rocket::Core::Context Context;
+  ::mock::CovelliteGui::Core::Context Context;
 
   using namespace ::testing;
 
@@ -807,7 +839,7 @@ TEST_F(Window_test, /*DISABLED_*/Test_OnTouch)
   const WindowApi_t WindowApi{ WindowOs };
   const IWindowApi_t & IWindowApi = WindowApi;
 
-  EXPECT_CALL(RocketCoreProxy, CreateContext(_, _, _))
+  EXPECT_CALL(CovelliteGuiCoreProxy, CreateContext(_, _, _))
     .Times(1)
     .WillOnce(Return(&Context));
 
@@ -825,11 +857,11 @@ TEST_F(Window_test, /*DISABLED_*/Test_OnTouch)
 // ************************************************************************** //
 TEST_F(Window_test, /*DISABLED_*/Test_OnRelease)
 {
-  using RocketCoreProxy_t = ::mock::Rocket::Core::Proxy;
-  RocketCoreProxy_t RocketCoreProxy;
-  RocketCoreProxy_t::GetInstance() = &RocketCoreProxy;
+  using CovelliteGuiCoreProxy_t = ::mock::CovelliteGui::Core::Proxy;
+  CovelliteGuiCoreProxy_t CovelliteGuiCoreProxy;
+  CovelliteGuiCoreProxy_t::GetInstance() = &CovelliteGuiCoreProxy;
 
-  ::mock::Rocket::Core::Context Context;
+  ::mock::CovelliteGui::Core::Context Context;
 
   using namespace ::testing;
 
@@ -837,7 +869,7 @@ TEST_F(Window_test, /*DISABLED_*/Test_OnRelease)
   const WindowApi_t WindowApi{ WindowOs };
   const IWindowApi_t & IWindowApi = WindowApi;
 
-  EXPECT_CALL(RocketCoreProxy, CreateContext(_, _, _))
+  EXPECT_CALL(CovelliteGuiCoreProxy, CreateContext(_, _, _))
     .Times(1)
     .WillOnce(Return(&Context));
 
@@ -917,19 +949,19 @@ TEST_F(Window_test, /*DISABLED_*/Test_OnBack_EmptyLayers)
 // ************************************************************************** //
 TEST_F(Window_test, /*DISABLED_*/Test_OnKeyDown)
 {
-  using SystemToRocketKeyCodeProxy_t = ::covellite::gui::SystemToRocketKeyCodeProxy;
-  SystemToRocketKeyCodeProxy_t SystemToRocketKeyCodeProxy;
-  SystemToRocketKeyCodeProxy_t::GetInstance() = &SystemToRocketKeyCodeProxy;
+  using SystemToGuiKeyCodeProxy_t = ::covellite::gui::SystemToGuiKeyCodeProxy;
+  SystemToGuiKeyCodeProxy_t SystemToGuiKeyCodeProxy;
+  SystemToGuiKeyCodeProxy_t::GetInstance() = &SystemToGuiKeyCodeProxy;
 
-  using RocketCoreProxy_t = ::mock::Rocket::Core::Proxy;
-  RocketCoreProxy_t RocketCoreProxy;
-  RocketCoreProxy_t::GetInstance() = &RocketCoreProxy;
+  using CovelliteGuiCoreProxy_t = ::mock::CovelliteGui::Core::Proxy;
+  CovelliteGuiCoreProxy_t CovelliteGuiCoreProxy;
+  CovelliteGuiCoreProxy_t::GetInstance() = &CovelliteGuiCoreProxy;
 
   const auto KeyCode = 1711012116;
-  const auto RocketKeyCode = 
-    (::mock::Rocket::Core::Input::KeyIdentifier)1711012117;
+  const auto CovelliteGuiKeyCode = 
+    (::mock::CovelliteGui::Core::Input::KeyIdentifier)1711012117;
 
-  ::mock::Rocket::Core::Context Context;
+  ::mock::CovelliteGui::Core::Context Context;
 
   const WindowOs_t WindowOs{ m_App };
   const WindowApi_t WindowApi{ WindowOs };
@@ -939,17 +971,17 @@ TEST_F(Window_test, /*DISABLED_*/Test_OnKeyDown)
 
   InSequence Dummy;
 
-  EXPECT_CALL(RocketCoreProxy, CreateContext(_, _, _))
+  EXPECT_CALL(CovelliteGuiCoreProxy, CreateContext(_, _, _))
     .Times(1)
     .WillOnce(Return(&Context));
 
   Tested_t Example{ IWindowApi };
 
-  EXPECT_CALL(SystemToRocketKeyCodeProxy, Convert(KeyCode))
+  EXPECT_CALL(SystemToGuiKeyCodeProxy, Convert(KeyCode))
     .Times(1)
-    .WillOnce(Return(RocketKeyCode));
+    .WillOnce(Return(CovelliteGuiKeyCode));
 
-  EXPECT_CALL(Context, ProcessKeyDown(RocketKeyCode, 0))
+  EXPECT_CALL(Context, ProcessKeyDown(CovelliteGuiKeyCode, 0))
     .Times(1);
 
   using namespace ::covellite::events;
@@ -961,13 +993,13 @@ TEST_F(Window_test, /*DISABLED_*/Test_OnKeyDown)
 // ************************************************************************** //
 TEST_F(Window_test, /*DISABLED_*/Test_OnKeyPressed_ControlCodes)
 {
-  using RocketCoreProxy_t = ::mock::Rocket::Core::Proxy;
-  RocketCoreProxy_t RocketCoreProxy;
-  RocketCoreProxy_t::GetInstance() = &RocketCoreProxy;
+  using CovelliteGuiCoreProxy_t = ::mock::CovelliteGui::Core::Proxy;
+  CovelliteGuiCoreProxy_t CovelliteGuiCoreProxy;
+  CovelliteGuiCoreProxy_t::GetInstance() = &CovelliteGuiCoreProxy;
 
   using namespace ::testing;
 
-  ::mock::Rocket::Core::Context Context;
+  ::mock::CovelliteGui::Core::Context Context;
 
   InSequence Dummy;
 
@@ -975,7 +1007,7 @@ TEST_F(Window_test, /*DISABLED_*/Test_OnKeyPressed_ControlCodes)
   const WindowApi_t WindowApi{ WindowOs };
   const IWindowApi_t & IWindowApi = WindowApi;
 
-  EXPECT_CALL(RocketCoreProxy, CreateContext(_, _, _))
+  EXPECT_CALL(CovelliteGuiCoreProxy, CreateContext(_, _, _))
     .Times(1)
     .WillOnce(Return(&Context));
 
@@ -997,15 +1029,15 @@ TEST_F(Window_test, /*DISABLED_*/Test_OnKeyPressed_ControlCodes)
 // ************************************************************************** //
 TEST_F(Window_test, /*DISABLED_*/Test_OnKeyPressed)
 {
-  using RocketCoreProxy_t = ::mock::Rocket::Core::Proxy;
-  RocketCoreProxy_t RocketCoreProxy;
-  RocketCoreProxy_t::GetInstance() = &RocketCoreProxy;
+  using CovelliteGuiCoreProxy_t = ::mock::CovelliteGui::Core::Proxy;
+  CovelliteGuiCoreProxy_t CovelliteGuiCoreProxy;
+  CovelliteGuiCoreProxy_t::GetInstance() = &CovelliteGuiCoreProxy;
 
-  const ::mock::Rocket::Core::word KeyCode = 17110;
+  const auto KeyCode = static_cast< CovelliteGuiUnicode_t>(17110);
 
   using namespace ::testing;
 
-  ::mock::Rocket::Core::Context Context;
+  ::mock::CovelliteGui::Core::Context Context;
 
   InSequence Dummy;
 
@@ -1013,7 +1045,7 @@ TEST_F(Window_test, /*DISABLED_*/Test_OnKeyPressed)
   const WindowApi_t WindowApi{ WindowOs };
   const IWindowApi_t & IWindowApi = WindowApi;
 
-  EXPECT_CALL(RocketCoreProxy, CreateContext(_, _, _))
+  EXPECT_CALL(CovelliteGuiCoreProxy, CreateContext(_, _, _))
     .Times(1)
     .WillOnce(Return(&Context));
 

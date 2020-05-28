@@ -74,10 +74,10 @@ Renderer::~Renderer(void) noexcept
 }
 
 void Renderer::RenderGeometry(
-  Rocket::Core::Vertex * _pVertex, int _VertexCount,
+  CovelliteGui::Core::Vertex * _pVertex, int _VertexCount,
   int * _pIndex, int _IndexCount,
-  Rocket::Core::TextureHandle _hTexture,
-  const Rocket::Core::Vector2f & _Position) /*override*/
+  CovelliteGui::Core::TextureHandle _hTexture,
+  const CovelliteGui::Core::Vector2f & _Position) /*override*/
 {
   const auto hGeometry = CompileGeometry(
     _pVertex, _VertexCount,
@@ -87,10 +87,10 @@ void Renderer::RenderGeometry(
   ReleaseCompiledGeometry(hGeometry);
 }
 
-Rocket::Core::CompiledGeometryHandle Renderer::CompileGeometry(
-  Rocket::Core::Vertex * _pVertex, int _VertexCount,
+CovelliteGui::Core::CompiledGeometryHandle Renderer::CompileGeometry(
+  CovelliteGui::Core::Vertex * _pVertex, int _VertexCount,
   int * _pIndex, int _IndexCount,
-  Rocket::Core::TextureHandle _hTexture) /*override*/
+  CovelliteGui::Core::TextureHandle _hTexture) /*override*/
 {
   static size_t ObjectId = 0;
 
@@ -132,7 +132,7 @@ Rocket::Core::CompiledGeometryHandle Renderer::CompileGeometry(
   }
 
   const auto Convert = 
-    [](Rocket::Core::Vertex * _pVertex, const ::std::size_t _VertexCount)
+    [](CovelliteGui::Core::Vertex * _pVertex, const ::std::size_t _VertexCount)
   {
     ::std::vector<::covellite::api::Vertex> Result{ _VertexCount };
 
@@ -194,12 +194,12 @@ Rocket::Core::CompiledGeometryHandle Renderer::CompileGeometry(
   m_Objects[ObjectId].pPosition = pPosition;
   m_Objects[ObjectId].Renders = m_pRenders->Obtain(Object);
 
-  return (Rocket::Core::CompiledGeometryHandle)ObjectId;
+  return (CovelliteGui::Core::CompiledGeometryHandle)ObjectId;
 }
 
 void Renderer::RenderCompiledGeometry(
-  Rocket::Core::CompiledGeometryHandle _hGeometry,
-  const Rocket::Core::Vector2f & _Position) /*override*/
+  CovelliteGui::Core::CompiledGeometryHandle _hGeometry,
+  const CovelliteGui::Core::Vector2f & _Position) /*override*/
 {
   auto itObject = m_Objects.find((size_t)_hGeometry);
   if (itObject == m_Objects.end()) return;
@@ -213,7 +213,7 @@ void Renderer::RenderCompiledGeometry(
 }
 
 void Renderer::ReleaseCompiledGeometry(
-  Rocket::Core::CompiledGeometryHandle _hGeometry) /*override*/
+  CovelliteGui::Core::CompiledGeometryHandle _hGeometry) /*override*/
 {
   const auto strObjectId = String_t{ uT("%ID%") }
     .Replace(uT("%ID%"), (size_t)_hGeometry);
@@ -276,9 +276,9 @@ void Renderer::SetScissorRegion(int _X, int _Y, int _Width, int _Height) /*overr
 }
 
 bool Renderer::LoadTexture(
-  Rocket::Core::TextureHandle & _hTexture,
-  Rocket::Core::Vector2i & _TextureDimensions,
-  const Rocket::Core::String & _PathToFile) /*override*/
+  CovelliteGui::Core::TextureHandle & _hTexture,
+  CovelliteGui::Core::Vector2i & _TextureDimensions,
+  const CovelliteGui::Core::String & _PathToFile) /*override*/
 {
   // В Android'e файлы грузятся из 'папки' assets, кроме того, возможно
   // использование виртуальной файловой системы, поэтому exists использовать 
@@ -293,7 +293,7 @@ bool Renderer::LoadTexture(
   {
     const image::Universal_t<image::pixel::RGBA> Image
     {
-      app::Vfs_t::GetInstance().GetData(_PathToFile.CString())
+      app::Vfs_t::GetInstance().GetData(CovelliteGuiStringToUtf8(_PathToFile))
     };
 
     _TextureDimensions.x = static_cast<int>(Image.GetData().Width);
@@ -305,18 +305,19 @@ bool Renderer::LoadTexture(
   catch (const ::std::exception &)
   {
     // Сюда попадаем, если нет файла текстуры или он имеет невалидый формат
-    // (записывать в лог ничего не нужно, это libRocket сделает самостоятельно).
+    // (записывать в лог ничего не нужно, это используемая библиотека GUI
+    // сделает сама).
   }
 
   return false;
 }
 
 bool Renderer::GenerateTexture(
-  Rocket::Core::TextureHandle & _hTexture,
-  const Rocket::Core::byte * _pSource,
-  const Rocket::Core::Vector2i & _SourceDimensions) /*override*/
+  CovelliteGui::Core::TextureHandle & _hTexture,
+  const CovelliteGui::Core::byte * _pSource,
+  const CovelliteGui::Core::Vector2i & _SourceDimensions) /*override*/
 {
-  static Rocket::Core::TextureHandle TextureId = 0;
+  static CovelliteGui::Core::TextureHandle TextureId = 0;
 
   const auto strTextureId = String_t{ uT("Covellite.Gui.Texture.%ID%") }
     .Replace(uT("%ID%"), (size_t)++TextureId);
@@ -340,7 +341,7 @@ bool Renderer::GenerateTexture(
   return true;
 }
 
-void Renderer::ReleaseTexture(Rocket::Core::TextureHandle _hTexture) /*override*/
+void Renderer::ReleaseTexture(CovelliteGui::Core::TextureHandle _hTexture) /*override*/
 {
   const auto strTextureId = String_t{ uT("Covellite.Gui.Texture.%ID%") }
     .Replace(uT("%ID%"), (size_t)_hTexture);

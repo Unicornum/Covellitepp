@@ -26,6 +26,27 @@ void Layer::Element::SetFocus(void)
 
 /**
 * \brief
+*  Функция изменения значения элементов слоя, для которых характерно числовое
+*  значение.
+* \details
+*  - ProgressBar или CircularBar.
+*
+* \param [in] _Meaning
+*  Новое значение элемента.
+*/
+void Layer::Element::SetMeaning(const float _Meaning)
+{
+  const auto Tag =
+    m_pElement->GetTagName();
+
+  if (Tag == "progressbar" || Tag == "circularbar")
+  {
+    CovelliteGuiSetProgressBarValue(m_pElement, _Meaning);
+  }
+}
+
+/**
+* \brief
 *  Функция изменения значения элемента слоя.
 * \details
 *  - Для текстовых полей ввода (\b textarea и \b input.text) функция заменяет
@@ -47,23 +68,18 @@ void Layer::Element::SetMeaning(const String_t & _Meaning)
   const auto Tag =
     m_pElement->GetTagName();
   const auto Type =
-    m_pElement->GetAttribute("type", Rocket::Core::String{ "unknown" });
+    m_pElement->GetAttribute("type", CovelliteGui::Core::String{ "unknown" });
 
   using namespace ::alicorn::extension::std;
 
   // 06 Февраль 2019 13:27 (unicornum.verum@gmail.com)
   TODO("Проверить работу функции для textarea");
 
-  // 05 Март 2019 12:42 (unicornum.verum@gmail.com)
-  TODO("Тест для progressbar и circularbar.");
-
-  if (Tag == "textarea" ||
-    Tag == "progressbar" ||
-    Tag == "circularbar" ||
+  if (Tag == "textarea" || 
     (Tag == "input" && (Type == "range" || Type == "text")))
   {
     auto & Control =
-      dynamic_cast<Rocket::Controls::ElementFormControl &>(*m_pElement);
+      dynamic_cast<CovelliteGui::Controls::ElementFormControl &>(*m_pElement);
 
     // Для select это не работает (как и ElementFormControlSelect::SetSelection(),
     // выглядит так, как будто список строк просто удаляется), как устанавливать 
@@ -92,7 +108,7 @@ void Layer::Element::SetMeaning(const String_t & _Meaning)
 */
 auto Layer::Element::GetMeaning(void) const -> String_t
 {
-  const Rocket::Core::String Unknown = "unknown";
+  const CovelliteGui::Core::String Unknown = "unknown";
 
   const auto Tag = m_pElement->GetTagName();
   const auto Type = m_pElement->GetAttribute("type", Unknown);
@@ -106,13 +122,14 @@ auto Layer::Element::GetMeaning(void) const -> String_t
     (Tag == "input" && (Type == "text" || Type == "range")))
   {
     const auto & Control =
-      dynamic_cast<Rocket::Controls::ElementFormControl &>(*m_pElement);
+      dynamic_cast<CovelliteGui::Controls::ElementFormControl &>(*m_pElement);
 
-    return string_cast<String, Encoding::UTF8>(Control.GetValue().CString());
+    return string_cast<String, Encoding::UTF8>(
+      CovelliteGuiStringToUtf8(Control.GetValue()));
   }
 
   return string_cast<String, Encoding::UTF8>(
-    m_pElement->GetInnerRML().CString());
+    CovelliteGuiStringToUtf8(m_pElement->GetInnerRML()));
 }
 
 /**
@@ -152,16 +169,16 @@ void Layer::Element::SetClassStyle(const String_t & _Class)
 *  из класса-наследника конкретного слоя передавать конкретный путь, содержащий
 *  описание этого слоя).
 * \note
-*  В силу специфики работы libRocket в пути к корневой папке программы
-*  допустимы символы системного языка операционной системы, в путях же внутри
-*  этой папки следует использовать исключительно латиницу.
+*  В силу специфики работы в пути к корневой папке программы допустимы символы
+*  системного языка операционной системы, в путях же внутри этой папки следует
+*  использовать исключительно латиницу.
 *
 * \exception std::exception
 *  - Действие невозможно (подробнее см. описание исключения).
 */
 Layer::Layer(::covellite::gui::IWindow & _Window, const Path_t & _PathToFile) :
   m_Events(_Window),
-  m_pDocument(_Window.LoadDocument(Convert(_PathToFile).c_str()))
+  m_pDocument(_Window.LoadDocument(_PathToFile))
 {
   if (m_pDocument == nullptr)
   {
@@ -173,7 +190,7 @@ Layer::Layer(::covellite::gui::IWindow & _Window, const Path_t & _PathToFile) :
 * \brief
 *  Конструктор создания слоя с заголовком.
 * \details
-*  - Документ libRocket может содержать заголовок окна, для примера объявления
+*  - Документ может содержать заголовок окна, для примера объявления
 *  заголовка ниже в качестве _TitleId следует передать "title", тогда
 *  в качестве текста заголовка будет выведено "Layer example".
 *
@@ -187,7 +204,7 @@ Layer::Layer(::covellite::gui::IWindow & _Window, const Path_t & _PathToFile) :
 * \endcode
 *
 * \param [in] _pContext
-*  Объект контекста окна libRocket.
+*  Объект контекста окна.
 * \param [in] _PathToFile
 *  Путь к rml файлу, из которого должен загружаться слой.
 * \param [in] _TitleId
@@ -211,11 +228,6 @@ Layer::Layer(::covellite::gui::IWindow & _Window, const Path_t & _PathToFile,
 }
 
 //! @endcond
-
-Layer::~Layer(void) noexcept
-{
-  m_pDocument->RemoveReference();
-}
 
 /**
 * \brief
@@ -247,7 +259,7 @@ void Layer::Hide(void) /*override*/
 */
 auto Layer::GetId(void) const -> DocumentId_t
 {
-  return m_pDocument->GetId().CString();
+  return CovelliteGuiStringToUtf8(m_pDocument->GetId());
 }
 
 /**
@@ -307,7 +319,7 @@ float Layer::EmployFontSize(float _PercentFromMaxScreenSize)
   if (m_pDocument->GetTagName() != u8"body")
   {
     throw STD_EXCEPTION << "Unexpected document tag name: "
-      << m_pDocument->GetTagName().CString();
+      << CovelliteGuiStringToUtf8(m_pDocument->GetTagName());
   }
 
   const auto FontSize = ::std::max(GetWidth(), GetHeight()) * 

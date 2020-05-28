@@ -1,5 +1,7 @@
 ﻿
-#pragma once
+// Так нужно - для тестов.
+#ifndef COVELLITE_GUI_INITIALIZER_HPP
+#define COVELLITE_GUI_INITIALIZER_HPP
 #include <Covellite\Gui\File.hpp>
 #include <Covellite\Gui\System.hpp>
 #include <memory>
@@ -16,7 +18,7 @@ class IStringTranslator;
 * \ingroup CovelliteGuiGroup
 * \brief
 *  Класс входит в проект \ref CovelliteGuiPage \n
-*  Класс, инкапсулирующий инициализацию/разрушение библиотеки libRocket.
+*  Класс, инкапсулирующий инициализацию/разрушение используемой библиотеки GUI.
 * \todo
 *  Класс используется для внутренней реализации и не должен попадать в Externals.
 *
@@ -38,7 +40,7 @@ class IStringTranslator;
 class Initializer final
 {
   using RenderInterfacePtr_t = 
-    ::std::shared_ptr<Rocket::Core::RenderInterface>;
+    ::std::shared_ptr<CovelliteGui::Core::RenderInterface>;
   using StringTranslatorPtr_t = 
     ::std::shared_ptr<covellite::gui::IStringTranslator>;
   class Helper;
@@ -58,9 +60,11 @@ private:
 
 public:
   explicit Initializer(const Data &);
-  ~Initializer(void) noexcept;
+  ~Initializer(void);
 };
 
 } // namespace gui
 
 } // namespace covellite
+
+#endif // COVELLITE_GUI_INITIALIZER_HPP

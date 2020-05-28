@@ -2,8 +2,8 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ImportGroup Label="PropertySheets">
     <Import Project="Solution\Externals\Default.props" />
-    <Import Project="Solution\Externals\Covellite\Covellite.props" />
     <Import Project="Solution.props" />
+    <Import Project="Solution\Externals\Covellite\Covellite.props" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros">
     <PlatformToolsetVersion>0</PlatformToolsetVersion>
@@ -14,7 +14,7 @@
   <ItemDefinitionGroup>
     <ClCompile />
     <ClCompile>
-      <AdditionalOptions>-fopenmp -Wno-nonportable-include-path %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>-fopenmp -Wno-nonportable-include-path -Wno-invalid-source-encoding %(AdditionalOptions)</AdditionalOptions>
       <PreprocessorDefinitions>%(PreprocessorDefinitions);__ANDROID__</PreprocessorDefinitions>
       <EnableNeonCodegen>true</EnableNeonCodegen>
     </ClCompile>

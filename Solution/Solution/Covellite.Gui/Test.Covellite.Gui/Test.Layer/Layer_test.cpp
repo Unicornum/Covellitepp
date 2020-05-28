@@ -40,7 +40,7 @@ TEST_F(Layer_test, /*DISABLED_*/Test_Constructor_NullptrDocument)
 
   using namespace ::testing;
 
-  EXPECT_CALL(Window, LoadDocument(_))
+  EXPECT_CALL(Window, DoLoadDocument(_))
     .Times(1)
     .WillOnce(Return(nullptr));
 
@@ -51,24 +51,20 @@ TEST_F(Layer_test, /*DISABLED_*/Test_Constructor_NullptrDocument)
 TEST_F(Layer_test, /*DISABLED_*/Test_Constructor)
 {
   Window Window;
-  ::covellite::gui::IWindow & IWindow = Window;
   Document_t Document;
 
   {
+    ::covellite::gui::IWindow & IWindow = Window;
+
     const char * PathToFile = "Path1710032323";
 
     using namespace ::testing;
 
-    EXPECT_CALL(Window, LoadDocument(Eq(PathToFile)))
+    EXPECT_CALL(Window, DoLoadDocument(Eq(PathToFile)))
       .Times(1)
       .WillOnce(Return(&Document));
 
     const Tested Example{ IWindow, Path_t{ PathToFile } };
-
-    InSequence Dummy;
-
-    EXPECT_CALL(Document, RemoveReference())
-      .Times(1);
   }
 }
 
@@ -81,7 +77,7 @@ TEST_F(Layer_test, /*DISABLED_*/Test_Constructor_Events)
 
   using namespace ::testing;
 
-  EXPECT_CALL(Window, LoadDocument(_))
+  EXPECT_CALL(Window, DoLoadDocument(_))
     .Times(1)
     .WillOnce(Return(&Document));
 
@@ -101,7 +97,7 @@ TEST_F(Layer_test, /*DISABLED_*/Test_Constructor_Title_NullptrDocument)
 
   using namespace ::testing;
 
-  EXPECT_CALL(Window, LoadDocument(_))
+  EXPECT_CALL(Window, DoLoadDocument(_))
     .Times(1)
     .WillOnce(Return(nullptr));
 
@@ -121,16 +117,13 @@ TEST_F(Layer_test, /*DISABLED_*/Test_Constructor_Title_UnknownTitle)
 
   InSequence Dummy;
 
-  EXPECT_CALL(Window, LoadDocument(Eq(PathToFile)))
+  EXPECT_CALL(Window, DoLoadDocument(Eq(PathToFile)))
     .Times(1)
     .WillOnce(Return(&Document));
 
   EXPECT_CALL(Document, GetElementById(Eq(TitleId)))
     .Times(1)
     .WillOnce(Return(nullptr));
-
-  EXPECT_CALL(Document, RemoveReference())
-    .Times(1);
 
   EXPECT_STDEXCEPTION(Tested(IWindow, Path_t(PathToFile), TitleId),
     (".*Unexpected title id: " + ::std::string(TitleId)).c_str());
@@ -140,10 +133,9 @@ TEST_F(Layer_test, /*DISABLED_*/Test_Constructor_Title_UnknownTitle)
 TEST_F(Layer_test, /*DISABLED_*/Test_Constructor_Title)
 {
   Window Window;
-  ::covellite::gui::IWindow & IWindow = Window;
   const char * PathToFile = "Path1710040013";
   Document_t Document;
-  ::mock::Rocket::Core::Element Title;
+  ::mock::CovelliteGui::Core::Element Title;
   const char * TitleId = "TitleId1612201119";
   const char * DocumentTitle = "Title1612201121";
 
@@ -151,7 +143,7 @@ TEST_F(Layer_test, /*DISABLED_*/Test_Constructor_Title)
 
   InSequence Dummy;
 
-  EXPECT_CALL(Window, LoadDocument(Eq(PathToFile)))
+  EXPECT_CALL(Window, DoLoadDocument(Eq(PathToFile)))
     .Times(1)
     .WillOnce(Return(&Document));
 
@@ -166,12 +158,9 @@ TEST_F(Layer_test, /*DISABLED_*/Test_Constructor_Title)
   EXPECT_CALL(Title, SetInnerRML(Eq(DocumentTitle)))
     .Times(1);
 
-  {
-    Tested Example{ IWindow, Path_t(PathToFile), TitleId };
+  ::covellite::gui::IWindow & IWindow = Window;
 
-    EXPECT_CALL(Document, RemoveReference())
-      .Times(1);
-  }
+  Tested Example{ IWindow, Path_t(PathToFile), TitleId };
 }
 
 // ************************************************************************** //
@@ -180,11 +169,11 @@ TEST_F(Layer_test, /*DISABLED_*/Test_Constructor_Title_Events)
   Window Window;
   ::covellite::gui::IWindow & IWindow = Window;
   Document_t Document;
-  ::mock::Rocket::Core::Element Title;
+  ::mock::CovelliteGui::Core::Element Title;
 
   using namespace ::testing;
 
-  EXPECT_CALL(Window, LoadDocument(_))
+  EXPECT_CALL(Window, DoLoadDocument(_))
     .Times(1)
     .WillOnce(Return(&Document));
 
@@ -211,7 +200,7 @@ TEST_F(Layer_test, /*DISABLED_*/Test_Show)
 
   InSequence Dummy;
 
-  EXPECT_CALL(Window, LoadDocument(_))
+  EXPECT_CALL(Window, DoLoadDocument(_))
     .Times(1)
     .WillOnce(Return(&Document));
 
@@ -235,7 +224,7 @@ TEST_F(Layer_test, /*DISABLED_*/Test_Hide)
 
   InSequence Dummy;
 
-  EXPECT_CALL(Window, LoadDocument(_))
+  EXPECT_CALL(Window, DoLoadDocument(_))
     .Times(1)
     .WillOnce(Return(&Document));
 
@@ -261,7 +250,7 @@ TEST_F(Layer_test, /*DISABLED_*/Test_GetId)
 
   InSequence Dummy;
 
-  EXPECT_CALL(Window, LoadDocument(_))
+  EXPECT_CALL(Window, DoLoadDocument(_))
     .Times(1)
     .WillOnce(Return(&Document));
 
@@ -281,14 +270,14 @@ TEST_F(Layer_test, /*DISABLED_*/Test_GetElement)
   Window Window;
   ::covellite::gui::IWindow & IWindow = Window;
   Document_t Document;
-  ::mock::Rocket::Core::Element Element;
+  ::mock::CovelliteGui::Core::Element Element;
   const char * Id = "1701031206";
 
   using namespace ::testing;
 
   InSequence Dummy;
 
-  EXPECT_CALL(Window, LoadDocument(_))
+  EXPECT_CALL(Window, DoLoadDocument(_))
     .Times(1)
     .WillOnce(Return(&Document));
 
@@ -310,13 +299,13 @@ TEST_F(Layer_test, /*DISABLED_*/Test_GetWidth)
   Window Window;
   ::covellite::gui::IWindow & IWindow = Window;
   Document_t Document;
-  const ::mock::Rocket::Core::Vector2i Size = { 1701131210, 0 };
+  const ::mock::CovelliteGui::Core::Vector2i Size = { 1701131210, 0 };
 
   using namespace ::testing;
 
   InSequence Dummy;
 
-  EXPECT_CALL(Window, LoadDocument(_))
+  EXPECT_CALL(Window, DoLoadDocument(_))
     .Times(1)
     .WillOnce(Return(&Document));
 
@@ -344,13 +333,13 @@ TEST_F(Layer_test, /*DISABLED_*/Test_GetHeight)
   Window Window;
   ::covellite::gui::IWindow & IWindow = Window;
   Document_t Document;
-  const ::mock::Rocket::Core::Vector2i Size = { 0, 1701131212 };
+  const ::mock::CovelliteGui::Core::Vector2i Size = { 0, 1701131212 };
 
   using namespace ::testing;
 
   InSequence Dummy;
 
-  EXPECT_CALL(Window, LoadDocument(_))
+  EXPECT_CALL(Window, DoLoadDocument(_))
     .Times(1)
     .WillOnce(Return(&Document));
 
@@ -377,13 +366,13 @@ TEST_F(Layer_test, /*DISABLED_*/Test_EmployFontSize_UnexpectedDocumentTag)
   Window Window;
   ::covellite::gui::IWindow & IWindow = Window;
   Document_t Document;
-  const ::mock::Rocket::Core::String TagName = "Tag1702091254";
+  const ::mock::CovelliteGui::Core::String TagName = "Tag1702091254";
 
   using namespace ::testing;
 
   InSequence Dummy;
 
-  EXPECT_CALL(Window, LoadDocument(_))
+  EXPECT_CALL(Window, DoLoadDocument(_))
     .Times(1)
     .WillOnce(Return(&Document));
 
@@ -408,7 +397,7 @@ TEST_F(Layer_test, /*DISABLED_*/Test_EmployFontSize)
 
   using namespace ::testing;
 
-  EXPECT_CALL(Window, LoadDocument(_))
+  EXPECT_CALL(Window, DoLoadDocument(_))
     .Times(1)
     .WillOnce(Return(&Document));
 
@@ -424,7 +413,7 @@ TEST_F(Layer_test, /*DISABLED_*/Test_EmployFontSize)
     InSequence Dummy;
 
     const double Percent = 2.0;
-    const ::mock::Rocket::Core::Vector2i Size = { 0, 800 };
+    const ::mock::CovelliteGui::Core::Vector2i Size = { 0, 800 };
 
     EXPECT_CALL(Context, GetDimensions())
       .Times(2)
@@ -441,7 +430,7 @@ TEST_F(Layer_test, /*DISABLED_*/Test_EmployFontSize)
     InSequence Dummy;
 
     const double Percent = 1.0;
-    const ::mock::Rocket::Core::Vector2i Size = { 765, 0 };
+    const ::mock::CovelliteGui::Core::Vector2i Size = { 765, 0 };
 
     EXPECT_CALL(Context, GetDimensions())
       .Times(2)
@@ -461,13 +450,13 @@ TEST_F(Layer_test, /*DISABLED_*/Test_Element_Focus)
   Window Window;
   ::covellite::gui::IWindow & IWindow = Window;
   Document_t Document;
-  ::mock::Rocket::Core::Element Element;
+  ::mock::CovelliteGui::Core::Element Element;
 
   using namespace ::testing;
 
   InSequence Dummy;
 
-  EXPECT_CALL(Window, LoadDocument(_))
+  EXPECT_CALL(Window, DoLoadDocument(_))
     .Times(1)
     .WillOnce(Return(&Document));
 
@@ -483,6 +472,51 @@ TEST_F(Layer_test, /*DISABLED_*/Test_Element_Focus)
   Example.GetElement("").SetFocus();
 }
 
+#ifdef COVELLITE_GUI_ROCKET
+
+#elif defined COVELLITE_GUI_RMLUI
+
+// ************************************************************************** //
+TEST_F(Layer_test, /*DISABLED_*/Test_Element_SetMeaning_ProgressBar_RmlUi)
+{
+  Window Window;
+  ::covellite::gui::IWindow & IWindow = Window;
+
+  Document_t Document;
+  ::mock::CovelliteGui::Controls::ElementProgressBar Element;
+  const char * Tag = "progressbar";
+  const float Value = 200527.1625f;
+
+  using namespace ::testing;
+
+  InSequence Dummy;
+
+  EXPECT_CALL(Window, DoLoadDocument(_))
+    .Times(1)
+    .WillOnce(Return(&Document));
+
+  Tested Example{ IWindow, Path_t{} };
+
+  EXPECT_CALL(Document, GetElementById(_))
+    .Times(1)
+    .WillOnce(Return(&Element));
+
+  EXPECT_CALL(Element, GetTagName())
+    .Times(1)
+    .WillOnce(Return(Tag));
+
+  EXPECT_CALL(Element, SetValue(Value))
+    .Times(1);
+
+  using namespace ::alicorn::extension::std;
+
+  Example.GetElement("").SetMeaning(Value);
+}
+
+#else // COVELLITE_GUI_*
+# error "Need define COVELLITE_GUI_ROCKET or COVELLITE_GUI_RMLUI"
+#endif // COVELLITE_GUI_*
+
 // ************************************************************************** //
 TEST_F(Layer_test, /*DISABLED_*/Test_Element_SetMeaning_Textarea)
 {
@@ -490,7 +524,7 @@ TEST_F(Layer_test, /*DISABLED_*/Test_Element_SetMeaning_Textarea)
   ::covellite::gui::IWindow & IWindow = Window;
 
   Document_t Document;
-  ::mock::Rocket::Controls::ElementFormControl Element;
+  ::mock::CovelliteGui::Controls::ElementFormControl Element;
   const char * Tag = "textarea";
   const char * Type = "Type1902041652";
   const char * Value = u8"ValueÇíà÷åíèå1902041653";
@@ -499,7 +533,7 @@ TEST_F(Layer_test, /*DISABLED_*/Test_Element_SetMeaning_Textarea)
 
   InSequence Dummy;
 
-  EXPECT_CALL(Window, LoadDocument(_))
+  EXPECT_CALL(Window, DoLoadDocument(_))
     .Times(1)
     .WillOnce(Return(&Document));
 
@@ -532,7 +566,7 @@ TEST_F(Layer_test, /*DISABLED_*/Test_Element_SetMeaning_Input_Text)
   ::covellite::gui::IWindow & IWindow = Window;
 
   Document_t Document;
-  ::mock::Rocket::Controls::ElementFormControl Element;
+  ::mock::CovelliteGui::Controls::ElementFormControl Element;
   const char * Tag = "input";
   const char * Type = "text";
   const char * Value = u8"ValueÇíà÷åíèå1902041658";
@@ -541,7 +575,7 @@ TEST_F(Layer_test, /*DISABLED_*/Test_Element_SetMeaning_Input_Text)
 
   InSequence Dummy;
 
-  EXPECT_CALL(Window, LoadDocument(_))
+  EXPECT_CALL(Window, DoLoadDocument(_))
     .Times(1)
     .WillOnce(Return(&Document));
 
@@ -574,7 +608,7 @@ TEST_F(Layer_test, /*DISABLED_*/Test_Element_SetMeaning_Input_Range)
   ::covellite::gui::IWindow & IWindow = Window;
 
   Document_t Document;
-  ::mock::Rocket::Controls::ElementFormControl Element;
+  ::mock::CovelliteGui::Controls::ElementFormControl Element;
   const char * Tag = "input";
   const char * Type = "range";
   const char * Value = u8"ValueÇíà÷åíèå1902041659";
@@ -583,7 +617,7 @@ TEST_F(Layer_test, /*DISABLED_*/Test_Element_SetMeaning_Input_Range)
 
   InSequence Dummy;
 
-  EXPECT_CALL(Window, LoadDocument(_))
+  EXPECT_CALL(Window, DoLoadDocument(_))
     .Times(1)
     .WillOnce(Return(&Document));
 
@@ -616,7 +650,7 @@ TEST_F(Layer_test, /*DISABLED_*/Test_Element_SetMeaning_InnerRml)
   ::covellite::gui::IWindow & IWindow = Window;
 
   Document_t Document;
-  ::mock::Rocket::Core::Element Element;
+  ::mock::CovelliteGui::Core::Element Element;
   const char * Tag = "Tag1902041640";
   const char * Type = "Type1902041641";
   const char * Value = u8"Value1902041642Òåêñò";
@@ -625,7 +659,7 @@ TEST_F(Layer_test, /*DISABLED_*/Test_Element_SetMeaning_InnerRml)
 
   InSequence Dummy;
 
-  EXPECT_CALL(Window, LoadDocument(_))
+  EXPECT_CALL(Window, DoLoadDocument(_))
     .Times(1)
     .WillOnce(Return(&Document));
 
@@ -658,7 +692,7 @@ TEST_F(Layer_test, /*DISABLED_*/Test_Element_GetMeaning_Textarea)
   ::covellite::gui::IWindow & IWindow = Window;
 
   Document_t Document;
-  ::mock::Rocket::Controls::ElementFormControl Element;
+  ::mock::CovelliteGui::Controls::ElementFormControl Element;
   const char * Tag = "textarea";
   const char * Type = "Type1902041715";
   const char * Value = u8"ValueÒåêñò1902041716";
@@ -667,7 +701,7 @@ TEST_F(Layer_test, /*DISABLED_*/Test_Element_GetMeaning_Textarea)
 
   InSequence Dummy;
 
-  EXPECT_CALL(Window, LoadDocument(_))
+  EXPECT_CALL(Window, DoLoadDocument(_))
     .Times(1)
     .WillOnce(Return(&Document));
 
@@ -702,7 +736,7 @@ TEST_F(Layer_test, /*DISABLED_*/Test_Element_GetMeaning_Input_Text)
   ::covellite::gui::IWindow & IWindow = Window;
 
   Document_t Document;
-  ::mock::Rocket::Controls::ElementFormControl Element;
+  ::mock::CovelliteGui::Controls::ElementFormControl Element;
   const char * Tag = "input";
   const char * Type = "text";
   const char * Value = u8"ValueÒåêñò1902041717";
@@ -711,7 +745,7 @@ TEST_F(Layer_test, /*DISABLED_*/Test_Element_GetMeaning_Input_Text)
 
   InSequence Dummy;
 
-  EXPECT_CALL(Window, LoadDocument(_))
+  EXPECT_CALL(Window, DoLoadDocument(_))
     .Times(1)
     .WillOnce(Return(&Document));
 
@@ -746,7 +780,7 @@ TEST_F(Layer_test, /*DISABLED_*/Test_Element_GetMeaning_Input_Range)
   ::covellite::gui::IWindow & IWindow = Window;
 
   Document_t Document;
-  ::mock::Rocket::Controls::ElementFormControl Element;
+  ::mock::CovelliteGui::Controls::ElementFormControl Element;
   const char * Tag = "input";
   const char * Type = "range";
   const char * Value = u8"ValueÒåêñò1902041718";
@@ -755,7 +789,7 @@ TEST_F(Layer_test, /*DISABLED_*/Test_Element_GetMeaning_Input_Range)
 
   InSequence Dummy;
 
-  EXPECT_CALL(Window, LoadDocument(_))
+  EXPECT_CALL(Window, DoLoadDocument(_))
     .Times(1)
     .WillOnce(Return(&Document));
 
@@ -790,7 +824,7 @@ TEST_F(Layer_test, /*DISABLED_*/Test_Element_GetMeaning_Select)
   ::covellite::gui::IWindow & IWindow = Window;
 
   Document_t Document;
-  ::mock::Rocket::Controls::ElementFormControl Element;
+  ::mock::CovelliteGui::Controls::ElementFormControl Element;
   const char * Tag = "select";
   const char * Type = "Type1902041719";
   const char * Value = u8"ValueÒåêñò1902041720";
@@ -799,7 +833,7 @@ TEST_F(Layer_test, /*DISABLED_*/Test_Element_GetMeaning_Select)
 
   InSequence Dummy;
 
-  EXPECT_CALL(Window, LoadDocument(_))
+  EXPECT_CALL(Window, DoLoadDocument(_))
     .Times(1)
     .WillOnce(Return(&Document));
 
@@ -834,7 +868,7 @@ TEST_F(Layer_test, /*DISABLED_*/Test_Element_GetMeaning_InnerRml)
   ::covellite::gui::IWindow & IWindow = Window;
 
   Document_t Document;
-  ::mock::Rocket::Core::Element Element;
+  ::mock::CovelliteGui::Core::Element Element;
   const char * Tag = "Tag1902041709";
   const char * Type = "Type1902041710";
   const char * Value = u8"ValueÒåêñò1902041711";
@@ -843,7 +877,7 @@ TEST_F(Layer_test, /*DISABLED_*/Test_Element_GetMeaning_InnerRml)
 
   InSequence Dummy;
 
-  EXPECT_CALL(Window, LoadDocument(_))
+  EXPECT_CALL(Window, DoLoadDocument(_))
     .Times(1)
     .WillOnce(Return(&Document));
 
@@ -878,14 +912,14 @@ TEST_F(Layer_test, /*DISABLED_*/Test_Element_SetClassStyle)
   ::covellite::gui::IWindow & IWindow = Window;
 
   Document_t Document;
-  ::mock::Rocket::Core::Element Element;
+  ::mock::CovelliteGui::Core::Element Element;
   const char * Value = u8"ValueÒåêñò1902041733";
 
   using namespace ::testing;
 
   InSequence Dummy;
 
-  EXPECT_CALL(Window, LoadDocument(_))
+  EXPECT_CALL(Window, DoLoadDocument(_))
     .Times(1)
     .WillOnce(Return(&Document));
 

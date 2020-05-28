@@ -23,9 +23,9 @@ class File_test :
 {
 protected:
   using Tested_t = ::covellite::gui::File;
-  using ITested_t = ::mock::Rocket::Core::FileInterface;
+  using ITested_t = ::mock::CovelliteGui::Core::FileInterface;
   using Data_t = ::boost::filesystem::binary::Data_t;
-  using Handle_t = ::mock::Rocket::Core::FileHandle;
+  using Handle_t = ::mock::CovelliteGui::Core::FileHandle;
 
   // Вызывается ПЕРЕД запуском каждого теста
   void SetUp(void) override

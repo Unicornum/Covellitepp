@@ -54,7 +54,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;_LIB;TESTDLL_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>COVELLITE_GUI_RMLUI;WIN32;_DEBUG;_CONSOLE;_LIB;TESTDLL_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <EnablePREfast>false</EnablePREfast>
       <FloatingPointModel>Precise</FloatingPointModel>
       <WarningLevel>Level4</WarningLevel>
@@ -69,7 +69,7 @@
       <Optimization>MaxSpeed</Optimization>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;_LIB;TESTDLL_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>COVELLITE_GUI_RMLUI;WIN32;NDEBUG;_CONSOLE;_LIB;TESTDLL_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <EnablePREfast>false</EnablePREfast>
       <FloatingPointModel>Precise</FloatingPointModel>
       <WarningLevel>Level4</WarningLevel>
@@ -86,7 +86,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\Covellite.Gui\File.cpp" />
-    <ClCompile Include="..\Covellite.Gui\Initializer.cpp" />
     <ClCompile Include="..\Covellite.Gui\Layers.cpp" />
     <ClCompile Include="..\Covellite.Gui\StringTranslator.cpp" />
     <ClCompile Include="stdafx.cpp">
@@ -105,7 +104,7 @@
     <ClCompile Include="Test.Layer\Layer_test.cpp" />
     <ClCompile Include="Test.Renderer\Renderer_test.cpp" />
     <ClCompile Include="Test.StringTranslator\StringTranslator_test.cpp" />
-    <ClCompile Include="Test.SystemToRocketKeyCode\SystemToRocketKeyCode_test.cpp" />
+    <ClCompile Include="Test.SystemToGuiKeyCode\SystemToGuiKeyCode_test.cpp" />
     <ClCompile Include="Test.System\System.android_test.cpp" />
     <ClCompile Include="Test.System\System.windows_test.cpp" />
     <ClCompile Include="Test.System\System_test.cpp" />
@@ -113,7 +112,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\Covellite.Gui\File.hpp" />
-    <ClInclude Include="..\Covellite.Gui\Initializer.hpp" />
     <ClInclude Include="..\Covellite.Gui\StringTranslator.hpp" />
     <ClInclude Include="mock.hpp" />
     <ClInclude Include="stdafx.h" />

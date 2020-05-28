@@ -9,15 +9,12 @@
 #include "Layers/Example2DGame.hpp"
 #include "Layers/Demo.hpp"
 #include "Basements/Simple2DGame.hpp"
-#include <Rocket/Plugin.hpp>
 
 /// [Constructor main window]
 ExampleWindow::ExampleWindow(WindowGui_t & _WindowGui) :
   m_WindowGui(_WindowGui),
   m_Events(_WindowGui)
 {
-  ::Rocket::Plugin::Initialise();
-
   // Набор строк локализации приложения в данном случае используется для 
   // вывода различного текста на различных платформах).
   m_WindowGui.Set(

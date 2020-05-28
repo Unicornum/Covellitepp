@@ -5,16 +5,16 @@
   <!--     All changes will be overwritten.     -->
   <!-- ======================================== -->
   <string name="CompanyName">UnicornumVerum</string>
-  <string name="FileDescription">Кроссплатформенный (Windows/Android) GUI фреймворк для разработки приложений на С++</string>
-  <string name="FileVersion">Version: 2.2.4 Revision: 2247 Platform: ARM Build: 02:42 24.05.2020</string>
-  <string name="FileVersionShort">2.2.4.2247 ARM</string>
+  <string name="FileDescription">Кроссплатформенный фреймворк для разработки приложений на С++</string>
+  <string name="FileVersion">Version: 2.2.5 Revision: 2281 Platform: ARM Build: 00:21 29.05.2020</string>
+  <string name="FileVersionShort">2.2.5.2281 ARM</string>
   <string name="LegalCopyright">© UnicornumVerum 2016 - 2020 (unicornum.verum@gmail.ru)</string>
   <string name="ProductName">Covellite++</string>
   <string name="ApplicationName">Covellite++</string>
-  <string name="ProductVersion">Version: 2.2.4 Revision: 2247 Platform: ARM Build: 02:42 24.05.2020</string>
-  <string name="ProductVersionYear">2.2.4.2020</string>
+  <string name="ProductVersion">Version: 2.2.5 Revision: 2281 Platform: ARM Build: 00:21 29.05.2020</string>
+  <string name="ProductVersionYear">2.2.5.2020</string>
   <string name="ProductVersionMajor">2</string>
   <string name="ProductVersionMinor">2</string>
-  <string name="ProductVersionService">4</string>
-  <string name="ProductRevision">2247</string>
+  <string name="ProductVersionService">5</string>
+  <string name="ProductRevision">2281</string>
 </resources>

@@ -207,6 +207,7 @@ auto OpenGLCommonStatic::CreateFog(const ComponentPtr_t & _pComponent) -> Render
 {
   const auto sStyle = _pComponent->GetValue(uT("style"), uT("linear"));
 
+  // cppcheck-suppress internalAstError
   const auto Style =
     (sStyle == uT("linear")) ? GL_LINEAR :
     (sStyle == uT("exp")) ? GL_EXP :

@@ -64,14 +64,14 @@ public class MainActivity extends NativeActivity
 *  
 *  - В файл \b AndroidManifest.xml (в раздел \b activity) проекта добавить
 *  имя нативной библиотеки, которая будет загружаться при старте программы
-*  (без префикса lib и расширения .so), например для libRocket.so следует
+*  (без префикса lib и расширения .so), например для libExample.so следует
 *  добавить:
 *  
 * \code
 
 <activity ...>
   <meta-data android:name="android.app.lib_name"
-             android:value="Rocket"/>
+             android:value="Example"/>
   ...
 </activity>
 

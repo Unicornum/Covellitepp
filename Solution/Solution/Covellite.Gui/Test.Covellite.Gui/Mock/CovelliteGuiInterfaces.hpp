@@ -20,10 +20,10 @@ namespace gui
 {
 
 class File :
-  public ::mock::Rocket::Core::FileInterface
+  public ::mock::CovelliteGui::Core::FileInterface
 {
-  using FileHandle_t = ::mock::Rocket::Core::FileHandle;
-  using String_t = ::mock::Rocket::Core::String;
+  using FileHandle_t = ::mock::CovelliteGui::Core::FileHandle;
+  using String_t = ::mock::CovelliteGui::Core::String;
 
 public:
   FileHandle_t Open(const String_t &) override { throw ::std::exception(); }
@@ -41,12 +41,12 @@ public:
 };
 
 class System :
-  public ::mock::Rocket::Core::SystemInterface
+  public ::mock::CovelliteGui::Core::SystemInterface
 {
   using StringTranslatorPtr_t = ::std::shared_ptr<IStringTranslator>;
 
 public:
-  float GetElapsedTime(void) override { throw ::std::exception(); }
+  ::covellite::gui::CovelliteGuiTime_t GetElapsedTime(void) override { throw ::std::exception(); }
 
 public:
   explicit System(const StringTranslatorPtr_t & _pStringTranslator) :
@@ -61,11 +61,11 @@ namespace api
 {
 
 class RenderOpenGL :
-  public ::mock::Rocket::Core::RenderInterface
+  public ::mock::CovelliteGui::Core::RenderInterface
 {
-  using Vertex_t = ::mock::Rocket::Core::Vertex;
-  using TextureHandle_t = ::mock::Rocket::Core::TextureHandle;
-  using Vector2f_t = ::mock::Rocket::Core::Vector2f;
+  using Vertex_t = ::mock::CovelliteGui::Core::Vertex;
+  using TextureHandle_t = ::mock::CovelliteGui::Core::TextureHandle;
+  using Vector2f_t = ::mock::CovelliteGui::Core::Vector2f;
 
 public:
   void RenderGeometry(Vertex_t *, int, int *, int, TextureHandle_t,

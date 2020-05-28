@@ -1,7 +1,9 @@
 
 #pragma once
+#include <memory>
+#include <alicorn/boost/filesystem.forward.hpp>
 #include <Covellite/Events/IEvents.hpp>
-#include <Covellite/Gui/Rocket.forward.hpp>
+#include <Covellite/Gui/External.hpp>
 
 namespace covellite
 {
@@ -28,11 +30,12 @@ class IWindow :
   public ::covellite::events::IEvents
 {
 protected:
-  using Document_t = Rocket::Core::ElementDocument;
-  using PathToFile_t = Rocket::Core::String;
+  using Document_t = CovelliteGui::Core::ElementDocument;
+  using DocumentPtr_t = ::std::unique_ptr<Document_t, void(*)(Document_t *)>;
+  using PathToFile_t = ::boost::filesystem::path;
 
 public:
-  virtual Document_t * LoadDocument(const PathToFile_t &) = 0;
+  virtual DocumentPtr_t LoadDocument(const PathToFile_t &) = 0;
 };
 
 } // namespace gui

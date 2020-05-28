@@ -49,17 +49,20 @@
     <ClCompile />
     <ClCompile>
       <AdditionalOptions>-Wno-unused-variable %(AdditionalOptions)</AdditionalOptions>
+      <PreprocessorDefinitions>COVELLITE_GUI_RMLUI;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM'">
     <ClCompile />
     <ClCompile>
       <AdditionalOptions>-Wno-unused-variable %(AdditionalOptions)</AdditionalOptions>
+      <PreprocessorDefinitions>COVELLITE_GUI_RMLUI;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="EventListener.hpp" />
     <ClInclude Include="Events.hpp" />
+    <ClInclude Include="External.hpp" />
     <ClInclude Include="File.hpp" />
     <ClInclude Include="ILayer.hpp" />
     <ClInclude Include="Initializer.hpp" />
@@ -73,10 +76,10 @@
     <ClInclude Include="Layers.mock.hpp" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="Renderer.hpp" />
-    <ClInclude Include="Rocket.forward.hpp" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="StringTranslator.hpp" />
     <ClInclude Include="System.hpp" />
+    <ClInclude Include="SystemToGuiKeyCode.hpp" />
     <ClInclude Include="Vfs.hpp" />
     <ClInclude Include="Window.hpp" />
     <ClInclude Include="Window.mock.hpp" />
@@ -87,7 +90,7 @@
   <ItemGroup>
     <ClCompile Include="EventListener.cpp" />
     <ClCompile Include="File.cpp" />
-    <ClCompile Include="Initializer.cpp" />
+    <ClCompile Include="Initializer.android.cpp" />
     <ClCompile Include="Layer.android.cpp" />
     <ClCompile Include="Layer.cpp" />
     <ClCompile Include="Layers.cpp" />
@@ -95,7 +98,7 @@
     <ClCompile Include="StringTranslator.cpp" />
     <ClCompile Include="System.android.cpp" />
     <ClCompile Include="System.cpp" />
-    <ClCompile Include="SystemToRocketKeyCode.android.cpp" />
+    <ClCompile Include="SystemToGuiKeyCode.android.cpp" />
     <ClCompile Include="Window.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

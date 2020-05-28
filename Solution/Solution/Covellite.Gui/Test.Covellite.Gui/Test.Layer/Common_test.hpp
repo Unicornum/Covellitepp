@@ -7,9 +7,10 @@ class Layer_test :
 protected:
   using Tested_t = ::covellite::gui::Layer;
   using ITested_t = ::covellite::gui::ILayer;
-  using Context_t = ::mock::Rocket::Core::Context;
-  using Document_t = ::mock::Rocket::Core::ElementDocument;
-  using String_t = ::mock::Rocket::Core::String;
+  using Context_t = ::mock::CovelliteGui::Core::Context;
+  using Document_t = ::mock::CovelliteGui::Core::ElementDocument;
+  using DocumentPtr_t = ::std::unique_ptr<Document_t, void(*)(Document_t *)>;
+  using String_t = ::mock::CovelliteGui::Core::String;
   using Path_t = ::boost::filesystem::path;
 
   // Вызывается ПЕРЕД запуском каждого теста
@@ -56,7 +57,12 @@ protected:
   {
   public:
     operator Events_t (void) const override { return m_Events; }
-    MOCK_METHOD1(LoadDocument, Document_t * (const PathToFile_t &));
+    DocumentPtr_t LoadDocument(const PathToFile_t & _Path) override
+    {
+      return DocumentPtr_t{ DoLoadDocument(_Path), [](Document_t *) {} };
+    }
+
+    MOCK_METHOD1(DoLoadDocument, Document_t * (const PathToFile_t &));
 
   public:
     Events_t m_Events;

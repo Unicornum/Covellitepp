@@ -13,7 +13,7 @@ namespace gui
 * \brief
 *  Функция получения времени, прошедшего с момента запуска программы.
 */
-float System::GetElapsedTime(void) /*override*/
+CovelliteGuiTime_t System::GetElapsedTime(void) /*override*/
 {
   const auto Now = std::chrono::system_clock::now();
 

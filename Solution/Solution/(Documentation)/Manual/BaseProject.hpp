@@ -171,7 +171,4 @@
 *  класса виртуальной файловой системы, который просто читает данные с диска):
 *
 * \include .\Solution\Example\Example\ReadFileData.cpp
-*
-*  [libRocket]: https://barotto.github.io/libRocketDoc/ "libRocket"
-*  [Доступные css свойства]: https://barotto.github.io/libRocketDoc/pages/rcss.html "libRocket CSS"
 */

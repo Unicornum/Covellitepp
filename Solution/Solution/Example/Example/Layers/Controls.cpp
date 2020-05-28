@@ -30,14 +30,14 @@ Controls::Controls(IWindowGui_t & _Window) :
   // ************************************************************************ //
 
   AddParameter(uT("\uF2BD"), uT("Имя"), 
-    uT("<input type=\"text\" value=\"&lt;нет&gt;\" id=\"id_name\"/>"), 
+    uT("<input type=\"text\" value=\"<нет>\" id=\"id_name\"/>"), 
     uT("none"), uT(""));
 
   m_Events[events::Change.DocumentId(GetId()).ElementId("id_name")]
     .Connect([&](void)
   {
     auto Name = GetElement("id_name");
-    Name.SetMeaning(Name.GetMeaning().Replace(uT("&lt;нет&gt;"), uT("")));
+    Name.SetMeaning(Name.GetMeaning().Replace(uT("<нет>"), uT("")));
   });
 
   // ************************************************************************ //
@@ -118,7 +118,7 @@ Controls::Controls(IWindowGui_t & _Window) :
 
   AddParameter(uT("\uF026"), uT("Звук"), uT("Выключен"), 
     uT("id_sound_enabled_value"),
-    BuildButton(uT("id_sound_enabled"), uT("\uF204"), false));
+    BuildButton(uT("id_sound_enabled"), uT("\uF204"), true));
 
   m_Events[events::Click.DocumentId(GetId()).ElementId("id_sound_enabled")]
     .Connect([&](void) 
@@ -134,7 +134,7 @@ Controls::Controls(IWindowGui_t & _Window) :
   // ************************************************************************ //
 
   AddParameter(uT("\uF027"), uT("Громкость звука"), 
-    uT("<div class=\"sound\">0 <input id=\"id_volume\" type=\"range\" min=\"0\" max=\"100\" value=\"50\" step=\"1\"/> 100</div>"),
+    uT("<div>0 <input id=\"id_volume\" type=\"range\" min=\"0\" max=\"100\" value=\"50\" step=\"1\"/> 100</div>"),
     uT(""), uT(""));
 
   m_Events[events::Click.DocumentId(GetId()).ElementId("id_volume")]
@@ -194,7 +194,7 @@ void Controls::AddParameter(const String_t & _Icon, const String_t & _Name,
   return     
     uT("<control class=\"fcontrols\">") +
     uT("<control-back>") + 
-      (_IsUsingBackSymbol ? uT("\uF111") : uT("1")) + 
+      (_IsUsingBackSymbol ? uT("\uF111") : uT(" ")) + 
     uT("</control-back>") +
     uT("<button class=\"control\" id=\"") + _Id + uT("\">") + 
       _Code + 

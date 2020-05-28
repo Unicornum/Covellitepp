@@ -12,7 +12,7 @@ namespace gui
 * \ingroup CovelliteGuiGroup
 * \brief
 *  Класс входит в проект \ref CovelliteGuiPage \n
-*  Реализация интерфейса libRocket для чтения файлов.
+*  Реализация интерфейса для чтения файлов.
 * \todo
 *  Класс используется для внутренней реализации и не должен попадать в Externals.
 *
@@ -28,10 +28,10 @@ namespace gui
 *  © CTAPOBEP 2016
 */
 class File final :
-  public Rocket::Core::FileInterface
+  public CovelliteGui::Core::FileInterface
 {
-  using Path_t = Rocket::Core::String;
-  using Handle_t = Rocket::Core::FileHandle;
+  using Path_t = CovelliteGui::Core::String;
+  using Handle_t = CovelliteGui::Core::FileHandle;
   using Data_t = ::boost::filesystem::binary::Data_t;
 
   struct FileInfo

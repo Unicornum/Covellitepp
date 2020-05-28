@@ -21,8 +21,8 @@ namespace gui
 *  Класс входит в проект \ref CovelliteGuiPage \n
 *  Класс обобщенной логики рендеринга GUI.
 * \details
-*  - Задача класса - скрыть от клиентского кода ссылку на libRocket 
-*  (в разделе используется Rocket::Core::RenderererInterface).
+*  - Задача класса - скрыть от клиентского кода ссылку на код библиотеки GUI 
+*  (в разделе используется CovelliteGui::Core::RenderererInterface).
 * \todo
 *  Класс используется для внутренней реализации и не должен попадать в Externals.
 *  
@@ -40,7 +40,7 @@ namespace gui
 *  © CTAPOBEP 2018
 */
 class Renderer final :
-  public Rocket::Core::RenderInterface
+  public CovelliteGui::Core::RenderInterface
 {
   using String_t = ::alicorn::extension::std::String;
   using Render_t = ::std::function<void(void)>;
@@ -51,21 +51,21 @@ class Renderer final :
   using Object_t = ::std::vector<ComponentPtr_t>;
 
 public:
-  // Интерфейс Rocket::Core::RenderererInterface
-  void RenderGeometry(Rocket::Core::Vertex *, int, int *, int,
-    Rocket::Core::TextureHandle, const Rocket::Core::Vector2f &) override;
-  Rocket::Core::CompiledGeometryHandle CompileGeometry(Rocket::Core::Vertex *,
-    int, int *, int, Rocket::Core::TextureHandle) override;
-  void RenderCompiledGeometry(Rocket::Core::CompiledGeometryHandle,
-    const Rocket::Core::Vector2f &) override;
-  void ReleaseCompiledGeometry(Rocket::Core::CompiledGeometryHandle) override;
+  // Интерфейс CovelliteGui::Core::RenderererInterface
+  void RenderGeometry(CovelliteGui::Core::Vertex *, int, int *, int,
+    CovelliteGui::Core::TextureHandle, const CovelliteGui::Core::Vector2f &) override;
+  CovelliteGui::Core::CompiledGeometryHandle CompileGeometry(CovelliteGui::Core::Vertex *,
+    int, int *, int, CovelliteGui::Core::TextureHandle) override;
+  void RenderCompiledGeometry(CovelliteGui::Core::CompiledGeometryHandle,
+    const CovelliteGui::Core::Vector2f &) override;
+  void ReleaseCompiledGeometry(CovelliteGui::Core::CompiledGeometryHandle) override;
   void EnableScissorRegion(bool) override;
   void SetScissorRegion(int, int, int, int) override;
-  bool LoadTexture(Rocket::Core::TextureHandle &, Rocket::Core::Vector2i &,
-    const Rocket::Core::String &) override;
-  bool GenerateTexture(Rocket::Core::TextureHandle &,
-    const Rocket::Core::byte *, const Rocket::Core::Vector2i &) override;
-  void ReleaseTexture(Rocket::Core::TextureHandle) override;
+  bool LoadTexture(CovelliteGui::Core::TextureHandle &, CovelliteGui::Core::Vector2i &,
+    const CovelliteGui::Core::String &) override;
+  bool GenerateTexture(CovelliteGui::Core::TextureHandle &,
+    const CovelliteGui::Core::byte *, const CovelliteGui::Core::Vector2i &) override;
+  void ReleaseTexture(CovelliteGui::Core::TextureHandle) override;
 
 public:
   void RenderScene(void);

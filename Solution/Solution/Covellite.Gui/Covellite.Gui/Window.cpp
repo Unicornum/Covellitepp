@@ -16,6 +16,7 @@
 #include <Covellite/Gui/StringTranslator.hpp>
 #include <Covellite/Gui/EventListener.hpp>
 #include <Covellite/Gui/Events.hpp>
+#include "SystemToGuiKeyCode.hpp"
 
 #ifndef __USING_GTEST
 # include <alicorn\logger.hpp>
@@ -36,27 +37,27 @@ Window::Window(const WindowApi_t & _Window) :
       m_pRenderer,
       m_pStringTranslator
     })),
-  m_pContext(Rocket::Core::CreateContext("main", GetContextSize()),
-    [](Rocket::Core::Context * _pContext) { _pContext->RemoveReference(); })
+  m_pContext(CovelliteGui::Core::CreateContext("main", GetContextSize()),
+    [](CovelliteGui::Core::Context * _pContext) { CovelliteGuiRemove(_pContext); })
 {
   if (m_pContext == nullptr)
   {
     throw STD_EXCEPTION << "Create context failed.";
   }
 
-  Rocket::Controls::Initialise();
+  CovelliteGui::Controls::Initialise();
 
   if (::alicorn::extension::cpp::IS_DEBUG_CONFIGURATION)
   {
     // Инициализация через установку контекста сделана из-за того, что 
-    // Rocket::Debugger::Initialise() можно вызывать только один раз в рамках
+    // CovelliteGui::Debugger::Initialise() можно вызывать только один раз в рамках
     // работы одного .so модуля (повторный вызов приводит к ошибке в логе
     // и Debugger работать не будет), Android программа грузит .so модуль
     // только один раз при первом старте, а при повторной активации программы
     // просто вызывает функции ранее загруженного модуля.
-    if (!Rocket::Debugger::SetContext(m_pContext.get()))
+    if (!CovelliteGui::Debugger::SetContext(m_pContext.get()))
     {
-      Rocket::Debugger::Initialise(m_pContext.get());
+      CovelliteGui::Debugger::Initialise(m_pContext.get());
     }
   }
 
@@ -88,7 +89,7 @@ Window::Window(const WindowApi_t & _Window) :
   m_Events[events::Key.Down]
     .Connect([&](const events::Key_t::Code & _Code)
   {
-    m_pContext->ProcessKeyDown(SystemToRocketKeyCode(_Code), 0);
+    m_pContext->ProcessKeyDown(SystemToGuiKeyCode(_Code), 0);
   });
   m_Events[events::Key.Pressed]
     .Connect([&](const events::Key_t::Code & _Code) 
@@ -97,7 +98,7 @@ Window::Window(const WindowApi_t & _Window) :
     // Key.Pressed с нулем в качестве кода нажатой кнопки.
     if (_Code < 0x20) return;
 
-    m_pContext->ProcessTextInput(static_cast<Rocket::Core::word>(_Code));  
+    m_pContext->ProcessTextInput(static_cast<CovelliteGuiUnicode_t>(_Code));
   });
 
   m_Events[events::Drawing.Do]
@@ -125,14 +126,12 @@ Window::operator Events_t (void) const /*override*/
 
 /**
 * \brief
-*  Функция загрузки документа libRocket из указанного файла.
+*  Функция загрузки документа из указанного файла.
 */
-Window::Document_t * Window::LoadDocument(const PathToFile_t & _Path) /*override*/
+Window::DocumentPtr_t Window::LoadDocument(const PathToFile_t & _Path) /*override*/
 {
-  // 23 Июль 2018 19:41 (unicornum.verum@gmail.com)
-  TODO("Возвращать unique_ptr с deleter'ом, вызывающим RemoveReference()?");
-
-  return m_pContext->LoadDocument(_Path);
+  return DocumentPtr_t(m_pContext->LoadDocument(Layer::Convert(_Path).c_str()),
+    [](Document_t * _pDocument) { CovelliteGuiRemove(_pDocument); });
 }
 
 /**
@@ -206,12 +205,6 @@ void Window::DoDrawWindow(void)
 * \details
 *  - Функция загрузит все файлы шрифтов из папки, указанной как значение
 *  параметра \b PathToFontsDirectory раздела \b Covellitepp настроек.
-*  - При указании шрифта стиля в файле .rcss следует учитывать, что для каждого 
-*  шрифта создается текстура, содержащая используемые символы и чем больше
-*  символов используется, тем больше времени займет загрузка .rml файла.
-*  Ограничить диапазон используемых символов можно через параметр стиля
-*  \b font-charset (подробнее см. в описании работы со шрифтами в документации 
-*  libRocket).
 *  - Ошибка (если таковая возникнет) будет записана в лог через интерфейс
 *  System.
 */
@@ -270,6 +263,6 @@ void Window::DoDrawWindow(void)
 
   Directory::Iterate(PathToFontsDirectory, [](const Path_t & _PathToFont)
   {
-    Rocket::Core::FontDatabase::LoadFontFace(_PathToFont.string().c_str());
+    CovelliteGuiLoadFontFace(_PathToFont.string());
   });
 }

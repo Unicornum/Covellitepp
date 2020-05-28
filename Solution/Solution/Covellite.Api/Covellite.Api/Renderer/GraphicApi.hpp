@@ -42,22 +42,14 @@ public:
   const Creators_t & GetCreators(void) const final;
 
 protected:
-  // cppcheck-suppress pureVirtualCall
   virtual Render_t CreateCamera(const ComponentPtr_t &) = 0;
-  // cppcheck-suppress pureVirtualCall
   virtual Render_t CreateBkSurface(const ComponentPtr_t &) { return nullptr; }
-  // cppcheck-suppress pureVirtualCall
   virtual Render_t CreateState(const ComponentPtr_t &) = 0;
-  // cppcheck-suppress pureVirtualCall
   virtual Render_t CreateFog(const ComponentPtr_t &) = 0;
   virtual Render_t CreateShader(const ComponentPtr_t &) { return nullptr; }
-  // cppcheck-suppress pureVirtualCall
   virtual Render_t CreateTexture(const ComponentPtr_t &) = 0;
-  // cppcheck-suppress pureVirtualCall
   virtual Render_t CreateBuffer(const ComponentPtr_t &) = 0;
-  // cppcheck-suppress pureVirtualCall
   virtual Render_t CreateTransform(const ComponentPtr_t &) { return nullptr; }
-  // cppcheck-suppress pureVirtualCall
   virtual Render_t CreatePresentBuffer(const ComponentPtr_t &) { return nullptr; }
 
 protected:

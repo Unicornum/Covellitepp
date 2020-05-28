@@ -7,11 +7,11 @@
 #include <alicorn/std/exception.hpp>
 #include <alicorn/boost/filesystem.hpp>
 #include <alicorn/logger.hpp>
-
+#include <alicorn/cpp/disable-warnings.hpp>
+ALICORN_DISABLE_ALL_WARNINGS
 #define TINYOBJLOADER_IMPLEMENTATION
-#include <alicorn/cpp/disable-all-warnings.hpp>
 #include <tinyobj/tiny_obj_loader.h>
-#include <alicorn/cpp/restore-warnings.hpp>
+ALICORN_RESTORE_WARNINGS
 
 namespace basement
 {

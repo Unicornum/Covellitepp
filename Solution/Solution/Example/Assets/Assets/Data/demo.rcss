@@ -9,11 +9,26 @@ dummy {
   border-color: red;
 }
 
+@spritesheet theme-demo {
+  src: demo.background.jpg;
+  background-demo: 0px 0px 800px 450px;
+}
+
+@spritesheet theme-demo-progress-bar {
+  src: demo.progress.png;
+  progress-bk-left: 1px 0px 24px 31px;
+  progress-bk-center: 25px 0px 6px 31px;
+  progress-bk-right: 25px 0px -24px 31px;
+  progress-start: 6px 32px 10px 31px;
+  progress-center: 25px 32px 1px 31px;
+  progress-end: 16px 32px -10px 31px;
+}
+
 body {
   min-width: 480px;
   min-height: 480px;
   background-color: rgba(0, 0, 0, 0);
-  background-decorator: none;
+  decorator: none;
 }
 
 form {
@@ -32,9 +47,7 @@ button {
   display: block;
   font-family: Ubuntu;
   color: white;
-  header-font-effect: outline;
-  header-width: 2px;
-  header-color: grey;
+  font-effect: outline(2px grey);
 }
 
 /**************************** Main menu ***************************************/
@@ -42,8 +55,7 @@ button {
 form#id_main_menu {
   left: 0;
   top: 0;
-  background-decorator: image;
-  background-image: demo.background.jpg 0px 0px 800px 450px;
+  decorator: image(background-demo);
 }
 
 button#id_landscape,
@@ -53,12 +65,12 @@ button#id_help,
 button#id_back {
   max-width: 51%;
   float: right;
-  font-size: 2 em;
+  font-size: 2em;
   text-align: right;
-  padding-top: 0.16 em;
-  padding-bottom: 0.16 em;
-  padding-right: 0.5 em;
-  margin-right: 0.5 em;
+  padding-top: 0.16em;
+  padding-bottom: 0.16em;
+  padding-right: 0.5em;
+  margin-right: 0.5em;
   margin-bottom: 10px;
 }
 
@@ -67,11 +79,11 @@ button#id_back {
   button#id_shadows:hover,
   button#id_help:hover,
   button#id_back:hover {
-    font-size: 2.26 em;
-    padding-top: 0.07375 em;
-    padding-bottom: 0.07375 em;
-    padding-right: 0.4 em;
-    margin-right: 0.45 em;
+    font-size: 2.26em;
+    padding-top: 0.07375em;
+    padding-bottom: 0.07375em;
+    padding-right: 0.4em;
+    margin-right: 0.45em;
     background-color: rgba(128, 128, 128, 128);
   }
 
@@ -80,11 +92,11 @@ button#id_back {
   button#id_shadows:active,
   button#id_help:active,
   button#id_back:active {
-    font-size: 2 em;
-    padding-top: 0.16 em;
-    padding-bottom: 0.16 em;
-    padding-right: 0.5 em;
-    margin-right: 0.5 em;
+    font-size: 2em;
+    padding-top: 0.16em;
+    padding-bottom: 0.16em;
+    padding-right: 0.5em;
+    margin-right: 0.5em;
   }
 
 
@@ -93,27 +105,24 @@ button#id_back {
 form#id_loading {
   left: 0;
   top: 0;
-  background-decorator: image;
-  background-image: demo.background.jpg 0px 0px 800px 450px;
+  decorator: image(background-demo);
 }
 
 progressbar {
   display: block;
   margin-left: 10%;
   margin-right: 10%;
-  margin-bottom: 1 em;
-  height: 3 em;
-  background-decorator: tiled-horizontal;
-  background-left-image: demo.progress.png 1px 0px 25px 31px;
-  background-center-image: demo.progress.png 25px 0px 31px 31px;
-  background-right-image: demo.progress.png 25px 0px 1px 31px;
-  progress-start-image: demo.progress.png 1px 32px 25px 63px;
-  progress-center-image: demo.progress.png 25px 32px 31px 63px;
-  progress-end-image: demo.progress.png 25px 32px 1px 63px;
-  /*mask: true; ??? */
+  margin-bottom: 1em;
+  height: 3em;
+  decorator: tiled-horizontal(progress-bk-left, progress-bk-center, progress-bk-right);
 }
 
-circularbar {
+  progressbar fill {
+    decorator: tiled-horizontal(progress-start, progress-center, progress-end);
+    margin: 0 2%;
+  }
+
+  /*circularbar {
   display: block;
   position: absolute;
   left: 0px;
@@ -123,48 +132,46 @@ circularbar {
   vertical-align: middle;
   gauge-src: demo.circular.png;
 }
+*/
 
-/**************************** Game menu ***************************************/
-
-form#id_game_menu {
-  left: 0;
-  top: 0;
-}
+  /**************************** Game menu ***************************************/
+  form#id_game_menu {
+    left: 0;
+    top: 0;
+  }
 
 button#id_back_to_main_menu {
   position: absolute;
   text-align: center;
-  font-size: 2 em;
-  max-width: 1.2 em;
-  padding-left: 0.25 em;
-  padding-top: 0.25 em;
-  padding-right: 0.25 em;
-  padding-bottom: 0.25 em;
+  font-size: 2em;
+  max-width: 1.2em;
+  padding-left: 0.25em;
+  padding-top: 0.25em;
+  padding-right: 0.25em;
+  padding-bottom: 0.25em;
 }
 
   button#id_back_to_main_menu:hover {
-    font-size: 2.5 em;
-    padding-left: 0.075 em;
-    padding-top: 0.075 em;
-    padding-right: 0.075 em;
-    padding-bottom: 0.075 em;
+    font-size: 2.5em;
+    padding-left: 0.075em;
+    padding-top: 0.075em;
+    padding-right: 0.075em;
+    padding-bottom: 0.075em;
   }
 
   button#id_back_to_main_menu:active {
-    font-size: 2 em;
-    padding-left: 0.25 em;
-    padding-top: 0.25 em;
-    padding-right: 0.25 em;
-    padding-bottom: 0.25 em;
+    font-size: 2em;
+    padding-left: 0.25em;
+    padding-top: 0.25em;
+    padding-right: 0.25em;
+    padding-bottom: 0.25em;
   }
 
 input#id_fps {
   position: absolute;
-  top: 0.25 em;
+  top: 0.25em;
   right: 0;
-  max-width: 4 em;
-  header-font-effect: outline;
-  header-width: 2px;
-  header-color: grey;
-  /*padding-top: 0.25 em;*/ /*!!! Существенно (~25%) роняет fps !!!*/
+  max-width: 4em;
+  font-effect: outline(2px grey);
+  /*padding-top: 0.25em;*/ /*!!! Существенно (~25%) роняет fps !!!*/
 }

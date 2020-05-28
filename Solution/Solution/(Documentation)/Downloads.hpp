@@ -7,20 +7,22 @@
 *  
 * ### Сборка для Windows (x64, Win7+)
 *  
-*   + Распаковать архив, запускать файл ./Bin/x64/Example.exe.
-*   + Программа Settings.exe предназначена для изменения настроек основной
+*  - Распаковать архив, запускать файл ./Bin/x64/Example.exe.
+*  - Программа Settings.exe предназначена для изменения настроек основной
 *  программы (станут доступны после первого запуска основной программы).
-*   + Вместо кнопки \b Back Android'a использовать \b Alt + \b Left.
+*  - Вместо кнопки \b Back Android'a использовать \b Alt + \b Left.
+*  - Завершить работу программы в главном окне можно кнопкой ESC.
 *  
 * ### Сборка для Android (ARM/ARM64, API15+)
 *  
-*   + Скопировать .apk файл на карту устройства, выбрать в папке, следовать
+*  - Cкопировать .apk файл на карту устройства, выбрать в папке, следовать
 *  указаниям установщика пакетов.
 *  
 * | Версия    | Windows               | Android               | Комментарий             |
 * | :-------: | :-------------------: | :-------------------: | :---------------------- |
-* | 2.2.4     | [Windows]             | [Android]             |                         |
-* | 2.2.2     | [Windows v2.2.3]      | [Android v2.2.3]      |                         |
+* | 2.2.5     | [Windows]             | [Android]             |                         |
+* | 2.2.4     | [Windows v2.2.4]      | [Android v2.2.4]      |                         |
+* | 2.2.3     | [Windows v2.2.3]      | [Android v2.2.3]      |                         |
 * | 2.2.2     | [Windows v2.2.2]      | [Android v2.2.2]      |                         |
 * | 2.2.1     | [Windows v2.2.1]      | [Android v2.2.1]      |                         |
 * | 2.2.0     | [Windows v2.2.0]      | [Android v2.2.0]      |                         |
@@ -29,6 +31,8 @@
 *  
 *  [Windows]: https://github.com/Unicornum/Unicornum.github.io/releases/download/covellite/Covellitepp.zip "Covellite++ Windows example"
 *  [Android]: https://github.com/Unicornum/Unicornum.github.io/releases/download/covellite/Covellitepp.apk "Covellite++ Android example"
+*  [Windows v2.2.4]: https://github.com/Unicornum/Unicornum.github.io/releases/download/covellite/Covellitepp_v2.2.4.zip "Covellite++ Windows example"
+*  [Android v2.2.4]: https://github.com/Unicornum/Unicornum.github.io/releases/download/covellite/Covellitepp_v2.2.4.apk "Covellite++ Android example"
 *  [Windows v2.2.3]: https://github.com/Unicornum/Unicornum.github.io/releases/download/covellite/Covellitepp_v2.2.3.zip "Covellite++ Windows example"
 *  [Android v2.2.3]: https://github.com/Unicornum/Unicornum.github.io/releases/download/covellite/Covellitepp_v2.2.3.apk "Covellite++ Android example"
 *  [Windows v2.2.2]: https://github.com/Unicornum/Unicornum.github.io/releases/download/covellite/Covellitepp_v2.2.2.zip "Covellite++ Windows example"

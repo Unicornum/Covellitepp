@@ -18,9 +18,9 @@ public:
   {
     if (!m_FreeIds.empty())
     {
-      const auto Id = m_FreeIds.front();
+      const auto Result = m_FreeIds.front();
       m_FreeIds.pop();
-      return Id;
+      return Result;
     }
 
     return m_NextId++;

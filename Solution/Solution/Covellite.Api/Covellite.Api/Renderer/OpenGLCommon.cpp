@@ -165,6 +165,7 @@ auto OpenGLCommon::GetDepthRender(
   return _IsEnabled ? (_IsClear ? DepthClear : DepthEnable) : DepthDisable;
 }
 
+// cppcheck-suppress unusedFunction
 auto OpenGLCommon::GetPreRenderGeometry(void) -> MatrixBuilder_t
 {
   ::std::deque<MatrixBuilder_t> PreRenders;
@@ -214,6 +215,7 @@ auto OpenGLCommon::GetPreRenderGeometry(void) -> MatrixBuilder_t
   };
 }
 
+// cppcheck-suppress unusedFunction
 auto OpenGLCommon::GetPreRenderBillboardGeometry(void) -> MatrixBuilder_t
 {
   ::std::deque<MatrixBuilder_t> PreRenders;

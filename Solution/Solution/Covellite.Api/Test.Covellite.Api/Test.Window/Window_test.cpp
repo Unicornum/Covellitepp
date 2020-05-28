@@ -151,7 +151,6 @@ TEST_F(Window_test, /*DISABLED_*/Test_Constructor)
 
   const ::mock::Id_t WindowOsId = 1710311123;
   const ::mock::Id_t WindowSectionId = 1806101824;
-  const ::mock::Id_t BackgroundColorSectionId = 1808231108;
 
   for (const auto IsFullScreen : { true, false })
   {
