@@ -279,7 +279,7 @@ Layer::Element Layer::GetElement(const ElementId_t & _Id) const
 
 int Layer::GetWidth(void) const
 {
-  auto * pContext = m_pDocument->GetContext();
+  const auto * const pContext = m_pDocument->GetContext();
   if (pContext == nullptr) throw STD_EXCEPTION << "Null pointer.";
 
   return pContext->GetDimensions().x;
@@ -287,7 +287,7 @@ int Layer::GetWidth(void) const
 
 int Layer::GetHeight(void) const
 {
-  auto * pContext = m_pDocument->GetContext();
+  const auto * const pContext = m_pDocument->GetContext();
   if (pContext == nullptr) throw STD_EXCEPTION << "Null pointer.";
 
   return pContext->GetDimensions().y;

@@ -41,6 +41,7 @@ protected:
   using Render_t = ::std::function<void(void)>;
   using Time_t = ::std::chrono::microseconds;
   using RenderTargetViews_t = ::std::vector<ID3D11RenderTargetView *>;
+  using Object_t = ::std::vector<Component_t::ComponentPtr_t>;
 
   // Вызывается ПЕРЕД запуском каждого теста
   void SetUp(void) override
@@ -130,6 +131,12 @@ protected:
   static ::Camera & GetCameraMartix(Tested_t & _Example)
   {
     return _Example.m_pConstants->Get<::Camera>();
+  }
+
+  template<class T>
+  void IntroduceBufferSize(::std::vector<T> & _Data)
+  {
+    (*reinterpret_cast<size_t *>(_Data.data())) = _Data.size() * sizeof(T);
   }
 };
 
@@ -1199,29 +1206,30 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_BkSurface_SwapChain_GetDesc_Fail)
   Tested_t oExample{ Data_t{} };
   ITested_t & IExample = oExample;
 
-  auto itDataCreator = IExample.GetCreators().find(uT("Data"));
-  ASSERT_NE(IExample.GetCreators().end(), itDataCreator);
-
   auto itCreator = IExample.GetCreators().find(uT("BkSurface"));
   ASSERT_NE(IExample.GetCreators().end(), itCreator);
 
+  Object_t Data;
+
   for (auto & Destination : Destinations)
   {
-    const auto pData = Component_t::Make(
+    Data.push_back(Component_t::Make(
       {
         { uT("kind"), uT("Texture")},
         { uT("destination"), Destination },
-      });
-
-    auto Render = itDataCreator->second(pData);
-    EXPECT_EQ(nullptr, Render);
+      }));
   }
 
   EXPECT_CALL(SwapChain, GetResult(Eq("GetDesc")))
     .Times(1)
     .WillOnce(Return(E_FAIL));
 
-  EXPECT_THROW(itCreator->second(Component_t::Make({})), ::std::exception);
+  const auto pBkSurface = Component_t::Make(
+    {
+      { uT("service"), Data }
+    });
+
+  EXPECT_THROW(itCreator->second(pBkSurface), ::std::exception);
 
   EXPECT_CALL(SwapChain, GetResult(Eq("GetDesc")))
     .Times(1)
@@ -1289,20 +1297,13 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_BkSurface_Color)
   const Tested_t oExample{ Data_t{} };
   const ITested_t & IExample = oExample;
 
-  auto itDataCreator = IExample.GetCreators().find(uT("Data"));
-  ASSERT_NE(IExample.GetCreators().end(), itDataCreator);
-
   auto itCreator = IExample.GetCreators().find(uT("BkSurface"));
   ASSERT_NE(IExample.GetCreators().end(), itCreator);
 
   const auto TestCallCreateTexture = [&](
-    const Component_t::ComponentPtr_t & _pTexture,
     const UINT _Width, const UINT _Height,
     const ::std::size_t _Slot)
   {
-    auto Render = itDataCreator->second(_pTexture);
-    EXPECT_EQ(nullptr, Render);
-
     D3D11_TEXTURE2D_DESC TextureDesc = { 0 };
     TextureDesc.Width = _Width;
     TextureDesc.Height = _Height;
@@ -1337,7 +1338,7 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_BkSurface_Color)
       .WillOnce(Return(&(RenderTargetView[_Slot])));
   };
 
-  ::std::vector<Component_t::ComponentPtr_t> TextureComponents;
+  Object_t TextureComponents;
   ::std::vector<ID3D11RenderTargetView *> RenderTargetViewPtrs;
 
   DXGI_SWAP_CHAIN_DESC Desc = { 0 };
@@ -1359,13 +1360,15 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_BkSurface_Color)
       });
 
     TextureComponents.push_back(pData);
-    TestCallCreateTexture(pData, 
-      Desc.BufferDesc.Width, Desc.BufferDesc.Height, i);
+    TestCallCreateTexture(Desc.BufferDesc.Width, Desc.BufferDesc.Height, i);
 
     RenderTargetViewPtrs.push_back(&(RenderTargetView[i]));
   }
 
-  auto Render = itCreator->second(Component_t::Make({}));
+  auto Render = itCreator->second(Component_t::Make(
+    {
+      { uT("service"), TextureComponents }
+    }));
   ASSERT_NE(nullptr, Render);
 
   for (::std::size_t i = 0; i < Destinations.size(); i++)
@@ -1463,20 +1466,13 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_BkSurface_Color_Mapper)
   const Tested_t oExample{ Data_t{} };
   const ITested_t & IExample = oExample;
 
-  auto itDataCreator = IExample.GetCreators().find(uT("Data"));
-  ASSERT_NE(IExample.GetCreators().end(), itDataCreator);
-
   auto itCreator = IExample.GetCreators().find(uT("BkSurface"));
   ASSERT_NE(IExample.GetCreators().end(), itCreator);
 
   const auto TestCallCreateTexture = [&](
-    const Component_t::ComponentPtr_t & _pTexture,
     const UINT _Width, const UINT _Height,
     const ::std::size_t _Slot)
   {
-    auto Render = itDataCreator->second(_pTexture);
-    EXPECT_EQ(nullptr, Render);
-
     D3D11_TEXTURE2D_DESC TextureDesc = { 0 };
     TextureDesc.Width = _Width;
     TextureDesc.Height = _Height;
@@ -1525,7 +1521,7 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_BkSurface_Color_Mapper)
       .WillOnce(Return(&(CopyTexture2D[_Slot])));
   };
 
-  ::std::vector<Component_t::ComponentPtr_t> TextureComponents;
+  Object_t TextureComponents;
   ::std::vector<ID3D11RenderTargetView *> RenderTargetViewPtrs;
 
   DXGI_SWAP_CHAIN_DESC Desc = { 0 };
@@ -1548,13 +1544,15 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_BkSurface_Color_Mapper)
       });
 
     TextureComponents.push_back(pData);
-    TestCallCreateTexture(pData,
-      Desc.BufferDesc.Width, Desc.BufferDesc.Height, i);
+    TestCallCreateTexture(Desc.BufferDesc.Width, Desc.BufferDesc.Height, i);
 
     RenderTargetViewPtrs.push_back(&(RenderTargetView[i]));
   }
 
-  auto Render = itCreator->second(Component_t::Make({}));
+  auto Render = itCreator->second(Component_t::Make(
+    {
+      { uT("service"), TextureComponents }
+    }));
   ASSERT_NE(nullptr, Render);
 
   for (::std::size_t i = 0; i < Destinations.size(); i++)
@@ -1644,9 +1642,6 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_BkSurface_Color_Fail)
   const Tested_t oExample{ Data_t{} };
   const ITested_t & IExample = oExample;
 
-  auto itDataCreator = IExample.GetCreators().find(uT("Data"));
-  ASSERT_NE(IExample.GetCreators().end(), itDataCreator);
-
   auto itCreator = IExample.GetCreators().find(uT("BkSurface"));
   ASSERT_NE(IExample.GetCreators().end(), itCreator);
 
@@ -1654,20 +1649,25 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_BkSurface_Color_Fail)
 
   for (auto & Destination : Destinations)
   {
-    const auto pData = Component_t::Make(
+    const Object_t Service = 
+    {
+      Component_t::Make(
       {
         { uT("kind"), uT("Texture")},
         { uT("destination"), Destination },
-      });
+      })
+    };
 
-    const auto DataRender = itDataCreator->second(pData);
-    EXPECT_EQ(nullptr, DataRender);
+    const auto pBkSurface = Component_t::Make(
+      {
+        { uT("service"), Service }
+      });
 
     EXPECT_CALL(Device, GetResult(Eq("CreateTexture2D")))
       .Times(1)
       .WillOnce(Return(E_FAIL));
 
-    EXPECT_THROW(itCreator->second(Component_t::Make({})), ::std::exception);
+    EXPECT_THROW(itCreator->second(pBkSurface), ::std::exception);
 
     EXPECT_CALL(Device, GetResult(Eq("CreateTexture2D")))
       .Times(1)
@@ -1677,7 +1677,7 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_BkSurface_Color_Fail)
       .Times(1)
       .WillOnce(Return(E_FAIL));
 
-    EXPECT_THROW(itCreator->second(Component_t::Make({})), ::std::exception);
+    EXPECT_THROW(itCreator->second(pBkSurface), ::std::exception);
 
     EXPECT_CALL(Device, GetResult(Eq("CreateTexture2D")))
       .Times(1)
@@ -1691,7 +1691,7 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_BkSurface_Color_Fail)
       .Times(1)
       .WillOnce(Return(E_FAIL));
 
-    EXPECT_THROW(itCreator->second(Component_t::Make({})), ::std::exception);
+    EXPECT_THROW(itCreator->second(pBkSurface), ::std::exception);
   }
 }
 
@@ -1729,19 +1729,11 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_BkSurface_Depth)
   const Tested_t oExample{ Data_t{} };
   const ITested_t & IExample = oExample;
 
-  auto itDataCreator = IExample.GetCreators().find(uT("Data"));
-  ASSERT_NE(IExample.GetCreators().end(), itDataCreator);
-
   auto itCreator = IExample.GetCreators().find(uT("BkSurface"));
   ASSERT_NE(IExample.GetCreators().end(), itCreator);
 
-  const auto TestCallCreateTexture = [&](
-    const Component_t::ComponentPtr_t & _pTexture,
-    const UINT _Width, const UINT _Height)
+  const auto TestCallCreateTexture = [&](const UINT _Width, const UINT _Height)
   {
-    auto Render = itDataCreator->second(_pTexture);
-    EXPECT_EQ(nullptr, Render);
-
     D3D11_TEXTURE2D_DESC TextureDesc = { 0 };
     TextureDesc.Width = _Width;
     TextureDesc.Height = _Height;
@@ -1792,10 +1784,12 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_BkSurface_Depth)
       { uT("destination"), uT("depth") },
     });
 
-  TestCallCreateTexture(pTextureComponent, 
-    Desc.BufferDesc.Width, Desc.BufferDesc.Height);
+  TestCallCreateTexture(Desc.BufferDesc.Width, Desc.BufferDesc.Height);
 
-  auto Render = itCreator->second(Component_t::Make({}));
+  auto Render = itCreator->second(Component_t::Make(
+    {
+      { uT("service"), Object_t{ pTextureComponent } }
+    }));
   ASSERT_NE(nullptr, Render);
 
   {
@@ -1869,9 +1863,6 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_BkSurface_Depth_Fail)
   const Tested_t oExample{ Data_t{} };
   const ITested_t & IExample = oExample;
 
-  auto itDataCreator = IExample.GetCreators().find(uT("Data"));
-  ASSERT_NE(IExample.GetCreators().end(), itDataCreator);
-
   auto itCreator = IExample.GetCreators().find(uT("BkSurface"));
   ASSERT_NE(IExample.GetCreators().end(), itCreator);
 
@@ -1879,20 +1870,25 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_BkSurface_Depth_Fail)
 
   for (auto & Destination : Destinations)
   {
-    const auto pData = Component_t::Make(
+    const Object_t Service =
+    {
+      Component_t::Make(
       {
         { uT("kind"), uT("Texture")},
         { uT("destination"), Destination },
-      });
+      })
+    };
 
-    const auto DataRender = itDataCreator->second(pData);
-    EXPECT_EQ(nullptr, DataRender);
+    const auto pBkSurface = Component_t::Make(
+      {
+        { uT("service"), Service }
+      });
 
     EXPECT_CALL(Device, GetResult(Eq("CreateTexture2D")))
       .Times(1)
       .WillOnce(Return(E_FAIL));
 
-    EXPECT_THROW(itCreator->second(Component_t::Make({})), ::std::exception);
+    EXPECT_THROW(itCreator->second(pBkSurface), ::std::exception);
 
     EXPECT_CALL(Device, GetResult(Eq("CreateTexture2D")))
       .Times(1)
@@ -1902,7 +1898,7 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_BkSurface_Depth_Fail)
       .Times(1)
       .WillOnce(Return(E_FAIL));
 
-    EXPECT_THROW(itCreator->second(Component_t::Make({})), ::std::exception);
+    EXPECT_THROW(itCreator->second(pBkSurface), ::std::exception);
 
     EXPECT_CALL(Device, GetResult(Eq("CreateTexture2D")))
       .Times(1)
@@ -1916,7 +1912,7 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_BkSurface_Depth_Fail)
       .Times(1)
       .WillOnce(Return(E_FAIL));
 
-    EXPECT_THROW(itCreator->second(Component_t::Make({})), ::std::exception);
+    EXPECT_THROW(itCreator->second(pBkSurface), ::std::exception);
   }
 }
 
@@ -1965,13 +1961,10 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_BkSurface_ResizeWindow)
   Tested_t oExample{ Data_t{} };
   ITested_t & IExample = oExample;
 
-  auto itDataCreator = IExample.GetCreators().find(uT("Data"));
-  ASSERT_NE(IExample.GetCreators().end(), itDataCreator);
-
   auto itCreator = IExample.GetCreators().find(uT("BkSurface"));
   ASSERT_NE(IExample.GetCreators().end(), itCreator);
 
-  ::std::vector<Component_t::ComponentPtr_t> TextureComponents;
+  Object_t Service;
 
   for (::std::size_t i = 0; i < Destinations.size(); i++)
   {
@@ -1981,10 +1974,7 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_BkSurface_ResizeWindow)
         { uT("destination"), Destinations[i] },
       });
 
-    TextureComponents.push_back(pData);
-
-    auto Render = itDataCreator->second(pData);
-    EXPECT_EQ(nullptr, Render);
+    Service.push_back(pData);
   }
 
   InSequence Dummy;
@@ -2010,7 +2000,10 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_BkSurface_ResizeWindow)
     }
   }
 
-  auto Render = itCreator->second(Component_t::Make({}));
+  auto Render = itCreator->second(Component_t::Make(
+    {
+      { uT("service"), Service }
+    }));
   ASSERT_NE(nullptr, Render);
 
   {
@@ -2068,9 +2061,9 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_BkSurface_ResizeWindow)
     for (::std::size_t i = 0; i < Destinations.size(); i++)
     {
       EXPECT_EQ(Desc.BufferDesc.Width,
-        TextureComponents[i]->GetValue(uT("width"), 0));
+        Service[i]->GetValue(uT("width"), 0));
       EXPECT_EQ(Desc.BufferDesc.Height,
-        TextureComponents[i]->GetValue(uT("height"), 0));
+        Service[i]->GetValue(uT("height"), 0));
     }
   }
 
@@ -2137,27 +2130,19 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_BkSurface_ResizeWindow_Mapper)
   Tested_t oExample{ Data_t{} };
   ITested_t & IExample = oExample;
 
-  auto itDataCreator = IExample.GetCreators().find(uT("Data"));
-  ASSERT_NE(IExample.GetCreators().end(), itDataCreator);
-
   auto itCreator = IExample.GetCreators().find(uT("BkSurface"));
   ASSERT_NE(IExample.GetCreators().end(), itCreator);
 
-  ::std::vector<Component_t::ComponentPtr_t> TextureComponents;
+  Object_t Service;
 
   for (::std::size_t i = 0; i < Destinations.size(); i++)
   {
-    const auto pData = Component_t::Make(
+    Service.push_back(Component_t::Make(
       {
         { uT("kind"), uT("Texture")},
         { uT("destination"), Destinations[i] },
         { uT("mapper"), BufferMapper_t{} },
-      });
-
-    TextureComponents.push_back(pData);
-
-    auto Render = itDataCreator->second(pData);
-    EXPECT_EQ(nullptr, Render);
+      }));
   }
 
   InSequence Dummy;
@@ -2191,7 +2176,10 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_BkSurface_ResizeWindow_Mapper)
     }
   }
 
-  auto Render = itCreator->second(Component_t::Make({}));
+  auto Render = itCreator->second(Component_t::Make(
+    {
+      { uT("service"), Service }
+    }));
   ASSERT_NE(nullptr, Render);
 
   {
@@ -2260,9 +2248,9 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_BkSurface_ResizeWindow_Mapper)
     for (::std::size_t i = 0; i < Destinations.size(); i++)
     {
       EXPECT_EQ(Desc.BufferDesc.Width,
-        TextureComponents[i]->GetValue(uT("width"), 0));
+        Service[i]->GetValue(uT("width"), 0));
       EXPECT_EQ(Desc.BufferDesc.Height,
-        TextureComponents[i]->GetValue(uT("height"), 0));
+        Service[i]->GetValue(uT("height"), 0));
     }
   }
 
@@ -2622,14 +2610,15 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_State_Scissor_Enabled_FromData)
   Desc.ScissorEnable = TRUE;
 
   const auto pData = Component_t::Make(
-    {
-      { uT("kind"), uT("Rect") },
-    });
+  {
+    { uT("kind"), uT("Rect") },
+  });
 
   const auto pComponent = Component_t::Make(
     {
       { uT("kind"), uT("Scissor") },
       { uT("enabled"), true },
+      { uT("service"), Object_t{ pData } }
     });
 
   using namespace ::testing;
@@ -2644,14 +2633,6 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_State_Scissor_Enabled_FromData)
 
   const Tested_t oExample{ Data_t{} };
   const ITested_t & IExample = oExample;
-
-  {
-    auto itDataCreator = IExample.GetCreators().find(uT("Data"));
-    ASSERT_NE(IExample.GetCreators().end(), itDataCreator);
-
-    auto Render = itDataCreator->second(pData);
-    EXPECT_EQ(nullptr, Render);
-  }
 
   auto itCreator = IExample.GetCreators().find(uT("State"));
   ASSERT_NE(IExample.GetCreators().end(), itCreator);
@@ -2873,9 +2854,6 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_State_Depth_Disabled_BkSurfaceTarget)
   const Tested_t oExample{ Data_t{} };
   const ITested_t & IExample = oExample;
 
-  auto itDataCreator = IExample.GetCreators().find(uT("Data"));
-  ASSERT_NE(IExample.GetCreators().end(), itDataCreator);
-
   auto itBkSurfaceCreator = IExample.GetCreators().find(uT("BkSurface"));
   ASSERT_NE(IExample.GetCreators().end(), itBkSurfaceCreator);
 
@@ -2883,16 +2861,15 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_State_Depth_Disabled_BkSurfaceTarget)
 
   InSequence Dummy;
 
+  Object_t Service;
+
   for (::std::size_t i = 0; i < Destinations.size(); i++)
   {
-    const auto pData = Component_t::Make(
+    Service.push_back(Component_t::Make(
       {
         { uT("kind"), uT("Texture")},
         { uT("destination"), Destinations[i] },
-      });
-
-    auto Render = itDataCreator->second(pData);
-    EXPECT_EQ(nullptr, Render);
+      }));
 
     EXPECT_CALL(Device, CreateRenderTargetView(_, _))
       .Times(1)
@@ -2901,7 +2878,10 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_State_Depth_Disabled_BkSurfaceTarget)
     RenderTargetViewPtrs.push_back(&(RenderTargetView[i]));
   }
 
-  auto BkSurfaceRender = itBkSurfaceCreator->second(Component_t::Make({}));
+  auto BkSurfaceRender = itBkSurfaceCreator->second(Component_t::Make(
+    {
+      { uT("service"), Service }
+    }));
   ASSERT_NE(nullptr, BkSurfaceRender);
 
   auto itCreator = IExample.GetCreators().find(uT("State"));
@@ -3192,9 +3172,6 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_State_Depth_Enabled_NoClear_Overwrite_B
   const Tested_t oExample{ Data_t{} };
   const ITested_t & IExample = oExample;
 
-  auto itDataCreator = IExample.GetCreators().find(uT("Data"));
-  ASSERT_NE(IExample.GetCreators().end(), itDataCreator);
-
   auto itBkSurfaceCreator = IExample.GetCreators().find(uT("BkSurface"));
   ASSERT_NE(IExample.GetCreators().end(), itBkSurfaceCreator);
 
@@ -3202,16 +3179,15 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_State_Depth_Enabled_NoClear_Overwrite_B
 
   InSequence Dummy;
 
+  Object_t Service;
+
   for (::std::size_t i = 0; i < Destinations.size(); i++)
   {
-    const auto pData = Component_t::Make(
+    Service.push_back(Component_t::Make(
       {
         { uT("kind"), uT("Texture")},
         { uT("destination"), Destinations[i] },
-      });
-
-    auto Render = itDataCreator->second(pData);
-    EXPECT_EQ(nullptr, Render);
+      }));
 
     EXPECT_CALL(Device, CreateRenderTargetView(_, _))
       .Times(1)
@@ -3220,22 +3196,20 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_State_Depth_Enabled_NoClear_Overwrite_B
     RenderTargetViewPtrs.push_back(&(RenderTargetView[i]));
   }
 
-  {
-    const auto pData = Component_t::Make(
-      {
-        { uT("kind"), uT("Texture")},
-        { uT("destination"), uT("depth") },
-      });
+  Service.push_back(Component_t::Make(
+    {
+      { uT("kind"), uT("Texture")},
+      { uT("destination"), uT("depth") },
+    }));
 
-    auto Render = itDataCreator->second(pData);
-    EXPECT_EQ(nullptr, Render);
+  EXPECT_CALL(Device, CreateDepthStencilView(_, _))
+    .Times(1)
+    .WillOnce(Return(&DepthStencilView));
 
-    EXPECT_CALL(Device, CreateDepthStencilView(_, _))
-      .Times(1)
-      .WillOnce(Return(&DepthStencilView));
-  }
-
-  auto BkSurfaceRender = itBkSurfaceCreator->second(Component_t::Make({}));
+  auto BkSurfaceRender = itBkSurfaceCreator->second(Component_t::Make(
+    {
+      { uT("service"), Service }
+    }));
   ASSERT_NE(nullptr, BkSurfaceRender);
 
   auto itCreator = IExample.GetCreators().find(uT("State"));
@@ -3457,9 +3431,6 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_State_Depth_Enabled_Clear_Overwrite_BkS
   const Tested_t oExample{ Data_t{} };
   const ITested_t & IExample = oExample;
 
-  auto itDataCreator = IExample.GetCreators().find(uT("Data"));
-  ASSERT_NE(IExample.GetCreators().end(), itDataCreator);
-
   auto itBkSurfaceCreator = IExample.GetCreators().find(uT("BkSurface"));
   ASSERT_NE(IExample.GetCreators().end(), itBkSurfaceCreator);
 
@@ -3467,16 +3438,15 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_State_Depth_Enabled_Clear_Overwrite_BkS
 
   InSequence Dummy;
 
+  Object_t Service;
+
   for (::std::size_t i = 0; i < Destinations.size(); i++)
   {
-    const auto pData = Component_t::Make(
+    Service.push_back(Component_t::Make(
       {
         { uT("kind"), uT("Texture")},
         { uT("destination"), Destinations[i] },
-      });
-
-    auto Render = itDataCreator->second(pData);
-    EXPECT_EQ(nullptr, Render);
+      }));
 
     EXPECT_CALL(Device, CreateRenderTargetView(_, _))
       .Times(1)
@@ -3485,22 +3455,20 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_State_Depth_Enabled_Clear_Overwrite_BkS
     RenderTargetViewPtrs.push_back(&(RenderTargetView[i]));
   }
 
-  {
-    const auto pData = Component_t::Make(
-      {
-        { uT("kind"), uT("Texture")},
-        { uT("destination"), uT("depth") },
-      });
+  Service.push_back(Component_t::Make(
+    {
+      { uT("kind"), uT("Texture")},
+      { uT("destination"), uT("depth") },
+    }));
 
-    auto Render = itDataCreator->second(pData);
-    EXPECT_EQ(nullptr, Render);
+  EXPECT_CALL(Device, CreateDepthStencilView(_, _))
+    .Times(1)
+    .WillOnce(Return(&DepthStencilView));
 
-    EXPECT_CALL(Device, CreateDepthStencilView(_, _))
-      .Times(1)
-      .WillOnce(Return(&DepthStencilView));
-  }
-
-  auto BkSurfaceRender = itBkSurfaceCreator->second(Component_t::Make({}));
+  auto BkSurfaceRender = itBkSurfaceCreator->second(Component_t::Make(
+    {
+      { uT("service"), Service }
+    }));
   ASSERT_NE(nullptr, BkSurfaceRender);
 
   auto itCreator = IExample.GetCreators().find(uT("State"));
@@ -3709,9 +3677,6 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_State_Depth_Enabled_NoClear_NoOverwrite
   const Tested_t oExample{ Data_t{} };
   const ITested_t & IExample = oExample;
 
-  auto itDataCreator = IExample.GetCreators().find(uT("Data"));
-  ASSERT_NE(IExample.GetCreators().end(), itDataCreator);
-
   auto itBkSurfaceCreator = IExample.GetCreators().find(uT("BkSurface"));
   ASSERT_NE(IExample.GetCreators().end(), itBkSurfaceCreator);
 
@@ -3719,16 +3684,15 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_State_Depth_Enabled_NoClear_NoOverwrite
 
   InSequence Dummy;
 
+  Object_t Service;
+
   for (::std::size_t i = 0; i < Destinations.size(); i++)
   {
-    const auto pData = Component_t::Make(
+    Service.push_back(Component_t::Make(
       {
         { uT("kind"), uT("Texture")},
         { uT("destination"), Destinations[i] },
-      });
-
-    auto Render = itDataCreator->second(pData);
-    EXPECT_EQ(nullptr, Render);
+      }));
 
     EXPECT_CALL(Device, CreateRenderTargetView(_, _))
       .Times(1)
@@ -3737,22 +3701,20 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_State_Depth_Enabled_NoClear_NoOverwrite
     RenderTargetViewPtrs.push_back(&(RenderTargetView[i]));
   }
 
-  {
-    const auto pData = Component_t::Make(
-      {
-        { uT("kind"), uT("Texture")},
-        { uT("destination"), uT("depth") },
-      });
+  Service.push_back(Component_t::Make(
+    {
+      { uT("kind"), uT("Texture")},
+      { uT("destination"), uT("depth") },
+    }));
 
-    auto Render = itDataCreator->second(pData);
-    EXPECT_EQ(nullptr, Render);
+  EXPECT_CALL(Device, CreateDepthStencilView(_, _))
+    .Times(1)
+    .WillOnce(Return(&DepthStencilView));
 
-    EXPECT_CALL(Device, CreateDepthStencilView(_, _))
-      .Times(1)
-      .WillOnce(Return(&DepthStencilView));
-  }
-
-  auto BkSurfaceRender = itBkSurfaceCreator->second(Component_t::Make({}));
+  auto BkSurfaceRender = itBkSurfaceCreator->second(Component_t::Make(
+    {
+      { uT("service"), Service }
+    }));
   ASSERT_NE(nullptr, BkSurfaceRender);
 
   auto itCreator = IExample.GetCreators().find(uT("State"));
@@ -3949,9 +3911,6 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_State_Depth_Enabled_Clear_NoOverwrite_B
   const Tested_t oExample{ Data_t{} };
   const ITested_t & IExample = oExample;
 
-  auto itDataCreator = IExample.GetCreators().find(uT("Data"));
-  ASSERT_NE(IExample.GetCreators().end(), itDataCreator);
-
   auto itBkSurfaceCreator = IExample.GetCreators().find(uT("BkSurface"));
   ASSERT_NE(IExample.GetCreators().end(), itBkSurfaceCreator);
 
@@ -3959,16 +3918,15 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_State_Depth_Enabled_Clear_NoOverwrite_B
 
   InSequence Dummy;
 
+  Object_t Service;
+
   for (::std::size_t i = 0; i < Destinations.size(); i++)
   {
-    const auto pData = Component_t::Make(
+    Service.push_back(Component_t::Make(
       {
         { uT("kind"), uT("Texture")},
         { uT("destination"), Destinations[i] },
-      });
-
-    auto Render = itDataCreator->second(pData);
-    EXPECT_EQ(nullptr, Render);
+      }));
 
     EXPECT_CALL(Device, CreateRenderTargetView(_, _))
       .Times(1)
@@ -3977,22 +3935,20 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_State_Depth_Enabled_Clear_NoOverwrite_B
     RenderTargetViewPtrs.push_back(&(RenderTargetView[i]));
   }
 
-  {
-    const auto pData = Component_t::Make(
-      {
-        { uT("kind"), uT("Texture")},
-        { uT("destination"), uT("depth") },
-      });
+  Service.push_back(Component_t::Make(
+    {
+      { uT("kind"), uT("Texture")},
+      { uT("destination"), uT("depth") },
+    }));
 
-    auto Render = itDataCreator->second(pData);
-    EXPECT_EQ(nullptr, Render);
+  EXPECT_CALL(Device, CreateDepthStencilView(_, _))
+    .Times(1)
+    .WillOnce(Return(&DepthStencilView));
 
-    EXPECT_CALL(Device, CreateDepthStencilView(_, _))
-      .Times(1)
-      .WillOnce(Return(&DepthStencilView));
-  }
-
-  auto BkSurfaceRender = itBkSurfaceCreator->second(Component_t::Make({}));
+  auto BkSurfaceRender = itBkSurfaceCreator->second(Component_t::Make(
+    {
+      { uT("service"), Service }
+    }));
   ASSERT_NE(nullptr, BkSurfaceRender);
 
   auto itCreator = IExample.GetCreators().find(uT("State"));
@@ -4167,9 +4123,6 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_State_Clear_BkSurfaceTarget)
   const Tested_t oExample{ Data_t{} };
   const ITested_t & IExample = oExample;
 
-  auto itDataCreator = IExample.GetCreators().find(uT("Data"));
-  ASSERT_NE(IExample.GetCreators().end(), itDataCreator);
-
   auto itBkSurfaceCreator = IExample.GetCreators().find(uT("BkSurface"));
   ASSERT_NE(IExample.GetCreators().end(), itBkSurfaceCreator);
 
@@ -4190,23 +4143,25 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_State_Clear_BkSurfaceTarget)
 
   InSequence Dummy;
 
+  Object_t Service;
+
   for (::std::size_t i = 0; i < Destinations.size(); i++)
   {
-    const auto pData = Component_t::Make(
+    Service.push_back(Component_t::Make(
       {
         { uT("kind"), uT("Texture")},
         { uT("destination"), Destinations[i] },
-      });
-
-    auto Render = itDataCreator->second(pData);
-    EXPECT_EQ(nullptr, Render);
+      }));
 
     EXPECT_CALL(Device, CreateRenderTargetView(_, _))
       .Times(1)
       .WillOnce(Return(&(RenderTargetViews[i])));
   }
 
-  auto BkSurfaceRender = itBkSurfaceCreator->second(Component_t::Make({}));
+  auto BkSurfaceRender = itBkSurfaceCreator->second(Component_t::Make(
+    {
+      { uT("service"), Service }
+    }));
   ASSERT_NE(nullptr, BkSurfaceRender);
 
   const auto TestCallRender = [&](
@@ -4364,9 +4319,6 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Texture_UnknownDestination)
   const Tested_t oExample{ Data_t{} };
   const ITested_t & IExample = oExample;
 
-  auto itDataCreator = IExample.GetCreators().find(uT("Data"));
-  ASSERT_NE(IExample.GetCreators().end(), itDataCreator);
-
   auto itCreator = IExample.GetCreators().find(uT("Texture"));
   ASSERT_NE(IExample.GetCreators().end(), itCreator);
 
@@ -4393,16 +4345,16 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Texture_UnknownDestination)
   }
 
   {
-    const auto pData = Component_t::Make(
+    const Object_t Data = { Component_t::Make(
       {
         { uT("kind"), uT("Texture")},
         { uT("destination"), uT("destination1907251220") },
-      });
+      })};
 
-    auto Render = itDataCreator->second(pData);
-    EXPECT_EQ(nullptr, Render);
-
-    TestCall(Component_t::Make({}));
+    TestCall(Component_t::Make(
+      {
+        { uT("service"), Data }
+      }));
   }
 }
 
@@ -4428,9 +4380,6 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Texture_PBR)
 
   const Tested_t oExample{ Data_t{} };
   const ITested_t & IExample = oExample;
-
-  auto itDataCreator = IExample.GetCreators().find(uT("Data"));
-  ASSERT_NE(IExample.GetCreators().end(), itDataCreator);
 
   auto itCreator = IExample.GetCreators().find(uT("Texture"));
   ASSERT_NE(IExample.GetCreators().end(), itCreator);
@@ -4466,7 +4415,7 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Texture_PBR)
       .WillOnce(Return(&Texture2D));
 
     EXPECT_CALL(DeviceContext, UpdateSubresource(&Texture2D, 0, nullptr, 
-      _BinaryData.data(), _Width * 4, 0, _))
+      _BinaryData, _Width * 4, 0))
       .Times(1);
 
     EXPECT_CALL(Device, CreateShaderResourceView(&Texture2D, SrvDesc))
@@ -4496,7 +4445,43 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Texture_PBR)
   };
 
   {
-    const ::std::vector<uint8_t> BinaryData = { 0x19, 0x07, 0x25, 0x11, 0x51 };
+    const ::std::vector<uint8_t> BinaryData = 
+      { 0x19, 0x07, 0x25, 0x11, 0x51, 0x00 };
+    const int Width = 7251149;
+    const int Height = 1907251150;
+
+    const auto pComponent = Component_t::Make(
+      {
+        { uT("mipmapping"), false },
+        { uT("width"), Width },
+        { uT("height"), Height },
+        { uT("content"), BinaryData },
+      });
+
+    TestCall(pComponent, BinaryData, Width, Height, 0);
+  }
+
+  {
+    const ::std::vector<uint8_t> BinaryData = 
+      { 0x18, 0x12, 0x29, 0x11, 0x57, 0x00 };
+    const int Width = 12291159;
+    const int Height = 1812291200;
+
+    const Object_t Data = { Component_t::Make(
+      {
+        { uT("kind"), uT("Texture")},
+        { uT("mipmapping"), false },
+        { uT("width"), Width },
+        { uT("height"), Height },
+        { uT("content"), BinaryData },
+      }) };
+
+    TestCall(Component_t::Make({ { uT("service"), Data } }), BinaryData, Width, Height, 0);
+  }
+
+  {
+    const ::std::vector<uint8_t> BinaryData = 
+      { 0x19, 0x07, 0x25, 0x11, 0x51, 0x00 };
     const int Width = 7251149;
     const int Height = 1907251150;
 
@@ -4505,66 +4490,28 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Texture_PBR)
         { uT("width"), Width },
         { uT("mipmapping"), false },
         { uT("height"), Height },
-        { uT("data"), BinaryData.data() },
+        { uT("content"), BinaryData },
       });
 
     TestCall(pComponent, BinaryData, Width, Height, 0);
   }
 
   {
-    const ::std::vector<uint8_t> BinaryData = { 0x18, 0x12, 0x29, 0x11, 0x57 };
+    const ::std::vector<uint8_t> BinaryData = 
+      { 0x18, 0x12, 0x29, 0x11, 0x57, 0x00 };
     const int Width = 12291159;
     const int Height = 1812291200;
 
-    const auto pData = Component_t::Make(
+    const Object_t Data = { Component_t::Make(
       {
         { uT("kind"), uT("Texture")},
         { uT("mipmapping"), false },
         { uT("width"), Width },
         { uT("height"), Height },
-        { uT("data"), BinaryData.data() },
-      });
+        { uT("content"), BinaryData },
+      }) };
 
-    auto Render = itDataCreator->second(pData);
-    EXPECT_EQ(nullptr, Render);
-
-    TestCall(Component_t::Make({}), BinaryData, Width, Height, 0);
-  }
-
-  {
-    const ::std::vector<uint8_t> BinaryData = { 0x19, 0x07, 0x25, 0x11, 0x51 };
-    const int Width = 7251149;
-    const int Height = 1907251150;
-
-    const auto pComponent = Component_t::Make(
-      {
-        { uT("width"), Width },
-        { uT("mipmapping"), false },
-        { uT("height"), Height },
-        { uT("data"), BinaryData.data() },
-      });
-
-    TestCall(pComponent, BinaryData, Width, Height, 0);
-  }
-
-  {
-    const ::std::vector<uint8_t> BinaryData = { 0x18, 0x12, 0x29, 0x11, 0x57 };
-    const int Width = 12291159;
-    const int Height = 1812291200;
-
-    const auto pData = Component_t::Make(
-      {
-        { uT("kind"), uT("Texture")},
-        { uT("mipmapping"), false },
-        { uT("width"), Width },
-        { uT("height"), Height },
-        { uT("data"), BinaryData.data() },
-      });
-
-    auto Render = itDataCreator->second(pData);
-    EXPECT_EQ(nullptr, Render);
-
-    TestCall(Component_t::Make({}), BinaryData, Width, Height, 0);
+    TestCall(Component_t::Make({ { uT("service"), Data } }), BinaryData, Width, Height, 0);
   }
 
   const ::std::vector<String_t> Destinations =
@@ -4579,16 +4526,17 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Texture_PBR)
   for (::std::size_t i = 0; i < Destinations.size(); i++)
   {
     {
-      const ::std::vector<uint8_t> BinaryData = { 0x19, 0x07, 0x25, 0x12, 0x06 };
+      const ::std::vector<uint8_t> BinaryData = 
+        { 0x19, 0x07, 0x25, 0x12, 0x06, 0x00 };
       const int Width = 7251202;
       const int Height = 1907251203;
 
       const auto pComponent = Component_t::Make(
         {
-          { uT("width"), Width },
           { uT("mipmapping"), false },
+          { uT("width"), Width },
           { uT("height"), Height },
-          { uT("data"), BinaryData.data() },
+          { uT("content"), BinaryData },
           { uT("destination"), Destinations[i] },
         });
 
@@ -4596,37 +4544,36 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Texture_PBR)
     }
 
     {
-      const ::std::vector<uint8_t> BinaryData = { 0x19, 0x07, 0x25, 0x12, 0x07 };
+      const ::std::vector<uint8_t> BinaryData = 
+        { 0x19, 0x07, 0x25, 0x12, 0x07, 0x00 };
       const int Width = 7251204;
       const int Height = 1907251205;
 
-      const auto pData = Component_t::Make(
-        {
+      const Object_t Data = { Component_t::Make(
+          {
           { uT("kind"), uT("Texture")},
           { uT("mipmapping"), false },
           { uT("width"), Width },
           { uT("height"), Height },
-          { uT("data"), BinaryData.data() },
+          { uT("content"), BinaryData },
           { uT("destination"), Destinations[i] },
-        });
+        }) };
 
-      auto Render = itDataCreator->second(pData);
-      EXPECT_EQ(nullptr, Render);
-
-      TestCall(Component_t::Make({}), BinaryData, Width, Height, i);
+      TestCall(Component_t::Make({ { uT("service"), Data } }), BinaryData, Width, Height, i);
     }
 
     {
-      const ::std::vector<uint8_t> BinaryData = { 0x19, 0x07, 0x25, 0x12, 0x06 };
+      const ::std::vector<uint8_t> BinaryData = 
+        { 0x19, 0x07, 0x25, 0x12, 0x06, 0x00 };
       const int Width = 7251202;
       const int Height = 1907251203;
 
       const auto pComponent = Component_t::Make(
         {
-          { uT("width"), Width },
           { uT("mipmapping"), false },
+          { uT("width"), Width },
           { uT("height"), Height },
-          { uT("data"), BinaryData.data() },
+          { uT("content"), BinaryData },
           { uT("destination"), Destinations[i] },
         });
 
@@ -4634,24 +4581,22 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Texture_PBR)
     }
 
     {
-      const ::std::vector<uint8_t> BinaryData = { 0x19, 0x07, 0x25, 0x12, 0x07 };
+      const ::std::vector<uint8_t> BinaryData = 
+        { 0x19, 0x07, 0x25, 0x12, 0x07, 0x00 };
       const int Width = 7251204;
       const int Height = 1907251205;
 
-      const auto pData = Component_t::Make(
-        {
+      const Object_t Data = { Component_t::Make(
+          {
           { uT("kind"), uT("Texture")},
           { uT("mipmapping"), false },
           { uT("width"), Width },
           { uT("height"), Height },
-          { uT("data"), BinaryData.data() },
+          { uT("content"), BinaryData },
           { uT("destination"), Destinations[i] },
-        });
+        }) };
 
-      auto Render = itDataCreator->second(pData);
-      EXPECT_EQ(nullptr, Render);
-
-      TestCall(Component_t::Make({}), BinaryData, Width, Height, i);
+      TestCall(Component_t::Make({ { uT("service"), Data } }), BinaryData, Width, Height, i);
     }
   }
 }
@@ -4678,9 +4623,6 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Texture_PBR_Mipmapping)
 
   const Tested_t oExample{ Data_t{} };
   const ITested_t & IExample = oExample;
-
-  auto itDataCreator = IExample.GetCreators().find(uT("Data"));
-  ASSERT_NE(IExample.GetCreators().end(), itDataCreator);
 
   auto itCreator = IExample.GetCreators().find(uT("Texture"));
   ASSERT_NE(IExample.GetCreators().end(), itCreator);
@@ -4716,7 +4658,7 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Texture_PBR_Mipmapping)
       .WillOnce(Return(&Texture2D));
 
     EXPECT_CALL(DeviceContext, UpdateSubresource(&Texture2D, 0, nullptr,
-      _BinaryData.data(), _Width * 4, 0, _))
+      _BinaryData, _Width * 4, 0))
       .Times(1);
 
     EXPECT_CALL(Device, CreateShaderResourceView(&Texture2D, SrvDesc))
@@ -4746,7 +4688,8 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Texture_PBR_Mipmapping)
   };
 
   {
-    const ::std::vector<uint8_t> BinaryData = { 0x19, 0x07, 0x25, 0x11, 0x51 };
+    const ::std::vector<uint8_t> BinaryData = 
+      { 0x19, 0x07, 0x25, 0x11, 0x51, 0x00 };
     const int Width = 7251149;
     const int Height = 1907251150;
 
@@ -4755,30 +4698,29 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Texture_PBR_Mipmapping)
         { uT("width"), Width },
         { uT("mipmapping"), true },
         { uT("height"), Height },
-        { uT("data"), BinaryData.data() },
+        { uT("content"), BinaryData },
       });
 
     TestCall(pComponent, BinaryData, Width, Height, 0);
   }
 
   {
-    const ::std::vector<uint8_t> BinaryData = { 0x18, 0x12, 0x29, 0x11, 0x57 };
+    const ::std::vector<uint8_t> BinaryData = 
+      { 0x18, 0x12, 0x29, 0x11, 0x57, 0x00 };
     const int Width = 12291159;
     const int Height = 1812291200;
 
-    const auto pData = Component_t::Make(
-      {
+    const Object_t Data = { Component_t::Make(
+    {
         { uT("kind"), uT("Texture")},
         { uT("mipmapping"), true },
         { uT("width"), Width },
         { uT("height"), Height },
-        { uT("data"), BinaryData.data() },
-      });
+        { uT("content"), BinaryData },
+      }) };
 
-    auto Render = itDataCreator->second(pData);
-    EXPECT_EQ(nullptr, Render);
-
-    TestCall(Component_t::Make({}), BinaryData, Width, Height, 0);
+    TestCall(Component_t::Make({ { uT("service"), Data } }), 
+      BinaryData, Width, Height, 0);
   }
 
   const ::std::vector<String_t> Destinations =
@@ -4793,7 +4735,8 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Texture_PBR_Mipmapping)
   for (::std::size_t i = 0; i < Destinations.size(); i++)
   {
     {
-      const ::std::vector<uint8_t> BinaryData = { 0x19, 0x07, 0x25, 0x12, 0x06 };
+      const ::std::vector<uint8_t> BinaryData = 
+        { 0x19, 0x07, 0x25, 0x12, 0x06, 0x00 };
       const int Width = 7251202;
       const int Height = 1907251203;
 
@@ -4802,7 +4745,7 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Texture_PBR_Mipmapping)
           { uT("width"), Width },
           { uT("mipmapping"), true },
           { uT("height"), Height },
-          { uT("data"), BinaryData.data() },
+          { uT("content"), BinaryData },
           { uT("destination"), Destinations[i] },
         });
 
@@ -4810,24 +4753,23 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Texture_PBR_Mipmapping)
     }
 
     {
-      const ::std::vector<uint8_t> BinaryData = { 0x19, 0x07, 0x25, 0x12, 0x07 };
+      const ::std::vector<uint8_t> BinaryData = 
+        { 0x19, 0x07, 0x25, 0x12, 0x07, 0x00 };
       const int Width = 7251204;
       const int Height = 1907251205;
 
-      const auto pData = Component_t::Make(
+      const Object_t Data = { Component_t::Make(
         {
           { uT("kind"), uT("Texture")},
           { uT("mipmapping"), true },
           { uT("width"), Width },
           { uT("height"), Height },
-          { uT("data"), BinaryData.data() },
+          { uT("content"), BinaryData },
           { uT("destination"), Destinations[i] },
-        });
+        }) };
 
-      auto Render = itDataCreator->second(pData);
-      EXPECT_EQ(nullptr, Render);
-
-      TestCall(Component_t::Make({}), BinaryData, Width, Height, i);
+      TestCall(Component_t::Make({ { uT("service"), Data } }), 
+        BinaryData, Width, Height, i);
     }
   }
 }
@@ -4855,9 +4797,6 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Texture_PBR_UsingExistsEntity)
   const Tested_t oExample{ Data_t{} };
   const ITested_t & IExample = oExample;
 
-  auto itDataCreator = IExample.GetCreators().find(uT("Data"));
-  ASSERT_NE(IExample.GetCreators().end(), itDataCreator);
-
   auto itCreator = IExample.GetCreators().find(uT("Texture"));
   ASSERT_NE(IExample.GetCreators().end(), itCreator);
 
@@ -4867,7 +4806,10 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Texture_PBR_UsingExistsEntity)
   {
     ::mock::DirectX11::ShaderResourceView ShaderResourceView;
 
-    const auto pTextureComponent = Component_t::Make({});
+    const auto pTextureComponent = Component_t::Make(
+      { 
+        { uT("service"), Object_t{ _pData } }
+      });
 
     {
       const auto pTexture = ::std::make_shared<Tested_t::Texture>(_pData);
@@ -4910,9 +4852,6 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Texture_PBR_UsingExistsEntity)
         { uT("kind"), uT("Texture")},
       });
 
-    auto Render = itDataCreator->second(pData);
-    EXPECT_EQ(nullptr, Render);
-
     TestCall(pData, 0);
   }
 
@@ -4933,9 +4872,6 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Texture_PBR_UsingExistsEntity)
         { uT("kind"), uT("Texture")},
         { uT("destination"), Destinations[i] },
       });
-
-    auto Render = itDataCreator->second(pData);
-    EXPECT_EQ(nullptr, Render);
 
     TestCall(pData, i);
   }
@@ -4981,9 +4917,6 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Texture_PBR_ReadData)
   const Tested_t oExample{ Data_t{} };
   const ITested_t & IExample = oExample;
 
-  auto itDataCreator = IExample.GetCreators().find(uT("Data"));
-  ASSERT_NE(IExample.GetCreators().end(), itDataCreator);
-
   auto itCreator = IExample.GetCreators().find(uT("Texture"));
   ASSERT_NE(IExample.GetCreators().end(), itCreator);
 
@@ -4992,6 +4925,7 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Texture_PBR_ReadData)
   ::mock::DirectX11::ShaderResourceView ShaderResourceView;
 
   const auto TestCall = [&](
+    const Component_t::ComponentPtr_t & _pData,
     const Tested_t::Texture::Ptr_t & _pTexture,
     const ::std::size_t _Slot)
   {
@@ -5014,7 +4948,10 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Texture_PBR_ReadData)
     EXPECT_CALL(Device, CreateTexture2D(_, _))
       .Times(0);
 
-    auto Render = itCreator->second(Component_t::Make({}));
+    auto Render = itCreator->second(Component_t::Make(
+      { 
+        { uT("service"), Object_t{ _pData } }
+      }));
     ASSERT_NE(nullptr, Render);
 
     ////////////////////////////////////////////////////////////////////////////
@@ -5117,8 +5054,6 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Texture_PBR_ReadData)
 
   for (::std::size_t i = 0; i < Destinations.size(); i++)
   {
-    const ::std::vector<uint8_t> BinaryData = { 0x19, 0x07, 0x25, 0x12, 0x07 };
-
     const auto pData = Component_t::Make(
       {
         { uT("kind"), uT("Texture")},
@@ -5130,10 +5065,7 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Texture_PBR_ReadData)
     Textures.push_back(pTexture);
     pData->SetValue(uT("entity"), pTexture);
 
-    auto Render = itDataCreator->second(pData);
-    EXPECT_EQ(nullptr, Render);
-
-    TestCall(pTexture, i);
+    TestCall(pData, pTexture, i);
   }
 }
 
@@ -5243,8 +5175,7 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Shader_CreateInputLayout_Fail)
 
     const auto pShader = Component_t::Make(
       { 
-        { uT("data"), (const uint8_t *)ShaderData.data() },
-        { uT("count"), ShaderData.size() },
+        { uT("content"), ::std::vector<uint8_t>{ ShaderData.cbegin(), ShaderData.cend() } },
         { uT("entry"), _Entry }
       });
 
@@ -5303,8 +5234,7 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Shader_CreateVertexShader_Fail)
 
     const auto pShader = Component_t::Make(
       {
-        { uT("data"), (const uint8_t *)ShaderData.data() },
-        { uT("count"), ShaderData.size() },
+        { uT("content"), ::std::vector<uint8_t>{ ShaderData.cbegin(), ShaderData.cend() } },
         { uT("entry"), _Entry }
       });
 
@@ -5368,8 +5298,7 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Shader_CreatePixelShader_Fail)
 
     const auto pShader = Component_t::Make(
       {
-        { uT("data"), (const uint8_t *)ShaderData.data() },
-        { uT("count"), ShaderData.size() },
+        { uT("content"), ::std::vector<uint8_t>{ ShaderData.cbegin(), ShaderData.cend() } },
         { uT("entry"), _Entry }
       });
 
@@ -5410,7 +5339,7 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Shader_CreatePixelShader_Fail)
 }
 
 // ************************************************************************** //
-TEST_F(DirectX11_test, /*DISABLED_*/Test_Shader_DefaultData_Deprecated)
+TEST_F(DirectX11_test, DISABLED_Test_Shader_DefaultData_Deprecated)
 {
   const ::std::string VertexShaderPrefix =
     "#define COVELLITE_SHADER_DESKTOP\r\n"
@@ -5533,7 +5462,6 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Shader_DefaultData)
 
   const auto TestCallRender = [&](
     const Component_t::ComponentPtr_t & _pShader,
-    const Component_t::ComponentPtr_t & _pData,
     const ::std::string & _Entry,
     const ::std::string & _Version,
     const ::std::string & _Prefix,
@@ -5565,15 +5493,6 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Shader_DefaultData)
 
     const Tested_t oExample{ Data_t{} };
     const ITested_t & IExample = oExample;
-
-    if (_pData != nullptr)
-    {
-      auto itCreator = IExample.GetCreators().find(uT("Data"));
-      ASSERT_NE(IExample.GetCreators().end(), itCreator);
-
-      auto Render = itCreator->second(_pData);
-      EXPECT_EQ(nullptr, Render);
-    }
 
     auto itCreator = IExample.GetCreators().find(uT("Shader"));
     ASSERT_NE(IExample.GetCreators().end(), itCreator);
@@ -5608,20 +5527,20 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Shader_DefaultData)
           { uT("entry"), Entry },
         });
 
-      TestCallRender(pComponent, nullptr, strEntry, "vs_4_0",
+      TestCallRender(pComponent, strEntry, "vs_4_0",
         VertexShaderPrefix, "");
     }
 
     {
-      const auto pData = Component_t::Make(
+      const Object_t Data = { Component_t::Make(
         {
           { uT("kind"), uT("Shader") },
           { uT("entry"), Entry },
-        });
+        }) };
 
-      const auto pComponent = Component_t::Make({ });
+      const auto pComponent = Component_t::Make({ { uT("service"), Data } });
 
-      TestCallRender(pComponent, pData, strEntry, "vs_4_0",
+      TestCallRender(pComponent, strEntry, "vs_4_0",
         VertexShaderPrefix, "");
     }
   }
@@ -5644,20 +5563,20 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Shader_DefaultData)
           { uT("entry"), Entry },
         });
 
-      TestCallRender(pComponent, nullptr, "psMain", "ps_4_0",
+      TestCallRender(pComponent, "psMain", "ps_4_0",
         PixelShaderPrefix, PixelShaderPostfix);
     }
 
     {
-      const auto pData = Component_t::Make(
+      const Object_t Data = { Component_t::Make(
         {
           { uT("kind"), uT("Shader") },
           { uT("entry"), Entry },
-        });
+        }) };
 
-      const auto pComponent = Component_t::Make({ });
+      const auto pComponent = Component_t::Make({ { uT("service"), Data } });
 
-      TestCallRender(pComponent, pData, "psMain", "ps_4_0",
+      TestCallRender(pComponent, "psMain", "ps_4_0",
         PixelShaderPrefix, PixelShaderPostfix);
     }
   }
@@ -5680,7 +5599,6 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Shader_Vertex)
 
   const auto TestCallRender = [&](
     const Component_t::ComponentPtr_t & _pShader, 
-    const Component_t::ComponentPtr_t & _pData, 
     const InputDesc_t _Layout,
     const ::std::string & _EntryPoint)
   {
@@ -5725,15 +5643,6 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Shader_Vertex)
 
     const Tested_t oExample{ Data_t{} };
     const ITested_t & IExample = oExample;
-
-    if (_pData != nullptr)
-    {
-      auto itCreator = IExample.GetCreators().find(uT("Data"));
-      ASSERT_NE(IExample.GetCreators().end(), itCreator);
-
-      auto Render = itCreator->second(_pData);
-      EXPECT_EQ(nullptr, Render);
-    }
 
     auto itCreator = IExample.GetCreators().find(uT("Shader"));
     ASSERT_NE(IExample.GetCreators().end(), itCreator);
@@ -5797,26 +5706,24 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Shader_Vertex)
     {
       const auto pComponent = Component_t::Make(
         {
-          { uT("data"), (const uint8_t *)ShaderData.data() },
-          { uT("count"), ShaderData.size() },
+          { uT("content"), ::std::vector<uint8_t>{ ShaderData.cbegin(), ShaderData.cend() } },
           { uT("entry"), uT("vs1") },
         });
 
-      TestCallRender(pComponent, nullptr, Layout, "vs1");
+      TestCallRender(pComponent, Layout, "vs1");
     }
 
     {
-      const auto pComponent = Component_t::Make({ });
-
-      const auto pData = Component_t::Make(
+      const Object_t Data = { Component_t::Make(
         {
           { uT("kind"), uT("Shader") },
-          { uT("data"), (const uint8_t *)ShaderData.data() },
-          { uT("count"), ShaderData.size() },
+          { uT("content"), ::std::vector<uint8_t>{ ShaderData.cbegin(), ShaderData.cend() } },
           { uT("entry"), uT("vs1") },
-        });
+        }) };
 
-      TestCallRender(pComponent, pData, Layout, "vs1");
+      const auto pComponent = Component_t::Make({ { uT("service"), Data } });
+
+      TestCallRender(pComponent, Layout, "vs1");
     }
   }
 
@@ -5831,26 +5738,24 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Shader_Vertex)
     {
       const auto pComponent = Component_t::Make(
         {
-          { uT("data"), (const uint8_t *)ShaderData.data() },
-          { uT("count"), ShaderData.size() },
+          { uT("content"), ::std::vector<uint8_t>{ ShaderData.cbegin(), ShaderData.cend() } },
           { uT("entry"), uT("vs2") },
         });
 
-      TestCallRender(pComponent, nullptr, Layout, "vs2");
+      TestCallRender(pComponent, Layout, "vs2");
     }
 
     {
-      const auto pData = Component_t::Make(
+      const Object_t Data = { Component_t::Make(
         {
           { uT("kind"), uT("Shader") },
-          { uT("data"), (const uint8_t *)ShaderData.data() },
-          { uT("count"), ShaderData.size() },
+          { uT("content"), ::std::vector<uint8_t>{ ShaderData.cbegin(), ShaderData.cend() } },
           { uT("entry"), uT("vs2") },
-        });
+        }) };
 
-      const auto pComponent = Component_t::Make({});
+      const auto pComponent = Component_t::Make({ { uT("service"), Data } });
 
-      TestCallRender(pComponent, pData, Layout, "vs2");
+      TestCallRender(pComponent, Layout, "vs2");
     }
   }
 
@@ -5865,26 +5770,24 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Shader_Vertex)
     {
       const auto pComponent = Component_t::Make(
         {
-          { uT("data"), (const uint8_t *)ShaderData.data() },
-          { uT("count"), ShaderData.size() },
+          { uT("content"), ::std::vector<uint8_t>{ ShaderData.cbegin(), ShaderData.cend() } },
           { uT("entry"), uT("vs3") },
         });
 
-      TestCallRender(pComponent, nullptr, Layout, "vs3");
+      TestCallRender(pComponent, Layout, "vs3");
     }
 
     {
-      const auto pData = Component_t::Make(
+      const Object_t Data = { Component_t::Make(
         {
           { uT("kind"), uT("Shader") },
-          { uT("data"), (const uint8_t *)ShaderData.data() },
-          { uT("count"), ShaderData.size() },
+          { uT("content"), ::std::vector<uint8_t>{ ShaderData.cbegin(), ShaderData.cend() } },
           { uT("entry"), uT("vs3") },
-        });
+        }) };
 
-      const auto pComponent = Component_t::Make({});
+      const auto pComponent = Component_t::Make({ { uT("service"), Data } });
 
-      TestCallRender(pComponent, pData, Layout, "vs3");
+      TestCallRender(pComponent, Layout, "vs3");
     }
   }
 }
@@ -5903,9 +5806,6 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Shader_CreateVertex_Instance_InvalidVal
   const Tested_t Example{ Data_t{} };
   const ITested_t & IExample = Example;
 
-  auto itDataCreator = IExample.GetCreators().find(uT("Data"));
-  ASSERT_NE(IExample.GetCreators().end(), itDataCreator);
-
   auto itCreator = IExample.GetCreators().find(uT("Shader"));
   ASSERT_NE(IExample.GetCreators().end(), itCreator);
 
@@ -5923,8 +5823,7 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Shader_CreateVertex_Instance_InvalidVal
     const auto pShader = Component_t::Make(
       {
         { uT("entry"), uT("vs1") },
-        { uT("data"), (const uint8_t *)ShaderData.data() },
-        { uT("count"), ShaderData.size() },
+        { uT("content"), ::std::vector<uint8_t>{ ShaderData.cbegin(), ShaderData.cend() } },
         { uT("instance"), uT("invalid1909231417") },
       });
 
@@ -5932,19 +5831,15 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Shader_CreateVertex_Instance_InvalidVal
   }
 
   {
-    const auto pData = Component_t::Make(
+    const Object_t Data = { Component_t::Make(
       {
         { uT("kind"), uT("Shader") },
         { uT("entry"), uT("vs2") },
-        { uT("data"), (const uint8_t *)ShaderData.data() },
-        { uT("count"), ShaderData.size() },
+        { uT("content"), ::std::vector<uint8_t>{ ShaderData.cbegin(), ShaderData.cend() } },
         { uT("instance"), uT("invalid1909231418") },
-      });
+      }) };
 
-    auto DataRender = itDataCreator->second(pData);
-    EXPECT_EQ(nullptr, DataRender);
-
-    TestCall(Component_t::Make({}));
+    TestCall(Component_t::Make({ { uT("service"), Data } }));
   }
 }
 
@@ -5974,7 +5869,6 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Shader_CreateVertex_Instance)
 
   const auto TestCallRender = [&](
     const Component_t::ComponentPtr_t & _pShader,
-    const Component_t::ComponentPtr_t & _pData,
     const InputDesc_t _Layout,
     const ::std::string & _EntryPoint)
   {
@@ -6019,15 +5913,6 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Shader_CreateVertex_Instance)
 
     const Tested_t oExample{ Data_t{} };
     const ITested_t & IExample = oExample;
-
-    if (_pData != nullptr)
-    {
-      auto itCreator = IExample.GetCreators().find(uT("Data"));
-      ASSERT_NE(IExample.GetCreators().end(), itCreator);
-
-      auto Render = itCreator->second(_pData);
-      EXPECT_EQ(nullptr, Render);
-    }
 
     auto itCreator = IExample.GetCreators().find(uT("Shader"));
     ASSERT_NE(IExample.GetCreators().end(), itCreator);
@@ -6094,28 +5979,24 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Shader_CreateVertex_Instance)
   {
     const auto pComponent = Component_t::Make(
       {
-        { uT("data"), (const uint8_t *)ShaderData.data() },
-        { uT("count"), ShaderData.size() },
+        { uT("content"), ::std::vector<uint8_t>{ ShaderData.cbegin(), ShaderData.cend() } },
         { uT("entry"), uT("vs1") },
         { uT("instance"), uT("f4i4i4f4") },
       });
 
-    TestCallRender(pComponent, nullptr, Layout, "vs1");
+    TestCallRender(pComponent, Layout, "vs1");
   }
 
   {
-    const auto pData = Component_t::Make(
+    const Object_t Data = { Component_t::Make(
       {
         { uT("kind"), uT("Shader") },
-        { uT("data"), (const uint8_t *)ShaderData.data() },
-        { uT("count"), ShaderData.size() },
+        { uT("content"), ::std::vector<uint8_t>{ ShaderData.cbegin(), ShaderData.cend() } },
         { uT("entry"), uT("vs2") },
         { uT("instance"), uT("f4i4i4f4") },
-      });
+      }) };
 
-    const auto pComponent = Component_t::Make({});
-
-    TestCallRender(pComponent, pData, Layout, "vs2");
+    TestCallRender(Component_t::Make({ { uT("service"), Data } }), Layout, "vs2");
   }
 }
 
@@ -6133,7 +6014,6 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Shader_Pixel)
 
   const auto TestCallRender = [&](
     const Component_t::ComponentPtr_t & _pShader,
-    const Component_t::ComponentPtr_t & _pData,
     const ::std::string & _Entry)
   {
     const ::std::string PixelShaderPostfix =
@@ -6182,15 +6062,6 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Shader_Pixel)
 
     const Tested_t oExample{ Data_t{} };
     const ITested_t & IExample = oExample;
-
-    if (_pData != nullptr)
-    {
-      auto itCreator = IExample.GetCreators().find(uT("Data"));
-      ASSERT_NE(IExample.GetCreators().end(), itCreator);
-
-      auto Render = itCreator->second(_pData);
-      EXPECT_EQ(nullptr, Render);
-    }
 
     auto itCreator = IExample.GetCreators().find(uT("Shader"));
     ASSERT_NE(IExample.GetCreators().end(), itCreator);
@@ -6242,24 +6113,22 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Shader_Pixel)
     {
       const auto pComponent = Component_t::Make(
         {
-          { uT("data"), (const uint8_t *)ShaderData.data() },
-          { uT("count"), ShaderData.size() },
+          { uT("content"), ::std::vector<uint8_t>{ ShaderData.cbegin(), ShaderData.cend() } },
           { uT("entry"), Entry },
         });
 
-      TestCallRender(pComponent, nullptr, strEntry);
+      TestCallRender(pComponent, strEntry);
     }
 
     {
-      const auto pData = Component_t::Make(
+      const Object_t Data = { Component_t::Make(
         {
           { uT("kind"), uT("Shader") },
-          { uT("data"), (const uint8_t *)ShaderData.data() },
-          { uT("count"), ShaderData.size() },
+          { uT("content"), ::std::vector<uint8_t>{ ShaderData.cbegin(), ShaderData.cend() } },
           { uT("entry"), Entry },
-        });
+        }) };
 
-      TestCallRender(Component_t::Make({ }), pData, strEntry);
+      TestCallRender(Component_t::Make({ { uT("service"), Data } }), strEntry);
     }
   }
 }
@@ -6277,7 +6146,6 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Shader_Pixel_NoReturn)
 
   const auto TestCallRender = [&](
     const Component_t::ComponentPtr_t & _pShader,
-    const Component_t::ComponentPtr_t & _pData,
     const ::std::string & _Entry)
   {
     using DirectXProxy_t = ::mock::DirectX11::Proxy;
@@ -6320,15 +6188,6 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Shader_Pixel_NoReturn)
 
     const Tested_t oExample{ Data_t{} };
     const ITested_t & IExample = oExample;
-
-    if (_pData != nullptr)
-    {
-      auto itCreator = IExample.GetCreators().find(uT("Data"));
-      ASSERT_NE(IExample.GetCreators().end(), itCreator);
-
-      auto Render = itCreator->second(_pData);
-      EXPECT_EQ(nullptr, Render);
-    }
 
     auto itCreator = IExample.GetCreators().find(uT("Shader"));
     ASSERT_NE(IExample.GetCreators().end(), itCreator);
@@ -6380,26 +6239,22 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Shader_Pixel_NoReturn)
     {
       const auto pComponent = Component_t::Make(
         {
-          { uT("data"), (const uint8_t *)ShaderData.data() },
-          { uT("count"), ShaderData.size() },
+          { uT("content"), ::std::vector<uint8_t>{ ShaderData.cbegin(), ShaderData.cend() } },
           { uT("entry"), Entry },
         });
 
-      TestCallRender(pComponent, nullptr, "ps1");
+      TestCallRender(pComponent, "ps1");
     }
 
     {
-      const auto pData = Component_t::Make(
+      const Object_t Data = { Component_t::Make(
         {
           { uT("kind"), uT("Shader") },
-          { uT("data"), (const uint8_t *)ShaderData.data() },
-          { uT("count"), ShaderData.size() },
+          { uT("content"), ::std::vector<uint8_t>{ ShaderData.cbegin(), ShaderData.cend() } },
           { uT("entry"), Entry },
-        });
+        }) };
 
-      const auto pComponent = Component_t::Make({ });
-
-      TestCallRender(pComponent, pData, "ps1");
+      TestCallRender(Component_t::Make({ { uT("service"), Data } }), "ps1");
     }
   }
 }
@@ -6417,7 +6272,6 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Shader_Pixel_Multitarget)
 
   const auto TestCallRender = [&](
     const Component_t::ComponentPtr_t & _pShader,
-    const Component_t::ComponentPtr_t & _pData,
     const ::std::string & _Entry)
   {
     using DirectXProxy_t = ::mock::DirectX11::Proxy;
@@ -6460,15 +6314,6 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Shader_Pixel_Multitarget)
 
     const Tested_t oExample{ Data_t{} };
     const ITested_t & IExample = oExample;
-
-    if (_pData != nullptr)
-    {
-      auto itCreator = IExample.GetCreators().find(uT("Data"));
-      ASSERT_NE(IExample.GetCreators().end(), itCreator);
-
-      auto Render = itCreator->second(_pData);
-      EXPECT_EQ(nullptr, Render);
-    }
 
     auto itCreator = IExample.GetCreators().find(uT("Shader"));
     ASSERT_NE(IExample.GetCreators().end(), itCreator);
@@ -6520,26 +6365,22 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Shader_Pixel_Multitarget)
     {
       const auto pComponent = Component_t::Make(
         {
-          { uT("data"), (const uint8_t *)ShaderData.data() },
-          { uT("count"), ShaderData.size() },
+          { uT("content"), ::std::vector<uint8_t>{ ShaderData.cbegin(), ShaderData.cend() } },
           { uT("entry"), Entry },
         });
 
-      TestCallRender(pComponent, nullptr, strEntry);
+      TestCallRender(pComponent, strEntry);
     }
 
     {
-      const auto pData = Component_t::Make(
+      const Object_t Data = { Component_t::Make(
         {
           { uT("kind"), uT("Shader") },
-          { uT("data"), (const uint8_t *)ShaderData.data() },
-          { uT("count"), ShaderData.size() },
+          { uT("content"), ::std::vector<uint8_t>{ ShaderData.cbegin(), ShaderData.cend() } },
           { uT("entry"), Entry },
-        });
+        }) };
 
-      const auto pComponent = Component_t::Make({ });
-
-      TestCallRender(pComponent, pData, strEntry);
+      TestCallRender(Component_t::Make({ { uT("service"), Data } }), strEntry);
     }
   }
 }
@@ -6547,9 +6388,7 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Shader_Pixel_Multitarget)
 // ************************************************************************** //
 TEST_F(DirectX11_test, /*DISABLED_*/Test_Buffer_CreateVertex_Fail)
 {
-  const auto TestCallRender = [](
-    const Component_t::ComponentPtr_t _pData,
-    const Component_t::ComponentPtr_t _pBuffer)
+  const auto TestCallRender = [](const Component_t::ComponentPtr_t _pBuffer)
   {
     using DirectXProxy_t = ::mock::DirectX11::Proxy;
     DirectXProxy_t DirectXProxy;
@@ -6565,15 +6404,6 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Buffer_CreateVertex_Fail)
 
     const Tested_t oExample{ Data_t{} };
     const ITested_t & IExample = oExample;
-
-    if (_pData != nullptr)
-    {
-      auto itCreator = IExample.GetCreators().find(uT("Data"));
-      ASSERT_NE(IExample.GetCreators().end(), itCreator);
-
-      const auto Render = itCreator->second(_pData);
-      EXPECT_EQ(nullptr, Render);
-    }
 
     auto itCreator = IExample.GetCreators().find(uT("Buffer"));
     ASSERT_NE(IExample.GetCreators().end(), itCreator);
@@ -6590,44 +6420,44 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Buffer_CreateVertex_Fail)
     EXPECT_THROW(itCreator->second(_pBuffer), ::std::exception);
   };
 
-  const vertex::Polygon * pPolygon = nullptr;
+  const ::std::vector<vertex::Polygon> Polygon;
 
   {
     const auto pComponent = Component_t::Make(
       {
-        { uT("data"), pPolygon },
+        { uT("content"), Polygon },
       });
 
-    TestCallRender(nullptr, pComponent);
+    TestCallRender(pComponent);
   }
 
   {
     const auto pData = Component_t::Make(
       {
-        { uT("data"), pPolygon },
+        { uT("content"), Polygon },
       });
 
-    TestCallRender(pData, Component_t::Make({ }));
+    TestCallRender(Component_t::Make({ { uT("service"), Object_t{ pData } } }));
   }
 
-  const vertex::Polyhedron * pPolyhedron = nullptr;
+  const ::std::vector<vertex::Polyhedron> Polyhedron;
 
   {
     const auto pComponent = Component_t::Make(
       {
-        { uT("data"), pPolyhedron },
+        { uT("content"), Polyhedron },
       });
 
-    TestCallRender(nullptr, pComponent);
+    TestCallRender(pComponent);
   }
 
   {
     const auto pData = Component_t::Make(
       {
-        { uT("data"), pPolyhedron },
+        { uT("content"), Polyhedron },
       });
 
-    TestCallRender(pData, Component_t::Make({ }));
+    TestCallRender(Component_t::Make({ { uT("service"), Object_t{ pData } } }));
   }
 
   {
@@ -6636,25 +6466,29 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Buffer_CreateVertex_Fail)
 
     const auto pData = Component_t::Make(
       {
-        { uT("data"), pPolyhedron },
+        { uT("content"), Polyhedron },
       });
 
     const auto pComponent = Component_t::Make(
       {
         { uT("mapper"), Dummy },
+        { uT("service"), Object_t{ pData } }
       });
 
-    TestCallRender(pData, pComponent);
+    TestCallRender(pComponent);
   }
+
+  // 14 Июнь 2020 19:24 (unicornum.verum@gmail.com)
+  TODO("Отсутствует тест для ::covellite::api::Vertex?");
 }
 
 // ************************************************************************** //
 TEST_F(DirectX11_test, /*DISABLED_*/Test_Buffer_Vertex_Static)
 {
   const auto TestCallRender = [](
-    const Component_t::ComponentPtr_t & _pBuffer,
-    const Component_t::ComponentPtr_t & _pData,
-    const void * _pRawData, size_t _RawDataSize, size_t _VertexSize)
+    const Component_t::ComponentPtr_t & _pBuffer, 
+    const auto & _RawData,
+    size_t _VertexSize)
   {
     using DirectXProxy_t = ::mock::DirectX11::Proxy;
     DirectXProxy_t DirectXProxy;
@@ -6665,11 +6499,11 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Buffer_Vertex_Static)
     ::mock::DirectX11::Buffer Buffer;
 
     D3D11_SUBRESOURCE_DATA InitData = { 0 };
-    InitData.pSysMem = _pRawData;
+    InitData.pSysMem = _RawData.data();
 
     D3D11_BUFFER_DESC Desc = { 0 };
     Desc.Usage = D3D11_USAGE_DEFAULT;
-    Desc.ByteWidth = static_cast<UINT>(_RawDataSize * _VertexSize);
+    Desc.ByteWidth = static_cast<UINT>(_RawData.size() * _VertexSize);
     Desc.BindFlags = D3D11_BIND_VERTEX_BUFFER;
 
     using namespace ::testing;
@@ -6684,15 +6518,6 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Buffer_Vertex_Static)
 
     const Tested_t oExample{ Data_t{} };
     const ITested_t & IExample = oExample;
-
-    if (_pData != nullptr)
-    {
-      auto itCreator = IExample.GetCreators().find(uT("Data"));
-      ASSERT_NE(IExample.GetCreators().end(), itCreator);
-
-      auto Render = itCreator->second(_pData);
-      EXPECT_EQ(nullptr, Render);
-    }
 
     auto itCreator = IExample.GetCreators().find(uT("Buffer"));
     ASSERT_NE(IExample.GetCreators().end(), itCreator);
@@ -6717,40 +6542,40 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Buffer_Vertex_Static)
   };
 
   {
-    const ::std::vector<vertex::Polygon> VertexData =
+    ::std::vector<vertex::Polygon> VertexData =
     {
       { 1.0f, 2.0f, 1809081155, 3.0f, 4.0f },
       { 5.0f, 6.0f, 1809081156, 7.0f, 8.0f },
     };
+    IntroduceBufferSize(VertexData);
 
     {
       const auto pComponent = Component_t::Make(
         {
-          { uT("data"), VertexData.data() },
-          { uT("count"), VertexData.size() },
+          { uT("content"), VertexData },
         });
 
-      TestCallRender(pComponent, nullptr, 
-        VertexData.data(), VertexData.size(), sizeof(vertex::Polygon));
+      TestCallRender(pComponent, VertexData, sizeof(vertex::Polygon));
     }
 
     {
       const auto pData = Component_t::Make(
         {
           { uT("kind"), uT("Buffer") },
-          { uT("data"), VertexData.data() },
-          { uT("count"), VertexData.size() },
+          { uT("content"), VertexData },
         });
 
-      const auto pComponent = Component_t::Make({});
+      const auto pComponent = Component_t::Make(
+        {
+          { uT("service"), Object_t{ pData } }
+        });
 
-      TestCallRender(pComponent, pData, 
-        VertexData.data(), VertexData.size(), sizeof(vertex::Polygon));
+      TestCallRender(pComponent, VertexData, sizeof(vertex::Polygon));
     }
   }
 
   {
-    const ::std::vector<vertex::Polyhedron> VertexData =
+    ::std::vector<vertex::Polyhedron> VertexData =
     {
       { 
         1.0f, 2.0f, 3.0f, 
@@ -6763,35 +6588,35 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Buffer_Vertex_Static)
         15.0f, 16.0f
       },
     };
+    IntroduceBufferSize(VertexData);
 
     {
       const auto pComponent = Component_t::Make(
         {
-          { uT("data"), VertexData.data() },
-          { uT("count"), VertexData.size() },
+          { uT("content"), VertexData },
         });
 
-      TestCallRender(pComponent, nullptr, 
-        VertexData.data(), VertexData.size(), sizeof(vertex::Polyhedron));
+      TestCallRender(pComponent, VertexData, sizeof(vertex::Polyhedron));
     }
 
     {
       const auto pData = Component_t::Make(
         {
           { uT("kind"), uT("Buffer") },
-          { uT("data"), VertexData.data() },
-          { uT("count"), VertexData.size() },
+          { uT("content"), VertexData },
         });
 
-      const auto pComponent = Component_t::Make({});
+      const auto pComponent = Component_t::Make(
+        {
+          { uT("service"), Object_t{ pData } }
+        });
 
-      TestCallRender(pComponent, pData, 
-        VertexData.data(), VertexData.size(), sizeof(vertex::Polyhedron));
+      TestCallRender(pComponent, VertexData, sizeof(vertex::Polyhedron));
     }
   }
 
   {
-    const ::std::vector<::covellite::api::Vertex> VertexData =
+    ::std::vector<::covellite::api::Vertex> VertexData =
     {
       {
         1.0f, 2.0f, 3.0f, 4.0f, 
@@ -6804,30 +6629,30 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Buffer_Vertex_Static)
         16.0f, 17.0f, 18.0f, 19.0f
       },
     };
+    IntroduceBufferSize(VertexData);
 
     {
       const auto pComponent = Component_t::Make(
         {
-          { uT("data"), VertexData.data() },
-          { uT("count"), VertexData.size() },
+          { uT("content"), VertexData },
         });
 
-      TestCallRender(pComponent, nullptr,
-        VertexData.data(), VertexData.size(), sizeof(::covellite::api::Vertex));
+      TestCallRender(pComponent, VertexData, sizeof(::covellite::api::Vertex));
     }
 
     {
       const auto pData = Component_t::Make(
         {
           { uT("kind"), uT("Buffer") },
-          { uT("data"), VertexData.data() },
-          { uT("count"), VertexData.size() },
+          { uT("content"), VertexData },
         });
 
-      const auto pComponent = Component_t::Make({});
+      const auto pComponent = Component_t::Make(
+        { 
+          { uT("service"), Object_t{ pData } } 
+        });
 
-      TestCallRender(pComponent, pData,
-        VertexData.data(), VertexData.size(), sizeof(::covellite::api::Vertex));
+      TestCallRender(pComponent, VertexData, sizeof(::covellite::api::Vertex));
     }
   }
 }
@@ -6847,7 +6672,6 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Buffer_Vertex_Dynamic)
 
   const auto TestCallRender = [](
     const Component_t::ComponentPtr_t & _pBuffer,
-    const Component_t::ComponentPtr_t & _pData,
     const void * _pRawData, size_t _RawDataSize, size_t _VertexSize)
   {
     using DirectXProxy_t = ::mock::DirectX11::Proxy;
@@ -6889,15 +6713,6 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Buffer_Vertex_Dynamic)
 
     const Tested_t oExample{ Data_t{} };
     const ITested_t & IExample = oExample;
-
-    if (_pData != nullptr)
-    {
-      auto itCreator = IExample.GetCreators().find(uT("Data"));
-      ASSERT_NE(IExample.GetCreators().end(), itCreator);
-
-      auto Render = itCreator->second(_pData);
-      EXPECT_EQ(nullptr, Render);
-    }
 
     auto itCreator = IExample.GetCreators().find(uT("Buffer"));
     ASSERT_NE(IExample.GetCreators().end(), itCreator);
@@ -6993,7 +6808,7 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Buffer_Vertex_Dynamic)
       .Times(AtLeast(1));
   };
 
-  const ::std::vector<::covellite::api::Vertex> VertexData =
+  ::std::vector<::covellite::api::Vertex> VertexData =
   {
     {
       1.0f, 2.0f, 3.0f, 4.0f, 
@@ -7006,15 +6821,15 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Buffer_Vertex_Dynamic)
       16.0f, 17.0f, 18.0f, 19.0f
     },
   };
+  IntroduceBufferSize(VertexData);
 
   {
     const auto pComponent = Component_t::Make(
       {
-        { uT("data"), VertexData.data() },
-        { uT("count"), VertexData.size() },
+        { uT("content"), VertexData },
       });
 
-    TestCallRender(pComponent, nullptr,
+    TestCallRender(pComponent,
       VertexData.data(), VertexData.size(), sizeof(::covellite::api::Vertex));
   }
 
@@ -7022,13 +6837,12 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Buffer_Vertex_Dynamic)
     const auto pData = Component_t::Make(
       {
         { uT("kind"), uT("Buffer") },
-        { uT("data"), VertexData.data() },
-        { uT("count"), VertexData.size() },
+        { uT("content"), VertexData },
       });
 
-    const auto pComponent = Component_t::Make({ });
+    const auto pComponent = Component_t::Make({ { uT("service"), Object_t{ pData } } });
 
-    TestCallRender(pComponent, pData,
+    TestCallRender(pComponent,
       VertexData.data(), VertexData.size(), sizeof(::covellite::api::Vertex));
   }
 }
@@ -7103,25 +6917,16 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Transform_Default)
   const Tested_t Example{ Data_t{} };
   const ITested_t & IExample = Example;
 
-  auto itDataCreator = IExample.GetCreators().find(uT("Data"));
-  ASSERT_NE(IExample.GetCreators().end(), itDataCreator);
-
   auto itCreator = IExample.GetCreators().find(uT("Transform"));
   ASSERT_NE(IExample.GetCreators().end(), itCreator);
 
   auto pPosition = Component_t::Make({ { uT("kind"), uT("Position") } });
   auto pRotation = Component_t::Make({ { uT("kind"), uT("Rotation") } });
   auto pScale = Component_t::Make({ { uT("kind"), uT("Scale") } });
-  const auto pTransform = Component_t::Make({});
-
-  auto PositionRender = itDataCreator->second(pPosition);
-  EXPECT_EQ(nullptr, PositionRender);
-
-  auto RotationRender = itDataCreator->second(pRotation);
-  EXPECT_EQ(nullptr, RotationRender);
-
-  auto ScaleRender = itDataCreator->second(pScale);
-  EXPECT_EQ(nullptr, ScaleRender);
+  const auto pTransform = Component_t::Make(
+    {
+      { uT("service"), Object_t{ pPosition, pRotation, pScale } }
+    });
 
   const auto Render = itCreator->second(pTransform);
   ASSERT_NE(nullptr, Render);
@@ -7234,9 +7039,6 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Transform_Static)
   const Tested_t oExample{ Data_t{} };
   const ITested_t & IExample = oExample;
 
-  auto itDataCreator = IExample.GetCreators().find(uT("Data"));
-  ASSERT_NE(IExample.GetCreators().end(), itDataCreator);
-
   auto itCreator = IExample.GetCreators().find(uT("Transform"));
   ASSERT_NE(IExample.GetCreators().end(), itCreator);
 
@@ -7282,15 +7084,6 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Transform_Static)
       1204.0f, 1205.0f, 1206.0f,
       1152.0f, 1153.0f, 1154.0f);
 
-    auto PositionRender = itDataCreator->second(pPosition);
-    EXPECT_EQ(nullptr, PositionRender);
-
-    auto RotationRender = itDataCreator->second(pRotation);
-    EXPECT_EQ(nullptr, RotationRender);
-
-    auto ScaleRender = itDataCreator->second(pScale);
-    EXPECT_EQ(nullptr, ScaleRender);
-
     const auto Render = itCreator->second(_pTransform);
     ASSERT_NE(nullptr, Render);
 
@@ -7323,6 +7116,7 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Transform_Static)
   const auto pTransform = Component_t::Make(
     {
       { uT("kind"), uT("Static") },
+      { uT("service"), Object_t{ pPosition, pRotation, pScale } }
     });
 
   TestCallRender(pTransform);
@@ -7384,9 +7178,6 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Transform_Billboard)
   Tested_t Example{ Data_t{} };
   ITested_t & IExample = Example;
 
-  auto itDataCreator = IExample.GetCreators().find(uT("Data"));
-  ASSERT_NE(IExample.GetCreators().end(), itDataCreator);
-
   auto itCreator = IExample.GetCreators().find(uT("Transform"));
   ASSERT_NE(IExample.GetCreators().end(), itCreator);
 
@@ -7394,9 +7185,6 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Transform_Billboard)
 
   auto TestCallRender = [&](const Component_t::ComponentPtr_t & _pTransform)
   {
-    auto PositionRender = itDataCreator->second(pPosition);
-    EXPECT_EQ(nullptr, PositionRender);
-
     const auto Render = itCreator->second(_pTransform);
     ASSERT_NE(nullptr, Render);
 
@@ -7455,6 +7243,7 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Transform_Billboard)
   const auto pTransform = Component_t::Make(
     {
       { uT("kind"), uT("Billboard") },
+      { uT("service"), Object_t{ pPosition } }
     });
 
   TestCallRender(pTransform);
@@ -7516,9 +7305,6 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Transform_DefaultValues)
   Tested_t Example{ Data_t{} };
   ITested_t & IExample = Example;
 
-  auto itDataCreator = IExample.GetCreators().find(uT("Data"));
-  ASSERT_NE(IExample.GetCreators().end(), itDataCreator);
-
   auto itCreator = IExample.GetCreators().find(uT("Transform"));
   ASSERT_NE(IExample.GetCreators().end(), itCreator);
 
@@ -7529,18 +7315,6 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Transform_DefaultValues)
   auto TestCallRender = [&](const Component_t::ComponentPtr_t & _pComponent,
     const bool _IsFullTransform = true)
   {
-    auto PositionRender = itDataCreator->second(pPosition);
-    EXPECT_EQ(nullptr, PositionRender);
-
-    if (_IsFullTransform)
-    {
-      auto RotationRender = itDataCreator->second(pRotation);
-      EXPECT_EQ(nullptr, RotationRender);
-
-      auto ScaleRender = itDataCreator->second(pScale);
-      EXPECT_EQ(nullptr, ScaleRender);
-    }
-
     const auto Render = itCreator->second(_pComponent);
     ASSERT_NE(nullptr, Render);
 
@@ -7589,16 +7363,19 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Transform_DefaultValues)
 
   TestCallRender(Component_t::Make(
     {
+      { uT("service"), Object_t{ pPosition, pRotation, pScale } }
     }));
 
   TestCallRender(Component_t::Make(
     {
       { uT("kind"), uT("Static") },
+      { uT("service"), Object_t{ pPosition, pRotation, pScale } }
     }));
 
   TestCallRender(Component_t::Make(
     {
       { uT("kind"), uT("Billboard") },
+      { uT("service"), Object_t{ pPosition } }
     }), false);
 }
 
@@ -7619,9 +7396,6 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Transform_Combine)
 
   Tested_t Example{ Data_t{} };
   ITested_t & IExample = Example;
-
-  auto itDataCreator = IExample.GetCreators().find(uT("Data"));
-  ASSERT_NE(IExample.GetCreators().end(), itDataCreator);
 
   auto itCreator = IExample.GetCreators().find(uT("Transform"));
   ASSERT_NE(IExample.GetCreators().end(), itCreator);
@@ -7685,13 +7459,10 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Transform_Combine)
 
     MatrixIdentity = ::glm::transpose(MatrixIdentity);
 
-    for (const auto & pComponent : Components)
-    {
-      auto ScaleRender = itDataCreator->second(pComponent);
-      EXPECT_EQ(nullptr, ScaleRender);
-    }
-
-    auto Render = itCreator->second(Component_t::Make({ }));
+    auto Render = itCreator->second(Component_t::Make(
+      { 
+        { uT("service"), Object_t{ Components.begin(), Components.end() } }
+      }));
     ASSERT_NE(nullptr, Render);
 
     ::Object ExpectMatrices;
@@ -7718,15 +7489,10 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Transform_Combine)
 
     MatrixIdentity = ::glm::transpose(MatrixIdentity);
 
-    for (const auto & pComponent : Components)
-    {
-      auto ScaleRender = itDataCreator->second(pComponent);
-      EXPECT_EQ(nullptr, ScaleRender);
-    }
-
     auto Render = itCreator->second(Component_t::Make(
       {
         { uT("kind"), uT("Static") },
+        { uT("service"), Object_t{ Components.begin(), Components.end() } }
       }));
     ASSERT_NE(nullptr, Render);
 
@@ -7769,15 +7535,10 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Transform_Combine)
 
     MatrixIdentity = ::glm::transpose(MatrixIdentity);
 
-    for (const auto & pComponent : Components)
-    {
-      auto ScaleRender = itDataCreator->second(pComponent);
-      EXPECT_EQ(nullptr, ScaleRender);
-    }
-
     auto Render = itCreator->second(Component_t::Make(
       {
         { uT("kind"), uT("Billboard") },
+        { uT("service"), Object_t{ Components.begin(), Components.end() } }
       }));
     ASSERT_NE(nullptr, Render);
 
@@ -8224,9 +7985,6 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Camera_Orthographic)
   const Tested_t oExample{ Data_t{} };
   const ITested_t & IExample = oExample;
 
-  auto itDataCreator = IExample.GetCreators().find(uT("Data"));
-  ASSERT_NE(IExample.GetCreators().end(), itDataCreator);
-
   auto itCameraCreator = IExample.GetCreators().find(uT("Camera"));
   ASSERT_NE(IExample.GetCreators().end(), itCameraCreator);
 
@@ -8237,12 +7995,10 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Camera_Orthographic)
       { uT("y"), Y },
     });
 
-  auto DataRender = itDataCreator->second(pPosition);
-  EXPECT_EQ(nullptr, DataRender);
-
   const auto pCamera = Component_t::Make(
     {
       { uT("kind"), uT("Orthographic") },
+      { uT("service"), Object_t{ pPosition } }
     });
 
   auto Render = itCameraCreator->second(pCamera);
@@ -8321,9 +8077,6 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Camera_Perspective)
   const Tested_t oExample{ Data_t{} };
   const ITested_t & IExample = oExample;
 
-  auto itDataCreator = IExample.GetCreators().find(uT("Data"));
-  ASSERT_NE(IExample.GetCreators().end(), itDataCreator);
-
   auto itCameraCreator = IExample.GetCreators().find(uT("Camera"));
   ASSERT_NE(IExample.GetCreators().end(), itCameraCreator);
 
@@ -8380,11 +8133,6 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Camera_Perspective)
       ::glm::vec3{ 0.0f, 0.0f, 1.0f });
   };
 
-  const auto pCamera = Component_t::Make(
-    {
-      { uT("kind"), uT("Perspective") },
-    });
-
   // Default values
   {
     const auto AngleY = 90.0f;
@@ -8402,6 +8150,11 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Camera_Perspective)
       GetProjection(AngleY, Width, Height, ZNear, ZFar));
     Matrices.View = ::glm::transpose(View);
     Matrices.ViewInverse = ::glm::transpose(::glm::inverse(View));
+
+    const auto pCamera = Component_t::Make(
+      {
+        { uT("kind"), uT("Perspective") },
+      });
 
     auto CameraRender = itCameraCreator->second(pCamera);
     ASSERT_NE(nullptr, CameraRender);
@@ -8425,11 +8178,11 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Camera_Perspective)
         { uT("kind"), uT("Rotation") },
       });
 
-    auto PositionRender = itDataCreator->second(pPosition);
-    EXPECT_EQ(nullptr, PositionRender);
-
-    auto RotationRender = itDataCreator->second(pRotation);
-    EXPECT_EQ(nullptr, RotationRender);
+    const auto pCamera = Component_t::Make(
+      {
+        { uT("kind"), uT("Perspective") },
+        { uT("service"), Object_t{ pPosition, pRotation } }
+      });
 
     auto CameraRender = itCameraCreator->second(pCamera);
     ASSERT_NE(nullptr, CameraRender);
@@ -8628,7 +8381,628 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Camera_SetDefaultRenderTarget_And_Depth
 }
 
 // ************************************************************************** //
-TEST_F(DirectX11_test, /*DISABLED_*/Test_Fog)
+TEST_F(DirectX11_test, /*DISABLED_*/Test_Present_Index_CreateIndexBuffer_Fail)
+{
+  using DirectXProxy_t = ::mock::DirectX11::Proxy;
+  DirectXProxy_t DirectXProxy;
+  DirectXProxy_t::GetInstance() = &DirectXProxy;
+
+  ::mock::DirectX11::Device Device;
+  const ::std::vector<int> IndexData = { 1, 2, 3, 4, 5, 6 };
+
+  using namespace ::testing;
+
+  EXPECT_CALL(DirectXProxy, CreateDevice())
+    .Times(1)
+    .WillOnce(Return(&Device));
+
+  const Tested_t oExample{ Data_t{} };
+  const ITested_t & IExample = oExample;
+
+  auto itCreator = IExample.GetCreators().find(uT("Present"));
+  ASSERT_NE(IExample.GetCreators().end(), itCreator);
+
+  const auto TestCall = [&](const Component_t::ComponentPtr_t & _pComponent)
+  {
+    InSequence Dummy;
+
+    EXPECT_CALL(Device, CreateBuffer(_, _))
+      .Times(1);
+
+    EXPECT_CALL(Device, GetResult(Eq("CreateBuffer")))
+      .Times(1)
+      .WillOnce(Return(E_FAIL));
+
+    EXPECT_THROW(itCreator->second(_pComponent), ::std::exception);
+  };
+
+  {
+    const auto pPresent = Component_t::Make(
+      {
+        { uT("content"), IndexData },
+      });
+
+    TestCall(pPresent);
+  }
+
+  {
+    const auto pIndexData = Component_t::Make(
+      {
+        { uT("kind"), uT("Buffer") },
+        { uT("content"), IndexData },
+      });
+
+    TestCall(Component_t::Make({ { uT("service"), Object_t{ pIndexData } } }));
+  }
+}
+
+// ************************************************************************** //
+TEST_F(DirectX11_test, /*DISABLED_*/Test_Present_Index)
+{
+  ::std::vector<int> IndexData = { 1, 2, 3, 4, 5, 6 };
+  IntroduceBufferSize(IndexData);
+
+  const auto TestCallRender = [&](
+    const Component_t::ComponentPtr_t & _pComponent)
+  {
+    using DirectXProxy_t = ::mock::DirectX11::Proxy;
+    DirectXProxy_t DirectXProxy;
+    DirectXProxy_t::GetInstance() = &DirectXProxy;
+
+    ::mock::DirectX11::Device Device;
+    ::mock::DirectX11::DeviceContext DeviceContext;
+    ::mock::DirectX11::Buffer Buffer;
+
+    D3D11_SUBRESOURCE_DATA InitData = { 0 };
+    InitData.pSysMem = IndexData.data();
+
+    D3D11_BUFFER_DESC Desc = { 0 };
+    Desc.Usage = D3D11_USAGE_DEFAULT;
+    Desc.ByteWidth = sizeof(int) * (int)IndexData.size();
+    Desc.BindFlags = D3D11_BIND_INDEX_BUFFER;
+
+    using namespace ::testing;
+
+    EXPECT_CALL(DirectXProxy, CreateDevice())
+      .Times(1)
+      .WillOnce(Return(&Device));
+
+    EXPECT_CALL(DirectXProxy, CreateDeviceContext())
+      .Times(1)
+      .WillOnce(Return(&DeviceContext));
+
+    const Tested_t oExample{ Data_t{} };
+    const ITested_t & IExample = oExample;
+
+    auto itCreator = IExample.GetCreators().find(uT("Present"));
+    ASSERT_NE(IExample.GetCreators().end(), itCreator);
+
+    InSequence Dummy;
+
+    EXPECT_CALL(Device, CreateBuffer(Desc, InitData))
+      .Times(1)
+      .WillOnce(Return(&Buffer));
+
+    auto Render = itCreator->second(_pComponent);
+    ASSERT_NE(nullptr, Render);
+
+    EXPECT_CALL(DeviceContext, 
+      IASetIndexBuffer(&Buffer, DXGI_FORMAT_R32_UINT, 0))
+      .Times(1);
+
+    EXPECT_CALL(DeviceContext,
+      IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST))
+      .Times(1);
+
+    EXPECT_CALL(DeviceContext, DrawIndexed(IndexData.size(), 0, 0))
+      .Times(1);
+
+    Render();
+
+    EXPECT_CALL(Buffer, Release())
+      .Times(1);
+  };
+
+  {
+    const auto pComponent = Component_t::Make(
+      {
+        { uT("content"), IndexData },
+      });
+
+    TestCallRender(pComponent);
+  }
+
+  {
+    const auto pData = Component_t::Make(
+      {
+        { uT("kind"), uT("Buffer") },
+        { uT("content"), IndexData },
+      });
+
+    TestCallRender(Component_t::Make({ { uT("service"), Object_t{ pData } } }));
+  }
+}
+
+// ************************************************************************** //
+TEST_F(DirectX11_test, /*DISABLED_*/Test_Present_Instance_CreateIndexBuffer_Fail)
+{
+  using BufferMapper_t = ::covellite::api::cbBufferMap_t<void>;
+
+  using DirectXProxy_t = ::mock::DirectX11::Proxy;
+  DirectXProxy_t DirectXProxy;
+  DirectXProxy_t::GetInstance() = &DirectXProxy;
+
+  ::mock::DirectX11::Device Device;
+  const ::std::vector<int> IndexData = { 1, 2, 3, 4, 5, 6 };
+
+  using namespace ::testing;
+
+  EXPECT_CALL(DirectXProxy, CreateDevice())
+    .Times(1)
+    .WillOnce(Return(&Device));
+
+  const Tested_t oExample{ Data_t{} };
+  const ITested_t & IExample = oExample;
+
+  auto itCreator = IExample.GetCreators().find(uT("Present"));
+  ASSERT_NE(IExample.GetCreators().end(), itCreator);
+
+  const auto TestCall = [&](const Component_t::ComponentPtr_t & _pComponent)
+  {
+    InSequence Dummy;
+
+    EXPECT_CALL(Device, CreateBuffer(_, _))
+      .Times(1);
+
+    EXPECT_CALL(Device, GetResult(Eq("CreateBuffer")))
+      .Times(1)
+      .WillOnce(Return(E_FAIL));
+
+    EXPECT_THROW(itCreator->second(_pComponent), ::std::exception);
+  };
+
+  {
+    const auto pInstanceData = Component_t::Make(
+      {
+        { uT("kind"), uT("Buffer") },
+        { uT("mapper"), BufferMapper_t{} },
+      });
+
+    const auto pPresent = Component_t::Make(
+      {
+        { uT("content"), IndexData },
+        { uT("service"), Object_t{ pInstanceData } }
+      });
+
+    TestCall(pPresent);
+  }
+
+  {
+    const auto pInstanceData = Component_t::Make(
+      {
+        { uT("kind"), uT("Buffer") },
+        { uT("mapper"), BufferMapper_t{} },
+      });
+
+    const auto pIndexData = Component_t::Make(
+      {
+        { uT("kind"), uT("Buffer") },
+        { uT("content"), IndexData },
+      });
+
+    TestCall(Component_t::Make({ { uT("service"), Object_t{ pInstanceData, pIndexData } } }));
+  }
+}
+
+// ************************************************************************** //
+TEST_F(DirectX11_test, /*DISABLED_*/Test_Present_Instance_CreateInstanceBuffer_Fail)
+{
+  using BufferMapper_t = ::covellite::api::cbBufferMap_t<void>;
+
+  using DirectXProxy_t = ::mock::DirectX11::Proxy;
+  DirectXProxy_t DirectXProxy;
+  DirectXProxy_t::GetInstance() = &DirectXProxy;
+
+  ::mock::DirectX11::Device Device;
+  const ::std::vector<int> IndexData = { 1, 2, 3, 4, 5, 6 };
+
+  using namespace ::testing;
+
+  EXPECT_CALL(DirectXProxy, CreateDevice())
+    .Times(1)
+    .WillOnce(Return(&Device));
+
+  const Tested_t oExample{ Data_t{} };
+  const ITested_t & IExample = oExample;
+
+  auto itCreator = IExample.GetCreators().find(uT("Present"));
+  ASSERT_NE(IExample.GetCreators().end(), itCreator);
+
+  const auto TestCall = [&](const Component_t::ComponentPtr_t & _pComponent)
+  {
+    InSequence Dummy;
+
+    EXPECT_CALL(Device, CreateBuffer(_, _))
+      .Times(1);
+
+    EXPECT_CALL(Device, GetResult(Eq("CreateBuffer")))
+      .Times(1)
+      .WillOnce(Return(S_OK));
+
+    EXPECT_CALL(Device, CreateBuffer(_))
+      .Times(1);
+
+    EXPECT_CALL(Device, GetResult(Eq("CreateBuffer")))
+      .Times(1)
+      .WillOnce(Return(E_FAIL));
+
+    EXPECT_THROW(itCreator->second(_pComponent), ::std::exception);
+  };
+
+  {
+    const auto pInstanceData = Component_t::Make(
+      {
+        { uT("kind"), uT("Buffer") },
+        { uT("mapper"), BufferMapper_t{} },
+      });
+
+    const auto pPresent = Component_t::Make(
+      {
+        { uT("content"), IndexData },
+        { uT("service"), Object_t{ pInstanceData } }
+      });
+
+    TestCall(pPresent);
+  }
+
+  {
+    const auto pInstanceData = Component_t::Make(
+      {
+        { uT("kind"), uT("Buffer") },
+        { uT("mapper"), BufferMapper_t{} },
+      });
+
+    const auto pIndexData = Component_t::Make(
+      {
+        { uT("kind"), uT("Buffer") },
+        { uT("content"), IndexData },
+      });
+
+    TestCall(Component_t::Make({ { uT("service"), Object_t{ pInstanceData, pIndexData } } }));
+  }
+}
+
+// ************************************************************************** //
+TEST_F(DirectX11_test, /*DISABLED_*/Test_Present_Instance_Map_Fail)
+{
+  using BufferMapper_t = ::covellite::api::cbBufferMap_t<void>;
+
+  const ::std::vector<int> IndexData = { 1 };
+
+  using DirectXProxy_t = ::mock::DirectX11::Proxy;
+  DirectXProxy_t DirectXProxy;
+  DirectXProxy_t::GetInstance() = &DirectXProxy;
+
+  ::mock::DirectX11::Device Device;
+  ::mock::DirectX11::DeviceContext DeviceContext;
+  ::mock::DirectX11::Buffer IndexBuffer;
+  ::mock::DirectX11::Buffer InstanceBuffer;
+  const ::std::size_t InstanceCount = 200;
+  const ::std::size_t InstanceBlockSize = 16 * 34;
+  const ::std::size_t InstanceBufferSize = InstanceCount * InstanceBlockSize;
+
+  class MapperProxy
+  {
+  public:
+    MOCK_METHOD1(Map, bool(void *));
+  };
+
+  MapperProxy oMapperProxy;
+
+  const BufferMapper_t Mapper = [&](void * _pData)
+  {
+    return oMapperProxy.Map(_pData);
+  };
+
+  using namespace ::testing;
+
+  EXPECT_CALL(DirectXProxy, CreateDevice())
+    .Times(1)
+    .WillOnce(Return(&Device));
+
+  EXPECT_CALL(DirectXProxy, CreateDeviceContext())
+    .Times(1)
+    .WillOnce(Return(&DeviceContext));
+
+  const Tested_t oExample{ Data_t{} };
+  const ITested_t & IExample = oExample;
+
+  auto itCreator = IExample.GetCreators().find(uT("Present"));
+  ASSERT_NE(IExample.GetCreators().end(), itCreator);
+
+  const auto TestCall = [&](
+    const Component_t::ComponentPtr_t & _pComponent)
+  {
+    Render_t Render;
+
+    {
+      InSequence Dummy;
+
+      EXPECT_CALL(Device, CreateBuffer(_, _))
+        .Times(1)
+        .WillOnce(Return(&IndexBuffer));
+
+      EXPECT_CALL(Device, CreateBuffer(_))
+        .Times(1)
+        .WillOnce(Return(&InstanceBuffer));
+
+      Render = itCreator->second(_pComponent);
+      ASSERT_NE(nullptr, Render);
+
+      EXPECT_CALL(oMapperProxy, Map(nullptr))
+        .Times(1)
+        .WillOnce(Return(true));
+
+      D3D11_MAPPED_SUBRESOURCE Resource = { 0 };
+
+      EXPECT_CALL(DeviceContext, Mapped(&InstanceBuffer, _))
+        .Times(1)
+        .WillOnce(Return(Resource));
+
+      EXPECT_CALL(DeviceContext, Map(0, 0))
+        .Times(1)
+        .WillOnce(Return(E_FAIL));
+
+      EXPECT_CALL(oMapperProxy, Map(_))
+        .Times(0);
+
+      EXPECT_THROW(Render(), ::std::exception);
+    }
+
+    EXPECT_CALL(IndexBuffer, Release())
+      .Times(AtLeast(1));
+
+    EXPECT_CALL(InstanceBuffer, Release())
+      .Times(AtLeast(1));
+  };
+
+  {
+    const auto pInstanceData = Component_t::Make(
+      {
+        { uT("kind"), uT("Buffer") },
+        { uT("mapper"), Mapper },
+        { uT("size"), InstanceBufferSize },
+        { uT("count"), InstanceCount },
+      });
+
+    const auto pPresent = Component_t::Make(
+      {
+        { uT("content"), IndexData },
+        { uT("service"), Object_t{ pInstanceData } }
+      });
+
+    TestCall(pPresent);
+  }
+
+  {
+    const auto pInstanceData = Component_t::Make(
+      {
+        { uT("kind"), uT("Buffer") },
+        { uT("mapper"), Mapper },
+        { uT("size"), InstanceBufferSize },
+        { uT("count"), InstanceCount },
+      });
+
+    const auto pIndexData = Component_t::Make(
+      {
+        { uT("kind"), uT("Buffer") },
+        { uT("content"), IndexData },
+      });
+
+    TestCall(Component_t::Make({ { uT("service"), Object_t{ pInstanceData, pIndexData } } }));
+  }
+}
+
+// ************************************************************************** //
+TEST_F(DirectX11_test, /*DISABLED_*/Test_Present_Instance)
+{
+  using BufferMapper_t = ::covellite::api::cbBufferMap_t<void>;
+
+  ::std::vector<int> IndexData = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 0 };
+  IntroduceBufferSize(IndexData);
+
+  using DirectXProxy_t = ::mock::DirectX11::Proxy;
+  DirectXProxy_t DirectXProxy;
+  DirectXProxy_t::GetInstance() = &DirectXProxy;
+
+  ::mock::DirectX11::Device Device;
+  ::mock::DirectX11::DeviceContext DeviceContext;
+  ::mock::DirectX11::Buffer IndexBuffer;
+  ::mock::DirectX11::Buffer InstanceBuffer;
+  const ::std::size_t InstanceCount = 200;
+  const ::std::size_t InstanceBlockSize = 16 * 34;
+  const ::std::size_t InstanceBufferSize = InstanceCount * InstanceBlockSize;
+
+  D3D11_BUFFER_DESC IndexDesc = { 0 };
+  IndexDesc.Usage = D3D11_USAGE_DEFAULT;
+  IndexDesc.ByteWidth = sizeof(int) * (int)IndexData.size();
+  IndexDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
+
+  D3D11_SUBRESOURCE_DATA InitIndexData = { 0 };
+  InitIndexData.pSysMem = IndexData.data();
+
+  D3D11_BUFFER_DESC InstanceDesc = { 0 };
+  InstanceDesc.Usage = D3D11_USAGE_DYNAMIC;
+  InstanceDesc.ByteWidth = InstanceBufferSize;
+  InstanceDesc.BindFlags = D3D10_BIND_VERTEX_BUFFER;
+  InstanceDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
+
+  class MapperProxy
+  {
+  public:
+    MOCK_METHOD1(Map, bool(void *));
+  };
+
+  MapperProxy oMapperProxy;
+
+  const BufferMapper_t Mapper = [&](void * _pData)
+  {
+    return oMapperProxy.Map(_pData);
+  };
+
+  using namespace ::testing;
+
+  EXPECT_CALL(DirectXProxy, CreateDevice())
+    .Times(1)
+    .WillOnce(Return(&Device));
+
+  EXPECT_CALL(DirectXProxy, CreateDeviceContext())
+    .Times(1)
+    .WillOnce(Return(&DeviceContext));
+
+  const Tested_t oExample{ Data_t{} };
+  const ITested_t & IExample = oExample;
+
+  auto itCreator = IExample.GetCreators().find(uT("Present"));
+  ASSERT_NE(IExample.GetCreators().end(), itCreator);
+
+  const auto TestCall = [&](
+    const Component_t::ComponentPtr_t & _pComponent)
+  {
+    Render_t Render;
+
+    {
+      InSequence Dummy;
+
+      EXPECT_CALL(Device, CreateBuffer(IndexDesc, InitIndexData))
+        .Times(1)
+        .WillOnce(Return(&IndexBuffer));
+
+      EXPECT_CALL(Device, CreateBuffer(InstanceDesc))
+        .Times(1)
+        .WillOnce(Return(&InstanceBuffer));
+
+      Render = itCreator->second(_pComponent);
+      ASSERT_NE(nullptr, Render);
+
+      const auto TestCallDraw = [&](void)
+      {
+        EXPECT_CALL(DeviceContext,
+          IASetVertexBuffers(1, 1, &InstanceBuffer, InstanceBlockSize, 0))
+          .Times(1);
+
+        EXPECT_CALL(DeviceContext,
+          IASetIndexBuffer(&IndexBuffer, DXGI_FORMAT_R32_UINT, 0))
+          .Times(1);
+
+        EXPECT_CALL(DeviceContext,
+          IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST))
+          .Times(1);
+
+        EXPECT_CALL(DeviceContext,
+          DrawIndexedInstanced(IndexData.size(), InstanceCount, 0, 0, 0))
+          .Times(1);
+      };
+
+      // ********************* Отрисовка без обновления *********************** //
+
+      EXPECT_CALL(oMapperProxy, Map(nullptr))
+        .Times(1)
+        .WillOnce(Return(false));
+
+      EXPECT_CALL(DeviceContext, Map(_, _))
+        .Times(0);
+
+      EXPECT_CALL(oMapperProxy, Map(_))
+        .Times(0);
+
+      EXPECT_CALL(DeviceContext, Unmap(_, _))
+        .Times(0);
+
+      TestCallDraw();
+      Render();
+
+      // ********************** Отрисовка с обновлением *********************** //
+
+      D3D11_MAPPED_SUBRESOURCE Resource = { 0 };
+      Resource.pData = (void *)1909240917;
+
+      EXPECT_CALL(oMapperProxy, Map(nullptr))
+        .Times(1)
+        .WillOnce(Return(true));
+
+      EXPECT_CALL(DeviceContext, Mapped(&InstanceBuffer, D3D11_MAP_WRITE_NO_OVERWRITE))
+        .Times(1)
+        .WillOnce(Return(Resource));
+
+      EXPECT_CALL(DeviceContext, Map(0, 0))
+        .Times(1)
+        .WillOnce(Return(S_OK));
+
+      EXPECT_CALL(oMapperProxy, Map(Resource.pData))
+        .Times(1);
+
+      EXPECT_CALL(DeviceContext, Unmap(&InstanceBuffer, 0))
+        .Times(1);
+
+      TestCallDraw();
+      Render();
+    }
+
+    EXPECT_CALL(IndexBuffer, Release())
+      .Times(AtLeast(1));
+
+    EXPECT_CALL(InstanceBuffer, Release())
+      .Times(AtLeast(1));
+  };
+
+  {
+    const auto pInstanceData = Component_t::Make(
+      {
+        { uT("kind"), uT("Buffer") },
+        { uT("mapper"), Mapper },
+        { uT("size"), InstanceBufferSize },
+        { uT("count"), InstanceCount },
+      });
+
+    const auto pPresent = Component_t::Make(
+      {
+        { uT("content"), IndexData },
+        { uT("service"), Object_t{ pInstanceData } }
+      });
+
+    TestCall(pPresent);
+  }
+
+  {
+    const auto pInstanceData = Component_t::Make(
+      {
+        { uT("kind"), uT("Buffer") },
+        { uT("mapper"), Mapper },
+        { uT("size"), InstanceBufferSize },
+        { uT("count"), InstanceCount },
+      });
+
+    const auto pIndexData = Component_t::Make(
+      {
+        { uT("kind"), uT("Buffer") },
+        { uT("content"), IndexData },
+      });
+
+    TestCall(Component_t::Make({ { uT("service"), Object_t{ pInstanceData, pIndexData } } }));
+  }
+}
+
+#define Updater_test DirectX11_test
+#include "../Updater_test.hpp"
+
+static const auto ImplClassName = uT("DirectX11");
+
+#define Common_test DirectX11_test
+#include "../Common_test.hpp"
+
+// ************************************************************************** //
+TEST_F(DirectX11_test, DISABLED_Test_Fog_deprecated)
 {
   using DirectXProxy_t = ::mock::DirectX11::Proxy;
   DirectXProxy_t DirectXProxy;
@@ -8784,697 +9158,6 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Fog)
 }
 
 // ************************************************************************** //
-TEST_F(DirectX11_test, /*DISABLED_*/Test_Present_Index_CreateIndexBuffer_Fail)
-{
-  using DirectXProxy_t = ::mock::DirectX11::Proxy;
-  DirectXProxy_t DirectXProxy;
-  DirectXProxy_t::GetInstance() = &DirectXProxy;
-
-  ::mock::DirectX11::Device Device;
-  const ::std::vector<int> IndexData = { 1, 2, 3, 4, 5, 6 };
-
-  using namespace ::testing;
-
-  EXPECT_CALL(DirectXProxy, CreateDevice())
-    .Times(1)
-    .WillOnce(Return(&Device));
-
-  const Tested_t oExample{ Data_t{} };
-  const ITested_t & IExample = oExample;
-
-  auto itDataCreator = IExample.GetCreators().find(uT("Data"));
-  ASSERT_NE(IExample.GetCreators().end(), itDataCreator);
-
-  auto itCreator = IExample.GetCreators().find(uT("Present"));
-  ASSERT_NE(IExample.GetCreators().end(), itCreator);
-
-  const auto TestCall = [&](const Component_t::ComponentPtr_t & _pComponent)
-  {
-    InSequence Dummy;
-
-    EXPECT_CALL(Device, CreateBuffer(_, _))
-      .Times(1);
-
-    EXPECT_CALL(Device, GetResult(Eq("CreateBuffer")))
-      .Times(1)
-      .WillOnce(Return(E_FAIL));
-
-    EXPECT_THROW(itCreator->second(_pComponent), ::std::exception);
-  };
-
-  {
-    const auto pPresent = Component_t::Make(
-      {
-        { uT("data"), IndexData.data() },
-        { uT("count"), IndexData.size() },
-      });
-
-    TestCall(pPresent);
-  }
-
-  {
-    const auto pIndexData = Component_t::Make(
-      {
-        { uT("kind"), uT("Buffer") },
-        { uT("data"), IndexData.data() },
-        { uT("count"), IndexData.size() },
-      });
-
-    const auto Render = itDataCreator->second(pIndexData);
-    ASSERT_EQ(nullptr, Render);
-
-    TestCall(Component_t::Make({ }));
-  }
-}
-
-// ************************************************************************** //
-TEST_F(DirectX11_test, /*DISABLED_*/Test_Present_Index)
-{
-  const ::std::vector<int> IndexData = { 1, 2, 3, 4, 5, 6 };
-
-  const auto TestCallRender = [&](
-    const Component_t::ComponentPtr_t & _pComponent,
-    const Component_t::ComponentPtr_t & _pData)
-  {
-    using DirectXProxy_t = ::mock::DirectX11::Proxy;
-    DirectXProxy_t DirectXProxy;
-    DirectXProxy_t::GetInstance() = &DirectXProxy;
-
-    ::mock::DirectX11::Device Device;
-    ::mock::DirectX11::DeviceContext DeviceContext;
-    ::mock::DirectX11::Buffer Buffer;
-
-    D3D11_SUBRESOURCE_DATA InitData = { 0 };
-    InitData.pSysMem = IndexData.data();
-
-    D3D11_BUFFER_DESC Desc = { 0 };
-    Desc.Usage = D3D11_USAGE_DEFAULT;
-    Desc.ByteWidth = sizeof(int) * (int)IndexData.size();
-    Desc.BindFlags = D3D11_BIND_INDEX_BUFFER;
-
-    using namespace ::testing;
-
-    EXPECT_CALL(DirectXProxy, CreateDevice())
-      .Times(1)
-      .WillOnce(Return(&Device));
-
-    EXPECT_CALL(DirectXProxy, CreateDeviceContext())
-      .Times(1)
-      .WillOnce(Return(&DeviceContext));
-
-    const Tested_t oExample{ Data_t{} };
-    const ITested_t & IExample = oExample;
-
-    if (_pData != nullptr)
-    {
-      auto itCreator = IExample.GetCreators().find(uT("Data"));
-      ASSERT_NE(IExample.GetCreators().end(), itCreator);
-
-      auto Render = itCreator->second(_pData);
-      EXPECT_EQ(nullptr, Render);
-    }
-
-    auto itCreator = IExample.GetCreators().find(uT("Present"));
-    ASSERT_NE(IExample.GetCreators().end(), itCreator);
-
-    InSequence Dummy;
-
-    EXPECT_CALL(Device, CreateBuffer(Desc, InitData))
-      .Times(1)
-      .WillOnce(Return(&Buffer));
-
-    auto Render = itCreator->second(_pComponent);
-    ASSERT_NE(nullptr, Render);
-
-    EXPECT_CALL(DeviceContext, 
-      IASetIndexBuffer(&Buffer, DXGI_FORMAT_R32_UINT, 0))
-      .Times(1);
-
-    EXPECT_CALL(DeviceContext,
-      IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST))
-      .Times(1);
-
-    EXPECT_CALL(DeviceContext, DrawIndexed(IndexData.size(), 0, 0))
-      .Times(1);
-
-    Render();
-
-    EXPECT_CALL(Buffer, Release())
-      .Times(1);
-  };
-
-  {
-    const auto pComponent = Component_t::Make(
-      {
-        { uT("data"), IndexData.data() },
-        { uT("count"), IndexData.size() },
-      });
-
-    TestCallRender(pComponent, nullptr);
-  }
-
-  {
-    const auto pData = Component_t::Make(
-      {
-        { uT("kind"), uT("Buffer") },
-        { uT("data"), IndexData.data() },
-        { uT("count"), IndexData.size() },
-      });
-
-    TestCallRender(Component_t::Make({ }), pData);
-  }
-}
-
-// ************************************************************************** //
-TEST_F(DirectX11_test, /*DISABLED_*/Test_Present_Instance_CreateIndexBuffer_Fail)
-{
-  using BufferMapper_t = ::covellite::api::cbBufferMap_t<void>;
-
-  using DirectXProxy_t = ::mock::DirectX11::Proxy;
-  DirectXProxy_t DirectXProxy;
-  DirectXProxy_t::GetInstance() = &DirectXProxy;
-
-  ::mock::DirectX11::Device Device;
-  const ::std::vector<int> IndexData = { 1, 2, 3, 4, 5, 6 };
-
-  using namespace ::testing;
-
-  EXPECT_CALL(DirectXProxy, CreateDevice())
-    .Times(1)
-    .WillOnce(Return(&Device));
-
-  const Tested_t oExample{ Data_t{} };
-  const ITested_t & IExample = oExample;
-
-  auto itDataCreator = IExample.GetCreators().find(uT("Data"));
-  ASSERT_NE(IExample.GetCreators().end(), itDataCreator);
-
-  auto itCreator = IExample.GetCreators().find(uT("Present"));
-  ASSERT_NE(IExample.GetCreators().end(), itCreator);
-
-  const auto TestCall = [&](const Component_t::ComponentPtr_t & _pComponent)
-  {
-    InSequence Dummy;
-
-    EXPECT_CALL(Device, CreateBuffer(_, _))
-      .Times(1);
-
-    EXPECT_CALL(Device, GetResult(Eq("CreateBuffer")))
-      .Times(1)
-      .WillOnce(Return(E_FAIL));
-
-    EXPECT_THROW(itCreator->second(_pComponent), ::std::exception);
-  };
-
-  {
-    const auto pInstanceData = Component_t::Make(
-      {
-        { uT("kind"), uT("Buffer") },
-        { uT("mapper"), BufferMapper_t{} },
-      });
-
-    const auto InstanceRender = itDataCreator->second(pInstanceData);
-    ASSERT_EQ(nullptr, InstanceRender);
-
-    const auto pPresent = Component_t::Make(
-      {
-        { uT("data"), IndexData.data() },
-        { uT("count"), IndexData.size() },
-      });
-
-    TestCall(pPresent);
-  }
-
-  {
-    const auto pInstanceData = Component_t::Make(
-      {
-        { uT("kind"), uT("Buffer") },
-        { uT("mapper"), BufferMapper_t{} },
-      });
-
-    const auto InstanceRender = itDataCreator->second(pInstanceData);
-    ASSERT_EQ(nullptr, InstanceRender);
-
-    const auto pIndexData = Component_t::Make(
-      {
-        { uT("kind"), uT("Buffer") },
-        { uT("data"), IndexData.data() },
-        { uT("count"), IndexData.size() },
-      });
-
-    const auto IndexRender = itDataCreator->second(pIndexData);
-    ASSERT_EQ(nullptr, IndexRender);
-
-    TestCall(Component_t::Make({ }));
-  }
-}
-
-// ************************************************************************** //
-TEST_F(DirectX11_test, /*DISABLED_*/Test_Present_Instance_CreateInstanceBuffer_Fail)
-{
-  using BufferMapper_t = ::covellite::api::cbBufferMap_t<void>;
-
-  using DirectXProxy_t = ::mock::DirectX11::Proxy;
-  DirectXProxy_t DirectXProxy;
-  DirectXProxy_t::GetInstance() = &DirectXProxy;
-
-  ::mock::DirectX11::Device Device;
-  const ::std::vector<int> IndexData = { 1, 2, 3, 4, 5, 6 };
-
-  using namespace ::testing;
-
-  EXPECT_CALL(DirectXProxy, CreateDevice())
-    .Times(1)
-    .WillOnce(Return(&Device));
-
-  const Tested_t oExample{ Data_t{} };
-  const ITested_t & IExample = oExample;
-
-  auto itDataCreator = IExample.GetCreators().find(uT("Data"));
-  ASSERT_NE(IExample.GetCreators().end(), itDataCreator);
-
-  auto itCreator = IExample.GetCreators().find(uT("Present"));
-  ASSERT_NE(IExample.GetCreators().end(), itCreator);
-
-  const auto TestCall = [&](const Component_t::ComponentPtr_t & _pComponent)
-  {
-    InSequence Dummy;
-
-    EXPECT_CALL(Device, CreateBuffer(_, _))
-      .Times(1);
-
-    EXPECT_CALL(Device, GetResult(Eq("CreateBuffer")))
-      .Times(1)
-      .WillOnce(Return(S_OK));
-
-    EXPECT_CALL(Device, CreateBuffer(_))
-      .Times(1);
-
-    EXPECT_CALL(Device, GetResult(Eq("CreateBuffer")))
-      .Times(1)
-      .WillOnce(Return(E_FAIL));
-
-    EXPECT_THROW(itCreator->second(_pComponent), ::std::exception);
-  };
-
-  {
-    const auto pInstanceData = Component_t::Make(
-      {
-        { uT("kind"), uT("Buffer") },
-        { uT("mapper"), BufferMapper_t{} },
-      });
-
-    const auto InstanceRender = itDataCreator->second(pInstanceData);
-    ASSERT_EQ(nullptr, InstanceRender);
-
-    const auto pPresent = Component_t::Make(
-      {
-        { uT("data"), IndexData.data() },
-        { uT("count"), IndexData.size() },
-      });
-
-    TestCall(pPresent);
-  }
-
-  {
-    const auto pInstanceData = Component_t::Make(
-      {
-        { uT("kind"), uT("Buffer") },
-        { uT("mapper"), BufferMapper_t{} },
-      });
-
-    const auto InstanceRender = itDataCreator->second(pInstanceData);
-    ASSERT_EQ(nullptr, InstanceRender);
-
-    const auto pIndexData = Component_t::Make(
-      {
-        { uT("kind"), uT("Buffer") },
-        { uT("data"), IndexData.data() },
-        { uT("count"), IndexData.size() },
-      });
-
-    const auto IndexRender = itDataCreator->second(pIndexData);
-    ASSERT_EQ(nullptr, IndexRender);
-
-    TestCall(Component_t::Make({ }));
-  }
-}
-
-// ************************************************************************** //
-TEST_F(DirectX11_test, /*DISABLED_*/Test_Present_Instance_Map_Fail)
-{
-  using BufferMapper_t = ::covellite::api::cbBufferMap_t<void>;
-
-  const ::std::vector<int> IndexData = { 1 };
-
-  using DirectXProxy_t = ::mock::DirectX11::Proxy;
-  DirectXProxy_t DirectXProxy;
-  DirectXProxy_t::GetInstance() = &DirectXProxy;
-
-  ::mock::DirectX11::Device Device;
-  ::mock::DirectX11::DeviceContext DeviceContext;
-  ::mock::DirectX11::Buffer IndexBuffer;
-  ::mock::DirectX11::Buffer InstanceBuffer;
-  const ::std::size_t InstanceCount = 200;
-  const ::std::size_t InstanceBlockSize = 16 * 34;
-  const ::std::size_t InstanceBufferSize = InstanceCount * InstanceBlockSize;
-
-  class MapperProxy
-  {
-  public:
-    MOCK_METHOD1(Map, bool(void *));
-  };
-
-  MapperProxy oMapperProxy;
-
-  const BufferMapper_t Mapper = [&](void * _pData)
-  {
-    return oMapperProxy.Map(_pData);
-  };
-
-  using namespace ::testing;
-
-  EXPECT_CALL(DirectXProxy, CreateDevice())
-    .Times(1)
-    .WillOnce(Return(&Device));
-
-  EXPECT_CALL(DirectXProxy, CreateDeviceContext())
-    .Times(1)
-    .WillOnce(Return(&DeviceContext));
-
-  const Tested_t oExample{ Data_t{} };
-  const ITested_t & IExample = oExample;
-
-  auto itDataCreator = IExample.GetCreators().find(uT("Data"));
-  ASSERT_NE(IExample.GetCreators().end(), itDataCreator);
-
-  auto itCreator = IExample.GetCreators().find(uT("Present"));
-  ASSERT_NE(IExample.GetCreators().end(), itCreator);
-
-  const auto TestCall = [&](
-    const Component_t::ComponentPtr_t & _pComponent)
-  {
-    Render_t Render;
-
-    {
-      InSequence Dummy;
-
-      EXPECT_CALL(Device, CreateBuffer(_, _))
-        .Times(1)
-        .WillOnce(Return(&IndexBuffer));
-
-      EXPECT_CALL(Device, CreateBuffer(_))
-        .Times(1)
-        .WillOnce(Return(&InstanceBuffer));
-
-      Render = itCreator->second(_pComponent);
-      ASSERT_NE(nullptr, Render);
-
-      EXPECT_CALL(oMapperProxy, Map(nullptr))
-        .Times(1)
-        .WillOnce(Return(true));
-
-      D3D11_MAPPED_SUBRESOURCE Resource = { 0 };
-
-      EXPECT_CALL(DeviceContext, Mapped(&InstanceBuffer, _))
-        .Times(1)
-        .WillOnce(Return(Resource));
-
-      EXPECT_CALL(DeviceContext, Map(0, 0))
-        .Times(1)
-        .WillOnce(Return(E_FAIL));
-
-      EXPECT_CALL(oMapperProxy, Map(_))
-        .Times(0);
-
-      EXPECT_THROW(Render(), ::std::exception);
-    }
-
-    EXPECT_CALL(IndexBuffer, Release())
-      .Times(AtLeast(1));
-
-    EXPECT_CALL(InstanceBuffer, Release())
-      .Times(AtLeast(1));
-  };
-
-  {
-    const auto pInstanceData = Component_t::Make(
-      {
-        { uT("kind"), uT("Buffer") },
-        { uT("mapper"), Mapper },
-        { uT("size"), InstanceBufferSize },
-        { uT("count"), InstanceCount },
-      });
-
-    const auto InstanceRender = itDataCreator->second(pInstanceData);
-    ASSERT_EQ(nullptr, InstanceRender);
-
-    const auto pPresent = Component_t::Make(
-      {
-        { uT("data"), IndexData.data() },
-        { uT("count"), IndexData.size() },
-      });
-
-    TestCall(pPresent);
-  }
-
-  {
-    const auto pInstanceData = Component_t::Make(
-      {
-        { uT("kind"), uT("Buffer") },
-        { uT("mapper"), Mapper },
-        { uT("size"), InstanceBufferSize },
-        { uT("count"), InstanceCount },
-      });
-
-    const auto InstanceRender = itDataCreator->second(pInstanceData);
-    ASSERT_EQ(nullptr, InstanceRender);
-
-    const auto pIndexData = Component_t::Make(
-      {
-        { uT("kind"), uT("Buffer") },
-        { uT("data"), IndexData.data() },
-        { uT("count"), IndexData.size() },
-      });
-
-    const auto IndexRender = itDataCreator->second(pIndexData);
-    ASSERT_EQ(nullptr, IndexRender);
-
-    TestCall(Component_t::Make({ }));
-  }
-}
-
-// ************************************************************************** //
-TEST_F(DirectX11_test, /*DISABLED_*/Test_Present_Instance)
-{
-  using BufferMapper_t = ::covellite::api::cbBufferMap_t<void>;
-
-  const ::std::vector<int> IndexData = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 0 };
-
-  using DirectXProxy_t = ::mock::DirectX11::Proxy;
-  DirectXProxy_t DirectXProxy;
-  DirectXProxy_t::GetInstance() = &DirectXProxy;
-
-  ::mock::DirectX11::Device Device;
-  ::mock::DirectX11::DeviceContext DeviceContext;
-  ::mock::DirectX11::Buffer IndexBuffer;
-  ::mock::DirectX11::Buffer InstanceBuffer;
-  const ::std::size_t InstanceCount = 200;
-  const ::std::size_t InstanceBlockSize = 16 * 34;
-  const ::std::size_t InstanceBufferSize = InstanceCount * InstanceBlockSize;
-
-  D3D11_BUFFER_DESC IndexDesc = { 0 };
-  IndexDesc.Usage = D3D11_USAGE_DEFAULT;
-  IndexDesc.ByteWidth = sizeof(int) * (int)IndexData.size();
-  IndexDesc.BindFlags = D3D11_BIND_INDEX_BUFFER;
-
-  D3D11_SUBRESOURCE_DATA InitIndexData = { 0 };
-  InitIndexData.pSysMem = IndexData.data();
-
-  D3D11_BUFFER_DESC InstanceDesc = { 0 };
-  InstanceDesc.Usage = D3D11_USAGE_DYNAMIC;
-  InstanceDesc.ByteWidth = InstanceBufferSize;
-  InstanceDesc.BindFlags = D3D10_BIND_VERTEX_BUFFER;
-  InstanceDesc.CPUAccessFlags = D3D11_CPU_ACCESS_WRITE;
-
-  class MapperProxy
-  {
-  public:
-    MOCK_METHOD1(Map, bool(void *));
-  };
-
-  MapperProxy oMapperProxy;
-
-  const BufferMapper_t Mapper = [&](void * _pData)
-  {
-    return oMapperProxy.Map(_pData);
-  };
-
-  using namespace ::testing;
-
-  EXPECT_CALL(DirectXProxy, CreateDevice())
-    .Times(1)
-    .WillOnce(Return(&Device));
-
-  EXPECT_CALL(DirectXProxy, CreateDeviceContext())
-    .Times(1)
-    .WillOnce(Return(&DeviceContext));
-
-  const Tested_t oExample{ Data_t{} };
-  const ITested_t & IExample = oExample;
-
-  auto itDataCreator = IExample.GetCreators().find(uT("Data"));
-  ASSERT_NE(IExample.GetCreators().end(), itDataCreator);
-
-  auto itCreator = IExample.GetCreators().find(uT("Present"));
-  ASSERT_NE(IExample.GetCreators().end(), itCreator);
-
-  const auto TestCall = [&](
-    const Component_t::ComponentPtr_t & _pComponent)
-  {
-    Render_t Render;
-
-    {
-      InSequence Dummy;
-
-      EXPECT_CALL(Device, CreateBuffer(IndexDesc, InitIndexData))
-        .Times(1)
-        .WillOnce(Return(&IndexBuffer));
-
-      EXPECT_CALL(Device, CreateBuffer(InstanceDesc))
-        .Times(1)
-        .WillOnce(Return(&InstanceBuffer));
-
-      Render = itCreator->second(_pComponent);
-      ASSERT_NE(nullptr, Render);
-
-      const auto TestCallDraw = [&](void)
-      {
-        EXPECT_CALL(DeviceContext,
-          IASetVertexBuffers(1, 1, &InstanceBuffer, InstanceBlockSize, 0))
-          .Times(1);
-
-        EXPECT_CALL(DeviceContext,
-          IASetIndexBuffer(&IndexBuffer, DXGI_FORMAT_R32_UINT, 0))
-          .Times(1);
-
-        EXPECT_CALL(DeviceContext,
-          IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST))
-          .Times(1);
-
-        EXPECT_CALL(DeviceContext,
-          DrawIndexedInstanced(IndexData.size(), InstanceCount, 0, 0, 0))
-          .Times(1);
-      };
-
-      // ********************* Отрисовка без обновления *********************** //
-
-      EXPECT_CALL(oMapperProxy, Map(nullptr))
-        .Times(1)
-        .WillOnce(Return(false));
-
-      EXPECT_CALL(DeviceContext, Map(_, _))
-        .Times(0);
-
-      EXPECT_CALL(oMapperProxy, Map(_))
-        .Times(0);
-
-      EXPECT_CALL(DeviceContext, Unmap(_, _))
-        .Times(0);
-
-      TestCallDraw();
-      Render();
-
-      // ********************** Отрисовка с обновлением *********************** //
-
-      D3D11_MAPPED_SUBRESOURCE Resource = { 0 };
-      Resource.pData = (void *)1909240917;
-
-      EXPECT_CALL(oMapperProxy, Map(nullptr))
-        .Times(1)
-        .WillOnce(Return(true));
-
-      EXPECT_CALL(DeviceContext, Mapped(&InstanceBuffer, D3D11_MAP_WRITE_NO_OVERWRITE))
-        .Times(1)
-        .WillOnce(Return(Resource));
-
-      EXPECT_CALL(DeviceContext, Map(0, 0))
-        .Times(1)
-        .WillOnce(Return(S_OK));
-
-      EXPECT_CALL(oMapperProxy, Map(Resource.pData))
-        .Times(1);
-
-      EXPECT_CALL(DeviceContext, Unmap(&InstanceBuffer, 0))
-        .Times(1);
-
-      TestCallDraw();
-      Render();
-    }
-
-    EXPECT_CALL(IndexBuffer, Release())
-      .Times(AtLeast(1));
-
-    EXPECT_CALL(InstanceBuffer, Release())
-      .Times(AtLeast(1));
-  };
-
-  {
-    const auto pInstanceData = Component_t::Make(
-      {
-        { uT("kind"), uT("Buffer") },
-        { uT("mapper"), Mapper },
-        { uT("size"), InstanceBufferSize },
-        { uT("count"), InstanceCount },
-      });
-
-    const auto InstanceRender = itDataCreator->second(pInstanceData);
-    ASSERT_EQ(nullptr, InstanceRender);
-
-    const auto pPresent = Component_t::Make(
-      {
-        { uT("data"), IndexData.data() },
-        { uT("count"), IndexData.size() },
-      });
-
-    TestCall(pPresent);
-  }
-
-  {
-    const auto pInstanceData = Component_t::Make(
-      {
-        { uT("kind"), uT("Buffer") },
-        { uT("mapper"), Mapper },
-        { uT("size"), InstanceBufferSize },
-        { uT("count"), InstanceCount },
-      });
-
-    const auto InstanceRender = itDataCreator->second(pInstanceData);
-    ASSERT_EQ(nullptr, InstanceRender);
-
-    const auto pIndexData = Component_t::Make(
-      {
-        { uT("kind"), uT("Buffer") },
-        { uT("data"), IndexData.data() },
-        { uT("count"), IndexData.size() },
-      });
-
-    const auto IndexRender = itDataCreator->second(pIndexData);
-    ASSERT_EQ(nullptr, IndexRender);
-
-    TestCall(Component_t::Make({ }));
-  }
-}
-
-#define Updater_test DirectX11_test
-#include "../Updater_test.hpp"
-
-static const auto ImplClassName = uT("DirectX11");
-
-#define Common_test DirectX11_test
-#include "../Common_test.hpp"
-
-// ************************************************************************** //
 TEST_F(DirectX11_test, /*DISABLED_*/Test_Create_ConstantBuffer_Fail_deprecated)
 {
   const auto TestCall = [](const int _BufferIndex)
@@ -9524,7 +9207,7 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Create_ConstantBuffer_Fail_deprecated)
 }
 
 // ************************************************************************** //
-TEST_F(DirectX11_test, /*DISABLED_*/Test_Buffer_Polyhedron_Dynamic_deprecated)
+TEST_F(DirectX11_test, DISABLED_Test_Buffer_Polyhedron_Dynamic_deprecated)
 {
   using BufferMapper_t = ::covellite::api::cbBufferMap_t<vertex::Polyhedron>;
 
@@ -9762,7 +9445,7 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Buffer_CreateIndex_Fail_deprecated)
 }
 
 // ************************************************************************** //
-TEST_F(DirectX11_test, /*DISABLED_*/Test_Buffer_Index_deprecated)
+TEST_F(DirectX11_test, DISABLED_Test_Buffer_Index_deprecated)
 {
   const ::std::vector<int> IndexData = { 1, 2, 3, 4, 5, 6 };
 
@@ -11274,7 +10957,7 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Lights_SendInfoToPixelShader_deprecated
 }
 
 // ************************************************************************** //
-TEST_F(DirectX11_test, /*DISABLED_*/Test_Light_Ambient_deprecated)
+TEST_F(DirectX11_test, DISABLED_Test_Light_Ambient_deprecated)
 {
   using DirectXProxy_t = ::mock::DirectX11::Proxy;
   DirectXProxy_t DirectXProxy;
@@ -11427,7 +11110,7 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Light_Ambient_deprecated)
 }
 
 // ************************************************************************** //
-TEST_F(DirectX11_test, /*DISABLED_*/Test_Light_Direction_deprecated)
+TEST_F(DirectX11_test, DISABLED_Test_Light_Direction_deprecated)
 {
   using DirectXProxy_t = ::mock::DirectX11::Proxy;
   DirectXProxy_t DirectXProxy;
@@ -11612,7 +11295,7 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Light_Direction_deprecated)
 }
 
 // ************************************************************************** //
-TEST_F(DirectX11_test, /*DISABLED_*/Test_Light_Points_deprecated)
+TEST_F(DirectX11_test, DISABLED_Test_Light_Points_deprecated)
 {
   using DirectXProxy_t = ::mock::DirectX11::Proxy;
   DirectXProxy_t DirectXProxy;

@@ -186,7 +186,7 @@ auto OpenGLCommonStatic::CreateState(const ComponentPtr_t & _pComponent) -> Rend
 {
   const auto CreateAlphaTestState = [&](void)
   {
-    const auto Value = _pComponent->GetValue(uT("discard"), 0.0f);
+    const auto Value = (*_pComponent)[uT("discard")].Default(0.0f);
 
     return [=](void)
     {
@@ -205,7 +205,7 @@ auto OpenGLCommonStatic::CreateState(const ComponentPtr_t & _pComponent) -> Rend
 
 auto OpenGLCommonStatic::CreateFog(const ComponentPtr_t & _pComponent) -> Render_t /*override*/
 {
-  const auto sStyle = _pComponent->GetValue(uT("style"), uT("linear"));
+  const String_t sStyle = (*_pComponent)[uT("style")].Default(uT("linear"));
 
   // cppcheck-suppress internalAstError
   const auto Style =
@@ -215,12 +215,12 @@ auto OpenGLCommonStatic::CreateFog(const ComponentPtr_t & _pComponent) -> Render
       throw STD_EXCEPTION << "Unknown style fog: " << sStyle <<
         " [" << _pComponent->Id << "].");
 
-  const auto pFogData =
-    m_ServiceComponents.Get({ { uT("Fog"), _pComponent } })[0];
+  const auto pFogData = CapturingServiceComponent::Get(_pComponent, 
+    { { uT("Fog"), _pComponent } })[0];
 
   return [=](void)
   {
-    const Component::Fog Fog{ pFogData };
+    const Component::Fog Fog{ *pFogData };
 
     glEnable(GL_FOG);
     glHint(GL_FOG_HINT, GL_NICEST);
@@ -238,14 +238,14 @@ auto OpenGLCommonStatic::CreateMaterial(const ComponentPtr_t & _pComponent) -> R
   auto GetColor = [&](const String_t & _Name)
   {
     return GraphicApi::ARGBtoFloat4<::glm::vec4>(
-      _pComponent->GetValue(_Name, 0xFF000000));
+      (*_pComponent)[_Name].Default(0xFF000000));
   };
 
   const auto Ambient = GetColor(uT("ambient"));
   const auto Diffuse = GetColor(uT("diffuse"));
   const auto Specular = GetColor(uT("specular"));
   const auto Emission = GetColor(uT("emission"));
-  const float Shininess[] = { _pComponent->GetValue(uT("shininess"), 0.0f) };
+  const float Shininess[] = { (*_pComponent)[uT("shininess")].Default(0.0f) };
 
   return [=](void)
   {
@@ -265,8 +265,8 @@ auto OpenGLCommonStatic::CreateLight(const ComponentPtr_t & _pComponent) -> Rend
 
 auto OpenGLCommonStatic::CreateTexture(const ComponentPtr_t & _pComponent) -> Render_t /*override*/
 {
-  const auto pTextureData =
-    m_ServiceComponents.Get({ { uT("Texture"), _pComponent } })[0];
+  const auto pTextureData = CapturingServiceComponent::Get(_pComponent, 
+    { { uT("Texture"), _pComponent } })[0];
 
   static const ::std::vector<String_t> IgnoreDestination =
   {
@@ -283,13 +283,13 @@ auto OpenGLCommonStatic::CreateTexture(const ComponentPtr_t & _pComponent) -> Re
     return (itValue != _Container.cend());
   };
 
-  const auto Destination =
-    pTextureData->GetValue(uT("destination"), uT("albedo"));
+  const String_t Destination =
+    (*pTextureData)[uT("destination")].Default(uT("albedo"));
 
   if (Destination == uT("albedo"))
   {
     const auto pTexture =
-      ::std::make_shared<Texture>(Component::Texture{ pTextureData });
+      ::std::make_shared<Texture>(Component::Texture{ *pTextureData, uT("diffuse") });
 
     return [=](void)
     {
@@ -319,14 +319,14 @@ auto OpenGLCommonStatic::CreateTexture(const ComponentPtr_t & _pComponent) -> Re
 
 auto OpenGLCommonStatic::CreateBuffer(const ComponentPtr_t & _pBuffer) -> Render_t /*override*/
 {
-  const auto pBufferData = 
-    m_ServiceComponents.Get({ { uT("Buffer"), _pBuffer } })[0];
+  const auto pBufferData = CapturingServiceComponent::Get(_pBuffer, 
+    { { uT("Buffer"), _pBuffer } })[0];
 
   auto CreateConstantLightsBuffer = [&](void) -> Render_t
   {
     using Type_t = cbBufferMap_t<::Lights_t>;
 
-    if (!_pBuffer->IsType<const Type_t &>(uT("mapper")))
+    if (!(*_pBuffer)[uT("mapper")].IsType<const Type_t &>())
     {
       throw STD_EXCEPTION << "Unexpected buffer format [" <<
         "id: " << _pBuffer->Id << ", " <<
@@ -334,7 +334,7 @@ auto OpenGLCommonStatic::CreateBuffer(const ComponentPtr_t & _pBuffer) -> Render
         "kind: " << _pBuffer->Kind << "].";
     }
 
-    const auto cbBufferMapper = _pBuffer->GetValue(uT("mapper"), Type_t{});
+    const Type_t cbBufferMapper = (*_pBuffer)[uT("mapper")].Default(Type_t{});
     if (!cbBufferMapper)
     {
       throw STD_EXCEPTION << "Unexpected empty mapper: " << _pBuffer->Id;
@@ -351,21 +351,19 @@ auto OpenGLCommonStatic::CreateBuffer(const ComponentPtr_t & _pBuffer) -> Render
   {
     using Type_t = int;
 
-    if (!pBufferData->IsType<const Type_t *>(uT("data")))
+    if (!(*pBufferData)[uT("content")].IsType<::std::vector<Type_t>>())
     {
       return CreateConstantLightsBuffer();
     }
 
-    const Component::Buffer<Type_t> Info{ pBufferData };
-
-    const ::std::vector<Type_t> BufferData{ Info.pData, Info.pData + Info.Count };
+    const Component::Buffer<Type_t> Info{ *pBufferData };
 
     return [=](void)
     {
       m_DrawElements = [=](void)
       {
-        glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(BufferData.size()),
-          GL_UNSIGNED_INT, BufferData.data());
+        glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(Info.Data.size()),
+          GL_UNSIGNED_INT, Info.Data.data());
       };
     };
   };
@@ -375,18 +373,17 @@ auto OpenGLCommonStatic::CreateBuffer(const ComponentPtr_t & _pBuffer) -> Render
     using Type_t = ::covellite::api::Vertex;
     using BufferMapper_t = cbBufferMap_t<Type_t>;
 
-    if (!pBufferData->IsType<const Type_t *>(uT("data")))
+    if (!(*pBufferData)[uT("content")].IsType<::std::vector<Type_t>>())
     {
       return CreateIndexBuffer();
     }
 
-    const Component::Buffer<Type_t> Info{ pBufferData };
+    const Component::Buffer<Type_t> Info{ *pBufferData };
 
-    const auto pData = ::std::make_shared<::std::vector<Type_t>>(
-      Info.pData, Info.pData + Info.Count);
+    const auto pData = ::std::make_shared<::std::vector<Type_t>>(Info.Data);
 
-    const auto & cbBufferMapper =
-      _pBuffer->GetValue<const BufferMapper_t &>(uT("mapper"), nullptr);
+    const BufferMapper_t & cbBufferMapper =
+      (*_pBuffer)[uT("mapper")].Default(BufferMapper_t{});
 
     const Render_t FlatRender = [=](void)
     {
@@ -433,18 +430,17 @@ auto OpenGLCommonStatic::CreateBuffer(const ComponentPtr_t & _pBuffer) -> Render
     using Type_t = ::covellite::api::vertex::Polyhedron;
     using BufferMapper_t = cbBufferMap_t<Type_t>;
 
-    if (!pBufferData->IsType<const Type_t *>(uT("data")))
+    if (!(*pBufferData)[uT("content")].IsType<::std::vector<Type_t>>())
     {
       return CreateVertexBuffer();
     }
 
-    const Component::Buffer<Type_t> Info{ pBufferData };
+    const Component::Buffer<Type_t> Info{ *pBufferData };
 
-    const auto pData = ::std::make_shared<::std::vector<Type_t>>(
-      Info.pData, Info.pData + Info.Count);
+    const auto pData = ::std::make_shared<::std::vector<Type_t>>(Info.Data);
 
-    const auto & cbBufferMapper =
-      _pBuffer->GetValue<const BufferMapper_t &>(uT("mapper"), nullptr);
+    const BufferMapper_t & cbBufferMapper =
+      (*_pBuffer)[uT("mapper")].Default(BufferMapper_t{});
 
     const Render_t StaticRender = [=](void)
     {
@@ -475,26 +471,24 @@ auto OpenGLCommonStatic::CreateBuffer(const ComponentPtr_t & _pBuffer) -> Render
   {
     using Type_t = ::covellite::api::vertex::Polygon;
 
-    if (!pBufferData->IsType<const Type_t *>(uT("data")))
+    if (!(*pBufferData)[uT("content")].IsType<::std::vector<Type_t>>())
     {
       return CreatePolyhedronVertexBuffer();
     }
 
-    const Component::Buffer<Type_t> Info{ pBufferData };
-
-    const ::std::vector<Type_t> BufferData{ Info.pData, Info.pData + Info.Count };
+    const Component::Buffer<Type_t> Info{ *pBufferData };
 
     return [=](void)
     {
-      glVertexPointer(2, GL_FLOAT, sizeof(Type_t), &BufferData[0].x);
+      glVertexPointer(2, GL_FLOAT, sizeof(Type_t), &Info.Data[0].x);
       glEnableClientState(GL_VERTEX_ARRAY);
 
-      glColorPointer(4, GL_UNSIGNED_BYTE, sizeof(Type_t), &BufferData[0].ABGRColor);
+      glColorPointer(4, GL_UNSIGNED_BYTE, sizeof(Type_t), &Info.Data[0].ABGRColor);
       glEnableClientState(GL_COLOR_ARRAY);
 
       glDisableClientState(GL_NORMAL_ARRAY);
 
-      glTexCoordPointer(2, GL_FLOAT, sizeof(Type_t), &BufferData[0].u);
+      glTexCoordPointer(2, GL_FLOAT, sizeof(Type_t), &Info.Data[0].u);
       glEnableClientState(GL_TEXTURE_COORD_ARRAY);
     };
   };
@@ -514,7 +508,7 @@ auto OpenGLCommonStatic::CreateTransform(const ComponentPtr_t & _pComponent) -> 
 
   const auto GetPreRenderDefaultGeometry = [&](void) -> PreRender_t
   {
-    const auto PreRender = GetPreRenderGeometry();
+    const auto PreRender = GetPreRenderGeometry(_pComponent);
 
     return [=](::glm::mat4 & _Matrix)
     {
@@ -525,7 +519,7 @@ auto OpenGLCommonStatic::CreateTransform(const ComponentPtr_t & _pComponent) -> 
   const auto GetPreRenderStaticGeometry = [&](void) -> PreRender_t
   {
     ::glm::mat4 MatrixWorld = ::glm::identity<::glm::mat4>();
-    GetPreRenderGeometry()(MatrixWorld);
+    GetPreRenderGeometry(_pComponent)(MatrixWorld);
 
     return [=](::glm::mat4 & _Matrix)
     {
@@ -535,7 +529,8 @@ auto OpenGLCommonStatic::CreateTransform(const ComponentPtr_t & _pComponent) -> 
 
   const auto GetPreRenderBillboardGeometry = [&](void) -> PreRender_t
   {
-    const auto PreRender = OpenGLCommonStatic::GetPreRenderBillboardGeometry();
+    const auto PreRender = 
+      OpenGLCommonStatic::GetPreRenderBillboardGeometry(_pComponent);
 
     return [=](::glm::mat4 & _Matrix)
     {
@@ -571,16 +566,15 @@ auto OpenGLCommonStatic::CreateTransform(const ComponentPtr_t & _pComponent) -> 
 
 auto OpenGLCommonStatic::CreatePresentBuffer(const ComponentPtr_t &_pBuffer) -> Render_t /*override*/
 {
-  const auto pBufferData =
-    m_ServiceComponents.Get({ { uT("Buffer"), _pBuffer } })[0];
+  const auto pBufferData = CapturingServiceComponent::Get(_pBuffer, 
+    { { uT("Buffer"), _pBuffer } })[0];
 
-  const Component::Buffer<int> Info{ pBufferData };
-  const ::std::vector<int> BufferData{ Info.pData, Info.pData + Info.Count };
+  const Component::Buffer<int> Info{ *pBufferData };
 
   return [=](void)
   {
-    glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(BufferData.size()),
-      GL_UNSIGNED_INT, BufferData.data());
+    glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(Info.Data.size()),
+      GL_UNSIGNED_INT, Info.Data.data());
     glBindTexture(GL_TEXTURE_2D, 0);
 
     // Восстанавливаем матрицу вида, сформированную камерой.
@@ -594,7 +588,7 @@ auto OpenGLCommonStatic::CreateGeometry(const ComponentPtr_t & _pComponent) -> R
 
   const auto GetPreRenderDefaultGeometry = [&](void) -> PreRender_t
   {
-    const auto PreRender = GetPreRenderGeometry();
+    const auto PreRender = GetPreRenderGeometry(_pComponent);
 
     return [=](void)
     {
@@ -610,7 +604,7 @@ auto OpenGLCommonStatic::CreateGeometry(const ComponentPtr_t & _pComponent) -> R
   const auto GetPreRenderStaticGeometry = [&](void) -> PreRender_t
   {
     ::glm::mat4 MatrixWorld = ::glm::identity<::glm::mat4>();
-    GetPreRenderGeometry()(MatrixWorld);
+    GetPreRenderGeometry(_pComponent)(MatrixWorld);
 
     return [=](void)
     {
@@ -625,7 +619,8 @@ auto OpenGLCommonStatic::CreateGeometry(const ComponentPtr_t & _pComponent) -> R
 
   const auto GetPreRenderBillboardGeometry = [&](void) -> PreRender_t
   {
-    const auto PreRender = OpenGLCommonStatic::GetPreRenderBillboardGeometry();
+    const auto PreRender = 
+      OpenGLCommonStatic::GetPreRenderBillboardGeometry(_pComponent);
 
     return [=](void)
     {
@@ -641,7 +636,7 @@ auto OpenGLCommonStatic::CreateGeometry(const ComponentPtr_t & _pComponent) -> R
     };
   };
 
-  const auto Variety = _pComponent->GetValue(uT("variety"), uT("Default"));
+  const String_t Variety = (*_pComponent)[uT("variety")].Default(uT("Default"));
 
   const auto PreRender =
     (Variety == uT("Default")) ? GetPreRenderDefaultGeometry() :
@@ -689,18 +684,19 @@ auto OpenGLCommonStatic::GetCameraCommon(void) -> Render_t
   };
 }
 
-auto OpenGLCommonStatic::GetCameraOrthographic(const ComponentPtr_t &) -> Render_t
+auto OpenGLCommonStatic::GetCameraOrthographic(
+  const ComponentPtr_t & _pComponent) -> Render_t
 {
   const auto CommonRender = GetCameraCommon();
 
-  const auto ServiceComponents = m_ServiceComponents.Get(
+  const auto ServiceComponents = CapturingServiceComponent::Get(_pComponent,
     {
       { uT("Position"), api::Component::Make({}) },
     });
 
   return [=](void)
   {
-    const Component::Position Pos{ ServiceComponents[0] };
+    const Component::Position Pos{ *ServiceComponents[0] };
 
     CommonRender();
 
@@ -724,7 +720,7 @@ auto OpenGLCommonStatic::GetCameraPerspective(const ComponentPtr_t & _pComponent
 {
   const auto CommonRender = GetCameraCommon();
 
-  const auto ServiceComponents = m_ServiceComponents.Get(
+  const auto ServiceComponents = CapturingServiceComponent::Get(_pComponent,
     {
       { uT("Position"), api::Component::Make({}) },
       { uT("Rotation"), api::Component::Make({}) },
@@ -739,8 +735,8 @@ auto OpenGLCommonStatic::GetCameraPerspective(const ComponentPtr_t & _pComponent
 
     // ************************** Матрица проекции ************************** //
 
-    const auto AngleY = _pComponent->GetValue(uT("fov"), 90.0f) *
-      static_cast<float>(::alicorn::extension::cpp::math::GreedToRadian);
+    const auto AngleY = (float)(*_pComponent)[uT("fov")].Default(90.0f) *
+      ::alicorn::extension::cpp::math::Constant<float>::DegreeToRadian;
     const float zFar = 200.0f;
 
     const ::glm::mat4 Perspective = ::glm::perspectiveFovRH(AngleY,
@@ -752,17 +748,17 @@ auto OpenGLCommonStatic::GetCameraPerspective(const ComponentPtr_t & _pComponent
     // **************************** Матрица вида **************************** //
 
     // Точка, куда смотрит камера - задается как компонент Data.Position.
-    const Component::Position Look{ ServiceComponents[0] };
+    const Component::Position Look{ *ServiceComponents[0] };
 
     auto GetEye = [&](void) -> ::glm::vec3
     {
       // Расстояние от камеры до Look.
-      const auto Distance = _pComponent->GetValue(uT("distance"), 0.0f) + 0.1f;
+      const float Distance = (*_pComponent)[uT("distance")].Default(0.0f);
 
       // Точка, где расположена камера - вычисляется на основе Look, Distance и
       // компонента Data.Rotation.
 
-      const Component::Position Rot{ ServiceComponents[1] };
+      const Component::Position Rot{ *ServiceComponents[1] };
 
       ::glm::mat4 Transform = ::glm::identity<::glm::mat4>();
 
@@ -775,7 +771,7 @@ auto OpenGLCommonStatic::GetCameraPerspective(const ComponentPtr_t & _pComponent
       Transform = ::glm::rotate(Transform,
         Rot.X, ::glm::vec3{ 1.0f, 0.0f, 0.0f });
 
-      return Transform * ::glm::vec4{ Distance, 0.0f, 0.0f, 1.0f };
+      return Transform * ::glm::vec4{ Distance + 0.1f, 0.0f, 0.0f, 1.0f };
     };
 
     const ::glm::mat4 LookAt = ::glm::lookAtRH(

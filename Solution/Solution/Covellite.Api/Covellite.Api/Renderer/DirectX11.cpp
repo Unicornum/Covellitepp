@@ -292,7 +292,7 @@ auto DirectX11::CreateCamera(const ComponentPtr_t & _pComponent) -> Render_t /*o
     m_pConstants->SetCameraId(CameraId);
   };
 
-  const auto ServiceComponents = m_ServiceComponents.Get(
+  const auto ServiceComponents = CapturingServiceComponent::Get(_pComponent,
     {
       { uT("Position"), api::Component::Make({}) },
       { uT("Rotation"), api::Component::Make({}) },
@@ -300,7 +300,7 @@ auto DirectX11::CreateCamera(const ComponentPtr_t & _pComponent) -> Render_t /*o
 
   const Render_t CameraOptographic = [=](void)
   {
-    const Component::Position Pos{ ServiceComponents[0] };
+    const Component::Position Pos{ *ServiceComponents[0] };
 
     SetDefaultRenderTarget();
     DisabledBlendRender();
@@ -327,8 +327,8 @@ auto DirectX11::CreateCamera(const ComponentPtr_t & _pComponent) -> Render_t /*o
     m_pConstants->Get<::Matrices>().View = CameraMatrices.View;
     m_pConstants->Get<::Matrices>().ViewInverse = CameraMatrices.ViewInverse;
 
-    _pComponent->SetValue(uT("view"), CameraMatrices.View);
-    _pComponent->SetValue(uT("projection"), CameraMatrices.Projection);
+    (*_pComponent)[uT("view")] = CameraMatrices.View;
+    (*_pComponent)[uT("projection")] = CameraMatrices.Projection;
   };
 
   const Render_t CameraPerspective = [=](void)
@@ -346,10 +346,10 @@ auto DirectX11::CreateCamera(const ComponentPtr_t & _pComponent) -> Render_t /*o
 
     // ************************** Матрица проекции ************************** //
 
-    const auto AngleY = _pComponent->GetValue(uT("fov"), 90.0f) *
-      static_cast<float>(::alicorn::extension::cpp::math::GreedToRadian);
-    const auto zNear = _pComponent->GetValue(uT("znear"), 0.01f);
-    const auto zFar = _pComponent->GetValue(uT("zfar"), 200.0f);
+    const auto AngleY = (float)(*_pComponent)[uT("fov")].Default(90.0f) *
+      ::alicorn::extension::cpp::math::Constant<float>::DegreeToRadian;
+    const float zNear = (*_pComponent)[uT("znear")].Default(0.01f);
+    const float zFar = (*_pComponent)[uT("zfar")].Default(200.0f);
 
     CameraMatrices.Projection = ::glm::transpose(::glm::perspectiveFovRH(AngleY,
       (float)Viewport.Width, (float)Viewport.Height, zFar, zNear));
@@ -357,17 +357,17 @@ auto DirectX11::CreateCamera(const ComponentPtr_t & _pComponent) -> Render_t /*o
     // **************************** Матрица вида **************************** //
 
     // Точка, куда смотрит камера - задается как компонент Data.Position.
-    const Component::Position Look{ ServiceComponents[0] };
+    const Component::Position Look{ *ServiceComponents[0] };
 
     auto GetEye = [&](void) -> ::glm::vec3
     {
       // Расстояние от камеры до Look.
-      const auto Distance = _pComponent->GetValue(uT("distance"), 0.0f) + 0.1f;
+      const float Distance = (*_pComponent)[uT("distance")].Default(0.0f);
 
       // Точка, где расположена камера - вычисляется на основе Look, Distance и
       // компонента Data.Rotation.
 
-      const Component::Position Rot{ ServiceComponents[1] };
+      const Component::Position Rot{ *ServiceComponents[1] };
 
       ::glm::mat4 Transform = ::glm::identity<::glm::mat4>();
 
@@ -380,7 +380,7 @@ auto DirectX11::CreateCamera(const ComponentPtr_t & _pComponent) -> Render_t /*o
       Transform = ::glm::rotate(Transform,
         Rot.X, ::glm::vec3{ 1.0f, 0.0f, 0.0f });
 
-      return Transform * ::glm::vec4{ Distance, 0.0f, 0.0f, 1.0f };
+      return Transform * ::glm::vec4{ Distance + 0.1f, 0.0f, 0.0f, 1.0f };
     };
 
     const auto View = ::glm::lookAtRH(
@@ -392,8 +392,8 @@ auto DirectX11::CreateCamera(const ComponentPtr_t & _pComponent) -> Render_t /*o
     CameraMatrices.ViewInverse = ::glm::transpose(::glm::inverse(View));
     m_pConstants->Update<::Camera>();
 
-    _pComponent->SetValue(uT("view"), CameraMatrices.View);
-    _pComponent->SetValue(uT("projection"), CameraMatrices.Projection);
+    (*_pComponent)[uT("view")] = CameraMatrices.View;
+    (*_pComponent)[uT("projection")] = CameraMatrices.Projection;
 
     m_pConstants->Get<::Matrices>().Projection = CameraMatrices.Projection;
     m_pConstants->Get<::Matrices>().View = CameraMatrices.View;
@@ -433,10 +433,10 @@ public:
     const auto pDataTexture = m_pDataTexture.lock();
     if (pDataTexture)
     {
-      pDataTexture->SetValue(uT("width"), static_cast<int>(_Width));
-      pDataTexture->SetValue(uT("height"), static_cast<int>(_Height));
+      (*pDataTexture)[uT("width")] = static_cast<int>(_Width);
+      (*pDataTexture)[uT("height")] = static_cast<int>(_Height);
 
-      if (pDataTexture->IsType<const cbBufferMap_t<const void> &>(uT("mapper")))
+      if ((*pDataTexture)[uT("mapper")].IsType<const cbBufferMap_t<const void> &>())
       {
         m_pReadDataTexture = MakeRGBACopy(_pDevice, _Width, _Height);
       }
@@ -654,14 +654,14 @@ private:
 public:
   explicit Texture(const ComponentPtr_t & _pDataTexture) :
     m_pDataTexture{ _pDataTexture },
-    m_Destination{ _pDataTexture->GetValue(uT("destination"), uT("albedo")) },
+    m_Destination{ (*_pDataTexture)[uT("destination")].Default(uT("albedo")) },
     m_iDestination{ GetDestinationIndex(m_Destination) }
   {
 
   }
 };
 
-auto DirectX11::CreateBkSurface(const ComponentPtr_t &) -> Render_t /*override*/
+auto DirectX11::CreateBkSurface(const ComponentPtr_t & _pComponent) -> Render_t /*override*/
 {
   const auto pBkSurfaceTextures =
     ::std::make_shared<::std::vector<Texture::Ptr_t>>();
@@ -674,11 +674,11 @@ auto DirectX11::CreateBkSurface(const ComponentPtr_t &) -> Render_t /*override*/
     auto pTexture = ::std::make_shared<Texture>(_pDataTexture);
     pTexture->MakeTarget(m_pDevice, 
       Desc.BufferDesc.Width, Desc.BufferDesc.Height);
-    _pDataTexture->SetValue(uT("entity"), pTexture);
+    (*_pDataTexture)[uT("entity")] = pTexture;
     pBkSurfaceTextures->push_back(pTexture);
   };
 
-  m_ServiceComponents.Process(
+  CapturingServiceComponent::Process(_pComponent,
     {
       { uT("Texture"), DoDataTexture },
     });
@@ -751,7 +751,7 @@ auto DirectX11::CreateState(const ComponentPtr_t & _pComponent) -> Render_t /*ov
 
   const auto CreateScissorState = [&](void)
   {
-    const Component::Scissor ScissorData{ _pComponent };
+    const Component::Scissor ScissorData{ *_pComponent };
 
     D3D11_RASTERIZER_DESC rasterDesc = { 0 };
     rasterDesc.FillMode = D3D11_FILL_SOLID;
@@ -762,12 +762,12 @@ auto DirectX11::CreateState(const ComponentPtr_t & _pComponent) -> Render_t /*ov
     ComPtr_t<ID3D11RasterizerState> pScissor;
     DX_CHECK m_pDevice->CreateRasterizerState(&rasterDesc, &pScissor);
 
-    const auto pScissorRect = 
-      m_ServiceComponents.Get({ {uT("Rect"), _pComponent} })[0];
+    const auto pScissorRect = CapturingServiceComponent::Get(_pComponent,
+      { {uT("Rect"), _pComponent} })[0];
 
     Render_t ScissorEnabled = [=](void)
     {
-      const Component::Scissor ScissorRect{ pScissorRect };
+      const Component::Scissor ScissorRect{ *pScissorRect };
 
       D3D11_RECT Rect = { 0 };
       Rect.left = ScissorRect.Left;
@@ -790,9 +790,9 @@ auto DirectX11::CreateState(const ComponentPtr_t & _pComponent) -> Render_t /*ov
   const auto CreateDepthState = [&](void)
   {
     return GetDepthState(
-      _pComponent->GetValue(uT("enabled"), false),
-      _pComponent->GetValue(uT("clear"), false),
-      _pComponent->GetValue(uT("overwrite"), true));
+      (*_pComponent)[uT("enabled")].Default(false),
+      (*_pComponent)[uT("clear")].Default(false),
+      (*_pComponent)[uT("overwrite")].Default(true));
   };
 
   const auto CreateClearState = [&](void)
@@ -808,7 +808,7 @@ auto DirectX11::CreateState(const ComponentPtr_t & _pComponent) -> Render_t /*ov
       };
     };
     const auto BackgroundColor =
-      ARGBtoFloat4(_pComponent->GetValue(uT("color"), 0xFF000000));
+      ARGBtoFloat4((*_pComponent)[uT("color")].Default(0xFF000000));
 
     return [=](void)
     {
@@ -852,22 +852,21 @@ auto DirectX11::CreateTexture(const ComponentPtr_t & _pComponent) -> Render_t /*
 {
   using BufferMapper_t = cbBufferMap_t<const void>;
 
-  const auto pTextureData =
-    m_ServiceComponents.Get({ { uT("Texture"), _pComponent } })[0];
+  const auto pTextureData = CapturingServiceComponent::Get(_pComponent, 
+    { { uT("Texture"), _pComponent } })[0];
 
-  const Component::Texture TextureData{ pTextureData };
+  const Component::Texture TextureData{ *pTextureData, uT("albedo") };
 
-  auto pTexture = pTextureData->GetValue(uT("entity"), Texture::Ptr_t{});
+  Texture::Ptr_t pTexture = (*pTextureData)[uT("entity")].Default(Texture::Ptr_t{});
   if (pTexture == nullptr)
   {
-
     pTexture = ::std::make_shared<Texture>(pTextureData);
     pTexture->MakeSource(m_pDevice, m_pImmediateContext, TextureData.Width, 
-      TextureData.Height, TextureData.pData, TextureData.IsUsingMipmapping);
+      TextureData.Height, TextureData.Data.data(), TextureData.IsUsingMipmapping);
   }
   else
   {
-    pTextureData->SetValue(uT("entity"), Texture::Ptr_t{});
+    (*pTextureData)[uT("entity")] = Texture::Ptr_t{};
   }
 
   if (pTexture->m_pReadDataTexture == nullptr)
@@ -879,8 +878,8 @@ auto DirectX11::CreateTexture(const ComponentPtr_t & _pComponent) -> Render_t /*
     };
   }
 
-  const auto cbBufferMapper =
-    pTextureData->GetValue<const BufferMapper_t &>(uT("mapper"), BufferMapper_t{});
+  const BufferMapper_t cbBufferMapper = 
+    (*pTextureData)[uT("mapper")].Default(BufferMapper_t{});
 
   return [=](void)
   {
@@ -905,18 +904,18 @@ auto DirectX11::CreateShader(const ComponentPtr_t & _pComponent) -> Render_t /*o
 {
   using namespace ::alicorn::extension::std;
 
-  const auto pShaderDataComponent =
-    m_ServiceComponents.Get({ { uT("Shader"), _pComponent } })[0];
+  const auto pShaderDataComponent = CapturingServiceComponent::Get(_pComponent, 
+    { { uT("Shader"), _pComponent } })[0];
 
   const auto GetShaderData = [&](void)
   {
-    try
-    {
-      return Component::Shader{ pShaderDataComponent, ::DefaultDeprecated };
-    }
-    catch (const ::std::exception &) {}
+    //try
+    //{
+    //  return Component::Shader{ *pShaderDataComponent, ::DefaultDeprecated };
+    //}
+    //catch (const ::std::exception &) {}
 
-    return Component::Shader{ pShaderDataComponent, ::Default };
+    return Component::Shader{ *pShaderDataComponent, ::Default };
   };
 
   const auto ShaderData = GetShaderData();
@@ -927,7 +926,7 @@ auto DirectX11::CreateShader(const ComponentPtr_t & _pComponent) -> Render_t /*o
     "#define COVELLITE_SHADER_VERTEX\r\n";
   const auto HeaderShaderText = ::Predefined + ::Data +
     ShaderData.GetInstanceInput(::Input);
-  auto ShaderText = ShaderData.GetBody();
+  auto ShaderText = ShaderData.Data;
   ::std::string Entry = ShaderData.Entry;
 
   if (ShaderData.Kind == uT("Pixel"))
@@ -1041,15 +1040,15 @@ auto DirectX11::CreateBuffer(const ComponentPtr_t & _pComponent) -> Render_t /*o
 {
   namespace vertex = ::covellite::api::vertex;
 
-  const auto pBufferData =
-    m_ServiceComponents.Get({ { uT("Buffer"), _pComponent } })[0];
+  const auto pBufferData = CapturingServiceComponent::Get(_pComponent, 
+    { { uT("Buffer"), _pComponent } })[0];
 
-  if (pBufferData->IsType<const vertex::Polygon *>(uT("data")))
+  if ((*pBufferData)[uT("content")].IsType<::std::vector<vertex::Polygon>>())
   {
-    const Component::Buffer<vertex::Polygon> VertexData{ pBufferData };
+    const Component::Buffer<vertex::Polygon> VertexData{ *pBufferData };
 
-    auto pBuffer = 
-      Buffer::Create(m_pDevice, false, VertexData.pData, VertexData.Count);
+    auto pBuffer = Buffer::Create(m_pDevice, false, 
+      VertexData.Data.data(), VertexData.Data.size());
 
     return [=](void)
     {
@@ -1059,17 +1058,17 @@ auto DirectX11::CreateBuffer(const ComponentPtr_t & _pComponent) -> Render_t /*o
         pBuffer.GetAddressOf(), &Stride, &Offset);
     };
   }
-  else if (pBufferData->IsType<const vertex::Polyhedron *>(uT("data")))
+  else if ((*pBufferData)[uT("content")].IsType<::std::vector<vertex::Polyhedron>>())
   {
     using BufferMapper_t = cbBufferMap_t<vertex::Polyhedron>;
 
-    const Component::Buffer<vertex::Polyhedron> VertexData{ pBufferData };
+    const Component::Buffer<vertex::Polyhedron> VertexData{ *pBufferData };
 
-    const auto & cbBufferMapper =
-      _pComponent->GetValue<const BufferMapper_t &>(uT("mapper"), nullptr);
+    const BufferMapper_t & cbBufferMapper =
+      (*_pComponent)[uT("mapper")].Default(BufferMapper_t{});
 
     auto pBuffer = Buffer::Create(m_pDevice, (cbBufferMapper != nullptr), 
-      VertexData.pData, VertexData.Count);
+      VertexData.Data.data(), VertexData.Data.size());
 
     const Render_t StaticRender = [=](void)
     {
@@ -1096,17 +1095,17 @@ auto DirectX11::CreateBuffer(const ComponentPtr_t & _pComponent) -> Render_t /*o
 
     return (cbBufferMapper == nullptr) ? StaticRender : DynamicRender;
   }
-  else if (pBufferData->IsType<const ::covellite::api::Vertex *>(uT("data")))
+  else if ((*pBufferData)[uT("content")].IsType<::std::vector<::covellite::api::Vertex>>())
   {
     using BufferMapper_t = cbBufferMap_t<::covellite::api::Vertex>;
 
-    const Component::Buffer<::covellite::api::Vertex> VertexData{ pBufferData };
+    const Component::Buffer<::covellite::api::Vertex> VertexData{ *pBufferData };
 
-    const auto & cbBufferMapper =
-      _pComponent->GetValue<const BufferMapper_t &>(uT("mapper"), nullptr);
+    const BufferMapper_t & cbBufferMapper =
+      (*_pComponent)[uT("mapper")].Default(BufferMapper_t{});
 
     auto pBuffer = Buffer::Create(m_pDevice, (cbBufferMapper != nullptr),
-      VertexData.pData, VertexData.Count);
+      VertexData.Data.data(), VertexData.Data.size());
 
     const Render_t StaticRender = [=](void)
     {
@@ -1133,12 +1132,12 @@ auto DirectX11::CreateBuffer(const ComponentPtr_t & _pComponent) -> Render_t /*o
 
     return (cbBufferMapper == nullptr) ? StaticRender : DynamicRender;
   }
-  else if (_pComponent->IsType<const cbBufferMap_t<::Lights_t> &>(uT("mapper")))
+  else if ((*_pComponent)[uT("mapper")].IsType<const cbBufferMap_t<::Lights_t> &>())
   {
     using BufferMapper_t = cbBufferMap_t<::Lights_t>;
 
-    const auto cbBufferMapper = 
-      _pComponent->GetValue(uT("mapper"), BufferMapper_t{});
+    const BufferMapper_t cbBufferMapper =
+      (*_pComponent)[uT("mapper")].Default(BufferMapper_t{});
     if (!cbBufferMapper)
     {
       throw STD_EXCEPTION << "Unexpected empty mapper: " << _pComponent->Id;
@@ -1149,19 +1148,20 @@ auto DirectX11::CreateBuffer(const ComponentPtr_t & _pComponent) -> Render_t /*o
       cbBufferMapper(&m_pConstants->Get<::Object>().Lights);
     };
   }
-  else if (_pComponent->IsType<const cbBufferMap_t<void> &>(uT("mapper")))
+  else if ((*_pComponent)[uT("mapper")].IsType<const cbBufferMap_t<void> &>())
   {
     using BufferMap_t = cbBufferMap_t<void>;
     using BufferData_t = ::std::vector<uint8_t>;
 
-    const auto cbBufferMapper =
-      _pComponent->GetValue<const BufferMap_t &>(uT("mapper"), BufferMap_t{});
+    const BufferMap_t cbBufferMapper = 
+      (*_pComponent)[uT("mapper")].Default(BufferMap_t{});
     if (!cbBufferMapper)
     {
       throw STD_EXCEPTION << "Unexpected empty mapper: " << _pComponent->Id;
     }
 
-    const auto BufferSize = pBufferData->GetValue(uT("size"), (::std::size_t)0);
+    const ::std::size_t BufferSize = 
+      (*pBufferData)[uT("size")].Default((::std::size_t)0);
     if (BufferSize == 0)
     {
       throw STD_EXCEPTION << "Unexpected zero size: " << _pComponent->Id;
@@ -1191,10 +1191,10 @@ auto DirectX11::CreateBuffer(const ComponentPtr_t & _pComponent) -> Render_t /*o
     };
   }
 
-  const Component::Buffer<int> IndexData{ pBufferData };
+  const Component::Buffer<int> IndexData{ *pBufferData };
 
-  auto pBuffer = 
-    Buffer::Create(m_pDevice, false, IndexData.pData, IndexData.Count);
+  auto pBuffer = Buffer::Create(m_pDevice, false, 
+    IndexData.Data.data(), IndexData.Data.size());
 
   return [=](void)
   {
@@ -1206,9 +1206,9 @@ auto DirectX11::CreateBuffer(const ComponentPtr_t & _pComponent) -> Render_t /*o
 auto DirectX11::CreateTransform(const ComponentPtr_t & _pComponent) -> Render_t /*override*/
 {
   const auto BuildTransformMatrix =
-    (_pComponent->Kind == uT("Unknown")) ? CreateDefaultTransformRender<::Object>() :
-    (_pComponent->Kind == uT("Static")) ? CreateStaticTransformRender<::Object>() :
-    (_pComponent->Kind == uT("Billboard")) ? CreateBillboardTransformRender<::Camera, ::Object>() :
+    (_pComponent->Kind == uT("Unknown")) ? CreateDefaultTransformRender<::Object>(_pComponent) :
+    (_pComponent->Kind == uT("Static")) ? CreateStaticTransformRender<::Object>(_pComponent) :
+    (_pComponent->Kind == uT("Billboard")) ? CreateBillboardTransformRender<::Camera, ::Object>(_pComponent) :
       throw STD_EXCEPTION << "Unexpected transform component: " <<
         " [id=" << _pComponent->Id << ", kind=" << _pComponent->Kind << "].";
 
@@ -1228,11 +1228,11 @@ auto DirectX11::CreatePresentBuffer(const ComponentPtr_t & _pComponent) ->Render
 
   const auto SaveBuffer = [&](const ComponentPtr_t & _pBufferData)
   {
-    if (_pBufferData->IsType<const int *>(uT("data")))
+    if ((*_pBufferData)[uT("content")].IsType<::std::vector<int>>())
     {
       pIndexBufferData = _pBufferData;
     }
-    else if (_pBufferData->IsType<const BufferMapper_t &>(uT("mapper")))
+    else if ((*_pBufferData)[uT("mapper")].IsType<const BufferMapper_t &>())
     {
       pInstanceBufferData = _pBufferData;
     }
@@ -1242,16 +1242,16 @@ auto DirectX11::CreatePresentBuffer(const ComponentPtr_t & _pComponent) ->Render
     }
   };
 
-  m_ServiceComponents.Process(
+  CapturingServiceComponent::Process(_pComponent,
     {
       { uT("Buffer"), SaveBuffer },
     });
 
-  const Component::Buffer<int> IndexBufferData{ pIndexBufferData };
+  const Component::Buffer<int> IndexBufferData{ *pIndexBufferData };
 
   const auto pIndexBuffer = Buffer::Create(m_pDevice, false, 
-    IndexBufferData.pData, IndexBufferData.Count);
-  const auto IndexCount = static_cast<DWORD>(IndexBufferData.Count);
+    IndexBufferData.Data.data(), IndexBufferData.Data.size());
+  const auto IndexCount = static_cast<DWORD>(IndexBufferData.Data.size());
 
   if (pInstanceBufferData == nullptr)
   {
@@ -1265,18 +1265,18 @@ auto DirectX11::CreatePresentBuffer(const ComponentPtr_t & _pComponent) ->Render
     };
   }
 
-  const auto cbBufferMapper =
-    pInstanceBufferData->GetValue<const BufferMapper_t &>(uT("mapper"), nullptr);
+  const BufferMapper_t cbBufferMapper =
+    (*pInstanceBufferData)[uT("mapper")].Default(BufferMapper_t{});
 
   // 23 Сентябрь 2019 22:29 (unicornum.verum@gmail.com)
   TODO("Тест значений size и count по умолчанию");
-  const auto BufferSize =
-    pInstanceBufferData->GetValue(uT("size"), (::std::size_t)16);
+  const ::std::size_t BufferSize =
+    (*pInstanceBufferData)[uT("size")].Default((::std::size_t)16);
 
   // 24 Сентябрь 2019 08:00 (unicornum.verum@gmail.com)
   TODO("Перенести чтение параметра внутрь рендера для возможности его изменения");
   const auto InstanceCount = static_cast<UINT>(
-    pInstanceBufferData->GetValue(uT("count"), (::std::size_t)1));
+    (::std::size_t)(*pInstanceBufferData)[uT("count")].Default((::std::size_t)1));
 
   // 24 Сентябрь 2019 08:27 (unicornum.verum@gmail.com)
   TODO("Проверки выравнивания BufferSize в 16 байт и делимости без остатка BufferSize / InstanceCount");
@@ -1312,13 +1312,13 @@ auto DirectX11::CreatePresentBuffer(const ComponentPtr_t & _pComponent) ->Render
 
 auto DirectX11::CreateGeometry(const ComponentPtr_t & _pComponent) -> Render_t /*override*/
 {
-  const auto Variety = _pComponent->GetValue(uT("variety"), uT("Default"));
+  const String_t Variety = (*_pComponent)[uT("variety")].Default(uT("Default"));
 
   // cppcheck-suppress internalAstError
   const auto BuildTransformMatrix =
-    (Variety == uT("Default")) ? CreateDefaultTransformRender<::Matrices>() :
-    (Variety == uT("Static")) ? CreateStaticTransformRender<::Matrices>() :
-    (Variety == uT("Billboard")) ? CreateBillboardTransformRender<::Matrices, ::Matrices>() :
+    (Variety == uT("Default")) ? CreateDefaultTransformRender<::Matrices>(_pComponent) :
+    (Variety == uT("Static")) ? CreateStaticTransformRender<::Matrices>(_pComponent) :
+    (Variety == uT("Billboard")) ? CreateBillboardTransformRender<::Matrices, ::Matrices>(_pComponent) :
       throw STD_EXCEPTION << "Unknown variety: " << Variety <<
         " [id=" << _pComponent->Id << "].";
 
@@ -1426,7 +1426,8 @@ auto DirectX11::GetDepthState(
 }
 
 template<class TConstantBuffer>
-auto DirectX11::CreateDefaultTransformRender(void) -> Render_t
+auto DirectX11::CreateDefaultTransformRender(
+  const ComponentPtr_t & _pComponent) -> Render_t
 {
   ::std::deque<Render_t> PreRenders;
 
@@ -1436,7 +1437,7 @@ auto DirectX11::CreateDefaultTransformRender(void) -> Render_t
     {
       auto & World = m_pConstants->Get<TConstantBuffer>().World;
 
-      const Component::Position Position{ _pPosition };
+      const Component::Position Position{ *_pPosition };
 
       World = ::glm::translate(World,
         ::glm::vec3{ Position.X, Position.Y, Position.Z });
@@ -1449,7 +1450,7 @@ auto DirectX11::CreateDefaultTransformRender(void) -> Render_t
     {
       auto & World = m_pConstants->Get<::Object>().World;
 
-      const Component::Rotation Rotation{ _pRotation };
+      const Component::Rotation Rotation{ *_pRotation };
 
       World = ::glm::rotate(World, Rotation.Z, ::glm::vec3{ 0.0f, 0.0f, 1.0f });
       World = ::glm::rotate(World, Rotation.Y, ::glm::vec3{ 0.0f, 1.0f, 0.0f });
@@ -1463,7 +1464,7 @@ auto DirectX11::CreateDefaultTransformRender(void) -> Render_t
     {
       auto & World = m_pConstants->Get<::Object>().World;
 
-      const Component::Scale Scale{ _pScale };
+      const Component::Scale Scale{ *_pScale };
 
       World = ::glm::scale(World, ::glm::vec3{ Scale.X, Scale.Y, Scale.Z });
     });
@@ -1475,7 +1476,7 @@ auto DirectX11::CreateDefaultTransformRender(void) -> Render_t
       ::glm::transpose(m_pConstants->Get<::Object>().World);
   });
 
-  m_ServiceComponents.Process(
+  CapturingServiceComponent::Process(_pComponent,
     {
       { uT("Position"), CreatePosition },
       { uT("Rotation"), CreateRotation },
@@ -1494,9 +1495,9 @@ auto DirectX11::CreateDefaultTransformRender(void) -> Render_t
 }
 
 template<class TConstantBuffer>
-auto DirectX11::CreateStaticTransformRender(void) -> Render_t
+auto DirectX11::CreateStaticTransformRender(const ComponentPtr_t & _pComponent) -> Render_t
 {
-  CreateDefaultTransformRender<TConstantBuffer>()();
+  CreateDefaultTransformRender<TConstantBuffer>(_pComponent)();
   const auto World = m_pConstants->Get<TConstantBuffer>().World;
 
   return [=](void)
@@ -1506,7 +1507,7 @@ auto DirectX11::CreateStaticTransformRender(void) -> Render_t
 }
 
 template<class TCamera, class TConstantBuffer>
-auto DirectX11::CreateBillboardTransformRender(void) -> Render_t
+auto DirectX11::CreateBillboardTransformRender(const ComponentPtr_t & _pComponent) -> Render_t
 {
   ::std::deque<Render_t> PreRenders;
 
@@ -1516,7 +1517,7 @@ auto DirectX11::CreateBillboardTransformRender(void) -> Render_t
     {
       auto & World = m_pConstants->Get<TConstantBuffer>().World;
 
-      const Component::Position Position{ _pPosition };
+      const Component::Position Position{ *_pPosition };
 
       World = ::glm::translate(World,
         ::glm::vec3{ Position.X, Position.Y, Position.Z });
@@ -1529,7 +1530,8 @@ auto DirectX11::CreateBillboardTransformRender(void) -> Render_t
       ::glm::transpose(m_pConstants->Get<TConstantBuffer>().World);
   });
 
-  m_ServiceComponents.Process({ { uT("Position"), CreatePosition } });
+  CapturingServiceComponent::Process(_pComponent, 
+    { { uT("Position"), CreatePosition } });
 
   PreRenders.push_front([=](void)
   {

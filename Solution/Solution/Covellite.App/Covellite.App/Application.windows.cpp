@@ -52,7 +52,7 @@ Application::Application(const Run_t & _Run) :
 
   WINAPI_CHECK RegisterClassEx(&WindowClass);
 
-  m_Events[events::Application.Exit].Connect([]()
+  m_Events[events::Application.Exit].Connect([](void) noexcept
   { 
     PostQuitMessage(0); 
   });
@@ -123,7 +123,7 @@ Application::Application(EventBased) :
 */
 ::std::string Application::GetCommandLine(void) const
 {
-  auto * pCommandLine = GetCommandLineA();
+  const auto * const pCommandLine = GetCommandLineA();
   return (pCommandLine == nullptr) ? "" : pCommandLine;
 }
 
@@ -144,7 +144,8 @@ bool Application::PostCommand(bool _IsWaitMessage)
 
   bool IsLostFocus = false;
 
-  const ProcessEvents_t ProcessEventsContinuous = [&IsLostFocus](MSG & _Message)
+  const ProcessEvents_t ProcessEventsContinuous = 
+    [&IsLostFocus](MSG & _Message) noexcept
   {
     const auto Result = (IsLostFocus) ?
       USING_MOCK ::GetMessage(&_Message, NULL, 0, 0) :

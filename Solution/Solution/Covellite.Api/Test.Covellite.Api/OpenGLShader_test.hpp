@@ -136,9 +136,6 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_BkSurface)
   ITested_t & IExample = Example;
   IExample.PresentFrame();
 
-  auto itDataCreator = IExample.GetCreators().find(uT("Data"));
-  ASSERT_NE(IExample.GetCreators().end(), itDataCreator);
-
   auto itCreator = IExample.GetCreators().find(uT("BkSurface"));
   ASSERT_NE(IExample.GetCreators().end(), itCreator);
 
@@ -168,20 +165,15 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_BkSurface)
 
   InSequence Dummy;
 
-  ::std::vector<Component_t::ComponentPtr_t> m_TextureComponents;
+  Object_t m_TextureComponents;
 
   for (::std::size_t i = 0; i < Destinations.size(); i++)
   {
-    const auto pTexture = Component_t::Make(
+    m_TextureComponents.push_back(Component_t::Make(
       {
         { uT("kind"), uT("Texture") },
         { uT("destination"), Destinations[i] },
-      });
-
-    auto DataRender = itDataCreator->second(pTexture);
-    EXPECT_EQ(nullptr, DataRender);
-
-    m_TextureComponents.push_back(pTexture);
+      }));
   }
 
   EXPECT_CALL(GLProxy, GetFloatv(GL_VIEWPORT))
@@ -218,7 +210,7 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_BkSurface)
       .Times(1);
 
     EXPECT_CALL(GLProxy, TexImage2D(GL_TEXTURE_2D, 0, _,
-      Width, Height, 0, Format, _, nullptr))
+      Width, Height, 0, Format, _, ::std::vector<uint8_t>{}))
       .Times(1);
 
     EXPECT_CALL(GLProxy, BindTexture(GL_TEXTURE_2D, 0))
@@ -240,7 +232,10 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_BkSurface)
   EXPECT_CALL(GLProxy, BindFramebuffer(GL_FRAMEBUFFER, 0))
     .Times(1);
 
-  auto Render = itCreator->second(Component_t::Make({}));
+  auto Render = itCreator->second(Component_t::Make(
+    { 
+      { uT("service"), m_TextureComponents }
+    }));
   ASSERT_NE(nullptr, Render);
 
   EXPECT_CALL(GLProxy, TexImage2D(_, _, _, _, _, _, _, _, _))
@@ -284,9 +279,6 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_BkSurface_RenderDepthOnly)
   const Tested_t Example{ Data_t{} };
   const ITested_t & IExample = Example;
 
-  auto itDataCreator = IExample.GetCreators().find(uT("Data"));
-  ASSERT_NE(IExample.GetCreators().end(), itDataCreator);
-
   auto itCreator = IExample.GetCreators().find(uT("BkSurface"));
   ASSERT_NE(IExample.GetCreators().end(), itCreator);
 
@@ -310,14 +302,14 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_BkSurface_RenderDepthOnly)
       { uT("destination"), uT("depth") },
     });
 
-  auto DataRender = itDataCreator->second(pTexture);
-  EXPECT_EQ(nullptr, DataRender);
-
   EXPECT_CALL(GLProxy, CheckFramebufferStatus(GL_FRAMEBUFFER))
     .Times(1)
     .WillOnce(Return(GL_FRAMEBUFFER_COMPLETE));
 
-  auto Render = itCreator->second(Component_t::Make({}));
+  auto Render = itCreator->second(Component_t::Make(
+    {
+      { uT("service"), Object_t{ pTexture } }
+    }));
   ASSERT_NE(nullptr, Render);
 
   EXPECT_CALL(GLProxy, DrawBuffers(::std::vector<::mock::GLenum>{}))
@@ -338,9 +330,6 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_BkSurface_Mapping)
   Tested_t Example{ Data_t{} };
   ITested_t & IExample = Example;
   IExample.PresentFrame();
-
-  auto itDataCreator = IExample.GetCreators().find(uT("Data"));
-  ASSERT_NE(IExample.GetCreators().end(), itDataCreator);
 
   auto itCreator = IExample.GetCreators().find(uT("BkSurface"));
   ASSERT_NE(IExample.GetCreators().end(), itCreator);
@@ -371,21 +360,16 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_BkSurface_Mapping)
 
   InSequence Dummy;
 
-  ::std::vector<Component_t::ComponentPtr_t> m_TextureComponents;
+  Object_t m_TextureComponents;
 
   for (::std::size_t i = 0; i < Destinations.size(); i++)
   {
-    const auto pTexture = Component_t::Make(
+    m_TextureComponents.push_back(Component_t::Make(
       {
         { uT("kind"), uT("Texture") },
         { uT("destination"), Destinations[i] },
         { uT("mapper"), BufferMapper_t{} },
-      });
-
-    auto DataRender = itDataCreator->second(pTexture);
-    EXPECT_EQ(nullptr, DataRender);
-
-    m_TextureComponents.push_back(pTexture);
+      }));
   }
 
   EXPECT_CALL(GLProxy, GetFloatv(GL_VIEWPORT))
@@ -422,7 +406,7 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_BkSurface_Mapping)
       .Times(1);
 
     EXPECT_CALL(GLProxy, TexImage2D(GL_TEXTURE_2D, 0, _,
-      Width, Height, 0, Format, _, nullptr))
+      Width, Height, 0, Format, _, ::std::vector<uint8_t>{}))
       .Times(1);
 
     EXPECT_CALL(GLProxy, BindTexture(GL_TEXTURE_2D, 0))
@@ -444,7 +428,10 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_BkSurface_Mapping)
   EXPECT_CALL(GLProxy, BindFramebuffer(GL_FRAMEBUFFER, 0))
     .Times(1);
 
-  auto Render = itCreator->second(Component_t::Make({}));
+  auto Render = itCreator->second(Component_t::Make(
+    {
+      { uT("service"), m_TextureComponents }
+    }));
   ASSERT_NE(nullptr, Render);
 
   EXPECT_CALL(GLProxy, TexImage2D(_, _, _, _, _, _, _, _, _))
@@ -489,9 +476,6 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_BkSurface_ResizeWindow)
   ITested_t & IExample = Example;
   IExample.PresentFrame();
 
-  auto itDataCreator = IExample.GetCreators().find(uT("Data"));
-  ASSERT_NE(IExample.GetCreators().end(), itDataCreator);
-
   auto itCreator = IExample.GetCreators().find(uT("BkSurface"));
   ASSERT_NE(IExample.GetCreators().end(), itCreator);
 
@@ -518,20 +502,15 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_BkSurface_ResizeWindow)
 
   InSequence Dummy;
 
-  ::std::vector<Component_t::ComponentPtr_t> m_TextureComponents;
+  Object_t m_TextureComponents;
 
   for (::std::size_t i = 0; i < Destinations.size(); i++)
   {
-    const auto pTexture = Component_t::Make(
+    m_TextureComponents.push_back(Component_t::Make(
       {
         { uT("kind"), uT("Texture") },
         { uT("destination"), Destinations[i] },
-      });
-
-    auto DataRender = itDataCreator->second(pTexture);
-    EXPECT_EQ(nullptr, DataRender);
-
-    m_TextureComponents.push_back(pTexture);
+      }));
   }
 
   EXPECT_CALL(GLProxy, GetFloatv(GL_VIEWPORT))
@@ -548,7 +527,7 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_BkSurface_ResizeWindow)
       .Times(1);
 
     EXPECT_CALL(GLProxy, TexImage2D(GL_TEXTURE_2D, _, _,
-      Width, Height, _, _, _, nullptr))
+      Width, Height, _, _, _, ::std::vector<uint8_t>{}))
       .Times(1);
 
     EXPECT_CALL(GLProxy, BindTexture(GL_TEXTURE_2D, 0))
@@ -563,7 +542,10 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_BkSurface_ResizeWindow)
     .Times(1)
     .WillOnce(Return(GL_FRAMEBUFFER_COMPLETE));
 
-  auto Render = itCreator->second(Component_t::Make({}));
+  auto Render = itCreator->second(Component_t::Make(
+    {
+      { uT("service"), m_TextureComponents }
+    }));
   ASSERT_NE(nullptr, Render);
 
   EXPECT_CALL(GLProxy, TexImage2D(_, _, _, _, _, _, _, _, _))
@@ -595,7 +577,7 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_BkSurface_ResizeWindow)
       .Times(1);
 
     EXPECT_CALL(GLProxy, TexImage2D(GL_TEXTURE_2D, _, _,
-      Width2, Height2, _, _, _, nullptr))
+      Width2, Height2, _, _, _, ::std::vector<uint8_t>{}))
       .Times(1);
 
     EXPECT_CALL(GLProxy, BindTexture(GL_TEXTURE_2D, 0))
@@ -643,9 +625,6 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_BkSurface_ResizeWindow_Mapping)
   ITested_t & IExample = Example;
   IExample.PresentFrame();
 
-  auto itDataCreator = IExample.GetCreators().find(uT("Data"));
-  ASSERT_NE(IExample.GetCreators().end(), itDataCreator);
-
   auto itCreator = IExample.GetCreators().find(uT("BkSurface"));
   ASSERT_NE(IExample.GetCreators().end(), itCreator);
 
@@ -672,21 +651,16 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_BkSurface_ResizeWindow_Mapping)
 
   InSequence Dummy;
 
-  ::std::vector<Component_t::ComponentPtr_t> m_TextureComponents;
+  Object_t m_TextureComponents;
 
   for (::std::size_t i = 0; i < Destinations.size(); i++)
   {
-    const auto pTexture = Component_t::Make(
+    m_TextureComponents.push_back(Component_t::Make(
       {
         { uT("kind"), uT("Texture") },
         { uT("destination"), Destinations[i] },
         { uT("mapper"), BufferMapper_t{}}
-     });
-
-    auto DataRender = itDataCreator->second(pTexture);
-    EXPECT_EQ(nullptr, DataRender);
-
-    m_TextureComponents.push_back(pTexture);
+      }));
   }
 
   EXPECT_CALL(GLProxy, GetFloatv(GL_VIEWPORT))
@@ -703,7 +677,7 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_BkSurface_ResizeWindow_Mapping)
       .Times(1);
 
     EXPECT_CALL(GLProxy, TexImage2D(GL_TEXTURE_2D, _, _,
-      Width, Height, _, _, _, nullptr))
+      Width, Height, _, _, _, ::std::vector<uint8_t>{}))
       .Times(1);
 
     EXPECT_CALL(GLProxy, BindTexture(GL_TEXTURE_2D, 0))
@@ -718,7 +692,10 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_BkSurface_ResizeWindow_Mapping)
     .Times(1)
     .WillOnce(Return(GL_FRAMEBUFFER_COMPLETE));
 
-  auto Render = itCreator->second(Component_t::Make({}));
+  auto Render = itCreator->second(Component_t::Make(
+    {
+      { uT("service"), m_TextureComponents }
+    }));
   ASSERT_NE(nullptr, Render);
 
   for (::std::size_t i = 0; i < m_TextureComponents.size(); i++)
@@ -762,7 +739,7 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_BkSurface_ResizeWindow_Mapping)
       .Times(1);
 
     EXPECT_CALL(GLProxy, TexImage2D(GL_TEXTURE_2D, _, _,
-      Width2, Height2, _, _, _, nullptr))
+      Width2, Height2, _, _, _, ::std::vector<uint8_t>{}))
       .Times(1);
 
     EXPECT_CALL(GLProxy, BindTexture(GL_TEXTURE_2D, 0))
@@ -815,9 +792,6 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Shader_InvalidType)
   const Tested_t Example{ Data_t{} };
   const ITested_t & IExample = Example;
 
-  auto itDataCreator = IExample.GetCreators().find(uT("Data"));
-  ASSERT_NE(IExample.GetCreators().end(), itDataCreator);
-
   auto itCreator = IExample.GetCreators().find(uT("Shader"));
   ASSERT_NE(IExample.GetCreators().end(), itCreator);
 
@@ -840,8 +814,7 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Shader_InvalidType)
     const auto pShader = Component_t::Make(
       {
         { uT("entry"), uT("vs1") },
-        { uT("data"), (const uint8_t *)ShaderData.data() },
-        { uT("count"), ShaderData.size() },
+        { uT("content"), ::std::vector<uint8_t>{ ShaderData.begin(), ShaderData.end() } },
       });
 
     TestCall(pShader);
@@ -852,14 +825,10 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Shader_InvalidType)
       {
         { uT("kind"), uT("Shader") },
         { uT("entry"), uT("vs2") },
-        { uT("data"), (const uint8_t *)ShaderData.data() },
-        { uT("count"), ShaderData.size() },
+        { uT("content"), ::std::vector<uint8_t>{ ShaderData.begin(), ShaderData.end() } },
       });
 
-    auto DataRender = itDataCreator->second(pData);
-    EXPECT_EQ(nullptr, DataRender);
-
-    TestCall(Component_t::Make({}));
+    TestCall(Component_t::Make({ { uT("service"), Object_t{ pData } } }));
   }
 }
 
@@ -872,9 +841,6 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Shader_NotExistsEntryPoint)
 
   const Tested_t Example{ Data_t{} };
   const ITested_t & IExample = Example;
-
-  auto itDataCreator = IExample.GetCreators().find(uT("Data"));
-  ASSERT_NE(IExample.GetCreators().end(), itDataCreator);
 
   auto itCreator = IExample.GetCreators().find(uT("Shader"));
   ASSERT_NE(IExample.GetCreators().end(), itCreator);
@@ -909,10 +875,7 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Shader_NotExistsEntryPoint)
         { uT("entry"), uT("vsUnknown") },
       });
 
-    auto DataRender = itDataCreator->second(pData);
-    EXPECT_EQ(nullptr, DataRender);
-
-    TestCall(Component_t::Make({}));
+    TestCall(Component_t::Make({ { uT("service"), Object_t{ pData } } }));
   }
 }
 
@@ -925,9 +888,6 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Shader_CompileFail)
 
   const Tested_t Example{ Data_t{} };
   const ITested_t & IExample = Example;
-
-  auto itDataCreator = IExample.GetCreators().find(uT("Data"));
-  ASSERT_NE(IExample.GetCreators().end(), itDataCreator);
 
   auto itCreator = IExample.GetCreators().find(uT("Shader"));
   ASSERT_NE(IExample.GetCreators().end(), itCreator);
@@ -982,10 +942,7 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Shader_CompileFail)
         { uT("entry"), uT("vsVolume") },
       });
 
-    auto DataRender = itDataCreator->second(pData);
-    EXPECT_EQ(nullptr, DataRender);
-
-    TestCall(Component_t::Make({}));
+    TestCall(Component_t::Make({ { uT("service"), Object_t{ pData } } }));
   }
 }
 
@@ -1003,9 +960,6 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Shader_CreateVertex_Default)
 
   const Tested_t Example{ Data_t{} };
   const ITested_t & IExample = Example;
-
-  auto itDataCreator = IExample.GetCreators().find(uT("Data"));
-  ASSERT_NE(IExample.GetCreators().end(), itDataCreator);
 
   auto itCreator = IExample.GetCreators().find(uT("Shader"));
   ASSERT_NE(IExample.GetCreators().end(), itCreator);
@@ -1076,10 +1030,7 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Shader_CreateVertex_Default)
         { uT("entry"), uT("vsVolume") },
       });
 
-    auto DataRender = itDataCreator->second(pData);
-    EXPECT_EQ(nullptr, DataRender);
-
-    TestCall(Component_t::Make({}), "vsVolume");
+    TestCall(Component_t::Make({ { uT("service"), Object_t{ pData } } }), "vsVolume");
   }
 }
 
@@ -1096,9 +1047,6 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Shader_CreateVertex)
 
   const Tested_t Example{ Data_t{} };
   const ITested_t & IExample = Example;
-
-  auto itDataCreator = IExample.GetCreators().find(uT("Data"));
-  ASSERT_NE(IExample.GetCreators().end(), itDataCreator);
 
   auto itCreator = IExample.GetCreators().find(uT("Shader"));
   ASSERT_NE(IExample.GetCreators().end(), itCreator);
@@ -1157,8 +1105,7 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Shader_CreateVertex)
     const auto pShader = Component_t::Make(
       {
         { uT("entry"), uT("vs1") },
-        { uT("data"), (const uint8_t *)ShaderData.data() },
-        { uT("count"), ShaderData.size() },
+        { uT("content"), ::std::vector<uint8_t>{ ShaderData.begin(), ShaderData.end() } },
       });
 
     TestCall(pShader, "vs1");
@@ -1169,14 +1116,10 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Shader_CreateVertex)
       {
         { uT("kind"), uT("Shader") },
         { uT("entry"), uT("vs2") },
-        { uT("data"), (const uint8_t *)ShaderData.data() },
-        { uT("count"), ShaderData.size() },
+        { uT("content"), ::std::vector<uint8_t>{ ShaderData.begin(), ShaderData.end() } },
       });
 
-    auto DataRender = itDataCreator->second(pData);
-    EXPECT_EQ(nullptr, DataRender);
-
-    TestCall(Component_t::Make({}), "vs2");
+    TestCall(Component_t::Make({ { uT("service"), Object_t{ pData } } }), "vs2");
   }
 }
 
@@ -1193,9 +1136,6 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Shader_CreateVertex_Instance_Invalid
 
   const Tested_t Example{ Data_t{} };
   const ITested_t & IExample = Example;
-
-  auto itDataCreator = IExample.GetCreators().find(uT("Data"));
-  ASSERT_NE(IExample.GetCreators().end(), itDataCreator);
 
   auto itCreator = IExample.GetCreators().find(uT("Shader"));
   ASSERT_NE(IExample.GetCreators().end(), itCreator);
@@ -1214,8 +1154,7 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Shader_CreateVertex_Instance_Invalid
     const auto pShader = Component_t::Make(
       {
         { uT("entry"), uT("vs1") },
-        { uT("data"), (const uint8_t *)ShaderData.data() },
-        { uT("count"), ShaderData.size() },
+        { uT("content"), ::std::vector<uint8_t>{ ShaderData.begin(), ShaderData.end() } },
         { uT("instance"), uT("invalid1909231417") },
       });
 
@@ -1227,15 +1166,11 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Shader_CreateVertex_Instance_Invalid
       {
         { uT("kind"), uT("Shader") },
         { uT("entry"), uT("vs2") },
-        { uT("data"), (const uint8_t *)ShaderData.data() },
-        { uT("count"), ShaderData.size() },
+        { uT("content"), ::std::vector<uint8_t>{ ShaderData.begin(), ShaderData.end() } },
         { uT("instance"), uT("invalid1909231418") },
      });
 
-    auto DataRender = itDataCreator->second(pData);
-    EXPECT_EQ(nullptr, DataRender);
-
-    TestCall(Component_t::Make({}));
+    TestCall(Component_t::Make({ { uT("service"), Object_t{ pData } } }));
   }
 }
 
@@ -1252,9 +1187,6 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Shader_CreateVertex_Instance)
 
   const Tested_t Example{ Data_t{} };
   const ITested_t & IExample = Example;
-
-  auto itDataCreator = IExample.GetCreators().find(uT("Data"));
-  ASSERT_NE(IExample.GetCreators().end(), itDataCreator);
 
   auto itCreator = IExample.GetCreators().find(uT("Shader"));
   ASSERT_NE(IExample.GetCreators().end(), itCreator);
@@ -1327,8 +1259,7 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Shader_CreateVertex_Instance)
     const auto pShader = Component_t::Make(
       {
         { uT("entry"), uT("vs1") },
-        { uT("data"), (const uint8_t *)ShaderData.data() },
-        { uT("count"), ShaderData.size() },
+        { uT("content"), ::std::vector<uint8_t>{ ShaderData.begin(), ShaderData.end() } },
         { uT("instance"), uT("f4f4i4f4") },
       });
 
@@ -1340,15 +1271,11 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Shader_CreateVertex_Instance)
       {
         { uT("kind"), uT("Shader") },
         { uT("entry"), uT("vs2") },
-        { uT("data"), (const uint8_t *)ShaderData.data() },
-        { uT("count"), ShaderData.size() },
+        { uT("content"), ::std::vector<uint8_t>{ ShaderData.begin(), ShaderData.end() } },
         { uT("instance"), uT("f4f4i4f4") },
       });
 
-    auto DataRender = itDataCreator->second(pData);
-    EXPECT_EQ(nullptr, DataRender);
-
-    TestCall(Component_t::Make({}), "vs2");
+    TestCall(Component_t::Make({ { uT("service"), Object_t{ pData } } }), "vs2");
   }
 }
 
@@ -1361,9 +1288,6 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Shader_CreatePixel_Default)
 
   const Tested_t Example{ Data_t{} };
   const ITested_t & IExample = Example;
-
-  auto itDataCreator = IExample.GetCreators().find(uT("Data"));
-  ASSERT_NE(IExample.GetCreators().end(), itDataCreator);
 
   auto itCreator = IExample.GetCreators().find(uT("Shader"));
   ASSERT_NE(IExample.GetCreators().end(), itCreator);
@@ -1430,10 +1354,7 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Shader_CreatePixel_Default)
         { uT("entry"), uT("psLightened") },
       });
 
-    auto DataRender = itDataCreator->second(pData);
-    EXPECT_EQ(nullptr, DataRender);
-
-    TestCall(Component_t::Make({}), "psLightened");
+    TestCall(Component_t::Make({ { uT("service"), Object_t{ pData } } }), "psLightened");
   }
 }
 
@@ -1450,9 +1371,6 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Shader_CreatePixel_SingleTarget)
 
   const Tested_t Example{ Data_t{} };
   const ITested_t & IExample = Example;
-
-  auto itDataCreator = IExample.GetCreators().find(uT("Data"));
-  ASSERT_NE(IExample.GetCreators().end(), itDataCreator);
 
   auto itCreator = IExample.GetCreators().find(uT("Shader"));
   ASSERT_NE(IExample.GetCreators().end(), itCreator);
@@ -1507,8 +1425,7 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Shader_CreatePixel_SingleTarget)
     const auto pShader = Component_t::Make(
       {
         { uT("entry"), uT("ps1") },
-        { uT("data"), (const uint8_t *)ShaderData.data() },
-        { uT("count"), ShaderData.size() },
+        { uT("content"), ::std::vector<uint8_t>{ ShaderData.begin(), ShaderData.end() } },
       });
 
     TestCall(pShader, "ps1");
@@ -1519,14 +1436,10 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Shader_CreatePixel_SingleTarget)
       {
         { uT("kind"), uT("Shader") },
         { uT("entry"), uT("ps2") },
-        { uT("data"), (const uint8_t *)ShaderData.data() },
-        { uT("count"), ShaderData.size() },
+        { uT("content"), ::std::vector<uint8_t>{ ShaderData.begin(), ShaderData.end() } },
       });
 
-    auto DataRender = itDataCreator->second(pData);
-    EXPECT_EQ(nullptr, DataRender);
-
-    TestCall(Component_t::Make({}), "ps2");
+    TestCall(Component_t::Make({ { uT("service"), Object_t{ pData } } }), "ps2");
   }
 }
 
@@ -1542,9 +1455,6 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Shader_CreatePixel_MultiTarget)
 
   const Tested_t Example{ Data_t{} };
   const ITested_t & IExample = Example;
-
-  auto itDataCreator = IExample.GetCreators().find(uT("Data"));
-  ASSERT_NE(IExample.GetCreators().end(), itDataCreator);
 
   auto itCreator = IExample.GetCreators().find(uT("Shader"));
   ASSERT_NE(IExample.GetCreators().end(), itCreator);
@@ -1598,8 +1508,7 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Shader_CreatePixel_MultiTarget)
     const auto pShader = Component_t::Make(
       {
         { uT("entry"), uT("ps") },
-        { uT("data"), (const uint8_t *)ShaderData.data() },
-        { uT("count"), ShaderData.size() },
+        { uT("content"), ::std::vector<uint8_t>{ ShaderData.begin(), ShaderData.end() } },
       });
 
     TestCall(pShader, "ps");
@@ -1610,14 +1519,10 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Shader_CreatePixel_MultiTarget)
       {
         { uT("kind"), uT("Shader") },
         { uT("entry"), uT("ps") },
-        { uT("data"), (const uint8_t *)ShaderData.data() },
-        { uT("count"), ShaderData.size() },
+        { uT("content"), ::std::vector<uint8_t>{ ShaderData.begin(), ShaderData.end() } },
       });
 
-    auto DataRender = itDataCreator->second(pData);
-    EXPECT_EQ(nullptr, DataRender);
-
-    TestCall(Component_t::Make({}), "ps");
+    TestCall(Component_t::Make({ { uT("service"), Object_t{ pData } } }), "ps");
   }
 }
 
@@ -1633,9 +1538,6 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Shader_CreatePixel_NoReturn)
 
   const Tested_t Example{ Data_t{} };
   const ITested_t & IExample = Example;
-
-  auto itDataCreator = IExample.GetCreators().find(uT("Data"));
-  ASSERT_NE(IExample.GetCreators().end(), itDataCreator);
 
   auto itCreator = IExample.GetCreators().find(uT("Shader"));
   ASSERT_NE(IExample.GetCreators().end(), itCreator);
@@ -1689,8 +1591,7 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Shader_CreatePixel_NoReturn)
     const auto pShader = Component_t::Make(
       {
         { uT("entry"), uT("ps") },
-        { uT("data"), (const uint8_t *)ShaderData.data() },
-        { uT("count"), ShaderData.size() },
+        { uT("content"), ::std::vector<uint8_t>{ ShaderData.begin(), ShaderData.end() } },
       });
 
     TestCall(pShader, "ps");
@@ -1701,14 +1602,10 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Shader_CreatePixel_NoReturn)
       {
         { uT("kind"), uT("Shader") },
         { uT("entry"), uT("ps") },
-        { uT("data"), (const uint8_t *)ShaderData.data() },
-        { uT("count"), ShaderData.size() },
+        { uT("content"), ::std::vector<uint8_t>{ ShaderData.begin(), ShaderData.end() } },
       });
 
-    auto DataRender = itDataCreator->second(pData);
-    EXPECT_EQ(nullptr, DataRender);
-
-    TestCall(Component_t::Make({}), "ps");
+    TestCall(Component_t::Make({ { uT("service"), Object_t{ pData } } }), "ps");
   }
 }
 
@@ -1729,18 +1626,28 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Shader_UsingProgram_DeleteVertexShad
   auto itCreator = IExample.GetCreators().find(uT("Shader"));
   ASSERT_NE(IExample.GetCreators().end(), itCreator);
 
-  const auto pVertexShader = Component_t::Make(
+  const auto pVertexShader0 = Component_t::Make(
     {
       { uT("entry"), uT("vs") },
-      { uT("data"), (const uint8_t *)ShaderData.data() },
-      { uT("count"), ShaderData.size() },
+      { uT("content"), ::std::vector<uint8_t>{ ShaderData.begin(), ShaderData.end() } },
     });
 
-  const auto pPixelShader = Component_t::Make(
+  const auto pVertexShader1 = Component_t::Make(
+    {
+      { uT("entry"), uT("vs") },
+      { uT("content"), ::std::vector<uint8_t>{ ShaderData.begin(), ShaderData.end() } },
+    });
+
+  const auto pPixelShader0 = Component_t::Make(
     {
       { uT("entry"), uT("ps") },
-      { uT("data"), (const uint8_t *)ShaderData.data() },
-      { uT("count"), ShaderData.size() },
+      { uT("content"), ::std::vector<uint8_t>{ ShaderData.begin(), ShaderData.end() } },
+    });
+
+  const auto pPixelShader1 = Component_t::Make(
+    {
+      { uT("entry"), uT("ps") },
+      { uT("content"), ::std::vector<uint8_t>{ ShaderData.begin(), ShaderData.end() } },
     });
 
   const ::mock::GLuint VertexShader0Id = 1908251613;
@@ -1765,19 +1672,19 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Shader_UsingProgram_DeleteVertexShad
     .WillOnce(Return(VertexShader0Id))
     .WillOnce(Return(VertexShader1Id));
 
-  auto PixelShaderRender0 = itCreator->second(pPixelShader);
+  auto PixelShaderRender0 = itCreator->second(pPixelShader0);
   ASSERT_NE(nullptr, PixelShaderRender0);
 
-  auto PixelShaderRender1 = itCreator->second(pPixelShader);
+  auto PixelShaderRender1 = itCreator->second(pPixelShader1);
   ASSERT_NE(nullptr, PixelShaderRender1);
 
-  auto VertexShaderRender0 = itCreator->second(pVertexShader);
+  auto VertexShaderRender0 = itCreator->second(pVertexShader0);
   ASSERT_NE(nullptr, VertexShaderRender0);
 
   InSequence Dummy;
 
   {
-    auto VertexShaderRender1 = itCreator->second(pVertexShader);
+    auto VertexShaderRender1 = itCreator->second(pVertexShader1);
     ASSERT_NE(nullptr, VertexShaderRender1);
 
     const auto TestCreateProgram = [&](
@@ -1915,18 +1822,28 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Shader_UsingProgram_DeletePixelShade
   auto itCreator = IExample.GetCreators().find(uT("Shader"));
   ASSERT_NE(IExample.GetCreators().end(), itCreator);
 
-  const auto pVertexShader = Component_t::Make(
+  const auto pVertexShader0 = Component_t::Make(
     {
       { uT("entry"), uT("vs") },
-      { uT("data"), (const uint8_t *)ShaderData.data() },
-      { uT("count"), ShaderData.size() },
+      { uT("content"), ::std::vector<uint8_t>{ ShaderData.begin(), ShaderData.end() } },
     });
 
-  const auto pPixelShader = Component_t::Make(
+  const auto pVertexShader1 = Component_t::Make(
+    {
+      { uT("entry"), uT("vs") },
+      { uT("content"), ::std::vector<uint8_t>{ ShaderData.begin(), ShaderData.end() } },
+    });
+
+  const auto pPixelShader0 = Component_t::Make(
     {
       { uT("entry"), uT("ps") },
-      { uT("data"), (const uint8_t *)ShaderData.data() },
-      { uT("count"), ShaderData.size() },
+      { uT("content"), ::std::vector<uint8_t>{ ShaderData.begin(), ShaderData.end() } },
+    });
+
+  const auto pPixelShader1 = Component_t::Make(
+    {
+      { uT("entry"), uT("ps") },
+      { uT("content"), ::std::vector<uint8_t>{ ShaderData.begin(), ShaderData.end() } },
     });
 
   const ::mock::GLuint VertexShader0Id = 1908251613;
@@ -1951,19 +1868,19 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Shader_UsingProgram_DeletePixelShade
     .WillOnce(Return(PixelShader0Id))
     .WillOnce(Return(PixelShader1Id));
 
-  auto VertexShaderRender0 = itCreator->second(pVertexShader);
+  auto VertexShaderRender0 = itCreator->second(pVertexShader0);
   ASSERT_NE(nullptr, VertexShaderRender0);
 
-  auto VertexShaderRender1 = itCreator->second(pVertexShader);
+  auto VertexShaderRender1 = itCreator->second(pVertexShader1);
   ASSERT_NE(nullptr, VertexShaderRender1);
 
-  auto PixelShaderRender0 = itCreator->second(pPixelShader);
+  auto PixelShaderRender0 = itCreator->second(pPixelShader0);
   ASSERT_NE(nullptr, PixelShaderRender0);
 
   InSequence Dummy;
 
   {
-    auto PixelShaderRender1 = itCreator->second(pPixelShader);
+    auto PixelShaderRender1 = itCreator->second(pPixelShader1);
     ASSERT_NE(nullptr, PixelShaderRender1);
 
     const auto TestCreateProgram = [&](
@@ -2103,18 +2020,28 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Shader_UsingProgram_LinkProgramFail)
   auto itCreator = IExample.GetCreators().find(uT("Shader"));
   ASSERT_NE(IExample.GetCreators().end(), itCreator);
 
-  const auto pVertexShader = Component_t::Make(
+  const auto pVertexShader0 = Component_t::Make(
     {
       { uT("entry"), uT("vs") },
-      { uT("data"), (const uint8_t *)ShaderData.data() },
-      { uT("count"), ShaderData.size() },
+      { uT("content"), ::std::vector<uint8_t>{ ShaderData.begin(), ShaderData.end() } },
     });
 
-  const auto pPixelShader = Component_t::Make(
+  const auto pVertexShader1 = Component_t::Make(
+    {
+      { uT("entry"), uT("vs") },
+      { uT("content"), ::std::vector<uint8_t>{ ShaderData.begin(), ShaderData.end() } },
+    });
+
+  const auto pPixelShader0 = Component_t::Make(
     {
       { uT("entry"), uT("ps") },
-      { uT("data"), (const uint8_t *)ShaderData.data() },
-      { uT("count"), ShaderData.size() },
+      { uT("content"), ::std::vector<uint8_t>{ ShaderData.begin(), ShaderData.end() } },
+    });
+
+  const auto pPixelShader1 = Component_t::Make(
+    {
+      { uT("entry"), uT("ps") },
+      { uT("content"), ::std::vector<uint8_t>{ ShaderData.begin(), ShaderData.end() } },
     });
 
   const ::mock::GLuint VertexShader0Id = 1908251613;
@@ -2139,19 +2066,19 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Shader_UsingProgram_LinkProgramFail)
     .WillOnce(Return(PixelShader0Id))
     .WillOnce(Return(PixelShader1Id));
 
-  auto VertexShaderRender0 = itCreator->second(pVertexShader);
+  auto VertexShaderRender0 = itCreator->second(pVertexShader0);
   ASSERT_NE(nullptr, VertexShaderRender0);
 
-  auto VertexShaderRender1 = itCreator->second(pVertexShader);
+  auto VertexShaderRender1 = itCreator->second(pVertexShader1);
   ASSERT_NE(nullptr, VertexShaderRender1);
 
-  auto PixelShaderRender0 = itCreator->second(pPixelShader);
+  auto PixelShaderRender0 = itCreator->second(pPixelShader0);
   ASSERT_NE(nullptr, PixelShaderRender0);
 
   InSequence Dummy;
 
   {
-    auto PixelShaderRender1 = itCreator->second(pPixelShader);
+    auto PixelShaderRender1 = itCreator->second(pPixelShader1);
     ASSERT_NE(nullptr, PixelShaderRender1);
 
     const auto TestCreateProgram = [&](
@@ -2229,9 +2156,6 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Texture_Default)
   const Tested_t Example{ Data_t{} };
   const ITested_t & IExample = Example;
 
-  auto itDataCreator = IExample.GetCreators().find(uT("Data"));
-  ASSERT_NE(IExample.GetCreators().end(), itDataCreator);
-
   auto itCreator = IExample.GetCreators().find(uT("Texture"));
   ASSERT_NE(IExample.GetCreators().end(), itCreator);
 
@@ -2240,7 +2164,7 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Texture_Default)
   const ::mock::GLint LocationId = 1908221259;
 
   const auto TestCall = [&](const Component_t::ComponentPtr_t & _pTexture,
-    const uint8_t * _pSource, const int _Width, const int _Height)
+    const ::std::vector<uint8_t> & _Source, const int _Width, const int _Height)
   {
     using namespace ::testing;
 
@@ -2255,7 +2179,7 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Texture_Default)
 
     EXPECT_CALL(GLProxy, TexImage2D(GL_TEXTURE_2D, 0, GL_RGBA,
       _Width, _Height, 0,
-      GL_RGBA, GL_UNSIGNED_BYTE, _pSource))
+      GL_RGBA, GL_UNSIGNED_BYTE, _Source))
       .Times(1);
 
     EXPECT_CALL(GLProxy, BindTexture(GL_TEXTURE_2D, 0))
@@ -2292,37 +2216,55 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Texture_Default)
   };
 
   {
-    const uint8_t * pSource = (uint8_t *)1812181806;
+    ::std::vector<uint8_t> Source = 
+    { 
+      0x20, 0x06, 0x15, 0x12, 0x28,
+      0x20, 0x06, 0x15, 0x12, 0x28,
+      0x20, 0x06, 0x15, 0x12, 0x28,
+      0x20, 0x06, 0x15, 0x12, 0x28,
+      0x20, 0x06, 0x15, 0x12, 0x28,
+      0x20, 0x06, 0x15, 0x12, 0x28,
+      0x20, 0x06, 0x15, 0x12, 0x28,
+      0x20, 0x06, 0x15, 0x12, 0x28,
+    };
+    IntroduceBufferSize(Source);
+
     const int Width = 1812181807;
     const int Height = 1812181808;
 
     const auto pTexture = Component_t::Make(
       {
-        { uT("data"), pSource },
+        { uT("content"), Source },
         { uT("width"), Width },
         { uT("height"), Height },
       });
 
-    TestCall(pTexture, pSource, Width, Height);
+    TestCall(pTexture, Source, Width, Height);
   }
 
   {
-    const uint8_t * pSource = (uint8_t *)1907251056;
+    ::std::vector<uint8_t> Source = 
+    { 
+      0x20, 0x06, 0x15, 0x12, 0x29,
+      0x20, 0x06, 0x15, 0x12, 0x29,
+      0x20, 0x06, 0x15, 0x12, 0x29,
+      0x20, 0x06, 0x15, 0x12, 0x29,
+      0x20, 0x06, 0x15, 0x12, 0x29,
+    };
+    IntroduceBufferSize(Source);
+
     const int Width = 1907251057;
     const int Height = 1907251058;
 
     const auto pData = Component_t::Make(
       {
         { uT("kind"), uT("Texture") },
-        { uT("data"), pSource },
+        { uT("content"), Source },
         { uT("width"), Width },
         { uT("height"), Height },
       });
 
-    auto DataRender = itDataCreator->second(pData);
-    EXPECT_EQ(nullptr, DataRender);
-
-    TestCall(Component_t::Make({}), pSource, Width, Height);
+    TestCall(Component_t::Make({ { uT("service"), Object_t{ pData } } }), Source, Width, Height);
   }
 }
 
@@ -2336,9 +2278,6 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Texture_PBR)
   const Tested_t Example{ Data_t{} };
   const ITested_t & IExample = Example;
 
-  auto itDataCreator = IExample.GetCreators().find(uT("Data"));
-  ASSERT_NE(IExample.GetCreators().end(), itDataCreator);
-
   auto itCreator = IExample.GetCreators().find(uT("Texture"));
   ASSERT_NE(IExample.GetCreators().end(), itCreator);
 
@@ -2348,7 +2287,7 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Texture_PBR)
 
   const auto TestCall = [&](
     const Component_t::ComponentPtr_t & _pTexture,
-    const uint8_t * _pSource,
+    const ::std::vector<uint8_t> & _Source,
     const int _Width, const int _Height,
     const ::std::size_t _Index,
     const ::std::string & _TexName)
@@ -2368,7 +2307,7 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Texture_PBR)
 
     EXPECT_CALL(GLProxy, TexImage2D(GL_TEXTURE_2D, 0, GL_RGBA,
       _Width, _Height, 0,
-      GL_RGBA, GL_UNSIGNED_BYTE, _pSource))
+      GL_RGBA, GL_UNSIGNED_BYTE, _Source))
       .Times(1);
 
     EXPECT_CALL(GLProxy, BindTexture(GL_TEXTURE_2D, 0))
@@ -2419,54 +2358,58 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Texture_PBR)
     { uT("occlusion"), "TexOcclusion" },
   };
 
+  ::std::vector<uint8_t> Source =
+  {
+    0x20, 0x06, 0x15, 0x12, 0x30,
+    0x20, 0x06, 0x15, 0x12, 0x30,
+    0x20, 0x06, 0x15, 0x12, 0x30,
+    0x20, 0x06, 0x15, 0x12, 0x30,
+    0x20, 0x06, 0x15, 0x12, 0x30,
+  };
+  IntroduceBufferSize(Source);
+
   for (::std::size_t i = 0; i < Destinations.size(); i++)
   {
     {
-      const uint8_t * pSource = (uint8_t *)1908221842;
       const int Width = 1908221843;
       const int Height = 1908221844;
 
       const auto pTexture = Component_t::Make(
         {
-          { uT("data"), pSource },
+          { uT("content"), Source },
           { uT("width"), Width },
           { uT("height"), Height },
           { uT("destination"), Destinations[i].first },
         });
 
       TestCall(pTexture,
-        pSource, Width, Height, i, Destinations[i].second);
+        Source, Width, Height, i, Destinations[i].second);
     }
 
     {
-      const uint8_t * pSource = (uint8_t *)1908221846;
       const int Width = 1908221845;
       const int Height = 1908221847;
 
       const auto pData = Component_t::Make(
         {
           { uT("kind"), uT("Texture") },
-          { uT("data"), pSource },
+          { uT("content"), Source },
           { uT("width"), Width },
           { uT("height"), Height },
           { uT("destination"), Destinations[i].first },
         });
 
-      auto DataRender = itDataCreator->second(pData);
-      EXPECT_EQ(nullptr, DataRender);
-
-      TestCall(Component_t::Make({}),
-        pSource, Width, Height, i, Destinations[i].second);
+      TestCall(Component_t::Make({ { uT("service"), Object_t{ pData } } }),
+        Source, Width, Height, i, Destinations[i].second);
     }
 
     {
-      const uint8_t * pSource = (uint8_t *)1908221842;
       const int Width = 1908221843;
       const int Height = 1908221844;
 
       const auto pTexture = Component_t::Make(
         {
-          { uT("data"), pSource },
+          { uT("content"), Source },
           { uT("width"), Width },
           { uT("height"), Height },
           { uT("destination"), Destinations[i].first },
@@ -2474,29 +2417,25 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Texture_PBR)
         });
 
       TestCall(pTexture,
-        pSource, Width, Height, i, Destinations[i].second);
+        Source, Width, Height, i, Destinations[i].second);
     }
 
     {
-      const uint8_t * pSource = (uint8_t *)1908221846;
       const int Width = 1908221845;
       const int Height = 1908221847;
 
       const auto pData = Component_t::Make(
         {
           { uT("kind"), uT("Texture") },
-          { uT("data"), pSource },
+          { uT("content"), Source },
           { uT("width"), Width },
           { uT("height"), Height },
           { uT("destination"), Destinations[i].first },
           { uT("mipmapping"), false },
         });
 
-      auto DataRender = itDataCreator->second(pData);
-      EXPECT_EQ(nullptr, DataRender);
-
-      TestCall(Component_t::Make({}),
-        pSource, Width, Height, i, Destinations[i].second);
+      TestCall(Component_t::Make({ { uT("service"), Object_t{ pData } } }),
+        Source, Width, Height, i, Destinations[i].second);
     }
   }
 }
@@ -2511,9 +2450,6 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Texture_PBR_Mipmapping)
   const Tested_t Example{ Data_t{} };
   const ITested_t & IExample = Example;
 
-  auto itDataCreator = IExample.GetCreators().find(uT("Data"));
-  ASSERT_NE(IExample.GetCreators().end(), itDataCreator);
-
   auto itCreator = IExample.GetCreators().find(uT("Texture"));
   ASSERT_NE(IExample.GetCreators().end(), itCreator);
 
@@ -2523,7 +2459,7 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Texture_PBR_Mipmapping)
 
   const auto TestCall = [&](
     const Component_t::ComponentPtr_t & _pTexture,
-    const uint8_t * _pSource,
+    const ::std::vector<uint8_t> & _Source,
     const int _Width, const int _Height,
     const ::std::size_t _Index,
     const ::std::string & _TexName)
@@ -2543,7 +2479,7 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Texture_PBR_Mipmapping)
 
     EXPECT_CALL(GLProxy, TexImage2D(GL_TEXTURE_2D, 0, GL_RGBA,
       _Width, _Height, 0,
-      GL_RGBA, GL_UNSIGNED_BYTE, _pSource))
+      GL_RGBA, GL_UNSIGNED_BYTE, _Source))
       .Times(1);
 
     EXPECT_CALL(GLProxy, BindTexture(GL_TEXTURE_2D, 0))
@@ -2603,16 +2539,25 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Texture_PBR_Mipmapping)
     { uT("occlusion"), "TexOcclusion" },
   };
 
+  ::std::vector<uint8_t> Source =
+  {
+    0x20, 0x06, 0x15, 0x12, 0x31,
+    0x20, 0x06, 0x15, 0x12, 0x31,
+    0x20, 0x06, 0x15, 0x12, 0x31,
+    0x20, 0x06, 0x15, 0x12, 0x31,
+    0x20, 0x06, 0x15, 0x12, 0x31,
+  };
+  IntroduceBufferSize(Source);
+
   for (::std::size_t i = 0; i < Destinations.size(); i++)
   {
     {
-      const uint8_t * pSource = (uint8_t *)1908221842;
       const int Width = 1908221843;
       const int Height = 1908221844;
 
       const auto pTexture = Component_t::Make(
         {
-          { uT("data"), pSource },
+          { uT("content"), Source },
           { uT("width"), Width },
           { uT("height"), Height },
           { uT("destination"), Destinations[i].first },
@@ -2620,29 +2565,25 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Texture_PBR_Mipmapping)
         });
 
       TestCall(pTexture,
-        pSource, Width, Height, i, Destinations[i].second);
+        Source, Width, Height, i, Destinations[i].second);
     }
 
     {
-      const uint8_t * pSource = (uint8_t *)1908221846;
       const int Width = 1908221845;
       const int Height = 1908221847;
 
       const auto pData = Component_t::Make(
         {
           { uT("kind"), uT("Texture") },
-          { uT("data"), pSource },
+          { uT("content"), Source },
           { uT("width"), Width },
           { uT("height"), Height },
           { uT("destination"), Destinations[i].first },
           { uT("mipmapping"), true },
         });
 
-      auto DataRender = itDataCreator->second(pData);
-      EXPECT_EQ(nullptr, DataRender);
-
-      TestCall(Component_t::Make({}),
-        pSource, Width, Height, i, Destinations[i].second);
+      TestCall(Component_t::Make({ { uT("service"), Object_t{ pData } } }),
+        Source, Width, Height, i, Destinations[i].second);
     }
   }
 }
@@ -2686,9 +2627,6 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Texture_PBR_ReadData)
   const Tested_t Example{ Data_t{} };
   const ITested_t & IExample = Example;
 
-  auto itDataCreator = IExample.GetCreators().find(uT("Data"));
-  ASSERT_NE(IExample.GetCreators().end(), itDataCreator);
-
   auto itCreator = IExample.GetCreators().find(uT("Texture"));
   ASSERT_NE(IExample.GetCreators().end(), itCreator);
 
@@ -2707,7 +2645,7 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Texture_PBR_ReadData)
   {
     const auto Index = static_cast<::mock::GLint>(_Index);
 
-    ::covellite::api::renderer::Component::Texture TextureData{ _pDataTexture };
+    ::covellite::api::renderer::Component::Texture TextureData{ *_pDataTexture, uT("") };
 
     using namespace ::testing;
 
@@ -2722,7 +2660,7 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Texture_PBR_ReadData)
 
     EXPECT_CALL(GLProxy, TexImage2D(GL_TEXTURE_2D, 0, GL_RGBA,
       Width, Height, 0,
-      GL_RGBA, GL_UNSIGNED_BYTE, nullptr))
+      GL_RGBA, GL_UNSIGNED_BYTE, ::std::vector<uint8_t>{}))
       .Times(1);
 
     EXPECT_CALL(GLProxy, BindTexture(GL_TEXTURE_2D, 0))
@@ -2744,7 +2682,10 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Texture_PBR_ReadData)
     EXPECT_CALL(GLProxy, GenTextures(1))
       .Times(0);
 
-    auto Render = itCreator->second(Component_t::Make({}));
+    auto Render = itCreator->second(Component_t::Make(
+      {
+        { uT("service"), Object_t{ _pDataTexture } }
+      }));
     ASSERT_NE(nullptr, Render);
 
     const auto TestCallActivateTexture = [&](void)
@@ -2864,9 +2805,6 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Texture_PBR_ReadData)
         { uT("destination"), Destinations[i].first },
       });
 
-    auto DataRender = itDataCreator->second(pData);
-    EXPECT_EQ(nullptr, DataRender);
-
     TestCall(pData, i, Destinations[i].second, RawData, ExpectData);
   }
 }
@@ -2881,9 +2819,6 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Texture_Depth)
   const Tested_t Example{ Data_t{} };
   const ITested_t & IExample = Example;
 
-  auto itDataCreator = IExample.GetCreators().find(uT("Data"));
-  ASSERT_NE(IExample.GetCreators().end(), itDataCreator);
-
   auto itCreator = IExample.GetCreators().find(uT("Texture"));
   ASSERT_NE(IExample.GetCreators().end(), itCreator);
 
@@ -2893,7 +2828,7 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Texture_Depth)
 
   const auto TestCall = [&](
     const Component_t::ComponentPtr_t & _pTexture,
-    const uint8_t * _pSource,
+    const ::std::vector<uint8_t> & _Source,
     const int _Width, const int _Height,
     const ::std::size_t _Index,
     const ::std::string & _TexName)
@@ -2913,7 +2848,7 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Texture_Depth)
 
     EXPECT_CALL(GLProxy, TexImage2D(GL_TEXTURE_2D, 0, GL_DEPTH_COMPONENT,
       _Width, _Height, 0,
-      GL_DEPTH_COMPONENT, GL_UNSIGNED_INT, _pSource))
+      GL_DEPTH_COMPONENT, GL_UNSIGNED_INT, _Source))
       .Times(1);
 
     EXPECT_CALL(GLProxy, BindTexture(GL_TEXTURE_2D, 0))
@@ -2952,40 +2887,46 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Texture_Depth)
       .Times(1);
   };
 
+  ::std::vector<uint8_t> Source =
   {
-    const uint8_t * pSource = (uint8_t *)1910041342;
+    0x20, 0x06, 0x15, 0x12, 0x32,
+    0x20, 0x06, 0x15, 0x12, 0x32,
+    0x20, 0x06, 0x15, 0x12, 0x32,
+    0x20, 0x06, 0x15, 0x12, 0x32,
+    0x20, 0x06, 0x15, 0x12, 0x32,
+  };
+  IntroduceBufferSize(Source);
+
+  {
     const int Width = 1910041343;
     const int Height = 1910041344;
 
     const auto pTexture = Component_t::Make(
       {
-        { uT("data"), pSource },
+        { uT("content"), Source },
         { uT("width"), Width },
         { uT("height"), Height },
         { uT("destination"), uT("depth") },
       });
 
-    TestCall(pTexture, pSource, Width, Height, 5, "TexDepth");
+    TestCall(pTexture, Source, Width, Height, 5, "TexDepth");
   }
 
   {
-    const uint8_t * pSource = (uint8_t *)1910041345;
     const int Width = 1910041346;
     const int Height = 1910041347;
 
     const auto pData = Component_t::Make(
       {
         { uT("kind"), uT("Texture") },
-        { uT("data"), pSource },
+        { uT("content"), Source },
         { uT("width"), Width },
         { uT("height"), Height },
         { uT("destination"), uT("depth") },
       });
 
-    auto DataRender = itDataCreator->second(pData);
-    EXPECT_EQ(nullptr, DataRender);
-
-    TestCall(Component_t::Make({}), pSource, Width, Height, 5, "TexDepth");
+    TestCall(Component_t::Make({ { uT("service"), Object_t{ pData } } }), 
+      Source, Width, Height, 5, "TexDepth");
   }
 }
 
@@ -3001,9 +2942,6 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Texture_UsingExists)
   const Tested_t Example{ Data_t{} };
   const ITested_t & IExample = Example;
 
-  auto itDataCreator = IExample.GetCreators().find(uT("Data"));
-  ASSERT_NE(IExample.GetCreators().end(), itDataCreator);
-
   auto itCreator = IExample.GetCreators().find(uT("Texture"));
   ASSERT_NE(IExample.GetCreators().end(), itCreator);
 
@@ -3014,12 +2952,12 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Texture_UsingExists)
   const auto TestCall = [&](
     const Component_t::ComponentPtr_t & _pData,
     const Component_t::ComponentPtr_t & _pTexture,
-    const uint8_t * _pSource,
+    const ::std::vector<uint8_t> & _Source,
     const int _Width, const int _Height,
     const ::std::size_t _Index,
     const ::std::string & _TexName)
   {
-    const ::covellite::api::renderer::Component::Texture TextureData{ _pData };
+    const ::covellite::api::renderer::Component::Texture TextureData{ *_pData, uT("") };
     const auto Index = static_cast<::mock::GLint>(_Index);
 
     using namespace ::testing;
@@ -3034,7 +2972,7 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Texture_UsingExists)
       .Times(1);
 
     EXPECT_CALL(GLProxy, TexImage2D(GL_TEXTURE_2D, 0, _,
-      _Width, _Height, 0, _, _, _pSource))
+      _Width, _Height, 0, _, _, _Source))
       .Times(1);
 
     EXPECT_CALL(GLProxy, BindTexture(GL_TEXTURE_2D, 0))
@@ -3089,26 +3027,32 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Texture_UsingExists)
     { uT("depth"),     "TexDepth" },
   };
 
+  ::std::vector<uint8_t> Source =
+  {
+    0x20, 0x06, 0x15, 0x12, 0x33,
+    0x20, 0x06, 0x15, 0x12, 0x33,
+    0x20, 0x06, 0x15, 0x12, 0x33,
+    0x20, 0x06, 0x15, 0x12, 0x33,
+    0x20, 0x06, 0x15, 0x12, 0x33,
+  };
+  IntroduceBufferSize(Source);
+
   for (::std::size_t i = 0; i < Destinations.size(); i++)
   {
-    const uint8_t * pSource = (uint8_t *)1908221846;
     const int Width = 1908221845;
     const int Height = 1908221847;
 
     const auto pData = Component_t::Make(
       {
         { uT("kind"), uT("Texture") },
-        { uT("data"), pSource },
+        { uT("content"), Source },
         { uT("width"), Width },
         { uT("height"), Height },
         { uT("destination"), Destinations[i].first },
       });
 
-    auto DataRender = itDataCreator->second(pData);
-    EXPECT_EQ(nullptr, DataRender);
-
-    TestCall(pData, Component_t::Make({}),
-      pSource, Width, Height, i, Destinations[i].second);
+    TestCall(pData, Component_t::Make({ { uT("service"), Object_t{ pData } } }),
+      Source, Width, Height, i, Destinations[i].second);
   }
 }
 
@@ -3122,9 +3066,6 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Texture_NoDeclaredInShader)
   const Tested_t Example{ Data_t{} };
   const ITested_t & IExample = Example;
 
-  auto itDataCreator = IExample.GetCreators().find(uT("Data"));
-  ASSERT_NE(IExample.GetCreators().end(), itDataCreator);
-
   auto itCreator = IExample.GetCreators().find(uT("Texture"));
   ASSERT_NE(IExample.GetCreators().end(), itCreator);
 
@@ -3132,7 +3073,7 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Texture_NoDeclaredInShader)
 
   const auto TestCall = [&](
     const Component_t::ComponentPtr_t & _pTexture,
-    const uint8_t * /*_pSource*/,
+    const ::std::vector<uint8_t> & /*_Source*/,
     const int /*_Width*/, const int /*_Height*/,
     const ::std::size_t _Index,
     const ::std::string & _TexName)
@@ -3173,6 +3114,16 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Texture_NoDeclaredInShader)
     { uT("depth"),     "TexDepth" },
   };
 
+  ::std::vector<uint8_t> Source =
+  {
+    0x20, 0x06, 0x15, 0x12, 0x34,
+    0x20, 0x06, 0x15, 0x12, 0x34,
+    0x20, 0x06, 0x15, 0x12, 0x34,
+    0x20, 0x06, 0x15, 0x12, 0x34,
+    0x20, 0x06, 0x15, 0x12, 0x34,
+  };
+  IntroduceBufferSize(Source);
+
   for (::std::size_t i = 0; i < Destinations.size(); i++)
   {
     {
@@ -3182,14 +3133,14 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Texture_NoDeclaredInShader)
 
       const auto pTexture = Component_t::Make(
         {
-          { uT("data"), pSource },
+          { uT("content"), Source },
           { uT("width"), Width },
           { uT("height"), Height },
           { uT("destination"), Destinations[i].first },
         });
 
       TestCall(pTexture,
-        pSource, Width, Height, i, Destinations[i].second);
+        Source, Width, Height, i, Destinations[i].second);
     }
 
     {
@@ -3200,17 +3151,14 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Texture_NoDeclaredInShader)
       const auto pData = Component_t::Make(
         {
           { uT("kind"), uT("Texture") },
-          { uT("data"), pSource },
+          { uT("content"), Source },
           { uT("width"), Width },
           { uT("height"), Height },
           { uT("destination"), Destinations[i].first },
         });
 
-      auto DataRender = itDataCreator->second(pData);
-      EXPECT_EQ(nullptr, DataRender);
-
-      TestCall(Component_t::Make({}),
-        pSource, Width, Height, i, Destinations[i].second);
+      TestCall(Component_t::Make({ { uT("service"), Object_t{ pData } } }),
+        Source, Width, Height, i, Destinations[i].second);
     }
   }
 }
@@ -3227,9 +3175,6 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Buffer_Fail)
 
   auto itCreator = IExample.GetCreators().find(uT("Buffer"));
   ASSERT_NE(IExample.GetCreators().end(), itCreator);
-
-  auto itDataCreator = IExample.GetCreators().find(uT("Data"));
-  ASSERT_NE(IExample.GetCreators().end(), itDataCreator);
 
   auto TestCallRender = [&](const Component_t::ComponentPtr_t & _pComponent)
   {
@@ -3252,8 +3197,7 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Buffer_Fail)
 
     const auto pBuffer = Component_t::Make(
       {
-        { uT("data"), Source.data() },
-        { uT("count"), Source.size() },
+        { uT("content"), Source },
       });
 
     TestCallRender(pBuffer);
@@ -3261,14 +3205,10 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Buffer_Fail)
     const auto pData = Component_t::Make(
       {
         { uT("kind"), uT("Buffer") },
-        { uT("data"), Source.data() },
-        { uT("count"), Source.size() },
+        { uT("content"), Source },
       });
 
-    auto DataRender = itDataCreator->second(pData);
-    EXPECT_EQ(nullptr, DataRender);
-
-    TestCallRender(Component_t::Make({ }));
+    TestCallRender(Component_t::Make({ { uT("service"), Object_t{ pData } } }));
   }
 
   {
@@ -3280,8 +3220,7 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Buffer_Fail)
 
     const auto pBuffer = Component_t::Make(
       {
-        { uT("data"), Source.data() },
-        { uT("count"), Source.size() },
+        { uT("content"), Source },
         { uT("mapper"), Mapper },
       });
 
@@ -3290,15 +3229,11 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Buffer_Fail)
     const auto pData = Component_t::Make(
       {
         { uT("kind"), uT("Buffer") },
-        { uT("data"), Source.data() },
-        { uT("count"), Source.size() },
+        { uT("content"), Source },
         { uT("mapper"), Mapper },
       });
 
-    auto DataRender = itDataCreator->second(pData);
-    EXPECT_EQ(nullptr, DataRender);
-
-    TestCallRender(Component_t::Make({ }));
+    TestCallRender(Component_t::Make({ { uT("service"), Object_t{ pData } } }));
   }
 
   {
@@ -3306,8 +3241,7 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Buffer_Fail)
 
     const auto pBuffer = Component_t::Make(
       {
-        { uT("data"), Source.data() },
-        { uT("count"), Source.size() },
+        { uT("content"), Source },
       });
 
     TestCallRender(pBuffer);
@@ -3315,14 +3249,10 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Buffer_Fail)
     const auto pData = Component_t::Make(
       {
         { uT("kind"), uT("Buffer") },
-        { uT("data"), Source.data() },
-        { uT("count"), Source.size() },
+        { uT("content"), Source },
       });
 
-    auto DataRender = itDataCreator->second(pData);
-    EXPECT_EQ(nullptr, DataRender);
-
-    TestCallRender(Component_t::Make({ }));
+    TestCallRender(Component_t::Make({ { uT("service"), Object_t{ pData } } }));
   }
 }
 
@@ -3341,7 +3271,7 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Buffer_Vertex_Static)
   const ::mock::GLint TexCoordId = 1908231302;
   const ::mock::GLint ExtraId = 1908231304;
 
-  const ::std::vector<Vertex_t> Source =
+  ::std::vector<Vertex_t> Source =
   {
     {
       1808261932.0f, 1808261933.0f, 1812161256.0f, 1808261934.0f,
@@ -3355,6 +3285,8 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Buffer_Vertex_Static)
     },
     { 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f }, // Маркер конца данных
   };
+
+  IntroduceBufferSize(Source);
 
   const ::mock::GLProxy::Floats_t ExpectedVertexData =
   {
@@ -3380,9 +3312,6 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Buffer_Vertex_Static)
   auto itCreator = IExample.GetCreators().find(uT("Buffer"));
   ASSERT_NE(IExample.GetCreators().end(), itCreator);
 
-  auto itDataCreator = IExample.GetCreators().find(uT("Data"));
-  ASSERT_NE(IExample.GetCreators().end(), itDataCreator);
-
   auto TestCallRender = [&](const Component_t::ComponentPtr_t & _pComponent)
   {
     using namespace ::testing;
@@ -3399,8 +3328,8 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Buffer_Vertex_Static)
     const auto Size =
       static_cast<::mock::GLsizeiptr>(Source.size() * sizeof(Vertex_t));
 
-    EXPECT_CALL(GLProxy,
-      BufferData(GL_ARRAY_BUFFER, Size, Source.data(), GL_STATIC_DRAW))
+    EXPECT_CALL(GLProxy, BufferData(GL_ARRAY_BUFFER, Size, 
+      GetExpected(Source), GL_STATIC_DRAW))
       .Times(1);
 
     EXPECT_CALL(GLProxy, BindBuffer(GL_ARRAY_BUFFER, 0))
@@ -3479,8 +3408,7 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Buffer_Vertex_Static)
   {
     const auto pBuffer = Component_t::Make(
       {
-        { uT("data"), Source.data() },
-        { uT("count"), Source.size() },
+        { uT("content"), Source },
       });
 
     TestCallRender(pBuffer);
@@ -3492,14 +3420,10 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Buffer_Vertex_Static)
     const auto pData = Component_t::Make(
       {
         { uT("kind"), uT("Buffer") },
-        { uT("data"), Source.data() },
-        { uT("count"), Source.size() },
+        { uT("content"), Source },
       });
 
-    auto DataRender = itDataCreator->second(pData);
-    EXPECT_EQ(nullptr, DataRender);
-
-    TestCallRender(Component_t::Make({ }));
+    TestCallRender(Component_t::Make({ { uT("service"), Object_t{ pData } } }));
   }
 }
 
@@ -3529,7 +3453,7 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Buffer_Vertex_Dynamic)
   const ::mock::GLint TexCoordId = 1908232205;
   const ::mock::GLint ExtraId = 1908232206;
 
-  const ::std::vector<Vertex_t> Source1 =
+  ::std::vector<Vertex_t> Source1 =
   {
     {
       1808261932.0f, 1808261933.0f, 1812161256.0f, 1808261934.0f,
@@ -3543,6 +3467,8 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Buffer_Vertex_Dynamic)
     },
     { 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f }, // Маркер конца данных
   };
+
+  IntroduceBufferSize(Source1);
 
   const ::std::vector<::mock::GLfloat> Source2 =
   {
@@ -3586,8 +3512,8 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Buffer_Vertex_Dynamic)
     const auto Size =
       static_cast<::mock::GLsizeiptr>(Source1.size() * sizeof(Vertex_t));
 
-    EXPECT_CALL(GLProxy,
-      BufferData(GL_ARRAY_BUFFER, Size, Source1.data(), GL_DYNAMIC_DRAW))
+    EXPECT_CALL(GLProxy, BufferData(GL_ARRAY_BUFFER, Size, 
+      GetExpected(Source1), GL_DYNAMIC_DRAW))
       .Times(1);
 
     EXPECT_CALL(GLProxy, BindBuffer(GL_ARRAY_BUFFER, 0))
@@ -3747,8 +3673,7 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Buffer_Vertex_Dynamic)
   {
     const auto pBuffer = Component_t::Make(
       {
-        { uT("data"), Source1.data() },
-        { uT("count"), Source1.size() },
+        { uT("content"), Source1 },
         { uT("mapper"), Mapper },
       });
 
@@ -3758,22 +3683,16 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Buffer_Vertex_Dynamic)
   // ************** Передача данных в объекте компонента Data *************** //
 
   {
-    auto itDataCreator = IExample.GetCreators().find(uT("Data"));
-    ASSERT_NE(IExample.GetCreators().end(), itDataCreator);
-
     const auto pData = Component_t::Make(
       {
         { uT("kind"), uT("Buffer") },
-        { uT("data"), Source1.data() },
-        { uT("count"), Source1.size() },
+        { uT("content"), Source1 },
       });
-
-    auto DataRender = itDataCreator->second(pData);
-    EXPECT_EQ(nullptr, DataRender);
 
     const auto pBuffer = Component_t::Make(
       {
         { uT("mapper"), Mapper },
+        { uT("service"), Object_t{ pData } }
       });
 
     TestCallRender(pBuffer);
@@ -3793,7 +3712,7 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Buffer_Vertex_IgnoreNotExistsVariabl
   const ::mock::GLuint BufferId = 1908231206;
   const ::mock::GLint ProgramId = 1908231246;
 
-  const ::std::vector<Vertex_t> Source =
+  ::std::vector<Vertex_t> Source =
   {
     {
       1808261932.0f, 1808261933.0f, 1812161256.0f, 1808261934.0f,
@@ -3808,14 +3727,13 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Buffer_Vertex_IgnoreNotExistsVariabl
     { 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f }, // Маркер конца данных
   };
 
+  IntroduceBufferSize(Source);
+
   const Tested_t Example{ Data_t{} };
   const ITested_t & IExample = Example;
 
   auto itCreator = IExample.GetCreators().find(uT("Buffer"));
   ASSERT_NE(IExample.GetCreators().end(), itCreator);
-
-  auto itDataCreator = IExample.GetCreators().find(uT("Data"));
-  ASSERT_NE(IExample.GetCreators().end(), itDataCreator);
 
   auto TestCallRender = [&](const Component_t::ComponentPtr_t & _pComponent)
   {
@@ -3906,8 +3824,7 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Buffer_Vertex_IgnoreNotExistsVariabl
   {
     const auto pBuffer = Component_t::Make(
       {
-        { uT("data"), Source.data() },
-        { uT("count"), Source.size() },
+        { uT("content"), Source },
       });
 
     TestCallRender(pBuffer);
@@ -3919,14 +3836,10 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Buffer_Vertex_IgnoreNotExistsVariabl
     const auto pData = Component_t::Make(
       {
         { uT("kind"), uT("Buffer") },
-        { uT("data"), Source.data() },
-        { uT("count"), Source.size() },
+        { uT("content"), Source },
       });
 
-    auto DataRender = itDataCreator->second(pData);
-    EXPECT_EQ(nullptr, DataRender);
-
-    TestCallRender(Component_t::Make({ }));
+    TestCallRender(Component_t::Make({ { uT("service"), Object_t{ pData } } }));
   }
 
   //////////////////////////////////////////////////////////////////////////////
@@ -3936,8 +3849,7 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Buffer_Vertex_IgnoreNotExistsVariabl
   {
     const auto pBuffer = Component_t::Make(
       {
-        { uT("data"), Source.data() },
-        { uT("count"), Source.size() },
+        { uT("content"), Source },
         { uT("mapper"), BufferMapper_t{} },
       });
 
@@ -3947,183 +3859,19 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Buffer_Vertex_IgnoreNotExistsVariabl
   // ************** Передача данных в объекте компонента Data *************** //
 
   {
-    auto itDataCreator = IExample.GetCreators().find(uT("Data"));
-    ASSERT_NE(IExample.GetCreators().end(), itDataCreator);
-
     const auto pData = Component_t::Make(
       {
         { uT("kind"), uT("Buffer") },
-        { uT("data"), Source.data() },
-        { uT("count"), Source.size() },
+        { uT("content"), Source },
       });
-
-    auto DataRender = itDataCreator->second(pData);
-    EXPECT_EQ(nullptr, DataRender);
 
     const auto pBuffer = Component_t::Make(
       {
         { uT("mapper"), BufferMapper_t{} },
+        { uT("service"), Object_t{ pData } }
       });
 
     TestCallRender(pBuffer);
-  }
-}
-
-// ************************************************************************** //
-TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Fog)
-{
-  Tested::GetValue() = 2;
-
-  using GLProxy_t = ::mock::GLProxy;
-  GLProxy_t GLProxy;
-  GLProxy_t::GetInstance() = &GLProxy;
-
-  const Tested_t Example{ Data_t{} };
-  const ITested_t & IExample = Example;
-
-  auto itDataCreator = IExample.GetCreators().find(uT("Data"));
-  ASSERT_NE(IExample.GetCreators().end(), itDataCreator);
-
-  auto itCreator = IExample.GetCreators().find(uT("Fog"));
-  ASSERT_NE(IExample.GetCreators().end(), itCreator);
-
-  auto itShaderCreator = IExample.GetCreators().find(uT("Shader"));
-  ASSERT_NE(IExample.GetCreators().end(), itShaderCreator);
-
-  auto VsRender = itShaderCreator->second(Component_t::Make(
-    {
-      { uT("entry"), uT("vsFlat") },
-    }));
-  ASSERT_NE(nullptr, VsRender);
-
-  auto PsRender = itShaderCreator->second(Component_t::Make(
-    {
-      { uT("entry"), uT("psColored") },
-    }));
-  ASSERT_NE(nullptr, PsRender);
-
-  const auto TestCall = [&](
-    const Component_t::ComponentPtr_t & _pData,
-    const Component_t::ComponentPtr_t & _pFog,
-    const uint32_t _Color, 
-    const float _Near, const float _Far, 
-    const float _Density)
-  {
-    if (_pData != nullptr)
-    {
-      const auto Render = itDataCreator->second(_pData);
-      EXPECT_EQ(nullptr, Render);
-    }
-
-    const auto Render = itCreator->second(_pFog);
-    ASSERT_NE(nullptr, Render);
-
-    const ::mock::GLint ProgramId = 1908261142;
-    const ::mock::GLint ColorLocationId = 1908261240;
-    const ::mock::GLint NearLocationId = 1908261241;
-    const ::mock::GLint FarLocationId = 1908261242;
-    const ::mock::GLint DensityLocationId = 1908261243;
-
-    for (int i = 0; i < 5; i++)
-    {
-      using namespace ::testing;
-
-      InSequence Dummy;
-
-      Render(); // Переписывает значения из компонента в структуру
-
-      EXPECT_CALL(GLProxy, UseProgram(_))
-        .Times(AtLeast(1));
-
-      VsRender(); // Нужно, чтобы сформировалась шейдерная программа, иначе
-                  // не будет вызывана функция glUseProgram().
-
-      EXPECT_CALL(GLProxy, GetIntegerv(GL_CURRENT_PROGRAM))
-        .Times(1)
-        .WillOnce(Return(&ProgramId));
-
-      EXPECT_CALL(GLProxy, GetUniformLocation(ProgramId, Eq("FogData.Color")))
-        .Times(1)
-        .WillOnce(Return(ColorLocationId));
-
-      EXPECT_CALL(GLProxy, 
-        Uniform4fv(ColorLocationId, 1, ARGBtoVec4(_Color + i)))
-        .Times(1);
-
-      EXPECT_CALL(GLProxy, GetUniformLocation(ProgramId, Eq("FogData.Near")))
-        .Times(1)
-        .WillOnce(Return(NearLocationId));
-
-      EXPECT_CALL(GLProxy, Uniform1f(NearLocationId, _Near + i))
-        .Times(1);
-
-      EXPECT_CALL(GLProxy, GetUniformLocation(ProgramId, Eq("FogData.Far")))
-        .Times(1)
-        .WillOnce(Return(FarLocationId));
-
-      EXPECT_CALL(GLProxy, Uniform1f(FarLocationId, _Far + i))
-        .Times(1);
-
-      EXPECT_CALL(GLProxy, GetUniformLocation(ProgramId, Eq("FogData.Density")))
-        .Times(1)
-        .WillOnce(Return(DensityLocationId));
-
-      EXPECT_CALL(GLProxy, Uniform1f(DensityLocationId, _Density + i))
-        .Times(1);
-
-      PsRender(); // Передача данных шейдеру
-
-      const Component_t::ComponentPtr_t pData =
-        (_pData != nullptr) ? _pData : _pFog;
-
-      pData->SetValue(uT("color"), _Color + i + 1);
-      pData->SetValue(uT("near"), _Near + i + 1);
-      pData->SetValue(uT("far"), _Far + i + 1);
-      pData->SetValue(uT("density"), _Density + i + 1);
-    }
-  };
-
-  {
-    const auto pDefaultFog = Component_t::Make({ });
-
-    TestCall(nullptr, pDefaultFog, 0xFFFFFFFF, 10.0f, 100.0f, 1.0f);
-  }
-
-  {
-    const uint32_t Color = 0x19072916;
-    const auto Near = 1907291728.0f;
-    const auto Far = 1907291729.0f;
-    const auto Density = 1907291800.0f;
-
-    const auto pFog = Component_t::Make(
-      {
-        { uT("color"), Color },
-        { uT("near"), Near },
-        { uT("far"), Far },
-        { uT("density"), Density },
-      });
-
-    TestCall(nullptr, pFog, Color, Near, Far, Density);
-  }
-
-  {
-    const uint32_t Color = 0x19073010;
-    const auto Near = 1907301018.0f;
-    const auto Far = 1907301019.0f;
-    const auto Density = 1907291800.0f;
-
-    const auto pData = Component_t::Make(
-      {
-        { uT("kind"), uT("Fog") },
-        { uT("color"), Color },
-        { uT("near"), Near },
-        { uT("far"), Far },
-        { uT("density"), Density },
-      });
-
-    const auto pFog = Component_t::Make({ });
-
-    TestCall(pData, pFog, Color, Near, Far, Density);
   }
 }
 
@@ -4160,25 +3908,16 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Transform_Default)
   const ::mock::GLint ProgramId = 1908241203;
   const ::mock::GLint MatrixWorldLocationId = 1908241207;
 
-  auto itDataCreator = IExample.GetCreators().find(uT("Data"));
-  ASSERT_NE(IExample.GetCreators().end(), itDataCreator);
-
   auto itCreator = IExample.GetCreators().find(uT("Transform"));
   ASSERT_NE(IExample.GetCreators().end(), itCreator);
 
   auto pPosition = Component_t::Make({ { uT("kind"), uT("Position") } });
   auto pRotation = Component_t::Make({ { uT("kind"), uT("Rotation") } });
   auto pScale = Component_t::Make({ { uT("kind"), uT("Scale") } });
-  const auto pTransform = Component_t::Make({});
-
-  auto PositionRender = itDataCreator->second(pPosition);
-  EXPECT_EQ(nullptr, PositionRender);
-
-  auto RotationRender = itDataCreator->second(pRotation);
-  EXPECT_EQ(nullptr, RotationRender);
-
-  auto ScaleRender = itDataCreator->second(pScale);
-  EXPECT_EQ(nullptr, ScaleRender);
+  const auto pTransform = Component_t::Make(
+    {
+      { uT("service"), Object_t{ pPosition, pRotation, pScale } }
+    });
 
   const auto Render = itCreator->second(pTransform);
   ASSERT_NE(nullptr, Render);
@@ -4263,9 +4002,6 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Transform_Static)
   const ::mock::GLint ProgramId = 1908241203;
   const ::mock::GLint MatrixWorldLocationId = 1908241207;
 
-  auto itDataCreator = IExample.GetCreators().find(uT("Data"));
-  ASSERT_NE(IExample.GetCreators().end(), itDataCreator);
-
   auto itCreator = IExample.GetCreators().find(uT("Transform"));
   ASSERT_NE(IExample.GetCreators().end(), itCreator);
 
@@ -4310,15 +4046,6 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Transform_Static)
       1956.0f, 1957.0f, 1958.0f,
       1204.0f, 1205.0f, 1206.0f,
       1152.0f, 1153.0f, 1154.0f);
-
-    auto PositionRender = itDataCreator->second(pPosition);
-    EXPECT_EQ(nullptr, PositionRender);
-
-    auto RotationRender = itDataCreator->second(pRotation);
-    EXPECT_EQ(nullptr, RotationRender);
-
-    auto ScaleRender = itDataCreator->second(pScale);
-    EXPECT_EQ(nullptr, ScaleRender);
 
     const auto Render = itCreator->second(_pTransform);
     ASSERT_NE(nullptr, Render);
@@ -4367,6 +4094,7 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Transform_Static)
   const auto pTransform = Component_t::Make(
     {
       { uT("kind"), uT("Static") },
+      { uT("service"), Object_t{ pPosition, pRotation, pScale } }
     });
 
   TestCallRender(pTransform);
@@ -4385,9 +4113,6 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Transform_Billboard)
   const ::mock::GLint ProgramId = 1908241203;
   const ::mock::GLint MatrixWorldLocationId = 1908241207;
 
-  auto itDataCreator = IExample.GetCreators().find(uT("Data"));
-  ASSERT_NE(IExample.GetCreators().end(), itDataCreator);
-
   auto itCreator = IExample.GetCreators().find(uT("Transform"));
   ASSERT_NE(IExample.GetCreators().end(), itCreator);
 
@@ -4395,9 +4120,6 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Transform_Billboard)
 
   auto TestCallRender = [&](const Component_t::ComponentPtr_t & _pTransform)
   {
-    auto PositionRender = itDataCreator->second(pPosition);
-    EXPECT_EQ(nullptr, PositionRender);
-
     const auto Render = itCreator->second(_pTransform);
     ASSERT_NE(nullptr, Render);
 
@@ -4471,6 +4193,7 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Transform_Billboard)
   const auto pTransform = Component_t::Make(
     {
       { uT("kind"), uT("Billboard") },
+      { uT("service"), Object_t{ pPosition } }
     });
 
   TestCallRender(pTransform);
@@ -4486,9 +4209,6 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Transform_DefaultValues)
   Tested_t Example{ Data_t{} };
   const ITested_t & IExample = Example;
 
-  auto itDataCreator = IExample.GetCreators().find(uT("Data"));
-  ASSERT_NE(IExample.GetCreators().end(), itDataCreator);
-
   auto itCreator = IExample.GetCreators().find(uT("Transform"));
   ASSERT_NE(IExample.GetCreators().end(), itCreator);
 
@@ -4499,18 +4219,6 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Transform_DefaultValues)
   auto TestCallRender = [&](const Component_t::ComponentPtr_t & _pComponent,
     const bool _IsFullTransform = true)
   {
-    auto PositionRender = itDataCreator->second(pPosition);
-    EXPECT_EQ(nullptr, PositionRender);
-
-    if (_IsFullTransform)
-    {
-      auto RotationRender = itDataCreator->second(pRotation);
-      EXPECT_EQ(nullptr, RotationRender);
-
-      auto ScaleRender = itDataCreator->second(pScale);
-      EXPECT_EQ(nullptr, ScaleRender);
-    }
-
     const auto Render = itCreator->second(_pComponent);
     ASSERT_NE(nullptr, Render);
 
@@ -4556,16 +4264,19 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Transform_DefaultValues)
 
   TestCallRender(Component_t::Make(
     {
+      { uT("service"), Object_t{ pPosition, pRotation, pScale } }
     }));
 
   TestCallRender(Component_t::Make(
     {
       { uT("kind"), uT("Static") },
+      { uT("service"), Object_t{ pPosition, pRotation, pScale } }
     }));
 
   TestCallRender(Component_t::Make(
     {
       { uT("kind"), uT("Billboard") },
+      { uT("service"), Object_t{ pPosition, pRotation, pScale } }
     }), false);
 }
 
@@ -4578,9 +4289,6 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Transform_Combine)
 
   Tested_t Example{ Data_t{} };
   const ITested_t & IExample = Example;
-
-  auto itDataCreator = IExample.GetCreators().find(uT("Data"));
-  ASSERT_NE(IExample.GetCreators().end(), itDataCreator);
 
   auto itCreator = IExample.GetCreators().find(uT("Transform"));
   ASSERT_NE(IExample.GetCreators().end(), itCreator);
@@ -4644,13 +4352,10 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Transform_Combine)
 
     MatrixIdentity = ::glm::transpose(MatrixIdentity);
 
-    for (const auto & pComponent : Components)
-    {
-      auto ScaleRender = itDataCreator->second(pComponent);
-      EXPECT_EQ(nullptr, ScaleRender);
-    }
-
-    auto Render = itCreator->second(Component_t::Make({ }));
+    auto Render = itCreator->second(Component_t::Make(
+      {
+        { uT("service"), Object_t{ Components.begin(), Components.end() } }
+      }));
     ASSERT_NE(nullptr, Render);
 
     using namespace ::testing;
@@ -4677,15 +4382,10 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Transform_Combine)
 
     MatrixIdentity = ::glm::transpose(MatrixIdentity);
 
-    for (const auto & pComponent : Components)
-    {
-      auto ScaleRender = itDataCreator->second(pComponent);
-      EXPECT_EQ(nullptr, ScaleRender);
-    }
-
     auto Render = itCreator->second(Component_t::Make(
       {
         { uT("kind"), uT("Static") },
+        { uT("service"), Object_t{ Components.begin(), Components.end() } }
       }));
     ASSERT_NE(nullptr, Render);
 
@@ -4728,15 +4428,10 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Transform_Combine)
 
     MatrixIdentity = ::glm::transpose(MatrixIdentity);
 
-    for (const auto & pComponent : Components)
-    {
-      auto ScaleRender = itDataCreator->second(pComponent);
-      EXPECT_EQ(nullptr, ScaleRender);
-    }
-
     auto Render = itCreator->second(Component_t::Make(
       {
         { uT("kind"), uT("Billboard") },
+        { uT("service"), Object_t{ Components.begin(), Components.end() } }
       }));
     ASSERT_NE(nullptr, Render);
 
@@ -5580,9 +5275,6 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Camera_Orthographic)
   const Tested_t Example{ Data_t{} };
   const ITested_t & IExample = Example;
 
-  auto itDataCreator = IExample.GetCreators().find(uT("Data"));
-  ASSERT_NE(IExample.GetCreators().end(), itDataCreator);
-
   auto itCreator = IExample.GetCreators().find(uT("Camera"));
   ASSERT_NE(IExample.GetCreators().end(), itCreator);
 
@@ -5603,17 +5295,17 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Camera_Orthographic)
 
   using namespace ::testing;
 
-  auto PositionRender = itDataCreator->second(Component_t::Make(
+  const auto pPosition = Component_t::Make(
     {
       { uT("kind"), uT("Position") },
       { uT("x"), X },
       { uT("y"), Y },
-    }));
-  EXPECT_EQ(nullptr, PositionRender);
+    });
 
   const auto pCameraComponent = Component_t::Make(
     {
       { uT("kind"), uT("Orthographic") },
+      { uT("service"), Object_t{ pPosition } },
     });
 
   auto Render = itCreator->second(pCameraComponent);
@@ -5885,9 +5577,6 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Camera_Perspective)
     PsRender(); // Передача матриц вида и проекции шейдеру
   };
 
-  auto itDataCreator = IExample.GetCreators().find(uT("Data"));
-  ASSERT_NE(IExample.GetCreators().end(), itDataCreator);
-
   auto itCreator = IExample.GetCreators().find(uT("Camera"));
   ASSERT_NE(IExample.GetCreators().end(), itCreator);
 
@@ -5908,96 +5597,93 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Camera_Perspective)
     { 92.0f, 2.22f, 20.2f, 2.0f, 3.0f, 4.0f, 5.0f, 6.0f, 7.0f, 8.0f },
   };
 
-  auto TestCamera = [&](const Component_t::ComponentPtr_t & _pCamera)
   {
+    // Default values + not using Position & Rotation
+
+    const auto pCamera = Component_t::Make(
+      {
+        { uT("kind"), uT("Perspective") },
+      });
+
+    auto Render = itCreator->second(pCamera);
+
+    auto Info = CameraInfos[0];
+
+    TestCallRender(
+      pCamera, Render,
+      Info.AngleY, Info.zNear, Info.zFar,
+      Info.X, Info.Y, Info.Z,
+      Info.A, Info.B, Info.C,
+      Info.Distance);
+  }
+
+  const auto pPosition = Component_t::Make(
     {
-      // Default values + not using Position & Rotation
+      { uT("kind"), uT("Position") },
+    });
 
-      auto Render = itCreator->second(_pCamera);
+  const auto pRotation = Component_t::Make(
+    {
+      { uT("kind"), uT("Rotation") },
+    });
 
-      auto Info = CameraInfos[0];
+  {
+    // Default values from Position & Rotation
+
+    const auto pCamera = Component_t::Make(
+      {
+        { uT("kind"), uT("Perspective") },
+        { uT("service"), Object_t{ pPosition, pRotation } },
+      });
+
+    auto Render = itCreator->second(pCamera);
+
+    auto Info = CameraInfos[0];
+
+    TestCallRender(
+      pCamera, Render,
+      Info.AngleY, Info.zNear, Info.zFar,
+      Info.X, Info.Y, Info.Z,
+      Info.A, Info.B, Info.C,
+      Info.Distance);
+  }
+
+  {
+    // Change values from Position & Rotation
+
+    const auto pCamera = Component_t::Make(
+      {
+        { uT("kind"), uT("Perspective") },
+        { uT("service"), Object_t{ pPosition, pRotation } },
+      });
+
+    auto Render = itCreator->second(pCamera);
+
+    for (size_t i = 1; i < CameraInfos.size(); i++)
+    {
+      auto Info = CameraInfos[i];
+
+      pPosition->SetValue(uT("x"), Info.X);
+      pPosition->SetValue(uT("y"), Info.Y);
+      pPosition->SetValue(uT("z"), Info.Z);
+
+      pRotation->SetValue(uT("x"), Info.A);
+      pRotation->SetValue(uT("y"), Info.B);
+      pRotation->SetValue(uT("z"), Info.C);
+
+      pCamera->SetValue(uT("fov"), Info.AngleY);
+      pCamera->SetValue(uT("znear"), Info.zNear);
+      pCamera->SetValue(uT("zfar"), Info.zFar);
+      pCamera->SetValue(uT("distance"), Info.Distance);
 
       TestCallRender(
-        _pCamera, Render,
+        pCamera, Render,
         Info.AngleY, Info.zNear, Info.zFar,
         Info.X, Info.Y, Info.Z,
         Info.A, Info.B, Info.C,
         Info.Distance);
     }
-
-    const auto pPosition = Component_t::Make(
-      {
-        { uT("kind"), uT("Position") },
-      });
-
-    const auto pRotation = Component_t::Make(
-      {
-        { uT("kind"), uT("Rotation") },
-      });
-
-    {
-      // Default values from Position & Rotation
-
-      auto Position = itDataCreator->second(pPosition);
-      EXPECT_EQ(nullptr, Position);
-
-      auto Rotation = itDataCreator->second(pRotation);
-      EXPECT_EQ(nullptr, Rotation);
-
-      auto Render = itCreator->second(_pCamera);
-
-      auto Info = CameraInfos[0];
-
-      TestCallRender(
-        _pCamera, Render,
-        Info.AngleY, Info.zNear, Info.zFar,
-        Info.X, Info.Y, Info.Z,
-        Info.A, Info.B, Info.C,
-        Info.Distance);
-    }
-
-    {
-      // Change values from Position & Rotation
-
-      auto Position = itDataCreator->second(pPosition);
-      EXPECT_EQ(nullptr, Position);
-
-      auto Rotation = itDataCreator->second(pRotation);
-      EXPECT_EQ(nullptr, Rotation);
-
-      auto Render = itCreator->second(_pCamera);
-
-      for (size_t i = 1; i < CameraInfos.size(); i++)
-      {
-        auto Info = CameraInfos[i];
-
-        pPosition->SetValue(uT("x"), Info.X);
-        pPosition->SetValue(uT("y"), Info.Y);
-        pPosition->SetValue(uT("z"), Info.Z);
-
-        pRotation->SetValue(uT("x"), Info.A);
-        pRotation->SetValue(uT("y"), Info.B);
-        pRotation->SetValue(uT("z"), Info.C);
-
-        _pCamera->SetValue(uT("fov"), Info.AngleY);
-        _pCamera->SetValue(uT("znear"), Info.zNear);
-        _pCamera->SetValue(uT("zfar"), Info.zFar);
-        _pCamera->SetValue(uT("distance"), Info.Distance);
-
-        TestCallRender(
-          _pCamera, Render,
-          Info.AngleY, Info.zNear, Info.zFar,
-          Info.X, Info.Y, Info.Z,
-          Info.A, Info.B, Info.C,
-          Info.Distance);
-      }
-    }
-  };
-
-  TestCamera(Component_t::Make(
-    {
-      { uT("kind"), uT("Perspective") },
-    }));
+  }
 }
 
 // ************************************************************************** //
@@ -6012,9 +5698,6 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Present_Index_CreateBuffer_Fail)
 
   auto itCreator = IExample.GetCreators().find(uT("Present"));
   ASSERT_NE(IExample.GetCreators().end(), itCreator);
-
-  auto itDataCreator = IExample.GetCreators().find(uT("Data"));
-  ASSERT_NE(IExample.GetCreators().end(), itDataCreator);
 
   auto TestCallRender = [&](const Component_t::ComponentPtr_t & _pComponent)
   {
@@ -6039,8 +5722,7 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Present_Index_CreateBuffer_Fail)
 
   const auto pBuffer = Component_t::Make(
     {
-      { uT("data"), Source.data() },
-      { uT("count"), Source.size() },
+      { uT("content"), Source },
     });
 
   TestCallRender(pBuffer);
@@ -6048,14 +5730,10 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Present_Index_CreateBuffer_Fail)
   const auto pData = Component_t::Make(
     {
       { uT("kind"), uT("Buffer") },
-      { uT("data"), Source.data() },
-      { uT("count"), Source.size() },
+      { uT("content"), Source },
     });
 
-  auto DataRender = itDataCreator->second(pData);
-  EXPECT_EQ(nullptr, DataRender);
-
-  TestCallRender(Component_t::Make({ }));
+  TestCallRender(Component_t::Make({ { uT("service"), Object_t{ pData } } }));
 }
 
 // ************************************************************************** //
@@ -6070,7 +5748,7 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Present_Index)
 
   const ::mock::GLuint BufferId = 1908241121;
 
-  const ::std::vector<int> Indices =
+  ::std::vector<int> Indices =
   {
     1808261927,
     1808261928,
@@ -6079,8 +5757,7 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Present_Index)
     1808261931
   };
 
-  auto itDataCreator = IExample.GetCreators().find(uT("Data"));
-  ASSERT_NE(IExample.GetCreators().end(), itDataCreator);
+  IntroduceBufferSize(Indices);
 
   auto itPresentCreator = IExample.GetCreators().find(uT("Present"));
   ASSERT_NE(IExample.GetCreators().end(), itPresentCreator);
@@ -6101,8 +5778,8 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Present_Index)
     const auto Size =
       static_cast<::mock::GLsizeiptr>(Indices.size() * sizeof(int));
 
-    EXPECT_CALL(GLProxy, BufferData(GL_ELEMENT_ARRAY_BUFFER,
-      Size, Indices.data(), GL_STATIC_DRAW))
+    EXPECT_CALL(GLProxy, BufferData(GL_ELEMENT_ARRAY_BUFFER, Size, 
+      GetExpected(Indices), GL_STATIC_DRAW))
       .Times(1);
 
     EXPECT_CALL(GLProxy, BindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0))
@@ -6137,8 +5814,7 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Present_Index)
   {
     const auto pPresent = Component_t::Make(
       {
-        { uT("data"), Indices.data() },
-        { uT("count"), Indices.size() },
+        { uT("content"), Indices },
       });
 
     TestCallRender(pPresent);
@@ -6147,15 +5823,13 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Present_Index)
   {
     // Индексный буфер через компонент Data
 
-    auto IndexBufferDataRender = itDataCreator->second(Component_t::Make(
+    const auto pData = Component_t::Make(
       {
         { uT("kind"), uT("Buffer") },
-        { uT("data"), Indices.data() },
-        { uT("count"), Indices.size() },
-      }));
-    EXPECT_EQ(nullptr, IndexBufferDataRender);
+        { uT("content"), Indices },
+      });
 
-    TestCallRender(Component_t::Make({ }));
+    TestCallRender(Component_t::Make({ { uT("service"), Object_t{ pData } } }));
   }
 }
 
@@ -6173,9 +5847,6 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Present_Instance_CreateBuffer_Fail)
 
   auto itCreator = IExample.GetCreators().find(uT("Present"));
   ASSERT_NE(IExample.GetCreators().end(), itCreator);
-
-  auto itDataCreator = IExample.GetCreators().find(uT("Data"));
-  ASSERT_NE(IExample.GetCreators().end(), itDataCreator);
 
   auto TestCallRender = [&](const Component_t::ComponentPtr_t & _pComponent)
   {
@@ -6214,13 +5885,10 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Present_Instance_CreateBuffer_Fail)
       { uT("mapper"), BufferMapper_t{} },
     });
 
-  auto InstanceDataRender = itDataCreator->second(pInstanceData);
-  EXPECT_EQ(nullptr, InstanceDataRender);
-
   const auto pPresent = Component_t::Make(
     {
-      { uT("data"), Source.data() },
-      { uT("count"), Source.size() },
+      { uT("content"), Source },
+      { uT("service"), Object_t{ pInstanceData } }
     });
 
   TestCallRender(pPresent);
@@ -6250,7 +5918,7 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Present_Instance)
   const ::std::size_t InstanceBufferSize = InstanceCount * InstanceStride;
   const ::mock::GLint ProgramId = 1909231917;
 
-  const ::std::vector<int> Indices =
+  ::std::vector<int> Indices =
   {
     1808261927,
     1808261928,
@@ -6261,6 +5929,8 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Present_Instance)
     1909231822,
     1909231823,
   };
+
+  IntroduceBufferSize(Indices);
 
   void * pLocalData = (void *)1909232013;
 
@@ -6275,9 +5945,6 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Present_Instance)
 
   auto itCreator = IExample.GetCreators().find(uT("Present"));
   ASSERT_NE(IExample.GetCreators().end(), itCreator);
-
-  auto itDataCreator = IExample.GetCreators().find(uT("Data"));
-  ASSERT_NE(IExample.GetCreators().end(), itDataCreator);
 
   auto TestCallRender = [&](const Component_t::ComponentPtr_t & _pPresent)
   {
@@ -6297,8 +5964,8 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Present_Instance)
     const auto Size =
       static_cast<::mock::GLsizeiptr>(Indices.size() * sizeof(int));
 
-    EXPECT_CALL(GLProxy, BufferData(GL_ELEMENT_ARRAY_BUFFER,
-      Size, Indices.data(), GL_STATIC_DRAW))
+    EXPECT_CALL(GLProxy, BufferData(GL_ELEMENT_ARRAY_BUFFER, Size, 
+      GetExpected(Indices), GL_STATIC_DRAW))
       .Times(1);
 
     EXPECT_CALL(GLProxy, BindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0))
@@ -6317,8 +5984,8 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Present_Instance)
     EXPECT_CALL(GLProxy, BindBuffer(GL_ARRAY_BUFFER, InstanceBufferId))
       .Times(1);
 
-    EXPECT_CALL(GLProxy, 
-      BufferData(GL_ARRAY_BUFFER, InstanceBufferSize, nullptr, GL_DYNAMIC_DRAW))
+    EXPECT_CALL(GLProxy, BufferData(GL_ARRAY_BUFFER, InstanceBufferSize, 
+      ::std::vector<uint8_t>{}, GL_DYNAMIC_DRAW))
       .Times(1);
 
     EXPECT_CALL(GLProxy, BindBuffer(GL_ARRAY_BUFFER, 0))
@@ -6486,13 +6153,10 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Present_Instance)
       { uT("count"), InstanceCount },
     });
 
-  auto InstanceDataRender = itDataCreator->second(pInstanceData);
-  EXPECT_EQ(nullptr, InstanceDataRender);
-
   const auto pPresent = Component_t::Make(
     {
-      { uT("data"), Indices.data() },
-      { uT("count"), Indices.size() },
+      { uT("content"), Indices },
+      { uT("service"), Object_t{ pInstanceData } }
     });
 
   TestCallRender(pPresent);
@@ -6501,9 +6165,166 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Present_Instance)
 
 ////////////////////////////////////////////////////////////////////////////////
 
+// ************************************************************************** //
+TEST_F(OpenGLShader_test, DISABLED_Test_Fog)
+{
+  Tested::GetValue() = 2;
+
+  using GLProxy_t = ::mock::GLProxy;
+  GLProxy_t GLProxy;
+  GLProxy_t::GetInstance() = &GLProxy;
+
+  const Tested_t Example{ Data_t{} };
+  const ITested_t & IExample = Example;
+
+  auto itDataCreator = IExample.GetCreators().find(uT("Data"));
+  ASSERT_NE(IExample.GetCreators().end(), itDataCreator);
+
+  auto itCreator = IExample.GetCreators().find(uT("Fog"));
+  ASSERT_NE(IExample.GetCreators().end(), itCreator);
+
+  auto itShaderCreator = IExample.GetCreators().find(uT("Shader"));
+  ASSERT_NE(IExample.GetCreators().end(), itShaderCreator);
+
+  auto VsRender = itShaderCreator->second(Component_t::Make(
+    {
+      { uT("entry"), uT("vsFlat") },
+    }));
+  ASSERT_NE(nullptr, VsRender);
+
+  auto PsRender = itShaderCreator->second(Component_t::Make(
+    {
+      { uT("entry"), uT("psColored") },
+    }));
+  ASSERT_NE(nullptr, PsRender);
+
+  const auto TestCall = [&](
+    const Component_t::ComponentPtr_t & _pData,
+    const Component_t::ComponentPtr_t & _pFog,
+    const uint32_t _Color,
+    const float _Near, const float _Far,
+    const float _Density)
+  {
+    if (_pData != nullptr)
+    {
+      const auto Render = itDataCreator->second(_pData);
+      EXPECT_EQ(nullptr, Render);
+    }
+
+    const auto Render = itCreator->second(_pFog);
+    ASSERT_NE(nullptr, Render);
+
+    const ::mock::GLint ProgramId = 1908261142;
+    const ::mock::GLint ColorLocationId = 1908261240;
+    const ::mock::GLint NearLocationId = 1908261241;
+    const ::mock::GLint FarLocationId = 1908261242;
+    const ::mock::GLint DensityLocationId = 1908261243;
+
+    for (int i = 0; i < 5; i++)
+    {
+      using namespace ::testing;
+
+      InSequence Dummy;
+
+      Render(); // Переписывает значения из компонента в структуру
+
+      EXPECT_CALL(GLProxy, UseProgram(_))
+        .Times(AtLeast(1));
+
+      VsRender(); // Нужно, чтобы сформировалась шейдерная программа, иначе
+                  // не будет вызывана функция glUseProgram().
+
+      EXPECT_CALL(GLProxy, GetIntegerv(GL_CURRENT_PROGRAM))
+        .Times(1)
+        .WillOnce(Return(&ProgramId));
+
+      EXPECT_CALL(GLProxy, GetUniformLocation(ProgramId, Eq("FogData.Color")))
+        .Times(1)
+        .WillOnce(Return(ColorLocationId));
+
+      EXPECT_CALL(GLProxy,
+        Uniform4fv(ColorLocationId, 1, ARGBtoVec4(_Color + i)))
+        .Times(1);
+
+      EXPECT_CALL(GLProxy, GetUniformLocation(ProgramId, Eq("FogData.Near")))
+        .Times(1)
+        .WillOnce(Return(NearLocationId));
+
+      EXPECT_CALL(GLProxy, Uniform1f(NearLocationId, _Near + i))
+        .Times(1);
+
+      EXPECT_CALL(GLProxy, GetUniformLocation(ProgramId, Eq("FogData.Far")))
+        .Times(1)
+        .WillOnce(Return(FarLocationId));
+
+      EXPECT_CALL(GLProxy, Uniform1f(FarLocationId, _Far + i))
+        .Times(1);
+
+      EXPECT_CALL(GLProxy, GetUniformLocation(ProgramId, Eq("FogData.Density")))
+        .Times(1)
+        .WillOnce(Return(DensityLocationId));
+
+      EXPECT_CALL(GLProxy, Uniform1f(DensityLocationId, _Density + i))
+        .Times(1);
+
+      PsRender(); // Передача данных шейдеру
+
+      const Component_t::ComponentPtr_t pData =
+        (_pData != nullptr) ? _pData : _pFog;
+
+      pData->SetValue(uT("color"), _Color + i + 1);
+      pData->SetValue(uT("near"), _Near + i + 1);
+      pData->SetValue(uT("far"), _Far + i + 1);
+      pData->SetValue(uT("density"), _Density + i + 1);
+    }
+  };
+
+  {
+    const auto pDefaultFog = Component_t::Make({ });
+
+    TestCall(nullptr, pDefaultFog, 0xFFFFFFFF, 10.0f, 100.0f, 1.0f);
+  }
+
+  {
+    const uint32_t Color = 0x19072916;
+    const auto Near = 1907291728.0f;
+    const auto Far = 1907291729.0f;
+    const auto Density = 1907291800.0f;
+
+    const auto pFog = Component_t::Make(
+      {
+        { uT("color"), Color },
+        { uT("near"), Near },
+        { uT("far"), Far },
+        { uT("density"), Density },
+      });
+
+    TestCall(nullptr, pFog, Color, Near, Far, Density);
+  }
+
+  {
+    const uint32_t Color = 0x19073010;
+    const auto Near = 1907301018.0f;
+    const auto Far = 1907301019.0f;
+    const auto Density = 1907291800.0f;
+
+    const auto pData = Component_t::Make(
+      {
+        { uT("kind"), uT("Fog") },
+        { uT("color"), Color },
+        { uT("near"), Near },
+        { uT("far"), Far },
+        { uT("density"), Density },
+      });
+
+    const auto pFog = Component_t::Make({ });
+
+    TestCall(pData, pFog, Color, Near, Far, Density);
+  }
+}
 
 // ************************************************************************** //
-TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Present_Geometry_Default_deprecated)
+TEST_F(OpenGLShader_test, DISABLED_Test_Present_Geometry_Default_deprecated)
 {
   using GLProxy_t = ::mock::GLProxy;
   GLProxy_t GLProxy;
@@ -6556,8 +6377,8 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Present_Geometry_Default_deprecated)
     const auto Size =
       static_cast<::mock::GLsizeiptr>(Indices.size() * sizeof(int));
 
-    EXPECT_CALL(GLProxy, BufferData(GL_ELEMENT_ARRAY_BUFFER,
-      Size, Indices.data(), GL_STATIC_DRAW))
+    EXPECT_CALL(GLProxy, BufferData(GL_ELEMENT_ARRAY_BUFFER, Size, 
+      GetExpected(Indices), GL_STATIC_DRAW))
       .Times(1);
 
     EXPECT_CALL(GLProxy, BindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0))
@@ -6697,7 +6518,7 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Present_Geometry_Default_deprecated)
 }
 
 // ************************************************************************** //
-TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Present_Geometry_Static_deprecated)
+TEST_F(OpenGLShader_test, DISABLED_Test_Present_Geometry_Static_deprecated)
 {
   using GLProxy_t = ::mock::GLProxy;
   GLProxy_t GLProxy;
@@ -6750,8 +6571,8 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Present_Geometry_Static_deprecated)
     const auto Size =
       static_cast<::mock::GLsizeiptr>(Indices.size() * sizeof(int));
 
-    EXPECT_CALL(GLProxy, BufferData(GL_ELEMENT_ARRAY_BUFFER,
-      Size, Indices.data(), GL_STATIC_DRAW))
+    EXPECT_CALL(GLProxy, BufferData(GL_ELEMENT_ARRAY_BUFFER, Size, 
+      GetExpected(Indices), GL_STATIC_DRAW))
       .Times(1);
 
     EXPECT_CALL(GLProxy, BindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0))
@@ -6903,7 +6724,7 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Present_Geometry_Static_deprecated)
 }
 
 // ************************************************************************** //
-TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Present_Geometry_Billboard_deprecated)
+TEST_F(OpenGLShader_test, DISABLED_Test_Present_Geometry_Billboard_deprecated)
 {
   using GLProxy_t = ::mock::GLProxy;
   GLProxy_t GLProxy;
@@ -6954,8 +6775,8 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Present_Geometry_Billboard_deprecate
     const auto Size =
       static_cast<::mock::GLsizeiptr>(Indices.size() * sizeof(int));
 
-    EXPECT_CALL(GLProxy, BufferData(GL_ELEMENT_ARRAY_BUFFER,
-      Size, Indices.data(), GL_STATIC_DRAW))
+    EXPECT_CALL(GLProxy, BufferData(GL_ELEMENT_ARRAY_BUFFER, Size, 
+      GetExpected(Indices), GL_STATIC_DRAW))
       .Times(1);
 
     EXPECT_CALL(GLProxy, BindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0))
@@ -7092,7 +6913,7 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Present_Geometry_Billboard_deprecate
 }
 
 // ************************************************************************** //
-TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Present_Geometry_DefaultTransformValues_deprecated)
+TEST_F(OpenGLShader_test, DISABLED_Test_Present_Geometry_DefaultTransformValues_deprecated)
 {
   using GLProxy_t = ::mock::GLProxy;
   GLProxy_t GLProxy;
@@ -7188,7 +7009,7 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Present_Geometry_DefaultTransformVal
 }
 
 // ************************************************************************** //
-TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Present_Geometry_CombineTransform_deprecated)
+TEST_F(OpenGLShader_test, DISABLED_Test_Present_Geometry_CombineTransform_deprecated)
 {
   using GLProxy_t = ::mock::GLProxy;
   GLProxy_t GLProxy;
@@ -7514,7 +7335,7 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Camera_Orthographic_DefaultPosition_
 }
 
 // ************************************************************************** //
-TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Camera_Orthographic_deprecated)
+TEST_F(OpenGLShader_test, DISABLED_Test_Camera_Orthographic_deprecated)
 {
   Tested::GetValue() = 1;
 
@@ -7667,7 +7488,7 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Camera_Orthographic_deprecated)
 }
 
 // ************************************************************************** //
-TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Camera_Perspective_deprecated)
+TEST_F(OpenGLShader_test, DISABLED_Test_Camera_Perspective_deprecated)
 {
   Tested::GetValue() = 1;
 
@@ -7938,7 +7759,7 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Camera_Perspective_deprecated)
 }
 
 // ************************************************************************** //
-TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Light_Ambient_deprecated)
+TEST_F(OpenGLShader_test, DISABLED_Test_Light_Ambient_deprecated)
 {
   Tested::GetValue() = 3;
 
@@ -8136,7 +7957,7 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Light_Ambient_deprecated)
 }
 
 // ************************************************************************** //
-TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Light_Direction_deprecated)
+TEST_F(OpenGLShader_test, DISABLED_Test_Light_Direction_deprecated)
 {
   Tested::GetValue() = 3;
 
@@ -8379,7 +8200,7 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Light_Direction_deprecated)
 }
 
 // ************************************************************************** //
-TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Light_Points_deprecated)
+TEST_F(OpenGLShader_test, DISABLED_Test_Light_Points_deprecated)
 {
   Tested::GetValue() = 3;
 

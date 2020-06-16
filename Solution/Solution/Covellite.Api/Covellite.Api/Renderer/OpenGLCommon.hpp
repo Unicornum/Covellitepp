@@ -51,8 +51,8 @@ protected:
 
 protected:
   Render_t GetDepthRender(const bool, const bool, const bool);
-  MatrixBuilder_t GetPreRenderGeometry(void);
-  MatrixBuilder_t GetPreRenderBillboardGeometry(void);
+  MatrixBuilder_t GetPreRenderGeometry(const ComponentPtr_t &);
+  MatrixBuilder_t GetPreRenderBillboardGeometry(const ComponentPtr_t &);
 
 protected:
   class TexParameters final

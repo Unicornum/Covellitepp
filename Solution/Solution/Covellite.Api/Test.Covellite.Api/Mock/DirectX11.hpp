@@ -96,7 +96,19 @@ inline bool operator== (
   const D3D11_SUBRESOURCE_DATA & _Left,
   const D3D11_SUBRESOURCE_DATA & _Right)
 {
-  return DirectX::operator== (_Left, _Right);
+  if (_Left.SysMemPitch != _Right.SysMemPitch) return false;
+  if (_Left.SysMemSlicePitch != _Right.SysMemSlicePitch) return false;
+
+  if (_Left.pSysMem == nullptr || _Right.pSysMem == nullptr)
+  {
+    return (_Left.pSysMem == _Right.pSysMem);
+  }
+
+  const auto LeftDataSize = *reinterpret_cast<const size_t *>(_Left.pSysMem);
+  const auto RightDataSize = *reinterpret_cast<const size_t *>(_Right.pSysMem);
+  if (LeftDataSize != RightDataSize) return false;
+
+  return (memcmp(_Left.pSysMem, _Right.pSysMem, LeftDataSize) == 0);
 }
 
 inline bool operator== (
@@ -1203,8 +1215,22 @@ public:
   {
     if (dynamic_cast<ID3D11Texture2D *>(pDstResource) != nullptr)
     {
+      ::std::vector<uint8_t> Uint8Data;
+
+      if (pSrcData != nullptr)
+      {
+        auto * pData = reinterpret_cast<const uint8_t *>(pSrcData);
+        while (true)
+        {
+          Uint8Data.push_back(*pData);
+          if (*pData == 0x00) break;
+
+          pData++;
+        }
+      }
+
       UpdateSubresource(pDstResource, DstSubresource, pDstBox,
-        pSrcData, SrcRowPitch, SrcDepthPitch, 0);
+        Uint8Data, SrcRowPitch, SrcDepthPitch);
     }
     else if (dynamic_cast<CameraBuffer *>(pDstResource) != nullptr)
     {

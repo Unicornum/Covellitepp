@@ -175,7 +175,7 @@ Shadows::Shadows(void) :
 
 auto Shadows::GetObject(const Any_t & _Value) const -> Objects_t /*override*/
 {
-  m_pCursorData = ::covellite::any_cast<CursorDataPtr_t>(_Value);
+  m_pCursorData = ::boost::any_cast<const CursorDataPtr_t &>(_Value);
   auto pCursorData = m_pCursorData;
 
   const ::covellite::api::cbBufferMap_t<const void> TextureMapper = 

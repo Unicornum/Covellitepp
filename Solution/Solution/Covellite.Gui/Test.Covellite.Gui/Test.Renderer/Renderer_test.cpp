@@ -81,6 +81,18 @@ bool operator== (
       ::covellite::any_cast<Vertexes_t>(_Right);
   }
 
+  if (_Left.type() == typeid(::std::vector<int>))
+  {
+    return ::covellite::any_cast<::std::vector<int>>(_Left) ==
+      ::covellite::any_cast<::std::vector<int>>(_Right);
+  }
+
+  if (_Left.type() == typeid(::std::vector<uint8_t>))
+  {
+    return ::covellite::any_cast<::std::vector<uint8_t>>(_Left) ==
+      ::covellite::any_cast<::std::vector<uint8_t>>(_Right);
+  }
+
   throw STD_EXCEPTION << "Unknown type values: " << _Left.type().name();
 }
 
@@ -98,6 +110,8 @@ protected:
   using Renders_t = Component_t::Renders;
   using Values_t = ::std::vector<::covellite::Any_t>;
   using Vertex_t = ::covellite::api::Vertex;
+  using ComponentPtr_t = ::std::shared_ptr<Component_t>;
+  using Object_t = ::std::vector<ComponentPtr_t>;
 
   // Вызывается ПЕРЕД запуском каждого теста
   void SetUp(void) override
@@ -125,7 +139,7 @@ protected:
         const String_t & _Name, 
         const T & _DefaultValue)
       {
-        return _pComponent->GetValue(_Name, _DefaultValue);
+        return (*_pComponent)[_Name].Default(_DefaultValue);
       }
     };
 
@@ -293,20 +307,6 @@ TEST_F(Renderer_test, /*DISABLED_*/Test_RenderCompiledGeometry_Textured)
 {
   RenderProxy RenderProxy;
 
-  auto DataCreator =
-    [&](const Component_t::ComponentPtr_t & _pComponent) -> Renders_t::Render_t
-  {
-    return [&, _pComponent]()
-    {
-      RenderProxy.Render(ComponentData{ _pComponent }
-        .AddValue(uT("type"), uT(""))
-        .AddValue(uT("kind"), uT(""))
-        .AddValue(uT("x"), 0.0f)
-        .AddValue(uT("y"), 0.0f)
-        .GetValues());
-    };
-  };
-
   auto ShaderCreator =
     [&](const Component_t::ComponentPtr_t & _pComponent) -> Renders_t::Render_t
   {
@@ -325,38 +325,28 @@ TEST_F(Renderer_test, /*DISABLED_*/Test_RenderCompiledGeometry_Textured)
   auto BufferCreator =
     [&](const Component_t::ComponentPtr_t & _pComponent) -> Renders_t::Render_t
   {
-    if (_pComponent->IsType<const Vertex_t *>(uT("data")))
+    if ((*_pComponent)[uT("content")].IsType<::std::vector<Vertex_t>>())
     {
-      const auto * pData =
-        _pComponent->GetValue(uT("data"), (const Vertex_t *)nullptr);
-      const auto Count = 
-        _pComponent->GetValue(uT("count"), (::std::size_t)0);
-
-      // Данные нужно сохранять здесь, т.к. указатель на данные - локальный
-      // объект и при вызове рендера уже не существует.
-      const ::std::vector<Vertex_t> Data{ pData, pData + Count };
+      const ::std::vector<Vertex_t> Data = (*_pComponent)[uT("content")];
 
       return [&, _pComponent, Data]()
       {
-        static const ::std::vector<Vertex_t> Dummy;
-
         RenderProxy.Render(ComponentData{ _pComponent }
           .AddValue(uT("id"), uT(""))
           .AddValue(uT("type"), uT(""))
-          .AddValue(uT("data"), Data)
+          .AddValue(uT("content"), Data)
           .AddValue(uT("dimension"), 0)
           .GetValues());
       };
     }
-    else if (_pComponent->IsType<const int *>(uT("data")))
+    else if ((*_pComponent)[uT("content")].IsType<::std::vector<int>>())
     {
       return [&, _pComponent]()
       {
         RenderProxy.Render(ComponentData{ _pComponent }
           .AddValue(uT("id"), uT(""))
           .AddValue(uT("type"), uT(""))
-          .AddValue(uT("data"), (const int *)nullptr)
-          .AddValue(uT("count"), (size_t)0)
+          .AddValue(uT("content"), ::std::vector<int>{})
           .GetValues());
       };
     }
@@ -367,21 +357,43 @@ TEST_F(Renderer_test, /*DISABLED_*/Test_RenderCompiledGeometry_Textured)
   auto SimpleCreator =
     [&](const Component_t::ComponentPtr_t & _pComponent) -> Renders_t::Render_t
   {
-    if (_pComponent->Kind == uT("Camera")) return nullptr;
-
-    return [&, _pComponent]()
+    if (_pComponent->Type == uT("Transform"))
     {
-      RenderProxy.Render(ComponentData{ _pComponent }
-        .AddValue(uT("id"), uT(""))
-        .AddValue(uT("type"), uT(""))
-        .AddValue(uT("kind"), uT(""))
-        .GetValues());
-    };
+      const Object_t Data = (*_pComponent)[uT("service")].Default(Object_t{});
+      if (Data.size() != 1) return nullptr;
+
+      using namespace ::alicorn::extension::std;
+
+      return [&, _pComponent, Data]()
+      {
+        RenderProxy.Render(ComponentData{ _pComponent }
+          .AddValue(uT("id"), uT(""))
+          .AddValue(uT("type"), uT(""))
+          .AddValue(uT("kind"), uT(""))
+          .GetValues() +
+          ComponentData{ Data[0] }
+          .AddValue(uT("type"), uT(""))
+          .AddValue(uT("kind"), uT(""))
+          .AddValue(uT("x"), 0.0f)
+          .AddValue(uT("y"), 0.0f)
+          .GetValues());
+      };
+    }
+    else
+    {
+      return [&, _pComponent]()
+      {
+        RenderProxy.Render(ComponentData{ _pComponent }
+          .AddValue(uT("id"), uT(""))
+          .AddValue(uT("type"), uT(""))
+          .AddValue(uT("kind"), uT(""))
+          .GetValues());
+      };
+    }
   };
 
   const Renders_t::Creators_t Creators =
   {
-    { uT("Data"), DataCreator },
     { uT("Texture"), SimpleCreator },
     { uT("Shader"), ShaderCreator },
     { uT("Buffer"), BufferCreator },
@@ -408,12 +420,21 @@ TEST_F(Renderer_test, /*DISABLED_*/Test_RenderCompiledGeometry_Textured)
 
   const auto Converted = Convert(Vertexes);
 
-  auto * const pIndex = (int *)1811161259;
-  const int IndexCount = 1811161300;
+  ::std::vector<int> Indexes =
+  {
+    2006131139,
+    2006131140,
+    2006131141,
+    2006131142,
+    2006131143,
+    2006131144
+  };
+
   const size_t TextureId = 1811161754;
 
-  const auto hGeometry = IExample.CompileGeometry(Vertexes.data(), 
-    static_cast<int>(Vertexes.size()), pIndex, IndexCount, TextureId);
+  const auto hGeometry = IExample.CompileGeometry(
+    Vertexes.data(), static_cast<int>(Vertexes.size()), 
+    Indexes.data(), static_cast<int>(Indexes.size()), TextureId);
 
   const auto strObjectId = uT("{ID}").Replace(uT("{ID}"), (size_t)hGeometry);
 
@@ -450,8 +471,7 @@ TEST_F(Renderer_test, /*DISABLED_*/Test_RenderCompiledGeometry_Textured)
   {
     uT("Covellite.Gui.Present.") + strObjectId,
     uT("Present"),
-    (const int *)pIndex,
-    (size_t)IndexCount,
+    Indexes,
   };
 
   using namespace ::testing;
@@ -473,10 +493,9 @@ TEST_F(Renderer_test, /*DISABLED_*/Test_RenderCompiledGeometry_Textured)
     EXPECT_CALL(RenderProxy, Render(VertexBufferValues))
       .Times(1);
 
-    EXPECT_CALL(RenderProxy, Render(PositionValues))
-      .Times(1);
+    using namespace ::alicorn::extension::std;
 
-    EXPECT_CALL(RenderProxy, Render(TransformValues))
+    EXPECT_CALL(RenderProxy, Render(TransformValues + PositionValues))
       .Times(1);
 
     EXPECT_CALL(RenderProxy, Render(PresentValues))
@@ -506,20 +525,6 @@ TEST_F(Renderer_test, /*DISABLED_*/Test_RenderCompiledGeometry_NonTextured)
 {
   RenderProxy RenderProxy;
 
-  auto DataCreator =
-    [&](const Component_t::ComponentPtr_t & _pComponent) -> Renders_t::Render_t
-  {
-    return [&, _pComponent]()
-    {
-      RenderProxy.Render(ComponentData{ _pComponent }
-        .AddValue(uT("type"), uT(""))
-        .AddValue(uT("kind"), uT(""))
-        .AddValue(uT("x"), 0.0f)
-        .AddValue(uT("y"), 0.0f)
-        .GetValues());
-    };
-  };
-
   auto ShaderCreator =
     [&](const Component_t::ComponentPtr_t & _pComponent) -> Renders_t::Render_t
   {
@@ -538,16 +543,9 @@ TEST_F(Renderer_test, /*DISABLED_*/Test_RenderCompiledGeometry_NonTextured)
   auto BufferCreator =
     [&](const Component_t::ComponentPtr_t & _pComponent) -> Renders_t::Render_t
   {
-    if (_pComponent->IsType<const Vertex_t *>(uT("data")))
+    if ((*_pComponent)[uT("content")].IsType<::std::vector<Vertex_t>>())
     {
-      const auto * pData =
-        _pComponent->GetValue(uT("data"), (const Vertex_t *)nullptr);
-      const auto Count =
-        _pComponent->GetValue(uT("count"), (::std::size_t)0);
-
-      // Данные нужно сохранять здесь, т.к. указатель на данные - локальный
-      // объект и при вызове рендера уже не существует.
-      const ::std::vector<Vertex_t> Data{ pData, pData + Count };
+      const ::std::vector<Vertex_t> Data = (*_pComponent)[uT("content")];
 
       return [&, _pComponent, Data]()
       {
@@ -556,20 +554,19 @@ TEST_F(Renderer_test, /*DISABLED_*/Test_RenderCompiledGeometry_NonTextured)
         RenderProxy.Render(ComponentData{ _pComponent }
           .AddValue(uT("id"), uT(""))
           .AddValue(uT("type"), uT(""))
-          .AddValue(uT("data"), Data)
+          .AddValue(uT("content"), Data)
           .AddValue(uT("dimension"), 0)
           .GetValues());
       };
     }
-    else if (_pComponent->IsType<const int *>(uT("data")))
+    else if ((*_pComponent)[uT("content")].IsType<::std::vector<int>>())
     {
       return [&, _pComponent]()
       {
         RenderProxy.Render(ComponentData{ _pComponent }
           .AddValue(uT("id"), uT(""))
           .AddValue(uT("type"), uT(""))
-          .AddValue(uT("data"), (const int *)nullptr)
-          .AddValue(uT("count"), (size_t)0)
+          .AddValue(uT("content"), ::std::vector<int>{})
           .GetValues());
       };
     }
@@ -580,23 +577,43 @@ TEST_F(Renderer_test, /*DISABLED_*/Test_RenderCompiledGeometry_NonTextured)
   auto SimpleCreator =
     [&](const Component_t::ComponentPtr_t & _pComponent) -> Renders_t::Render_t
   {
-    const auto Kind = _pComponent->Kind;
-
-    if (Kind == uT("Camera")) return nullptr;
-
-    return [&, _pComponent]()
+    if (_pComponent->Type == uT("Transform"))
     {
-      RenderProxy.Render(ComponentData{ _pComponent }
-        .AddValue(uT("id"), uT(""))
-        .AddValue(uT("type"), uT(""))
-        .AddValue(uT("kind"), uT(""))
-        .GetValues());
-    };
+      const Object_t Data = (*_pComponent)[uT("service")].Default(Object_t{});
+      if (Data.size() != 1) return nullptr;
+
+      using namespace ::alicorn::extension::std;
+
+      return [&, _pComponent, Data]()
+      {
+        RenderProxy.Render(ComponentData{ _pComponent }
+          .AddValue(uT("id"), uT(""))
+          .AddValue(uT("type"), uT(""))
+          .AddValue(uT("kind"), uT(""))
+          .GetValues() +
+          ComponentData{ Data[0] }
+          .AddValue(uT("type"), uT(""))
+          .AddValue(uT("kind"), uT(""))
+          .AddValue(uT("x"), 0.0f)
+          .AddValue(uT("y"), 0.0f)
+          .GetValues());
+      };
+    }
+    else
+    {
+      return [&, _pComponent]()
+      {
+        RenderProxy.Render(ComponentData{ _pComponent }
+          .AddValue(uT("id"), uT(""))
+          .AddValue(uT("type"), uT(""))
+          .AddValue(uT("kind"), uT(""))
+          .GetValues());
+      };
+    }
   };
 
   const Renders_t::Creators_t Creators =
   {
-    { uT("Data"), DataCreator },
     { uT("Shader"), ShaderCreator },
     { uT("Buffer"), BufferCreator },
     { uT("Transform"), SimpleCreator },
@@ -641,12 +658,16 @@ TEST_F(Renderer_test, /*DISABLED_*/Test_RenderCompiledGeometry_NonTextured)
   };
 
   const auto Converted = Convert(Vertexes);
+  ::std::vector<int> Indexes =
+  {
+    2006131147,
+    2006131148,
+    2006131149
+  };
 
-  auto * const pIndex = (int *)1811161259;
-  const int IndexCount = 1811161300;
-
-  const auto hGeometry = IExample.CompileGeometry(Vertexes.data(), 
-    static_cast<int>(Vertexes.size()), pIndex, IndexCount, 0);
+  const auto hGeometry = IExample.CompileGeometry(
+    Vertexes.data(), static_cast<int>(Vertexes.size()), 
+    Indexes.data(), static_cast<int>(Indexes.size()), 0);
 
   const auto strObjectId = uT("{ID}").Replace(uT("{ID}"), (size_t)hGeometry);
 
@@ -676,8 +697,7 @@ TEST_F(Renderer_test, /*DISABLED_*/Test_RenderCompiledGeometry_NonTextured)
   {
     uT("Covellite.Gui.Present.") + strObjectId,
     uT("Present"),
-    (const int *)pIndex,
-    (size_t)IndexCount,
+    Indexes,
   };
 
   using namespace ::testing;
@@ -696,10 +716,9 @@ TEST_F(Renderer_test, /*DISABLED_*/Test_RenderCompiledGeometry_NonTextured)
     EXPECT_CALL(RenderProxy, Render(VertexBufferValues))
       .Times(1);
 
-    EXPECT_CALL(RenderProxy, Render(PositionValues))
-      .Times(1);
+    using namespace ::alicorn::extension::std;
 
-    EXPECT_CALL(RenderProxy, Render(TransformValues))
+    EXPECT_CALL(RenderProxy, Render(TransformValues + PositionValues))
       .Times(1);
 
     EXPECT_CALL(RenderProxy, Render(PresentValues))
@@ -935,12 +954,25 @@ TEST_F(Renderer_test, /*DISABLED_*/Test_SetScissorRegion)
 {
   RenderProxy RenderProxy;
 
-  auto DataCreator =
+  auto ScissorCreator = 
     [&](const Component_t::ComponentPtr_t & _pComponent) -> Renders_t::Render_t
   {
-    return [&, _pComponent]()
+    if (_pComponent->Kind != uT("Scissor")) return nullptr;
+
+    const Object_t Data = (*_pComponent)[uT("service")].Default(Object_t{});
+    if (Data.size() != 1) return nullptr;
+
+    using namespace ::alicorn::extension::std;
+
+    return [&, _pComponent, Data]()
     {
       RenderProxy.Render(ComponentData{ _pComponent }
+        .AddValue(uT("id"), uT(""))
+        .AddValue(uT("type"), uT(""))
+        .AddValue(uT("kind"), uT(""))
+        .AddValue(uT("enabled"), uT(""))
+        .GetValues() +
+        ComponentData{ Data[0] }
         .AddValue(uT("type"), uT(""))
         .AddValue(uT("kind"), uT(""))
         .AddValue(uT("left"), 0)
@@ -951,26 +983,8 @@ TEST_F(Renderer_test, /*DISABLED_*/Test_SetScissorRegion)
     };
   };
 
-  auto ScissorCreator = 
-    [&](const Component_t::ComponentPtr_t & _pComponent) -> Renders_t::Render_t
-  {
-    const auto Kind = _pComponent->Kind;
-    if (Kind != uT("Scissor")) return nullptr;
-
-    return [&, _pComponent]()
-    {
-      RenderProxy.Render(ComponentData{ _pComponent }
-        .AddValue(uT("id"), uT(""))
-        .AddValue(uT("type"), uT(""))
-        .AddValue(uT("kind"), uT(""))
-        .AddValue(uT("enabled"), uT(""))
-        .GetValues());
-    };
-  };
-
   const Renders_t::Creators_t Creators =
   {
-    { uT("Data"), DataCreator },
     { uT("State"), ScissorCreator },
   };
 
@@ -1008,10 +1022,9 @@ TEST_F(Renderer_test, /*DISABLED_*/Test_SetScissorRegion)
       Y + Height,
     };
 
-    EXPECT_CALL(RenderProxy, Render(ExpectedRectData))
-      .Times(1);
+    using namespace ::alicorn::extension::std;
 
-    EXPECT_CALL(RenderProxy, Render(ExpectedScissorData))
+    EXPECT_CALL(RenderProxy, Render(ExpectedScissorData + ExpectedRectData))
       .Times(1);
 
     Example.RenderScene();
@@ -1036,10 +1049,9 @@ TEST_F(Renderer_test, /*DISABLED_*/Test_SetScissorRegion)
       Y + Height,
     };
 
-    EXPECT_CALL(RenderProxy, Render(ExpectedRectData))
-      .Times(1);
+    using namespace ::alicorn::extension::std;
 
-    EXPECT_CALL(RenderProxy, Render(ExpectedScissorData))
+    EXPECT_CALL(RenderProxy, Render(ExpectedScissorData + ExpectedRectData))
       .Times(1);
 
     Example.RenderScene();
@@ -1187,7 +1199,7 @@ TEST_F(Renderer_test, /*DISABLED_*/Test_GenerateTexture)
       RenderProxy.Render(ComponentData{ _pComponent }
         .AddValue(uT("id"), uT(""))
         .AddValue(uT("type"), uT(""))
-        .AddValue<const uint8_t *>(uT("data"), nullptr)
+        .AddValue(uT("content"), ::std::vector<uint8_t>{})
         .AddValue(uT("width"), 0)
         .AddValue(uT("height"), 0)
         .GetValues());
@@ -1208,16 +1220,25 @@ TEST_F(Renderer_test, /*DISABLED_*/Test_GenerateTexture)
 
   // Первый вызов функции
   {
-    const uint8_t * const pData = (uint8_t *)1811071432;
-    const int Width = 1811071433;
-    const int Height = 1811071434;
+    const ::std::vector<uint8_t> Data =
+    {
+      0x00, 0x01, 0x02, 0x03,   0x04, 0x05, 0x06, 0x07,   0x08, 0x09, 0x10, 0x11,
+      0x00, 0x01, 0x02, 0x03,   0x04, 0x05, 0x06, 0x07,   0x08, 0x09, 0x10, 0x11,
+      0x00, 0x01, 0x02, 0x03,   0x04, 0x05, 0x06, 0x07,   0x08, 0x09, 0x10, 0x11,
+      0x00, 0x01, 0x02, 0x03,   0x04, 0x05, 0x06, 0x07,   0x08, 0x09, 0x10, 0x11,
+      0x00, 0x01, 0x02, 0x03,   0x04, 0x05, 0x06, 0x07,   0x08, 0x09, 0x10, 0x11,
+      0x00, 0x01, 0x02, 0x03,   0x04, 0x05, 0x06, 0x07,   0x08, 0x09, 0x10, 0x11,
+    };
+
+    const int Width = 3;
+    const int Height = 6;
 
     ::mock::CovelliteGui::Core::TextureHandle hTexture = 0;
-    auto Result = IExample.GenerateTexture(hTexture, pData, { Width, Height });
+    auto Result = IExample.GenerateTexture(hTexture, Data.data(), { Width, Height });
     EXPECT_TRUE(Result);
     EXPECT_EQ(1, hTexture);
 
-    auto Renders = pRenders->Obtain(
+    auto Renders = pRenders->Obtain(Component_t::Renders::Object_t
       {
         Component_t::Make(
           {
@@ -1231,7 +1252,7 @@ TEST_F(Renderer_test, /*DISABLED_*/Test_GenerateTexture)
     {
       uT("Covellite.Gui.Texture.1"),
       uT("Texture"),
-      pData,
+      Data,
       Width,
       Height
     };
@@ -1244,16 +1265,29 @@ TEST_F(Renderer_test, /*DISABLED_*/Test_GenerateTexture)
 
   // Второй вызов функции
   {
-    const uint8_t * const pData = (uint8_t *)1811071454;
-    const int Width = 1811071455;
-    const int Height = 1811071456;
+    const ::std::vector<uint8_t> Data =
+    {
+      0x00, 0x01, 0x02, 0x03,   0x04, 0x05, 0x06, 0x07,
+      0x00, 0x01, 0x02, 0x03,   0x04, 0x05, 0x06, 0x07,
+      0x00, 0x01, 0x02, 0x03,   0x04, 0x05, 0x06, 0x07,
+      0x00, 0x01, 0x02, 0x03,   0x04, 0x05, 0x06, 0x07,
+      0x00, 0x01, 0x02, 0x03,   0x04, 0x05, 0x06, 0x07,
+      0x00, 0x01, 0x02, 0x03,   0x04, 0x05, 0x06, 0x07,
+      0x00, 0x01, 0x02, 0x03,   0x04, 0x05, 0x06, 0x07,
+      0x00, 0x01, 0x02, 0x03,   0x04, 0x05, 0x06, 0x07,
+      0x00, 0x01, 0x02, 0x03,   0x04, 0x05, 0x06, 0x07,
+      0x00, 0x01, 0x02, 0x03,   0x04, 0x05, 0x06, 0x07,
+    };
+
+    const int Width = 2;
+    const int Height = 10;
 
     ::mock::CovelliteGui::Core::TextureHandle hTexture = 0;
-    auto Result = IExample.GenerateTexture(hTexture, pData, { Width, Height });
+    auto Result = IExample.GenerateTexture(hTexture, Data.data(), { Width, Height });
     EXPECT_TRUE(Result);
     EXPECT_EQ(2, hTexture);
 
-    auto Renders = pRenders->Obtain(
+    auto Renders = pRenders->Obtain(Component_t::Renders::Object_t
       {
         Component_t::Make(
           {
@@ -1267,7 +1301,7 @@ TEST_F(Renderer_test, /*DISABLED_*/Test_GenerateTexture)
     {
       uT("Covellite.Gui.Texture.2"),
       uT("Texture"),
-      pData,
+      Data,
       Width,
       Height
     };
@@ -1277,28 +1311,6 @@ TEST_F(Renderer_test, /*DISABLED_*/Test_GenerateTexture)
 
     Renders[0]();
   }
-}
-
-// ************************************************************************** //
-TEST_F(Renderer_test, /*DISABLED_*/Test_GenerateTexture_Fail)
-{
-  auto Creator = [&](const Component_t::ComponentPtr_t &) -> Renders_t::Render_t
-  {
-    throw ::std::exception{};
-  };
-
-  const Renders_t::Creators_t Creators =
-  {
-    { uT("Texture"), Creator },
-  };
-
-  Tested_t Example{ ::std::make_shared<Renders_t>(Creators) };
-  RenderInterface_t & IExample = Example;
-
-  ::mock::CovelliteGui::Core::TextureHandle hTexture = 0;
-  auto Result = IExample.GenerateTexture(hTexture, nullptr, { 0, 0 });
-  EXPECT_FALSE(Result);
-  EXPECT_EQ(0, hTexture);
 }
 
 // ************************************************************************** //
@@ -1313,10 +1325,23 @@ TEST_F(Renderer_test, /*DISABLED_*/Test_ReleaseTexture)
       RenderProxy.Render(ComponentData{ _pComponent }
         .AddValue(uT("id"), uT(""))
         .AddValue(uT("type"), uT(""))
-        .AddValue<const uint8_t *>(uT("data"), nullptr)
+        .AddValue(uT("content"), ::std::vector<uint8_t>{})
         .GetValues());
     };
   };
+
+  const ::std::vector<uint8_t> Data =
+  {
+    0x00, 0x01, 0x02, 0x03,   0x04, 0x05, 0x06, 0x07,   0x08, 0x09, 0x10, 0x11,
+    0x00, 0x01, 0x02, 0x03,   0x04, 0x05, 0x06, 0x07,   0x08, 0x09, 0x10, 0x11,
+    0x00, 0x01, 0x02, 0x03,   0x04, 0x05, 0x06, 0x07,   0x08, 0x09, 0x10, 0x11,
+    0x00, 0x01, 0x02, 0x03,   0x04, 0x05, 0x06, 0x07,   0x08, 0x09, 0x10, 0x11,
+    0x00, 0x01, 0x02, 0x03,   0x04, 0x05, 0x06, 0x07,   0x08, 0x09, 0x10, 0x11,
+    0x00, 0x01, 0x02, 0x03,   0x04, 0x05, 0x06, 0x07,   0x08, 0x09, 0x10, 0x11,
+  };
+
+  const int Width = 3;
+  const int Height = 6;
 
   const Renders_t::Creators_t Creators =
   {
@@ -1331,13 +1356,15 @@ TEST_F(Renderer_test, /*DISABLED_*/Test_ReleaseTexture)
   using namespace ::testing;
 
   {
-    auto Renders = pRenders->Obtain(
+    auto Renders = pRenders->Obtain(Component_t::Renders::Object_t
       {
           Component_t::Make(
           {
             { uT("id"), uT("Covellite.Gui.Texture.1811071543") },
             { uT("type"), uT("Texture") },
-            { uT("data"), (const uint8_t *)1811071544 },
+            { uT("content"), Data },
+            { uT("width"), Width },
+            { uT("height"), Height },
            })
       });
 
@@ -1347,7 +1374,7 @@ TEST_F(Renderer_test, /*DISABLED_*/Test_ReleaseTexture)
     {
       uT("Covellite.Gui.Texture.1811071543"),
       uT("Texture"),
-      (const uint8_t *)1811071544,
+      Data,
     };
 
     EXPECT_CALL(RenderProxy, Render(ExpectedTextureData))
@@ -1359,7 +1386,7 @@ TEST_F(Renderer_test, /*DISABLED_*/Test_ReleaseTexture)
   IExample.ReleaseTexture(1811071543);
 
   {
-    auto Renders = pRenders->Obtain(
+    auto Renders = pRenders->Obtain(Component_t::Renders::Object_t
       {
           Component_t::Make(
           {
@@ -1374,7 +1401,7 @@ TEST_F(Renderer_test, /*DISABLED_*/Test_ReleaseTexture)
     {
       uT("Covellite.Gui.Texture.1811071543"),
       uT("Texture"),
-      (const uint8_t *)nullptr,
+      ::std::vector<uint8_t>{},
     };
 
     EXPECT_CALL(RenderProxy, Render(ExpectedTextureData))
@@ -1409,8 +1436,7 @@ TEST_F(Renderer_test, /*DISABLED_*/Test_RenderScene)
         .AddValue(uT("id"), uT(""))
         .AddValue(uT("type"), uT(""))
         .AddValue(uT("entry"), uT(""))
-        .AddValue<const uint8_t *>(uT("data"), nullptr)
-        .AddValue(uT("count"), (size_t)0)
+        .AddValue(uT("content"), ::std::vector<uint8_t>{})
         .GetValues());
     };
   };
@@ -1453,8 +1479,7 @@ TEST_F(Renderer_test, /*DISABLED_*/Test_RenderScene)
     uT("Covellite.Gui.Shader.Vertex"),
     uT("Shader"),
     uT("vsFlat"),
-    (const uint8_t *)nullptr,
-    (size_t)0,
+    ::std::vector<uint8_t>{},
   };
 
   using namespace ::testing;

@@ -34,6 +34,11 @@ public:
   using Creators_t = ::std::map<Type_t, Creator_t>;
 
 public:
+  Render_t Obtain(const ComponentPtr_t &);
+  void Remove(const ComponentPtr_t &);
+
+public:
+  // deprecated
   Renders_t Obtain(const Object_t &);
   void Remove(const Object_t &);
 

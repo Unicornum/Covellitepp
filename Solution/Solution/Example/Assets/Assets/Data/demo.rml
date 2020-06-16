@@ -7,7 +7,7 @@
   <body id="id_demo">
     <form id="id_main_menu">
       <form>
-        <button id="id_landscape">Lanscape</button>
+        <button id="id_landscape">Landscape</button>
         <button id="id_animation">Animation</button>
         <button id="id_shadows">Shadows</button>
         <button id="id_help">Help</button>

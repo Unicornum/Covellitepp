@@ -29,7 +29,7 @@ void StringTranslator::Set(const Bank_t & _Strings)
 
 auto StringTranslator::Translate(const Utf8String_t & _Source) ->Utf8String_t /*override*/
 {
-  auto itSource = m_Strings.find(_Source);
+  const auto itSource = m_Strings.find(_Source);
   if (itSource == m_Strings.end()) return _Source;
 
   return itSource->second;

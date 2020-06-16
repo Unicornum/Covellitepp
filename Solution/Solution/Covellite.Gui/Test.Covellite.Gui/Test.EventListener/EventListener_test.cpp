@@ -236,17 +236,17 @@ TEST_F(EventListener_test, /*DISABLED_*/Test_ProcessEvent_OnClick_Exception)
     .Times(1)
     .WillOnce(Return(&OwnerDocument));
 
-  EXPECT_CALL(TargetElement, GetId())
+  EXPECT_CALL(Event, GetType())
     .Times(1)
-    .WillOnce(Return(TargetElementId));
+    .WillOnce(Return(Type));
 
   EXPECT_CALL(OwnerDocument, GetId())
     .Times(1)
     .WillOnce(Return(DocumentId));
 
-  EXPECT_CALL(Event, GetType())
+  EXPECT_CALL(TargetElement, GetId())
     .Times(1)
-    .WillOnce(Return(Type));
+    .WillOnce(Return(TargetElementId));
 
   EXPECT_CALL(Handler, DoClick())
     .Times(1)
@@ -294,17 +294,17 @@ TEST_F(EventListener_test, /*DISABLED_*/Test_ProcessEvent_OnChange_Exception)
     .Times(1)
     .WillOnce(Return(&OwnerDocument));
 
-  EXPECT_CALL(TargetElement, GetId())
+  EXPECT_CALL(Event, GetType())
     .Times(1)
-    .WillOnce(Return(TargetElementId));
+    .WillOnce(Return(Type));
 
   EXPECT_CALL(OwnerDocument, GetId())
     .Times(1)
     .WillOnce(Return(DocumentId));
 
-  EXPECT_CALL(Event, GetType())
+  EXPECT_CALL(TargetElement, GetId())
     .Times(1)
-    .WillOnce(Return(Type));
+    .WillOnce(Return(TargetElementId));
 
   EXPECT_CALL(Handler, DoChange())
     .Times(1)
@@ -351,17 +351,17 @@ TEST_F(EventListener_test, /*DISABLED_*/Test_ProcessEvent_OnClick)
     .Times(1)
     .WillOnce(Return(&OwnerDocument));
 
-  EXPECT_CALL(TargetElement, GetId())
+  EXPECT_CALL(Event, GetType())
     .Times(1)
-    .WillOnce(Return(TargetElementId));
+    .WillOnce(Return(Type));
 
   EXPECT_CALL(OwnerDocument, GetId())
     .Times(1)
     .WillOnce(Return(OwnerDocumentId));
 
-  EXPECT_CALL(Event, GetType())
+  EXPECT_CALL(TargetElement, GetId())
     .Times(1)
-    .WillOnce(Return(Type));  
+    .WillOnce(Return(TargetElementId));
 
   EXPECT_CALL(Handler, DoClick())
     .Times(1);
@@ -407,17 +407,17 @@ TEST_F(EventListener_test, /*DISABLED_*/Test_ProcessEvent_OnChamge)
     .Times(1)
     .WillOnce(Return(&OwnerDocument));
 
-  EXPECT_CALL(TargetElement, GetId())
+  EXPECT_CALL(Event, GetType())
     .Times(1)
-    .WillOnce(Return(TargetElementId));
+    .WillOnce(Return(Type));
 
   EXPECT_CALL(OwnerDocument, GetId())
     .Times(1)
     .WillOnce(Return(OwnerDocumentId));
 
-  EXPECT_CALL(Event, GetType())
+  EXPECT_CALL(TargetElement, GetId())
     .Times(1)
-    .WillOnce(Return(Type));
+    .WillOnce(Return(TargetElementId));
 
   EXPECT_CALL(Handler, DoChange())
     .Times(1);

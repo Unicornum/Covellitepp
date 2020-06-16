@@ -8,9 +8,13 @@
 #include <alicorn/cpp/disable-warnings.hpp>
 ALICORN_DISABLE_ALL_WARNINGS
 #include <glm/glm.force.hpp>
-ALICORN_RESTORE_WARNINGS
+#include <boost/signals2.hpp>
 #include <alicorn/std/string.hpp>
 #include <alicorn/std/exception.hpp>
+#include <alicorn/std/singleton.hpp>
+#include <alicorn/std.fast/unordered-map.hpp>
+#include <alicorn/image.hpp>
+ALICORN_RESTORE_WARNINGS
 
 // Использование здесь включений отдельных файлов Covellite++ вместо
 // единого файла позволяет ускорить сборку всего на пару секунд.

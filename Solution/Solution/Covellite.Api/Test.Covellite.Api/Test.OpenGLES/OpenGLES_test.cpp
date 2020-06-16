@@ -46,6 +46,7 @@ protected:
   using Component_t = ::covellite::api::Component;
   using Render_t = ::std::function<void(void)>;
   using Time_t = ::std::chrono::microseconds;
+  using Object_t = ::std::vector<Component_t::ComponentPtr_t>;
 
   // Вызывается ПЕРЕД запуском каждого теста
   void SetUp(void) override

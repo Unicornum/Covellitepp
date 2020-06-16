@@ -20,8 +20,10 @@ TEST_F(OpenGLStatic_test, /*DISABLED_*/Test_Texture_Albedo)
   auto itCreator = IExample.GetCreators().find(uT("Texture"));
   ASSERT_NE(IExample.GetCreators().end(), itCreator);
 
-  const auto TestCall = [&](const Component_t::ComponentPtr_t & _pTexture,
-    const uint8_t * _pSource, const int _Width, const int _Height)
+  const auto TestCall = [&](
+    const Component_t::ComponentPtr_t & _pTexture,
+    const ::std::vector<uint8_t> & _Source, 
+    const int _Width, const int _Height)
   {
     const ::mock::GLuint TextureId = 1812181809;
 
@@ -38,7 +40,7 @@ TEST_F(OpenGLStatic_test, /*DISABLED_*/Test_Texture_Albedo)
 
     EXPECT_CALL(GLProxy, TexImage2D(GL_TEXTURE_2D, 0, GL_RGBA,
       _Width, _Height, 0,
-      GL_RGBA, GL_UNSIGNED_BYTE, _pSource))
+      GL_RGBA, GL_UNSIGNED_BYTE, _Source))
       .Times(1);
 
     EXPECT_CALL(GLProxy, BindTexture(GL_TEXTURE_2D, 0))

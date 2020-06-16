@@ -2,6 +2,7 @@
 #include "stdafx.h"
 #include "GameWorld.hpp"
 #include <random>
+#include <chrono>
 #include <alicorn/std/vector.hpp>
 #include <alicorn/logger.hpp>
 #include <Covellite/Api/Component.inl>
@@ -450,6 +451,9 @@ void GameWorld::LoadObject(
 
 void GameWorld::PrepareLoader(const IntPtr_t & _pLoadingPercent)
 {
+  using namespace ::std::chrono;
+  const auto Start = system_clock::now();
+
   const auto pLoadedObjects = ::std::make_shared<size_t>(0);
 
   const Updater_t LoaderUpdater = [=](const float)
@@ -458,6 +462,10 @@ void GameWorld::PrepareLoader(const IntPtr_t & _pLoadingPercent)
     {
       *_pLoadingPercent = 101; // 101 для того, чтобы отрисовалось 100%
       m_pGameScene->CompleteReplace();
+
+      LOGGER(Info) << "Loading time: " << 
+        duration<float>{system_clock::now() - Start}.count();
+
       return;
     }
 

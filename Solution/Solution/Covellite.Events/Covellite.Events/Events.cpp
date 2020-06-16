@@ -11,13 +11,13 @@ Events::Events(void) :
 
 }
 
-Events::Events(const Events & _Events) :
+Events::Events(const Events & _Events) noexcept :
   m_pSignals(_Events.m_pSignals)
 {
 
 }
 
-Events::~Events(void) noexcept
+Events::~Events(void)
 {
   for (auto & Connection : m_Connections)
   {

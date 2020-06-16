@@ -50,10 +50,13 @@ private:
 
 public:
   Events(void);
-  Events(const Events &);
+  Events(const Events &) noexcept;
+  Events(Events &&) = default;
+  Events & operator= (const Events &) = delete;
+  Events & operator= (Events &&) = delete;
 
 public:
-  ~Events(void) noexcept;
+  ~Events(void);
 };
 
 } // namespace events

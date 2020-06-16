@@ -1,9 +1,9 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Tasks>
   <Options>
-    <Width>1951</Width>
+    <Width>1746</Width>
     <Height>970</Height>
-    <X>418</X>
+    <X>623</X>
     <Y>44</Y>
   </Options>
   <Process>
@@ -13,21 +13,14 @@
     </Task1>
   </Process>
   <Complete>
+    <Week6284/>
+    <Week6283/>
+    <Week6282/>
     <Week6281>
-      <Task6 Text="Адаптация стилей главного окна программы под RmlUi." Type="Red" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="false"/>
-      <Task7 Text="Адаптация стилей всех окон под RmlUi." Type="Red" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="false"/>
-      <Task8 Text="Некорректное отображение элементов." Type="Bug" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="false"/>
-      <Task9 Text="Исправление стилей отображения главного окна программы." Type="Red" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="false"/>
+      <Task9 Text="Адаптация стилей главного окна программы под RmlUi." Type="Red" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="false"/>
+      <Task10 Text="Адаптация стилей всех окон под RmlUi." Type="Red" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="false"/>
+      <Task11 Text="Некорректное отображение элементов." Type="Bug" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="false"/>
+      <Task12 Text="Исправление стилей отображения главного окна программы." Type="Red" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="false"/>
     </Week6281>
-    <Week6280>
-      <Task11 Text="Ширина scrollbar'a в процентах ширины экрана." Type="Red" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="true" ParentTaskText="false"/>
-      <Task12 Text="Увеличение размеров ползунка громкости звука." Type="Red" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="true" ParentTaskText="false"/>
-      <Task13 Text="Завершение работы программы по нажатию ESC в главном окне." Type="Red" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="true" ParentTaskText="false"/>
-      <Task14 Text="Перенос кода воспроизведения звука на новую версию MiniAudio." Type="Red" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="true" ParentTaskText="false"/>
-      <Task15 Text="Реализация тумана через пользовательский константный буфер." Type="Red" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="true" ParentTaskText="false"/>
-      <Task16 Text="Android: некорректное отображение вращающегося кубика при использовании инстансинга." Type="Bug" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="true" ParentTaskText="false"/>
-    </Week6280>
-    <Week6279/>
-    <Week6278/>
   </Complete>
 </Tasks>

@@ -29,19 +29,11 @@ namespace renderer
 {
 
 GraphicApi::GraphicApi(void) :
-  m_ServiceComponents{ m_Components },
   m_StartProgram{ std::chrono::system_clock::now() },
   m_CurrentFrameTime{ 0.0f }
 {
   m_Creators =
   {
-    {
-      uT("Data"), [=](const ComponentPtr_t & _pComponent)
-      {
-        m_Components.push_back(_pComponent);
-        return Render_t{};
-      }
-    },
     { uT("Camera"), [=](const ComponentPtr_t & _pComponent)
       { return CreateCamera(_pComponent); } },
     { uT("BkSurface"), [=](const ComponentPtr_t & _pComponent)
@@ -112,8 +104,8 @@ auto GraphicApi::CreateUpdater(const ComponentPtr_t & _pComponent) const -> Rend
   {
     // Создание здесь объекта, а не ссылки позволяет релизовать замену
     // функции обратного вызова внутри самой функции обратного вызова.
-    const auto Updater =
-      _pComponent->GetValue<const Updater_t &>(hFunctionName, Empty);
+    const Updater_t Updater =
+      (*_pComponent)[hFunctionName].Default(Empty);
 
     Updater(m_CurrentFrameTime);
   };

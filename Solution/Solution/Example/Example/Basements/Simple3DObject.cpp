@@ -1,6 +1,7 @@
 ﻿
 #include "stdafx.h"
 #include "Simple3DObject.hpp"
+#include <boost/any.hpp>
 #include <alicorn/std/vector.hpp>
 #include <alicorn/logger.hpp>
 #include <glm/glm.force.hpp>
@@ -385,7 +386,7 @@ auto Simple3DObject::BuildLights(int _LightsFlags) -> Id
     return false;
   };
 
-  m_Objects[Id] = m_pRenders->Obtain(
+  m_Objects[Id] = m_pRenders->Obtain(Component_t::Renders::Object_t
     {
       Component_t::Make(
       {

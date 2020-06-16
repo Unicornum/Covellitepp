@@ -41,21 +41,23 @@ GraphicApi::CapturingServiceComponent::CapturingServiceComponent(
 *  - Компоненты расположены в том порядке значений \b kind, что и во входном
 *  наборе.
 */
-auto GraphicApi::CapturingServiceComponent::Get(
-  const Expected_t & _Expected) -> ::std::vector<ComponentPtr_t>
+/*static*/ auto GraphicApi::CapturingServiceComponent::Get(
+  const ComponentPtr_t & _pMainComponent,
+  const Expected_t & _Expected) -> Services_t
 {
-  ::std::vector<ComponentPtr_t> Result;
+  Services_t & Source = (*_pMainComponent)[uT("service")].Default(Services_t{});
+  Services_t Result;
 
   for (const auto & Info : _Expected)
   {
-    auto itResult = ::std::find_if(m_Components.rbegin(), m_Components.rend(),
+    auto itResult = ::std::find_if(Source.rbegin(), Source.rend(),
       [&](const ComponentPtr_t & _pComponent)
     { return Info.first == _pComponent->Kind; });
 
-    if (itResult != m_Components.rend())
+    if (itResult != Source.rend())
     {
       Result.push_back(*itResult);
-      m_Components.erase(::std::next(itResult).base());
+      Source.erase(::std::next(itResult).base());
     }
     else
     {
@@ -63,12 +65,12 @@ auto GraphicApi::CapturingServiceComponent::Get(
     }
   }
 
-  if (!m_Components.empty())
+  if (!Source.empty())
   {
     // 14 Февраль 2019 16:29 (unicornum.verum@gmail.com)
     TODO("Писать в лог warning'и о лишних компонентах.");
 
-    m_Components.clear();
+    Source.clear();
   }
 
   return Result;
@@ -88,13 +90,14 @@ auto GraphicApi::CapturingServiceComponent::Get(
 * \param [in] _PreRenders
 *  Исходный набор обработчиков компонентов.
 */
-void GraphicApi::CapturingServiceComponent::Process(
+/*static*/ void GraphicApi::CapturingServiceComponent::Process(
+  const ComponentPtr_t & _pMainComponent,
   const Handlers_t & _PreRenders)
 {
-  for (; !m_Components.empty(); m_Components.pop_front())
-  {
-    const auto pComponent = m_Components.front();
+  Services_t & Source = (*_pMainComponent)[uT("service")].Default(Services_t{});
 
+  for (const auto & pComponent : Source)
+  {
     auto itComponent = _PreRenders.find(pComponent->Kind);
     if (itComponent != _PreRenders.end())
     {
@@ -106,6 +109,8 @@ void GraphicApi::CapturingServiceComponent::Process(
       TODO("Писать в лог warning о лишнем компоненте.");
     }
   }
+
+  Source.clear();
 }
 
 } // namespace renderer

@@ -661,10 +661,10 @@ auto OpenGLCommonShader::CreateBkSurface(
 
   const auto DoDataTexture = [&](const ComponentPtr_t & _pDataTexture)
   {
-    _pDataTexture->SetValue(uT("width"), static_cast<int>(Viewport[2]));
-    _pDataTexture->SetValue(uT("height"), static_cast<int>(Viewport[3]));
+    (*_pDataTexture)[uT("width")] = static_cast<int>(Viewport[2]);
+    (*_pDataTexture)[uT("height")] = static_cast<int>(Viewport[3]);
 
-    const Component::Texture TextureData{ _pDataTexture };
+    const Component::Texture TextureData{ *_pDataTexture, uT("diffuse") };
 
     const auto pTexture = ::std::make_shared<Texture>(TextureData);
     Textures.push_back({ _pDataTexture, pTexture });
@@ -683,13 +683,11 @@ auto OpenGLCommonShader::CreateBkSurface(
         GL_TEXTURE_2D, pTexture->m_TextureId, 0);
     }
 
-    _pDataTexture->SetValue(uT("entity"), pTexture);
+    (*_pDataTexture)[uT("entity")].Default(pTexture);
   };
 
-  m_ServiceComponents.Process(
-    {
-      { uT("Texture"), DoDataTexture },
-    });
+  CapturingServiceComponent::Process(_pComponent,
+    { { uT("Texture"), DoDataTexture } });
  
   const auto FramebufferStatus = glCheckFramebufferStatus(GL_FRAMEBUFFER);
   pFrameBuffer->Unbind();
@@ -708,8 +706,8 @@ auto OpenGLCommonShader::CreateBkSurface(
 
       for (const auto & Texture : Textures)
       {
-        Texture.first->SetValue(uT("width"), static_cast<int>(Viewport[2]));
-        Texture.first->SetValue(uT("height"), static_cast<int>(Viewport[3]));
+        (*Texture.first)[uT("width")] = static_cast<int>(Viewport[2]);
+        (*Texture.first)[uT("height")] = static_cast<int>(Viewport[3]);
         Texture.second->MakeContent(Viewport[2], Viewport[3], nullptr);
       }
     }
@@ -742,16 +740,16 @@ auto OpenGLCommonShader::CreateTexture(const ComponentPtr_t & _pComponent) -> Re
 {
   using BufferMapper_t = cbBufferMap_t<const void>;
 
-  const auto pTextureDataComponent =
-    m_ServiceComponents.Get({ { uT("Texture"), _pComponent } })[0];
+  const auto pTextureDataComponent = CapturingServiceComponent::Get(_pComponent, 
+    { { uT("Texture"), _pComponent } })[0];
 
-  const Component::Texture TextureData{ pTextureDataComponent };
+  const Component::Texture TextureData{ *pTextureDataComponent, uT("diffuse") };
 
   ::std::function<GLint(void)> GetTexMinFilter = 
     [=](void) { return m_TexParameters.MinFilter; };
 
   Texture::Ptr_t pTexture =
-    pTextureDataComponent->GetValue(uT("entity"), Texture::Ptr_t{});
+    (*pTextureDataComponent)[uT("entity")].Default(Texture::Ptr_t{});
   if (pTexture == nullptr)
   {
     pTexture = ::std::make_shared<Texture>(TextureData);
@@ -767,7 +765,7 @@ auto OpenGLCommonShader::CreateTexture(const ComponentPtr_t & _pComponent) -> Re
   }
   else
   {
-    pTextureDataComponent->SetValue(uT("entity"), Texture::Ptr_t{});
+    (*pTextureDataComponent)[uT("entity")] = Texture::Ptr_t{};
   }
 
   const Render_t TextureRender = [=](void)
@@ -798,13 +796,13 @@ auto OpenGLCommonShader::CreateTexture(const ComponentPtr_t & _pComponent) -> Re
     glUniform1i(LocationId, Index);
   };
 
-  if (!pTextureDataComponent->IsType<const BufferMapper_t &>(uT("mapper")))
+  if (!(*pTextureDataComponent)[uT("mapper")].IsType<const BufferMapper_t &>())
   {
     return TextureRender;
   }
 
-  const auto cbBufferMapper = 
-    pTextureDataComponent->GetValue<const BufferMapper_t &>(uT("mapper"), BufferMapper_t{});
+  const BufferMapper_t cbBufferMapper =
+    (*pTextureDataComponent)[uT("mapper")].Default(BufferMapper_t{});
   const auto pFrameBuffer = ::std::make_shared<FrameBuffer>();
 
   return [=](void)
@@ -963,8 +961,7 @@ public:
       ::Data + 
       _ShaderData.GetInstanceInput(::Input);
 
-    const auto BodyShaderText =
-      _ShaderData.GetBody();
+    const auto BodyShaderText = _ShaderData.Data;
 
     return ::std::make_shared<Shader>(*this, GL_VERTEX_SHADER,
       (m_ShaderHeader +
@@ -992,7 +989,7 @@ public:
 
     const auto HeaderShaderText = ::Predefined + ::Data + ::Input;
     const auto BodyShaderText = ::std::string{
-      _ShaderData.pData, _ShaderData.pData + _ShaderData.Count };
+      _ShaderData.Data.cbegin(), _ShaderData.Data.cend() };
 
     ::std::string Main;
 
@@ -1091,10 +1088,10 @@ public:
 
 auto OpenGLCommonShader::CreateShader(const ComponentPtr_t & _pComponent) -> Render_t /*override*/
 {
-  const auto pShaderDataComponent =
-    m_ServiceComponents.Get({ { uT("Shader"), _pComponent } })[0];
+  const auto pShaderDataComponent = CapturingServiceComponent::Get(_pComponent, 
+    { { uT("Shader"), _pComponent } })[0];
 
-  const Component::Shader ShaderData{ pShaderDataComponent, ::Default };
+  const Component::Shader ShaderData{ *pShaderDataComponent, ::Default };
 
   if (ShaderData.Kind == uT("Vertex"))
   {
@@ -1132,15 +1129,15 @@ auto OpenGLCommonShader::CreateShader(const ComponentPtr_t & _pComponent) -> Ren
 
 auto OpenGLCommonShader::CreateBuffer(const ComponentPtr_t & _pBuffer) -> Render_t /*override*/
 {
-  const auto pBufferData = 
-    m_ServiceComponents.Get({ { uT("Buffer"), _pBuffer } })[0];
+  const auto pBufferData = CapturingServiceComponent::Get(_pBuffer, 
+    { { uT("Buffer"), _pBuffer } })[0];
 
   auto CreateConstantUserBuffer = [&](void) -> Render_t
   {
     using Type_t = cbBufferMap_t<void>;
     using BufferData_t = ::std::vector<uint8_t>;
 
-    if (!_pBuffer->IsType<const Type_t &>(uT("mapper")))
+    if (!(*_pBuffer)[uT("mapper")].IsType<const Type_t &>())
     {
       throw STD_EXCEPTION << "Unexpected buffer format [" <<
         "id: " << _pBuffer->Id << ", " <<
@@ -1148,22 +1145,22 @@ auto OpenGLCommonShader::CreateBuffer(const ComponentPtr_t & _pBuffer) -> Render
         "kind: " << _pBuffer->Kind << "].";
     }
 
-    const auto cbBufferMapper =
-      _pBuffer->GetValue<const Type_t &>(uT("mapper"), Type_t{});
+    const Type_t cbBufferMapper =
+      (*_pBuffer)[uT("mapper")].Default(Type_t{});
     if (!cbBufferMapper)
     {
       throw STD_EXCEPTION << "Unexpected empty mapper: " << _pBuffer->Id;
     }
 
-    const auto BufferSize = 
-      _pBuffer->GetValue(uT("size"), (::std::size_t)0);
+    const ::std::size_t BufferSize =
+      (*_pBuffer)[uT("size")].Default((::std::size_t)0);
     if (BufferSize == 0)
     {
       throw STD_EXCEPTION << "Unexpected zero size: " << _pBuffer->Id;
     }
 
-    const auto cbName =
-      _pBuffer->GetValue(uT("name"), ::std::string{ "cbUserData" });
+    const ::std::string cbName =
+      (*_pBuffer)[uT("name")].Default(::std::string{ "cbUserData" });
 
     const auto pData =
       ::std::make_shared<BufferData_t>(BufferSize, (uint8_t)0x00);
@@ -1181,12 +1178,12 @@ auto OpenGLCommonShader::CreateBuffer(const ComponentPtr_t & _pBuffer) -> Render
   {
     using Type_t = cbBufferMap_t<::Lights_t>;
 
-    if (!_pBuffer->IsType<const Type_t &>(uT("mapper")))
+    if (!(*_pBuffer)[uT("mapper")].IsType<const Type_t &>())
     {
       return CreateConstantUserBuffer();
     }
 
-    const auto cbBufferMapper = _pBuffer->GetValue(uT("mapper"), Type_t{});
+    const Type_t cbBufferMapper = (*_pBuffer)[uT("mapper")].Default(Type_t{});
     if (!cbBufferMapper)
     {
       throw STD_EXCEPTION << "Unexpected empty mapper: " << _pBuffer->Id;
@@ -1202,16 +1199,16 @@ auto OpenGLCommonShader::CreateBuffer(const ComponentPtr_t & _pBuffer) -> Render
   {
     using Type_t = int;
 
-    if (!pBufferData->IsType<const Type_t *>(uT("data")))
+    if (!(*pBufferData)[uT("content")].IsType<::std::vector<Type_t>>())
     {
       return CreateConstantLightsBuffer();
     }
 
-    const Component::Buffer<Type_t> Info{ pBufferData };
+    const Component::Buffer<Type_t> Info{ *pBufferData };
 
     const auto pBuffer = ::std::make_shared<Buffer>(GL_ELEMENT_ARRAY_BUFFER,
-      Info.pData, Info.Count * sizeof(Type_t), GL_STATIC_DRAW);
-    const auto Size = static_cast<GLsizei>(Info.Count);
+      Info.Data.data(), Info.Data.size() * sizeof(Type_t), GL_STATIC_DRAW);
+    const auto Size = static_cast<GLsizei>(Info.Data.size());
 
     return [=](void)
     {
@@ -1229,20 +1226,20 @@ auto OpenGLCommonShader::CreateBuffer(const ComponentPtr_t & _pBuffer) -> Render
     using Type_t = ::covellite::api::Vertex;
     using BufferMapper_t = cbBufferMap_t<Type_t>;
 
-    if (!pBufferData->IsType<const Type_t *>(uT("data")))
+    if (!(*pBufferData)[uT("content")].IsType<::std::vector<Type_t>>())
     {
       return CreateIndexBuffer();
     }
 
-    const Component::Buffer<Type_t> Info{ pBufferData };
+    const Component::Buffer<Type_t> Info{ *pBufferData };
 
-    const auto & cbBufferMapper =
-      _pBuffer->GetValue<const BufferMapper_t &>(uT("mapper"), nullptr);
+    const BufferMapper_t & cbBufferMapper =
+      (*_pBuffer)[uT("mapper")].Default(BufferMapper_t{});
 
     if (cbBufferMapper == nullptr)
     {
       const auto pBuffer = ::std::make_shared<Buffer>(GL_ARRAY_BUFFER,
-        Info.pData, Info.Count * sizeof(Type_t), GL_STATIC_DRAW);
+        Info.Data.data(), Info.Data.size() * sizeof(Type_t), GL_STATIC_DRAW);
 
       return [=](void)
       {
@@ -1253,10 +1250,9 @@ auto OpenGLCommonShader::CreateBuffer(const ComponentPtr_t & _pBuffer) -> Render
     }
 
     const auto pBuffer = ::std::make_shared<Buffer>(GL_ARRAY_BUFFER,
-      Info.pData, Info.Count * sizeof(Type_t), GL_DYNAMIC_DRAW);
+      Info.Data.data(), Info.Data.size() * sizeof(Type_t), GL_DYNAMIC_DRAW);
 
-    const auto pData = ::std::make_shared<::std::vector<Type_t>>(
-      Info.pData, Info.pData + Info.Count);
+    const auto pData = ::std::make_shared<::std::vector<Type_t>>(Info.Data);
 
     return [=](void)
     {
@@ -1285,7 +1281,7 @@ auto OpenGLCommonShader::CreateTransform(const ComponentPtr_t & _pComponent) -> 
 
   const auto GetPreRenderDefaultGeometry = [&](void) -> TransformRender_t
   {
-    const auto TransformRender = GetPreRenderGeometry();
+    const auto TransformRender = GetPreRenderGeometry(_pComponent);
 
     return [=](void)
     {
@@ -1299,7 +1295,7 @@ auto OpenGLCommonShader::CreateTransform(const ComponentPtr_t & _pComponent) -> 
   const auto GetPreRenderStaticGeometry = [&](void) -> TransformRender_t
   {
     ::glm::mat4 World = ::glm::identity<::glm::mat4>();
-    GetPreRenderGeometry()(World);
+    GetPreRenderGeometry(_pComponent)(World);
     World = ::glm::transpose(World);
 
     return [=](void)
@@ -1311,7 +1307,7 @@ auto OpenGLCommonShader::CreateTransform(const ComponentPtr_t & _pComponent) -> 
   const auto GetPreRenderBillboardGeometry = [&](void) -> TransformRender_t
   {
     const auto TransformRender = 
-      OpenGLCommonShader::GetPreRenderBillboardGeometry();
+      OpenGLCommonShader::GetPreRenderBillboardGeometry(_pComponent);
 
     return [=](void)
     {
@@ -1350,11 +1346,11 @@ auto OpenGLCommonShader::CreatePresentBuffer(const ComponentPtr_t & _pComponent)
 
   const auto SaveBuffer = [&](const ComponentPtr_t & _pBufferData)
   {
-    if (_pBufferData->IsType<const int *>(uT("data")))
+    if ((*_pBufferData)[uT("content")].IsType<::std::vector<int>>())
     {
       pIndexBufferData = _pBufferData;
     }
-    else if (_pBufferData->IsType<const BufferMapper_t &>(uT("mapper")))
+    else if ((*_pBufferData)[uT("mapper")].IsType<const BufferMapper_t &>())
     {
       pInstanceBufferData = _pBufferData;
     }
@@ -1365,16 +1361,16 @@ auto OpenGLCommonShader::CreatePresentBuffer(const ComponentPtr_t & _pComponent)
     }
   };
 
-  m_ServiceComponents.Process(
+  CapturingServiceComponent::Process(_pComponent, 
     {
       { uT("Buffer"), SaveBuffer },
     });
 
-  const Component::Buffer<int> IndexBufferData{ pIndexBufferData };
+  const Component::Buffer<int> IndexBufferData{ *pIndexBufferData };
 
   const auto pIndexBuffer = ::std::make_shared<Buffer>(GL_ELEMENT_ARRAY_BUFFER,
-    IndexBufferData.pData, IndexBufferData.Count * sizeof(int), GL_STATIC_DRAW);
-  const auto IndexCount = static_cast<GLsizei>(IndexBufferData.Count);
+    IndexBufferData.Data.data(), IndexBufferData.Data.size() * sizeof(int), GL_STATIC_DRAW);
+  const auto IndexCount = static_cast<GLsizei>(IndexBufferData.Data.size());
 
   if (pInstanceBufferData == nullptr)
   {
@@ -1386,12 +1382,12 @@ auto OpenGLCommonShader::CreatePresentBuffer(const ComponentPtr_t & _pComponent)
     };
   }
 
-  const auto cbBufferMapper =
-    pInstanceBufferData->GetValue<const BufferMapper_t &>(uT("mapper"), nullptr);
-  const auto BufferSize =
-    pInstanceBufferData->GetValue(uT("size"), (::std::size_t)16);
+  const BufferMapper_t cbBufferMapper =
+    (*pInstanceBufferData)[uT("mapper")].Default(BufferMapper_t{});
+  const ::std::size_t BufferSize =
+    (*pInstanceBufferData)[uT("size")].Default((::std::size_t)16);
   const auto InstanceCount = static_cast<GLint>(
-    pInstanceBufferData->GetValue(uT("count"), (::std::size_t)1));
+    (::std::size_t)(*pInstanceBufferData)[uT("count")].Default((::std::size_t)1));
   const auto Stride = static_cast<GLsizei>(
     BufferSize / InstanceCount);
 
@@ -1428,7 +1424,7 @@ auto OpenGLCommonShader::CreateGeometry(const ComponentPtr_t & _pComponent) -> R
 
   const auto GetPreRenderDefaultGeometry = [&](void) -> PreRender_t
   {
-    const auto PreRender = GetPreRenderGeometry();
+    const auto PreRender = GetPreRenderGeometry(_pComponent);
 
     return [=](void)
     {
@@ -1442,7 +1438,7 @@ auto OpenGLCommonShader::CreateGeometry(const ComponentPtr_t & _pComponent) -> R
   const auto GetPreRenderStaticGeometry = [&](void) -> PreRender_t
   {
     ::glm::mat4 World = ::glm::identity<::glm::mat4>();
-    GetPreRenderGeometry()(World);
+    GetPreRenderGeometry(_pComponent)(World);
     World = ::glm::transpose(World);
 
     return [=](void)
@@ -1453,7 +1449,8 @@ auto OpenGLCommonShader::CreateGeometry(const ComponentPtr_t & _pComponent) -> R
 
   const auto GetPreRenderBillboardGeometry = [&](void) -> PreRender_t
   {
-    const auto PreRender = OpenGLCommonShader::GetPreRenderBillboardGeometry();
+    const auto PreRender = 
+      OpenGLCommonShader::GetPreRenderBillboardGeometry(_pComponent);
 
     return [=](void)
     {
@@ -1464,7 +1461,7 @@ auto OpenGLCommonShader::CreateGeometry(const ComponentPtr_t & _pComponent) -> R
     };
   };
 
-  const auto Variety = _pComponent->GetValue(uT("variety"), uT("Default"));
+  const String_t Variety = (*_pComponent)[uT("variety")].Default(uT("Default"));
 
   const auto PreRender =
     (Variety == uT("Default")) ? GetPreRenderDefaultGeometry() :
@@ -1507,7 +1504,7 @@ auto OpenGLCommonShader::GetCameraOrthographic(
 {
   const auto CommonRender = GetCameraCommon();
 
-  const auto ServiceComponents = m_ServiceComponents.Get(
+  const auto ServiceComponents = CapturingServiceComponent::Get(_pComponent,
     {
       { uT("Position"), api::Component::Make({}) },
     });
@@ -1521,7 +1518,7 @@ auto OpenGLCommonShader::GetCameraOrthographic(
 
     // 25 Август 2019 20:19 (unicornum.verum@gmail.com)
     TODO("Тест не проверяет возможность изменения смещения во время работы программы");
-    const Component::Position Offset{ ServiceComponents[0] };
+    const Component::Position Offset{ *ServiceComponents[0] };
 
     auto & Matrix = m_pConstants->Get<::Camera>();
 
@@ -1535,8 +1532,8 @@ auto OpenGLCommonShader::GetCameraOrthographic(
     Matrix.ViewInverse = ::glm::transpose(
       ::glm::inverse(::glm::identity<::glm::mat4>()));
 
-    _pComponent->SetValue(uT("view"), Matrix.View);
-    _pComponent->SetValue(uT("projection"), Matrix.Projection);
+    (*_pComponent)[uT("view")] = Matrix.View;
+    (*_pComponent)[uT("projection")] = Matrix.Projection;
   };
 }
 
@@ -1545,7 +1542,7 @@ auto OpenGLCommonShader::GetCameraPerspective(
 {
   const auto CommonRender = GetCameraCommon();
 
-  const auto ServiceComponents = m_ServiceComponents.Get(
+  const auto ServiceComponents = CapturingServiceComponent::Get(_pComponent,
     {
       { uT("Position"), api::Component::Make({}) },
       { uT("Rotation"), api::Component::Make({}) },
@@ -1562,10 +1559,10 @@ auto OpenGLCommonShader::GetCameraPerspective(
 
     // ************************** Матрица проекции ************************** //
 
-    const auto AngleY = _pComponent->GetValue(uT("fov"), 90.0f) *
-      static_cast<float>(::alicorn::extension::cpp::math::GreedToRadian);
-    const auto zNear = _pComponent->GetValue(uT("znear"), 0.01f);
-    const auto zFar = _pComponent->GetValue(uT("zfar"), 200.0f);
+    const auto AngleY = (float)(*_pComponent)[uT("fov")].Default(90.0f) *
+      ::alicorn::extension::cpp::math::Constant<float>::DegreeToRadian;
+    const float zNear = (*_pComponent)[uT("znear")].Default(0.01f);
+    const float zFar = (*_pComponent)[uT("zfar")].Default(200.0f);
 
     Matrix.Projection = ::glm::transpose(::glm::perspectiveFovRH(AngleY,
       Viewport[2], Viewport[3], zFar, zNear));
@@ -1573,17 +1570,17 @@ auto OpenGLCommonShader::GetCameraPerspective(
     // **************************** Матрица вида **************************** //
 
     // Точка, куда смотрит камера - задается как компонент Data.Position.
-    const Component::Position Look{ ServiceComponents[0] };
+    const Component::Position Look{ *ServiceComponents[0] };
 
     auto GetEye = [&](void) -> ::glm::vec3
     {
       // Расстояние от камеры до Look.
-      const auto Distance = _pComponent->GetValue(uT("distance"), 0.0f) + 0.1f;
+      const float Distance = (*_pComponent)[uT("distance")].Default(0.0f);
 
       // Точка, где расположена камера - вычисляется на основе Look, Distance и
       // компонента Data.Rotation.
 
-      const Component::Position Rot{ ServiceComponents[1] };
+      const Component::Position Rot{ *ServiceComponents[1] };
 
       ::glm::mat4 Transform = ::glm::identity<::glm::mat4>();
 
@@ -1596,7 +1593,7 @@ auto OpenGLCommonShader::GetCameraPerspective(
       Transform = ::glm::rotate(Transform,
         Rot.X, ::glm::vec3{ 1.0f, 0.0f, 0.0f });
 
-      return Transform * ::glm::vec4{ Distance, 0.0f, 0.0f, 1.0f };
+      return Transform * ::glm::vec4{ Distance + 0.1f, 0.0f, 0.0f, 1.0f };
     };
 
     const auto View = ::glm::lookAtRH(
@@ -1607,8 +1604,8 @@ auto OpenGLCommonShader::GetCameraPerspective(
     Matrix.View = ::glm::transpose(View);
     Matrix.ViewInverse = ::glm::transpose(::glm::inverse(View));
 
-    _pComponent->SetValue(uT("view"), Matrix.View);
-    _pComponent->SetValue(uT("projection"), Matrix.Projection);
+    (*_pComponent)[uT("view")] = Matrix.View;
+    (*_pComponent)[uT("projection")] = Matrix.Projection;
   };
 }
 

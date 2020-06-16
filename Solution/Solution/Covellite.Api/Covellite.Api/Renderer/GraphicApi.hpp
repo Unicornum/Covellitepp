@@ -66,7 +66,7 @@ private:
   Render_t CreatePresent(const ComponentPtr_t &);
   Render_t CreateUpdater(const ComponentPtr_t &) const;
 
-private:
+protected:
   /**
   * \ingroup CovelliteApiRendererGroup
   * \brief
@@ -90,13 +90,14 @@ private:
   class CapturingServiceComponent final
   {
     using Kind_t = ::alicorn::extension::std::String;
+    using Services_t = ::std::vector<ComponentPtr_t>;
     using Expected_t = ::std::vector<::std::pair<Kind_t, ComponentPtr_t>>;
     using Hadler_t = ::std::function<void(const ComponentPtr_t &)>;
     using Handlers_t = ::std::map<Kind_t, Hadler_t>;
 
   public:
-    ::std::vector<ComponentPtr_t> Get(const Expected_t &);
-    void Process(const Handlers_t &);
+    static Services_t Get(const ComponentPtr_t &, const Expected_t &);
+    static void Process(const ComponentPtr_t &, const Handlers_t &);
 
   private:
     Components_t & m_Components;
@@ -105,11 +106,8 @@ private:
     explicit CapturingServiceComponent(Components_t &);
   };
 
-  Components_t m_Components;
-
 protected:
   bool m_IsResizeWindow = false;
-  CapturingServiceComponent m_ServiceComponents;
 
 private:
   using TimePoint_t = ::std::chrono::system_clock::time_point;

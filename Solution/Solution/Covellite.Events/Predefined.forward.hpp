@@ -1,22 +1,25 @@
 
 #pragma once
+#include <boost/predef/os.h>
+#include <boost/predef/platform.h>
 
 /**
 * \file
 *  Файл предварительных определений, которые могут использоваться во всех 
 *  проектах фреймворка.
-*
-* \todo
-*  Заменить boost::any на std::any когда это будет возможно (для Android - 
-*  перейти на новую версию Android NDK, в Windows - включить в настройках 
-*  проекта последнюю версию стандарта).
 */
 
+namespace std { class any; }
 namespace boost { class any; }
 
 namespace covellite
 {
+#if BOOST_OS_WINDOWS
+namespace any_location = ::std;
+#elif BOOST_PLAT_ANDROID
+namespace any_location = ::boost;
+#endif
 
-using Any_t = ::boost::any;
+using Any_t = any_location::any;
 
 } // namespace covellite

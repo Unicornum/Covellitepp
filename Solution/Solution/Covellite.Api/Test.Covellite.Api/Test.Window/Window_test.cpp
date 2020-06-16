@@ -421,7 +421,7 @@ TEST_F(Window_test, /*DISABLED_*/Test_GetRenders)
     .WillOnce(ReturnRef(Creators1));
 
   const auto pResult1 = IExample.GetRenders();
-  const auto Result1 = pResult1->Obtain(
+  const auto Result1 = pResult1->Obtain(::covellite::api::Component::Renders::Object_t
     { 
       ::covellite::api::Component::Make({ { uT("type"), uT("Type1") } }),
     });
@@ -431,7 +431,7 @@ TEST_F(Window_test, /*DISABLED_*/Test_GetRenders)
     .WillOnce(ReturnRef(Creators2));
 
   const auto pResult2 = IExample.GetRenders();
-  const auto Result2 = pResult2->Obtain(
+  const auto Result2 = pResult2->Obtain(::covellite::api::Component::Renders::Object_t
     { 
       ::covellite::api::Component::Make({ { uT("type"), uT("Type2") } }),
     });

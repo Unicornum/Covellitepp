@@ -127,7 +127,7 @@ Window::~Window(void) noexcept
 
 Window::Rect Window::GetClientRect(void) const /*override*/
 {
-  RECT ClientRect;
+  RECT ClientRect = { 0 };
   WINAPI_CHECK USING_MOCK ::GetClientRect(
     ::covellite::any_cast<HWND>(m_Handle), &ClientRect);
   return { 0, 0,

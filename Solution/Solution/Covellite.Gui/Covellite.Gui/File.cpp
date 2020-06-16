@@ -47,7 +47,7 @@ void File::Close(Handle_t _hFile) /*override*/
 */
 size_t File::Read(void * _pBuffer, size_t _Size, Handle_t _hFile) /*override*/
 {
-  auto itFile = m_Infos.find(_hFile);
+  const auto itFile = m_Infos.find(_hFile);
   if (itFile == m_Infos.end()) return 0;
 
   auto & FileInfo = itFile->second;
@@ -68,7 +68,7 @@ size_t File::Read(void * _pBuffer, size_t _Size, Handle_t _hFile) /*override*/
 */
 bool File::Seek(Handle_t _hFile, long _BeginPosition, int _Origin) /*override*/
 {
-  auto itFile = m_Infos.find(_hFile);
+  const auto itFile = m_Infos.find(_hFile);
   if (itFile == m_Infos.end()) return false;
 
   auto & FileInfo = itFile->second;
@@ -77,7 +77,7 @@ bool File::Seek(Handle_t _hFile, long _BeginPosition, int _Origin) /*override*/
 
   if (_Origin == SEEK_SET)
   {
-    NewPosition = _BeginPosition;
+    NewPosition = static_cast<size_t>(_BeginPosition);
   }
   else if (_Origin == SEEK_CUR)
   {
@@ -101,7 +101,7 @@ bool File::Seek(Handle_t _hFile, long _BeginPosition, int _Origin) /*override*/
 */
 size_t File::Tell(Handle_t _hFile) /*override*/
 {
-  auto itFile = m_Infos.find(_hFile);
+  const auto itFile = m_Infos.find(_hFile);
   if (itFile == m_Infos.end()) return 0;
 
   return itFile->second.Position;
@@ -113,7 +113,7 @@ size_t File::Tell(Handle_t _hFile) /*override*/
 */
 size_t File::Length(Handle_t _hFile) /*override*/
 {
-  auto itFile = m_Infos.find(_hFile);
+  const auto itFile = m_Infos.find(_hFile);
   if (itFile == m_Infos.end()) return 0;
 
   return itFile->second.Data.size();
@@ -123,7 +123,7 @@ size_t File::Length(Handle_t _hFile) /*override*/
 * \brief
 *  Функция создания уникального идентификатора для открываемого файла.
 */
-/*static*/ File::Handle_t File::MakeUniqueHandle(void)
+/*static*/ File::Handle_t File::MakeUniqueHandle(void) noexcept
 {
   // Первый индекс должен быть > 0, т.к. 0 используется для индикации ошибки.
   static size_t Index = 1;

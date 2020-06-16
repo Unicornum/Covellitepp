@@ -86,11 +86,11 @@ private:
   Render_t CreateBlendState(bool);
   Render_t GetDepthState(const bool, const bool, const bool);
   template<class>
-  Render_t CreateDefaultTransformRender(void);
+  Render_t CreateDefaultTransformRender(const ComponentPtr_t &);
   template<class>
-  Render_t CreateStaticTransformRender(void);
+  Render_t CreateStaticTransformRender(const ComponentPtr_t &);
   template<class, class>
-  Render_t CreateBillboardTransformRender(void);
+  Render_t CreateBillboardTransformRender(const ComponentPtr_t &);
 
 private:
   ComPtr_t<ID3D11Device>                  m_pDevice;

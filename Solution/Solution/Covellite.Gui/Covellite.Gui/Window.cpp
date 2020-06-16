@@ -130,8 +130,17 @@ Window::operator Events_t (void) const /*override*/
 */
 Window::DocumentPtr_t Window::LoadDocument(const PathToFile_t & _Path) /*override*/
 {
-  return DocumentPtr_t(m_pContext->LoadDocument(Layer::Convert(_Path).c_str()),
+  const auto Start = ::std::chrono::system_clock::now();
+
+  auto pResult = DocumentPtr_t(m_pContext->LoadDocument(Layer::Convert(_Path).c_str()),
     [](Document_t * _pDocument) { CovelliteGuiRemove(_pDocument); });
+
+  ::std::chrono::duration<double> TimeCall =
+    ::std::chrono::system_clock::now() - Start;
+
+  LOGGER(Info) << _Path.string() << ": " << TimeCall.count();
+
+  return pResult;
 }
 
 /**
@@ -194,9 +203,23 @@ Window::Vector_t Window::GetContextSize(void) const
 */
 void Window::DoDrawWindow(void)
 {
+  static auto Start = ::std::chrono::system_clock::now();
+  static int fps = 0;
+
   m_pContext->Update();
   m_pContext->Render();
   m_pRenderer->RenderScene();
+  fps++;
+
+  const ::std::chrono::duration<double> TimeCall =
+    ::std::chrono::system_clock::now() - Start;
+  if (TimeCall.count() >= 1.0)
+  {
+    LOGGER(Info) << "fps: " << fps;
+
+    Start = ::std::chrono::system_clock::now();
+    fps = 0;
+  }
 }
 
 /**

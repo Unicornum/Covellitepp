@@ -1,21 +1,68 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Tasks>
   <Options>
-    <X>419</X>
+    <X>619</X>
     <Y>46</Y>
-    <Width>1950</Width>
-    <Height>972</Height>
+    <Width>1750</Width>
+    <Height>963</Height>
   </Options>
   <Process/>
   <Complete>
-    <Week6280>
-      <Task3 Text="OpenGL: State.Clear: Очистка всего окна." Type="Red" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="true" ParentTaskText="false"/>
-      <Task4 Text="Очистка заголовка окна на Android." Type="Red" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="true" ParentTaskText="false"/>
-      <Task5 Text="Ошибка при использовании инстансинга на Android." Type="Bug" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="true" ParentTaskText="false"/>
-      <Task9 Text="Android: некорректное определение индекса атрибута при использовании инстансинга." Type="Bug" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="true" ParentTaskText="false"/>
-    </Week6280>
-    <Week6279/>
-    <Week6278/>
-    <Week6277/>
+    <Week6284>
+      <Task22 Text="Исправление/дополнение описания компонентной системы." Type="Red" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="false"/>
+      <Task23 Text="Извлечение данных текстур, шейдеров и буферов как параметр content основного компонента." Type="Red" Version="None" ExternalProgram="None" Expanded="false" Completed="true" History="false" ParentTaskText="false">
+        <Task24 Text="Реализация DirectX10." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+        <Task25 Text="Огромный расход памяти." Type="Bug" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+        <Task26 Text="Компилируемость всех реализаций." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+      </Task23>
+      <Task27 Text="Обработка вспомогательных компонентов как параметра service." Type="Red" Version="None" ExternalProgram="None" Expanded="false" Completed="true" History="false" ParentTaskText="false">
+        <Task28 Text="Реализация DirectX10." Type="None" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+        <Task29 Text="Компилируемость всех реализаций." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+        <Task30 Text="Реализация DirectX11." Type="None" Version="None" ExternalProgram="None" Expanded="false" Completed="true" History="false" ParentTaskText="false"/>
+        <Task31 Text="Реализация OpenGL|ES." Type="None" Version="None" ExternalProgram="None" Expanded="false" Completed="true" History="false" ParentTaskText="false"/>
+      </Task27>
+      <Task1 Text="Восстановление проваливающихся тестов." Type="Red" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="false">
+        <Task11 Text="Реализация DirectX11." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true">
+          <Task12 Text="BkSurface." Type="None" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+          <Task13 Text="State." Type="None" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+          <Task14 Text="Shader." Type="None" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+          <Task15 Text="Texture." Type="None" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+          <Task16 Text="Transform." Type="None" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+          <Task17 Text="Buffer." Type="None" Version="None" ExternalProgram="None" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+          <Task18 Text="Present." Type="None" Version="None" ExternalProgram="None" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+          <Task19 Text="Camera." Type="None" Version="None" ExternalProgram="None" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+        </Task11>
+        <Task2 Text="Реализация OpenGL|ES3." Type="None" Version="None" ExternalProgram="None" Expanded="false" Completed="true" History="false" ParentTaskText="true">
+          <Task5 Text="Разное." Type="None" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+          <Task6 Text="BkSurface." Type="None" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+          <Task7 Text="Shader." Type="None" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+          <Task8 Text="Transform." Type="None" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+          <Task9 Text="Camera." Type="None" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+          <Task10 Text="Texture." Type="None" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+          <Task4 Text="Buffer." Type="None" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+          <Task3 Text="Present." Type="None" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+        </Task2>
+      </Task1>
+    </Week6284>
+    <Week6283>
+      <Task33 Text="Изменение интерфейса класса компонента." Type="Red" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="true" ParentTaskText="false">
+        <Task34 Text="Функция проверки совпадения типа параметра." Type="None" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+        <Task35 Text="Получение значения параметра." Type="None" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+        <Task36 Text="Установка значения параметра." Type="None" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+        <Task37 Text="Тесты изменения типа при переприсваивании значения параметра." Type="None" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+        <Task38 Text="Реорганизация кода." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+      </Task33>
+      <Task39 Text="Компонент: замена использования функции GetValue() на оператор[]." Type="Red" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="false"/>
+      <Task40 Text="Класс Component::Renders." Type="Red" Version="None" ExternalProgram="None" Expanded="false" Completed="true" History="false" ParentTaskText="false">
+        <Task41 Text="Формирование параметра service как набора вспомогательных компонентов." Type="None" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+        <Task42 Text="Преобразование данных для текстуры." Type="None" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+        <Task43 Text="Преобразование данных шейдеров." Type="None" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+        <Task44 Text="Преобразование данных буферов." Type="None" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+        <Task45 Text="Заготовки функций манипуляций отдельными компонентами/рендерами." Type="None" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+        <Task46 Text="Функции получения/удаления рендеров по одному." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="true" ParentTaskText="true"/>
+      </Task40>
+    </Week6283>
+    <Week6282/>
+    <Week6281/>
   </Complete>
 </Tasks>

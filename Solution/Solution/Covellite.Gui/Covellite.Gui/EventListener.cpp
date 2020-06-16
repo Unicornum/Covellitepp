@@ -8,7 +8,7 @@
 
 using namespace covellite::gui;
 
-  Window::EventListener::EventListener(const Events_t & _Events) :
+Window::EventListener::EventListener(const Events_t & _Events) :
   m_Events(_Events)
 {
 }
@@ -17,13 +17,13 @@ void Window::EventListener::ProcessEvent(Event_t & _Event) /*override*/
 {
   try
   {
-    auto * pTargetElement = _Event.GetTargetElement();
+    auto * const pTargetElement = _Event.GetTargetElement();
     if (pTargetElement == nullptr)
     {
       throw STD_EXCEPTION << "Target element null pointer.";
     }
 
-    auto * pDocument = pTargetElement->GetOwnerDocument();
+    const auto * const pDocument = pTargetElement->GetOwnerDocument();
     if (pDocument == nullptr)
     {
       throw STD_EXCEPTION << "Owner document null pointer.";

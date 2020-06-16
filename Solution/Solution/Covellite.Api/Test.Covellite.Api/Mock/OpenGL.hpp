@@ -174,7 +174,7 @@ public:
   MOCK_METHOD1(GenTextures, GLuint(GLsizei));
   MOCK_METHOD3(TexParameteri, void (GLenum, GLenum, GLfixed));
   MOCK_METHOD9(TexImage2D, void (GLenum, GLint, GLint, GLsizei, GLsizei, GLint, 
-    GLenum, GLenum, const GLvoid *));
+    GLenum, GLenum, ::std::vector<uint8_t>));
   MOCK_METHOD2(DeleteTextures, void(GLsizei, GLuint));
   MOCK_METHOD2(BlendFunc, void(GLenum, GLenum));
   MOCK_METHOD4(Viewport, void (GLint, GLint, GLsizei, GLsizei));
@@ -202,7 +202,7 @@ public:
   MOCK_METHOD1(GenBuffers, GLuint(GLsizei));
   MOCK_METHOD2(DeleteBuffers, void(GLsizei, GLuint));
   MOCK_METHOD2(BindBuffer, void(GLenum, GLuint));
-  MOCK_METHOD4(BufferData, void(GLenum, GLsizeiptr, const GLvoid *, GLenum));
+  MOCK_METHOD4(BufferData, void(GLenum, GLsizeiptr, ::std::vector<uint8_t>, GLenum));
   MOCK_METHOD2(GetAttribLocation, GLint(GLuint, ::std::string));
   MOCK_METHOD6(VertexAttribPointer, void(GLuint, GLint, GLenum, GLboolean, 
     GLsizei, const GLvoid *));
@@ -523,7 +523,20 @@ void glEnableVertexAttribArray(GLuint index)
 void glBufferData(GLenum target, GLsizeiptr size, const GLvoid * data,
   GLenum usage)
 {
-  GLProxy::GetInstance()->BufferData(target, size, data, usage);
+  ::std::vector<uint8_t> Data;
+
+  if (data != nullptr)
+  {
+    const auto * const pData = reinterpret_cast<const uint8_t *>(data);
+
+    if (*pData != 0x00)
+    {
+      const auto Size = *reinterpret_cast<const size_t *>(data);
+      Data = ::std::vector<uint8_t>{ pData, pData + Size };
+    }
+  }
+
+  GLProxy::GetInstance()->BufferData(target, size, Data, usage);
 }
 
 void glBindBuffer(GLenum target, GLuint buffer)
@@ -736,8 +749,17 @@ void glTexImage2D(GLenum _Param1, GLint _Param2, GLint _Param3, GLsizei _Param4,
   GLsizei _Param5, GLint _Param6, GLenum _Param7, GLenum _Param8, 
   const GLvoid * _Param9)
 {
+  ::std::vector<uint8_t> Data;
+
+  if (_Param9 != nullptr)
+  {
+    const auto * const pData = reinterpret_cast<const uint8_t *>(_Param9);
+    const auto Size = *reinterpret_cast<const size_t *>(_Param9);
+    Data = ::std::vector<uint8_t>{ pData, pData + Size };
+  }
+
   GLProxy::GetInstance()->TexImage2D(_Param1, _Param2, _Param3, _Param4, 
-    _Param5, _Param6, _Param7, _Param8, _Param9);
+    _Param5, _Param6, _Param7, _Param8, Data);
 }
 
 void glDeleteTextures(GLsizei _Param1, const GLuint * _Param2)

@@ -73,9 +73,9 @@ private:
   void SetViewport(int, int);
   Render_t CreateBlendState(bool);
   Render_t GetDepthState(bool, bool, bool);
-  Render_t CreateBasePreRenderGeometry(void);
-  Render_t CreateStaticPreRenderGeometry(void);
-  Render_t CreateBillboardPreRenderGeometry(void);
+  Render_t CreateBasePreRenderGeometry(const ComponentPtr_t &);
+  Render_t CreateStaticPreRenderGeometry(const ComponentPtr_t &);
+  Render_t CreateBillboardPreRenderGeometry(const ComponentPtr_t &);
 
 private:
   ComPtr_t<ID3D10Device>            m_pDevice;

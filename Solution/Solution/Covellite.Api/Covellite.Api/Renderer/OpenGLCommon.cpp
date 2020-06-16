@@ -64,12 +64,12 @@ auto OpenGLCommon::CreateState(const ComponentPtr_t & _pComponent) -> Render_t /
 
   const auto CreateScissorState = [&](void)
   {
-    const auto pScissorRect = 
-      m_ServiceComponents.Get({ { uT("Rect"), api::Component::Make({}) } })[0];
+    const auto pScissorRect = CapturingServiceComponent::Get(_pComponent, 
+      { { uT("Rect"), api::Component::Make({}) } })[0];
 
     Render_t ScissorEnabled = [=](void)
     {
-      const Component::Scissor Rect{ pScissorRect };
+      const Component::Scissor Rect{ *pScissorRect };
 
       glEnable(GL_SCISSOR_TEST);
 
@@ -86,16 +86,16 @@ auto OpenGLCommon::CreateState(const ComponentPtr_t & _pComponent) -> Render_t /
       glDisable(GL_SCISSOR_TEST);
     };
 
-    const Component::Scissor Scissor{ _pComponent };
+    const Component::Scissor Scissor{ *_pComponent };
     return (Scissor.IsEnabled) ? ScissorEnabled : ScissorDisabled;
   };
 
   const auto CreateDepthState = [&](void)
   {
     return GetDepthRender(
-      _pComponent->GetValue(uT("enabled"), false),
-      _pComponent->GetValue(uT("clear"), false),
-      _pComponent->GetValue(uT("overwrite"), true));
+      (*_pComponent)[uT("enabled")].Default(false),
+      (*_pComponent)[uT("clear")].Default(false),
+      (*_pComponent)[uT("overwrite")].Default(true));
   };
 
   const auto CreateClearState = [&](void)
@@ -107,7 +107,7 @@ auto OpenGLCommon::CreateState(const ComponentPtr_t & _pComponent) -> Render_t /
     class Color { public: float r, g, b, a; };
 
     const auto BackgroundColor = ARGBtoFloat4<Color>(
-      _pComponent->GetValue(uT("color"), 0xFF000000));
+      (*_pComponent)[uT("color")].Default(0xFF000000));
     // ?????????????????????????????????????????????????????????????????????? //
 
     return [=](void)
@@ -166,7 +166,7 @@ auto OpenGLCommon::GetDepthRender(
 }
 
 // cppcheck-suppress unusedFunction
-auto OpenGLCommon::GetPreRenderGeometry(void) -> MatrixBuilder_t
+auto OpenGLCommon::GetPreRenderGeometry(const ComponentPtr_t & _pComponent) -> MatrixBuilder_t
 {
   ::std::deque<MatrixBuilder_t> PreRenders;
 
@@ -175,7 +175,7 @@ auto OpenGLCommon::GetPreRenderGeometry(void) -> MatrixBuilder_t
     // OpenGL требует фомирования мартиц тансформации в обратном порядке!
     PreRenders.push_front([_pPosition](::glm::mat4 & _Matrix)
     {
-      const Component::Position Pos{ _pPosition };
+      const Component::Position Pos{ *_pPosition };
       _Matrix = ::glm::translate(_Matrix, ::glm::vec3{ Pos.X, Pos.Y, Pos.Z });
     });
   };
@@ -185,7 +185,7 @@ auto OpenGLCommon::GetPreRenderGeometry(void) -> MatrixBuilder_t
     // OpenGL требует фомирования мартиц тансформации в обратном порядке!
     PreRenders.push_front([_pRotation](::glm::mat4 & _Matrix)
     {
-      const Component::Rotation Rot{ _pRotation };
+      const Component::Rotation Rot{ *_pRotation };
       _Matrix = ::glm::rotate(_Matrix, Rot.Z, ::glm::vec3{ 0.0f, 0.0f, 1.0f });
       _Matrix = ::glm::rotate(_Matrix, Rot.Y, ::glm::vec3{ 0.0f, 1.0f, 0.0f });
       _Matrix = ::glm::rotate(_Matrix, Rot.X, ::glm::vec3{ 1.0f, 0.0f, 0.0f });
@@ -197,12 +197,12 @@ auto OpenGLCommon::GetPreRenderGeometry(void) -> MatrixBuilder_t
     // OpenGL требует фомирования мартиц тансформации в обратном порядке!
     PreRenders.push_front([_pScale](::glm::mat4 & _Matrix)
     {
-      const Component::Scale Scale{ _pScale };
+      const Component::Scale Scale{ *_pScale };
       _Matrix = ::glm::scale(_Matrix, ::glm::vec3{ Scale.X, Scale.Y, Scale.Z });
     });
   };
 
-  m_ServiceComponents.Process(
+  CapturingServiceComponent::Process(_pComponent,
     {
       { uT("Position"), CreatePosition },
       { uT("Rotation"), CreateRotation },
@@ -216,7 +216,7 @@ auto OpenGLCommon::GetPreRenderGeometry(void) -> MatrixBuilder_t
 }
 
 // cppcheck-suppress unusedFunction
-auto OpenGLCommon::GetPreRenderBillboardGeometry(void) -> MatrixBuilder_t
+auto OpenGLCommon::GetPreRenderBillboardGeometry(const ComponentPtr_t & _pComponent) -> MatrixBuilder_t
 {
   ::std::deque<MatrixBuilder_t> PreRenders;
 
@@ -225,12 +225,13 @@ auto OpenGLCommon::GetPreRenderBillboardGeometry(void) -> MatrixBuilder_t
     // OpenGL требует фомирования мартиц тансформации в обратном порядке!
     PreRenders.push_front([_pPosition](::glm::mat4 & _Matrix)
     {
-      const Component::Position Pos{ _pPosition };
+      const Component::Position Pos{ *_pPosition };
       _Matrix = ::glm::translate(_Matrix, ::glm::vec3{ Pos.X, Pos.Y, Pos.Z });
     });
   };
 
-  m_ServiceComponents.Process({ { uT("Position"), CreatePosition } });
+  CapturingServiceComponent::Process(_pComponent,
+    { { uT("Position"), CreatePosition } });
 
   PreRenders.push_front([=](::glm::mat4 & _Matrix)
   {

@@ -34,7 +34,7 @@ namespace renderer
 class Component final
 {
   using String_t = ::alicorn::extension::std::String;
-  using ComponentPtr_t = ::std::shared_ptr<::covellite::api::Component>;
+  using Component_t = ::covellite::api::Component;
 
 public:
   class Rasterizer;
@@ -57,8 +57,8 @@ public:
   const String_t CullMode;
 
 public:
-  explicit Rasterizer(const ComponentPtr_t & _pComponent) :
-    CullMode(_pComponent->GetValue(uT("cull"), uT("Back")))
+  explicit Rasterizer(Component_t & _Component) :
+    CullMode(_Component[uT("cull")].Default(uT("Back")))
   {
 
   }
@@ -74,12 +74,12 @@ public:
   const int Bottom;
 
 public:
-  explicit Scissor(const ComponentPtr_t & _pComponent) :
-    IsEnabled(_pComponent->GetValue(uT("enabled"), false)),
-    Left(_pComponent->GetValue(uT("left"), 0)),
-    Top(_pComponent->GetValue(uT("top"), 0)),
-    Right(_pComponent->GetValue(uT("right"), 0)),
-    Bottom(_pComponent->GetValue(uT("bottom"), 0))
+  explicit Scissor(Component_t & _Component) :
+    IsEnabled(_Component[uT("enabled")].Default(false)),
+    Left(_Component[uT("left")].Default(0)),
+    Top(_Component[uT("top")].Default(0)),
+    Right(_Component[uT("right")].Default(0)),
+    Bottom(_Component[uT("bottom")].Default(0))
   {
 
   }
@@ -88,28 +88,27 @@ public:
 template<class T>
 class Component::Buffer
 {
-private:
-  ::std::vector<T> m_Data;
+  using Data_t = ::std::vector<T>;
+  static const Data_t & GetFakeData(void) 
+  {
+    static const Data_t FakeData;
+    return FakeData;
+  };
 
 public:
-  inline ::std::vector<T> GetBody(void) const { return { pData, pData + Count }; }
-
-public:
-  const T * const pData;
-  const size_t Count;
+  const Data_t Data;
   const int Dimension;
 
-public:
-  explicit Buffer(const ComponentPtr_t & _pComponent) :
-    pData(_pComponent->GetValue<const T *>(uT("data"), m_Data.data())),
-    Count(_pComponent->GetValue(uT("count"), m_Data.size())),
-    Dimension(_pComponent->GetValue(uT("dimension"), 3))
+private:
+  inline static Data_t GetContent(Component_t & _Component, const Data_t & _Data)
   {
+    return ::std::move((Data_t &)_Component[uT("content")].Default(_Data));
   }
-  Buffer(const ComponentPtr_t & _pComponent, const ::std::vector<T> & _Data) :
-    pData(_pComponent->GetValue(uT("data"), _Data.data())),
-    Count(_pComponent->GetValue(uT("count"), _Data.size())),
-    Dimension(_pComponent->GetValue(uT("dimension"), 3))
+
+public:
+  explicit Buffer(Component_t & _Component, const Data_t & _Data = GetFakeData()) :
+    Data(GetContent(_Component, _Data)),
+    Dimension(_Component[uT("dimension")].Default(3))
   {
   }
 };
@@ -126,14 +125,14 @@ public:
   const bool IsMapping;
 
 public:
-  explicit Texture(const ComponentPtr_t & _pComponent) :
-    Buffer(_pComponent),
-    pTextureData(_pComponent->GetValue<const uint8_t *>(uT("data"), nullptr)),
-    Width(_pComponent->GetValue(uT("width"), 0)),
-    Height(_pComponent->GetValue(uT("height"), 0)),
-    Destination(_pComponent->GetValue(uT("destination"), uT("diffuse"))),
-    IsUsingMipmapping(_pComponent->GetValue(uT("mipmapping"), false)),
-    IsMapping(_pComponent->IsType<const cbBufferMap_t<const void> &>(uT("mapper")))
+  Texture(Component_t & _Component, const String_t & _DefaultDestination) :
+    Buffer(_Component),
+    pTextureData(Data.empty() ? nullptr : Data.data()),
+    Width(_Component[uT("width")].Default(0)),
+    Height(_Component[uT("height")].Default(0)),
+    Destination(_Component[uT("destination")].Default(_DefaultDestination)),
+    IsUsingMipmapping(_Component[uT("mipmapping")].Default(false)),
+    IsMapping(_Component[uT("mapper")].IsType<const cbBufferMap_t<const void> &>())
   {
 
   }
@@ -149,8 +148,10 @@ public:
   const ::std::vector<String_t> Instance;
 
 private:
-  static String_t GetShaderType(const ::std::string & _Entry,
-    const uint8_t * _pBegin, const uint8_t * _pEnd,
+  static String_t GetShaderType(
+    const ::std::string & _Entry,
+    const uint8_t * _pBegin, 
+    const uint8_t * _pEnd,
     ::std::string & _ReturnType)
   {
     // Определение типа шейдера, функция вернет строку типа параметра 
@@ -223,8 +224,7 @@ private:
       const auto Index = ::std::to_string(i + 1);
       const auto Type =
         (Instance[i] == uT("f")) ? "float4" :
-        (Instance[i] == uT("i")) ? "int4" :
-        nullptr;
+        (Instance[i] == uT("i")) ? "int4" : "";
 
       InstanceBlockImplementation += ::std::string{ "COVELLITE_IN " } +
         Type + " iValue" + Index + " COVELLITE_INPUT_SEMANTIC(TEXCOORD" +
@@ -262,11 +262,11 @@ public:
   }
 
 public:
-  Shader(const ComponentPtr_t & _pComponent, const ::std::vector<uint8_t> & _Data) :
-    Buffer(_pComponent, _Data),
-    Entry(_pComponent->GetValue<::std::string>(uT("entry"), "Unknown")),
-    Kind(GetShaderType(Entry, pData, pData + Count, ReturnType)),
-    Instance{ GetInstance(_pComponent->GetValue(uT("instance"), uT(""))) }
+  Shader(Component_t & _Component, const ::std::vector<uint8_t> & _Data) :
+    Buffer(_Component, _Data),
+    Entry((const ::std::string &)_Component[uT("entry")].Default("Unknown")),
+    Kind(GetShaderType(Entry, Data.data(), Data.data() + Data.size(), ReturnType)),
+    Instance{ GetInstance(_Component[uT("instance")].Default(uT(""))) }
   {
   }
 };
@@ -298,10 +298,10 @@ public:
   const float Z;
 
 protected:
-  Transform(const ComponentPtr_t & _pComponent, const float _DefaultValue) :
-    X(_pComponent->GetValue(GetHashX(), _DefaultValue)),
-    Y(_pComponent->GetValue(GetHashY(), _DefaultValue)),
-    Z(_pComponent->GetValue(GetHashZ(), _DefaultValue))
+  Transform(Component_t & _Component, const float _DefaultValue) :
+    X(_Component[GetHashX()].Default(_DefaultValue)),
+    Y(_Component[GetHashY()].Default(_DefaultValue)),
+    Z(_Component[GetHashZ()].Default(_DefaultValue))
   {
 
   }
@@ -311,8 +311,8 @@ class Component::Position :
   public Transform
 {
 public:
-  explicit Position(const ComponentPtr_t & _pComponent) :
-    Transform(_pComponent, 0.0f)
+  explicit Position(Component_t & _Component) :
+    Transform(_Component, 0.0f)
   {
 
   }
@@ -322,8 +322,8 @@ class Component::Rotation :
   public Transform
 {
 public:
-  explicit Rotation(const ComponentPtr_t & _pComponent) :
-    Transform(_pComponent, 0.0f)
+  explicit Rotation(Component_t & _Component) :
+    Transform(_Component, 0.0f)
   {
 
   }
@@ -333,8 +333,8 @@ class Component::Scale :
   public Transform
 {
 public:
-  explicit Scale(const ComponentPtr_t & _pComponent) :
-    Transform(_pComponent, 1.0f)
+  explicit Scale(Component_t & _Component) :
+    Transform(_Component, 1.0f)
   {
 
   }
@@ -349,11 +349,11 @@ public:
   const float Density;
 
 public:
-  explicit Fog(const ComponentPtr_t & _pComponent) :
-    Color(_pComponent->GetValue(uT("color"), 0xFFFFFFFF)),
-    Near(_pComponent->GetValue(uT("near"), 10.0f)),
-    Far(_pComponent->GetValue(uT("far"), 100.0f)),
-    Density(_pComponent->GetValue(uT("density"), 1.0f))
+  explicit Fog(Component_t & _Component) :
+    Color(_Component[uT("color")].Default(0xFFFFFFFF)),
+    Near(_Component[uT("near")].Default(10.0f)),
+    Far(_Component[uT("far")].Default(100.0f)),
+    Density(_Component[uT("density")].Default(1.0f))
   {
 
   }

@@ -6,6 +6,21 @@
 *  =================
 *  <table frame=void><tr><td></td></tr></table>
 *  
+*  Version: 2.2.6.2335 Unknown
+*  -----
+*  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект \ref CovelliteApiPage : </td></tr></table>
+*  <table frame=void border=1 bordercolor=#FFFFFF cellpadding=5 cellspacing=0 width=98%><tr>
+*    <td width=10px></td>
+*    <td bgcolor=#B8CCE4 width=125px align=center> 11.06.2020 16:30 </td>
+*    <td bgcolor=#C0FFC0> Класс Component::Renders: функции получения/удаления рендеров по одному. </td>
+*  </tr></table>
+*  <table frame=void border=1 bordercolor=#FFFFFF cellpadding=5 cellspacing=0 width=98%><tr>
+*    <td width=10px></td>
+*    <td bgcolor=#B8CCE4 width=125px align=center> 09.06.2020 10:44 </td>
+*    <td bgcolor=#C0FFC0> Изменение интерфейса класса компонента. </td>
+*  </tr></table>
+*  <table frame=void><tr><td></td></tr></table>
+*  
 *  Version: 2.2.5.2279 Unknown
 *  -----
 *  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект \ref CovelliteGuiPage : </td></tr></table>

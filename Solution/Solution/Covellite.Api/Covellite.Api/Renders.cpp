@@ -2,6 +2,7 @@
 #include "stdafx.h"
 #include <Covellite/Api/Renders.hpp>
 #include <Covellite/Api/Component.inl>
+#include <Covellite/Api/Vertex.hpp>
 //#include <boost/thread/lock_guard.hpp>
 
 using namespace covellite::api;
@@ -20,6 +21,99 @@ Component::Renders::Renders(const Creators_t & _Creators) :
 }
 
 /**
+* \brief
+*  Функция получения рендера для указанного компонента.
+* \details
+*  - Если для компонента (с его идентификатором) рендер уже существует, будет
+*  возвращен существующий (с увеличением счетчика ссылок, см. описание функции
+*  Remove()), если нет - будет создан новый.
+*  - Для компонентов неподдерживаемых типов будет сделана запись в лог и
+*  возвращен рендер, содержащий функцию-заглушку, не выполняющую никакого
+*  действия.
+*  - Для компонентов, для которых создается render, содержащий nullptr, будет
+*  сделана запись в лог и возвращен рендер, содержащий функцию-заглушку,
+*  не выполняющую никакого действия.
+*  - Если при создании рендера компонента будет брошено исключение, будет
+*  сделана запись в лог и возвращен рендер, содержащий функцию-заглушку,
+*  не выполняющую никакого действия.
+*
+* \param [in] _pComponent
+*  Исходный компонент.
+*
+* \return
+*  Рендер для входного компонента.
+*/
+auto Component::Renders::Obtain(const ComponentPtr_t & _pComponent) -> Render_t
+{
+  auto itRender = m_AllExistingRenders.find(_pComponent->Id);
+  if (itRender != ::std::end(m_AllExistingRenders))
+  {
+    itRender->second.first++;
+    return itRender->second.second;
+  }
+
+  auto itCreator = m_Creators.find(_pComponent->Type);
+  if (itCreator == ::std::end(m_Creators))
+  {
+    LOGGER(Warning) << "Creating a component of an unknown type: " <<
+      _pComponent->Type << " [" << "id: " << _pComponent->Id << "].";
+
+    return [](void) {};
+  }
+
+  Render_t Result;
+
+  try
+  {
+    Result = itCreator->second(_pComponent);
+  }
+  catch (const ::std::exception & _Ex)
+  {
+    LOGGER(Error) << "Create render fail: " << _Ex.what() << " ["
+      << "id: " << _pComponent->Id << ", "
+      << "type: " << _pComponent->Type << "].";
+
+    return [](void) {};
+  }
+
+  if (Result == nullptr)
+  {
+    LOGGER(Warning) << "Received an empty render: " << "["
+      << "id: " << _pComponent->Id << ", "
+      << "type: " << _pComponent->Type << "].";
+
+    return [](void) {};
+  }
+
+  m_AllExistingRenders[_pComponent->Id] = { 1, Result };
+  return Result;
+}
+
+/**
+* \brief
+*  Функция удаления рендера для указанного компонента.
+* \details
+*  - Для каждого компонента функция уменьшает на 1 счетчик соответствующего ему
+*  рендера; когда счетчик уменьшается до нуля, рендер удаляется.
+*/
+void Component::Renders::Remove(const ComponentPtr_t & _pComponent)
+{
+  auto itRender = m_AllExistingRenders.find(_pComponent->Id);
+  if (itRender == m_AllExistingRenders.end()) return;
+
+  itRender->second.first--;
+
+  if (itRender->second.first == 0)
+  {
+    m_AllExistingRenders.erase(itRender);
+  }
+}
+
+/**
+* \deprecated
+*  Функция устарела и будет удалена в следующей стабильной версии, вместо
+*  нее следует использовать функцию получения одного рендера для одного
+*  компонента, передавая вспомогательные компоненты как параметр service.
 * \brief
 *  Функция получения набора рендеров для заданного набора компонентов.
 * \details
@@ -41,6 +135,12 @@ Component::Renders::Renders(const Creators_t & _Creators) :
 */
 auto Component::Renders::Obtain(const Object_t & _Object) -> Renders_t
 {
+  using Service_t = ::std::vector<ComponentPtr_t>;
+  using TextureData_t = ::std::vector<uint8_t>;
+  using ShaderData_t = ::std::vector<uint8_t>;
+  using VertexBufferData_t = ::std::vector<::covellite::api::Vertex>;
+  using IndexBufferData_t = ::std::vector<int>;
+
   // 23 Март 2019 18:20 (unicornum.verum@gmail.com)
   TODO("Тест работы в многопоточном режиме.");
   // Когда будут использоваться разные объекты этого класса, синхронизация
@@ -50,18 +150,94 @@ auto Component::Renders::Obtain(const Object_t & _Object) -> Renders_t
   Renders_t Result;
   Result.reserve(m_MaxRendersCount);
 
+  Service_t Service;
+  TextureData_t TextureData;
+  ShaderData_t ShaderData;
+  VertexBufferData_t VertexBufferData;
+  IndexBufferData_t IndexBufferData;
+
+  const auto IsExistsData = [](const Component & _Component)
+  {
+    try
+    {
+      _Component[uT("data")];
+      return true;
+    }
+    catch (const ::std::exception &) {}
+
+    return false;
+  };
+
   for (const auto & _pComponent : _Object)
   {
-    auto itRender = m_AllExistingRenders.find(_pComponent->Id);
+    if (_pComponent->Type == uT("Data"))
+    {
+      Service.push_back(_pComponent);
+    }
+    else if (!Service.empty())
+    {
+      (*_pComponent)[uT("service")] = Service;
+      Service.clear();
+    }
 
-    const auto GetExistsRender = [&](void)
+    Render_t ComponentRender;
+
+    auto itRender = m_AllExistingRenders.find(_pComponent->Id);
+    if (itRender != ::std::end(m_AllExistingRenders))
     {
       itRender->second.first++;
-      return itRender->second.second;
-    };
+      ComponentRender = itRender->second.second;
+    }
+    else
+    {
+      if (IsExistsData(*_pComponent))
+      {
+        // Преобразование способа хранения данных из пары (data, count)
+        // в (content); нужно для обеспечения обратной совместимости, потом все
+        // это будет удалено вместе со всей функцией.
+        // Сюда перенесено для того, чтобы копия данных хранилась только
+        // в тех компонентах, для которых создается рендер (иначе программа
+        // занимает огромное количество памяти).
 
-    const auto ComponentRender = (itRender == m_AllExistingRenders.end()) ?
-      Create(_pComponent) : GetExistsRender();
+        using Vertex_t = ::covellite::api::Vertex;
+
+        if ((*_pComponent)[uT("data")].IsType<const uint8_t *>())
+        {
+          if (_pComponent->Type == uT("Texture") || _pComponent->Kind == uT("Texture"))
+          {
+            const uint8_t * pData = (*_pComponent)[uT("data")];
+            const int Width = (*_pComponent)[uT("width")];
+            const int Height = (*_pComponent)[uT("height")];
+            (*_pComponent)[uT("content")] =
+              ::std::vector<uint8_t>{ pData, pData + (Width * Height * 4) };
+          }
+          else
+          {
+            const uint8_t * pData = (*_pComponent)[uT("data")];
+            const ::std::size_t Count = (*_pComponent)[uT("count")];
+            (*_pComponent)[uT("content")] =
+              ::std::vector<uint8_t>{ pData, pData + Count };
+          }
+        }
+        else if ((*_pComponent)[uT("data")].IsType<const Vertex_t *>())
+        {
+          const Vertex_t * pData = (*_pComponent)[uT("data")];
+          const ::std::size_t Count = (*_pComponent)[uT("count")];
+          (*_pComponent)[uT("content")] =
+            ::std::vector<Vertex_t>{ pData, pData + Count };
+        }
+        else if ((*_pComponent)[uT("data")].IsType<const int *>())
+        {
+          const int * pData = (*_pComponent)[uT("data")];
+          const ::std::size_t Count = (*_pComponent)[uT("count")];
+          (*_pComponent)[uT("content")] =
+            ::std::vector<int>{ pData, pData + Count };
+        }
+      }
+
+      ComponentRender = Create(_pComponent);
+    }
+
     if (ComponentRender) Result.push_back(ComponentRender);
   }
 
@@ -71,6 +247,10 @@ auto Component::Renders::Obtain(const Object_t & _Object) -> Renders_t
 }
 
 /**
+* \deprecated
+*  Функция устарела и будет удалена в следующей стабильной версии, вместо
+*  нее следует использовать функцию удаления одного рендера для одного
+*  компонента.
 * \brief
 *  Функция удаления рендеров для указанных компонентов.
 * \details

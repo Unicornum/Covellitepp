@@ -52,7 +52,7 @@ public:
   size_t Length(Handle_t) override;
 
 private:
-  static Handle_t MakeUniqueHandle(void);
+  static Handle_t MakeUniqueHandle(void) noexcept;
 
 private:
   ::std::map<Handle_t, FileInfo> m_Infos;

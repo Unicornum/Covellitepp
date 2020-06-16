@@ -59,6 +59,7 @@
       <FloatingPointModel>Precise</FloatingPointModel>
       <WarningLevel>Level4</WarningLevel>
       <SDLCheck>false</SDLCheck>
+      <DisableSpecificWarnings>6326</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -74,6 +75,7 @@
       <FloatingPointModel>Precise</FloatingPointModel>
       <WarningLevel>Level4</WarningLevel>
       <SDLCheck>false</SDLCheck>
+      <DisableSpecificWarnings>6326</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>

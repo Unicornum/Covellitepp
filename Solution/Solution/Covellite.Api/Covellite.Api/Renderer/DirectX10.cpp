@@ -152,10 +152,10 @@ public:
   {
     return [=](const ComponentPtr_t & _pComponent)
     {
-      const Component::Buffer<T> BufferData{ _pComponent };
+      const Component::Buffer<T> BufferData{ *_pComponent };
 
       return GetRender<T>(_pDevice,
-        Create(_pDevice, BufferData.pData, BufferData.Count));
+        Create(_pDevice, BufferData.Data.data(), BufferData.Data.size()));
     };
   }
 
@@ -166,10 +166,10 @@ public:
   {
     return [=](const ComponentPtr_t & _pComponent)
     {
-      const Component::Buffer<T> BufferData{ _pComponent };
+      const Component::Buffer<T> BufferData{ *_pComponent };
 
       return GetRender<T>(_pDevice,
-        CreateDynamic(_pDevice, BufferData.pData, BufferData.Count), _cbMapper);
+        CreateDynamic(_pDevice, BufferData.Data.data(), BufferData.Data.size()), _cbMapper);
     };
   }
 };
@@ -273,7 +273,8 @@ auto DirectX10::CreateCamera(const ComponentPtr_t & _pComponent) -> Render_t /*o
   const auto DisableBlendRender = CreateBlendState(false);
   const auto DisableDepthRender = GetDepthState(false, false, false);
 
-  const auto ServiceComponents = m_ServiceComponents.Get(
+  const auto ServiceComponents = 
+    CapturingServiceComponent::Get(_pComponent,
     {
       { uT("Position"), api::Component::Make({}) },
       { uT("Rotation"), api::Component::Make({}) },
@@ -289,7 +290,7 @@ auto DirectX10::CreateCamera(const ComponentPtr_t & _pComponent) -> Render_t /*o
     D3D10_VIEWPORT Viewport = { 0 };
     m_pDevice->RSGetViewports(&ViewportCount, &Viewport);
 
-    const Component::Position Pos{ ServiceComponents[0] };
+    const Component::Position Pos{ *ServiceComponents[0] };
 
     auto & CameraMatrices = m_pConstants->Get<::Camera>();
 
@@ -303,8 +304,8 @@ auto DirectX10::CreateCamera(const ComponentPtr_t & _pComponent) -> Render_t /*o
     CameraMatrices.ViewInverse = ::glm::transpose(::glm::inverse(View));
     m_pConstants->Update<::Camera>();
 
-    _pComponent->SetValue(uT("view"), CameraMatrices.View);
-    _pComponent->SetValue(uT("projection"), CameraMatrices.Projection);
+    (*_pComponent)[uT("view")] = CameraMatrices.View;
+    (*_pComponent)[uT("projection")] = CameraMatrices.Projection;
   };
 
   const Render_t CameraPerspective = [=](void)
@@ -321,10 +322,10 @@ auto DirectX10::CreateCamera(const ComponentPtr_t & _pComponent) -> Render_t /*o
 
     // ************************** Матрица проекции ************************** //
 
-    const auto AngleY = _pComponent->GetValue(uT("fov"), 90.0f) *
-      static_cast<float>(::alicorn::extension::cpp::math::GreedToRadian);
-    const auto zNear = _pComponent->GetValue(uT("znear"), 0.01f);
-    const auto zFar = _pComponent->GetValue(uT("zfar"), 200.0f);
+    const auto AngleY = (float)(*_pComponent)[uT("fov")].Default(90.0f) *
+      ::alicorn::extension::cpp::math::Constant<float>::DegreeToRadian;
+    const float zNear = (*_pComponent)[uT("znear")].Default(0.01f);
+    const float zFar = (*_pComponent)[uT("zfar")].Default(200.0f);
 
     CameraMatrices.Projection = ::glm::transpose(::glm::perspectiveFovRH(AngleY,
       (float)Viewport.Width, (float)Viewport.Height, zFar, zNear));
@@ -332,17 +333,17 @@ auto DirectX10::CreateCamera(const ComponentPtr_t & _pComponent) -> Render_t /*o
     // **************************** Матрица вида **************************** //
 
     // Точка, куда смотрит камера - задается как компонент Data.Position.
-    const Component::Position Look{ ServiceComponents[0] };
+    const Component::Position Look{ *ServiceComponents[0] };
 
     auto GetEye = [&](void) -> ::glm::vec3
     {
       // Расстояние от камеры до Look.
-      const auto Distance = _pComponent->GetValue(uT("distance"), 0.0f) + 0.1f;
+      const float Distance = (*_pComponent)[uT("distance")].Default(0.0f);
 
       // Точка, где расположена камера - вычисляется на основе Look, Distance и
       // компонента Data.Rotation.
 
-      const Component::Position Rot{ ServiceComponents[1] };
+      const Component::Position Rot{ *ServiceComponents[1] };
 
       ::glm::mat4 Transform = ::glm::identity<::glm::mat4>();
 
@@ -355,7 +356,7 @@ auto DirectX10::CreateCamera(const ComponentPtr_t & _pComponent) -> Render_t /*o
       Transform = ::glm::rotate(Transform,
         Rot.X, ::glm::vec3{ 1.0f, 0.0f, 0.0f });
 
-      return Transform * ::glm::vec4{ Distance, 0.0f, 0.0f, 1.0f };
+      return Transform * ::glm::vec4{ Distance + 0.1f, 0.0f, 0.0f, 1.0f };
     };
 
     const auto View = ::glm::lookAtRH(
@@ -367,8 +368,8 @@ auto DirectX10::CreateCamera(const ComponentPtr_t & _pComponent) -> Render_t /*o
     CameraMatrices.ViewInverse = ::glm::transpose(::glm::inverse(View));
     m_pConstants->Update<::Camera>();
 
-    _pComponent->SetValue(uT("view"), CameraMatrices.View);
-    _pComponent->SetValue(uT("projection"), CameraMatrices.Projection);
+    (*_pComponent)[uT("view")] = CameraMatrices.View;
+    (*_pComponent)[uT("projection")] = CameraMatrices.Projection;
   };
 
   return (_pComponent->Kind == uT("Perspective")) ?
@@ -398,14 +399,14 @@ public:
   {
     using BufferMapper_t = cbBufferMap_t<const void>;
 
-    const auto Destination =
-      m_pDataTexture->GetValue(uT("destination"), uT("albedo"));
+    const String_t Destination = 
+      (*m_pDataTexture)[uT("destination")].Default(uT("albedo"));
 
     m_pTexture = (Destination != uT("depth")) ?
       MakeRGBTarget(_pDevice, _Width, _Height) :
       MakeDepthTarget(_pDevice, _Width, _Height);
 
-    if (m_pDataTexture->IsType<const BufferMapper_t &>(uT("mapper")))
+    if ((*m_pDataTexture)[uT("mapper")].IsType<const BufferMapper_t &>())
     {
       m_pReadTexture = MakeRGBACopy(_pDevice, _Width, _Height);
     }
@@ -413,7 +414,7 @@ public:
 
   void MakeRGBASource(ComPtr_t<ID3D10Device> _pDevice)
   {
-    const Component::Texture TextureData{ m_pDataTexture };
+    const Component::Texture TextureData{ *m_pDataTexture, uT("albedo") };
 
     m_pTexture = (TextureData.IsUsingMipmapping) ?
       MakeRGBAMipmapsSource(_pDevice, TextureData) :
@@ -463,7 +464,7 @@ private:
     DX_CHECK _pDevice->CreateTexture2D(&textureDesc, nullptr, &pTexture);
 
     _pDevice->UpdateSubresource(pTexture.Get(), 0, NULL,
-      _TextureData.pData, _TextureData.Width * 4, 0);
+      _TextureData.Data.data(), _TextureData.Width * 4, 0);
 
     D3D10_SHADER_RESOURCE_VIEW_DESC srvDesc = { 0 };
     srvDesc.Format = textureDesc.Format;
@@ -479,7 +480,7 @@ private:
     ComPtr_t<ID3D10Device> _pDevice,
     const Component::Texture & _TextureData)
   {
-    const Component::Texture TextureData{ m_pDataTexture };
+    const Component::Texture TextureData{ *m_pDataTexture, uT("albedo") };
 
     D3D10_TEXTURE2D_DESC textureDesc = { 0 };
     textureDesc.Width = _TextureData.Width;
@@ -497,7 +498,7 @@ private:
     DX_CHECK _pDevice->CreateTexture2D(&textureDesc, nullptr, &pTexture);
 
     _pDevice->UpdateSubresource(pTexture.Get(), 0, NULL,
-      _TextureData.pData, _TextureData.Width * 4, 0);
+      _TextureData.Data.data(), _TextureData.Width * 4, 0);
 
     D3D10_SHADER_RESOURCE_VIEW_DESC srvDesc = { 0 };
     srvDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
@@ -519,8 +520,8 @@ private:
   {
     const auto CreateTextureTargetAndSource = [=](void)
     {
-      m_pDataTexture->SetValue(uT("width"), (int)_Width);
-      m_pDataTexture->SetValue(uT("height"), (int)_Height);
+      (*m_pDataTexture)[uT("width")] = (int)_Width;
+      (*m_pDataTexture)[uT("height")] = (int)_Height;
 
       D3D10_TEXTURE2D_DESC textureDesc = { 0 };
       textureDesc.Width = _Width;
@@ -577,8 +578,8 @@ private:
   {
     const auto CreateDepthTargetAndSource = [=](void)
     {
-      m_pDataTexture->SetValue(uT("width"), (int)_Width);
-      m_pDataTexture->SetValue(uT("height"), (int)_Height);
+      (*m_pDataTexture)[uT("width")] = (int)_Width;
+      (*m_pDataTexture)[uT("height")] = (int)_Height;
 
       D3D10_TEXTURE2D_DESC textureDesc = { 0 };
       textureDesc.Width = _Width;
@@ -654,7 +655,7 @@ private:
 public:
   explicit Texture(const ComponentPtr_t & _pDataTexture) :
     m_pDataTexture{ _pDataTexture },
-    m_Destination{ _pDataTexture->GetValue(uT("destination"), uT("albedo")) },
+    m_Destination{ (*_pDataTexture)[uT("destination")].Default(uT("albedo")) },
     m_iDestination{ GetDestinationIndex(m_Destination) }
   {
 
@@ -672,7 +673,7 @@ istream & operator>>(istream &, shared_ptr<T> &)
 
 } // namespace std
 
-auto DirectX10::CreateBkSurface(const ComponentPtr_t &) -> Render_t /*override*/
+auto DirectX10::CreateBkSurface(const ComponentPtr_t & _pComponent) -> Render_t /*override*/
 {
   const auto pBkSurfaceTextures = 
     ::std::make_shared<::std::vector<Texture::Ptr_t>>();
@@ -685,11 +686,11 @@ auto DirectX10::CreateBkSurface(const ComponentPtr_t &) -> Render_t /*override*/
     auto pTexture = ::std::make_shared<Texture>(_pDataTexture);
     pTexture->MakeTarget(m_pDevice, 
       Desc.BufferDesc.Width, Desc.BufferDesc.Height);
-    _pDataTexture->SetValue(uT("entity"), pTexture);
+    (*_pDataTexture)[uT("entity")] = pTexture;
     pBkSurfaceTextures->push_back(pTexture);
   };
 
-  m_ServiceComponents.Process(
+  CapturingServiceComponent::Process(_pComponent,
     {
       { uT("Texture"), DoDataTexture },
     });
@@ -759,7 +760,7 @@ auto DirectX10::CreateState(const ComponentPtr_t & _pComponent) -> Render_t /*ov
 
   const auto CreateScissorState = [&](void)
   {
-    const Component::Scissor ScissorData{ _pComponent };
+    const Component::Scissor ScissorData{ *_pComponent };
 
     D3D10_RASTERIZER_DESC RasterizerDesc = { 0 };
     RasterizerDesc.FillMode = D3D10_FILL_SOLID;
@@ -771,12 +772,12 @@ auto DirectX10::CreateState(const ComponentPtr_t & _pComponent) -> Render_t /*ov
     ComPtr_t<ID3D10RasterizerState> pScissor;
     DX_CHECK m_pDevice->CreateRasterizerState(&RasterizerDesc, &pScissor);
 
-    const auto pScissorRect = 
-      m_ServiceComponents.Get({ { uT("Rect"), _pComponent } })[0];
+    const auto pScissorRect = CapturingServiceComponent::Get(_pComponent, 
+      { { uT("Rect"), _pComponent } })[0];
 
     Render_t ScissorEnabled = [=](void)
     {
-      const Component::Scissor ScissorData{ pScissorRect };
+      const Component::Scissor ScissorData{ *pScissorRect };
 
       D3D10_RECT rect;
       rect.left = ScissorData.Left;
@@ -798,7 +799,7 @@ auto DirectX10::CreateState(const ComponentPtr_t & _pComponent) -> Render_t /*ov
 
   const auto CreateRasterizerState = [&](void)
   {
-    const Component::Rasterizer RasterizerData{ _pComponent };
+    const Component::Rasterizer RasterizerData{ *_pComponent };
 
     D3D10_RASTERIZER_DESC RasterizerDesc = { 0 };
     RasterizerDesc.FillMode = D3D10_FILL_SOLID;
@@ -820,7 +821,7 @@ auto DirectX10::CreateState(const ComponentPtr_t & _pComponent) -> Render_t /*ov
       RasterizerDesc.ScissorEnable = TRUE;
     };
 
-    m_ServiceComponents.Process(
+    CapturingServiceComponent::Process(_pComponent,
       {
         { uT("Rect"), DoDataRect },
       });
@@ -841,7 +842,7 @@ auto DirectX10::CreateState(const ComponentPtr_t & _pComponent) -> Render_t /*ov
     {
       Result = [=](void)
       {
-        const Component::Scissor ScissorData{ pScissorRect };
+        const Component::Scissor ScissorData{ *pScissorRect };
 
         D3D10_RECT rect;
         rect.left = ScissorData.Left;
@@ -860,9 +861,9 @@ auto DirectX10::CreateState(const ComponentPtr_t & _pComponent) -> Render_t /*ov
   const auto CreateDepthState = [&](void)
   {
     return GetDepthState(
-      _pComponent->GetValue(uT("enabled"), false),
-      _pComponent->GetValue(uT("clear"), false),
-      _pComponent->GetValue(uT("overwrite"), true));
+      (*_pComponent)[uT("enabled")].Default(false),
+      (*_pComponent)[uT("clear")].Default(false),
+      (*_pComponent)[uT("overwrite")].Default(true));
   };
 
   const auto CreateClearState = [&](void)
@@ -879,7 +880,7 @@ auto DirectX10::CreateState(const ComponentPtr_t & _pComponent) -> Render_t /*ov
     };
 
     const auto BackgroundColor = 
-      ARGBtoFloat4(_pComponent->GetValue(uT("color"), 0xFF000000));
+      ARGBtoFloat4((*_pComponent)[uT("color")].Default(0xFF000000));
 
     return [=](void)
     {
@@ -919,10 +920,10 @@ auto DirectX10::CreateTexture(const ComponentPtr_t & _pComponent) -> Render_t /*
 {
   using BufferMapper_t = cbBufferMap_t<const void>;
 
-  const auto pDataTexture =
-    m_ServiceComponents.Get({ { uT("Texture"), _pComponent } })[0];
+  const auto pDataTexture = CapturingServiceComponent::Get(_pComponent, 
+    { { uT("Texture"), _pComponent } })[0];
 
-  auto pTexture = pDataTexture->GetValue(uT("entity"), Texture::Ptr_t{});
+  Texture::Ptr_t pTexture = (*pDataTexture)[uT("entity")].Default(Texture::Ptr_t{});
   if (pTexture == nullptr)
   {
     pTexture = ::std::make_shared<Texture>(pDataTexture);
@@ -930,7 +931,7 @@ auto DirectX10::CreateTexture(const ComponentPtr_t & _pComponent) -> Render_t /*
   }
   else
   {
-    pDataTexture->SetValue(uT("entity"), Texture::Ptr_t{});
+    (*pDataTexture)[uT("entity")] = Texture::Ptr_t{};
   }
 
   if (pTexture->m_pReadTexture == nullptr)
@@ -942,8 +943,8 @@ auto DirectX10::CreateTexture(const ComponentPtr_t & _pComponent) -> Render_t /*
     };
   }
 
-  const auto cbBufferMapper =
-    pDataTexture->GetValue<const BufferMapper_t &>(uT("mapper"), BufferMapper_t{});
+  const BufferMapper_t cbBufferMapper =
+    (*pDataTexture)[uT("mapper")].Default(BufferMapper_t{});
 
   return [=](void)
   {
@@ -968,10 +969,10 @@ auto DirectX10::CreateShader(const ComponentPtr_t & _pComponent) -> Render_t /*o
 {
   using namespace ::alicorn::extension::std;
 
-  const auto pShaderDataComponent =
-    m_ServiceComponents.Get({ { uT("Shader"), _pComponent } })[0];
+  const auto pShaderDataComponent = CapturingServiceComponent::Get(_pComponent, 
+    { { uT("Shader"), _pComponent } })[0];
 
-  const auto ShaderData = Component::Shader{ pShaderDataComponent, ::Default };
+  const auto ShaderData = Component::Shader{ *pShaderDataComponent, ::Default };
 
   ::std::string Define = 
     "#define COVELLITE_SHADER_DESKTOP\r\n"
@@ -980,7 +981,7 @@ auto DirectX10::CreateShader(const ComponentPtr_t & _pComponent) -> Render_t /*o
 
   const auto HeaderShaderText = ::Predefined + ::Data + 
     ShaderData.GetInstanceInput(::Input);
-  auto ShaderText = ShaderData.GetBody();
+  auto ShaderText = ShaderData.Data;
   auto Entry = ShaderData.Entry;
 
   if (ShaderData.Kind == uT("Pixel"))
@@ -1079,24 +1080,24 @@ auto DirectX10::CreateShader(const ComponentPtr_t & _pComponent) -> Render_t /*o
 
 auto DirectX10::CreateBuffer(const ComponentPtr_t & _pBuffer) -> Render_t /*override*/
 {
-  const auto pBufferData = 
-    m_ServiceComponents.Get({ { uT("Buffer"), _pBuffer } })[0];
+  const auto pBufferData = CapturingServiceComponent::Get(_pBuffer, 
+    { { uT("Buffer"), _pBuffer } })[0];
 
-  if (pBufferData->IsType<const ::covellite::api::Vertex *>(uT("data")))
+  if ((*pBufferData)[uT("content")].IsType<::std::vector<::covellite::api::Vertex>>())
   {
     using BufferMapper_t = cbBufferMap_t<::covellite::api::Vertex>;
 
-    const auto & cbBufferMapper =
-      _pBuffer->GetValue<const BufferMapper_t &>(uT("mapper"), nullptr);
+    const BufferMapper_t & cbBufferMapper =
+      (*_pBuffer)[uT("mapper")].Default(BufferMapper_t{});
 
     return (cbBufferMapper == nullptr) ?
       Buffer::GetCreator<::covellite::api::Vertex>(m_pDevice)(pBufferData) :
       Buffer::GetCreator<::covellite::api::Vertex>(m_pDevice, cbBufferMapper)(pBufferData);
   }
-  else if (_pBuffer->IsType<const cbBufferMap_t<::Lights_t> &>(uT("mapper")))
+  else if ((*_pBuffer)[uT("mapper")].IsType<const cbBufferMap_t<::Lights_t> &>())
   {
-    const auto cbBufferMapper =
-      _pBuffer->GetValue<const cbBufferMap_t<::Lights_t> &>(uT("mapper"), nullptr);
+    const cbBufferMap_t<::Lights_t> cbBufferMapper =
+      (*_pBuffer)[uT("mapper")].Default(cbBufferMap_t<::Lights_t>{});
     if (cbBufferMapper == nullptr)
     {
       throw STD_EXCEPTION << "Unexpected mapper nullptr: " << _pBuffer->Id;
@@ -1107,19 +1108,19 @@ auto DirectX10::CreateBuffer(const ComponentPtr_t & _pBuffer) -> Render_t /*over
       cbBufferMapper(&m_pConstants->Get<::Object>().Lights);
     };
   }
-  else if (_pBuffer->IsType<const cbBufferMap_t<void> &>(uT("mapper")))
+  else if ((*_pBuffer)[uT("mapper")].IsType<const cbBufferMap_t<void> &>())
   {
     using BufferMap_t = cbBufferMap_t<void>;
     using BufferData_t = ::std::vector<uint8_t>;
 
-    const auto cbBufferMapper =
-      _pBuffer->GetValue<const BufferMap_t &>(uT("mapper"), BufferMap_t{});
+    const BufferMap_t cbBufferMapper = 
+      (*_pBuffer)[uT("mapper")].Default(BufferMap_t{});
     if (!cbBufferMapper)
     {
       throw STD_EXCEPTION << "Unexpected empty mapper: " << _pBuffer->Id;
     }
 
-    const auto BufferSize = pBufferData->GetValue(uT("size"), (::std::size_t)0);
+    const ::std::size_t BufferSize = (*pBufferData)[uT("size")].Default((::std::size_t)0);
     if (BufferSize == 0)
     {
       throw STD_EXCEPTION << "Unexpected zero size: " << _pBuffer->Id;
@@ -1151,9 +1152,9 @@ auto DirectX10::CreateBuffer(const ComponentPtr_t & _pBuffer) -> Render_t /*over
 auto DirectX10::CreateTransform(const ComponentPtr_t & _pComponent) -> Render_t /*override*/
 {
   const auto PreRender =
-    (_pComponent->Kind == uT("Unknown")) ? CreateBasePreRenderGeometry() :
-    (_pComponent->Kind == uT("Static")) ? CreateStaticPreRenderGeometry() :
-    (_pComponent->Kind == uT("Billboard")) ? CreateBillboardPreRenderGeometry() :
+    (_pComponent->Kind == uT("Unknown")) ? CreateBasePreRenderGeometry(_pComponent) :
+    (_pComponent->Kind == uT("Static")) ? CreateStaticPreRenderGeometry(_pComponent) :
+    (_pComponent->Kind == uT("Billboard")) ? CreateBillboardPreRenderGeometry(_pComponent) :
       throw STD_EXCEPTION << "Unexpected transform component: " <<
       " [id=" << _pComponent->Id << ", kind: " << _pComponent->Kind << "].";
 
@@ -1173,11 +1174,11 @@ auto DirectX10::CreatePresentBuffer(const ComponentPtr_t & _pBuffer) -> Render_t
 
   const auto SaveBuffer = [&](const ComponentPtr_t & _pBufferData)
   {
-    if (_pBufferData->IsType<const int *>(uT("data")))
+    if ((*_pBufferData)[uT("content")].IsType<::std::vector<int>>())
     {
       pIndexBufferData = _pBufferData;
     }
-    else if (_pBufferData->IsType<const BufferMapper_t &>(uT("mapper")))
+    else if ((*_pBufferData)[uT("mapper")].IsType<const BufferMapper_t &>())
     {
       pInstanceBufferData = _pBufferData;
     }
@@ -1187,16 +1188,16 @@ auto DirectX10::CreatePresentBuffer(const ComponentPtr_t & _pBuffer) -> Render_t
     }
   };
 
-  m_ServiceComponents.Process(
-  {
-    { uT("Buffer"), SaveBuffer },
-  });
+  CapturingServiceComponent::Process(_pBuffer,
+    {
+      { uT("Buffer"), SaveBuffer },
+    });
 
-  const Component::Buffer<int> IndexBufferData{ pIndexBufferData };
+  const Component::Buffer<int> IndexBufferData{ *pIndexBufferData };
 
   const auto pIndexBuffer =
-    Buffer::Create(m_pDevice, IndexBufferData.pData, IndexBufferData.Count);
-  const auto IndexCount = static_cast<UINT>(IndexBufferData.Count);
+    Buffer::Create(m_pDevice, IndexBufferData.Data.data(), IndexBufferData.Data.size());
+  const auto IndexCount = static_cast<UINT>(IndexBufferData.Data.size());
 
   if (pInstanceBufferData == nullptr)
   {
@@ -1208,10 +1209,10 @@ auto DirectX10::CreatePresentBuffer(const ComponentPtr_t & _pBuffer) -> Render_t
     };
   }
 
-  const auto BufferSize =
-    pInstanceBufferData->GetValue(uT("size"), (::std::size_t)16);
+  const ::std::size_t BufferSize =
+    (*pInstanceBufferData)[uT("size")].Default((::std::size_t)16);
   const auto MaxInstanceCount = static_cast<UINT>(
-    pInstanceBufferData->GetValue(uT("count"), (::std::size_t)1));
+    (::std::size_t)(*pInstanceBufferData)[uT("count")].Default((::std::size_t)1));
 
   if (BufferSize % 16 != 0)
   {
@@ -1230,10 +1231,10 @@ auto DirectX10::CreatePresentBuffer(const ComponentPtr_t & _pBuffer) -> Render_t
 
   return [=](void)
   {
-    const auto cbBufferMapper =
-      pInstanceBufferData->GetValue<const BufferMapper_t &>(uT("mapper"), BufferMapper_t{});
+    const BufferMapper_t cbBufferMapper =
+      (*pInstanceBufferData)[uT("mapper")].Default(BufferMapper_t{});
     const auto InstanceCount = ::std::min(MaxInstanceCount, static_cast<UINT>(
-      pInstanceBufferData->GetValue(uT("count"), (::std::size_t)0)));
+      (::std::size_t)(*pInstanceBufferData)[uT("count")].Default((::std::size_t)0)));
 
     const auto IsDirty = cbBufferMapper(nullptr);
     if (IsDirty)
@@ -1388,7 +1389,7 @@ auto DirectX10::GetDepthState(
   return _IsClear ? RenderDepthClear : RenderDepthEnabled;
 }
 
-auto DirectX10::CreateBasePreRenderGeometry(void) -> Render_t
+auto DirectX10::CreateBasePreRenderGeometry(const ComponentPtr_t & _pComponent) -> Render_t
 {
   ::std::deque<Render_t> PreRenders;
 
@@ -1398,7 +1399,7 @@ auto DirectX10::CreateBasePreRenderGeometry(void) -> Render_t
     {
       auto & World = m_pConstants->Get<::Object>().World;
 
-      const Component::Position Position{ _pPosition };
+      const Component::Position Position{ *_pPosition };
 
       World = ::glm::translate(World, 
         ::glm::vec3{ Position.X, Position.Y, Position.Z });
@@ -1411,7 +1412,7 @@ auto DirectX10::CreateBasePreRenderGeometry(void) -> Render_t
     {
       auto & World = m_pConstants->Get<::Object>().World;
 
-      const Component::Rotation Rotation{ _pRotation };
+      const Component::Rotation Rotation{ *_pRotation };
 
       World = ::glm::rotate(World, Rotation.Z, ::glm::vec3{ 0.0f, 0.0f, 1.0f });
       World = ::glm::rotate(World, Rotation.Y, ::glm::vec3{ 0.0f, 1.0f, 0.0f });
@@ -1425,7 +1426,7 @@ auto DirectX10::CreateBasePreRenderGeometry(void) -> Render_t
     {
       auto & World = m_pConstants->Get<::Object>().World;
 
-      const Component::Scale Scale{ _pScale };
+      const Component::Scale Scale{ *_pScale };
 
       World = ::glm::scale(World, ::glm::vec3{ Scale.X, Scale.Y, Scale.Z });
     });
@@ -1437,12 +1438,12 @@ auto DirectX10::CreateBasePreRenderGeometry(void) -> Render_t
       ::glm::transpose(m_pConstants->Get<::Object>().World);
   });
 
-  m_ServiceComponents.Process(
-  {
-    { uT("Position"), CreatePosition },
-    { uT("Rotation"), CreateRotation },
-    { uT("Scale"), CreateScale },
-  });
+  CapturingServiceComponent::Process(_pComponent,
+    {
+      { uT("Position"), CreatePosition },
+      { uT("Rotation"), CreateRotation },
+      { uT("Scale"), CreateScale },
+    });
 
   PreRenders.push_front([=](void)
   {
@@ -1455,9 +1456,9 @@ auto DirectX10::CreateBasePreRenderGeometry(void) -> Render_t
   };
 }
 
-auto DirectX10::CreateStaticPreRenderGeometry(void) -> Render_t
+auto DirectX10::CreateStaticPreRenderGeometry(const ComponentPtr_t & _pComponent) -> Render_t
 {
-  CreateBasePreRenderGeometry()();
+  CreateBasePreRenderGeometry(_pComponent)();
   const auto World = m_pConstants->Get<::Object>().World;
 
   return [=](void)
@@ -1466,7 +1467,7 @@ auto DirectX10::CreateStaticPreRenderGeometry(void) -> Render_t
   };
 }
 
-auto DirectX10::CreateBillboardPreRenderGeometry(void) -> Render_t
+auto DirectX10::CreateBillboardPreRenderGeometry(const ComponentPtr_t & _pComponent) -> Render_t
 {
   ::std::deque<Render_t> PreRenders;
 
@@ -1476,7 +1477,7 @@ auto DirectX10::CreateBillboardPreRenderGeometry(void) -> Render_t
     {
       auto & World = m_pConstants->Get<::Object>().World;
 
-      const Component::Position Position{ _pPosition };
+      const Component::Position Position{ *_pPosition };
 
       World = ::glm::translate(World,
         ::glm::vec3{ Position.X, Position.Y, Position.Z });
@@ -1489,7 +1490,8 @@ auto DirectX10::CreateBillboardPreRenderGeometry(void) -> Render_t
       ::glm::transpose(m_pConstants->Get<::Object>().World);
   });
 
-  m_ServiceComponents.Process({ { uT("Position"), CreatePosition } });
+  CapturingServiceComponent::Process(_pComponent,
+    { { uT("Position"), CreatePosition } });
 
   PreRenders.push_front([=](void)
   {

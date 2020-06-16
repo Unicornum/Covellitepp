@@ -107,8 +107,7 @@ Component_t::Make( // Индексный буфер
 {
   { uT("type"), uT("Data") },
   { uT("kind"), uT("Buffer") },
-  { uT("data"), Indices.data() },
-  { uT("count"), Indices.size() },
+  { uT("content"), Indices },
 }),
 Component_t::Make( // Present.Instance
 {

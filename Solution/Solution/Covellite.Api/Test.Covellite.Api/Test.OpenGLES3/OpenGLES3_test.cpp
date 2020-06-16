@@ -51,6 +51,7 @@ protected:
   using Component_t = ::covellite::api::Component;
   using Render_t = ::std::function<void(void)>;
   using Time_t = ::std::chrono::microseconds;
+  using Object_t = ::std::vector<Component_t::ComponentPtr_t>;
 
   // Вызывается ПЕРЕД запуском каждого теста
   void SetUp(void) override
@@ -95,6 +96,19 @@ protected:
 
   using Data_t = Data;
 
+  template<class T>
+  void IntroduceBufferSize(::std::vector<T> & _Data)
+  {
+    (*reinterpret_cast<size_t *>(_Data.data())) = _Data.size() * sizeof(T);
+  }
+
+  template<class T>
+  ::std::vector<uint8_t> GetExpected(const ::std::vector<T> & _Data)
+  {
+    ::std::vector<uint8_t> Result(sizeof(T) * _Data.size());
+    memcpy(Result.data(), _Data.data(), Result.size());
+    return Result;
+  }
 };
 
 // Образец макроса для подстановки в класс OpenGLES3 

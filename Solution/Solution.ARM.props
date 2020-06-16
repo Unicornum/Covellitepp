@@ -14,9 +14,10 @@
   <ItemDefinitionGroup>
     <ClCompile />
     <ClCompile>
-      <AdditionalOptions>-fopenmp -Wno-nonportable-include-path -Wno-invalid-source-encoding %(AdditionalOptions)</AdditionalOptions>
+      <AdditionalOptions>-fopenmp -Wno-nonportable-include-path -Wno-invalid-source-encoding -Wno-unusable-partial-specialization %(AdditionalOptions)</AdditionalOptions>
       <PreprocessorDefinitions>%(PreprocessorDefinitions);__ANDROID__</PreprocessorDefinitions>
       <EnableNeonCodegen>true</EnableNeonCodegen>
+      <CppLanguageStandard>c++1z</CppLanguageStandard>
     </ClCompile>
     <Link>
       <AdditionalOptions>-fopenmp %(AdditionalOptions)</AdditionalOptions>

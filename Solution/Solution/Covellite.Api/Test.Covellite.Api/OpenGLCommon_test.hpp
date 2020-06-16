@@ -144,16 +144,10 @@ TEST_F(OpenGLCommon_test, /*DISABLED_*/Test_State_Scissor_Enable)
   const Tested_t Example{ Data_t{} };
   const ITested_t & IExample = Example;
 
-  auto itCreatorData = IExample.GetCreators().find(uT("Data"));
-  ASSERT_NE(IExample.GetCreators().end(), itCreatorData);
-
   const auto pScissorData = Component_t::Make(
     {
       { uT("kind"), uT("Rect") },
     });
-
-  auto ScissorDataRender = itCreatorData->second(pScissorData);
-  EXPECT_EQ(nullptr, ScissorDataRender);
 
   auto itCreatorState = IExample.GetCreators().find(uT("State"));
   ASSERT_NE(IExample.GetCreators().end(), itCreatorState);
@@ -162,6 +156,7 @@ TEST_F(OpenGLCommon_test, /*DISABLED_*/Test_State_Scissor_Enable)
     {
       { uT("kind"), uT("Scissor") },
       { uT("enabled"), true },
+      { uT("service"), Object_t{ pScissorData } },
     });
 
   auto Render = itCreatorState->second(pScissor);
@@ -579,9 +574,6 @@ TEST_F(OpenGLCommon_test, /*DISABLED_*/Test_Texture_UnknownDestination)
   const Tested_t Example{ Data_t{} };
   const ITested_t & IExample = Example;
 
-  auto itDataCreator = IExample.GetCreators().find(uT("Data"));
-  ASSERT_NE(IExample.GetCreators().end(), itDataCreator);
-
   auto itCreator = IExample.GetCreators().find(uT("Texture"));
   ASSERT_NE(IExample.GetCreators().end(), itCreator);
 
@@ -624,10 +616,7 @@ TEST_F(OpenGLCommon_test, /*DISABLED_*/Test_Texture_UnknownDestination)
         { uT("destination"), uT("1907251103") },
      });
 
-    auto DataRender = itDataCreator->second(pData);
-    EXPECT_EQ(nullptr, DataRender);
-
-    TestCall(Component_t::Make({}));
+    TestCall(Component_t::Make({ { uT("service"), Object_t{ pData } } }));
   }
 }
 
@@ -650,8 +639,7 @@ TEST_F(OpenGLCommon_test, /*DISABLED_*/Test_Buffer_UnknownType)
         { uT("id"), uT("id.1905081956") },
         { uT("type"), uT("type.1905081956") },
         { uT("kind"), uT("kind.1905081956") },
-        { uT("data"), Source.data() },
-        { uT("count"), Source.size() },
+        { uT("content"), Source },
       });
 
     EXPECT_STDEXCEPTION(itCreator->second(pBuffer),
@@ -664,26 +652,18 @@ TEST_F(OpenGLCommon_test, /*DISABLED_*/Test_Buffer_UnknownType)
   // ************** Передача данных в объекте компонента Data *************** //
 
   {
-    auto itDataCreator = IExample.GetCreators().find(uT("Data"));
-    ASSERT_NE(IExample.GetCreators().end(), itDataCreator);
-
     const auto pData = Component_t::Make(
       {
         { uT("kind"), uT("Buffer") },
-        { uT("data"), Source.data() },
-        { uT("count"), Source.size() },
+        { uT("content"), Source },
       });
-
-    auto DataRender = itDataCreator->second(pData);
-    EXPECT_EQ(nullptr, DataRender);
 
     const auto pBuffer = Component_t::Make(
       {
         { uT("id"), uT("id.1905082000") },
         { uT("type"), uT("type.1905082000") },
         { uT("kind"), uT("kind.1905082000") },
-        { uT("data"), Source.data() },
-        { uT("count"), Source.size() },
+        { uT("service"), Object_t{ pData } }
       });
 
     EXPECT_STDEXCEPTION(itCreator->second(pBuffer),
@@ -694,9 +674,7 @@ TEST_F(OpenGLCommon_test, /*DISABLED_*/Test_Buffer_UnknownType)
   }
 }
 
-
 ////////////////////////////////////////////////////////////////////////////////
-
 
 // ************************************************************************** //
 TEST_F(OpenGLCommon_test, /*DISABLED_*/Test_Present_Geometry_UnknownVariety_deprecated)

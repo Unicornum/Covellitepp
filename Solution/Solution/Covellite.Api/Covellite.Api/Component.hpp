@@ -37,18 +37,35 @@ class Component final
   class Convertor;
   class ConstructorTag {};
 
-  class Data
+  class Param final
   {
   public:
-    size_t             hType;
+    template<class T>
+    bool IsType(void) const;
+    template<class T>
+    Param & Default(const T &);
+    template<class T>
+    operator T & (void);
+    template<class T>
+    operator const T & (void) const;
+    template<class T>
+    Param & operator= (const T &);
+
+  private:
+    template<class T>
+    void Set(const T &);
+
+  private:
+    friend Component;
     ::covellite::Any_t Value;
+    size_t             hType;
   };
 
 public:
   using String_t = ::alicorn::extension::std::String;
   using Name_t = String_t;
   using Hasher_t = ::std::hash<Name_t>;
-  using Params_t = ::alicorn::extension::std::fast::unordered_map<size_t, Data>;
+  using Params_t = ::alicorn::extension::std::fast::unordered_map<size_t, Param>;
   using SourceParams_t = ::std::map<Name_t, ::covellite::Any_t>;
   using Id_t = String_t;
   using Type_t = String_t;
@@ -63,6 +80,13 @@ public:
   static size_t GetHash(const Name_t &);
 
 public:
+  Param & operator[] (const Name_t &);
+  Param & operator[] (const size_t &);
+  const Param & operator[] (const Name_t &) const;
+  const Param & operator[] (const size_t &) const;
+
+public:
+  // deprecated
   template<class T>
   bool IsType(const Name_t &) const;
   template<class T>

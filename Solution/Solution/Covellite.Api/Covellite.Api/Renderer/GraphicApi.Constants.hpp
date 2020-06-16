@@ -138,12 +138,12 @@ auto GraphicApi::DoCreateFog(
   const ComponentPtr_t & _pComponent, 
   const bool _IsUpdate) -> Render_t
 {
-  const auto pFogData =
-    m_ServiceComponents.Get({ { uT("Fog"), _pComponent } })[0];
+  const auto pFogData = CapturingServiceComponent::Get(_pComponent, 
+    { { uT("Fog"), _pComponent } })[0];
 
   const Render_t NoUpdateRender = [=](void)
   {
-    const Component::Fog RawFogData{ pFogData };
+    const Component::Fog RawFogData{ *pFogData };
 
     auto & Fog = m_pConstants->Get<TFog>();
     Fog.Color = ARGBtoFloat4<color_t>(RawFogData.Color);
@@ -154,7 +154,7 @@ auto GraphicApi::DoCreateFog(
 
   const Render_t UpdateRender = [=](void)
   {
-    const Component::Fog RawFogData{ pFogData };
+    const Component::Fog RawFogData{ *pFogData };
 
     auto & Fog = m_pConstants->Get<TFog>();
     Fog.Color = ARGBtoFloat4<color_t>(RawFogData.Color);
@@ -175,19 +175,19 @@ auto GraphicApi::DoCreateLight(
 {
   const auto GetColor = [=](void)
   {
-    return ARGBtoFloat4<color_t>(_pComponent->GetValue(uT("color"), 0xFF000000));
+    return ARGBtoFloat4<color_t>((*_pComponent)[uT("color")].Default(0xFF000000));
   };
 
   // 15 Август 2019 00:19 (unicornum.verum@gmail.com)
   TODO("??? Почему версия для статического конвеера отличается ???");
   const auto ServiceComponents = _IsStatic ?
-    m_ServiceComponents.Get(
+    CapturingServiceComponent::Get(_pComponent,
     {
       { uT("Position"), api::Component::Make({ { uT("z"), 1.0f }, { uT("w"), 0.0f } }) },
       { uT("Direction"), api::Component::Make({ { uT("z"), 1.0f } }) },
       { uT("Attenuation"), api::Component::Make({ }) },
     }) :
-    m_ServiceComponents.Get(
+    CapturingServiceComponent::Get(_pComponent,
     {
       { uT("Position"), api::Component::Make({ }) },
       { uT("Direction"), api::Component::Make({ { uT("x"), 1.0f } }) },
@@ -216,7 +216,7 @@ auto GraphicApi::DoCreateLight(
       Light.IsValid = 1;
       Light.Color = GetColor();
 
-      const Component::Position Direction{ pDirection };
+      const Component::Position Direction{ *pDirection };
       Light.Direction = { Direction.X, Direction.Y, Direction.Z, 0.0f };
     };
   };
@@ -228,7 +228,7 @@ auto GraphicApi::DoCreateLight(
 
     return [=](void)
     {
-      const Component::Position Position{ pPosition };
+      const Component::Position Position{ *pPosition };
 
       auto & Lights = m_pConstants->Get<TLight>().Points;
 
@@ -243,16 +243,16 @@ auto GraphicApi::DoCreateLight(
 
       Light.Color = GetColor();
       Light.Position = { Position.X, Position.Y, Position.Z,
-        pPosition->GetValue(uT("w"), 1.0f) }; // w == 1.0f - point light
+        (*pPosition)[uT("w")].Default(1.0f) }; // w == 1.0f - point light
                                       // Такой сложный способ из-за того,
                                       // что здесь должен быть 0.0f, если
                                       // pPosition не задан.
 
       Light.Attenuation =
       {
-        pAttenuation->GetValue(uT("const"), 1.0f),
-        pAttenuation->GetValue(uT("linear"), 0.0f),
-        pAttenuation->GetValue(uT("exponent"), 0.0f),
+        (*pAttenuation)[uT("const")].Default(1.0f),
+        (*pAttenuation)[uT("linear")].Default(0.0f),
+        (*pAttenuation)[uT("exponent")].Default(0.0f),
         0.0f
       };
     };
