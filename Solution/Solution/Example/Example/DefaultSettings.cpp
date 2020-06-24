@@ -31,7 +31,7 @@ template<>
     uT("Data"));        // Путь к папке расположения файлов 3D объектов, которые 
                         // используются в проекте примера.
   (*pSettings).AddExtra(uT("PathToSoundsDirectory"),
-    uT("Data/Sounds"));        // Путь к папке расположения звуковых файлов, которые 
+    uT("Data/Sounds")); // Путь к папке расположения звуковых файлов, которые 
                         // используются в проекте примера.
     
   (*pSettings)[uT("Window")].SetDefault(uT("IsFullScreen"),

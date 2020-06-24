@@ -30,7 +30,7 @@ OpenGLCommon::Texture::Texture(const Component::Texture & _Data) :
 }
 
 // cppcheck-suppress unusedFunction
-void OpenGLCommon::Texture::Bind(const bool _IsActivate)
+void OpenGLCommon::Texture::Bind(const bool _IsActivate) noexcept
 {
   glBindTexture(GL_TEXTURE_2D, _IsActivate ? m_TextureId : 0);
 }
@@ -74,7 +74,10 @@ void OpenGLCommon::Texture::MakeContent(
     throw STD_EXCEPTION << "Create texture error: " << Error;
   }
 
-  if (m_IsMapping) m_ReadCopyData.resize(_Width * _Height * 4, 0x00);
+  if (m_IsMapping)
+  {
+    m_ReadCopyData.resize(static_cast<size_t>(_Width) * _Height * 4, 0x00);
+  }
 }
 
 /*static*/ auto OpenGLCommon::Texture::GetDestination(
@@ -113,7 +116,7 @@ void OpenGLCommon::Texture::MakeContent(
   return (_Destination == uT("depth")) ? GL_DEPTH_COMPONENT : GL_RGBA;
 }
 
-/*static*/ GLuint OpenGLCommon::Texture::BuildTexture(void)
+/*static*/ GLuint OpenGLCommon::Texture::BuildTexture(void) noexcept
 {
   GLuint TextureId = 0;
   glGenTextures(1, &TextureId);

@@ -26,13 +26,13 @@ OpenGLCommon::String_t OpenGLCommon::GetUsingApi(void) const /*override*/
 {
   using namespace ::alicorn::extension::std;
 
-  auto Version = reinterpret_cast<const char *>(glGetString(GL_VERSION));
+  const ::std::string Version = 
+    reinterpret_cast<const char *>(glGetString(GL_VERSION));
 
-  return m_PreVersion +
-    string_cast<String, Encoding::Ascii128>(::std::string{ Version });
+  return m_PreVersion + string_cast<String, Encoding::Ascii128>(Version);
 }
 
-void OpenGLCommon::ResizeWindow(int32_t _Width, int32_t _Height) /*final*/
+void OpenGLCommon::ResizeWindow(int32_t _Width, int32_t _Height) noexcept /*final*/
 {
   // (x, y) - левый нижний угол!
   glViewport(0, 0, _Width, _Height - m_Top);
@@ -42,9 +42,9 @@ void OpenGLCommon::ResizeWindow(int32_t _Width, int32_t _Height) /*final*/
 
 auto OpenGLCommon::CreateState(const ComponentPtr_t & _pComponent) -> Render_t /*override*/
 {
-  const auto CreateBlendState = [](void)
+  const auto CreateBlendState = [](void) noexcept
   {
-    return [](void)
+    return [](void) noexcept
     {
       glEnable(GL_BLEND);
       glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
@@ -81,7 +81,7 @@ auto OpenGLCommon::CreateState(const ComponentPtr_t & _pComponent) -> Render_t /
         Rect.Right - Rect.Left, Rect.Bottom - Rect.Top);
     };
 
-    Render_t ScissorDisabled = [](void)
+    Render_t ScissorDisabled = [](void) noexcept
     {
       glDisable(GL_SCISSOR_TEST);
     };
@@ -110,7 +110,7 @@ auto OpenGLCommon::CreateState(const ComponentPtr_t & _pComponent) -> Render_t /
       (*_pComponent)[uT("color")].Default(0xFF000000));
     // ?????????????????????????????????????????????????????????????????????? //
 
-    return [=](void)
+    return [=](void) noexcept
     {
       glClearColor(
         BackgroundColor.r,
@@ -138,7 +138,7 @@ auto OpenGLCommon::GetDepthRender(
   const bool _IsClear,
   const bool _IsOverwrite) -> Render_t
 {
-  const Render_t DepthDisable = [](void)
+  const Render_t DepthDisable = [](void) noexcept
   {
     glDisable(GL_DEPTH_TEST);
   };
@@ -146,14 +146,14 @@ auto OpenGLCommon::GetDepthRender(
   const auto IsOverwrite = 
     static_cast<GLboolean>(_IsOverwrite ? GL_TRUE : GL_FALSE);
 
-  const Render_t DepthEnable = [=](void)
+  const Render_t DepthEnable = [=](void) noexcept
   {
     glEnable(GL_DEPTH_TEST);
     glDepthMask(IsOverwrite);
     glDepthFunc(GL_GREATER);
   };
 
-  const Render_t DepthClear = [=](void)
+  const Render_t DepthClear = [=](void) noexcept
   {
     glEnable(GL_DEPTH_TEST);
     glDepthMask(IsOverwrite);

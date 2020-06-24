@@ -34,26 +34,24 @@ bool Common::Id::operator< (const Id & _Id) const
 
 /******************************************************************************/
 
-Common::Common(const RendersPtr_t & _pRenders) :
-  m_pRenders(_pRenders)
+Common::Common(WindowExpanse_t & _Window) :
+  m_pWindowExpanse(&_Window)
 {
+
 }
 
-void Common::Render(void) /*override*/
+Common::~Common(void)
 {
-  for (const auto Id : m_Scene)
+  for (const auto & Id : m_AllObjects)
   {
-    for (auto & Render : m_Objects[Id])
-    {
-      Render();
-    }
+    m_pWindowExpanse->RemoveObject(Id);
   }
 }
 
-void Common::LoadTexture(
+/*static*/ auto Common::LoadTexture(
   const Path_t & _RelativePathToSourceFile,
   const String_t & _Id,
-  const String_t & _Destination)
+  const String_t & _Destination) -> GameObject_t
 {
   using ::covellite::app::Settings_t;
   namespace image = ::alicorn::source::image;
@@ -68,24 +66,38 @@ void Common::LoadTexture(
       PathToTextureDirectory / _RelativePathToSourceFile)
   };
     
-  const auto Renders = m_pRenders->Obtain(
+  const auto pData = Component_t::Make(
     {
-      Component_t::Make(
-      {
-        { uT("type"), uT("Data") },
-        { uT("kind"), uT("Texture") },
-        { uT("data"), Image.GetData().Buffer.data() },
-        { uT("width"), static_cast<int>(Image.GetData().Width) },
-        { uT("height"), static_cast<int>(Image.GetData().Height) },
-        { uT("destination"), _Destination },
-      }),
+      { uT("type"), uT("Data") },
+      { uT("kind"), uT("Texture") },
+      { uT("content"), Image.GetData().Buffer },
+      { uT("width"), static_cast<int>(Image.GetData().Width) },
+      { uT("height"), static_cast<int>(Image.GetData().Height) },
+      { uT("destination"), _Destination },
+    });
+
+  return
+    {
       Component_t::Make(
       {
         { uT("id"), _Id },
         { uT("type"), uT("Texture") },
+        { uT("service"), GameObject_t{ pData } },
       }),
-    });
-    
-  ::boost::ignore_unused(Renders);
+    };
+   
   /// [Load texture]
+}
+
+auto Common::CreateObject(const GameObject_t & _Object) -> ObjectId_t
+{
+  const auto Id = m_pWindowExpanse->CreateObject(_Object);
+
+  m_AllObjects.push_back(Id);
+  return Id;
+}
+
+void Common::AddToRenderQueue(const ObjectId_t _Id, const size_t _Hash)
+{
+  m_pWindowExpanse->Add(0, _Id, _Hash);
 }

@@ -26,7 +26,7 @@ namespace renderer
 * \author
 *  CTAPOBEP (unicornum.verum@gmail.com)
 * \copyright
-*  © CTAPOBEP 2019
+*  © CTAPOBEP 2019 - 2020
 */
 class GraphicApi :
   public Registator_t<IGraphicApi>
@@ -39,24 +39,24 @@ protected:
 public:
   // Интерфейс IGraphicApi:
   void PresentFrame(void) override;
-  const Creators_t & GetCreators(void) const final;
+  const Creators_t & GetCreators(void) const noexcept final;
 
 protected:
   virtual Render_t CreateCamera(const ComponentPtr_t &) = 0;
-  virtual Render_t CreateBkSurface(const ComponentPtr_t &) { return nullptr; }
+  virtual Render_t CreateBkSurface(const ComponentPtr_t &) = 0;
   virtual Render_t CreateState(const ComponentPtr_t &) = 0;
-  virtual Render_t CreateFog(const ComponentPtr_t &) = 0;
-  virtual Render_t CreateShader(const ComponentPtr_t &) { return nullptr; }
+  virtual Render_t CreateShader(const ComponentPtr_t &) = 0;
   virtual Render_t CreateTexture(const ComponentPtr_t &) = 0;
   virtual Render_t CreateBuffer(const ComponentPtr_t &) = 0;
-  virtual Render_t CreateTransform(const ComponentPtr_t &) { return nullptr; }
-  virtual Render_t CreatePresentBuffer(const ComponentPtr_t &) { return nullptr; }
+  virtual Render_t CreateTransform(const ComponentPtr_t &) = 0;
+  virtual Render_t CreatePresentBuffer(const ComponentPtr_t &) = 0;
 
 protected:
   // deprecated
-  virtual Render_t CreateMaterial(const ComponentPtr_t &) { return nullptr; }
-  virtual Render_t CreateLight(const ComponentPtr_t &) { return nullptr; }
-  virtual Render_t CreateGeometry(const ComponentPtr_t &) { return nullptr; }
+  virtual Render_t CreateFog(const ComponentPtr_t &) = 0;
+  virtual Render_t CreateMaterial(const ComponentPtr_t &) = 0;
+  virtual Render_t CreateLight(const ComponentPtr_t &) = 0;
+  virtual Render_t CreateGeometry(const ComponentPtr_t &) = 0;
 
 public:
   template<class TColor>
@@ -80,8 +80,10 @@ protected:
   *
   * \version
   *  1.0.0.0        \n
+  *  2.0.0.0        \n
   * \date
   *  13 Февраль 2019    \n
+  *  16 Июнь 2020    \n
   * \author
   *  CTAPOBEP (unicornum.verum@gmail.com)
   * \copyright
@@ -98,12 +100,6 @@ protected:
   public:
     static Services_t Get(const ComponentPtr_t &, const Expected_t &);
     static void Process(const ComponentPtr_t &, const Handlers_t &);
-
-  private:
-    Components_t & m_Components;
-
-  public:
-    explicit CapturingServiceComponent(Components_t &);
   };
 
 protected:
@@ -140,3 +136,14 @@ protected:
 } // namespace api
 
 } // namespace covellite
+
+namespace std
+{
+
+template<class T>
+istream & operator>>(istream &, shared_ptr<T> &)
+{
+  throw STD_EXCEPTION << "Это не должно вызываться, нужно для компилируемости";
+}
+
+} // namespace std

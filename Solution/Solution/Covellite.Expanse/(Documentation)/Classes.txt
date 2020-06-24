@@ -1,0 +1,77 @@
+﻿
+@startuml
+
+note "Клиентский код." as NoteClientCode
+
+interface IEvents as "events::IEvents"
+{
+  {abstract} + operator Events_t (void)
+  ---
+}
+
+IEvents <|--- IWindow
+IGameScene <|-- IWindow
+I3DScene <|-- IWindow
+
+class Window
+{
+  ---
+  + Window(api::IWindow &)
+}
+
+IWindow <|-.-- Window
+
+interface IGameScene
+{
+  {abstract} + Id CreateObject(Component[])
+  {abstract} + void RemoveObject(Id)
+  ---
+}
+
+class GameScene
+{
+  + IGameScene:: ...
+  ---
+  + Update(void)
+  ---
+  + GameScene(RendersPtr &, IProduce3DObject &)
+}
+
+IGameScene <|-.- GameScene
+GameScene --* Window
+IProduce3DObject --o GameScene
+
+interface IProduce3DObject
+{
+  {abstract} + void Add(Id, Render[])
+  {abstract} + void Remove(Id)
+}
+
+interface I3DScene
+{
+  {abstract} + void AddObject(Pass, Id, HashForSort)
+  ---
+}
+
+class C3DScene
+{
+  + I3DScene:: ...
+  + IProduce3DObject:: ...
+  ---
+  + void Render(void)
+}
+
+IProduce3DObject <|-.- C3DScene
+I3DScene <|-.- C3DScene
+C3DScene --* Window
+
+class GameWorld
+{
+  ---
+  + GameWorld(IWindow &)
+}
+
+IWindow ---o GameWorld
+GameWorld -down- NoteClientCode
+
+@enduml

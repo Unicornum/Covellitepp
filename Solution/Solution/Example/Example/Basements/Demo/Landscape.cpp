@@ -269,7 +269,7 @@ Object_t Landscape::GetTransform(
     Random(0, 5) * math::Constant<float>::Pi / 3.0f : 0.0f;
   const auto Scale = 1.0f + (m_ScaleFactor - 1.0f) * Random(0, 100) / 100.0f;
 
-  return 
+  const Object_t Transform =
   {
     Component_t::Make(
       {
@@ -291,11 +291,16 @@ Object_t Landscape::GetTransform(
         { uT("y"), WorldPosition.second },
         { uT("z"), m_GameWorld.GetLandscapeHeight(_CellPosition) },
       }),
+  };
+
+  return 
+  {
     Component_t::Make(
       {
         { uT("id"), _TransformComponentId },
         { uT("type"), uT("Transform") },
         { uT("kind"), uT("Static") },
+        { uT("service"), Transform },
       })
   };
 }

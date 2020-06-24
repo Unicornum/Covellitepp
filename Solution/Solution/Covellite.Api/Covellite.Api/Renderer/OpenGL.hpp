@@ -47,6 +47,10 @@ private:
 
 public:
   explicit OpenGL(const Data_t &);
+  OpenGL(const OpenGL &) = delete;
+  OpenGL(OpenGL &&) = delete;
+  OpenGL & operator= (const OpenGL &) = delete;
+  OpenGL & operator= (OpenGL &&) = delete;
   ~OpenGL(void) noexcept;
 
 private:

@@ -15,7 +15,7 @@ using Shader_t = ::covellite::api::renderer::DirectX::Shader;
 
   const auto FullShaderBody = _Header + _Body;
 
-  const DWORD ShaderFlags = (IS_RELEASE_CONFIGURATION) ? 0 :
+  constexpr DWORD ShaderFlags = (IS_RELEASE_CONFIGURATION) ? 0 :
     D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION;
 
   ::Microsoft::WRL::ComPtr<ID3DBlob> pCompiledEffect;
@@ -28,7 +28,8 @@ using Shader_t = ::covellite::api::renderer::DirectX::Shader;
   {
     throw STD_EXCEPTION << "Failed: " << Result <<
       " [header line: " << GetHeaderLines(_Header) << ", "
-      << (char *)pError->GetBufferPointer() << "].";
+      << (pError ? (char *)pError->GetBufferPointer() : "Unknown error") 
+      << "].";
   }
 
   return pCompiledEffect;
@@ -41,10 +42,7 @@ using Shader_t = ::covellite::api::renderer::DirectX::Shader;
 
 /*static*/ auto Shader_t::Convert(const ::std::string & _Source) -> BinaryData_t
 {
-  const auto * pBegin = reinterpret_cast<const uint8_t *>(_Source.data());
-  const auto * pEnd = pBegin + _Source.size();
-
-  return BinaryData_t{ pBegin, pEnd };
+  return BinaryData_t{ ::std::begin(_Source), ::std::end(_Source) };
 }
 
 /*static*/ ::std::size_t Shader_t::GetHeaderLines(const BinaryData_t & _Header)

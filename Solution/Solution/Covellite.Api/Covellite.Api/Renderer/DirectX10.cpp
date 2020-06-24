@@ -11,6 +11,7 @@
 #include "Shaders/Shaders.hpp"
 #include "GraphicApi.Constants.hpp"
 
+#include <d3d10_1.h>
 #include <d3d10.h>
 #pragma comment(lib, "d3d10.lib")
 
@@ -23,7 +24,7 @@ public:
   class Support
   {
   public:
-    static UINT GetFlag(void) { return D3D10_BIND_VERTEX_BUFFER; }
+    static UINT GetFlag(void) noexcept { return D3D10_BIND_VERTEX_BUFFER; }
     static const UINT Index = static_cast<UINT>(-1);
   };
 
@@ -31,14 +32,14 @@ public:
   class Support<int>
   {
   public:
-    static UINT GetFlag(void) { return D3D10_BIND_INDEX_BUFFER; }
+    static UINT GetFlag(void) noexcept { return D3D10_BIND_INDEX_BUFFER; }
   };
 
   template<int TIndex>
   class Constant
   {
   public:
-    static UINT GetFlag(void) { return D3D10_BIND_CONSTANT_BUFFER; }
+    static UINT GetFlag(void) noexcept { return D3D10_BIND_CONSTANT_BUFFER; }
     static const UINT Index = TIndex;
   };
 
@@ -62,8 +63,8 @@ public:
   {
     return [=](void)
     {
-      const UINT stride = sizeof(T);
-      const UINT offset = 0;
+      constexpr UINT stride = sizeof(T);
+      constexpr UINT offset = 0;
       _pDevice->IASetVertexBuffers(0, 1,
         _pBuffer.GetAddressOf(), &stride, &offset);
     };
@@ -86,8 +87,8 @@ public:
         _pBuffer->Unmap();
       }
 
-      const UINT stride = sizeof(T);
-      const UINT offset = 0;
+      constexpr UINT stride = sizeof(T);
+      constexpr UINT offset = 0;
       _pDevice->IASetVertexBuffers(0, 1,
         _pBuffer.GetAddressOf(), &stride, &offset);
     };
@@ -95,7 +96,8 @@ public:
 
 public:
   template<class T>
-  static ComPtr_t<ID3D10Buffer> Create(ComPtr_t<ID3D10Device> _pDevice,
+  static ComPtr_t<ID3D10Buffer> Create(
+    const ComPtr_t<ID3D10Device> & _pDevice,
     const T * _pData, size_t _Count)
   {
     D3D10_BUFFER_DESC bd = { 0 };
@@ -106,7 +108,7 @@ public:
     D3D10_SUBRESOURCE_DATA InitData = { 0 };
     InitData.pSysMem = _pData;
 
-    D3D10_SUBRESOURCE_DATA * pInitData = 
+    const D3D10_SUBRESOURCE_DATA * const pInitData = 
       (_pData == nullptr) ? nullptr : &InitData;
 
     ComPtr_t<ID3D10Buffer> pBuffer;
@@ -116,7 +118,7 @@ public:
 
   template<class T>
   static ComPtr_t<ID3D10Buffer> CreateDynamic(
-    ComPtr_t<ID3D10Device> _pDevice,
+    const ComPtr_t<ID3D10Device> & _pDevice,
     const T * _pData, 
     size_t _Count)
   {
@@ -129,7 +131,7 @@ public:
     D3D10_SUBRESOURCE_DATA InitData = { 0 };
     InitData.pSysMem = _pData;
 
-    D3D10_SUBRESOURCE_DATA * pInitData =
+    const D3D10_SUBRESOURCE_DATA * const pInitData =
       (_pData == nullptr) ? nullptr : &InitData;
 
     ComPtr_t<ID3D10Buffer> pBuffer;
@@ -138,7 +140,8 @@ public:
   }
 
   template<class T>
-  static ComPtr_t<ID3D10Buffer> CreateConstant(ComPtr_t<ID3D10Device> _pDevice,
+  static ComPtr_t<ID3D10Buffer> CreateConstant(
+    const ComPtr_t<ID3D10Device> & _pDevice,
     const T * _pData, const ::std::size_t _Count = 1)
   {
     const auto pBuffer = Create(_pDevice, _pData, _Count);
@@ -201,7 +204,7 @@ DirectX10::DirectX10(const Data_t & _Data)
 {
   using ::alicorn::extension::cpp::IS_RELEASE_CONFIGURATION;
 
-  const UINT DeviceFlags = 
+  constexpr UINT DeviceFlags = 
     (IS_RELEASE_CONFIGURATION) ? 0 : D3D10_CREATE_DEVICE_DEBUG;
 
   DXGI_SWAP_CHAIN_DESC sd = { 0 };
@@ -335,7 +338,7 @@ auto DirectX10::CreateCamera(const ComponentPtr_t & _pComponent) -> Render_t /*o
     // Точка, куда смотрит камера - задается как компонент Data.Position.
     const Component::Position Look{ *ServiceComponents[0] };
 
-    auto GetEye = [&](void) -> ::glm::vec3
+    const auto GetEye = [&](void) -> ::glm::vec3
     {
       // Расстояние от камеры до Look.
       const float Distance = (*_pComponent)[uT("distance")].Default(0.0f);
@@ -393,7 +396,7 @@ public:
 
 public:
   void MakeTarget(
-    ComPtr_t<ID3D10Device> _pDevice, 
+    const ComPtr_t<ID3D10Device> & _pDevice, 
     const UINT _Width, 
     const UINT _Height)
   {
@@ -412,7 +415,7 @@ public:
     }
   }
 
-  void MakeRGBASource(ComPtr_t<ID3D10Device> _pDevice)
+  void MakeRGBASource(const ComPtr_t<ID3D10Device> & _pDevice)
   {
     const Component::Texture TextureData{ *m_pDataTexture, uT("albedo") };
 
@@ -422,7 +425,7 @@ public:
   }
 
   static ComPtr_t<ID3D10Texture2D> MakeRGBACopy(
-    ComPtr_t<ID3D10Device> _pDevice,
+    const ComPtr_t<ID3D10Device> & _pDevice,
     const UINT _Width, const UINT _Height)
   {
     D3D10_TEXTURE2D_DESC textureDesc = { 0 };
@@ -445,7 +448,7 @@ public:
 
 private:
   ComPtr_t<ID3D10Texture2D> MakeRGBASource(
-    ComPtr_t<ID3D10Device> _pDevice,
+    const ComPtr_t<ID3D10Device> & _pDevice,
     const Component::Texture & _TextureData)
   {
     D3D10_TEXTURE2D_DESC textureDesc = { 0 };
@@ -477,7 +480,7 @@ private:
   }
 
   ComPtr_t<ID3D10Texture2D> MakeRGBAMipmapsSource(
-    ComPtr_t<ID3D10Device> _pDevice,
+    const ComPtr_t<ID3D10Device> & _pDevice,
     const Component::Texture & _TextureData)
   {
     const Component::Texture TextureData{ *m_pDataTexture, uT("albedo") };
@@ -514,7 +517,7 @@ private:
 
 private:
   ComPtr_t<ID3D10Texture2D> MakeRGBTarget(
-    ComPtr_t<ID3D10Device> _pDevice,
+    const ComPtr_t<ID3D10Device> & _pDevice,
     const UINT _Width,
     const UINT _Height)
   {
@@ -572,7 +575,7 @@ private:
   }
 
   ComPtr_t<ID3D10Texture2D> MakeDepthTarget(
-    ComPtr_t<ID3D10Device> _pDevice,
+    const ComPtr_t<ID3D10Device> & _pDevice,
     const UINT _Width,
     const UINT _Height)
   {
@@ -661,17 +664,6 @@ public:
 
   }
 };
-
-namespace std
-{
-
-template<class T>
-istream & operator>>(istream &, shared_ptr<T> &)
-{
-  throw STD_EXCEPTION << "Это не должно вызываться, нужно для компилируемости";
-}
-
-} // namespace std
 
 auto DirectX10::CreateBkSurface(const ComponentPtr_t & _pComponent) -> Render_t /*override*/
 {
@@ -815,7 +807,7 @@ auto DirectX10::CreateState(const ComponentPtr_t & _pComponent) -> Render_t /*ov
 
     ComponentPtr_t pScissorRect;
 
-    const auto DoDataRect = [&](const ComponentPtr_t & _pDataRect)
+    const auto DoDataRect = [&](const ComponentPtr_t & _pDataRect) noexcept
     {
       pScissorRect = _pDataRect;
       RasterizerDesc.ScissorEnable = TRUE;
@@ -909,11 +901,6 @@ auto DirectX10::CreateState(const ComponentPtr_t & _pComponent) -> Render_t /*ov
   };
 
   return Creators[_pComponent->Kind]();
-}
-
-auto DirectX10::CreateFog(const ComponentPtr_t & _pComponent) -> Render_t /*override*/
-{
-  return DoCreateFog<::Fog>(_pComponent, true);
 }
 
 auto DirectX10::CreateTexture(const ComponentPtr_t & _pComponent) -> Render_t /*override*/
@@ -1083,7 +1070,7 @@ auto DirectX10::CreateBuffer(const ComponentPtr_t & _pBuffer) -> Render_t /*over
   const auto pBufferData = CapturingServiceComponent::Get(_pBuffer, 
     { { uT("Buffer"), _pBuffer } })[0];
 
-  if ((*pBufferData)[uT("content")].IsType<::std::vector<::covellite::api::Vertex>>())
+  if ((*pBufferData)[uT("content")].IsType<Buffer_t<::covellite::api::Vertex>>())
   {
     using BufferMapper_t = cbBufferMap_t<::covellite::api::Vertex>;
 
@@ -1111,7 +1098,6 @@ auto DirectX10::CreateBuffer(const ComponentPtr_t & _pBuffer) -> Render_t /*over
   else if ((*_pBuffer)[uT("mapper")].IsType<const cbBufferMap_t<void> &>())
   {
     using BufferMap_t = cbBufferMap_t<void>;
-    using BufferData_t = ::std::vector<uint8_t>;
 
     const BufferMap_t cbBufferMapper = 
       (*_pBuffer)[uT("mapper")].Default(BufferMap_t{});
@@ -1127,11 +1113,11 @@ auto DirectX10::CreateBuffer(const ComponentPtr_t & _pBuffer) -> Render_t /*over
     }
 
     const auto pData = 
-      ::std::make_shared<BufferData_t>(BufferSize, (uint8_t)0x00);
+      ::std::make_shared<BinaryData_t>(BufferSize, (uint8_t)0x00);
     const auto pBuffer = 
       Buffer::Create(m_pDevice, pData->data(), pData->size());
     constexpr auto BufferIndex = 
-      Buffer::Support<BufferData_t::value_type>::Index;
+      Buffer::Support<BinaryData_t::value_type>::Index;
 
     return [=](void)
     {
@@ -1174,7 +1160,7 @@ auto DirectX10::CreatePresentBuffer(const ComponentPtr_t & _pBuffer) -> Render_t
 
   const auto SaveBuffer = [&](const ComponentPtr_t & _pBufferData)
   {
-    if ((*_pBufferData)[uT("content")].IsType<::std::vector<int>>())
+    if ((*_pBufferData)[uT("content")].IsType<Buffer_t<int>>())
     {
       pIndexBufferData = _pBufferData;
     }
@@ -1245,7 +1231,7 @@ auto DirectX10::CreatePresentBuffer(const ComponentPtr_t & _pBuffer) -> Render_t
       pInstanceBuffer->Unmap();
     }
 
-    const UINT offset = 0;
+    constexpr UINT offset = 0;
     m_pDevice->IASetVertexBuffers(1, 1,
       pInstanceBuffer.GetAddressOf(), &Stride, &offset);
     m_pDevice->IASetIndexBuffer(pIndexBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);

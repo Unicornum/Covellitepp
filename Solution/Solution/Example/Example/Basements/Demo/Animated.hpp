@@ -121,7 +121,6 @@ private:
     mutable ::std::shared_ptr<Animations> m_pAnimations;
     Skeleton m_Skeleton;
     Skin_t m_SkinVertexes;
-    mutable Component_t::ComponentPtr_t m_pVertexData;
     mutable Component_t::ComponentPtr_t m_pSkinData;
     mutable Component_t::ComponentPtr_t m_pTransformBones;
 

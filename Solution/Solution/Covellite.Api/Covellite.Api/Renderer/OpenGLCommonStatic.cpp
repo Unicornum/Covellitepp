@@ -40,14 +40,14 @@ template<>
 class Support<::Camera>
 {
 public:
-  static void Update(const ::Camera &) {}
+  static void Update(const ::Camera &) noexcept {}
 };
 
 template<>
 class Support<::Fog>
 {
 public:
-  static void Update(const ::Fog &) {}
+  static void Update(const ::Fog &) noexcept {}
 };
 
 template<>
@@ -73,7 +73,7 @@ public:
 
     int Index = GL_LIGHT0;
 
-    auto SetLight = [&](
+    const auto SetLight = [&](
       const ::glm::vec4 & _Ambient,
       const ::glm::vec4 & _Diffuse,
       const ::glm::vec4 & _Specular,
@@ -135,7 +135,7 @@ template<>
 class Support<::Matrices>
 {
 public:
-  static void Update(const ::Matrices &) {}
+  static void Update(const ::Matrices &) noexcept {}
 };
 
 template<>
@@ -233,9 +233,10 @@ auto OpenGLCommonStatic::CreateFog(const ComponentPtr_t & _pComponent) -> Render
   };
 }
 
-auto OpenGLCommonStatic::CreateMaterial(const ComponentPtr_t & _pComponent) -> Render_t /*override*/
+auto OpenGLCommonStatic::CreateMaterial(
+  const ComponentPtr_t & _pComponent) -> Render_t /*override*/
 {
-  auto GetColor = [&](const String_t & _Name)
+  const auto GetColor = [&](const String_t & _Name)
   {
     return GraphicApi::ARGBtoFloat4<::glm::vec4>(
       (*_pComponent)[_Name].Default(0xFF000000));
@@ -291,7 +292,7 @@ auto OpenGLCommonStatic::CreateTexture(const ComponentPtr_t & _pComponent) -> Re
     const auto pTexture =
       ::std::make_shared<Texture>(Component::Texture{ *pTextureData, uT("diffuse") });
 
-    return [=](void)
+    return [=](void) noexcept
     {
       pTexture->Bind();
       glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, m_TexParameters.MinFilter);
@@ -351,7 +352,7 @@ auto OpenGLCommonStatic::CreateBuffer(const ComponentPtr_t & _pBuffer) -> Render
   {
     using Type_t = int;
 
-    if (!(*pBufferData)[uT("content")].IsType<::std::vector<Type_t>>())
+    if (!(*pBufferData)[uT("content")].IsType<Buffer_t<Type_t>>())
     {
       return CreateConstantLightsBuffer();
     }
@@ -360,7 +361,7 @@ auto OpenGLCommonStatic::CreateBuffer(const ComponentPtr_t & _pBuffer) -> Render
 
     return [=](void)
     {
-      m_DrawElements = [=](void)
+      m_DrawElements = [=](void) noexcept
       {
         glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(Info.Data.size()),
           GL_UNSIGNED_INT, Info.Data.data());
@@ -373,19 +374,19 @@ auto OpenGLCommonStatic::CreateBuffer(const ComponentPtr_t & _pBuffer) -> Render
     using Type_t = ::covellite::api::Vertex;
     using BufferMapper_t = cbBufferMap_t<Type_t>;
 
-    if (!(*pBufferData)[uT("content")].IsType<::std::vector<Type_t>>())
+    if (!(*pBufferData)[uT("content")].IsType<Buffer_t<Type_t>>())
     {
       return CreateIndexBuffer();
     }
 
     const Component::Buffer<Type_t> Info{ *pBufferData };
 
-    const auto pData = ::std::make_shared<::std::vector<Type_t>>(Info.Data);
+    const auto pData = ::std::make_shared<Buffer_t<Type_t>>(Info.Data);
 
     const BufferMapper_t & cbBufferMapper =
       (*_pBuffer)[uT("mapper")].Default(BufferMapper_t{});
 
-    const Render_t FlatRender = [=](void)
+    const Render_t FlatRender = [=](void) noexcept
     {
       glVertexPointer(2, GL_FLOAT, sizeof(Type_t), &pData->data()->px);
       glEnableClientState(GL_VERTEX_ARRAY);
@@ -399,7 +400,7 @@ auto OpenGLCommonStatic::CreateBuffer(const ComponentPtr_t & _pBuffer) -> Render
       glEnableClientState(GL_TEXTURE_COORD_ARRAY);
     };
 
-    const Render_t StaticRender = [=](void)
+    const Render_t StaticRender = [=](void) noexcept
     {
       glVertexPointer(3, GL_FLOAT, sizeof(Type_t), &(pData->data()->px));
       glEnableClientState(GL_VERTEX_ARRAY);
@@ -430,19 +431,19 @@ auto OpenGLCommonStatic::CreateBuffer(const ComponentPtr_t & _pBuffer) -> Render
     using Type_t = ::covellite::api::vertex::Polyhedron;
     using BufferMapper_t = cbBufferMap_t<Type_t>;
 
-    if (!(*pBufferData)[uT("content")].IsType<::std::vector<Type_t>>())
+    if (!(*pBufferData)[uT("content")].IsType<Buffer_t<Type_t>>())
     {
       return CreateVertexBuffer();
     }
 
     const Component::Buffer<Type_t> Info{ *pBufferData };
 
-    const auto pData = ::std::make_shared<::std::vector<Type_t>>(Info.Data);
+    const auto pData = ::std::make_shared<Buffer_t<Type_t>>(Info.Data);
 
     const BufferMapper_t & cbBufferMapper =
       (*_pBuffer)[uT("mapper")].Default(BufferMapper_t{});
 
-    const Render_t StaticRender = [=](void)
+    const Render_t StaticRender = [=](void) noexcept
     {
       glVertexPointer(3, GL_FLOAT, sizeof(Type_t), &(pData->data()->x));
       glEnableClientState(GL_VERTEX_ARRAY);
@@ -467,18 +468,18 @@ auto OpenGLCommonStatic::CreateBuffer(const ComponentPtr_t & _pBuffer) -> Render
     return (cbBufferMapper == nullptr) ? StaticRender : DynamicRender;
   };
 
-  auto CreatePolygonVertexBuffer = [&](void) -> Render_t
+  const auto CreatePolygonVertexBuffer = [&](void) -> Render_t
   {
     using Type_t = ::covellite::api::vertex::Polygon;
 
-    if (!(*pBufferData)[uT("content")].IsType<::std::vector<Type_t>>())
+    if (!(*pBufferData)[uT("content")].IsType<Buffer_t<Type_t>>())
     {
       return CreatePolyhedronVertexBuffer();
     }
 
     const Component::Buffer<Type_t> Info{ *pBufferData };
 
-    return [=](void)
+    return [=](void) noexcept
     {
       glVertexPointer(2, GL_FLOAT, sizeof(Type_t), &Info.Data[0].x);
       glEnableClientState(GL_VERTEX_ARRAY);
@@ -571,7 +572,7 @@ auto OpenGLCommonStatic::CreatePresentBuffer(const ComponentPtr_t &_pBuffer) -> 
 
   const Component::Buffer<int> Info{ *pBufferData };
 
-  return [=](void)
+  return [=](void) noexcept
   {
     glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(Info.Data.size()),
       GL_UNSIGNED_INT, Info.Data.data());
@@ -737,7 +738,7 @@ auto OpenGLCommonStatic::GetCameraPerspective(const ComponentPtr_t & _pComponent
 
     const auto AngleY = (float)(*_pComponent)[uT("fov")].Default(90.0f) *
       ::alicorn::extension::cpp::math::Constant<float>::DegreeToRadian;
-    const float zFar = 200.0f;
+    constexpr float zFar = 200.0f;
 
     const ::glm::mat4 Perspective = ::glm::perspectiveFovRH(AngleY,
       Viewport[2], Viewport[3], zFar, 0.01f);
@@ -750,7 +751,7 @@ auto OpenGLCommonStatic::GetCameraPerspective(const ComponentPtr_t & _pComponent
     // Точка, куда смотрит камера - задается как компонент Data.Position.
     const Component::Position Look{ *ServiceComponents[0] };
 
-    auto GetEye = [&](void) -> ::glm::vec3
+    const auto GetEye = [&](void) -> ::glm::vec3
     {
       // Расстояние от камеры до Look.
       const float Distance = (*_pComponent)[uT("distance")].Default(0.0f);

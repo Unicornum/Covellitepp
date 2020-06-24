@@ -25,21 +25,26 @@ auto Camera::GetObject(const Any_t &) const /*override*/ -> Objects_t
 
   const auto Far = 0.5f * math::Root<2>(Constant::Camera::FarClippingPlane);
 
-  Object_t Result =
-  {
-    Component_t::Make(
+  const auto pCameraPosition = Component_t::Make(
     {
       { uT("id"), Constant::Player::ComponentPositionId },
       { uT("type"), uT("Data") },
       { uT("kind"), uT("Position") },
-    }),
-    Component_t::Make(
+    });
+
+  const auto pCameraRotation = Component_t::Make(
     {
       { uT("id"), Constant::Player::ComponentRotationId },
       { uT("type"), uT("Data") },
       { uT("kind"), uT("Rotation") },
       { uT("y"), Constant::Camera::Pitch },
-    }),
+    });
+
+  Object_t Result =
+  {
+    pCameraPosition, pCameraRotation, // должны присутствовать, т.к. впоследствии 
+                                      // они извлекаются из базы данных компонентов  
+                                      // updater'ом камеры по из идентификаторам
     Component_t::Make(
     {
       { uT("id"), uT("Demo.Camera") },
@@ -47,6 +52,7 @@ auto Camera::GetObject(const Any_t &) const /*override*/ -> Objects_t
       { uT("kind"), uT("Perspective") },
       { uT("distance"), Constant::Camera::Distance },
       { uT("fov"), Constant::Camera::Fov * math::Constant<float>::RadianToDegree },
+      { uT("service"), Object_t{ pCameraPosition, pCameraRotation } },
     }),
     Component_t::Make(
     {

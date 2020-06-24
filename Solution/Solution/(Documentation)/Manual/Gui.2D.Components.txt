@@ -1,0 +1,38 @@
+﻿@startuml
+
+skinparam rectangle {
+  roundCorner 25
+}
+
+rectangle Camera
+rectangle Position.Camera
+rectangle "State.*" as State.Common
+rectangle Shader.Vertex
+
+rectangle {
+rectangle "Объекты сцены" {
+
+rectangle Shader.Pixel.Colored
+rectangle Shader.Pixel.Textured
+rectangle Texture
+rectangle Vertex.Buffer
+rectangle Transform
+rectangle Position.Object
+rectangle Present.Index
+
+}
+}
+
+Camera -down- State.Common
+Camera -right- Position.Camera
+State.Common -down- Shader.Vertex
+Shader.Vertex -down- Shader.Pixel.Colored
+Shader.Vertex -down- Shader.Pixel.Textured
+Shader.Pixel.Textured -down- Texture
+Texture -down- Vertex.Buffer
+Shader.Pixel.Colored -down- Vertex.Buffer
+Vertex.Buffer -down- Transform
+Transform -right- Position.Object
+Transform -down- Present.Index
+
+@enduml

@@ -55,7 +55,11 @@ public:
   virtual void Update(void) const = 0;
 
 public:
-  Data(void) { memset(&m_Data, 0, sizeof(m_Data)); }
+  Data(void) noexcept { memset(&m_Data, 0, sizeof(m_Data)); }
+  Data(const Data &) = delete;
+  Data(Data &&) = delete;
+  Data & operator= (const Data &) = delete;
+  Data & operator= (Data &&) = delete;
   virtual ~Data(void) = default;
 };
 

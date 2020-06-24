@@ -111,10 +111,19 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Renderer\DirectX.cpp" />
-    <ClCompile Include="Renderer\DirectX10.cpp" />
-    <ClCompile Include="Renderer\DirectX11.cpp" />
+    <ClCompile Include="Renderer\DirectX10.cpp">
+      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">26415;26418;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='Release|x64'">26415;26418;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+    </ClCompile>
+    <ClCompile Include="Renderer\DirectX11.cpp">
+      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">26415;26418;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='Release|x64'">26415;26418;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+    </ClCompile>
     <ClCompile Include="Renderer\DxCheck.cpp" />
-    <ClCompile Include="Renderer\GraphicApi.CapturingServiceComponent.cpp" />
+    <ClCompile Include="Renderer\GraphicApi.CapturingServiceComponent.cpp">
+      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">26415;26418;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='Release|x64'">26415;26418;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+    </ClCompile>
     <ClCompile Include="Renderer\GraphicApi.cpp" />
     <ClCompile Include="Renderer\OpenGL.cpp" />
     <ClCompile Include="Renderer\OpenGLCommon.cpp" />

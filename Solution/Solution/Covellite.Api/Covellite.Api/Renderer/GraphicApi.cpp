@@ -17,7 +17,7 @@
 #endif
 
 #include <Covellite/Api/Defines.hpp>
-#include "Component.hpp"
+#include <Covellite/Api/Component.inl>
 
 namespace covellite
 {
@@ -34,6 +34,8 @@ GraphicApi::GraphicApi(void) :
 {
   m_Creators =
   {
+    { uT("Test"), [=](const ComponentPtr_t &)
+      { return [](void) {}; } },
     { uT("Camera"), [=](const ComponentPtr_t & _pComponent)
       { return CreateCamera(_pComponent); } },
     { uT("BkSurface"), [=](const ComponentPtr_t & _pComponent)
@@ -69,7 +71,7 @@ void GraphicApi::PresentFrame(void) /*override*/
   m_IsResizeWindow = false;
 }
 
-auto GraphicApi::GetCreators(void) const -> const Creators_t & /*final*/
+auto GraphicApi::GetCreators(void) const noexcept -> const Creators_t & /*final*/
 {
   return m_Creators;
 }

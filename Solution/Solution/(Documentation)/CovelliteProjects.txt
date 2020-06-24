@@ -1,7 +1,8 @@
 ﻿
 @startuml
 
-[Covellite.Gui] -- [Covellite.Api]
+[Covellite.Gui] -- [Covellite.Expanse]
+[Covellite.Expanse] -- [Covellite.Api]
 [Covellite.Api] -- [Covellite.Os]
 [Covellite.Api] -- [Covellite.Egl]
 [Covellite.Os] -- [Covellite.App]

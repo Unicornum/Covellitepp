@@ -47,7 +47,7 @@ class IBasement
 {
 public:
   virtual void Notify(int, const ::boost::any &) {};
-  virtual void Render(void) = 0;
+  virtual void Render(void) {}
 
 public:
   virtual ~IBasement(void) = default;

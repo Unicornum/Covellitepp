@@ -165,6 +165,9 @@
     <ClInclude Include="Basements\Demo\Shadows.hpp">
       <Filter>Basements\Demo</Filter>
     </ClInclude>
+    <ClInclude Include="Basements\Empty.hpp">
+      <Filter>Basements</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -288,6 +291,9 @@
     </ClCompile>
     <ClCompile Include="Basements\Demo\Shadows.cpp">
       <Filter>Basements\Demo</Filter>
+    </ClCompile>
+    <ClCompile Include="Basements\Empty.cpp">
+      <Filter>Basements</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

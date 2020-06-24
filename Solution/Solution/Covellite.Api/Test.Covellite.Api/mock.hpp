@@ -17,7 +17,6 @@
 #include "Mock/Namespaces.hpp"
 
 #include <Covellite/App/Settings.mock.hpp>
-//#include <Covellite/Os/Configuration.mock.hpp>
 
 class Tested
 {

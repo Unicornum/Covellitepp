@@ -1,7 +1,7 @@
 ﻿
 #include "stdafx.h"
 #include "GraphicApi.hpp"
-#include "Component.hpp"
+#include <Covellite/Api/Component.inl>
 
 namespace covellite
 {
@@ -12,13 +12,6 @@ namespace api
 namespace renderer
 {
 
-GraphicApi::CapturingServiceComponent::CapturingServiceComponent(
-  Components_t & _Components) :
-  m_Components(_Components)
-{
-
-}
-
 /**
 * \brief
 *  Функция получения набора вспомогательных компонентов.
@@ -28,6 +21,9 @@ GraphicApi::CapturingServiceComponent::CapturingServiceComponent(
 *  - Найденные компоненты (добавленные в выходной набор) удаляются из очереди.
 *  - После вызова функции очередь компонентов будет пустой.
 *
+* \param [in] _pMainComponent
+*  Компонент, из которого (параметр \b service) будет извлечен набор
+*  вспомогательных компонентов.
 * \param [in] _Expected
 *  Информация об ожидаемом наборе компонентов, в котором каждый элемент
 *  должен содержать значение \b kind искомого компонента и компонент, который
@@ -87,6 +83,9 @@ GraphicApi::CapturingServiceComponent::CapturingServiceComponent(
 *  компоненты были добавлены в очередь.
 *  - После вызова функции очередь компонентов будет пустой.
 *
+* \param [in] _pMainComponent
+*  Компонент, из которого (параметр \b service) будет извлечен набор
+*  вспомогательных компонентов.
 * \param [in] _PreRenders
 *  Исходный набор обработчиков компонентов.
 */

@@ -25,6 +25,12 @@
 *
 *  Страница проекта \subpage CovelliteGuiPage
 *
+*  ### Covellite.Expanse
+*
+* \copydoc CovelliteExpanseBriefPage
+*
+*  Страница проекта \subpage CovelliteExpansePage
+*
 *  ### Covellite.Api
 *
 * \copydoc CovelliteApiBriefPage

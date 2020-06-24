@@ -64,7 +64,6 @@ protected:
   Render_t CreateCamera(const ComponentPtr_t &) override;
   Render_t CreateBkSurface(const ComponentPtr_t &) override;
   Render_t CreateState(const ComponentPtr_t &) override;
-  Render_t CreateFog(const ComponentPtr_t &) override;
   Render_t CreateTexture(const ComponentPtr_t &) override;
   Render_t CreateShader(const ComponentPtr_t &) override;
   Render_t CreateBuffer(const ComponentPtr_t &) override;
@@ -73,6 +72,8 @@ protected:
 
 private:
   // deprecated
+  Render_t CreateFog(const ComponentPtr_t &) override;
+  Render_t CreateMaterial(const ComponentPtr_t &) noexcept override { return nullptr; }
   Render_t CreateLight(const ComponentPtr_t &) override;
   Render_t CreateGeometry(const ComponentPtr_t &) override;
 
@@ -111,6 +112,10 @@ private:
 
 public:
   explicit DirectX11(const Data_t &);
+  DirectX11(const DirectX11 &) = delete;
+  DirectX11(DirectX11 &&) = delete;
+  DirectX11 & operator= (const DirectX11 &) = delete;
+  DirectX11 & operator= (DirectX11 &&) = delete;
   ~DirectX11(void);
 
 private:

@@ -1,0 +1,31 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Common">
+      <UniqueIdentifier>{2112fd14-f331-45f7-9e64-15b98548c466}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="stdafx.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="targetver.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="Defines.hpp" />
+    <ClInclude Include="IGameScene.hpp" />
+    <ClInclude Include="I3DScene.hpp" />
+    <ClInclude Include="IWindow.hpp" />
+    <ClInclude Include="3DScene.impl.hpp" />
+    <ClInclude Include="GameScene.impl.hpp" />
+    <ClInclude Include="Window.hpp" />
+    <ClInclude Include="Id.impl.hpp" />
+    <ClInclude Include="IProduce3DObject.impl.hpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="3DScene.cpp" />
+    <ClCompile Include="GameScene.cpp" />
+    <ClCompile Include="Window.cpp" />
+    <ClCompile Include="Id.cpp" />
+  </ItemGroup>
+</Project>

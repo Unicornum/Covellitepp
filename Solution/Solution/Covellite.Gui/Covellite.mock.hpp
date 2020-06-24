@@ -11,4 +11,5 @@ struct android_app
 #include "App.mock.hpp"
 #include "Os.mock.hpp"
 #include "Api.mock.hpp"
+#include "Expanse.mock.hpp"
 #include "Gui.mock.hpp"

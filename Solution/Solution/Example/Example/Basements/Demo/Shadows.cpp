@@ -139,8 +139,8 @@ Shadows::Shadows(void) :
 
   m_pShaderData = ::std::make_shared<ShaderData>();
 
-  const auto CellSceneRadius = 6;
-  const auto CellRockRadius = 4;
+  constexpr auto CellSceneRadius = 6;
+  constexpr auto CellRockRadius = 4;
 
   for (int y = -CellSceneRadius; y <= CellSceneRadius; y++)
   {
@@ -158,11 +158,10 @@ Shadows::Shadows(void) :
             abs(CellPosition.GetZ()) < CellRockRadius) ? Random(0, 2) : 4;
 
         const auto SceneObject =
-          GetTransform() +
+          GetTransform(GetTransformData(CellPosition)) +
           GetMesh(MeshIndex).GetObject();
 
         m_SceneObjects_pass1 +=
-          GetTransformData(CellPosition) +
           SceneObject;
 
         m_SceneObjects_pass2 +=
@@ -184,7 +183,7 @@ auto Shadows::GetObject(const Any_t & _Value) const -> Objects_t /*override*/
     if (_pData == nullptr) return pCursorData->IsClick;
     pCursorData->IsClick = false;
 
-    const auto * pData = reinterpret_cast<const uint32_t *>(_pData);
+    const auto * pData = static_cast<const uint32_t *>(_pData);
 
     const auto TextureABGRSample = pData[pCursorData->Y *
       static_cast<int32_t>(pCursorData->WindowX) + pCursorData->X];
@@ -197,7 +196,7 @@ auto Shadows::GetObject(const Any_t & _Value) const -> Objects_t /*override*/
     return false;
   };
 
-  m_SurfaceTextures[0]->SetValue(uT("mapper"), TextureMapper);
+  (*m_SurfaceTextures[0])[uT("mapper")] = TextureMapper;
 
   using namespace ::alicorn::extension::std;
 
@@ -234,11 +233,11 @@ Object_t Shadows::GetPass2(void) const
     GetTexture(0).GetObject() +
     Object_t
     {
-      m_ShadowMap[0],
       Component_t::Make(
       {
         { uT("id"), uT("Demo.Shadows.Texture.ShadowMap.depth") },
         { uT("type"), uT("Texture") },
+        { uT("service"), m_ShadowMap },
       }),
     } +
     m_SceneObjects_pass2;
@@ -282,13 +281,12 @@ Object_t Shadows::GetTextureSurface(const bool _IsTarget) const
   if (_IsTarget) // Набор текстур как внеэкранных поверхностей
   {
     return 
-      m_SurfaceTextures +
-      Object_t
       {
         Component_t::Make(
         {
           { uT("id"), uT("Demo.Shadows.BkSurface") },
           { uT("type"), uT("BkSurface") },
+          { uT("service"), m_SurfaceTextures },
         }),
       };
   }
@@ -305,11 +303,11 @@ Object_t Shadows::GetTextureSurface(const bool _IsTarget) const
 
   const Updater_t UpdaterSource = [=](const float)
   {
-    const float Width = pSurfaceTexture->GetValue(uT("width"), 1024);
-    const float Height = pSurfaceTexture->GetValue(uT("height"), 1024);
+    const int Width = (*pSurfaceTexture)[uT("width")].Default(1024);
+    const int Height = (*pSurfaceTexture)[uT("height")].Default(1024);
 
-    pScale->SetValue(uT("x"), Width);
-    pScale->SetValue(uT("y"), Height);
+    (*pScale)[uT("x")] = static_cast<float>(Width);
+    (*pScale)[uT("y")] = static_cast<float>(Height);
   };
 
   Object_t Result =
@@ -320,29 +318,26 @@ Object_t Shadows::GetTextureSurface(const bool _IsTarget) const
       { uT("type"), uT("Updater") },
       { uT("function"), UpdaterSource },
     }),
-    pScale,
     Component_t::Make(
     {
       { uT("id"), uT("Demo.Shadows.Flat.Transform") },
       { uT("type"), uT("Transform") },
+      { uT("service"), Object_t{ pScale } },
     })
   };
 
-  for (const auto & Texture : m_SurfaceTextures)
+  for (const auto & pTexture : m_SurfaceTextures)
   {
-    auto pTexture = Texture;
-
-    const auto Destination = 
-      pTexture->GetValue(uT("destination"), uT("Unknown"));
+    const String_t Destination = 
+      (*pTexture)[uT("destination")].Default(uT("Unknown"));
 
     Result += 
-      Object_t
     {
-      pTexture,
       Component_t::Make(
       {
         { uT("id"), uT("Demo.Shadows.Texture.") + Destination },
         { uT("type"), uT("Texture") },
+        { uT("service"), Object_t{ pTexture } },
       })
     };
   }
@@ -362,8 +357,8 @@ Object_t Shadows::GetShadowCamera(void) const
 
   const auto Pitch = pLights->Direction.Direction.z;
 
-  pCameraRotation->SetValue(uT("x"), 0.0f);
-  pCameraRotation->SetValue(uT("y"), -Pitch);
+  (*pCameraRotation)[uT("x")] = 0.0f;
+  (*pCameraRotation)[uT("y")] = -Pitch;
 
   const Updater_t Updater = [=](const float _Time)
   {
@@ -377,8 +372,10 @@ Object_t Shadows::GetShadowCamera(void) const
     pLights->Direction.Direction.x = math::radian::Cos(Direction);
     pLights->Direction.Direction.y = math::radian::Sin(Direction);
 
-    pCameraRotation->SetValue(uT("z"), Direction);
+    (*pCameraRotation)[uT("z")] = Direction;
   };
+
+  (*m_pLightCamera)[uT("service")] = Object_t{ pCameraRotation };
 
   return
   {
@@ -388,13 +385,12 @@ Object_t Shadows::GetShadowCamera(void) const
       { uT("type"), uT("Updater") },
       { uT("function"), Updater },
     }),
-    pCameraRotation,
     m_pLightCamera,
-    m_ShadowMap[0],
     Component_t::Make(
     {
       { uT("id"), uT("Demo.Shadows.BkSurface.ShadowMap") },
       { uT("type"), uT("BkSurface") },
+      { uT("service"), m_ShadowMap },
     }),
     Component_t::Make(
     {
@@ -409,26 +405,24 @@ Object_t Shadows::GetShadowCamera(void) const
 
 /*static*/ Object_t Shadows::GetShadowShaders(void)
 {
-  static const auto ShaderData =
-    Vfs_t::GetInstance().GetData("Data\\Shaders\\Shadows.pass1.fx");
+  const auto ShaderData =
+    Vfs_t::GetInstance().GetData("Data\\Shaders\\Shadows.pass2.fx");
 
-  return Object_t
+  return
   {
     Component_t::Make(
     {
       { uT("id"), uT("Demo.Shadows.Shado.Shader.Vertex") },
       { uT("type"), uT("Shader") },
       { uT("entry"), uT("vsVolume") },
-      //{ uT("data"), ShaderData.data() },
-      //{ uT("count"), ShaderData.size() },
+      //{ uT("content"), ShaderData },
     }),
     Component_t::Make(
     {
       { uT("id"), uT("Demo.Shadows.Shadow.Shader.Pixel") },
       { uT("type"), uT("Shader") },
       { uT("entry"), uT("psShadow") },
-      { uT("data"), ShaderData.data() },
-      { uT("count"), ShaderData.size() },
+      { uT("content"), ShaderData },
     }),
   };
 }
@@ -450,7 +444,7 @@ Object_t Shadows::GetSceneCamera(void) const
     const float CameraDirection = math::Constant<float>::Pi *
       (fmod(_Time / 100.0f, 2.0f) - 1.0f);
 
-    pCameraRotation->SetValue(uT("z"), CameraDirection);
+    (*pCameraRotation)[uT("z")] = CameraDirection;
   };
 
   using namespace ::alicorn::extension::std;
@@ -464,7 +458,6 @@ Object_t Shadows::GetSceneCamera(void) const
         { uT("type"), uT("Updater") },
         { uT("function"), CameraUpdater },
       }),
-      pCameraRotation,
       Component_t::Make(
       {
         { uT("id"), uT("Demo.Shadows.Camera.Scene") },
@@ -474,6 +467,7 @@ Object_t Shadows::GetSceneCamera(void) const
         { uT("fov"), Constant::Camera::Fov * math::Constant<float>::RadianToDegree },
         { uT("znear"), 0.5f },
         { uT("zfar"), 20.0f },
+        { uT("service"), Object_t{ pCameraRotation } },
       })
     } +
     GetTextureSurface(true) +
@@ -511,7 +505,7 @@ Object_t Shadows::GetSceneCamera(void) const
 
 /*static*/ Object_t Shadows::GetSceneShaders(void)
 {
-  static const auto ShaderData = 
+  const auto ShaderData = 
     Vfs_t::GetInstance().GetData("Data\\Shaders\\Shadows.pass2.fx");
 
   return Object_t
@@ -521,16 +515,14 @@ Object_t Shadows::GetSceneCamera(void) const
       { uT("id"), uT("Demo.Shadows.Scene.Shader.Vertex") },
       { uT("type"), uT("Shader") },
       { uT("entry"), uT("vsScene") },
-      { uT("data"), ShaderData.data() },
-      { uT("count"), ShaderData.size() },
+      { uT("content"), ShaderData },
     }),
     Component_t::Make(
     {
       { uT("id"), uT("Demo.Shadows.Scene.Shader.Pixel") },
       { uT("type"), uT("Shader") },
       { uT("entry"), uT("psLightened") },
-      { uT("data"), ShaderData.data() },
-      { uT("count"), ShaderData.size() },
+      { uT("content"), ShaderData },
     }),
   };
 }
@@ -548,9 +540,9 @@ Object_t Shadows::GetSceneLights(void) const
     memcpy(_pLights, &(*pLights), sizeof(Lights_t));
 
     pShaderData->Light.Projection = 
-      pLightCamera->GetValue(uT("projection"), ::glm::mat4{ 0.0f });
+      (*pLightCamera)[uT("projection")].Default(::glm::mat4{ 0.0f });
     pShaderData->Light.View = 
-      pLightCamera->GetValue(uT("view"), ::glm::mat4{ 0.0f });
+      (*pLightCamera)[uT("view")].Default(::glm::mat4{ 0.0f });
     return false;
   };
 
@@ -579,7 +571,7 @@ Object_t Shadows::GetShaderData(const CubeCoords & _CellPosition) const
   const ::covellite::api::cbBufferMap_t<void> ShaderDataMapper =
     [=](void * _pData)
   {
-    auto * pDestShaderData = reinterpret_cast<ShaderData *>(_pData);
+    auto * pDestShaderData = static_cast<ShaderData *>(_pData);
     pDestShaderData->Light = pSrcShaderData->Light;
     pDestShaderData->Object.IdX = ObjectColorIdX;
     pDestShaderData->Object.IdY = ObjectColorIdY;
@@ -630,7 +622,7 @@ Object_t Shadows::GetTransformData(const CubeCoords & _CellPosition) const
   };
 }
 
-/*static*/ Object_t Shadows::GetTransform(void)
+/*static*/ Object_t Shadows::GetTransform(const Object_t & _Data)
 {
   static size_t Index = 0;
 
@@ -643,6 +635,7 @@ Object_t Shadows::GetTransformData(const CubeCoords & _CellPosition) const
     {
       { uT("id"), uT("Demo.Shadows.Transform.") + Id },
       { uT("type"), uT("Transform") },
+      { uT("service"), _Data },
     }),
   };
 }
@@ -681,7 +674,7 @@ Object_t Shadows::GetTransformData(const CubeCoords & _CellPosition) const
 
 Object_t Shadows::GetFlatShaders(const String_t & _psEntryPoint) const
 {
-  static const auto ShaderData =
+  const auto ShaderData =
     Vfs_t::GetInstance().GetData("Data\\Shaders\\Shadows.pass3.fx");
 
   const auto pCursorData = m_pCursorData;
@@ -689,7 +682,7 @@ Object_t Shadows::GetFlatShaders(const String_t & _psEntryPoint) const
   const ::covellite::api::cbBufferMap_t<void> CursorMapper =
     [=](void * _pData)
   {
-    auto * pDestCursor = reinterpret_cast<Cursor *>(_pData);
+    auto * pDestCursor = static_cast<Cursor *>(_pData);
     pDestCursor->X = pCursorData->X / pCursorData->WindowX;
     pDestCursor->Y = pCursorData->Y / pCursorData->WindowY;
     return false;
@@ -702,16 +695,14 @@ Object_t Shadows::GetFlatShaders(const String_t & _psEntryPoint) const
       { uT("id"), uT("Demo.Shadows.Flat.Shader.Vertex") },
       { uT("type"), uT("Shader") },
       { uT("entry"), uT("vsFlat") },
-      { uT("data"), ShaderData.data() },
-      { uT("count"), ShaderData.size() },
+      { uT("content"), ShaderData },
     }),
     Component_t::Make(
     {
       { uT("id"), uT("Demo.Shadows.Flat.Shader.Pixel.") + _psEntryPoint },
       { uT("type"), uT("Shader") },
       { uT("entry"), _psEntryPoint },
-      { uT("data"), ShaderData.data() },
-      { uT("count"), ShaderData.size() },
+      { uT("content"), ShaderData },
     }),
     Component_t::Make(
     {
@@ -751,12 +742,11 @@ Object_t Shadows::GetTextureObject(
 
   return
   {
-    pOffset,
-    pScale,
     Component_t::Make(
     {
       { uT("id"), uT("Demo.Shadows.Flat.Auxiliary.Transform.") + Id },
       { uT("type"), uT("Transform") },
+      { uT("service"), Object_t{ pOffset, pScale } },
     }),
     Component_t::Make(
     {

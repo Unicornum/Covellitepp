@@ -605,10 +605,10 @@ void GameWorld::PrepareCamera(void)
     const auto Y =
       Interpolation(OldWorldPosition.second, NewWorldPosition.second);
 
-    pPosition->SetValue(uT("x"), X);
-    pPosition->SetValue(uT("y"), Y);
-    pPosition->SetValue(uT("z"), 
-      Constant::Player::Height + Interpolation(OldHeight, NewHeight));
+    (*pPosition)[uT("x")] = X;
+    (*pPosition)[uT("y")] = Y;
+    (*pPosition)[uT("z")] = 
+      Constant::Player::Height + Interpolation(OldHeight, NewHeight);
 
     const auto CameraPitch = Interpolation(OldPitch, NewPitch);
 
@@ -616,8 +616,8 @@ void GameWorld::PrepareCamera(void)
       -Interpolation(OldDirection.first, NewDirection.first),
       -Interpolation(OldDirection.second, NewDirection.second));
 
-    pRotation->SetValue(uT("y"), CameraPitch);
-    pRotation->SetValue(uT("z"), CameraDirection);
+    (*pRotation)[uT("y")] = CameraPitch;
+    (*pRotation)[uT("z")] = CameraDirection;
 
     m_pGameScene->SetCameraInfo(
       support::GameScene::Camera{ X, Y, CameraDirection });

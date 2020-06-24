@@ -17,12 +17,14 @@ namespace basement
 *
 * \version
 *  1.0.0.0        \n
+*  2.0.0.0        \n
 * \date
 *  29 ßíâàðü 2019    \n
+*  22 Èþíü 2020    \n
 * \author
 *  CTAPOBEP (unicornum.verum@gmail.com)
 * \copyright
-*  © CTAPOBEP 2019
+*  © CTAPOBEP 2019 - 2020
 */
 class Common :
   public IBasement
@@ -31,8 +33,10 @@ protected:
   using String_t = ::alicorn::extension::std::String;
   using Path_t = ::boost::filesystem::path;
   using Component_t = ::covellite::api::Component;
-  using Renders_t = Component_t::Renders::Renders_t;
-  using RendersPtr_t = ::std::shared_ptr<Component_t::Renders>;
+  using Updater_t = ::covellite::api::Updater_t;
+  using WindowExpanse_t = ::covellite::expanse::IWindow;
+  using ObjectId_t = ::covellite::expanse::ObjectId_t;
+  using GameObject_t = ::covellite::expanse::GameObject_t;
 
 protected:
   class Id final
@@ -51,19 +55,19 @@ protected:
     Id(void);
   };
 
-public:
-  void Render(void) override;
+protected:
+  static GameObject_t LoadTexture(const Path_t &, const String_t &, 
+    const String_t & = uT("albedo"));
+  ObjectId_t CreateObject(const GameObject_t &);
+  void AddToRenderQueue(const ObjectId_t, const size_t = 0);
+
+private:
+  WindowExpanse_t * m_pWindowExpanse = nullptr;
+  ::std::vector<ObjectId_t> m_AllObjects;
 
 protected:
-  void LoadTexture(const Path_t &, const String_t &, const String_t & = uT("albedo"));
-
-protected:
-  const RendersPtr_t m_pRenders;
-  ::std::map<Id, Renders_t> m_Objects;
-  ::std::vector<Id> m_Scene;
-
-protected:
-  explicit Common(const RendersPtr_t &);
+  Common(WindowExpanse_t &);
+  ~Common(void);
 };
 
 } // namespace basement

@@ -74,7 +74,7 @@ private:
   Object_t GetSceneLights(void) const;
   Object_t GetShaderData(const CubeCoords &) const;
   Object_t GetTransformData(const CubeCoords &) const;
-  static Object_t GetTransform(void);
+  static Object_t GetTransform(const Object_t &);
   static Object_t GetFlatCamera(void);
   Object_t GetFlatShaders(const String_t & = uT("psExperimental")) const;
   Object_t GetTextureObject(const String_t &, const float = 0.0f) const;

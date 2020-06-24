@@ -31,7 +31,14 @@ void DbRenders::AddObject(const Id_t _Id, const Object_t & _Object) /*override*/
       { [](void) { throw STD_EXCEPTION << "Unexpected render."; } });
   }
 
-  m_Renders[_Id] = m_pRenders->Obtain(_Object);
+  m_Renders[_Id].clear();
+
+  for (const auto & pComponent : _Object)
+  {
+    if (pComponent->Type == uT("Data")) continue;
+
+    m_Renders[_Id].push_back(m_pRenders->Obtain(pComponent));
+  }
 }
 
 // cppcheck-suppress passedByValue
@@ -39,12 +46,17 @@ void DbRenders::RemoveObject(const Id_t _Id, const Object_t & _Object) /*overrid
 {
   LOGGER_DEBUG(Trace) << "Remove renders for object: id = " << _Id;
 
-  m_pRenders->Remove(_Object);
+  for (const auto & pComponent : _Object)
+  {
+    if (pComponent->Type == uT("Data")) continue;
+
+    m_pRenders->Remove(pComponent);
+  }
 
   m_Renders[_Id] = 
   { 
-    [=](void)
-    {
+    [=](void) 
+    { 
       throw STD_EXCEPTION << "Using render for removed object: " << _Id;
     }
   };

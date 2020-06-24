@@ -13,14 +13,9 @@
     </Task1>
   </Process>
   <Complete>
+    <Week6285/>
     <Week6284/>
     <Week6283/>
     <Week6282/>
-    <Week6281>
-      <Task9 Text="Адаптация стилей главного окна программы под RmlUi." Type="Red" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="false"/>
-      <Task10 Text="Адаптация стилей всех окон под RmlUi." Type="Red" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="false"/>
-      <Task11 Text="Некорректное отображение элементов." Type="Bug" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="false"/>
-      <Task12 Text="Исправление стилей отображения главного окна программы." Type="Red" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="false"/>
-    </Week6281>
   </Complete>
 </Tasks>

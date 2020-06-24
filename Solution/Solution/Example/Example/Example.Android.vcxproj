@@ -103,6 +103,7 @@
     <ClInclude Include="Basements\Demo\View.hpp" />
     <ClInclude Include="Basements\Demo\Water.hpp" />
     <ClInclude Include="Basements\Dummy.hpp" />
+    <ClInclude Include="Basements\Empty.hpp" />
     <ClInclude Include="Basements\IBasement.hpp" />
     <ClInclude Include="Basements\Simple2DGame.hpp" />
     <ClInclude Include="Basements\Simple3DObject.hpp" />
@@ -158,6 +159,7 @@
     <ClCompile Include="Basements\Demo\Skybox.cpp" />
     <ClCompile Include="Basements\Demo\View.cpp" />
     <ClCompile Include="Basements\Demo\Water.cpp" />
+    <ClCompile Include="Basements\Empty.cpp" />
     <ClCompile Include="Basements\Simple2DGame.cpp" />
     <ClCompile Include="Basements\Simple3DObject.cpp" />
     <ClCompile Include="BasementWindow.cpp" />

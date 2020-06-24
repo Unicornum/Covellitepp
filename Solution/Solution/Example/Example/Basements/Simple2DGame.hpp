@@ -32,24 +32,24 @@ namespace basement
 *
 * \version
 *  1.0.0.0        \n
+*  2.0.0.0        \n
 * \date
 *  29 ßíâàðü 2019    \n
+*  22 Èþíü 2020    \n
 * \author
 *  CTAPOBEP (unicornum.verum@gmail.com)
 * \copyright
-*  © CTAPOBEP 2019
+*  © CTAPOBEP 2019 - 2020
 */
 class Simple2DGame final :
   public Common
 {
+  using WindowExpanse_t = ::covellite::expanse::IWindow;
+  using Events_t = ::covellite::events::Events;
   /// [Vertex format]
   using Vertex_t = ::covellite::api::Vertex;
   /// [Vertex format]
   using VertexData_t = ::std::vector<Vertex_t>;
-  using Object_t = ::std::vector<Component_t::ComponentPtr_t>;
-  using Events_t = ::covellite::events::Events;
-  using Updater_t = ::std::function<void(void)>;
-  using TimePoint_t = ::std::chrono::system_clock::time_point;
 
 public:
   class Rect final
@@ -60,9 +60,6 @@ public:
     float Right;
     float Bottom;
   };
-
-public:
-  void Render(void) override;
 
 private:
   class GameUnit final
@@ -76,8 +73,8 @@ private:
       float SpeedFactor;
 
     public:
-      inline float GetMin(void) const { return Position - Size / 2.0f; }
-      inline float GetMax(void) const { return Position + Size / 2.0f; }
+      inline float GetMin(void) const noexcept { return Position - Size / 2.0f; }
+      inline float GetMax(void) const noexcept { return Position + Size / 2.0f; }
       void Update(float);
     };
 
@@ -96,16 +93,17 @@ private:
 
 private:
   void AddCommonComponents(void);
-  void AddCamera(float, float);
-  void AddBackground(void);
-  void AddClock(void);
+  ObjectId_t AddCamera(float, float);
+  ObjectId_t AddBackground(void);
+  ObjectId_t AddClock(void);
   void AddActors(void);
-  Id BuildRectangle(const Object_t &, float, float, const String_t &);
-  Id BuildRectangle(const Object_t &, float, float, float, float, float, float);
-  Id BuildRectangle(const Rect &, const Rect &, float, float, float, float,
-    const String_t &, const Object_t &);
-  Id BuildRectangle(const Rect &, const Rect &, float, float, float, float,
-    const Object_t &, const Object_t &);
+  GameObject_t BuildRectangle(const GameObject_t &, float, float, const String_t &);
+  GameObject_t BuildRectangle(const GameObject_t &, float, float, float, float,
+    float, float);
+  GameObject_t BuildRectangle(const Rect &, const Rect &, float, float, float,
+    float, const String_t &, const GameObject_t &);
+  GameObject_t BuildRectangle(const Rect &, const Rect &, float, float, float, float,
+    const GameObject_t &, const GameObject_t &);
 
 private:
   Events_t m_Events;
@@ -119,17 +117,25 @@ private:
   const float m_GameFieldSize;
 
 private:
+  ObjectId_t                m_CameraId;
+  ObjectId_t                m_BackGroundId;
+  ObjectId_t                m_ClockId;
+  ObjectId_t                m_EnemiesId;
+  ObjectId_t                m_GreenSquareId;
+  ObjectId_t                m_RedSquareId;
   GameUnit                  m_UserUnit;
   ::std::vector<GameUnit>   m_Enemies;
   float                     m_EnemiesSpeed = 0.1f;
-  Updater_t                 m_ClockUpdater;
-  ::std::vector<Updater_t>  m_Updaters;
-  TimePoint_t               m_LastTime;
-  TimePoint_t               m_BeginRenderFrameTime;
-  TimePoint_t               m_BeginGameTime;
+  float                     m_BeginGameTime;
+  float                     m_GameTime;
+  float                     m_LastTime;
 
 public:
-  Simple2DGame(const Events_t &, const RendersPtr_t &, const Rect &);
+  Simple2DGame(WindowExpanse_t &, const Rect &);
+  Simple2DGame(const Simple2DGame &) = delete;
+  Simple2DGame(Simple2DGame &&) = delete;
+  const Simple2DGame & operator= (const Simple2DGame &) = delete;
+  Simple2DGame & operator= (Simple2DGame &&) = delete;
   ~Simple2DGame(void) noexcept;
 };
 

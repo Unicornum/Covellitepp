@@ -1,0 +1,79 @@
+﻿@startuml
+
+skinparam rectangle {
+  roundCorner 25
+}
+
+rectangle Camera
+rectangle Position.Camera
+rectangle "State.*" as State.Common
+rectangle Updater
+rectangle Vertex.Shader
+rectangle Vertex.Buffer.General
+rectangle Pixel.Shader
+rectangle "Texture.Object" as Textures
+rectangle "Buffer.Constant.Lights.All" as Buffer.Constant.Lights
+
+Camera -right- Position.Camera
+Camera -down- State.Common
+State.Common -down- Updater
+Updater -down- Vertex.Shader
+Vertex.Shader -down- Pixel.Shader
+Pixel.Shader -down- Buffer.Constant.Lights
+Buffer.Constant.Lights -down- Vertex.Buffer.General
+Vertex.Buffer.General -down- Textures
+
+rectangle {
+rectangle "Отдельный набор\nдля каждого\nобъекта сцены" {
+
+rectangle Transform.Every.Object
+rectangle Present.Index.General
+
+Textures -down- Transform.Every.Object
+Transform.Every.Object -down- Present.Index.General
+}
+}
+
+rectangle "Один набор для\nвсех объектов" {
+
+rectangle Transform.General
+rectangle Present.Instance
+
+Textures -down- Transform.General
+Transform.General -down- Present.Instance
+}
+
+rectangle Transform.General.Object
+
+Vertex.Buffer.General -down- Transform.General.Object
+
+rectangle {
+rectangle "Один объект из\nнескольких частей" {
+
+rectangle Texture.Every.Part
+rectangle Present.Index.Every.Part
+
+Transform.General.Object -down- Texture.Every.Part
+Texture.Every.Part -down- Present.Index.Every.Part
+}
+}
+
+rectangle {
+rectangle "Рендеринг только\nс ближайшими\nисточниками света" {
+
+rectangle Vertex.Buffer.Every
+rectangle Texture.Every
+rectangle Buffer.Constant.Lights.Nearest
+rectangle Transform.Every
+rectangle Present.Index.Every
+
+Pixel.Shader -down- Buffer.Constant.Lights.Nearest
+Buffer.Constant.Lights.Nearest -down- Vertex.Buffer.Every
+Vertex.Buffer.Every -down- Texture.Every
+Texture.Every -down- Transform.Every
+Transform.Every -down- Present.Index.Every
+}
+}
+
+
+@enduml

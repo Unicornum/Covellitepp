@@ -86,8 +86,7 @@ size_t GameObject::GetType(void) const /*final*/
 
 /*static*/ Object_t GameObject::GetShaderObject(const bool _IsSimple)
 {
-  static const auto PixelShaderData =
-    ::covellite::app::Vfs_t::GetInstance().GetData("Data\\Shaders\\Example.fx");
+  const auto Vfs = ::covellite::app::Vfs_t::GetInstance();
 
   const auto pShaderData = _IsSimple ?
     Component_t::Make(
@@ -101,8 +100,7 @@ size_t GameObject::GetType(void) const /*final*/
         { uT("type"), uT("Data") },
         { uT("kind"), uT("Shader") },
         { uT("entry"), uT("psExample") },
-        { uT("data"), PixelShaderData.data() },
-        { uT("count"), PixelShaderData.size() },
+        { uT("content"), Vfs.GetData("Data\\Shaders\\Example.fx") },
       });
 
   return Object_t
@@ -113,11 +111,11 @@ size_t GameObject::GetType(void) const /*final*/
       { uT("type"), uT("Shader") },
       { uT("entry"), uT("vsVolume") },
     }),
-    pShaderData,
     Component_t::Make(
     {
       { uT("id"), uT("Demo.Shader.Pixel") },
       { uT("type"), uT("Shader") },
+      { uT("service"), Object_t{ pShaderData } },
     }),
     Component_t::Make(
     {

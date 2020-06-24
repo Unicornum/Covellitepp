@@ -4,7 +4,7 @@
 #include <Covellite/Events/Params.hpp>
 #include <Covellite/Events/Error.hpp>
 #include <Covellite/Events/Events.inl>
-#include "Signals.hpp"
+#include <Covellite/Events/Signals.hpp>
 
 using namespace covellite::events;
 

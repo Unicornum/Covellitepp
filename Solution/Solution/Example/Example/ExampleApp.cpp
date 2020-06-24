@@ -61,14 +61,17 @@ void ExampleApp::DoInitWindow(void)
     
   // Создание обязательного набора объектов окон приложения.
     
-  MakeWindow<ExampleWindow>(                         // Клиентсткий код программы, управляющий
-                                                     // переходами между разными слоями GUI.
-    MakeWindow<::covellite::gui::Window>(            // Класс фреймворка, обеспечивающий отрисовку GUI.
-      MakeWindow<BasementWindow>(                    // Клиентский код, отрисовывающий 3D сцену.
-        MakeWindow<::covellite::api::Window>(        // Класс фреймворка окна графического Api
-                                                     // (реализация (OpenGL или DirectX) задается в настройках).
-          MakeWindow<::covellite::os::Window>(*this) // Класс фреймворка окна операционной системы.
-            ))));
+  const auto & wOs =                           // Класс фреймворка окна операционной системы.
+    MakeWindow<::covellite::os::Window>(*this);     
+  const auto & wApi =                          // Класс фреймворка окна графического Api
+    MakeWindow<::covellite::api::Window>(wOs); // (реализация DirectXOpenGL задается в настройках).
+  auto & wExpanse =                            // Класс фреймворка окна, обеспечивающего отрисовку 3D сцены.
+    MakeWindow<::covellite::expanse::Window>(wApi); 
+  MakeWindow<BasementWindow>(wApi, wExpanse);  // Клиентский код, формирующий 3D сцену.
+  auto & wGui =                                // Класс фреймворка окна, обеспечивающего отрисовку GUI.
+    MakeWindow<::covellite::gui::Window>(wApi);     
+  MakeWindow<ExampleWindow>(wGui);             // Клиентсткий код программы, управляющий
+                                               // переходами между разными слоями GUI.
 }
 /// [Create main window]
 

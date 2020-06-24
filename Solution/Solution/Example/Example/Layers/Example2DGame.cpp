@@ -45,12 +45,14 @@ Simple2DGame::Simple2DGame(IWindowGui_t & _Window) :
     using namespace ::alicorn::extension::std;
 
     float Second = 0.0f;
-    const float MilliSecond = modff(_GameTime, &Second);
+    const auto MilliSecond = (int)(modff(_GameTime, &Second) * 100);
 
-    GetElement("id_game_time").SetMeaning(
-      uT("Игровое время: {GAME_TIME_SEC}.{GAME_TIME_MILLI} сек.")
+    const auto TimeSample = uT("Игровое время: {GAME_TIME_SEC}.") +
+      (MilliSecond < 10 ? uT("0") : uT("")) + uT("{GAME_TIME_MILLI} сек.");
+
+    GetElement("id_game_time").SetMeaning(TimeSample      
       .Replace(uT("{GAME_TIME_SEC}"), (int)Second)
-      .Replace(uT("{GAME_TIME_MILLI}"), (int)(MilliSecond * 100.0f)));
+      .Replace(uT("{GAME_TIME_MILLI}"), MilliSecond));
   });
 
   m_Events[Drawing.Do].Connect([&](void)

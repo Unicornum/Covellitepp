@@ -563,7 +563,7 @@ TEST_F(Component_test, /*DISABLED_*/Test_SetValue_ChangeType)
   EXPECT_EQ(false, (*pExample)[uT("Param")].IsType<int>());
   EXPECT_EQ(true, (*pExample)[uT("Param")].IsType<String_t>());
 
-  const int Result = (*pExample)[uT("Param")];
+  (int)(*pExample)[uT("Param")];
   EXPECT_EQ(false, (*pExample)[uT("Param")].IsType<bool>());
   EXPECT_EQ(true, (*pExample)[uT("Param")].IsType<int>());
   EXPECT_EQ(false, (*pExample)[uT("Param")].IsType<String_t>());
@@ -573,7 +573,7 @@ TEST_F(Component_test, /*DISABLED_*/Test_SetValue_ChangeType)
   EXPECT_EQ(false, (*pExample)[uT("Param")].IsType<int>());
   EXPECT_EQ(false, (*pExample)[uT("Param")].IsType<String_t>());
 
-  const String_t Result2 = (*pExample)[uT("Unknown")].Default(uT("0"));
+  (String_t)(*pExample)[uT("Unknown")].Default(uT("0"));
   EXPECT_EQ(false, (*pExample)[uT("Unknown")].IsType<bool>());
   EXPECT_EQ(false, (*pExample)[uT("Unknown")].IsType<int>());
   EXPECT_EQ(true, (*pExample)[uT("Unknown")].IsType<String_t>());
@@ -726,6 +726,7 @@ TEST_F(Component_test, /*DISABLED_*/Test_GetValue_Hash_deprecated)
       { uT("Param9"), 123.45f },
     } });
 
+  // cppcheck-suppress shadowFunction
   auto GetValue = [&](const String_t & _Name, const auto & _DefaultValue) -> auto
   {
     return pExample->GetValue(Tested_t::GetHash(_Name), _DefaultValue);
@@ -795,6 +796,7 @@ TEST_F(Component_test, /*DISABLED_*/Test_GetValue_Hash_InvalidType_deprecated)
       { uT("Param4"), 123.45f },
     } });
 
+  // cppcheck-suppress shadowFunction
   auto GetValue = [&](const String_t & _Name, const auto & _DefaultValue) -> auto
   {
     return pExample->GetValue(Tested_t::GetHash(_Name), _DefaultValue);

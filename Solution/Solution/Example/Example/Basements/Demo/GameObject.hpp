@@ -102,16 +102,13 @@ public:
 
   class Texture final
   {
-    class Image;
-    using ImagePtr_t = ::std::shared_ptr<Image>;
-
   public:
-    Object_t GetObject(void) const;
-    float GetRatioXY(void) const;
+    Object_t GetObject(void) const { return { m_pTexture }; }
+    float GetRatioXY(void) const { return m_RatioXY; }
 
   private:
-    const ImagePtr_t m_pImage;
-    const String_t m_Id;
+    Component_t::ComponentPtr_t m_pTexture;
+    float m_RatioXY;
 
   public:
     explicit Texture(const Path_t &);

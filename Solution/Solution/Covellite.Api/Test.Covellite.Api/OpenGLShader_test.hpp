@@ -141,13 +141,9 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_BkSurface)
 
   const ::mock::GLint TextureId = 1910041735;
   const ::mock::GLint FrameBufferId = 1910041803;
+  const ::mock::GLint BindingFrameBufferId = 2006162207;
   const int Width = 41931;
   const int Height = 41932;
-
-  const float Viewport[] =
-  {
-    0.0f, 0.0f, (float)Width, (float)Height
-  };
 
   const ::std::vector<String_t> Destinations =
   {
@@ -161,10 +157,6 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_BkSurface)
     uT("depth"),    
   };
 
-  using namespace ::testing;
-
-  InSequence Dummy;
-
   Object_t m_TextureComponents;
 
   for (::std::size_t i = 0; i < Destinations.size(); i++)
@@ -176,13 +168,23 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_BkSurface)
       }));
   }
 
-  EXPECT_CALL(GLProxy, GetFloatv(GL_VIEWPORT))
+  using namespace ::testing;
+
+  InSequence Dummy;
+
+  const int Viewport[] = { 0, 0, Width, Height };
+
+  EXPECT_CALL(GLProxy, GetIntegerv(GL_VIEWPORT))
     .Times(1)
     .WillOnce(Return(Viewport));
 
   EXPECT_CALL(GLProxy, GenFramebuffers(1))
     .Times(1)
     .WillOnce(Return(FrameBufferId));
+
+  EXPECT_CALL(GLProxy, GetIntegerv(GL_FRAMEBUFFER_BINDING))
+    .Times(1)
+    .WillOnce(Return(&BindingFrameBufferId));
 
   EXPECT_CALL(GLProxy, BindFramebuffer(GL_FRAMEBUFFER, FrameBufferId))
     .Times(1);
@@ -229,7 +231,7 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_BkSurface)
     .Times(1)
     .WillOnce(Return(GL_FRAMEBUFFER_COMPLETE));
 
-  EXPECT_CALL(GLProxy, BindFramebuffer(GL_FRAMEBUFFER, 0))
+  EXPECT_CALL(GLProxy, BindFramebuffer(GL_FRAMEBUFFER, BindingFrameBufferId))
     .Times(1);
 
   auto Render = itCreator->second(Component_t::Make(
@@ -240,6 +242,10 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_BkSurface)
 
   EXPECT_CALL(GLProxy, TexImage2D(_, _, _, _, _, _, _, _, _))
     .Times(0);
+
+  EXPECT_CALL(GLProxy, GetIntegerv(GL_FRAMEBUFFER_BINDING))
+    .Times(1)
+    .WillOnce(Return(&BindingFrameBufferId));
 
   EXPECT_CALL(GLProxy, BindFramebuffer(GL_FRAMEBUFFER, FrameBufferId))
     .Times(1);
@@ -284,13 +290,6 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_BkSurface_RenderDepthOnly)
 
   const ::mock::GLuint TextureId = 1910041735;
   const ::mock::GLuint FrameBufferId = 1910041803;
-  const int Width = 41931;
-  const int Height = 41932;
-
-  const float Viewport[] =
-  {
-    0.0f, 0.0f, (float)Width, (float)Height
-  };
 
   using namespace ::testing;
 
@@ -336,13 +335,11 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_BkSurface_Mapping)
 
   const ::mock::GLint TextureId = 1910041735;
   const ::mock::GLint FrameBufferId = 1910041803;
+  const ::mock::GLint BindingFrameBufferId = 2006162217;
   const int Width = 12;
   const int Height = 48;
 
-  const float Viewport[] =
-  {
-    0.0f, 0.0f, (float)Width, (float)Height
-  };
+  const int Viewport[] = { 0, 0, Width, Height };
 
   const ::std::vector<String_t> Destinations =
   {
@@ -372,13 +369,17 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_BkSurface_Mapping)
       }));
   }
 
-  EXPECT_CALL(GLProxy, GetFloatv(GL_VIEWPORT))
+  EXPECT_CALL(GLProxy, GetIntegerv(GL_VIEWPORT))
     .Times(1)
     .WillOnce(Return(Viewport));
 
   EXPECT_CALL(GLProxy, GenFramebuffers(1))
     .Times(1)
     .WillOnce(Return(FrameBufferId));
+
+  EXPECT_CALL(GLProxy, GetIntegerv(GL_FRAMEBUFFER_BINDING))
+    .Times(1)
+    .WillOnce(Return(&BindingFrameBufferId));
 
   EXPECT_CALL(GLProxy, BindFramebuffer(GL_FRAMEBUFFER, FrameBufferId))
     .Times(1);
@@ -425,7 +426,7 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_BkSurface_Mapping)
     .Times(1)
     .WillOnce(Return(GL_FRAMEBUFFER_COMPLETE));
 
-  EXPECT_CALL(GLProxy, BindFramebuffer(GL_FRAMEBUFFER, 0))
+  EXPECT_CALL(GLProxy, BindFramebuffer(GL_FRAMEBUFFER, BindingFrameBufferId))
     .Times(1);
 
   auto Render = itCreator->second(Component_t::Make(
@@ -436,6 +437,10 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_BkSurface_Mapping)
 
   EXPECT_CALL(GLProxy, TexImage2D(_, _, _, _, _, _, _, _, _))
     .Times(0);
+
+  EXPECT_CALL(GLProxy, GetIntegerv(GL_FRAMEBUFFER_BINDING))
+    .Times(1)
+    .WillOnce(Return(&BindingFrameBufferId));
 
   EXPECT_CALL(GLProxy, BindFramebuffer(GL_FRAMEBUFFER, FrameBufferId))
     .Times(1);
@@ -483,10 +488,7 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_BkSurface_ResizeWindow)
   const int Width = 91305;
   const int Height = 91306;
 
-  const float Viewport[] =
-  {
-    0.0f, 0.0f, (float)Width, (float)Height
-  };
+  const int Viewport[] = { 0, 0, Width, Height };
 
   const ::std::vector<String_t> Destinations =
   {
@@ -513,9 +515,12 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_BkSurface_ResizeWindow)
       }));
   }
 
-  EXPECT_CALL(GLProxy, GetFloatv(GL_VIEWPORT))
+  EXPECT_CALL(GLProxy, GetIntegerv(GL_VIEWPORT))
     .Times(1)
     .WillOnce(Return(Viewport));
+
+  EXPECT_CALL(GLProxy, GetIntegerv(_))
+    .Times(1);
 
   for (::std::size_t i = 0; i < Destinations.size(); i++)
   {
@@ -551,6 +556,9 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_BkSurface_ResizeWindow)
   EXPECT_CALL(GLProxy, TexImage2D(_, _, _, _, _, _, _, _, _))
     .Times(0);
 
+  EXPECT_CALL(GLProxy, GetIntegerv(_))
+    .Times(1);
+
   EXPECT_CALL(GLProxy, BindFramebuffer(GL_FRAMEBUFFER, _))
     .Times(1);
 
@@ -560,14 +568,11 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_BkSurface_ResizeWindow)
   const int Width2 = 91307;
   const int Height2 = 91308;
 
-  const float Viewport2[] =
-  {
-    0.0f, 0.0f, (float)Width2, (float)Height2
-  };
+  const int Viewport2[] = { 0, 0, Width2, Height2 };
 
   IExample.ResizeWindow(Width2, Height2);
 
-  EXPECT_CALL(GLProxy, GetFloatv(GL_VIEWPORT))
+  EXPECT_CALL(GLProxy, GetIntegerv(GL_VIEWPORT))
     .Times(1)
     .WillOnce(Return(Viewport2));
 
@@ -588,6 +593,9 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_BkSurface_ResizeWindow)
       .WillOnce(Return(GL_NO_ERROR));
   }
 
+  EXPECT_CALL(GLProxy, GetIntegerv(_))
+    .Times(1);
+
   EXPECT_CALL(GLProxy, BindFramebuffer(GL_FRAMEBUFFER, _))
     .Times(1);
 
@@ -596,6 +604,9 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_BkSurface_ResizeWindow)
 
   EXPECT_CALL(GLProxy, TexImage2D(_, _, _, _, _, _, _, _, _))
     .Times(0);
+
+  EXPECT_CALL(GLProxy, GetIntegerv(_))
+    .Times(1);
 
   EXPECT_CALL(GLProxy, BindFramebuffer(GL_FRAMEBUFFER, _))
     .Times(1);
@@ -632,10 +643,7 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_BkSurface_ResizeWindow_Mapping)
   const int Width = 18;
   const int Height = 53;
 
-  const float Viewport[] =
-  {
-    0.0f, 0.0f, (float)Width, (float)Height
-  };
+  const int Viewport[] = { 0, 0, Width, Height };
 
   const ::std::vector<String_t> Destinations =
   {
@@ -663,9 +671,12 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_BkSurface_ResizeWindow_Mapping)
       }));
   }
 
-  EXPECT_CALL(GLProxy, GetFloatv(GL_VIEWPORT))
+  EXPECT_CALL(GLProxy, GetIntegerv(GL_VIEWPORT))
     .Times(1)
     .WillOnce(Return(Viewport));
+
+  EXPECT_CALL(GLProxy, GetIntegerv(_))
+    .Times(1);
 
   for (::std::size_t i = 0; i < Destinations.size(); i++)
   {
@@ -713,6 +724,9 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_BkSurface_ResizeWindow_Mapping)
   EXPECT_CALL(GLProxy, TexImage2D(_, _, _, _, _, _, _, _, _))
     .Times(0);
 
+  EXPECT_CALL(GLProxy, GetIntegerv(_))
+    .Times(1);
+
   EXPECT_CALL(GLProxy, BindFramebuffer(GL_FRAMEBUFFER, _))
     .Times(1);
 
@@ -722,14 +736,11 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_BkSurface_ResizeWindow_Mapping)
   const int Width2 = 36;
   const int Height2 = 17;
 
-  const float Viewport2[] =
-  {
-    0.0f, 0.0f, (float)Width2, (float)Height2
-  };
+  const int Viewport2[] = { 0, 0, Width2, Height2 };
 
   IExample.ResizeWindow(Width2, Height2);
 
-  EXPECT_CALL(GLProxy, GetFloatv(GL_VIEWPORT))
+  EXPECT_CALL(GLProxy, GetIntegerv(GL_VIEWPORT))
     .Times(1)
     .WillOnce(Return(Viewport2));
 
@@ -750,6 +761,9 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_BkSurface_ResizeWindow_Mapping)
       .WillOnce(Return(GL_NO_ERROR));
   }
 
+  EXPECT_CALL(GLProxy, GetIntegerv(_))
+    .Times(1);
+
   EXPECT_CALL(GLProxy, BindFramebuffer(GL_FRAMEBUFFER, _))
     .Times(1);
 
@@ -758,6 +772,9 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_BkSurface_ResizeWindow_Mapping)
 
   EXPECT_CALL(GLProxy, TexImage2D(_, _, _, _, _, _, _, _, _))
     .Times(0);
+
+  EXPECT_CALL(GLProxy, GetIntegerv(_))
+    .Times(1);
 
   EXPECT_CALL(GLProxy, BindFramebuffer(GL_FRAMEBUFFER, _))
     .Times(1);

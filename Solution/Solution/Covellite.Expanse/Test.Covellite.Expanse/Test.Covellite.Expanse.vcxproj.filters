@@ -1,0 +1,111 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source">
+      <UniqueIdentifier>{0b32bfba-a2e6-498f-b78b-da37c9bc83e4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Tests">
+      <UniqueIdentifier>{8c9b3b90-01b4-4c5a-9f59-393719bfa270}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Tests\IGameScene">
+      <UniqueIdentifier>{730f3d44-4395-44f2-96b5-776f2f5aabf6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Tests\I3DScene">
+      <UniqueIdentifier>{45eb38ef-8f58-453f-a65c-8e5b6d9b2f46}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Tests\IWindow">
+      <UniqueIdentifier>{255a8d7b-af98-4019-b0ce-e01c93029f0b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Tests\C3DScene">
+      <UniqueIdentifier>{532d4b5f-70c1-47eb-bee8-5b74222e430d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Tests\GameScene">
+      <UniqueIdentifier>{2f04bd8d-6c86-434d-b0ad-8f8e646aa66b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Tests\Window">
+      <UniqueIdentifier>{42cd7baa-1537-44b0-ad08-ef3da12f0011}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Tests\Id">
+      <UniqueIdentifier>{f749fe0b-93e7-4fd6-83a7-58604d192835}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Tests\IProduce3DObject">
+      <UniqueIdentifier>{9ec3914d-8618-453a-ad2f-ea156c5cf58b}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="Resources.rc">
+      <Filter>Source</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="stdafx.cpp">
+      <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Test.IGameScene\IGameScene_test.cpp">
+      <Filter>Tests\IGameScene</Filter>
+    </ClCompile>
+    <ClCompile Include="Test.I3DScene\I3DScene_test.cpp">
+      <Filter>Tests\I3DScene</Filter>
+    </ClCompile>
+    <ClCompile Include="Test.IWindow\IWindow_test.cpp">
+      <Filter>Tests\IWindow</Filter>
+    </ClCompile>
+    <ClCompile Include="Test.C3DScene\C3DScene_test.cpp">
+      <Filter>Tests\C3DScene</Filter>
+    </ClCompile>
+    <ClCompile Include="Test.GameScene\GameScene_test.cpp">
+      <Filter>Tests\GameScene</Filter>
+    </ClCompile>
+    <ClCompile Include="Test.Window\Window_test.cpp">
+      <Filter>Tests\Window</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Covellite.Expanse\Window.cpp">
+      <Filter>Tests\Window</Filter>
+    </ClCompile>
+    <ClCompile Include="Test.Id\Id_test.cpp">
+      <Filter>Tests\Id</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Covellite.Expanse\Id.cpp">
+      <Filter>Tests\Id</Filter>
+    </ClCompile>
+    <ClCompile Include="Test.IProduce3DObject\IProduce3DObject_test.cpp">
+      <Filter>Tests\IProduce3DObject</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Covellite.Expanse\3DScene.cpp">
+      <Filter>Tests\C3DScene</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Covellite.Expanse\GameScene.cpp">
+      <Filter>Tests\GameScene</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="stdafx.h">
+      <Filter>Source</Filter>
+    </ClInclude>
+    <ClInclude Include="mock.hpp" />
+    <ClInclude Include="..\Covellite.Expanse\IGameScene.hpp">
+      <Filter>Tests\IGameScene</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Covellite.Expanse\I3DScene.hpp">
+      <Filter>Tests\I3DScene</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Covellite.Expanse\IWindow.hpp">
+      <Filter>Tests\IWindow</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Covellite.Expanse\3DScene.impl.hpp">
+      <Filter>Tests\C3DScene</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Covellite.Expanse\GameScene.impl.hpp">
+      <Filter>Tests\GameScene</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Covellite.Expanse\Window.hpp">
+      <Filter>Tests\Window</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Covellite.Expanse\Id.hpp">
+      <Filter>Tests\Id</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Covellite.Expanse\IProduce3DObject.impl.hpp">
+      <Filter>Tests\IProduce3DObject</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>

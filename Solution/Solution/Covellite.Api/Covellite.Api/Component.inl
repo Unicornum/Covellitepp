@@ -92,8 +92,8 @@ inline Component::Component(const Params_t & _Params, ConstructorTag _Tag) :
 template<class T>
 inline bool Component::Param::IsType(void) const
 {
-  static const auto hType = typeid(T).hash_code();
-  return (this->hType == hType);
+  static const auto hTType = typeid(T).hash_code();
+  return (this->hType == hTType);
 }
 
 /**
@@ -179,14 +179,14 @@ Component::Param::operator T & (void)
 
   if (IsType<String_t>())
   {
-    using Type_t = typename ::std::remove_const<T>::type;
+    using TType_t = typename ::std::remove_const<T>::type;
 
     constexpr auto IsConvertable =
       !::std::is_pointer<T>::value &&
       !::std::is_reference<T>::value &&
-      is_streamable<::std::iostream, Type_t>::value;
+      is_streamable<::std::iostream, TType_t>::value;
 
-    Set(Convertor<IsConvertable>::template To<Type_t>(
+    Set(Convertor<IsConvertable>::template To<TType_t>(
       ::covellite::any_cast<const String_t &>(this->Value)));
   }
 
@@ -231,10 +231,10 @@ Component::Param & Component::Param::operator= (const T & _Value)
 template<class T>
 inline void Component::Param::Set(const T & _Value)
 {
-  static const auto hType = typeid(T).hash_code();
+  static const auto hTType = typeid(T).hash_code();
 
   this->Value = _Value;
-  this->hType = hType;
+  this->hType = hTType;
 }
 
 /**

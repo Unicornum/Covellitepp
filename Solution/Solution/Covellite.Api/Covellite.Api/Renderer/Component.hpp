@@ -88,25 +88,26 @@ public:
 template<class T>
 class Component::Buffer
 {
-  using Data_t = ::std::vector<T>;
-  static const Data_t & GetFakeData(void) 
+  static const Buffer_t<T> & GetFakeData(void) noexcept
   {
-    static const Data_t FakeData;
+    static const Buffer_t<T> FakeData;
     return FakeData;
   };
 
 public:
-  const Data_t Data;
+  const Buffer_t<T> Data;
   const int Dimension;
 
 private:
-  inline static Data_t GetContent(Component_t & _Component, const Data_t & _Data)
+  inline static Buffer_t<T> GetContent(
+    Component_t & _Component, 
+    const Buffer_t<T> & _Data)
   {
-    return ::std::move((Data_t &)_Component[uT("content")].Default(_Data));
+    return ::std::move((Buffer_t<T> &)_Component[uT("content")].Default(_Data));
   }
 
 public:
-  explicit Buffer(Component_t & _Component, const Data_t & _Data = GetFakeData()) :
+  explicit Buffer(Component_t & _Component, const Buffer_t<T> & _Data = GetFakeData()) :
     Data(GetContent(_Component, _Data)),
     Dimension(_Component[uT("dimension")].Default(3))
   {
@@ -228,7 +229,7 @@ private:
 
       InstanceBlockImplementation += ::std::string{ "COVELLITE_IN " } +
         Type + " iValue" + Index + " COVELLITE_INPUT_SEMANTIC(TEXCOORD" +
-        Index + ");" + (char)0x5C + "\r\n";
+        Index + ");" + char{ 0x5C } + "\r\n";
     }
 
     return ::boost::algorithm::replace_first_copy(_Input,
@@ -236,14 +237,13 @@ private:
   };
 
 public:
-  inline ::std::vector<uint8_t> GetInstanceInput(
-    const ::std::vector<uint8_t> & _Input) const
+  inline BinaryData_t GetInstanceInput(const BinaryData_t & _Input) const
   {
     if (Instance.empty()) return _Input;
 
     const auto strInput = 
       GetInstanceInput(::std::string{ _Input.cbegin(), _Input.cend() });
-    return ::std::vector<uint8_t>{ strInput.cbegin(), strInput.cend() };
+    return BinaryData_t{ strInput.cbegin(), strInput.cend() };
   }
 
   ::std::string GetInstanceCopyData(void) const
@@ -262,7 +262,7 @@ public:
   }
 
 public:
-  Shader(Component_t & _Component, const ::std::vector<uint8_t> & _Data) :
+  Shader(Component_t & _Component, const BinaryData_t & _Data) :
     Buffer(_Component, _Data),
     Entry((const ::std::string &)_Component[uT("entry")].Default("Unknown")),
     Kind(GetShaderType(Entry, Data.data(), Data.data() + Data.size(), ReturnType)),

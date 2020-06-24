@@ -25,23 +25,19 @@ GameObject::Mesh::Mesh(const ::std::vector<Triangle_t> & _Data) :
   // на экране загрузки при использовании общего Present'a для разных уровней
   // LOD.
 
-  const auto & Indices = m_MaterialIndices[uT("Unknown")];
-
   return
   {
     Component_t::Make(
     {
       { uT("id"), m_MeshId + uT(".Vertex") },
       { uT("type"), uT("Buffer") },
-      { uT("data"), static_cast<const Vertex_t *>(m_Vertexes.data()) },
-      { uT("count"), m_Vertexes.size() },
+      { uT("content"), m_Vertexes },
     }),
     Component_t::Make(
     {
       { uT("id"), m_MeshId + uT(".Present") },
       { uT("type"), uT("Present") },
-      { uT("data"), static_cast<const int *>(Indices.data()) },
-      { uT("count"), Indices.size() },
+      { uT("content"), m_MaterialIndices[uT("Unknown")] },
     }),
   };
 }

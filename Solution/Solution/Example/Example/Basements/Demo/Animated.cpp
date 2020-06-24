@@ -102,14 +102,22 @@ auto Animated::GetObject(const Any_t & _Value) const /*override*/ -> Objects_t
 {
   using Updater_t = ::covellite::api::Updater_t;
 
+  const auto pCameraPosition = Component_t::Make(
+    {
+      { uT("id"), uT("Demo.Animated.Camera.Position") },
+      { uT("type"), uT("Data") },
+      { uT("kind"), uT("Position") },
+      { uT("z"), Constant::Player::Height },
+    });
+
   const auto pCameraRotation = Component_t::Make(
-      {
-        { uT("id"), uT("Demo.Animated.Camera.Rotation") },
-        { uT("type"), uT("Data") },
-        { uT("kind"), uT("Rotation") },
-        { uT("y"), Constant::Camera::Pitch },
-        { uT("z"), 2.0f },
-      });
+    {
+      { uT("id"), uT("Demo.Animated.Camera.Rotation") },
+      { uT("type"), uT("Data") },
+      { uT("kind"), uT("Rotation") },
+      { uT("y"), Constant::Camera::Pitch },
+      { uT("z"), 2.0f },
+    });
 
   const Updater_t CameraUpdater = [=](const float _Time)
   {
@@ -118,7 +126,7 @@ auto Animated::GetObject(const Any_t & _Value) const /*override*/ -> Objects_t
     const float CameraDirection = math::Constant<float>::Pi * 
       (fmod(_Time / 10.0f, 2.0f) - 1.0f);
 
-    pCameraRotation->SetValue(uT("z"), CameraDirection);
+    (*pCameraRotation)[uT("z")] = CameraDirection;
 
     _pGameScene->SetCameraInfo(
       support::GameScene::Camera{ 0.0f, 0.0f, CameraDirection });
@@ -134,19 +142,12 @@ auto Animated::GetObject(const Any_t & _Value) const /*override*/ -> Objects_t
     }),
     Component_t::Make(
     {
-      { uT("id"), uT("Demo.Animated.Camera.Position") },
-      { uT("type"), uT("Data") },
-      { uT("kind"), uT("Position") },
-      { uT("z"), Constant::Player::Height },
-    }),
-    pCameraRotation,
-    Component_t::Make(
-    {
       { uT("id"), uT("Demo.Animated.Camera") },
       { uT("type"), uT("Camera") },
       { uT("kind"), uT("Perspective") },
       { uT("distance"), Constant::Camera::Distance },
       { uT("fov"), Constant::Camera::Fov * math::Constant<float>::RadianToDegree },
+      { uT("service"), Object_t{ pCameraPosition, pCameraRotation } }
     }),
     Component_t::Make(
     {
@@ -228,7 +229,7 @@ auto Animated::GetObject(const Any_t & _Value) const /*override*/ -> Objects_t
 
   const auto Id = String_t{ uT("%ID%") }.Replace(uT("%ID%"), Index++);
 
-  return     
+  const Object_t Transform =
   {
     Component_t::Make(
     {
@@ -236,18 +237,22 @@ auto Animated::GetObject(const Any_t & _Value) const /*override*/ -> Objects_t
       { uT("kind"), uT("Position") },
       { uT("x"), _Coords.ToPlane().first },
       { uT("y"), _Coords.ToPlane().second },
-    }),
+    })
+  };
+
+  return     
+  {
     Component_t::Make(
     {
       { uT("id"), uT("Demo.Animated.Transform.") + Id },
       { uT("type"), uT("Transform") },
+      { uT("service"), Transform },
     }),
     Component_t::Make(
     {
       { uT("id"), uT("Demo.Animated.Present.") + Id },
       { uT("type"), uT("Present") },
-      { uT("data"), _IndexBuffer.data() },
-      { uT("count"), _IndexBuffer.size() },
+      { uT("content"), _IndexBuffer },
     })
   };
 }

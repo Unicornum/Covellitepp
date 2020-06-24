@@ -117,6 +117,7 @@ TEST_F(FxData_test, /*DISABLED_*/Test_Fog)
   EXPECT_EQ(0, sizeof(::Fog) % 16);
 
   ::Fog Example;
+  // cppcheck-suppress memsetClassFloat
   memset(&Example, 0x00, sizeof(Example));
 
   EXPECT_EQ(::glm::vec4{ 0.0f }, Example.Color);

@@ -58,7 +58,6 @@ class Simple3DObject final :
   /// [Vertex format]
   using Vertex_t = ::covellite::api::Vertex;
   /// [Vertex format]
-  using Updater_t = ::covellite::api::Updater_t;
 
 public:
   void Notify(int, const ::boost::any &) override;
@@ -67,25 +66,27 @@ private:
   Updater_t GetUpdater(void);
 
 private:
-  Id BuildCamera(void);
-  Id BuildShader(int, bool);
-  Id BuildLights(int);
+  ObjectId_t BuildCamera(void);
+  ObjectId_t BuildShader(int, bool);
+  ObjectId_t BuildLights(int);
   void BuildSimpleCubes(int, float);
   void BuildInstanceCubes(int, int, float);
   void BuildCubeData(int);
-  Id BuildSimpleCubeObject(float, float, float);
+  ObjectId_t BuildSimpleCubeObject(float, float, float);
 
 private:
   Component_t::ComponentPtr_t m_pCubeRotation;
-  Id m_Camera;
+  ObjectId_t m_CameraId;
+  ObjectId_t m_ShaderId;
+  ObjectId_t m_LightsId;
   ::std::vector<Vertex_t> m_VertexData;
   ::std::vector<int> m_IndexData;
-  ::std::vector<Id> m_Cubes;
+  ::std::vector<ObjectId_t> m_Cubes;
   ::std::vector<float> m_InstanceData;
 
 public:
-  Simple3DObject(const RendersPtr_t &, const int, const int);
-  ~Simple3DObject(void) noexcept;
+  Simple3DObject(WindowExpanse_t &, const int, const int);
+  ~Simple3DObject(void);
 };
 
 } // namespace basement

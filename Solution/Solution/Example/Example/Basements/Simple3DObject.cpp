@@ -12,26 +12,29 @@ using namespace basement;
 namespace math = ::alicorn::extension::cpp::math;
 
 Simple3DObject::Simple3DObject(
-  const RendersPtr_t & _pRenders, 
+  WindowExpanse_t & _Window,
   const int _PolygonsCount, 
   const int _CubesCount) :
-  Common(_pRenders),
+  Common(_Window),
   m_pCubeRotation(Component_t::Make(
     {
       { uT("type"), uT("Data") },
       { uT("kind"), uT("Rotation") },
     }))
 {
-  LoadTexture("draw3dobject.title.png", 
-    uT("Example.Texture.Albedo"), uT("albedo"));
-  LoadTexture("draw3dobject.title.metalness.png", 
-    uT("Example.Texture.Metalness"), uT("metalness"));
-  LoadTexture("draw3dobject.title.roughness.png",
-    uT("Example.Texture.Roughness"), uT("roughness"));
-  LoadTexture("draw3dobject.title.normal.png", 
-    uT("Example.Texture.Normal"), uT("normal"));
-  LoadTexture("draw3dobject.title.occlusion.png",
-    uT("Example.Texture.Occlusion"), uT("occlusion"));
+  using namespace ::alicorn::extension::std;
+
+  CreateObject(
+    LoadTexture("draw3dobject.title.png",
+      uT("Example.Texture.Albedo"), uT("albedo")) +
+    LoadTexture("draw3dobject.title.metalness.png",
+      uT("Example.Texture.Metalness"), uT("metalness")) +
+    LoadTexture("draw3dobject.title.roughness.png",
+      uT("Example.Texture.Roughness"), uT("roughness")) +
+    LoadTexture("draw3dobject.title.normal.png",
+      uT("Example.Texture.Normal"), uT("normal")) +
+    LoadTexture("draw3dobject.title.occlusion.png",
+      uT("Example.Texture.Occlusion"), uT("occlusion")));
 
   const auto Step = static_cast<int>(sqrt(_CubesCount));
 
@@ -41,7 +44,7 @@ Simple3DObject::Simple3DObject(
     Offset += (float)Step / (2 * i);
   }
 
-  m_Camera = BuildCamera();
+  m_CameraId = BuildCamera();
   BuildCubeData(_PolygonsCount / 12);
 
   if (Constant::GetSettings<bool>(uT("IsCubeInstance")))
@@ -92,61 +95,59 @@ Simple3DObject::Simple3DObject(
   // - OpenGLES3  - 1024 куба по 768 полигонов каждый (без PBR, с PBR - 10 fps).
 }
 
-Simple3DObject::~Simple3DObject(void) noexcept
+Simple3DObject::~Simple3DObject(void)
 {
   LOGGER(Info) << "Basements Simple3DObject destoyed.";
-
-  // Рендеры не удаляются, т.к. объект класса Simple3DObject содержит уникальный
-  // объект m_pRenders, который удаляется вместе со всеми рендерами.
-  // m_pRenders->Remove(...);
 }
 
 void Simple3DObject::Notify(int _Message, const ::boost::any & _Value) /*override*/
 {
   using namespace ::alicorn::extension::std;
 
-  m_Scene.clear();
-  m_Scene.push_back(m_Camera);
-
   if (_Message == ::events::Simple3DObject.LightsChanged)
   {
     const auto Value = ::boost::any_cast<int>(_Value);
 
-    m_Scene.push_back(BuildShader(Value, 
-      Constant::GetSettings<bool>(uT("IsCubeInstance"))));
-    m_Scene.push_back(BuildLights(Value));
-    m_Scene += m_Cubes;
+    m_ShaderId = BuildShader(Value,
+      Constant::GetSettings<bool>(uT("IsCubeInstance")));
+    m_LightsId = BuildLights(Value);
   }
 }
 
 auto Simple3DObject::GetUpdater(void) -> Updater_t
 {
-  return [this](const float _TimeFromStartProgram)
+  return [=](const float _TimeFromStartProgram)
   {
     const auto Angle = _TimeFromStartProgram / 5.0f;
 
-    m_pCubeRotation->SetValue(uT("x"), static_cast<float>(
-      math::PI * (math::radian::Cos(Angle) + 1.0)));
-    m_pCubeRotation->SetValue(uT("z"), static_cast<float>(
-      math::PI * (math::radian::Sin(Angle) + 1.0)));
+    (*m_pCubeRotation)[uT("x")] =
+      math::Constant<float>::Pi * (math::radian::Cos(Angle) + 1.0f);
+    (*m_pCubeRotation)[uT("z")] = 
+      math::Constant<float>::Pi * (math::radian::Sin(Angle) + 1.0f);
+
+    AddToRenderQueue(m_CameraId);
+    AddToRenderQueue(m_ShaderId);
+    AddToRenderQueue(m_LightsId);
+    for (const auto & Id : m_Cubes) AddToRenderQueue(Id);
   };
 }
 
-auto Simple3DObject::BuildCamera(void) -> Id
+auto Simple3DObject::BuildCamera(void) -> ObjectId_t
 {
   const Id Id;
 
-  /// [Create camera]
-  m_Objects[Id] = m_pRenders->Obtain(
+  const auto pCameraPosition = Component_t::Make(
     {
-      Component_t::Make(
-      {
-        { uT("type"), uT("Data") },
-        { uT("kind"), uT("Position") },
-        { uT("x"), 0.0f },
-        { uT("y"), 0.0f },
-        { uT("z"), -1.6f },
-      }),
+      { uT("type"), uT("Data") },
+      { uT("kind"), uT("Position") },
+      { uT("x"), 0.0f },
+      { uT("y"), 0.0f },
+      { uT("z"), -1.6f },
+    });
+
+  /// [Create camera]
+  return CreateObject(
+    {
       Component_t::Make(
       {
         { uT("id"), uT("Example.Camera.") + Id.GetStringId() },
@@ -154,6 +155,7 @@ auto Simple3DObject::BuildCamera(void) -> Id
         { uT("kind"), uT("Perspective") },
         { uT("distance"), 10.0f },
         { uT("fov"), 90.0f },
+        { uT("service"), GameObject_t{ pCameraPosition } },
       }),
       Component_t::Make(
       {
@@ -190,73 +192,53 @@ auto Simple3DObject::BuildCamera(void) -> Id
       }),
     });
   /// [Create camera]
-
-  return Id;
 }
 
-auto Simple3DObject::BuildShader(int _LightsFlags, bool _IsInstanceMode) -> Id
+auto Simple3DObject::BuildShader(int _LightsFlags, bool _IsInstanceMode) -> ObjectId_t
 {
-  using Object_t = Component_t::Renders::Object_t;
+  const auto & Vfs = ::covellite::app::Vfs_t::GetInstance();
 
-  Component_t::ComponentPtr_t pVertexShader;
+  const auto pVertexShader = Component_t::Make(
+    {
+      { uT("id"), uT("Example.Shader.Vertex.Cube") },
+      { uT("type"), uT("Shader") },
+      { uT("entry"), uT("vsVolume") },
+    });
 
   if (_IsInstanceMode)
   {
-    static const auto VertexShaderData = ::covellite::app::Vfs_t::GetInstance()
-      .GetData("Data\\Shaders\\Cube.instance.fx");
-
-    pVertexShader = Component_t::Make(
-      {
-        { uT("id"), uT("Example.Shader.Vertex.Cube") },
-        { uT("type"), uT("Shader") },
-        { uT("data"), VertexShaderData.data() },
-        { uT("count"), VertexShaderData.size() },
-        { uT("entry"), uT("vsVolume") },
-        { uT("instance"), uT("f4") },
-      });
+    (*pVertexShader)[uT("content")] = Vfs.GetData("Data\\Shaders\\Cube.instance.fx");
+    (*pVertexShader)[uT("instance")] = uT("f4");
   }
-  else
-  {
-    pVertexShader = Component_t::Make(
-      {
-        { uT("id"), uT("Example.Shader.Vertex.Cube") },
-        { uT("type"), uT("Shader") },
-        { uT("entry"), uT("vsVolume") },
-      });
-  }
-
-  Object_t Components =
-  {
-    Component_t::Make(
-    {
-      { uT("id"), uT("Example.State.Sampler") },
-      { uT("type"), uT("State") },
-      { uT("kind"), uT("Sampler") },
-    }),
-    pVertexShader
-  };
 
   using namespace ::alicorn::extension::std;
 
-  static const auto PixelShaderData =
-    ::covellite::app::Vfs_t::GetInstance().GetData("Data\\Shaders\\Pbr.ps.fx");
+  const auto PixelShaderData = Vfs.GetData("Data\\Shaders\\Pbr.ps.fx");
 
   if ((_LightsFlags & (1 << Lights::PBR)) != 0)
   {
-    Components += Object_t
+    return CreateObject(
     {
+      /// [Shader textured object]
       Component_t::Make(
       {
-        { uT("type"), uT("Data") },
-        { uT("kind"), uT("Shader") },
-        { uT("data"), PixelShaderData.data() },
-        { uT("count"), PixelShaderData.size() },
-        { uT("entry"), uT("psPbrSimple") },
+        { uT("id"), uT("Example.State.Sampler") },
+        { uT("type"), uT("State") },
+        { uT("kind"), uT("Sampler") },
+      }),
+      pVertexShader,
+      Component_t::Make(
+      {
+        { uT("id"), uT("Example.Buffer.Vertex.Cube") },
+        { uT("type"), uT("Buffer") },
+        { uT("content"), m_VertexData },
       }),
       Component_t::Make(
       {
         { uT("id"), uT("Example.Shader.Pixel.Cube.PBR") },
         { uT("type"), uT("Shader") },
+        { uT("content"), PixelShaderData },
+        { uT("entry"), uT("psPbrSimple") },
       }),
       Component_t::Make(
       {
@@ -278,35 +260,40 @@ auto Simple3DObject::BuildShader(int _LightsFlags, bool _IsInstanceMode) -> Id
       {
         { uT("id"), uT("Example.Texture.Occlusion") },
       }),
-    };
+      /// [Shader textured object]
+    });
   }
-  else
-  {
-    Components += Object_t
+
+  return CreateObject(
     {
+      Component_t::Make(
+      {
+        { uT("id"), uT("Example.State.Sampler") },
+        { uT("type"), uT("State") },
+        { uT("kind"), uT("Sampler") },
+      }),
+      pVertexShader,
+      Component_t::Make(
+      {
+        { uT("id"), uT("Example.Buffer.Vertex.Cube") },
+        { uT("type"), uT("Buffer") },
+        { uT("content"), m_VertexData },
+      }),
       Component_t::Make(
       {
         { uT("id"), uT("Example.Shader.Pixel.Cube.Textured") },
         { uT("type"), uT("Shader") },
         { uT("entry"), uT("psSimple") },
-        { uT("data"), PixelShaderData.data() },
-        { uT("count"), PixelShaderData.size() },
+        { uT("content"), PixelShaderData },
       }),
       Component_t::Make(
       {
         { uT("id"), uT("Example.Texture.Albedo") },
       }),
-    };
-  }
-
-  const Id Id;
-
-  m_Objects[Id] = m_pRenders->Obtain(Components);
-
-  return Id;
+    });
 }
 
-auto Simple3DObject::BuildLights(int _LightsFlags) -> Id
+auto Simple3DObject::BuildLights(int _LightsFlags) -> ObjectId_t
 {
   using Lights_t = ::Lights_t;
   using BufferMapper_t = ::covellite::api::cbBufferMap_t<Lights_t>;
@@ -386,7 +373,7 @@ auto Simple3DObject::BuildLights(int _LightsFlags) -> Id
     return false;
   };
 
-  m_Objects[Id] = m_pRenders->Obtain(Component_t::Renders::Object_t
+  return CreateObject(Component_t::Renders::Object_t
     {
       Component_t::Make(
       {
@@ -395,8 +382,6 @@ auto Simple3DObject::BuildLights(int _LightsFlags) -> Id
         { uT("mapper"), Mapper },
       }),
     });
-
-  return Id;
 }
 
 void Simple3DObject::BuildSimpleCubes(int _Step, float _Offset)
@@ -445,16 +430,9 @@ void Simple3DObject::BuildInstanceCubes(
 
   const Id Id;
 
-  m_Objects[Id] = m_pRenders->Obtain(
-    {
-      Component_t::Make(
-      {
-        { uT("id"), uT("Example.Buffer.Vertex.Cube") },
-        { uT("type"), uT("Buffer") },
-        { uT("data"), static_cast<const Vertex_t *>(m_VertexData.data()) },
-        { uT("count"), m_VertexData.size() },
-      }),
-      Component_t::Make(
+  const GameObject_t Transform =
+  {
+    Component_t::Make(
       {
         { uT("type"), uT("Data") },
         { uT("kind"), uT("Scale") },
@@ -462,30 +440,42 @@ void Simple3DObject::BuildInstanceCubes(
         { uT("y"), 6.0f / _Step },
         { uT("z"), 6.0f / _Step },
       }),
-      m_pCubeRotation,
+    m_pCubeRotation
+  };
+
+  const auto pInstanceBuffer = Component_t::Make(
+    {
+      { uT("type"), uT("Data") },
+      { uT("kind"), uT("Buffer") },
+      { uT("size"), (::std::size_t)(_CubesCount) * 4 * sizeof(float) },
+      { uT("count"), (::std::size_t)_CubesCount },
+      { uT("mapper"), Mapper },
+    });
+
+  const auto CubesId = CreateObject(
+    {
+      //Component_t::Make(
+      //{
+      //  { uT("id"), uT("Example.Buffer.Vertex.Cube") },
+      //  { uT("type"), uT("Buffer") },
+      //  { uT("content"), m_VertexData },
+      //}),
       Component_t::Make(
       {
-        { uT("id"), uT("Example.Transform.Cubes") },
+        { uT("id"), uT("Example.Transform.Cubes.") + Id.GetStringId() },
         { uT("type"), uT("Transform") },
+        { uT("service"), Transform },
       }),
       Component_t::Make(
       {
-        { uT("type"), uT("Data") },
-        { uT("kind"), uT("Buffer") },
-        { uT("size"), (::std::size_t)(_CubesCount * 4 * sizeof(float)) },
-        { uT("count"), (::std::size_t)_CubesCount },
-        { uT("mapper"), Mapper },
-      }),
-      Component_t::Make(
-      {
-        { uT("id"), uT("Example.Present") },
+        { uT("id"), uT("Example.Present.") + Id.GetStringId() },
         { uT("type"), uT("Present") },
-        { uT("data"), static_cast<const int *>(m_IndexData.data()) },
-        { uT("count"), m_IndexData.size() },
+        { uT("content"), m_IndexData },
+        { uT("service"), GameObject_t{ pInstanceBuffer } },
       })
     });
 
-  m_Cubes.push_back(Id);
+  m_Cubes.push_back(CubesId);
 }
 
 void Simple3DObject::BuildCubeData(int _PolygonsFactor)
@@ -566,21 +556,13 @@ void Simple3DObject::BuildCubeData(int _PolygonsFactor)
 
 auto Simple3DObject::BuildSimpleCubeObject(
   float _PositionX, float _PositionY, // Положение относительно экранных координат
-  float _Scale) -> Id
+  float _Scale) -> ObjectId_t
 {
   const Id Id;
 
-  /// [Textured object]
-  m_Objects[Id] = m_pRenders->Obtain(
-    {
-      Component_t::Make(
-      {
-        { uT("id"), uT("Example.Buffer.Vertex.Cube") },
-        { uT("type"), uT("Buffer") },
-        { uT("data"), static_cast<const Vertex_t *>(m_VertexData.data()) },
-        { uT("count"), m_VertexData.size() },
-      }),
-      Component_t::Make(
+  const GameObject_t Transform =
+  {
+    Component_t::Make(
       {
         { uT("type"), uT("Data") },
         { uT("kind"), uT("Scale") },
@@ -588,8 +570,8 @@ auto Simple3DObject::BuildSimpleCubeObject(
         { uT("y"), _Scale },
         { uT("z"), _Scale },
       }),
-      m_pCubeRotation,
-      Component_t::Make(
+    m_pCubeRotation,
+    Component_t::Make(
       {
         { uT("type"), uT("Data") },
         { uT("kind"), uT("Position") },
@@ -597,20 +579,29 @@ auto Simple3DObject::BuildSimpleCubeObject(
         { uT("y"), -_PositionX },
         { uT("z"), _PositionY },
       }),
+  };
+
+  /// [Textured object]
+  return CreateObject(
+    {
+      //Component_t::Make(
+      //{
+      //  { uT("id"), uT("Example.Buffer.Vertex.Cube") },
+      //  { uT("type"), uT("Buffer") },
+      //  { uT("content"), m_VertexData },
+      //}),
       Component_t::Make(
       {
         { uT("id"), uT("Example.Transform.") + Id.GetStringId() },
         { uT("type"), uT("Transform") },
+        { uT("service"), Transform },
       }),
       Component_t::Make(
       {
         { uT("id"), uT("Example.Present") },
         { uT("type"), uT("Present") },
-        { uT("data"), static_cast<const int *>(m_IndexData.data()) },
-        { uT("count"), m_IndexData.size() },
+        { uT("content"), m_IndexData },
       })
     });
   /// [Textured object]
-
-  return Id;
 }

@@ -3,6 +3,7 @@
 #include <vector>
 #include <wrl.h>
 #include <d3dcommon.h>
+#include <Covellite/Api/Defines.hpp>
 
 namespace covellite
 {
@@ -32,7 +33,6 @@ class DirectX final
 {
   template<class T>
   using ComPtr_t = ::Microsoft::WRL::ComPtr<T>;
-  using BinaryData_t = ::std::vector<uint8_t>;
   using String_t = ::alicorn::extension::std::String;
 
 public:

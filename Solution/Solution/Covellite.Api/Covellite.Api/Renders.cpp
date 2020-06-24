@@ -1,6 +1,7 @@
 ﻿
 #include "stdafx.h"
 #include <Covellite/Api/Renders.hpp>
+#include <Covellite/Api/Defines.hpp>
 #include <Covellite/Api/Component.inl>
 #include <Covellite/Api/Vertex.hpp>
 //#include <boost/thread/lock_guard.hpp>
@@ -136,10 +137,6 @@ void Component::Renders::Remove(const ComponentPtr_t & _pComponent)
 auto Component::Renders::Obtain(const Object_t & _Object) -> Renders_t
 {
   using Service_t = ::std::vector<ComponentPtr_t>;
-  using TextureData_t = ::std::vector<uint8_t>;
-  using ShaderData_t = ::std::vector<uint8_t>;
-  using VertexBufferData_t = ::std::vector<::covellite::api::Vertex>;
-  using IndexBufferData_t = ::std::vector<int>;
 
   // 23 Март 2019 18:20 (unicornum.verum@gmail.com)
   TODO("Тест работы в многопоточном режиме.");
@@ -151,10 +148,10 @@ auto Component::Renders::Obtain(const Object_t & _Object) -> Renders_t
   Result.reserve(m_MaxRendersCount);
 
   Service_t Service;
-  TextureData_t TextureData;
-  ShaderData_t ShaderData;
-  VertexBufferData_t VertexBufferData;
-  IndexBufferData_t IndexBufferData;
+  BinaryData_t TextureData;
+  BinaryData_t ShaderData;
+  Buffer_t<::covellite::api::Vertex> VertexBufferData;
+  Buffer_t<int> IndexBufferData;
 
   const auto IsExistsData = [](const Component & _Component)
   {
@@ -208,30 +205,27 @@ auto Component::Renders::Obtain(const Object_t & _Object) -> Renders_t
             const uint8_t * pData = (*_pComponent)[uT("data")];
             const int Width = (*_pComponent)[uT("width")];
             const int Height = (*_pComponent)[uT("height")];
-            (*_pComponent)[uT("content")] =
-              ::std::vector<uint8_t>{ pData, pData + (Width * Height * 4) };
+            (*_pComponent)[uT("content")] = BinaryData_t{ pData, 
+              pData + (static_cast<size_t>(Width) * Height * 4) };
           }
           else
           {
             const uint8_t * pData = (*_pComponent)[uT("data")];
             const ::std::size_t Count = (*_pComponent)[uT("count")];
-            (*_pComponent)[uT("content")] =
-              ::std::vector<uint8_t>{ pData, pData + Count };
+            (*_pComponent)[uT("content")] = BinaryData_t{ pData, pData + Count };
           }
         }
         else if ((*_pComponent)[uT("data")].IsType<const Vertex_t *>())
         {
           const Vertex_t * pData = (*_pComponent)[uT("data")];
           const ::std::size_t Count = (*_pComponent)[uT("count")];
-          (*_pComponent)[uT("content")] =
-            ::std::vector<Vertex_t>{ pData, pData + Count };
+          (*_pComponent)[uT("content")] = Buffer_t<Vertex_t>{ pData, pData + Count };
         }
         else if ((*_pComponent)[uT("data")].IsType<const int *>())
         {
           const int * pData = (*_pComponent)[uT("data")];
           const ::std::size_t Count = (*_pComponent)[uT("count")];
-          (*_pComponent)[uT("content")] =
-            ::std::vector<int>{ pData, pData + Count };
+          (*_pComponent)[uT("content")] = Buffer_t<int>{ pData, pData + Count };
         }
       }
 

@@ -24,17 +24,6 @@
 #include "Shaders/Shaders.hpp"
 #include "GraphicApi.Constants.hpp"
 
-namespace std
-{
-
-template<class T>
-istream & operator>>(istream &, shared_ptr<T> &)
-{
-  throw STD_EXCEPTION << "Это не должно вызываться, нужно для компилируемости";
-}
-
-} // namespace std
-
 namespace covellite
 {
 
@@ -46,7 +35,7 @@ namespace renderer
 
 inline void CheckError(const int _Line)
 {
-  auto Error = glGetError();
+  const auto Error = glGetError();
   if (Error != GL_NO_ERROR)
   {
     throw EXCEPTION_NO_FILE_LINE(::std::runtime_error) << 
@@ -341,13 +330,13 @@ public:
     glBindBuffer(m_Type, _IsActivate ? m_BufferId : 0);
   }
 
-  inline void UpdateData(const void * _pData, const GLsizeiptr _Size) const
+  inline void UpdateData(const void * _pData, const size_t _Size) const
   {
-    glBufferSubData(m_Type, 0, _Size, _pData);
+    glBufferSubData(m_Type, 0, static_cast<GLsizeiptr>(_Size), _pData);
   }
 
   inline void UpdateData(const ::std::string & _UniformBufferName,
-    const void * _pData, const GLsizeiptr _Size) const
+    const void * _pData, const size_t _Size) const
   {
     GLint ProgramId = 0;
     glGetIntegerv(GL_CURRENT_PROGRAM, &ProgramId);
@@ -416,7 +405,7 @@ public:
 
   void SetInstanceData(
     const void * _pData, 
-    const GLsizeiptr _Size, 
+    const size_t _Size,
     const GLsizei _Stride)
   {
     using AttributeTypes_t = ::alicorn::extension::std::fast::unordered_map<
@@ -516,6 +505,11 @@ public:
   {
 
   }
+
+  Buffer(const Buffer &) = delete;
+  Buffer(Buffer &&) = delete;
+  Buffer & operator= (const Buffer &) = delete;
+  Buffer & operator= (Buffer &&) = delete;
 
   ~Buffer(void) noexcept
   {
@@ -637,10 +631,14 @@ private:
   mutable GLint m_CurrentFrameBufferId = 0;
 
 public:
-  FrameBuffer(void)
+  FrameBuffer(void) noexcept
   {
     glGenFramebuffers(1, &m_Id);
   }
+  FrameBuffer(const FrameBuffer &) = delete;
+  FrameBuffer(FrameBuffer &&) = delete;
+  FrameBuffer & operator= (const FrameBuffer &) = delete;
+  FrameBuffer & operator= (FrameBuffer &&) = delete;
   ~FrameBuffer(void) noexcept
   {
     glDeleteFramebuffers(1, &m_Id);
@@ -650,8 +648,8 @@ public:
 auto OpenGLCommonShader::CreateBkSurface(
   const ComponentPtr_t & _pComponent) -> Render_t /*override*/
 {
-  GLfloat Viewport[4] = { 0 };
-  glGetFloatv(GL_VIEWPORT, Viewport);
+  GLint Viewport[4] = { 0 };
+  glGetIntegerv(GL_VIEWPORT, Viewport);
 
   const auto pFrameBuffer = ::std::make_shared<FrameBuffer>();
   pFrameBuffer->Bind();
@@ -661,8 +659,8 @@ auto OpenGLCommonShader::CreateBkSurface(
 
   const auto DoDataTexture = [&](const ComponentPtr_t & _pDataTexture)
   {
-    (*_pDataTexture)[uT("width")] = static_cast<int>(Viewport[2]);
-    (*_pDataTexture)[uT("height")] = static_cast<int>(Viewport[3]);
+    (*_pDataTexture)[uT("width")] = Viewport[2];
+    (*_pDataTexture)[uT("height")] = Viewport[3];
 
     const Component::Texture TextureData{ *_pDataTexture, uT("diffuse") };
 
@@ -671,7 +669,7 @@ auto OpenGLCommonShader::CreateBkSurface(
 
     if (pTexture->m_Format != GL_DEPTH_COMPONENT)
     {
-      auto Attachment = GL_COLOR_ATTACHMENT0 +
+      const auto Attachment = GL_COLOR_ATTACHMENT0 +
         static_cast<int>(AttachmentIndexes.size());
       AttachmentIndexes.push_back(Attachment);
       glFramebufferTexture2D(GL_FRAMEBUFFER, Attachment, GL_TEXTURE_2D,
@@ -701,21 +699,20 @@ auto OpenGLCommonShader::CreateBkSurface(
   {
     if (m_IsResizeWindow)
     {
-      GLfloat Viewport[4] = { 0 };
-      glGetFloatv(GL_VIEWPORT, Viewport);
+      GLint ViewPort[4] = { 0 };
+      glGetIntegerv(GL_VIEWPORT, ViewPort);
 
       for (const auto & Texture : Textures)
       {
-        (*Texture.first)[uT("width")] = static_cast<int>(Viewport[2]);
-        (*Texture.first)[uT("height")] = static_cast<int>(Viewport[3]);
-        Texture.second->MakeContent(Viewport[2], Viewport[3], nullptr);
+        (*Texture.first)[uT("width")] = ViewPort[2];
+        (*Texture.first)[uT("height")] = ViewPort[3];
+        Texture.second->MakeContent(ViewPort[2], ViewPort[3], nullptr);
       }
     }
 
     pFrameBuffer->Bind();
     glDrawBuffers(static_cast<GLsizei>(AttachmentIndexes.size()),
       AttachmentIndexes.data());
-    //glViewport(0, 0, 1280, 768);
   };
 }
 
@@ -822,9 +819,9 @@ auto OpenGLCommonShader::CreateTexture(const ComponentPtr_t & _pComponent) -> Re
       for (int y = 0; y < TextureData.Height / 2; y++)
       {
         auto * pLineUp = 
-          pData + (y * TextureData.Width);
+          pData + (static_cast<size_t>(y) * TextureData.Width);
         auto * pLineDown = 
-          pData + ((TextureData.Height - y - 1) * TextureData.Width);
+          pData + ((static_cast<size_t>(TextureData.Height) - y - 1) * TextureData.Width);
 
         for (int x = 0; x < TextureData.Width; x++)
         {
@@ -869,10 +866,14 @@ class OpenGLCommonShader::Programs final
     const GLuint Id;
 
   public:
-    Program(void) :
+    Program(void) noexcept :
       Id{ glCreateProgram() }
     {
     }
+    Program(const Program &) = delete;
+    Program(Program &&) = delete;
+    Program & operator= (const Program &) = delete;
+    Program & operator= (Program &&) = delete;
     ~Program(void) noexcept
     {
       glDeleteProgram(Id);
@@ -940,6 +941,10 @@ class OpenGLCommonShader::Programs final
       auto pFullShaderBody = FullShaderBody.c_str();
       glShaderSource(Id, 1, &pFullShaderBody, nullptr);
     }
+    Shader(const Shader &) = delete;
+    Shader(Shader &&) = delete;
+    Shader & operator= (const Shader &) = delete;
+    Shader & operator= (Shader &&) = delete;
     ~Shader(void) noexcept
     {
       m_Programs.Clear(Id);
@@ -966,10 +971,8 @@ public:
     return ::std::make_shared<Shader>(*this, GL_VERTEX_SHADER,
       (m_ShaderHeader +
       "#define COVELLITE_SHADER_VERTEX\r\n" +
-      ::std::string{ reinterpret_cast<const char *>(
-        HeaderShaderText.data()), HeaderShaderText.size() }).c_str(),
-      (::std::string{ reinterpret_cast<const char *>(
-        BodyShaderText.data()), BodyShaderText.size() } +
+      ::std::string{ ::std::begin(HeaderShaderText), ::std::end(HeaderShaderText) }).c_str(),
+      (::std::string{ ::std::begin(BodyShaderText), ::std::end(BodyShaderText) } +
       "out Pixel PixelValue;\r\n"
       "void main()\r\n"
       "{\r\n"
@@ -1023,8 +1026,7 @@ public:
     return ::std::make_shared<Shader>(*this, GL_FRAGMENT_SHADER,
       (m_ShaderHeader +
       "#define COVELLITE_SHADER_PIXEL\r\n" +
-      ::std::string{ reinterpret_cast<const char *>(
-        HeaderShaderText.data()), HeaderShaderText.size() }).c_str(),
+      ::std::string{ ::std::begin(HeaderShaderText), ::std::end(HeaderShaderText) }).c_str(),
       (BodyShaderText +
       "in Pixel PixelValue;\r\n" +
       Main).c_str());
@@ -1135,7 +1137,6 @@ auto OpenGLCommonShader::CreateBuffer(const ComponentPtr_t & _pBuffer) -> Render
   auto CreateConstantUserBuffer = [&](void) -> Render_t
   {
     using Type_t = cbBufferMap_t<void>;
-    using BufferData_t = ::std::vector<uint8_t>;
 
     if (!(*_pBuffer)[uT("mapper")].IsType<const Type_t &>())
     {
@@ -1163,7 +1164,7 @@ auto OpenGLCommonShader::CreateBuffer(const ComponentPtr_t & _pBuffer) -> Render
       (*_pBuffer)[uT("name")].Default(::std::string{ "cbUserData" });
 
     const auto pData =
-      ::std::make_shared<BufferData_t>(BufferSize, (uint8_t)0x00);
+      ::std::make_shared<BinaryData_t>(BufferSize, (uint8_t)0x00);
     const auto pBuffer = 
       ::std::make_shared<Buffer>(pData->data(), pData->size());
 
@@ -1199,7 +1200,7 @@ auto OpenGLCommonShader::CreateBuffer(const ComponentPtr_t & _pBuffer) -> Render
   {
     using Type_t = int;
 
-    if (!(*pBufferData)[uT("content")].IsType<::std::vector<Type_t>>())
+    if (!(*pBufferData)[uT("content")].IsType<Buffer_t<Type_t>>())
     {
       return CreateConstantLightsBuffer();
     }
@@ -1214,19 +1215,19 @@ auto OpenGLCommonShader::CreateBuffer(const ComponentPtr_t & _pBuffer) -> Render
     {
       pBuffer->Bind();
 
-      m_DrawElements = [=](void)
+      m_DrawElements = [=](void) noexcept
       { 
         glDrawElements(GL_TRIANGLES, Size, GL_UNSIGNED_INT, nullptr);
       };
     };
   };
 
-  auto CreateVertexBuffer = [&](void) -> Render_t
+  const auto CreateVertexBuffer = [&](void) -> Render_t
   {
     using Type_t = ::covellite::api::Vertex;
     using BufferMapper_t = cbBufferMap_t<Type_t>;
 
-    if (!(*pBufferData)[uT("content")].IsType<::std::vector<Type_t>>())
+    if (!(*pBufferData)[uT("content")].IsType<Buffer_t<Type_t>>())
     {
       return CreateIndexBuffer();
     }
@@ -1252,7 +1253,7 @@ auto OpenGLCommonShader::CreateBuffer(const ComponentPtr_t & _pBuffer) -> Render
     const auto pBuffer = ::std::make_shared<Buffer>(GL_ARRAY_BUFFER,
       Info.Data.data(), Info.Data.size() * sizeof(Type_t), GL_DYNAMIC_DRAW);
 
-    const auto pData = ::std::make_shared<::std::vector<Type_t>>(Info.Data);
+    const auto pData = ::std::make_shared<Buffer_t<Type_t>>(Info.Data);
 
     return [=](void)
     {
@@ -1339,14 +1340,13 @@ auto OpenGLCommonShader::CreateTransform(const ComponentPtr_t & _pComponent) -> 
 auto OpenGLCommonShader::CreatePresentBuffer(const ComponentPtr_t & _pComponent) -> Render_t /*override*/
 {
   using BufferMapper_t = cbBufferMap_t<void>;
-  using BufferData_t = ::std::vector<uint8_t>;
 
   ComponentPtr_t pIndexBufferData = _pComponent;
   ComponentPtr_t pInstanceBufferData = nullptr;
 
   const auto SaveBuffer = [&](const ComponentPtr_t & _pBufferData)
   {
-    if ((*_pBufferData)[uT("content")].IsType<::std::vector<int>>())
+    if ((*_pBufferData)[uT("content")].IsType<Buffer_t<int>>())
     {
       pIndexBufferData = _pBufferData;
     }
@@ -1398,7 +1398,7 @@ auto OpenGLCommonShader::CreatePresentBuffer(const ComponentPtr_t & _pComponent)
   TODO("Проверка того, что Stride кратно 16");
 
   const auto pData =
-    ::std::make_shared<BufferData_t>(BufferSize, (uint8_t)0x00);
+    ::std::make_shared<BinaryData_t>(BufferSize, (uint8_t)0x00);
   const auto pInstanceBuffer = ::std::make_shared<Buffer>(GL_ARRAY_BUFFER,
     nullptr, BufferSize, GL_DYNAMIC_DRAW);
 
@@ -1572,7 +1572,7 @@ auto OpenGLCommonShader::GetCameraPerspective(
     // Точка, куда смотрит камера - задается как компонент Data.Position.
     const Component::Position Look{ *ServiceComponents[0] };
 
-    auto GetEye = [&](void) -> ::glm::vec3
+    const auto GetEye = [&](void) -> ::glm::vec3
     {
       // Расстояние от камеры до Look.
       const float Distance = (*_pComponent)[uT("distance")].Default(0.0f);

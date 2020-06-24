@@ -16,17 +16,6 @@
 #include "Component.hpp"
 #include "GraphicApi.Constants.hpp"
 
-namespace std
-{
-
-template<class T>
-istream & operator>>(istream &, shared_ptr<T> &)
-{
-  throw STD_EXCEPTION << "Это не должно вызываться, нужно для компилируемости";
-}
-
-} // namespace std
-
 namespace covellite
 {
 
@@ -98,7 +87,7 @@ public:
     D3D11_SUBRESOURCE_DATA InitData = { 0 };
     InitData.pSysMem = _pData;
 
-    auto * pInitData = (_pData == nullptr) ? nullptr : &InitData;
+    const auto * const pInitData = (_pData == nullptr) ? nullptr : &InitData;
 
     ComPtr_t<ID3D11Buffer> pBuffer;
     DX_CHECK _pDevice->CreateBuffer(&Desc, pInitData, &pBuffer);
@@ -218,8 +207,8 @@ void DirectX11::SetViewport(int _Width, int _Height)
   D3D11_VIEWPORT ViewPort = { 0 };
   ViewPort.TopLeftX = 0;
   ViewPort.TopLeftY = 0;
-  ViewPort.Width = (FLOAT)_Width;
-  ViewPort.Height = (FLOAT)_Height;
+  ViewPort.Width = static_cast<FLOAT>(_Width);
+  ViewPort.Height = static_cast<FLOAT>(_Height);
   ViewPort.MinDepth = 0.0f;
   ViewPort.MaxDepth = 1.0f;
   m_pImmediateContext->RSSetViewports(1, &ViewPort);
@@ -359,7 +348,7 @@ auto DirectX11::CreateCamera(const ComponentPtr_t & _pComponent) -> Render_t /*o
     // Точка, куда смотрит камера - задается как компонент Data.Position.
     const Component::Position Look{ *ServiceComponents[0] };
 
-    auto GetEye = [&](void) -> ::glm::vec3
+    const auto GetEye = [&](void) -> ::glm::vec3
     {
       // Расстояние от камеры до Look.
       const float Distance = (*_pComponent)[uT("distance")].Default(0.0f);
@@ -422,7 +411,7 @@ public:
 
 public:
   void MakeTarget(
-    ComPtr_t<ID3D11Device> _pDevice,
+    const ComPtr_t<ID3D11Device> & _pDevice,
     const UINT _Width,
     const UINT _Height)
   {
@@ -457,7 +446,7 @@ public:
   }
 
   static ComPtr_t<ID3D11Texture2D> MakeRGBACopy(
-    ComPtr_t<ID3D11Device> _pDevice,
+    const ComPtr_t<ID3D11Device> & _pDevice,
     const UINT _Width, const UINT _Height)
   {
     D3D11_TEXTURE2D_DESC textureDesc = { 0 };
@@ -1052,8 +1041,8 @@ auto DirectX11::CreateBuffer(const ComponentPtr_t & _pComponent) -> Render_t /*o
 
     return [=](void)
     {
-      static const UINT Stride = sizeof(vertex::Polygon);
-      static const UINT Offset = 0;
+      constexpr UINT Stride = sizeof(vertex::Polygon);
+      constexpr UINT Offset = 0;
       m_pImmediateContext->IASetVertexBuffers(0, 1,
         pBuffer.GetAddressOf(), &Stride, &Offset);
     };
@@ -1072,8 +1061,8 @@ auto DirectX11::CreateBuffer(const ComponentPtr_t & _pComponent) -> Render_t /*o
 
     const Render_t StaticRender = [=](void)
     {
-      static const UINT Stride = sizeof(vertex::Polyhedron);
-      static const UINT Offset = 0;
+      constexpr UINT Stride = sizeof(vertex::Polyhedron);
+      constexpr UINT Offset = 0;
       m_pImmediateContext->IASetVertexBuffers(0, 1,
         pBuffer.GetAddressOf(), &Stride, &Offset);
     };
@@ -1086,7 +1075,7 @@ auto DirectX11::CreateBuffer(const ComponentPtr_t & _pComponent) -> Render_t /*o
         D3D11_MAPPED_SUBRESOURCE Resource = { 0 };
         DX_CHECK m_pImmediateContext->Map(pBuffer.Get(), 0,
           D3D11_MAP_WRITE_NO_OVERWRITE, 0, &Resource);
-        cbBufferMapper(reinterpret_cast<vertex::Polyhedron *>(Resource.pData));
+        cbBufferMapper(static_cast<vertex::Polyhedron *>(Resource.pData));
         m_pImmediateContext->Unmap(pBuffer.Get(), 0);
       }
 
@@ -1095,7 +1084,7 @@ auto DirectX11::CreateBuffer(const ComponentPtr_t & _pComponent) -> Render_t /*o
 
     return (cbBufferMapper == nullptr) ? StaticRender : DynamicRender;
   }
-  else if ((*pBufferData)[uT("content")].IsType<::std::vector<::covellite::api::Vertex>>())
+  else if ((*pBufferData)[uT("content")].IsType<Buffer_t<::covellite::api::Vertex>>())
   {
     using BufferMapper_t = cbBufferMap_t<::covellite::api::Vertex>;
 
@@ -1109,8 +1098,8 @@ auto DirectX11::CreateBuffer(const ComponentPtr_t & _pComponent) -> Render_t /*o
 
     const Render_t StaticRender = [=](void)
     {
-      static const UINT Stride = sizeof(::covellite::api::Vertex);
-      static const UINT Offset = 0;
+      constexpr UINT Stride = sizeof(::covellite::api::Vertex);
+      constexpr UINT Offset = 0;
       m_pImmediateContext->IASetVertexBuffers(0, 1,
         pBuffer.GetAddressOf(), &Stride, &Offset);
     };
@@ -1123,7 +1112,7 @@ auto DirectX11::CreateBuffer(const ComponentPtr_t & _pComponent) -> Render_t /*o
         D3D11_MAPPED_SUBRESOURCE Resource = { 0 };
         DX_CHECK m_pImmediateContext->Map(pBuffer.Get(), 0,
           D3D11_MAP_WRITE_NO_OVERWRITE, 0, &Resource);
-        cbBufferMapper(reinterpret_cast<::covellite::api::Vertex *>(Resource.pData));
+        cbBufferMapper(static_cast<::covellite::api::Vertex *>(Resource.pData));
         m_pImmediateContext->Unmap(pBuffer.Get(), 0);
       }
 
@@ -1151,7 +1140,6 @@ auto DirectX11::CreateBuffer(const ComponentPtr_t & _pComponent) -> Render_t /*o
   else if ((*_pComponent)[uT("mapper")].IsType<const cbBufferMap_t<void> &>())
   {
     using BufferMap_t = cbBufferMap_t<void>;
-    using BufferData_t = ::std::vector<uint8_t>;
 
     const BufferMap_t cbBufferMapper = 
       (*_pComponent)[uT("mapper")].Default(BufferMap_t{});
@@ -1168,11 +1156,11 @@ auto DirectX11::CreateBuffer(const ComponentPtr_t & _pComponent) -> Render_t /*o
     }
 
     const auto pData = 
-      ::std::make_shared<BufferData_t>(BufferSize, (uint8_t)0x00);
+      ::std::make_shared<BinaryData_t>(BufferSize, (uint8_t)0x00);
     const auto pBuffer = Buffer::Create(
       m_pDevice, false, pData->data(), pData->size());
     constexpr auto BufferIndex = 
-      Buffer::Support<BufferData_t::value_type>::Index;
+      Buffer::Support<BinaryData_t::value_type>::Index;
 
     return [=](void)
     {
@@ -1228,7 +1216,7 @@ auto DirectX11::CreatePresentBuffer(const ComponentPtr_t & _pComponent) ->Render
 
   const auto SaveBuffer = [&](const ComponentPtr_t & _pBufferData)
   {
-    if ((*_pBufferData)[uT("content")].IsType<::std::vector<int>>())
+    if ((*_pBufferData)[uT("content")].IsType<Buffer_t<int>>())
     {
       pIndexBufferData = _pBufferData;
     }
@@ -1298,7 +1286,7 @@ auto DirectX11::CreatePresentBuffer(const ComponentPtr_t & _pComponent) ->Render
       m_pImmediateContext->Unmap(pInstanceBuffer.Get(), 0);
     }
 
-    const UINT offset = 0;
+    constexpr UINT offset = 0;
     m_pImmediateContext->IASetVertexBuffers(1, 1,
       pInstanceBuffer.GetAddressOf(), &Stride, &offset);
     m_pImmediateContext->IASetIndexBuffer(
@@ -1350,16 +1338,16 @@ auto DirectX11::CreateBlendState(bool _IsEnabled) -> Render_t
     BlendDesc.AlphaToCoverageEnable = FALSE;
     BlendDesc.IndependentBlendEnable = FALSE;
 
-    for (int i = 0; i < 8; i++)
+    for (auto & RenderTarget : BlendDesc.RenderTarget)
     {
-      BlendDesc.RenderTarget[i].BlendEnable = TRUE;
-      BlendDesc.RenderTarget[i].SrcBlend = D3D11_BLEND_SRC_ALPHA;
-      BlendDesc.RenderTarget[i].DestBlend = D3D11_BLEND_INV_SRC_ALPHA;
-      BlendDesc.RenderTarget[i].BlendOp = D3D11_BLEND_OP_ADD;
-      BlendDesc.RenderTarget[i].SrcBlendAlpha = D3D11_BLEND_ONE;
-      BlendDesc.RenderTarget[i].DestBlendAlpha = D3D11_BLEND_ZERO;
-      BlendDesc.RenderTarget[i].BlendOpAlpha = D3D11_BLEND_OP_ADD;
-      BlendDesc.RenderTarget[i].RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
+      RenderTarget.BlendEnable = TRUE;
+      RenderTarget.SrcBlend = D3D11_BLEND_SRC_ALPHA;
+      RenderTarget.DestBlend = D3D11_BLEND_INV_SRC_ALPHA;
+      RenderTarget.BlendOp = D3D11_BLEND_OP_ADD;
+      RenderTarget.SrcBlendAlpha = D3D11_BLEND_ONE;
+      RenderTarget.DestBlendAlpha = D3D11_BLEND_ZERO;
+      RenderTarget.BlendOpAlpha = D3D11_BLEND_OP_ADD;
+      RenderTarget.RenderTargetWriteMask = D3D11_COLOR_WRITE_ENABLE_ALL;
     }
 
     DX_CHECK m_pDevice->CreateBlendState(&BlendDesc, &pBlendState);

@@ -34,8 +34,8 @@ Simple2DGame::GameUnit::GameUnit(float _X, float _Y,
       { uT("kind"), uT("Position") },
     }))
 {
-  m_pPosition->SetValue(uT("x"), X.Position);
-  m_pPosition->SetValue(uT("y"), Y.Position);
+  (*m_pPosition)[uT("x")] = X.Position;
+  (*m_pPosition)[uT("y")] = Y.Position;
 }
 
 void Simple2DGame::GameUnit::Update(float _X, float _Y)
@@ -43,8 +43,8 @@ void Simple2DGame::GameUnit::Update(float _X, float _Y)
   X.Position = _X;
   Y.Position = _Y;
 
-  m_pPosition->SetValue(uT("x"), X.Position);
-  m_pPosition->SetValue(uT("y"), Y.Position);
+  (*m_pPosition)[uT("x")] = X.Position;
+  (*m_pPosition)[uT("y")] = Y.Position;
 }
 
 void Simple2DGame::GameUnit::Update(float _Moving)
@@ -52,8 +52,8 @@ void Simple2DGame::GameUnit::Update(float _Moving)
   X.Update(_Moving);
   Y.Update(_Moving);
 
-  m_pPosition->SetValue(uT("x"), X.Position);
-  m_pPosition->SetValue(uT("y"), Y.Position);
+  (*m_pPosition)[uT("x")] = X.Position;
+  (*m_pPosition)[uT("y")] = Y.Position;
 }
 
 bool Simple2DGame::GameUnit::IsIntersect(const GameUnit & _Unit) const
@@ -66,10 +66,9 @@ bool Simple2DGame::GameUnit::IsIntersect(const GameUnit & _Unit) const
   return true;
 }
 
-Simple2DGame::Simple2DGame(const Events_t & _Events, 
-  const RendersPtr_t & _pRenders, const Rect & _Rect) :
-  Common(_pRenders),
-  m_Events(_Events),
+Simple2DGame::Simple2DGame(WindowExpanse_t & _Window, const Rect & _Rect) :
+  Common(_Window),
+  m_Events(_Window),
   m_Width(_Rect.Right - _Rect.Left),
   m_Height(_Rect.Bottom - _Rect.Top),
   m_GameFieldSize(0.9f * math::Min(m_Width, m_Height)),
@@ -79,9 +78,9 @@ Simple2DGame::Simple2DGame(const Events_t & _Events,
   const auto Yo = (_Rect.Bottom + _Rect.Top) / 2.0f;
 
   AddCommonComponents();
-  AddCamera(Xo, Yo);
-  AddBackground();
-  AddClock();
+  m_CameraId = AddCamera(Xo, Yo);
+  m_BackGroundId = AddBackground();
+  m_ClockId = AddClock();
   AddActors();
 
   namespace events = ::covellite::events;
@@ -104,107 +103,188 @@ Simple2DGame::Simple2DGame(const Events_t & _Events,
     m_MouseX = (static_cast<float>(_Position.X) - Xo) / m_GameFieldSize;
     m_MouseY = (static_cast<float>(_Position.Y) - Yo) / m_GameFieldSize;
   });
-
-  m_BeginRenderFrameTime = ::std::chrono::system_clock::now();
 }
 
-Simple2DGame::~Simple2DGame(void) noexcept
+Simple2DGame::~Simple2DGame(void)
 {
-  LOGGER(Info) << "Basements Simple2DGame destoyed.";
-
-  // Рендеры не удаляются, т.к. объект класса Simple2DGame содержит уникальный
-  // объект m_pRenders, который удаляется вместе со всеми рендерами.
-  // m_pRenders->Remove(...);
-}
-
-void Simple2DGame::Render(void) /*override*/
-{
-  const auto Updaters = m_Updaters;
-  for (auto & Updater : Updaters) Updater();
-
-  Common::Render();
-
-  // Синхронизация в 60 fps 
-
-  using namespace ::std::chrono;
-
-  const auto Time = 
-    duration_cast<microseconds>(system_clock::now() - m_BeginRenderFrameTime);
-
-  if (microseconds{ 16667 } > Time)
-  {
-    ::std::this_thread::sleep_for(microseconds{ 16667 } - Time);
-  }
-
-  m_BeginRenderFrameTime = system_clock::now();
+  LOGGER(Info) << "Basements Simple2DGame destroyed.";
 }
 
 void Simple2DGame::AddCommonComponents(void)
 {
   // Создание общих рендеров, которые будут использоваться всеми объектами
-  // (объекты будут запрашивать эти рендеры по их id).
+  // (объекты будут использовать рендеры, запрашивая их по id).
 
-  LoadTexture("simple2dgame.bricks.jpg", uT("Simple2DGame.Texture"));
+  const auto pMainUpdater = Component_t::Make(
+    {
+      { uT("id"), uT("Simple2DGame.Updater.Main") },
+      { uT("type"), uT("Updater") },
+    });
+
+  const Updater_t EndGame = [=](const float _Time)
+  {
+    AddToRenderQueue(m_CameraId);
+    AddToRenderQueue(m_BackGroundId);
+    AddToRenderQueue(m_ClockId);
+    AddToRenderQueue(m_EnemiesId);
+    AddToRenderQueue(m_RedSquareId);
+
+    m_BeginGameTime = _Time - m_GameTime;
+  };
+
+  const Updater_t FinishGame = [=](const float _Time)
+  {
+    m_GameTime = _Time - m_BeginGameTime;
+
+    m_Events[::events::Simple2DGame.Finish](m_GameTime);
+
+    (*pMainUpdater)[uT("function")] = EndGame;
+  };
+
+  const Updater_t ProcessGame = [=](const float _Time)
+  {
+    AddToRenderQueue(m_CameraId);
+    AddToRenderQueue(m_BackGroundId);
+    AddToRenderQueue(m_ClockId);
+    AddToRenderQueue(m_EnemiesId);
+    AddToRenderQueue(m_GreenSquareId);
+
+    const float FrameTime = _Time - m_LastTime;
+    m_LastTime = _Time;
+
+    if (m_IsTouch)
+    {
+      m_UserUnit.Update(m_MouseX, m_MouseY);
+    }
+
+    if (m_UserUnit.X.GetMin() <= -0.5f ||
+      m_UserUnit.X.GetMax() >= 0.5f ||
+      m_UserUnit.Y.GetMin() <= -0.5f ||
+      m_UserUnit.Y.GetMax() >= 0.5f)
+    {
+      (*pMainUpdater)[uT("function")] = FinishGame;
+      return;
+    }
+
+    m_EnemiesSpeed += 0.02f * FrameTime;
+
+    for (auto & Enemy : m_Enemies)
+    {
+      Enemy.Update(m_EnemiesSpeed * FrameTime);
+
+      if (m_UserUnit.IsIntersect(Enemy))
+      {
+        (*pMainUpdater)[uT("function")] = FinishGame;
+        return;
+      }
+    }
+  };
+
+  const Updater_t WaitStartGame = [=](const float _Time)
+  {
+    m_BeginGameTime = _Time;
+
+    // Этот updater будет вызываться в начале рендеринга каждого кадра, его
+    // задача - добавить в список рендеринга объекты, которые должны быть
+    // отрендерены.
+
+    AddToRenderQueue(m_CameraId);
+    AddToRenderQueue(m_BackGroundId);
+    AddToRenderQueue(m_ClockId);
+    AddToRenderQueue(m_EnemiesId);
+    AddToRenderQueue(m_GreenSquareId);
+
+    if (!m_IsTouch) return;
+    if (m_UserUnit.X.GetMin() > m_MouseX) return;
+    if (m_UserUnit.X.GetMax() < m_MouseX) return;
+    if (m_UserUnit.Y.GetMin() > m_MouseY) return;
+    if (m_UserUnit.Y.GetMax() < m_MouseY) return;
+
+    (*pMainUpdater)[uT("function")] = ProcessGame;
+    m_LastTime = _Time;
+  };
+
+  (*pMainUpdater)[uT("function")] = WaitStartGame;
+
+  const Updater_t Synchronizer60fps = [=](const float _Now)
+  {
+    using namespace ::std::chrono;
+
+    static auto BeginRenderFrameTime = _Now;
+
+    // Синхронизация в 60 fps
+
+    const auto Time = 0.016666667f - (_Now - BeginRenderFrameTime);
+
+    if (Time > 0) ::std::this_thread::sleep_for(duration<float>{ Time });
+
+    BeginRenderFrameTime = _Now;
+  };
+
+  const auto pSynchronizer60fps = Component_t::Make(
+    {
+      { uT("id"), uT("Simple2DGame.Updater.Synchronizer") },
+      { uT("type"), uT("Updater") },
+      { uT("function"), Synchronizer60fps },
+    });
+
+  using namespace ::alicorn::extension::std;
 
   /// [Common objects]
-  const ::std::vector<int> IndexData = { 0,  1,  2,   2,  1,  3, };
-    
-  static const auto ShaderData =
-    ::covellite::app::Vfs_t::GetInstance().GetData("Data\\Shaders\\Textured.fx");
-    
-  const auto Renders = m_pRenders->Obtain(
+  const auto & Vfs = ::covellite::app::Vfs_t::GetInstance();
+        
+  const auto CommonObjectId = CreateObject(
+    LoadTexture("simple2dgame.bricks.jpg", uT("Simple2DGame.Texture")) +
+    LoadTexture("simple2dgame.clock.png", uT("Simple2DGame.Texture.Clock")) +
+    GameObject_t
     {
       Component_t::Make(
       {
         { uT("id"), uT("Simple2DGame.Shader.Pixel.Textured") },
         { uT("type"), uT("Shader") },
         { uT("entry"), uT("psTextured") },
-        { uT("data"), ShaderData.data() },
-        { uT("count"), ShaderData.size() },
+        { uT("content"), Vfs.GetData("Data\\Shaders\\Textured.fx") },
       }),
       Component_t::Make(
       {
         { uT("id"), uT("Simple2DGame.Shader.Pixel.Colored") },
         { uT("type"), uT("Shader") },
         { uT("entry"), uT("psColored") },
-      }),
-      Component_t::Make(
-      {
-        { uT("type"), uT("Data") },
-        { uT("kind"), uT("Buffer") },
-        { uT("data"), IndexData.data() },
-        { uT("count"), IndexData.size() },
+        // { uT("content"), - }, // использовать шейдер по умолчанию
       }),
       Component_t::Make(
       {
         { uT("id"), uT("Simple2DGame.Present.Rectangle") },
         { uT("type"), uT("Present") },
+        { uT("content"), ::std::vector<int>{ 0,  1,  2,   2,  1,  3, } },
       }),
+      pSynchronizer60fps,
+      pMainUpdater
     });
   /// [Common objects]
-
-  ::boost::ignore_unused(Renders);
 }
 
-void Simple2DGame::AddCamera(float _Xo, float _Yo)
+auto Simple2DGame::AddCamera(float _Xo, float _Yo) -> ObjectId_t
 {
   const Id Id;
 
   /// [Create camera]
-  m_Objects[Id] = m_pRenders->Obtain(
+  const auto pCameraPosition = Component_t::Make(
     {
-      Component_t::Make(
-      {
-        { uT("type"), uT("Data") },
-        { uT("kind"), uT("Position") },
-        { uT("x"), -_Xo },
-        { uT("y"), -_Yo },
-      }),
+      { uT("type"), uT("Data") },
+      { uT("kind"), uT("Position") },
+      { uT("x"), -_Xo },
+      { uT("y"), -_Yo },
+    });
+    
+  return CreateObject(
+    {
       Component_t::Make(
       {
         { uT("id"), uT("Simple2DGame.Camera.") + Id.GetStringId() },
         { uT("type"), uT("Camera") },
         { uT("kind"), uT("Orthographic") },
+        { uT("service"), GameObject_t{ pCameraPosition } },
       }),
       Component_t::Make(
       {
@@ -225,34 +305,36 @@ void Simple2DGame::AddCamera(float _Xo, float _Yo)
         { uT("entry"), uT("vsFlat") },
       }),
     });
-    
-  m_Scene.push_back(Id);
   /// [Create camera]
 }
 
-void Simple2DGame::AddBackground(void)
+auto Simple2DGame::AddBackground(void) -> ObjectId_t
 {
-  m_Scene.push_back(BuildRectangle({},
-    m_Width / m_GameFieldSize, m_Height / m_GameFieldSize,
-    uT("Simple2DGame.Texture")));
+  using namespace ::alicorn::extension::std;
 
-  m_Scene.push_back(BuildRectangle({},
-    1.0f, 1.0f,
-    0.0f, 0.0f, 0.0f, 1.0f)); // 0xFF000000
+  return CreateObject(
+    BuildRectangle({},
+      m_Width / m_GameFieldSize, m_Height / m_GameFieldSize,
+      uT("Simple2DGame.Texture")) +
+    BuildRectangle({},
+      1.0f, 1.0f,
+      0.0f, 0.0f, 0.0f, 1.0f)); // 0xFF000000
 }
 
-void Simple2DGame::AddClock(void)
+auto Simple2DGame::AddClock(void) -> ObjectId_t
 {
-  LoadTexture("simple2dgame.clock.png", uT("Simple2DGame.Texture.Clock"));
+  using namespace ::alicorn::extension::std;
+
+  GameObject_t Result;
 
   // Циферблат
 
-  m_Scene.push_back(BuildRectangle(
+  Result += BuildRectangle(
     Rect{ -0.5f, -0.5f, 0.5f, 0.5f },
     Rect{ 0.00f, 0.00f, 0.72f, 0.72f },
     1.0f, 1.0f, 1.0f, 0.5f, //0x7FFFFFFF,
     uT("Simple2DGame.Texture.Clock"),
-    {}));
+    {});
 
   // Секундная стрелка
 
@@ -262,7 +344,7 @@ void Simple2DGame::AddClock(void)
       { uT("kind"), uT("Rotation") },
     });
 
-  m_Scene.push_back(BuildRectangle(
+  Result += BuildRectangle(
     Rect{ -0.05f, -0.22f, 0.05f, 0.22f },
     Rect{ 0.85f, 0.14f, 0.99f, 0.70f },
     1.0f, 1.0f, 1.0f, 0.5f, //0x7FFFFFFF,
@@ -275,7 +357,7 @@ void Simple2DGame::AddClock(void)
           { uT("y"), -0.161f },
         }),
       pSecondArrowRotation
-    }));
+    });
 
   // Миллисекундная стрелка
 
@@ -285,7 +367,7 @@ void Simple2DGame::AddClock(void)
       { uT("kind"), uT("Rotation") },
     });
 
-  m_Scene.push_back(BuildRectangle(
+  Result += BuildRectangle(
     Rect{ -0.04f, -0.27f, 0.04f, 0.27f },
     Rect{ 0.738f, 0.00f, 0.848f, 0.70f },
     1.0f, 0.0f, 0.0f, 0.5f, //0x7F0000FF,
@@ -298,32 +380,40 @@ void Simple2DGame::AddClock(void)
           { uT("y"), -0.22f },
         }),
       pMillisecondArrowRotation
-    }));
+    });
 
   // Заглушка над центром стрелок
 
-  m_Scene.push_back(BuildRectangle(
+  Result += BuildRectangle(
     Rect{ -0.03f, -0.03f, 0.03f, 0.03f },
     Rect{ 0.755f, 0.768f, 0.957f, 0.965f },
     0.0f, 0.0f, 0.0f, 0.5f, //0x7F000000,
     uT("Simple2DGame.Texture.Clock"),
-    { }));
+    { });
 
-  m_ClockUpdater = [=](void)
+  const Updater_t ClockUpdater = [=](const float _Time)
   {
-    using namespace ::std::chrono;
-
-    const float GameTime = duration<float>{
-      system_clock::now() - m_BeginGameTime }.count();
-
     float Second = 0.0f;
-    const float MilliSecond = modff(GameTime, &Second);
+    const float MilliSecond = modff(_Time - m_BeginGameTime, &Second);
 
-    pSecondArrowRotation->SetValue(uT("z"), 
-      3.1415926f * 2.0f * Second / 60.0f);
-    pMillisecondArrowRotation->SetValue(uT("z"), 
-      3.1415926f * 2.0f * MilliSecond);
+    namespace math = ::alicorn::extension::cpp::math;
+
+    (*pSecondArrowRotation)[uT("z")] = 
+      math::Constant<float>::Pi * 2.0f * Second / 60.0f;
+    (*pMillisecondArrowRotation)[uT("z")] = 
+      math::Constant<float>::Pi * 2.0f * MilliSecond;
   };
+
+  Result.push_back(
+    Component_t::Make(
+      {
+        { uT("id"), uT("Simple2DGame.Updater.Clock") },
+        { uT("type"), uT("Updater") },
+        { uT("function"), ClockUpdater },
+      })
+  );
+
+  return CreateObject(Result);
 }
 
 void Simple2DGame::AddActors(void)
@@ -332,95 +422,33 @@ void Simple2DGame::AddActors(void)
   m_Enemies.push_back(GameUnit{ -0.25f, 0.25f, 0.3f, 0.15f, -115.0f });
   m_Enemies.push_back(GameUnit{ 0.25f, -0.25f, 0.15f, 0.3f, -60.0f });
 
+  using namespace ::alicorn::extension::std;
+
+  GameObject_t Result;
+
   for (const auto & Enemy : m_Enemies)
   {
-    m_Scene.push_back(BuildRectangle(
+    Result += BuildRectangle(
       { Enemy.m_pPosition },
       Enemy.X.Size, Enemy.Y.Size,
-      uT("Simple2DGame.Texture")));
+      uT("Simple2DGame.Texture"));
   }
 
-  m_Scene.push_back(BuildRectangle(
+  m_EnemiesId = CreateObject(Result);
+
+  m_GreenSquareId = CreateObject(BuildRectangle(
     { m_UserUnit.m_pPosition },
     m_UserUnit.X.Size, m_UserUnit.Y.Size,
     0.0f, 1.0f, 0.0f, 1.0f));//0xFF00FF00));
 
-  auto EndGame = [&](void)
-  {
-    m_Scene.pop_back();
-    m_Scene.push_back(BuildRectangle(
-      { m_UserUnit.m_pPosition },
-      m_UserUnit.X.Size, m_UserUnit.Y.Size,
-      1.0f, 0.0f, 0.0f, 1.0f));//0xFF0000FF));
-
-    using namespace ::std::chrono;
-
-    const float GameTime = duration<float>{
-      system_clock::now() - m_BeginGameTime }.count();
-
-    m_Events[::events::Simple2DGame.Finish](GameTime);
-
-    m_Updaters.clear();
-  };
-
-  auto ProcessGame = [&, EndGame](void)
-  {
-    using namespace ::std::chrono;
-
-    const auto CurrentTime = system_clock::now();
-    const float FrameTime = duration<float>{ CurrentTime - m_LastTime }.count();
-    m_LastTime = CurrentTime;
-
-    if (m_IsTouch)
-    {
-      m_UserUnit.Update(m_MouseX, m_MouseY);
-    }
-
-    if (m_UserUnit.X.GetMin() <= -0.5f ||
-      m_UserUnit.X.GetMax() >= 0.5f ||
-      m_UserUnit.Y.GetMin() <= -0.5f ||
-      m_UserUnit.Y.GetMax() >= 0.5f)
-    {
-      m_Updaters = { EndGame };
-      return;
-    }
-
-    m_EnemiesSpeed += 0.02f * FrameTime;
-
-    for (auto & Enemy : m_Enemies)
-    {
-      Enemy.Update(m_EnemiesSpeed * FrameTime);
-
-      if (m_UserUnit.IsIntersect(Enemy))
-      {
-        m_Updaters = { EndGame };
-        return;
-      }
-    }
-  };
-
-  auto WaitStartGame = [&, ProcessGame](void)
-  {
-    if (!m_IsTouch) return;
-    if (m_UserUnit.X.GetMin() > m_MouseX) return;
-    if (m_UserUnit.X.GetMax() < m_MouseX) return;
-    if (m_UserUnit.Y.GetMin() > m_MouseY) return;
-    if (m_UserUnit.Y.GetMax() < m_MouseY) return;
-
-    m_BeginGameTime = ::std::chrono::system_clock::now();
-    m_LastTime = ::std::chrono::system_clock::now();
-    m_Updaters = 
-    {
-      ProcessGame,
-      m_ClockUpdater,
-    };
-  };
-
-  m_Updaters = { WaitStartGame };
+  m_RedSquareId = CreateObject(BuildRectangle(
+    { m_UserUnit.m_pPosition },
+    m_UserUnit.X.Size, m_UserUnit.Y.Size,
+    1.0f, 0.0f, 0.0f, 1.0f));//0xFF0000FF));
 }
 
-auto Simple2DGame::BuildRectangle(const Object_t & _Transform,
-  float _Width, float _Height, const String_t & _TextureId) -> Id
+auto Simple2DGame::BuildRectangle(const GameObject_t & _Transform,
+  float _Width, float _Height, const String_t & _TextureId) -> GameObject_t
 {
   const float TextureOneCellInPixel = 0.2f;
   const float U = _Width / TextureOneCellInPixel;
@@ -434,8 +462,8 @@ auto Simple2DGame::BuildRectangle(const Object_t & _Transform,
     _Transform);
 }
 
-auto Simple2DGame::BuildRectangle(const Object_t & _Transform,
-  float _Width, float _Height, float _R, float _G, float _B, float _A) -> Id
+auto Simple2DGame::BuildRectangle(const GameObject_t & _Transform,
+  float _Width, float _Height, float _R, float _G, float _B, float _A) -> GameObject_t
 {
   return BuildRectangle(
     Rect{ -_Width / 2.0f, -_Height / 2.0f, _Width / 2.0f, _Height / 2.0f },
@@ -457,7 +485,7 @@ auto Simple2DGame::BuildRectangle(
   const Rect & _TexCoord,
   float _R, float _G, float _B, float _A,
   const String_t & _TextureId,
-  const Object_t & _Transform) -> Id
+  const GameObject_t & _Transform) -> GameObject_t
 {
   return BuildRectangle(_Polygon, _TexCoord, _R, _G, _B, _A,
     {
@@ -478,8 +506,8 @@ auto Simple2DGame::BuildRectangle(
   const Rect & _Polygon,
   const Rect & _TexCoord,
   float _R, float _G, float _B, float _A,
-  const Object_t & _PixelData, 
-  const Object_t & _Transform) -> Id
+  const GameObject_t & _PixelData, 
+  const GameObject_t & _Transform) -> GameObject_t
 {
   const Id Id;
 
@@ -509,49 +537,39 @@ auto Simple2DGame::BuildRectangle(
   };
   /// [Vertex buffer]
 
+  GameObject_t Trasform = _Transform;
+  Trasform.push_back(Component_t::Make(
+    {
+      { uT("type"), uT("Data") },
+      { uT("kind"), uT("Scale") },
+      { uT("x"), m_GameFieldSize },
+      { uT("y"), m_GameFieldSize },
+    }));
+
   using namespace ::alicorn::extension::std;
 
-  m_Objects[Id] = m_pRenders->Obtain(
+  return 
     _PixelData +
-    /// [Common object renders]
-    Object_t
+    GameObject_t
     {
-      Component_t::Make(
-      {
-        { uT("type"), uT("Data") },
-        { uT("kind"), uT("Buffer") },
-        { uT("data"), VertexData.data() },
-        { uT("count"), VertexData.size() },
-        { uT("dimension"), 2 },
-      }),
+      /// [Common object renders]
       Component_t::Make(
       {
         { uT("id"), uT("Simple2DGame.Buffer.Vertex.") + Id.GetStringId() },
         { uT("type"), uT("Buffer") },
-      }),
-    } +
-    _Transform +
-    Object_t
-    {
-      Component_t::Make(
-      {
-        { uT("type"), uT("Data") },
-        { uT("kind"), uT("Scale") },
-        { uT("x"), m_GameFieldSize },
-        { uT("y"), m_GameFieldSize },
+        { uT("content"), VertexData },
+        { uT("dimension"), 2 },
       }),
       Component_t::Make(
       {
         { uT("id"), uT("Simple2DGame.Transform.Rectangle.") + Id.GetStringId() },
         { uT("type"), uT("Transform") },
+        { uT("service"), Trasform },
       }),
       Component_t::Make(
       {
         { uT("id"), uT("Simple2DGame.Present.Rectangle") },
-        { uT("type"), uT("Present") },
       })
-    });
-    /// [Common object renders]
-
-  return Id;
+      /// [Common object renders]
+    };
 }

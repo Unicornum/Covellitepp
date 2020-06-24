@@ -146,17 +146,6 @@ Object_t Animated::Mesh::GetObject(const Any_t & _Value) const /*override*/
 
   const auto HoldInBoneName = uT("mixamorig:RightHandIndex2");
 
-  if (m_pVertexData == nullptr)
-  {
-    m_pVertexData = Component_t::Make(
-      {
-        { uT("type"), uT("Data") },
-        { uT("kind"), uT("Buffer") },
-        { uT("data"), m_Vertexes.data() },
-        { uT("count"), m_Vertexes.size() },
-      });
-  }
-
   if (m_pSkinData == nullptr)
   {
     m_pSkinData = Component_t::Make(
@@ -187,11 +176,11 @@ Object_t Animated::Mesh::GetObject(const Any_t & _Value) const /*override*/
 
   Object_t Result =
   {
-    m_pVertexData,
     Component_t::Make(
     {
       { uT("id"), m_MeshId + Id },
       { uT("type"), uT("Buffer") },
+      { uT("content"), m_Vertexes },
       { uT("mapper"), cbVertexData },
     }),
   };
@@ -216,8 +205,6 @@ Object_t Animated::Mesh::GetHoldInHandObject(
 {
   using Updater_t = ::covellite::api::Updater_t;
 
-  const auto & HoldInHand = m_MaterialIndices[uT("Human.Head.png")];
-
   const auto pHolInHandPosition = Component_t::Make(
     {
       { uT("type"), uT("Data") },
@@ -236,8 +223,8 @@ Object_t Animated::Mesh::GetHoldInHandObject(
 
   const Updater_t HoldInHandUpdater = [=](const float /*_Time*/)
   {
-    auto BoneTransforms =
-      pTransformBones->GetValue(uT("bones"), BoneTransforms_t{});
+    BoneTransforms_t BoneTransforms =
+      (*pTransformBones)[uT("bones")].Default(BoneTransforms_t{});
 
     const auto tfrmHand = BoneTransforms[_HoldBoneName];
 
@@ -247,39 +234,21 @@ Object_t Animated::Mesh::GetHoldInHandObject(
 
     const auto Translation = tfrmHand * HandPosition;
 
-    pHolInHandPosition->SetValue(uT("x"), Translation.x);
-    pHolInHandPosition->SetValue(uT("y"), Translation.y);
-    pHolInHandPosition->SetValue(uT("z"), Translation.z);
+    (*pHolInHandPosition)[uT("x")] = Translation.x;
+    (*pHolInHandPosition)[uT("y")] = Translation.y;
+    (*pHolInHandPosition)[uT("z")] = Translation.z;
 
     const ::glm::vec4 HandRotation{ 0.0f, 0.0f, -1.0f, 0.0f };
 
     const auto Rotation = tfrmHand * HandRotation;
 
-    pHolInHandRotation->SetValue(uT("x"), Rotation.x);
-    pHolInHandRotation->SetValue(uT("y"), Rotation.y);
-    pHolInHandRotation->SetValue(uT("z"), Rotation.z);
+    (*pHolInHandRotation)[uT("x")] = Rotation.x;
+    (*pHolInHandRotation)[uT("y")] = Rotation.y;
+    (*pHolInHandRotation)[uT("z")] = Rotation.z;
   };
 
-  return Object_t
+  const Object_t Transform =
   {
-    Component_t::Make(
-    {
-      { uT("id"), uT("Demo.Animated.HoldInHand.Updater") },
-      { uT("type"), uT("Updater") },
-      { uT("function"), HoldInHandUpdater },
-    }),
-    Component_t::Make(
-    {
-      { uT("type"), uT("Data") },
-      { uT("kind"), uT("Buffer") },
-      { uT("data"), static_cast<const Vertex_t *>(m_Vertexes.data()) },
-      { uT("count"), m_Vertexes.size() },
-    }),
-    Component_t::Make(
-    {
-      { uT("id"), m_MeshId + uT(".Vertex.HoldInHand") },
-      { uT("type"), uT("Buffer") },
-    }),
     Component_t::Make(
     {
       { uT("type"), uT("Data") },
@@ -298,17 +267,33 @@ Object_t Animated::Mesh::GetHoldInHandObject(
     }),
     pHolInHandRotation,
     pHolInHandPosition,
+  };
+
+  return Object_t
+  {
+    Component_t::Make(
+    {
+      { uT("id"), uT("Demo.Animated.HoldInHand.Updater") },
+      { uT("type"), uT("Updater") },
+      { uT("function"), HoldInHandUpdater },
+    }),
+    Component_t::Make(
+    {
+      { uT("id"), m_MeshId + uT(".Vertex.HoldInHand") },
+      { uT("type"), uT("Buffer") },
+      { uT("content"), m_Vertexes },
+    }),
     Component_t::Make(
     {
       { uT("id"), m_MeshId + uT(".Transform.HoldInHand") },
       { uT("type"), uT("Transform") },
+      { uT("service"), Transform },
     }),
     Component_t::Make(
     {
       { uT("id"), m_MeshId + uT(".Present.HoldInHand") },
       { uT("type"), uT("Present") },
-      { uT("data"), static_cast<const int *>(HoldInHand.data()) },
-      { uT("count"), HoldInHand.size() },
+      { uT("content"), m_MaterialIndices[uT("Human.Head.png")] },
     })
   };
 }

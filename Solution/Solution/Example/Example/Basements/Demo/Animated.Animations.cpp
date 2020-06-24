@@ -15,20 +15,22 @@ auto Animated::Animations::CreateAnimation(
   const ComponentPtr_t & _pTransform,
   const int _SkipAnimationFrames) -> BufferMapper_t
 {
-  const auto Name = _pAnimation->GetValue(uT("name"), uT("Unknown"));
-  const auto TicksPerSecond = _pAnimation->GetValue(uT("tps"), 1.0f);
-  const auto RawFrames = _pAnimation->GetValue(uT("frames"), animation::Frames_t{});
+  const String_t Name = 
+    (*_pAnimation)[uT("name")].Default(uT("Unknown"));
+  const float TicksPerSecond = 
+    (*_pAnimation)[uT("tps")].Default(1.0f);
+  const animation::Frames_t RawFrames = 
+    (*_pAnimation)[uT("frames")].Default(animation::Frames_t{});
 
   const auto pAnimation = Get(Name, TicksPerSecond, RawFrames);
 
   static const ::std::map<String_t, ::glm::mat4> TransformBonesDummy;
-  const auto TransformBones =
-    _pTransform->GetValue(uT("bones"), TransformBonesDummy);
+  const ::std::map<String_t, ::glm::mat4> TransformBones =
+    (*_pTransform)[uT("bones")].Default(TransformBonesDummy);
 
   using animation::Skeleton_t;
-  static const Skeleton_t SkeletonDummy;
-  const auto & Skeleton =
-    _pSkin->GetValue<const Skeleton_t &>(uT("skeleton"), SkeletonDummy);
+  const Skeleton_t & Skeleton = 
+    (*_pSkin)[uT("skeleton")].Default(Skeleton_t{});
 
   const auto UsingBones = Get(TransformBones, Skeleton);
 
@@ -50,8 +52,6 @@ auto Animated::Animations::CreateAnimation(
     make_unique<::std::size_t>(static_cast<::std::size_t>(-1));
   const auto piLastFrame = make_shared(piLastFrameTemp);
 
-  static const auto hRawData = ::std::hash<String_t>{}(uT("data"));
-
   return [=](::covellite::api::Vertex * _pData)
   {
     if (_pData == nullptr)
@@ -68,8 +68,8 @@ auto Animated::Animations::CreateAnimation(
       return true;
     }
 
-    const auto & Skeleton =
-      _pSkin->GetValue<const Skeleton_t &>(uT("skeleton"), SkeletonDummy);
+    const Skeleton_t & Skeleton =
+      (*_pSkin)[uT("skeleton")].Default(Skeleton_t{});
 
     auto Frame = pAnimation->GetFrame(*piLastFrame, Skeleton);
     if (Frame.empty()) return false;
@@ -83,13 +83,11 @@ auto Animated::Animations::CreateAnimation(
         TransformBones[Bone.first] = Frame[Bone.second];
       }
 
-      _pTransform->SetValue(uT("bones"), TransformBones);
+      (*_pTransform)[uT("bones")] = TransformBones;
     }
 
     using animation::Skin_t;
-    static const Skin_t SkinDummy;
-    const auto & SkinVertexes =
-      _pSkin->GetValue<const Skin_t &>(uT("vertexes"), SkinDummy);
+    const Skin_t & SkinVertexes = (*_pSkin)[uT("vertexes")].Default(Skin_t{});
 
     const auto VertexCount = static_cast<int>(SkinVertexes.size());
 

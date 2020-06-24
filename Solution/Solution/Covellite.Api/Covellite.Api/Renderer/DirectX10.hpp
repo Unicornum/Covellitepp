@@ -62,12 +62,18 @@ protected:
   Render_t CreateCamera(const ComponentPtr_t &) override;
   Render_t CreateBkSurface(const ComponentPtr_t &) override;
   Render_t CreateState(const ComponentPtr_t &) override;
-  Render_t CreateFog(const ComponentPtr_t &) override;
   Render_t CreateTexture(const ComponentPtr_t &) override;
   Render_t CreateShader(const ComponentPtr_t &) override;
   Render_t CreateBuffer(const ComponentPtr_t &) override;
   Render_t CreateTransform(const ComponentPtr_t &) override;
   Render_t CreatePresentBuffer(const ComponentPtr_t &) override;
+
+private:
+  // deprecated
+  Render_t CreateFog(const ComponentPtr_t &) noexcept override { return nullptr; }
+  Render_t CreateMaterial(const ComponentPtr_t &) noexcept override { return nullptr; }
+  Render_t CreateLight(const ComponentPtr_t &) noexcept override { return nullptr; }
+  Render_t CreateGeometry(const ComponentPtr_t &) noexcept override { return nullptr; }
 
 private:
   void SetViewport(int, int);
@@ -98,6 +104,10 @@ private:
 
 public:
   explicit DirectX10(const Data_t &);
+  DirectX10(const DirectX10 &) = delete;
+  DirectX10(DirectX10 &&) = delete;
+  DirectX10 & operator= (const DirectX10 &) = delete;
+  DirectX10 & operator= (DirectX10 &&) = delete;
   ~DirectX10(void);
 };
 

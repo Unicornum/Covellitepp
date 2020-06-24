@@ -43,7 +43,7 @@ public:
 public:
   // Èםעונפויס IGraphicApi:
   String_t GetUsingApi(void) const override;
-  void ResizeWindow(int32_t, int32_t) final;
+  void ResizeWindow(int32_t, int32_t) noexcept final;
 
 protected:
   // Èםעופויס GraphicApi

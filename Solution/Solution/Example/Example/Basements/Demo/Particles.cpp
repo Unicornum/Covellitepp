@@ -189,29 +189,17 @@ auto Particles::GetVertexesObject(void) const -> Objects_t
   {
     Component_t::Make(
     {
-      { uT("type"), uT("Data") },
-      { uT("kind"), uT("Shader") },
-      { uT("entry"), uT("vsParticles") },
-      { uT("data"), ShaderData.data() },
-      { uT("count"), ShaderData.size() },
-    }),
-    Component_t::Make(
-    {
       { uT("id"), uT("Demo.Shader.Vertex.Particles") },
       { uT("type"), uT("Shader") },
-    }),
-    Component_t::Make(
-    {
-      { uT("type"), uT("Data") },
-      { uT("kind"), uT("Shader") },
-      { uT("entry"), uT("psParticles") },
-      { uT("data"), ShaderData.data() },
-      { uT("count"), ShaderData.size() },
+      { uT("entry"), uT("vsParticles") },
+      { uT("content"), ShaderData },
     }),
     Component_t::Make(
     {
       { uT("id"), uT("Demo.Shader.Pixel.Particles") },
       { uT("type"), uT("Shader") },
+      { uT("entry"), uT("psParticles") },
+      { uT("content"), ShaderData },
     }),
     Component_t::Make(
     {
@@ -223,8 +211,7 @@ auto Particles::GetVertexesObject(void) const -> Objects_t
     {
       { uT("id"), uT("Demo.Vertex.Particles") },
       { uT("type"), uT("Buffer") },
-      { uT("data"), m_Vertexes.data() },
-      { uT("count"), m_Vertexes.size() },
+      { uT("content"), m_Vertexes },
       { uT("mapper"), Mapper },
     }),
     Component_t::Make(
@@ -256,8 +243,7 @@ auto Particles::GetVertexesObject(void) const -> Objects_t
       {
         { uT("id"), uT("Demo.Present.Particles.") + Id },
         { uT("type"), uT("Present") },
-        { uT("data"), m_Indices[i].data() },
-        { uT("count"), m_Indices[i].size() },
+        { uT("content"), m_Indices[i] },
       })
     };
   }
@@ -390,6 +376,18 @@ auto Particles::GetInstancedObject(void) const -> Objects_t
     LastTime = _Time;
   };
 
+  const Object_t InstanceData =
+  {
+    Component_t::Make(
+    {
+      { uT("type"), uT("Data") },
+      { uT("kind"), uT("Buffer") },
+      { uT("mapper"), Mapper },
+      { uT("count"), m_Count },
+      { uT("size"), m_Count * sizeof(Instance) },
+    })
+  };
+
   return
   {
     GetTexture(0).GetObject() +
@@ -397,30 +395,18 @@ auto Particles::GetInstancedObject(void) const -> Objects_t
     {
       Component_t::Make(
       {
-        { uT("type"), uT("Data") },
-        { uT("kind"), uT("Shader") },
-        { uT("entry"), uT("vsParticles") },
-        { uT("data"), ShaderData.data() },
-        { uT("count"), ShaderData.size() },
-        { uT("instance"), Instance::GetDescriptor() },
-      }),
-      Component_t::Make(
-      {
         { uT("id"), uT("Demo.Shader.Vertex.Particles") },
         { uT("type"), uT("Shader") },
-      }),
-      Component_t::Make(
-      {
-        { uT("type"), uT("Data") },
-        { uT("kind"), uT("Shader") },
-        { uT("entry"), uT("psParticles") },
-        { uT("data"), ShaderData.data() },
-        { uT("count"), ShaderData.size() },
+        { uT("entry"), uT("vsParticles") },
+        { uT("content"), ShaderData },
+        { uT("instance"), Instance::GetDescriptor() },
       }),
       Component_t::Make(
       {
         { uT("id"), uT("Demo.Shader.Pixel.Particles") },
         { uT("type"), uT("Shader") },
+        { uT("entry"), uT("psParticles") },
+        { uT("content"), ShaderData },
       }),
       Component_t::Make(
       {
@@ -440,8 +426,7 @@ auto Particles::GetInstancedObject(void) const -> Objects_t
       {
         { uT("id"), uT("Demo.Vertex.Particles") },
         { uT("type"), uT("Buffer") },
-        { uT("data"), m_Vertexes.data() },
-        { uT("count"), m_Vertexes.size() },
+        { uT("content"), m_Vertexes },
       }),
       Component_t::Make(
       {
@@ -451,18 +436,10 @@ auto Particles::GetInstancedObject(void) const -> Objects_t
       }),
       Component_t::Make(
       {
-        { uT("type"), uT("Data") },
-        { uT("kind"), uT("Buffer") },
-        { uT("mapper"), Mapper },
-        { uT("count"), m_Count },
-        { uT("size"), m_Count * sizeof(Instance) },
-      }),
-      Component_t::Make(
-      {
         { uT("id"), uT("Demo.Present.Particles") },
         { uT("type"), uT("Present") },
-        { uT("data"), m_Indices[0].data() },
-        { uT("count"), m_Indices[0].size() },
+        { uT("content"), m_Indices[0] },
+        { uT("service"), InstanceData },
       })
     }
   };

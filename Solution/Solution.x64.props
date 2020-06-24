@@ -18,6 +18,7 @@
       <OpenMPSupport>true</OpenMPSupport>
       <AdditionalOptions>/Zc:twoPhase- %(AdditionalOptions)</AdditionalOptions>
       <EnablePREfast>true</EnablePREfast>
+      <DisableSpecificWarnings>5045;26481;26446;26472;26486;26426;26485;%(DisableSpecificWarnings)</DisableSpecificWarnings>
       <WarningLevel>Level4</WarningLevel>
     </ClCompile>
   </ItemDefinitionGroup>
