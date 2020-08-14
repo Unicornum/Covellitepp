@@ -8,30 +8,31 @@
 TODO("Недопустимая ссылка на заголовочный файл!");
 #include "../Basements/Demo.hpp"
 
-using namespace layers;
+namespace layers
+{
 
-const auto LayerDescription =
-  uT("Демонстрационный режим предназначен для демонстрации различных ") +
-  uT("возможностей, предоставляемых базовым функционалом фреймворка ") +
-  uT("(а также тестирования его работы в течении длительного времени).<br/> ") +
-  uT("<br/>") +
-  uT("Главное меню:<br/>") +
-  uT("- <b>Lanscape</b> - бесконечный ландшафт, генерируемый случайным образом ") +
-  uT("(режимы дня/ночи и автоматического/ручного движения указывается ") +
-  uT("в настройках; ручное управление осуществляется при помощи кнопок ") + 
-  uT("клавиатуры QWEASDZXC или жестов мышью с нажатой левой кнопкой).<br/>") +
-  uT("Ночной режим демонстрирует рендеринг с использованием большого ") +
-  uT("количества (100+) точечных источников с сцене.<br/>") +
-  uT("- <b>Animation</b> - рендеринг анимированной модели, поверхность ") +
-  uT("которой отображается при помощи нескольких текстур.<br/>") +
-  uT("- <b>Shadows</b> - демонстрация использования рендеринга во внеэкранную ") +
-  uT("поверхность (динамичесткие тени и глубина резкости).<br/>") +
-  uT("- <b>Help</b> - отображение окна с этим описанием.<br/>") +
-  uT("- <b>Exit</b> - возврат на главное окно программы-примера ") +
-  uT("использования фреймворка.<br/>") +
-  uT("<br/>") +
-  uT("Выход в главное меню производится кнопкой в левом верхнем углу ") +
-  uT("внутриигрового меню.<br/>");
+const auto DemoLayerDescription =
+uT("Демонстрационный режим предназначен для демонстрации различных ") +
+uT("возможностей, предоставляемых базовым функционалом фреймворка ") +
+uT("(а также тестирования его работы в течении длительного времени).<br/> ") +
+uT("<br/>") +
+uT("Главное меню:<br/>") +
+uT("- <b>Lanscape</b> - бесконечный ландшафт, генерируемый случайным образом ") +
+uT("(режимы дня/ночи и автоматического/ручного движения указывается ") +
+uT("в настройках; ручное управление осуществляется при помощи кнопок ") +
+uT("клавиатуры QWEASDZXC или жестов мышью с нажатой левой кнопкой).<br/>") +
+uT("Ночной режим демонстрирует рендеринг с использованием большого ") +
+uT("количества (100+) точечных источников с сцене.<br/>") +
+uT("- <b>Animation</b> - рендеринг анимированной модели, поверхность ") +
+uT("которой отображается при помощи нескольких текстур.<br/>") +
+uT("- <b>Shadows</b> - демонстрация использования рендеринга во внеэкранную ") +
+uT("поверхность (динамичесткие тени и глубина резкости).<br/>") +
+uT("- <b>Help</b> - отображение окна с этим описанием.<br/>") +
+uT("- <b>Exit</b> - возврат на главное окно программы-примера ") +
+uT("использования фреймворка.<br/>") +
+uT("<br/>") +
+uT("Выход в главное меню производится кнопкой в левом верхнем углу ") +
+uT("внутриигрового меню.<br/>");
 
 Demo::Demo(IWindowGui_t & _Window) :
   Layer(_Window, "Data/demo.rml")
@@ -46,9 +47,9 @@ Demo::Demo(IWindowGui_t & _Window) :
 
 void Demo::EmployFontSize(void)
 {
-  const auto DoEmployFontSize = [=](void) 
-  { 
-    Layer::EmployFontSize(2.5); 
+  const auto DoEmployFontSize = [=](void)
+  {
+    Layer::EmployFontSize(2.5);
   };
 
   m_Events[::covellite::events::Window.Resize]
@@ -93,16 +94,16 @@ void Demo::ActivateProcessMainMenuEvents(void)
   });
 
   m_Events[Click.DocumentId(GetId()).ElementId("id_help")]
-    .Connect([=](void) 
-  { 
+    .Connect([=](void)
+  {
     m_Events[Button.Help]();
     m_Events[Help.Title](uT("Демонстрационный режим"));
-    m_Events[Help.Text](LayerDescription);
+    m_Events[Help.Text](DemoLayerDescription);
   });
 
   m_Events[Click.DocumentId(GetId()).ElementId("id_back")]
-    .Connect([=](void) 
-  { 
+    .Connect([=](void)
+  {
     m_Events[Button.Back](true);
   });
 
@@ -135,15 +136,15 @@ void Demo::ActivateProcessUserActionEvents(void)
     int32_t X, Y;
   };
 
-  using namespace ::covellite::events;
+  namespace events = ::covellite::events;
 
   const auto pIsTouch = ::std::make_shared<bool>(false);
   const auto pCursorCurrentPosition = ::std::make_shared<Coord>();
   const auto pCursorTouchPosition = ::std::make_shared<Coord>();
-  const auto pAction = 
+  const auto pAction =
     ::std::make_shared<::events::Demo_t::Id>(::events::Demo.None);
 
-  m_Events[Cursor.Motion].Connect([=](const Cursor_t::Position & _Position)
+  m_Events[events::Cursor.Motion].Connect([=](const events::Cursor_t::Position & _Position)
   {
     *pCursorCurrentPosition = { _Position.X, _Position.Y };
 
@@ -188,22 +189,22 @@ void Demo::ActivateProcessUserActionEvents(void)
     }
   });
 
-  m_Events[Cursor.Touch].Connect([=](void) 
+  m_Events[events::Cursor.Touch].Connect([=](void)
   {
     *pIsTouch = true;
     *pCursorTouchPosition = *pCursorCurrentPosition;
   });
 
-  m_Events[Cursor.Release].Connect([=](void)
+  m_Events[events::Cursor.Release].Connect([=](void)
   {
     *pIsTouch = false;
     *pAction = ::events::Demo.None;
   });
 
-  m_Events[::covellite::events::Key.Down].Connect(
-    [=](const ::covellite::events::Key_t::Code & _KeyCode)
+  m_Events[events::Key.Down].Connect(
+    [=](const events::Key_t::Code & _KeyCode)
   {
-    static const ::std::map<::covellite::events::Key_t::Code, ::events::Demo_t::Id> MapCodes =
+    static const ::std::map<events::Key_t::Code, ::events::Demo_t::Id> MapCodes =
     {
       { 0x57, ::events::Demo.MoveForward },
       { 0x53, ::events::Demo.MoveForward },
@@ -223,12 +224,12 @@ void Demo::ActivateProcessUserActionEvents(void)
     }
   });
 
-  m_Events[::covellite::events::Key.Up].Connect([=](void)
+  m_Events[events::Key.Up].Connect([=](void)
   {
     *pAction = ::events::Demo.None;
   });
 
-  m_Events[::covellite::events::Application.Update].Connect([=](void)
+  m_Events[events::Application.Update].Connect([=](void)
   {
     if (*pAction != ::events::Demo.None) m_Events[*pAction]();
   });
@@ -276,3 +277,5 @@ auto Demo::GetProcessCalculateFps(void) -> Updater_t
     }
   };
 }
+
+} // namespace layers

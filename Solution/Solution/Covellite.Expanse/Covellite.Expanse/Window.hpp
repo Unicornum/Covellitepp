@@ -1,5 +1,6 @@
 
 #pragma once
+#include <queue>
 #include <Covellite/Events/Events.hpp>
 #include <Covellite/App/IWindow.hpp>
 #include <Covellite/Api/IWindow.hpp>
@@ -45,13 +46,19 @@ public:
   void RemoveObject(const ObjectId_t) override;
 
 public:
+  // Èםעונפויס IWindow:
+  void DeferredCreateObject(const GameObject_t &, const fnCreateObject_t &) override;
+
+public:
   // Èםעונפויס I3DScene:
   void Add(const size_t, const ObjectId_t, const size_t = 0) override;
+  void Add(const ObjectId_t) override;
 
 private:
   class Scene;
   Events_t                 m_Events;
   ::std::unique_ptr<Scene> m_pScene;
+  ::std::queue<::std::function<void(void)>> m_LoadingQueue;
 
 public:
   explicit Window(const WindowApi_t &);

@@ -147,8 +147,7 @@ TEST_F(Window_test, /*DISABLED_*/Test_Events)
 // ************************************************************************** //
 TEST_F(Window_test, /*DISABLED_*/Test_CreateObject)
 {
-  using GameSceneProxy_t = ::mock::covellite::expanse::GameScene::Proxy;
-  GameSceneProxy_t GameSceneProxy;
+  ::mock::covellite::expanse::GameScene::Proxy GameSceneProxy;
 
   constexpr ::mock::Id_t GameSceneId = 2006201347;
   constexpr ::covellite::expanse::ObjectId_t ObjectId = 2006201351;
@@ -172,7 +171,7 @@ TEST_F(Window_test, /*DISABLED_*/Test_CreateObject)
     .WillOnce(Return(GameSceneId));
 
   Tested_t Example{ IWindowApi };
-  IGameScene_t & IExample = Example;
+  ::covellite::expanse::IWindow & IExample = Example;
 
   EXPECT_CALL(GameSceneProxy, CreateObject(GameSceneId, GameObject))
     .Times(1)
@@ -180,6 +179,136 @@ TEST_F(Window_test, /*DISABLED_*/Test_CreateObject)
 
   const auto Result = IExample.CreateObject(GameObject);
   EXPECT_EQ(Result, ObjectId);
+}
+
+// ************************************************************************** //
+TEST_F(Window_test, /*DISABLED_*/Test_DeferredCreateObject)
+{
+  class Callback :
+    public ::alicorn::extension::testing::Proxy<Callback>
+  {
+  public:
+    MOCK_METHOD1(Call, void(::covellite::expanse::ObjectId_t));
+  };
+
+  Callback oCallback;
+  ::mock::covellite::expanse::GameScene::Proxy GameSceneProxy;
+  ::mock::std::chrono::system_clock::Proxy SystemClockProxy;
+
+  constexpr ::mock::Id_t GameSceneId = 2008051010;
+  constexpr ::covellite::expanse::ObjectId_t ObjectId = 2008051011;
+
+  const ::covellite::expanse::GameObject_t GameObject1 =
+  {
+    ::covellite::api::Component::Make({}),
+  };
+
+  const ::covellite::expanse::GameObject_t GameObject2 =
+  {
+    ::covellite::api::Component::Make({}),
+    ::covellite::api::Component::Make({}),
+  };
+
+  const ::covellite::expanse::GameObject_t GameObject3 =
+  {
+    ::covellite::api::Component::Make({}),
+    ::covellite::api::Component::Make({}),
+    ::covellite::api::Component::Make({}),
+  };
+
+  const WindowApi_t WindowApi{ m_WindowOs };
+  const IWindowApi_t & IWindowApi = WindowApi;
+
+  using namespace ::testing;
+
+  InSequence Dummy;
+
+  EXPECT_CALL(GameSceneProxy, Constructor(_, _))
+    .Times(1)
+    .WillOnce(Return(GameSceneId));
+
+  Tested_t Example{ IWindowApi };
+  ::covellite::expanse::IWindow & IExample = Example;
+
+  EXPECT_CALL(GameSceneProxy, CreateObject(_, _))
+    .Times(0);
+
+  IExample.DeferredCreateObject(GameObject1, 
+    [&](::covellite::expanse::ObjectId_t _Id) { oCallback.Call(_Id); });
+
+  IExample.DeferredCreateObject(GameObject2,
+    [&](::covellite::expanse::ObjectId_t _Id) { oCallback.Call(_Id); });
+
+  IExample.DeferredCreateObject(GameObject3,
+    [&](::covellite::expanse::ObjectId_t _Id) { oCallback.Call(_Id); });
+
+  EXPECT_CALL(SystemClockProxy, Now())
+    .Times(1)
+    .WillOnce(Return(::std::chrono::microseconds{ 0 }));
+
+  EXPECT_CALL(SystemClockProxy, Now())
+    .Times(1)
+    .WillOnce(Return(::std::chrono::microseconds{ 9999 }));
+
+  EXPECT_CALL(GameSceneProxy, CreateObject(GameSceneId, GameObject1))
+    .Times(1)
+    .WillOnce(Return(ObjectId + 1));
+
+  EXPECT_CALL(oCallback, Call(ObjectId + 1))
+    .Times(1);
+
+  EXPECT_CALL(SystemClockProxy, Now())
+    .Times(1)
+    .WillOnce(Return(::std::chrono::microseconds{ 10001 }));
+
+  EXPECT_CALL(GameSceneProxy, CreateObject(_, _))
+    .Times(0);
+
+  EXPECT_CALL(SystemClockProxy, Now())
+    .Times(0);
+
+  Events_t ExampleEvents = Example;
+  ExampleEvents[::covellite::events::Drawing.Do]();
+
+  EXPECT_CALL(SystemClockProxy, Now())
+    .Times(1)
+    .WillOnce(Return(::std::chrono::microseconds{ 0 }));
+
+  EXPECT_CALL(SystemClockProxy, Now())
+    .Times(1)
+    .WillOnce(Return(::std::chrono::microseconds{ 1 }));
+
+  EXPECT_CALL(GameSceneProxy, CreateObject(GameSceneId, GameObject2))
+    .Times(1)
+    .WillOnce(Return(ObjectId + 2));
+
+  EXPECT_CALL(oCallback, Call(ObjectId + 2))
+    .Times(1);
+
+  EXPECT_CALL(SystemClockProxy, Now())
+    .Times(1)
+    .WillOnce(Return(::std::chrono::microseconds{ 2 }));
+
+  EXPECT_CALL(GameSceneProxy, CreateObject(GameSceneId, GameObject3))
+    .Times(1)
+    .WillOnce(Return(ObjectId + 3));
+
+  EXPECT_CALL(oCallback, Call(ObjectId + 3))
+    .Times(1);
+
+  EXPECT_CALL(SystemClockProxy, Now())
+    .Times(0);
+
+  ExampleEvents[::covellite::events::Drawing.Do]();
+
+  EXPECT_CALL(GameSceneProxy, CreateObject(_, _))
+    .Times(0);
+
+  IExample.DeferredCreateObject(GameObject1, 
+    [](::covellite::expanse::ObjectId_t _Id) {});
+
+  EXPECT_CALL(GameSceneProxy, CreateObject(_, _))
+    .Times(0);
 }
 
 // ************************************************************************** //
@@ -203,7 +332,7 @@ TEST_F(Window_test, /*DISABLED_*/Test_RemoveObject)
     .WillOnce(Return(GameSceneId));
 
   Tested_t Example{ IWindowApi };
-  IGameScene_t & IExample = Example;
+  ::covellite::expanse::IWindow & IExample = Example;
 
   EXPECT_CALL(GameSceneProxy, RemoveObject(GameSceneId, ObjectId))
     .Times(1);
@@ -212,10 +341,9 @@ TEST_F(Window_test, /*DISABLED_*/Test_RemoveObject)
 }
 
 // ************************************************************************** //
-TEST_F(Window_test, /*DISABLED_*/Test_Add)
+TEST_F(Window_test, /*DISABLED_*/Test_Add_PassAndHash)
 {
-  using C3DSceneProxy_t = ::mock::covellite::expanse::C3DScene::Proxy;
-  C3DSceneProxy_t C3DSceneProxy;
+  ::mock::covellite::expanse::C3DScene::Proxy C3DSceneProxy;
 
   constexpr ::mock::Id_t C3DSceneId = 2006201539;
 
@@ -231,7 +359,7 @@ TEST_F(Window_test, /*DISABLED_*/Test_Add)
     .WillOnce(Return(C3DSceneId));
 
   Tested_t Example{ IWindowApi };
-  I3DScene_t & IExample = Example;
+  ::covellite::expanse::IWindow & IExample = Example;
 
   EXPECT_CALL(C3DSceneProxy, Add(C3DSceneId, 0, 2006201540, 0))
     .Times(1);
@@ -242,6 +370,38 @@ TEST_F(Window_test, /*DISABLED_*/Test_Add)
     .Times(1);
 
   IExample.Add(1, 2006201541, 2006201542);
+}
+
+// ************************************************************************** //
+TEST_F(Window_test, /*DISABLED_*/Test_Add)
+{
+  ::mock::covellite::expanse::C3DScene::Proxy C3DSceneProxy;
+
+  constexpr ::mock::Id_t C3DSceneId = 2008042027;
+
+  const WindowApi_t WindowApi{ m_WindowOs };
+  const IWindowApi_t & IWindowApi = WindowApi;
+
+  using namespace ::testing;
+
+  InSequence Dummy;
+
+  EXPECT_CALL(C3DSceneProxy, Constructor())
+    .Times(1)
+    .WillOnce(Return(C3DSceneId));
+
+  Tested_t Example{ IWindowApi };
+  ::covellite::expanse::IWindow & IExample = Example;
+
+  EXPECT_CALL(C3DSceneProxy, Add(C3DSceneId, 2008042028))
+    .Times(1);
+
+  IExample.Add(2008042028);
+
+  EXPECT_CALL(C3DSceneProxy, Add(C3DSceneId, 2008042029))
+    .Times(1);
+
+  IExample.Add(2008042029);
 }
 
 // ************************************************************************** //
@@ -272,7 +432,6 @@ TEST_F(Window_test, /*DISABLED_*/Test_RedrawWindow)
     .WillOnce(Return(GameSceneId));
 
   const Tested_t Example{ IWindowApi };
-
 
   EXPECT_CALL(GameSceneProxy, Update(GameSceneId))
     .Times(1);

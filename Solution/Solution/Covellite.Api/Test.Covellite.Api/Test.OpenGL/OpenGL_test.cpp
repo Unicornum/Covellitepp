@@ -48,7 +48,7 @@ protected:
   // Вызывается ПЕРЕД запуском каждого теста
   void SetUp(void) override
   {
-    static const ::mock::GLfloat Viewport[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
+    static const ::mock::GLfloat Viewport[4] = { 1.0f, 2.0f, 3.0f, 4.0f };
     ::testing::DefaultValue<const ::mock::GLfloat *>::Set(Viewport);
 
     ::testing::DefaultValue<int>::Set(1710282125);
@@ -342,13 +342,8 @@ TEST_F(OpenGL_test, /*DISABLED_*/Test_wglMakeCurrent_Error)
 // ************************************************************************** //
 TEST_F(OpenGL_test, /*DISABLED_*/Test_Constructor_UpdateScreen)
 {
-  using WindowsProxy_t = ::mock::WindowsProxy;
-  WindowsProxy_t WindowsProxy;
-  WindowsProxy_t::GetInstance() = &WindowsProxy;
-
-  using GLProxy_t = ::mock::GLProxy;
-  GLProxy_t GLProxy;
-  GLProxy_t::GetInstance() = &GLProxy;
+  ::mock::WindowsProxy WindowsProxy;
+  ::mock::GLProxy GLProxy;
 
   Data_t Data;
   Data.Handle = (HWND)1710291025;
@@ -376,9 +371,6 @@ TEST_F(OpenGL_test, /*DISABLED_*/Test_Constructor_UpdateScreen)
     .Times(1);
 
   EXPECT_CALL(WindowsProxy, wglCreateContext(_))
-    .Times(1);
-
-  EXPECT_CALL(GLProxy, Viewport(0, 0, Width, Height))
     .Times(1);
 
   Tested_t Example{ Data };

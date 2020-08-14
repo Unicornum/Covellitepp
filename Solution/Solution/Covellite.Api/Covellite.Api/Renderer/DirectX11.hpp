@@ -10,6 +10,7 @@ struct ID3D11RenderTargetView;
 struct ID3D11Buffer;
 struct ID3D11DepthStencilView;
 class DirectX11_test;
+class DirectX11Texture_test;
 
 namespace covellite
 {
@@ -79,9 +80,9 @@ private:
 
 private:
   void CreateDeviceAndSwapChain(const Data_t &);
-  void SetViewport(int, int);
-  void CreateRenderTargetView(int, int);
-  void CreateDepthStencilView(int, int);
+  void SetRenderTargetSize(const UINT, const UINT);
+  void CreateRenderTargetView(const UINT, const UINT);
+  void CreateDepthStencilView(const UINT, const UINT);
 
 private:
   Render_t CreateBlendState(bool);
@@ -120,6 +121,7 @@ public:
 
 private:
   friend DirectX11_test;
+  friend DirectX11Texture_test;
 };
 
 FACTORY_REGISTER_STRING_NAME(DirectX11);

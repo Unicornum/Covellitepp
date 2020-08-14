@@ -1,18 +1,18 @@
 ﻿
 #include "stdafx.h"
-#include <boost/core/ignore_unused.hpp>
 #include <Covellite/App/Application.hpp>
-
-// 17 Май 2020 12:07 (unicornum.verum@gmail.com)
-TODO("Исправить, когда в winapi-check-proxy.hpp не будет ссылки на windows.h");
 #include <alicorn/platform/windows.hpp>
+#include <windef.h>
+#include <winuser.h>
 #include <processenv.h>
-#undef GetCommandLine
-
+#include <synchapi.h>
+#include <boost/core/ignore_unused.hpp>
 #include <alicorn/platform/winapi-check.hpp>
 #include <Covellite/Events.hpp>
 #include <Covellite/App/Events.hpp>
 #include "ClassName.windows.hpp"
+
+#undef GetCommandLine
 
 using namespace covellite::app;
 

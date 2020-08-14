@@ -19,9 +19,6 @@
     <Filter Include="Tests\OpenGL">
       <UniqueIdentifier>{cb147f30-3a51-40b1-baec-3f1012a92018}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Tests\OpenGLES">
-      <UniqueIdentifier>{fd1a3329-2102-4b41-9059-58e935c7ef33}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Tests\Fx">
       <UniqueIdentifier>{900921bd-f6fa-419f-8f22-8b725dce1005}</UniqueIdentifier>
     </Filter>
@@ -61,9 +58,6 @@
     </ClCompile>
     <ClCompile Include="Test.OpenGL\OpenGL_test.cpp">
       <Filter>Tests\OpenGL</Filter>
-    </ClCompile>
-    <ClCompile Include="Test.OpenGLES\OpenGLES_test.cpp">
-      <Filter>Tests\OpenGLES</Filter>
     </ClCompile>
     <ClCompile Include="Test.DirectX11\DirectX11_test.cpp">
       <Filter>Tests\DirectX11</Filter>
@@ -130,9 +124,6 @@
     </ClInclude>
     <ClInclude Include="OpenGLShader_test.hpp">
       <Filter>Tests\OpenGL</Filter>
-    </ClInclude>
-    <ClInclude Include="OpenGLStatic_test.hpp">
-      <Filter>Tests\OpenGLES</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

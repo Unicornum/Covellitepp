@@ -41,6 +41,7 @@ public:
 public:
   // Èםעונפויס I3DScene:
   void Add(const size_t, const ObjectId_t, const size_t = 0) override;
+  void Add(const ObjectId_t) override;
 
 public:
   void Render(void);
@@ -58,10 +59,11 @@ private:
   };
 
   ::std::vector<C3DObject_t> m_Renders;
-  ::std::vector<::std::multiset<Object_t, CombinationLess>> m_RenderQueue;
+  ::std::vector<::std::multiset<Object_t, CombinationLess>> m_RenderQueueDepracated;
+  ::std::vector<ObjectId_t> m_RenderQueue;
 
 public:
-  C3DScene(void) = default;
+  C3DScene(void);
   C3DScene(const C3DScene &) = delete;
   C3DScene(C3DScene &&) = delete;
   C3DScene & operator= (const C3DScene &) = delete;

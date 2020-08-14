@@ -5,7 +5,14 @@
 #include <alicorn/std/string.hpp>
 #include <alicorn/std/string/encoding.hpp>
 
-using namespace covellite::api::renderer;
+namespace covellite
+{
+
+namespace api
+{
+
+namespace renderer
+{
 
 // cppcheck-suppress unusedFunction
 /*static*/ bool DxCheck::IsSuccessfull(HRESULT _hResult)
@@ -21,3 +28,9 @@ using namespace covellite::api::renderer;
   return string_cast<::std::string, Encoding::UTF8>(
     String::GetString(_com_error{ _hResult }.ErrorMessage()));
 }
+
+} // namespace renderer
+
+} // namespace api
+
+} // namespace covellite

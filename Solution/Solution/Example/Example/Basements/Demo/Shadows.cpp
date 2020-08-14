@@ -18,7 +18,7 @@ using ::covellite::app::Vfs_t;
 static const float m_LightDistance = 100.0f;
 static const float m_LightFov = 6.0f;
 
-static const auto Random = [](const size_t _From, const size_t _To)
+static const auto RandomShadows = [](const size_t _From, const size_t _To)
 {
   static ::std::mt19937 Generator{ ::std::random_device{}() };
   return static_cast<size_t>(::std::uniform_int_distribution<>{
@@ -86,6 +86,8 @@ Shadows::Shadows(void) :
     {
       { uT("type"), uT("Data") },
       { uT("kind"), uT("Texture") },
+      { uT("name"), uT("TexShadowDepth") },
+      { uT("index"), 5 },
       { uT("destination"), uT("depth") },
     }),
   };
@@ -96,27 +98,48 @@ Shadows::Shadows(void) :
     {
       { uT("type"), uT("Data") },
       { uT("kind"), uT("Texture") },
-      { uT("destination"), uT("albedo") },
+      { uT("name"), uT("TexAlbedo") },
+      { uT("index"), 0 },
     }),
     Component_t::Make(
     {
       { uT("type"), uT("Data") },
       { uT("kind"), uT("Texture") },
-      { uT("destination"), uT("metalness") },
+      { uT("name"), uT("TexNormal") },
+      { uT("index"), 1 },
     }),
     Component_t::Make(
     {
       { uT("type"), uT("Data") },
       { uT("kind"), uT("Texture") },
-      { uT("destination"), uT("roughness") },
+      { uT("name"), uT("TexWorldPos") },
+      { uT("index"), 2 },
+      { uT("capacity"), 16 },
     }),
     Component_t::Make(
     {
       { uT("type"), uT("Data") },
       { uT("kind"), uT("Texture") },
+      { uT("name"), uT("TexObjectId") },
+      { uT("index"), 3 },
+    }),
+    Component_t::Make(
+    {
+      { uT("type"), uT("Data") },
+      { uT("kind"), uT("Texture") },
+      { uT("name"), uT("TexSceneDepth") },
+      { uT("index"), 4 },
       { uT("destination"), uT("depth") },
     })
   };
+
+  m_pBkSurface = Component_t::Make(
+    {
+      { uT("id"), uT("Demo.Shadows.BkSurface") },
+      { uT("type"), uT("BkSurface") },
+      { uT("service"), m_SurfaceTextures },
+      //{ uT("scale"), 0.25f },
+    });
 
   const auto ARGBtoFloat4 = [](uint32_t _HexColor)
   {
@@ -155,7 +178,7 @@ Shadows::Shadows(void) :
         const auto MeshIndex =
           (x == 0 && y == 0 && CellPosition.GetZ() == 0) ? 3 :
           (abs(x) < CellRockRadius && abs(y) < CellRockRadius &&
-            abs(CellPosition.GetZ()) < CellRockRadius) ? Random(0, 2) : 4;
+            abs(CellPosition.GetZ()) < CellRockRadius) ? RandomShadows(0, 2) : 4;
 
         const auto SceneObject =
           GetTransform(GetTransformData(CellPosition)) +
@@ -229,17 +252,7 @@ Object_t Shadows::GetPass2(void) const
   return
     GetSceneCamera() +
     GetSceneShaders() +
-    GetSceneLights() +
     GetTexture(0).GetObject() +
-    Object_t
-    {
-      Component_t::Make(
-      {
-        { uT("id"), uT("Demo.Shadows.Texture.ShadowMap.depth") },
-        { uT("type"), uT("Texture") },
-        { uT("service"), m_ShadowMap },
-      }),
-    } +
     m_SceneObjects_pass2;
 }
 
@@ -252,6 +265,7 @@ Object_t Shadows::GetPass3(void) const
   return
     GetFlatCamera() +
     GetFlatShaders() + 
+    GetSceneLights() +
     GetTextureSurface(false) +
     GetMesh(5).GetObject() +
 
@@ -278,18 +292,8 @@ Object_t Shadows::GetTextureSurface(const bool _IsTarget) const
 {
   using namespace ::alicorn::extension::std;
 
-  if (_IsTarget) // Набор текстур как внеэкранных поверхностей
-  {
-    return 
-      {
-        Component_t::Make(
-        {
-          { uT("id"), uT("Demo.Shadows.BkSurface") },
-          { uT("type"), uT("BkSurface") },
-          { uT("service"), m_SurfaceTextures },
-        }),
-      };
-  }
+  // Набор текстур как внеэкранных поверхностей
+  if (_IsTarget) return { m_pBkSurface };
 
   // Те же текстуры как источник для изображения
 
@@ -299,15 +303,16 @@ Object_t Shadows::GetTextureSurface(const bool _IsTarget) const
       { uT("kind"), uT("Scale") },
     });
 
-  const auto pSurfaceTexture = m_SurfaceTextures[0];
+  const auto pBkSurface = m_pBkSurface;
 
   const Updater_t UpdaterSource = [=](const float)
   {
-    const int Width = (*pSurfaceTexture)[uT("width")].Default(1024);
-    const int Height = (*pSurfaceTexture)[uT("height")].Default(1024);
+    const int Width = (*pBkSurface)[uT("width")].Default(1280);
+    const int Height = (*pBkSurface)[uT("height")].Default(720);
+    const float Scale = (*pBkSurface)[uT("scale")].Default(1.0f);
 
-    (*pScale)[uT("x")] = static_cast<float>(Width);
-    (*pScale)[uT("y")] = static_cast<float>(Height);
+    (*pScale)[uT("x")] = static_cast<float>(Width) / Scale;
+    (*pScale)[uT("y")] = static_cast<float>(Height) / Scale;
   };
 
   Object_t Result =
@@ -326,18 +331,20 @@ Object_t Shadows::GetTextureSurface(const bool _IsTarget) const
     })
   };
 
-  for (const auto & pTexture : m_SurfaceTextures)
+  const auto SurfaceTextures = m_SurfaceTextures + m_ShadowMap;
+
+  for (::std::size_t i = 0; i < SurfaceTextures.size(); i++)
   {
-    const String_t Destination = 
-      (*pTexture)[uT("destination")].Default(uT("Unknown"));
+    const auto Id = 
+      uT("Demo.Shadows.Texture.Source.%ID%").Replace(uT("%ID%"), i);
 
     Result += 
     {
       Component_t::Make(
       {
-        { uT("id"), uT("Demo.Shadows.Texture.") + Destination },
+        { uT("id"), Id },
         { uT("type"), uT("Texture") },
-        { uT("service"), Object_t{ pTexture } },
+        { uT("service"), Object_t{ SurfaceTextures[i] } },
       })
     };
   }
@@ -391,6 +398,8 @@ Object_t Shadows::GetShadowCamera(void) const
       { uT("id"), uT("Demo.Shadows.BkSurface.ShadowMap") },
       { uT("type"), uT("BkSurface") },
       { uT("service"), m_ShadowMap },
+      { uT("width"), 2048 },
+      { uT("height"), 2048 },
     }),
     Component_t::Make(
     {
@@ -400,13 +409,20 @@ Object_t Shadows::GetShadowCamera(void) const
       { uT("enabled"), true },
       { uT("clear"), true },
     }),
+    //Component_t::Make(
+    //{
+    //  { uT("id"), uT("Demo.Shadows.State.Rasterizer") },
+    //  { uT("type"), uT("State") },
+    //  { uT("kind"), uT("Rasterizer") },
+    //  { uT("cull"), uT("Front") },
+    //}),
   };
 }
 
 /*static*/ Object_t Shadows::GetShadowShaders(void)
 {
   const auto ShaderData =
-    Vfs_t::GetInstance().GetData("Data\\Shaders\\Shadows.pass2.fx");
+    Vfs_t::GetInstance().GetData("Data\\Shaders\\Shadows.pass1.fx");
 
   return
   {
@@ -483,10 +499,10 @@ Object_t Shadows::GetSceneCamera(void) const
       }),
       Component_t::Make(
       {
-        { uT("id"), uT("Demo.Shadows.State.Clear") },
+        { uT("id"), uT("Demo.Shadows.State.Clear.Scene") },
         { uT("type"), uT("State") },
         { uT("kind"), uT("Clear") },
-        { uT("color"), 0xFF7EC0EE },
+        { uT("color"), 0xFF0000FF },
       }),
       Component_t::Make(
       {
@@ -561,8 +577,7 @@ Object_t Shadows::GetShaderData(const CubeCoords & _CellPosition) const
 {
   static size_t Index = 0;
 
-  const auto Id = String_t{ uT("%ID%") }
-    .Replace(uT("%ID%"), Index++);
+  const auto Id = uT("%ID%").Replace(uT("%ID%"), Index++);
 
   const auto pSrcShaderData = m_pShaderData;
   const auto ObjectColorIdX = (127 + _CellPosition.GetX()) / 255.0f;
@@ -571,10 +586,9 @@ Object_t Shadows::GetShaderData(const CubeCoords & _CellPosition) const
   const ::covellite::api::cbBufferMap_t<void> ShaderDataMapper =
     [=](void * _pData)
   {
-    auto * pDestShaderData = static_cast<ShaderData *>(_pData);
-    pDestShaderData->Light = pSrcShaderData->Light;
-    pDestShaderData->Object.IdX = ObjectColorIdX;
-    pDestShaderData->Object.IdY = ObjectColorIdY;
+    auto * pDestShaderData = static_cast<Object_s *>(_pData);
+    pDestShaderData->IdX = ObjectColorIdX;
+    pDestShaderData->IdY = ObjectColorIdY;
     return false;
   };
 
@@ -585,16 +599,16 @@ Object_t Shadows::GetShaderData(const CubeCoords & _CellPosition) const
       { uT("id"), uT("Demo.Shadows.ShaderData") + Id },
       { uT("type"), uT("Buffer") },
       { uT("mapper"), ShaderDataMapper },
-      { uT("name"), uT("cbShaderData") },
-      { uT("size"), sizeof(ShaderData) },
+      { uT("name"), uT("cbObject") },
+      { uT("size"), sizeof(Object_s) },
     })
   };
 }
 
 Object_t Shadows::GetTransformData(const CubeCoords & _CellPosition) const
 {
-  const auto Rotate = Random(0, 5) * math::Constant<float>::Pi / 3.0f;
-  const auto Scale = 1.0f + (m_ScaleFactor - 1.0f) * Random(0, 100) / 100.0f;
+  const auto Rotate = RandomShadows(0, 5) * math::Constant<float>::Pi / 3.0f;
+  const auto Scale = 1.0f + (m_ScaleFactor - 1.0f) * RandomShadows(0, 100) / 100.0f;
   const auto WorldPosition = _CellPosition.ToPlane();
 
   return
@@ -652,39 +666,29 @@ Object_t Shadows::GetTransformData(const CubeCoords & _CellPosition) const
     }),
     Component_t::Make(
     {
-      { uT("id"), uT("Demo.Shadows.State.Clear") },
+      { uT("id"), uT("Demo.Shadows.State.Clear.Flat") },
       { uT("type"), uT("State") },
       { uT("kind"), uT("Clear") },
-      { uT("color"), 0xFF7F7FA0 },
-    }),
-    Component_t::Make(
-    {
-      { uT("id"), uT("Demo.Shadows.State.Sampler") },
-      { uT("type"), uT("State") },
-      { uT("kind"), uT("Sampler") },
-    }),
-    Component_t::Make(
-    {
-      { uT("id"), uT("Demo.Shadows.State.Blend") },
-      { uT("type"), uT("State") },
-      { uT("kind"), uT("Blend") },
+      { uT("color"), 0xFF00BFFF },
     }),
   };
 }
 
 Object_t Shadows::GetFlatShaders(const String_t & _psEntryPoint) const
 {
-  const auto ShaderData =
+  const auto ShaderTextData =
     Vfs_t::GetInstance().GetData("Data\\Shaders\\Shadows.pass3.fx");
 
+  const auto pSrcShaderData = m_pShaderData;
   const auto pCursorData = m_pCursorData;
 
   const ::covellite::api::cbBufferMap_t<void> CursorMapper =
     [=](void * _pData)
   {
-    auto * pDestCursor = static_cast<Cursor *>(_pData);
-    pDestCursor->X = pCursorData->X / pCursorData->WindowX;
-    pDestCursor->Y = pCursorData->Y / pCursorData->WindowY;
+    auto * pDestCursor = static_cast<ShaderData *>(_pData);
+    pDestCursor->Light = pSrcShaderData->Light;
+    pDestCursor->Cursor.X = pCursorData->X / pCursorData->WindowX;
+    pDestCursor->Cursor.Y = pCursorData->Y / pCursorData->WindowY;
     return false;
   };
 
@@ -695,22 +699,22 @@ Object_t Shadows::GetFlatShaders(const String_t & _psEntryPoint) const
       { uT("id"), uT("Demo.Shadows.Flat.Shader.Vertex") },
       { uT("type"), uT("Shader") },
       { uT("entry"), uT("vsFlat") },
-      { uT("content"), ShaderData },
+      { uT("content"), ShaderTextData },
     }),
     Component_t::Make(
     {
       { uT("id"), uT("Demo.Shadows.Flat.Shader.Pixel.") + _psEntryPoint },
       { uT("type"), uT("Shader") },
       { uT("entry"), _psEntryPoint },
-      { uT("content"), ShaderData },
+      { uT("content"), ShaderTextData },
     }),
     Component_t::Make(
     {
       { uT("id"), uT("Demo.Shadows.Cursor") },
       { uT("type"), uT("Buffer") },
       { uT("mapper"), CursorMapper },
-      { uT("name"), uT("cbCursor") },
-      { uT("size"), sizeof(Cursor) },
+      { uT("name"), uT("cbShaderData") },
+      { uT("size"), sizeof(ShaderData) },
     })
   };
 }

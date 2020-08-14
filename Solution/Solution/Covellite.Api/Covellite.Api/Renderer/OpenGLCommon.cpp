@@ -18,6 +18,8 @@ namespace renderer
 
 OpenGLCommon::OpenGLCommon(const Data_t & _Data, const String_t & _PreVersion) :
   m_Top{ _Data.Top },
+  m_Width{ _Data.Width },
+  m_Height{ _Data.Height },
   m_PreVersion{ _PreVersion }
 {
 }
@@ -34,8 +36,8 @@ OpenGLCommon::String_t OpenGLCommon::GetUsingApi(void) const /*override*/
 
 void OpenGLCommon::ResizeWindow(int32_t _Width, int32_t _Height) noexcept /*final*/
 {
-  // (x, y) - левый нижний угол!
-  glViewport(0, 0, _Width, _Height - m_Top);
+  m_Width = _Width;
+  m_Height = _Height;
 
   m_IsResizeWindow = true;
 }

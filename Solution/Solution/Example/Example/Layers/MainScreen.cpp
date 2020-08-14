@@ -5,7 +5,8 @@
 #include <alicorn/version.hpp>
 #include "Layer.hpp"
 
-using namespace layers;
+namespace layers
+{
 
 /// [Layer example]
 MainScreen::MainScreen(IWindowGui_t & _Window) :
@@ -48,7 +49,7 @@ MainScreen::MainScreen(IWindowGui_t & _Window) :
   GetElement("id_simple2dgame").SetMeaning(uT("\uF443"));
   GetElement("id_demo").SetMeaning(uT("\uF1BB"));
 
-  using namespace ::covellite;
+  namespace events = ::covellite::events;
 
   m_Events[events::Click.DocumentId(GetId()).ElementId("id_controls")]
     .Connect([&](void) { m_Events[Button.Controls](); });
@@ -61,3 +62,5 @@ MainScreen::MainScreen(IWindowGui_t & _Window) :
   m_Events[events::Click.DocumentId(GetId()).ElementId("id_demo")]
     .Connect([&](void) { m_Events[Button.Demo](); });
 }
+
+} // namespace layers

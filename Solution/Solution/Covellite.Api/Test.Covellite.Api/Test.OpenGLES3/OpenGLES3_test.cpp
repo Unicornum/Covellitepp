@@ -56,7 +56,7 @@ protected:
   // Вызывается ПЕРЕД запуском каждого теста
   void SetUp(void) override
   {
-    static const ::mock::GLfloat Viewport[4] = { 0.0f, 0.0f, 0.0f, 0.0f };
+    static const ::mock::GLfloat Viewport[4] = { 1.0f, 2.0f, 3.0f, 4.0f };
     ::testing::DefaultValue<const ::mock::GLfloat *>::Set(Viewport);
 
     ::testing::DefaultValue<int>::Set(1710282125);

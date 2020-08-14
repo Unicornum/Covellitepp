@@ -58,15 +58,21 @@ protected:
 protected:
   static GameObject_t LoadTexture(const Path_t &, const String_t &, 
     const String_t & = uT("albedo"));
+  static GameObject_t LoadTexture(const Path_t &, const String_t &,
+    const String_t &, const int);
   ObjectId_t CreateObject(const GameObject_t &);
   void AddToRenderQueue(const ObjectId_t, const size_t = 0);
+
+private:
+  static GameObject_t LoadTexture(const Path_t &, const String_t &,
+    const Component_t::ComponentPtr_t &);
 
 private:
   WindowExpanse_t * m_pWindowExpanse = nullptr;
   ::std::vector<ObjectId_t> m_AllObjects;
 
 protected:
-  Common(WindowExpanse_t &);
+  explicit Common(WindowExpanse_t &);
   ~Common(void);
 };
 

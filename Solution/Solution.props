@@ -3,9 +3,7 @@
   <ImportGroup Label="PropertySheets">
     <Import Project="Solution\Externals.doxygen.ignore\TinyObjLoader\TinyObjLoader.props" />
     <Import Project="Solution\Externals\Assimp\Assimp.props" />
-    <Import Project="Solution\Externals\GLM\GLM.props" />
     <Import Project="Solution\Externals\MiniAudio\MiniAudio.props" />
-    <Import Project="Solution\Externals.doxygen.ignore\DisableWarningsTempHeader\DisableWarningsTempHeader.props" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup />

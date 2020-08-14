@@ -53,39 +53,63 @@ Common::~Common(void)
   const String_t & _Id,
   const String_t & _Destination) -> GameObject_t
 {
+  return LoadTexture(_RelativePathToSourceFile, _Id,
+    Component_t::Make(
+    {
+      { uT("type"), uT("Data") },
+      { uT("kind"), uT("Texture") },
+      { uT("destination"), _Destination },
+    }));
+}
+
+/*static*/ auto Common::LoadTexture(
+  const Path_t & _RelativePathToSourceFile,
+  const String_t & _Id,
+  const String_t & _Name,
+  const int _Index) -> GameObject_t
+{
+  return LoadTexture(_RelativePathToSourceFile, _Id,
+    Component_t::Make(
+      {
+        { uT("type"), uT("Data") },
+        { uT("kind"), uT("Texture") },
+        { uT("name"), _Name },
+        { uT("index"), _Index },
+      }));
+}
+
+/*static*/ auto Common::LoadTexture(
+  const Path_t & _RelativePathToSourceFile, 
+  const String_t & _Id,
+  const Component_t::ComponentPtr_t & _pData) -> GameObject_t
+{
   using ::covellite::app::Settings_t;
   namespace image = ::alicorn::source::image;
-    
+
   const auto PathToTextureDirectory =
     Settings_t::GetInstance().Get<Path_t>(uT("PathToTextureDirectory"));
-    
+
   /// [Load texture]
   const image::Universal_t<image::pixel::RGBA> Image
   {
     ::covellite::app::Vfs_t::GetInstance().GetData(
       PathToTextureDirectory / _RelativePathToSourceFile)
   };
-    
-  const auto pData = Component_t::Make(
-    {
-      { uT("type"), uT("Data") },
-      { uT("kind"), uT("Texture") },
-      { uT("content"), Image.GetData().Buffer },
-      { uT("width"), static_cast<int>(Image.GetData().Width) },
-      { uT("height"), static_cast<int>(Image.GetData().Height) },
-      { uT("destination"), _Destination },
-    });
+
+  (*_pData)[uT("content")] = Image.GetData().Buffer;
+  (*_pData)[uT("width")]  = static_cast<int>(Image.GetData().Width);
+  (*_pData)[uT("height")] = static_cast<int>(Image.GetData().Height);
 
   return
+  {
+    Component_t::Make(
     {
-      Component_t::Make(
-      {
-        { uT("id"), _Id },
-        { uT("type"), uT("Texture") },
-        { uT("service"), GameObject_t{ pData } },
-      }),
-    };
-   
+      { uT("id"), _Id },
+      { uT("type"), uT("Texture") },
+      { uT("service"), GameObject_t{ _pData } },
+    }),
+  };
+
   /// [Load texture]
 }
 

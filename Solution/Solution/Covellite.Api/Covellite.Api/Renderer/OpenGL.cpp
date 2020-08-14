@@ -1,6 +1,7 @@
 
 #include "stdafx.h"
 #include "OpenGL.hpp"
+#include <winuser.h>
 #include <alicorn/platform/winapi-check.hpp>
 //#include <alicorn/logger.hpp>
 
@@ -89,12 +90,6 @@ OpenGL::OpenGL(const Data_t & _Data) :
 
   WINAPI_CHECK USING_MOCK ::wglMakeCurrent(m_hDeviceContex, m_hRenderContex);
 
-  RECT ClientRect = { 0 };
-  WINAPI_CHECK USING_MOCK ::GetClientRect(m_hWnd, &ClientRect);
-
-  ResizeWindow(ClientRect.right - ClientRect.left,
-    ClientRect.bottom - ClientRect.top);
-
   //glEnable(GL_DEBUG_OUTPUT);
   //glDebugMessageCallback(&GLDebugCallback, NULL);
   //glDebugMessageControl(GL_DONT_CARE, GL_DONT_CARE, GL_DONT_CARE, 0, NULL, GL_TRUE);
@@ -110,6 +105,12 @@ OpenGL::~OpenGL(void) noexcept
 
 void OpenGL::PresentFrame(void) /*override*/
 {
+  // Вызов не имеет смысла, но он нужен для того, чтобы не усложнять тесты
+  // реализации OpenGLES3, которая должна очищать заголовок окна Android и
+  // вызывает эту функцию.
+  GLint ViewPort[4] = { 0 };
+  glGetIntegerv(GL_VIEWPORT, ViewPort);
+
   WINAPI_CHECK USING_MOCK ::SwapBuffers(m_hDeviceContex);
 
   OpenGLCommonShader::PresentFrame();

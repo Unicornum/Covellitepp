@@ -4,6 +4,8 @@
 #include <alicorn/std/chrono.mock.hpp>
 #include <alicorn/std/string.hpp>
 #include <alicorn/std/string/string-cast.hpp>
+#include <alicorn/std/singleton.hpp>
+#include <alicorn/settings.mock.hpp>
 #include <alicorn/logger.mock.hpp>
 
 /**
@@ -19,3 +21,26 @@
 
 #include "Mock/GameScene.hpp"
 #include "Mock/3DScene.hpp"
+
+namespace alicorn
+{
+
+namespace extension
+{
+
+namespace std
+{
+
+using Section_t = alicorn::modules::settings::Section;
+using SectionPtr_t = ::std::unique_ptr<Section_t>;
+
+/*static*/ SectionPtr_t Singleton<Section_t>::Make(void)
+{
+  return ::std::make_unique<Section_t>(uT("Dummy"));
+}
+
+} // namespace std
+
+} // namespace extension
+
+} // namespace alicorn

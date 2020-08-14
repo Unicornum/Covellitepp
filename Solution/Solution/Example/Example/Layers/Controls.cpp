@@ -19,7 +19,7 @@ const auto LayerDescription =
 Controls::Controls(IWindowGui_t & _Window) :
   Layer(_Window, "controls.rml", uT("Настройки"), LayerDescription)
 {
-  using namespace ::covellite;
+  namespace events = ::covellite::events;
   using namespace ::alicorn::extension::std;
 
   // ************************************************************************ //

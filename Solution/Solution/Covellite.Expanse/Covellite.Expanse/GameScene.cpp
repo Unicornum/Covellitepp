@@ -135,5 +135,9 @@ void GameScene::RemoveObject(const ObjectId_t _Id) /*override*/
 */
 void GameScene::Update(void) const
 {
-  for (const auto & Updater : m_Updaters) Updater.second();
+  // Копия - для того, чтобы можно было создавать новые updater'ы во время
+  // выполнения существующих.
+  const auto Updaters = m_Updaters;
+
+  for (const auto & Updater : Updaters) Updater.second();
 }

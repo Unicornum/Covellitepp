@@ -91,7 +91,7 @@ private:
 private:
   Vector_t GetContextSize(void) const;
   void DoDrawWindow(void);
-  static void LoadFonts(void);
+  void LoadFonts(void);
 
 private:
   const WindowApi_t   & m_WindowApi;
@@ -102,6 +102,7 @@ private:
   InitializerPtr_t      m_pInitializer;
   ContextPtr_t          m_pContext;
   Layers_t              m_Layers;
+  ::std::map<Path_t, ::std::vector<uint8_t>> m_RawDataFonts;
 
 public:
   explicit Window(const WindowApi_t &);

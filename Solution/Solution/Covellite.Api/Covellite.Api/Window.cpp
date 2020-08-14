@@ -87,9 +87,14 @@ auto Window::GetRenders(void) const /*override*/ -> RendersPtr_t
 
 /*static*/ auto Window::MakeImpl(const WindowOs_t & _Window) -> IGraphicApiPtr_t
 {
-  renderer::SettingsData Data;
-  Data.Handle = _Window.GetHandle();
-  Data.Top = _Window.GetClientRect().Top;
+  renderer::SettingsData oSettingsData;
+  oSettingsData.Handle = _Window.GetHandle();
+
+  const auto ClientRect = _Window.GetClientRect();
+
+  oSettingsData.Top = ClientRect.Top;
+  oSettingsData.Width = ClientRect.Width;
+  oSettingsData.Height = ClientRect.Height;
 
   using String_t = ::alicorn::extension::std::String;
 
@@ -97,12 +102,12 @@ auto Window::GetRenders(void) const /*override*/ -> RendersPtr_t
   const auto WindowSection = MainSection[uT("Window")];
 
 # if BOOST_OS_WINDOWS
-  Data.IsFullScreen = WindowSection.Get<bool>(uT("IsFullScreen"));
+  oSettingsData.IsFullScreen = WindowSection.Get<bool>(uT("IsFullScreen"));
 # endif
 
   const auto NameOfApiClass = WindowSection.Get<String_t>(uT("GraphicsApi"));
 
-  return MakeImpl(NameOfApiClass, Data);
+  return MakeImpl(NameOfApiClass, oSettingsData);
 }
 
 } // namespace api

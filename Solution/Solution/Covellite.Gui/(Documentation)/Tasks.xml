@@ -1,36 +1,21 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Tasks>
   <Options>
-    <Width>1951</Width>
-    <Height>976</Height>
-    <X>418</X>
+    <Width>1749</Width>
+    <Height>967</Height>
+    <X>620</X>
     <Y>43</Y>
   </Options>
   <Process/>
   <Complete>
-    <Week6284>
-      <Task18 Text="Класс Renderer." Type="Red" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="false">
-        <Task19 Text="Передача данных через параметр content." Type="None" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
-        <Task20 Text="Реорганизация кода." Type="None" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
-        <Task21 Text="Передача вспомогательных компонентов как параметра service." Type="None" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
-      </Task18>
-    </Week6284>
-    <Week6283/>
-    <Week6282/>
-    <Week6281>
-      <Task6 Text="Переход на использование RmlUi." Type="Red" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="true" ParentTaskText="false">
-        <Task7 Text="Инкапсуляция использования Rocket внутри проекта." Type="None" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="false"/>
-        <Task8 Text="Компилируемость кода с использованием RmlUi." Type="None" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
-        <Task9 Text="Работоспособная Windows и Android версия." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
-        <Task10 Text="Некорректно обрабатывается ввод русских букв." Type="Bug" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
-        <Task11 Text="Восстановление тестов." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
-        <Task12 Text="Обобщенный заголовочный файл для выбора используемой библиотеки GUI." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
-        <Task13 Text="Отдельные тестовые проекты для тестирования логики работы разных библиотек." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
-        <Task14 Text="Компилируемость тестового проекта для RmlUi." Type="None" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
-        <Task15 Text="Адаптация тестов для RmlUi." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
-        <Task16 Text="Класс Initializer: раздельные тесты реализаций для Windwos и Android." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
-        <Task17 Text="Функция установки значения элемента 'progressbar'." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
-      </Task6>
-    </Week6281>
+    <Week6291>
+      <Task1 Text="Загрузка шрифтов средствами виртуальной файловой системы." Type="Red" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="true" ParentTaskText="false">
+        <Task2 Text="Использование в тестах главного файла RmlUi.mock.hpp." Type="None" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+        <Task3 Text="Отключение вывода в лог fps." Type="None" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+      </Task1>
+    </Week6291>
+    <Week6290/>
+    <Week6289/>
+    <Week6288/>
   </Complete>
 </Tasks>

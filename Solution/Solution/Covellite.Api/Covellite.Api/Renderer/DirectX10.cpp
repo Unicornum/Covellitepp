@@ -15,7 +15,14 @@
 #include <d3d10.h>
 #pragma comment(lib, "d3d10.lib")
 
-using namespace covellite::api::renderer;
+namespace covellite
+{
+
+namespace api
+{
+
+namespace renderer
+{
 
 class DirectX10::Buffer
 {
@@ -232,10 +239,7 @@ DirectX10::DirectX10(const Data_t & _Data)
   DX_CHECK m_pDevice->CreateRasterizerState(
     &RasterizerDesc, &m_pDefaultRasterizerState);
 
-  DXGI_SWAP_CHAIN_DESC Desc = { 0 };
-  DX_CHECK m_pSwapChain->GetDesc(&Desc);
-
-  SetViewport(Desc.BufferDesc.Width, Desc.BufferDesc.Height);
+  SetViewport(static_cast<UINT>(_Data.Width), static_cast<UINT>(_Data.Height));
 
   MakeConstants<ConstantBuffer>(m_pDevice);
 }
@@ -257,7 +261,7 @@ void DirectX10::PresentFrame(void) /*override*/
 void DirectX10::ResizeWindow(int32_t _Width, int32_t _Height) /*override*/
 {
   m_IsResizeWindow = true;
-  SetViewport(_Width, _Height);
+  SetViewport(static_cast<UINT>(_Width), static_cast<UINT>(_Height));
 }
 
 auto DirectX10::CreateCamera(const ComponentPtr_t & _pComponent) -> Render_t /*override*/
@@ -271,6 +275,18 @@ auto DirectX10::CreateCamera(const ComponentPtr_t & _pComponent) -> Render_t /*o
       &m_CurrentRenderTargets[0], nullptr);
 
     m_pDevice->RSSetState(m_pDefaultRasterizerState.Get());
+
+    DXGI_SWAP_CHAIN_DESC Desc = { 0 };
+    DX_CHECK m_pSwapChain->GetDesc(&Desc);
+
+    D3D10_VIEWPORT ViewPort = { 0 };
+    ViewPort.TopLeftX = 0;
+    ViewPort.TopLeftY = 0;
+    ViewPort.Width = Desc.BufferDesc.Width;
+    ViewPort.Height = Desc.BufferDesc.Height;
+    ViewPort.MinDepth = 0.0f;
+    ViewPort.MaxDepth = 1.0f;
+    m_pDevice->RSSetViewports(1, &ViewPort);
   };
 
   const auto DisableBlendRender = CreateBlendState(false);
@@ -385,9 +401,10 @@ public:
   using Ptr_t = ::std::shared_ptr<Texture>;
 
 public:
-  const ComponentPtr_t  m_pDataTexture;
-  const String_t        m_Destination;
-  const UINT            m_iDestination;
+  const ComponentPtr_t      m_pDataTexture;
+  const UINT                m_iDestination;
+  const DXGI_FORMAT         m_Format;
+  const uint8_t Align[4] = { 0 };
   ComPtr_t<ID3D10Texture2D>          m_pTexture;
   ComPtr_t<ID3D10Texture2D>          m_pReadTexture;
   ComPtr_t<ID3D10RenderTargetView>   m_pRenderTargetView;
@@ -402,14 +419,13 @@ public:
   {
     using BufferMapper_t = cbBufferMap_t<const void>;
 
-    const String_t Destination = 
-      (*m_pDataTexture)[uT("destination")].Default(uT("albedo"));
+    const Component::Texture TextureData{ *m_pDataTexture, uT("albedo") };
 
-    m_pTexture = (Destination != uT("depth")) ?
+    m_pTexture = (TextureData.Destination != uT("depth")) ?
       MakeRGBTarget(_pDevice, _Width, _Height) :
       MakeDepthTarget(_pDevice, _Width, _Height);
 
-    if ((*m_pDataTexture)[uT("mapper")].IsType<const BufferMapper_t &>())
+    if (TextureData.IsMapping)
     {
       m_pReadTexture = MakeRGBACopy(_pDevice, _Width, _Height);
     }
@@ -424,16 +440,16 @@ public:
       MakeRGBASource(_pDevice, TextureData);
   }
 
-  static ComPtr_t<ID3D10Texture2D> MakeRGBACopy(
+  ComPtr_t<ID3D10Texture2D> MakeRGBACopy(
     const ComPtr_t<ID3D10Device> & _pDevice,
-    const UINT _Width, const UINT _Height)
+    const UINT _Width, const UINT _Height) const
   {
     D3D10_TEXTURE2D_DESC textureDesc = { 0 };
     textureDesc.Width = _Width;
     textureDesc.Height = _Height;
     textureDesc.MipLevels = 1;
     textureDesc.ArraySize = 1;
-    textureDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+    textureDesc.Format = m_Format;
     textureDesc.Usage = D3D10_USAGE_STAGING;
     //textureDesc.BindFlags = D3D10_BIND_SHADER_RESOURCE;
     //textureDesc.MiscFlags = 0;
@@ -452,11 +468,11 @@ private:
     const Component::Texture & _TextureData)
   {
     D3D10_TEXTURE2D_DESC textureDesc = { 0 };
-    textureDesc.Width = _TextureData.Width;
-    textureDesc.Height = _TextureData.Height;
+    textureDesc.Width = static_cast<UINT>(_TextureData.Width);
+    textureDesc.Height = static_cast<UINT>(_TextureData.Height);
     textureDesc.MipLevels = 1;
     textureDesc.ArraySize = 1;
-    textureDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+    textureDesc.Format = m_Format;
     textureDesc.Usage = D3D10_USAGE_DEFAULT;
     textureDesc.BindFlags = D3D10_BIND_SHADER_RESOURCE;
     textureDesc.MiscFlags = 0;
@@ -467,7 +483,7 @@ private:
     DX_CHECK _pDevice->CreateTexture2D(&textureDesc, nullptr, &pTexture);
 
     _pDevice->UpdateSubresource(pTexture.Get(), 0, NULL,
-      _TextureData.Data.data(), _TextureData.Width * 4, 0);
+      _TextureData.Data.data(), static_cast<UINT>(_TextureData.Width * 4), 0);
 
     D3D10_SHADER_RESOURCE_VIEW_DESC srvDesc = { 0 };
     srvDesc.Format = textureDesc.Format;
@@ -483,14 +499,12 @@ private:
     const ComPtr_t<ID3D10Device> & _pDevice,
     const Component::Texture & _TextureData)
   {
-    const Component::Texture TextureData{ *m_pDataTexture, uT("albedo") };
-
     D3D10_TEXTURE2D_DESC textureDesc = { 0 };
-    textureDesc.Width = _TextureData.Width;
-    textureDesc.Height = _TextureData.Height;
+    textureDesc.Width = static_cast<UINT>(_TextureData.Width);
+    textureDesc.Height = static_cast<UINT>(_TextureData.Height);
     textureDesc.MipLevels = 0; // full set of subtextures
     textureDesc.ArraySize = 1;
-    textureDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+    textureDesc.Format = m_Format;
     textureDesc.Usage = D3D10_USAGE_DEFAULT;
     textureDesc.BindFlags = D3D10_BIND_RENDER_TARGET | D3D10_BIND_SHADER_RESOURCE;
     textureDesc.MiscFlags = D3D10_RESOURCE_MISC_GENERATE_MIPS;
@@ -501,10 +515,10 @@ private:
     DX_CHECK _pDevice->CreateTexture2D(&textureDesc, nullptr, &pTexture);
 
     _pDevice->UpdateSubresource(pTexture.Get(), 0, NULL,
-      _TextureData.Data.data(), _TextureData.Width * 4, 0);
+      _TextureData.Data.data(), static_cast<UINT>(_TextureData.Width * 4), 0);
 
     D3D10_SHADER_RESOURCE_VIEW_DESC srvDesc = { 0 };
-    srvDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+    srvDesc.Format = m_Format;
     srvDesc.ViewDimension = D3D10_SRV_DIMENSION_TEXTURE2D;
     srvDesc.Texture2D.MipLevels = static_cast<UINT>(-1);
 
@@ -531,7 +545,7 @@ private:
       textureDesc.Height = _Height;
       textureDesc.MipLevels = 1; //0 - full set of subtextures
       textureDesc.ArraySize = 1;
-      textureDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+      textureDesc.Format = m_Format;
       textureDesc.Usage = D3D10_USAGE_DEFAULT;
       textureDesc.BindFlags = D3D10_BIND_RENDER_TARGET | D3D10_BIND_SHADER_RESOURCE;
       textureDesc.MiscFlags = 0;
@@ -546,7 +560,7 @@ private:
     const auto CreateShaderResourceView = [=](auto _pTexture)
     {
       D3D10_SHADER_RESOURCE_VIEW_DESC srvDesc = { 0 };
-      srvDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+      srvDesc.Format = m_Format;
       srvDesc.ViewDimension = D3D10_SRV_DIMENSION_TEXTURE2D;
       srvDesc.Texture2D.MipLevels = 1;
 
@@ -559,7 +573,7 @@ private:
     const auto CreateRenderTargetView = [=](auto _pTexture)
     {
       D3D10_RENDER_TARGET_VIEW_DESC Desc = { 0 };
-      Desc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+      Desc.Format = m_Format;
       Desc.ViewDimension = D3D10_RTV_DIMENSION_TEXTURE2D;
 
       ComPtr_t<ID3D10RenderTargetView> pRenderTargetView;
@@ -632,8 +646,11 @@ private:
     return pTexture;
   }
 
-  static UINT GetDestinationIndex(const String_t & _Destination)
+  static UINT GetDestinationIndex(const ComponentPtr_t & _pData)
   {
+    const int Index = (*_pData)[uT("index")].Default(-1);
+    if (Index >= 0) return static_cast<UINT>(Index);
+
     static const ::std::vector<String_t> Destinations =
     {
       uT("albedo"),
@@ -644,41 +661,111 @@ private:
       uT("depth"),
     };
 
+    const String_t Destination = 
+      (*_pData)[uT("destination")].Default(uT("albedo"));
+
     const auto itDestination =
-      ::std::find(Destinations.cbegin(), Destinations.cend(), _Destination);
+      ::std::find(Destinations.cbegin(), Destinations.cend(), Destination);
     if (itDestination == Destinations.cend())
     {
-      throw STD_EXCEPTION << "Unexpected destination texture: " << _Destination;
+      throw STD_EXCEPTION << "Unexpected destination texture: " << Destination;
     }
 
     return static_cast<UINT>(
       ::std::distance(Destinations.cbegin(), itDestination));
   };
 
+  static DXGI_FORMAT GetFormat(const ComponentPtr_t & _pData)
+  {
+    const int Capacity = (*_pData)[uT("capacity")].Default(8);
+
+    return 
+      (Capacity == 32) ? DXGI_FORMAT_R32G32B32A32_FLOAT :
+      (Capacity == 16) ? DXGI_FORMAT_R16G16B16A16_FLOAT :
+      DXGI_FORMAT_R8G8B8A8_UNORM;
+  }
+
 public:
   explicit Texture(const ComponentPtr_t & _pDataTexture) :
     m_pDataTexture{ _pDataTexture },
-    m_Destination{ (*_pDataTexture)[uT("destination")].Default(uT("albedo")) },
-    m_iDestination{ GetDestinationIndex(m_Destination) }
+    m_iDestination{ GetDestinationIndex(_pDataTexture) },
+    m_Format{ GetFormat(_pDataTexture) }
   {
 
   }
+  Texture(const Texture &) = delete;
+  Texture(Texture &&) = delete;
+  Texture & operator= (const Texture &) = delete;
+  Texture & operator= (Texture &&) = delete;
+  ~Texture(void) = default;
 };
 
 auto DirectX10::CreateBkSurface(const ComponentPtr_t & _pComponent) -> Render_t /*override*/
 {
-  const auto pBkSurfaceTextures = 
-    ::std::make_shared<::std::vector<Texture::Ptr_t>>();
+  using Size_t = ::std::tuple<UINT, UINT>;
+  using fnBkSurfaceSize_t = ::std::function<Size_t(void)>;
 
-  DXGI_SWAP_CHAIN_DESC Desc = { 0 };
-  DX_CHECK m_pSwapChain->GetDesc(&Desc);
+  const auto pBkSurface = _pComponent;
+
+  const fnBkSurfaceSize_t GetScaleBkSurfaceSize = [=](void)
+  {
+    DXGI_SWAP_CHAIN_DESC Desc = { 0 };
+    DX_CHECK m_pSwapChain->GetDesc(&Desc);
+
+    const float Scale = (*pBkSurface)[uT("scale")];
+
+    const int Width = static_cast<int>(Scale * Desc.BufferDesc.Width) + 1;
+    const int Height = static_cast<int>(Scale * Desc.BufferDesc.Height) + 1;
+
+    (*pBkSurface)[uT("width")] = Width;
+    (*pBkSurface)[uT("height")] = Height;
+
+    return Size_t{ static_cast<UINT>(Width), static_cast<UINT>(Height) };
+  };
+
+  const fnBkSurfaceSize_t GetWindowBkSurfaceSize = [=](void)
+  {
+    DXGI_SWAP_CHAIN_DESC Desc = { 0 };
+    DX_CHECK m_pSwapChain->GetDesc(&Desc);
+
+    const int Width = static_cast<int>(Desc.BufferDesc.Width);
+    const int Height = static_cast<int>(Desc.BufferDesc.Height);
+
+    (*pBkSurface)[uT("width")] = Width;
+    (*pBkSurface)[uT("height")] = Height;
+
+    return Size_t{ static_cast<UINT>(Width), static_cast<UINT>(Height) };
+  };
+
+  const fnBkSurfaceSize_t GetUserBkSurfaceSize = [=](void)
+  {
+    const int Width = (*pBkSurface)[uT("width")];
+    const int Height = (*pBkSurface)[uT("height")];
+
+    return Size_t{ static_cast<UINT>(Width), static_cast<UINT>(Height) };
+  };
+
+  const auto IsScaleBkSurfaceSize = 
+    (*pBkSurface)[uT("scale")].IsType<float>();
+  const auto IsUserBkSurfaceSize =
+    (*pBkSurface)[uT("width")].IsType<int>() &&
+    (*pBkSurface)[uT("height")].IsType<int>();
+
+  const auto GetBkSurfaceSize =
+    (IsScaleBkSurfaceSize) ? GetScaleBkSurfaceSize :
+    (IsUserBkSurfaceSize) ? GetUserBkSurfaceSize : GetWindowBkSurfaceSize;
+
+  const auto [Width, Height] = GetBkSurfaceSize();
+
+  const auto pBkSurfaceTextures =
+    ::std::make_shared<::std::vector<Texture::Ptr_t>>();
 
   const auto DoDataTexture = [&](const ComponentPtr_t & _pDataTexture)
   {
     auto pTexture = ::std::make_shared<Texture>(_pDataTexture);
-    pTexture->MakeTarget(m_pDevice, 
-      Desc.BufferDesc.Width, Desc.BufferDesc.Height);
+    pTexture->MakeTarget(m_pDevice, Width, Height);
     (*_pDataTexture)[uT("entity")] = pTexture;
+
     pBkSurfaceTextures->push_back(pTexture);
   };
 
@@ -687,19 +774,18 @@ auto DirectX10::CreateBkSurface(const ComponentPtr_t & _pComponent) -> Render_t 
       { uT("Texture"), DoDataTexture },
     });
 
+
   return [=](void)
   {
+    const auto [Width, Height] = GetBkSurfaceSize();
+
     m_CurrentRenderTargets.clear();
 
     for (auto & pTexture : *pBkSurfaceTextures)
     {
       if (m_IsResizeWindow)
       {
-        DXGI_SWAP_CHAIN_DESC Desc = { 0 };
-        DX_CHECK m_pSwapChain->GetDesc(&Desc);
-
-        pTexture->MakeTarget(m_pDevice, 
-          Desc.BufferDesc.Width, Desc.BufferDesc.Height);
+        pTexture->MakeTarget(m_pDevice, Width, Height);
       }
 
       if (pTexture->m_pRenderTargetView)
@@ -725,6 +811,15 @@ auto DirectX10::CreateBkSurface(const ComponentPtr_t & _pComponent) -> Render_t 
     m_pDevice->OMSetRenderTargets(
       static_cast<UINT>(m_CurrentRenderTargets.size()),
       &m_CurrentRenderTargets[0], nullptr);
+
+    D3D10_VIEWPORT ViewPort = { 0 };
+    ViewPort.TopLeftX = 0;
+    ViewPort.TopLeftY = 0;
+    ViewPort.Width = Width;
+    ViewPort.Height = Height;
+    ViewPort.MinDepth = 0.0f;
+    ViewPort.MaxDepth = 1.0f;
+    m_pDevice->RSSetViewports(1, &ViewPort);
   };
 }
 
@@ -1116,12 +1211,13 @@ auto DirectX10::CreateBuffer(const ComponentPtr_t & _pBuffer) -> Render_t /*over
       ::std::make_shared<BinaryData_t>(BufferSize, (uint8_t)0x00);
     const auto pBuffer = 
       Buffer::Create(m_pDevice, pData->data(), pData->size());
-    constexpr auto BufferIndex = 
-      Buffer::Support<BinaryData_t::value_type>::Index;
 
     return [=](void)
     {
       cbBufferMapper(pData->data());
+
+      constexpr auto BufferIndex =
+        Buffer::Support<BinaryData_t::value_type>::Index;
 
       // Поскольку каждый буфер индивидуален, но работает через один и тот же
       // слот, то и активировать его нужно каждый раз.
@@ -1240,17 +1336,8 @@ auto DirectX10::CreatePresentBuffer(const ComponentPtr_t & _pBuffer) -> Render_t
   };
 }
 
-void DirectX10::SetViewport(int _Width, int _Height)
+void DirectX10::SetViewport(const UINT _Width, const UINT _Height)
 {
-  D3D10_VIEWPORT ViewPort = { 0 };
-  ViewPort.TopLeftX = 0;
-  ViewPort.TopLeftY = 0;
-  ViewPort.Width = _Width;
-  ViewPort.Height = _Height;
-  ViewPort.MinDepth = 0.0f;
-  ViewPort.MaxDepth = 1.0f;
-  m_pDevice->RSSetViewports(1, &ViewPort);
-
   if (m_pScreenRenderTargetView)
   {
     // Release the existing renderer target
@@ -1500,3 +1587,9 @@ auto DirectX10::CreateBillboardPreRenderGeometry(const ComponentPtr_t & _pCompon
     for (auto & Render : PreRenders) Render();
   };
 }
+
+} // namespace renderer
+
+} // namespace api
+
+} // namespace covellite

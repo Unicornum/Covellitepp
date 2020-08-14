@@ -4,21 +4,22 @@
 #include <alicorn/std/string.hpp>
 #include "Description.hpp"
 
-using namespace layers;
+namespace layers
+{
 
-const auto LayerDescription =
-  uT("Демонстрация вывода текста:.<br/>") +
-  uT("- Разными шрифтами.<br/>") +
-  uT("- Разного размера.<br/>") +
-  uT("- Разного цвета.<br/>") +
-  uT("- Подчеркнутый и курсив.<br/>") +
-  uT("- Со вставленными картинками.<br/>") +
-  uT("<br/>") +
-  uT("При выборе одной из реплик должен меняться статус персонажа ") +
-  uT("с соответствующим изменением цвета статуса.<br/>");
+const auto TextGameLayerDescription =
+uT("Демонстрация вывода текста:.<br/>") +
+uT("- Разными шрифтами.<br/>") +
+uT("- Разного размера.<br/>") +
+uT("- Разного цвета.<br/>") +
+uT("- Подчеркнутый и курсив.<br/>") +
+uT("- Со вставленными картинками.<br/>") +
+uT("<br/>") +
+uT("При выборе одной из реплик должен меняться статус персонажа ") +
+uT("с соответствующим изменением цвета статуса.<br/>");
 
 Text::Text(IWindowGui_t & _Window) :
-  Layer(_Window, "text.rml", uT("Текст в разных форматах"), LayerDescription)
+  Layer(_Window, "text.rml", uT("Текст в разных форматах"), TextGameLayerDescription)
 {
   using namespace ::alicorn::extension::std;
 
@@ -28,11 +29,11 @@ Text::Text(IWindowGui_t & _Window) :
     uT("поведение</i> животных, но их <u>тревога нарастает</u>. Мы могли бы ") +
     uT("объединиться и продолжить исследование вместе, что скажешь?"));
 
-  using namespace ::covellite;
+  namespace events = ::covellite::events;
 
   m_Events[events::Click.DocumentId(GetId()).ElementId("id_evil")]
-    .Connect([&](void) 
-  { 
+    .Connect([&](void)
+  {
     GetElement("id_status").SetClassStyle(uT("evil"));
     GetElement("id_status").SetMeaning(uT("рассержен"));
     GetElement("id_main_text").SetMeaning(uT("<big>Э</big>й, что ты делаешь?"));
@@ -54,3 +55,5 @@ Text::Text(IWindowGui_t & _Window) :
     GetElement("id_main_text").SetMeaning(uT("<big>О</big>тлично, идем!"));
   });
 }
+
+} // namespace layers

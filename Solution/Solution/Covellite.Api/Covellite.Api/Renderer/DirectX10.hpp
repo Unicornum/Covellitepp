@@ -76,7 +76,7 @@ private:
   Render_t CreateGeometry(const ComponentPtr_t &) noexcept override { return nullptr; }
 
 private:
-  void SetViewport(int, int);
+  void SetViewport(const UINT, const UINT);
   Render_t CreateBlendState(bool);
   Render_t GetDepthState(bool, bool, bool);
   Render_t CreateBasePreRenderGeometry(const ComponentPtr_t &);

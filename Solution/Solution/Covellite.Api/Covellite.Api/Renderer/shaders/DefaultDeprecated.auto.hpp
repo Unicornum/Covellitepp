@@ -1,7 +1,6 @@
 ﻿
 #pragma once
-#include <vector>
-#include <cstdint>
+#include <alicorn/std.memory/binary-data.hpp>
 
 // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! ВАЖНО !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 // Это АВТОМАТИЧЕСКИ сгенерированный файл, все изменения будут перезаписаны
@@ -11,7 +10,7 @@
 namespace
 {
 
-const ::std::vector<uint8_t> DefaultDeprecated =
+const ::alicorn::extension::std::memory::BinaryData_t DefaultDeprecated =
 {
   0xd, 0xa, 0x23, 0x69, 0x66, 0x64, 0x65, 0x66, 0x20, 0x43, 0x4f, 0x56, 0x45, 0x4c, 0x4c, 0x49, 
   0x54, 0x45, 0x5f, 0x53, 0x48, 0x41, 0x44, 0x45, 0x52, 0x5f, 0x56, 0x45, 0x52, 0x54, 0x45, 0x58, 

@@ -68,10 +68,18 @@ protected:
 
 protected:
   const int       m_Top;
+  int             m_Width = 0;
+  int             m_Height = 0;
+  const uint8_t   Align[4] = { 0 };
   const String_t  m_PreVersion;
 
 protected:
   OpenGLCommon(const Data_t &, const String_t &);
+  OpenGLCommon(const OpenGLCommon &) = delete;
+  OpenGLCommon(OpenGLCommon &&) = delete;
+  OpenGLCommon & operator= (const OpenGLCommon &) = delete;
+  OpenGLCommon & operator= (OpenGLCommon &&) = delete;
+  ~OpenGLCommon(void) = default;
 };
 
 } // namespace renderer

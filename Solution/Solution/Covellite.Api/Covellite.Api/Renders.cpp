@@ -6,7 +6,11 @@
 #include <Covellite/Api/Vertex.hpp>
 //#include <boost/thread/lock_guard.hpp>
 
-using namespace covellite::api;
+namespace covellite
+{
+
+namespace api
+{
 
 /**
 * \brief
@@ -296,3 +300,7 @@ auto Component::Renders::Create(const ComponentPtr_t & _pComponent) -> Render_t
 
   return Result;
 }
+
+} // namespace api
+
+} // namespace covellite

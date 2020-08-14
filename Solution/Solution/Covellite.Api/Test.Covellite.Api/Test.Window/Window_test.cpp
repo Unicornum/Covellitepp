@@ -137,26 +137,20 @@ TEST_F(Window_test, /*DISABLED_*/Test_Dummy)
 // ************************************************************************** //
 TEST_F(Window_test, /*DISABLED_*/Test_Constructor)
 {
-  using WindowOsProxy_t = ::mock::covellite::os::Window::Proxy;
-  WindowOsProxy_t WindowOsProxy;
-  WindowOsProxy_t::GetInstance() = &WindowOsProxy;
+  ::mock::covellite::os::Window::Proxy WindowOsProxy;
+  ::mock::alicorn::modules::settings::SectionImplProxy SettingsProxy;
+  ::mock::RendererImpl::Proxy RendererImplProxy;
 
-  using SettingsProxy_t = ::mock::alicorn::modules::settings::SectionImplProxy;
-  SettingsProxy_t SettingsProxy;
-  SettingsProxy_t::GetInstance() = &SettingsProxy;
-
-  using RendererImplProxy_t = ::mock::RendererImpl::Proxy;
-  RendererImplProxy_t RendererImplProxy;
-  RendererImplProxy_t::GetInstance() = &RendererImplProxy;
-
-  const ::mock::Id_t WindowOsId = 1710311123;
-  const ::mock::Id_t WindowSectionId = 1806101824;
+  constexpr ::mock::Id_t WindowOsId = 1710311123;
+  constexpr ::mock::Id_t WindowSectionId = 1806101824;
 
   for (const auto IsFullScreen : { true, false })
   {
     Data_t Data;
     Data.Handle = (HWND)1808221257;
     Data.Top = 1808271300;
+    Data.Width = 2008141048;
+    Data.Height = 2008141049;
     Data.IsFullScreen = IsFullScreen;
 
     using namespace ::testing;
@@ -175,7 +169,7 @@ TEST_F(Window_test, /*DISABLED_*/Test_Constructor)
 
     EXPECT_CALL(WindowOsProxy, GetClientRect(WindowOsId))
       .Times(1)
-      .WillOnce(Return(Rect_t{ 0, Data.Top, 0, 0 }));
+      .WillOnce(Return(Rect_t{ 0, Data.Top, Data.Width, Data.Height }));
 
     EXPECT_CALL(SettingsProxy, GetChildSectionImpl(_, uT("Window")))
       .Times(1);

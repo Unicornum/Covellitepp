@@ -8,6 +8,7 @@
 #include <Covellite/Events.hpp>
 #include <Covellite/App/Events.hpp>
 #include <Covellite/App/Settings.hpp>
+#include <Covellite/App/Vfs.hpp>
 #include <Covellite/Os/Events.hpp>
 #include <Covellite/Api/IWindow.hpp>
 #include <Covellite/Api/Events.hpp>
@@ -203,23 +204,9 @@ Window::Vector_t Window::GetContextSize(void) const
 */
 void Window::DoDrawWindow(void)
 {
-  static auto Start = ::std::chrono::system_clock::now();
-  static int fps = 0;
-
   m_pContext->Update();
   m_pContext->Render();
   m_pRenderer->RenderScene();
-  fps++;
-
-  const ::std::chrono::duration<double> TimeCall =
-    ::std::chrono::system_clock::now() - Start;
-  if (TimeCall.count() >= 1.0)
-  {
-    LOGGER(Info) << "fps: " << fps;
-
-    Start = ::std::chrono::system_clock::now();
-    fps = 0;
-  }
 }
 
 /**
@@ -231,61 +218,33 @@ void Window::DoDrawWindow(void)
 *  - Ошибка (если таковая возникнет) будет записана в лог через интерфейс
 *  System.
 */
-/*static*/ void Window::LoadFonts(void)
+void Window::LoadFonts(void)
 {
-  using Path_t = ::boost::filesystem::path;
-
-  class Directory
-  {
-    using fnCallBack_t = void(*)(const Path_t &);
-
-  public:
-    static void Iterate(const Path_t & _PathToFontsDirectory, 
-      const fnCallBack_t & _fnCallBack)
-    {
-# if BOOST_OS_WINDOWS
-
-      using ItDir_t = ::boost::filesystem::directory_iterator;
-
-      for (ItDir_t itPathToFont{ _PathToFontsDirectory };
-        itPathToFont != ItDir_t{}; ++itPathToFont)
-      {
-        _fnCallBack(itPathToFont->path());
-      }
-
-# elif BOOST_PLAT_ANDROID
-
-      // 07 Ноябрь 2017 12:03 (unicornum.verum@gmail.com)
-      TODO("Тест Android версии чтения шрифтов.");
-
-      using AppInfo_t = ::alicorn::system::platform::AppInfo;
-
-      auto * pAssetManager = AppInfo_t::Get<ANativeActivity>().assetManager;
-      if (pAssetManager == nullptr) return;
-
-      auto * pAssetDir = AAssetManager_openDir(pAssetManager,
-        _PathToFontsDirectory.string().c_str());
-      if (pAssetDir == nullptr) return;
-
-      const char * filename = nullptr;
-      while ((filename = AAssetDir_getNextFileName(pAssetDir)) != nullptr)
-      {
-        _fnCallBack(_PathToFontsDirectory / filename);
-      }
-
-      AAssetDir_close(pAssetDir);
-
-# endif
-    }
-  };
-
-  const auto CovelliteppSection = ::covellite::app::Settings_t::GetInstance();
-
+  const auto & CovelliteppSection = 
+    ::covellite::app::Settings_t::GetInstance();
   const auto PathToFontsDirectory =
     CovelliteppSection.Get<Path_t>(uT("PathToFontsDirectory"));
+  const auto & Vfs = 
+    ::covellite::app::Vfs_t::GetInstance();
 
-  Directory::Iterate(PathToFontsDirectory, [](const Path_t & _PathToFont)
+  try
   {
-    CovelliteGuiLoadFontFace(_PathToFont.string());
-  });
+    Vfs.BrowsingFiles(PathToFontsDirectory, [&](const Path_t & _FontFile)
+    {
+      // RmlUi не сохраняет копию переданных данных, поэтому прочитанные
+      // файлы следует хранить до конца использования.
+      m_RawDataFonts[_FontFile] = ::std::move(Vfs.GetData(_FontFile));
+
+      CovelliteGuiLoadFontFace(m_RawDataFonts[_FontFile]);
+    });
+  }
+  catch (const ::std::exception &)
+  {
+    // 03 Август 2020 15:52 (unicornum.verum@gmail.com)
+    TODO("Удалить перехват исключения, когда будет исправлен код Vfs.");
+
+    // Перехват исключения понадобился из-за некоррекной работы реализации
+    // чтения файлов для Vfs, которая бросает исключение для не существующей
+    // папки.
+  }
 }

@@ -26,7 +26,6 @@ template<>
 
   return ::std::make_unique<VfsCore_t>(::std::vector<ImplPtr_t>
   {
-    ::std::make_shared<::alicorn::modules::vfs::FileSystem>(""),        // Чтение данных из файлов в папке программы.
     ::std::make_shared<::alicorn::modules::vfs::Pack>("data/Data.pack", // Чтение данных из упакованного файла Data.pack.
       ::std::vector<ConverterPtr_t>{ ::std::make_shared<Compressor_t>() }),
   });

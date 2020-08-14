@@ -16,10 +16,11 @@ namespace renderer
 {
 
 OpenGLCommon::Texture::Texture(const Component::Texture & _Data) :
-  m_Destination(GetDestination(_Data.Destination)),
-  m_IsMapping(_Data.IsMapping),
+  m_Destination(GetDestination(_Data)),
   m_Format(GetFormat(_Data.Destination)),
-  m_TextureId(BuildTexture())
+  m_TextureId(BuildTexture()),
+  m_IsMapping(_Data.IsMapping),
+  m_Capacity(_Data.Capacity)
 {
   MakeContent(_Data.Width, _Data.Height, _Data.pTextureData);
 }
@@ -42,13 +43,37 @@ void OpenGLCommon::Texture::MakeContent(
 {
   Bind(true);
 
+# if !defined(GL_RGBA32F)
+#   define GL_RGBA32F GL_RGBA
+# endif
+
+# if !defined(GL_RGBA16F)
+#   define GL_RGBA16F GL_RGBA
+# endif
+
+# if !defined(GL_HALF_FLOAT)
+#   define GL_HALF_FLOAT GL_FLOAT
+# endif
+
+  const GLint InternalFormat =
+    (m_Format == GL_DEPTH_COMPONENT) ? GL_DEPTH_COMPONENT :
+    (m_Capacity == 32) ? GL_RGBA32F :
+    (m_Capacity == 16) ? GL_RGBA16F :
+    GL_RGBA;
+
+  const GLenum Format =
+    (InternalFormat == GL_RGBA) ? GL_UNSIGNED_BYTE :
+    (m_Capacity == 32) ? GL_FLOAT :
+    (m_Capacity == 16) ? GL_HALF_FLOAT :
+    GL_UNSIGNED_BYTE;
+
   // glTexImage2D копирует переданные данные в видеопамять, поэтому копировать
   // их в промежуточный буфер не нужно.
   glTexImage2D(GL_TEXTURE_2D, 0,
-    m_Format,
+    InternalFormat,
     _Width, _Height, 0,
     m_Format,
-    m_Format == GL_DEPTH_COMPONENT ? GL_UNSIGNED_INT : GL_UNSIGNED_BYTE,
+    m_Format == GL_DEPTH_COMPONENT ? GL_UNSIGNED_INT : Format,
     _pData);
 
   // Это рабочий вариант на Android'e; для подключения этой текстуры
@@ -81,9 +106,18 @@ void OpenGLCommon::Texture::MakeContent(
 }
 
 /*static*/ auto OpenGLCommon::Texture::GetDestination(
-  const String_t & _Destination) -> Destination_t
+  const Component::Texture & _TextureData) -> Destination_t
 {
-  if (_Destination == uT("diffuse")) return { 0, "TexDiffuse" };
+  if (_TextureData.Index >= 0)
+  {
+    using namespace ::alicorn::extension::std;
+
+    const auto Name = 
+      string_cast<::std::string, Encoding::Ascii128>(_TextureData.Name);
+    return { _TextureData.Index, Name };
+  }
+
+  if (_TextureData.Destination == uT("diffuse")) return { 0, "TexDiffuse" };
 
   static const ::std::vector<::std::pair<String_t, const char *>> Destinations =
   {
@@ -98,12 +132,12 @@ void OpenGLCommon::Texture::MakeContent(
   const auto itValue = ::std::find_if(Destinations.cbegin(),
     Destinations.cend(), [&](const ::std::pair<String_t, const char *> & _Dest)
   {
-    return (_Destination == _Dest.first);
+    return (_TextureData.Destination == _Dest.first);
   });
   if (itValue == Destinations.cend())
   {
     throw STD_EXCEPTION << "Unexpected destination texture: " <<
-      _Destination << uT(" [id=???") /*<< _pComponent->Id*/ << uT("].");
+      _TextureData.Destination << uT(" [id=???") /*<< _pComponent->Id*/ << uT("].");
   }
 
   const auto IndexDestination = 
@@ -111,7 +145,7 @@ void OpenGLCommon::Texture::MakeContent(
   return { IndexDestination, Destinations[IndexDestination].second };
 }
 
-/*static*/ GLuint OpenGLCommon::Texture::GetFormat(const String_t & _Destination)
+/*static*/ GLint OpenGLCommon::Texture::GetFormat(const String_t & _Destination)
 {
   return (_Destination == uT("depth")) ? GL_DEPTH_COMPONENT : GL_RGBA;
 }

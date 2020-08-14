@@ -11,7 +11,7 @@
 ExampleApp::ExampleApp(void) noexcept :
   Application(Continuous{})
 {
-  using namespace ::covellite;
+  namespace events = ::covellite::events;
     
   m_Events[events::Application.Start]
     .Connect([&]() { DoInitWindow(); } );

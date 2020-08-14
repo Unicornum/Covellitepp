@@ -3,8 +3,8 @@
 #include <alicorn\android.mock.hpp>
 
 struct AInputEvent {};
-struct ANativeWindow {};
 struct AConfiguration {};
+struct ANativeWindow {};
 
 struct android_app
 {

@@ -33,6 +33,13 @@ namespace api
 namespace renderer
 {
 
+inline GLuint glGetProgramId(void)
+{
+  GLint iProgramId = 0;
+  glGetIntegerv(GL_CURRENT_PROGRAM, &iProgramId);
+  return static_cast<GLuint>(iProgramId);
+}
+
 inline void CheckError(const int _Line)
 {
   const auto Error = glGetError();
@@ -57,7 +64,7 @@ public:
 
 private:
   static void Update(
-    const GLint _ProgramId, 
+    const GLuint _ProgramId, 
     const ::Camera & _Matrices,
     const ::std::string & _BufferName)
   {
@@ -77,7 +84,7 @@ private:
   }
 
 public:
-  static void Update(const GLint _ProgramId, const ::Camera & _Matrices)
+  static void Update(const GLuint _ProgramId, const ::Camera & _Matrices)
   {
     Update(_ProgramId, _Matrices, "MatricesData");
     Update(_ProgramId, _Matrices, "CameraData");
@@ -91,7 +98,7 @@ public:
   static const GLuint Index = COVELLITE_BUFFER_INDEX_FOG;
 
 public:
-  static void Update(const GLint _ProgramId, const ::Fog & _Fog)
+  static void Update(const GLuint _ProgramId, const ::Fog & _Fog)
   {
     const auto ColorId = glGetUniformLocation(_ProgramId, "FogData.Color");
     glUniform4fv(ColorId, 1, ::glm::value_ptr(_Fog.Color));
@@ -113,7 +120,7 @@ class Support<::Object>
 public:
   static const GLuint Index = COVELLITE_BUFFER_INDEX_OBJECT;
 
-  static void Update(const GLint _ProgramId, const ::Ambient_t & _Light)
+  static void Update(const GLuint _ProgramId, const ::Ambient_t & _Light)
   {
     const auto IsValidId =
       glGetUniformLocation(_ProgramId, "ObjectData.Lights.Ambient.IsValid");
@@ -124,7 +131,7 @@ public:
     glUniform4fv(ColorId, 1, ::glm::value_ptr(_Light.Color));
   }
 
-  static void Update(const GLint _ProgramId, const ::Direction_t & _Light)
+  static void Update(const GLuint _ProgramId, const ::Direction_t & _Light)
   {
     const auto IsValidId =
       glGetUniformLocation(_ProgramId, "ObjectData.Lights.Direction.IsValid");
@@ -138,7 +145,7 @@ public:
     glUniform4fv(DirectionId, 1, ::glm::value_ptr(_Light.Direction));
   }
 
-  static void Update(const GLint _ProgramId, const ::Points_t & _Lights)
+  static void Update(const GLuint _ProgramId, const ::Points_t & _Lights)
   {
     static const ::std::string LightsDataPoints[] =
     {
@@ -192,7 +199,7 @@ public:
   }
 
 public:
-  static void Update(const GLint _ProgramId, const ::Object & _Object)
+  static void Update(const GLuint _ProgramId, const ::Object & _Object)
   {
     const auto MatrixWorldId =
       glGetUniformLocation(_ProgramId, "ObjectData.World");
@@ -219,7 +226,7 @@ public:
   static const GLuint Index = COVELLITE_BUFFER_INDEX_MATRICES;
 
 public:
-  static void Update(const GLint _ProgramId, const ::Matrices & _Matrices)
+  static void Update(const GLuint _ProgramId, const ::Matrices & _Matrices)
   {
     const auto MatrixWorldId = 
       glGetUniformLocation(_ProgramId, "MatricesData.World");
@@ -235,7 +242,7 @@ public:
   static const GLuint Index = COVELLITE_BUFFER_INDEX_LIGHTS;
 
 private:
-  static void Update(const GLint _ProgramId, const ::Ambient_t & _Light)
+  static void Update(const GLuint _ProgramId, const ::Ambient_t & _Light)
   {
     const auto IsValidId =
       glGetUniformLocation(_ProgramId, "LightsData.Ambient.IsValid");
@@ -246,7 +253,7 @@ private:
     glUniform4fv(ColorId, 1, ::glm::value_ptr(_Light.Color));
   }
 
-  static void Update(const GLint _ProgramId, const ::Direction_t & _Light)
+  static void Update(const GLuint _ProgramId, const ::Direction_t & _Light)
   {
     const auto IsValidId =
       glGetUniformLocation(_ProgramId, "LightsData.Direction.IsValid");
@@ -260,7 +267,7 @@ private:
     glUniform4fv(DirectionId, 1, ::glm::value_ptr(_Light.Direction));
   }
 
-  static void Update(const GLint _ProgramId, const ::ScenePoints & _Lights)
+  static void Update(const GLuint _ProgramId, const ::ScenePoints & _Lights)
   {
     static const ::std::string LightsDataPoints[] =
     {
@@ -314,7 +321,7 @@ private:
   }
 
 public:
-  static void Update(const GLint _ProgramId, const ::SceneLights & _Lights)
+  static void Update(const GLuint _ProgramId, const ::SceneLights & _Lights)
   {
     Update(_ProgramId, _Lights.Ambient);
     Update(_ProgramId, _Lights.Direction);
@@ -338,11 +345,10 @@ public:
   inline void UpdateData(const ::std::string & _UniformBufferName,
     const void * _pData, const size_t _Size) const
   {
-    GLint ProgramId = 0;
-    glGetIntegerv(GL_CURRENT_PROGRAM, &ProgramId);
+    const auto ProgramId = glGetProgramId();
 
-    const auto BlockIndex = 
-      glGetUniformBlockIndex(ProgramId, _UniformBufferName.c_str());
+    const auto BlockIndex = glGetUniformBlockIndex(
+      ProgramId, _UniformBufferName.c_str());
 
     // Вероятно, шейдерная программа выкидывает неиспользуемые uniform-буфера,
     // в результате чего Index становится некорректным и glUniformBlockBinding()
@@ -369,36 +375,35 @@ public:
     // при использовании инстансинга привяжет смещение к идентификатору,
     // который в дальнейшем может быть получен здесь.
 
-    GLint ProgramId = 0;
-    glGetIntegerv(GL_CURRENT_PROGRAM, &ProgramId);
+    const auto ProgramId = glGetProgramId();
 
-    const auto hPosition =
-      glGetAttribLocation(ProgramId, "Covellite_VertexPosition");
+    const auto hPosition = static_cast<GLuint>(
+      glGetAttribLocation(ProgramId, "Covellite_VertexPosition"));
     if (hPosition != -1)
     {
       glEnableVertexAttribArray(hPosition);
       glVertexAttribPointer(hPosition, 4, GL_FLOAT, GL_FALSE,
-        sizeof(::covellite::api::Vertex), (void*)0);
+        sizeof(::covellite::api::Vertex), (void *)0);
       glVertexAttribDivisor(hPosition, 0);
     }
 
-    const auto hTexCoord =
-      glGetAttribLocation(ProgramId, "Covellite_VertexTexCoord");
+    const auto hTexCoord = static_cast<GLuint>(
+      glGetAttribLocation(ProgramId, "Covellite_VertexTexCoord"));
     if (hTexCoord != -1)
     {
       glEnableVertexAttribArray(hTexCoord);
       glVertexAttribPointer(hTexCoord, 2, GL_FLOAT, GL_FALSE,
-        sizeof(::covellite::api::Vertex), (void*)(sizeof(float) * 4));
+        sizeof(::covellite::api::Vertex), (void *)(sizeof(float) * 4));
       glVertexAttribDivisor(hTexCoord, 0);
     }
 
-    const auto hExtra =
-      glGetAttribLocation(ProgramId, "Covellite_VertexExtra");
+    const auto hExtra = static_cast<GLuint>(
+      glGetAttribLocation(ProgramId, "Covellite_VertexExtra"));
     if (hExtra != -1)
     {
       glEnableVertexAttribArray(hExtra);
       glVertexAttribPointer(hExtra, 4, GL_FLOAT, GL_FALSE,
-        sizeof(::covellite::api::Vertex), (void*)(sizeof(float) * 6));
+        sizeof(::covellite::api::Vertex), (void *)(sizeof(float) * 6));
       glVertexAttribDivisor(hExtra, 0);
     }
   }
@@ -417,8 +422,7 @@ public:
     Bind(true);
     UpdateData(_pData, _Size);
 
-    GLint ProgramId = 0;
-    glGetIntegerv(GL_CURRENT_PROGRAM, &ProgramId);
+    const auto ProgramId = glGetProgramId();
 
     const auto GetAttributeTypes = [&](void) -> AttributeTypes_t
     {
@@ -436,7 +440,7 @@ public:
 
       AttributeTypes_t Result;
 
-      for (GLint i = 0; i < AttributeCount; i++)
+      for (GLuint i = 0; i < static_cast<GLuint>(AttributeCount); i++)
       {
         auto iType = static_cast<GLenum>(-1);
         glGetActiveAttrib(ProgramId, i, NameBufferSize, &NameLength, 
@@ -460,7 +464,8 @@ public:
     {
       const auto Name = "iValue" + ::std::to_string(i + 1);
 
-      const auto hInstance = glGetAttribLocation(ProgramId, Name.c_str());
+      const auto hInstance = static_cast<GLuint>(
+        glGetAttribLocation(ProgramId, Name.c_str()));
       if (hInstance == -1) continue;
 
       glEnableVertexAttribArray(hInstance);
@@ -524,8 +529,7 @@ class OpenGLCommonShader::ConstantBuffer :
 public:
   void Update(void) const override
   {
-    GLint ProgramId = 0;
-    glGetIntegerv(GL_CURRENT_PROGRAM, &ProgramId);
+    const auto ProgramId = glGetProgramId();
 
     Support<T>::Update(ProgramId, Constants::Data<T>::m_Data);
 
@@ -584,7 +588,7 @@ auto OpenGLCommonShader::GetUsingApi(void) const -> String_t /*override*/
   for (GLint i = 0; i < ExtensionCount; i++)
   {
     LOGGER(Info) << "GL_EXTENSIONS: " <<
-      (const char *)glGetStringi(GL_EXTENSIONS, i);
+      (const char *)glGetStringi(GL_EXTENSIONS, static_cast<GLuint>(i));
   }
 
   return UsingApi;
@@ -617,7 +621,10 @@ class FrameBuffer
 public:
   inline void Bind(void) const
   {
-    glGetIntegerv(GL_FRAMEBUFFER_BINDING, &m_CurrentFrameBufferId);
+    GLint CurrentFrameBufferId = 0;
+    glGetIntegerv(GL_FRAMEBUFFER_BINDING, &CurrentFrameBufferId);
+    m_CurrentFrameBufferId = static_cast<GLuint>(CurrentFrameBufferId);
+
     glBindFramebuffer(GL_FRAMEBUFFER, m_Id);
   }
 
@@ -628,7 +635,7 @@ public:
 
 private:
   GLuint m_Id = 0;
-  mutable GLint m_CurrentFrameBufferId = 0;
+  mutable GLuint m_CurrentFrameBufferId = 0;
 
 public:
   FrameBuffer(void) noexcept
@@ -648,8 +655,67 @@ public:
 auto OpenGLCommonShader::CreateBkSurface(
   const ComponentPtr_t & _pComponent) -> Render_t /*override*/
 {
-  GLint Viewport[4] = { 0 };
-  glGetIntegerv(GL_VIEWPORT, Viewport);
+  using Size_t = ::std::pair<GLint, GLint>;
+  using fnBkSurfaceSize_t = ::std::function<Size_t(void)>;
+
+  const auto pBkSurface = _pComponent;
+
+  const fnBkSurfaceSize_t GetScaleBkSurfaceSize = [=](void)
+  {
+    GLint Viewport[4] = { 0 };
+    glGetIntegerv(GL_VIEWPORT, Viewport);
+
+    const float Scale = (*pBkSurface)[uT("scale")];
+
+    const int Width = static_cast<int>(Scale * Viewport[2]);
+    const int Height = static_cast<int>(Scale * Viewport[3]);
+
+    (*pBkSurface)[uT("width")] = Width;
+    (*pBkSurface)[uT("height")] = Height;
+
+    return Size_t{ static_cast<GLint>(Width), static_cast<GLint>(Height) };
+  };
+
+  const fnBkSurfaceSize_t GetWindowBkSurfaceSize = [=](void)
+  {
+    GLint Viewport[4] = { 0 };
+    glGetIntegerv(GL_VIEWPORT, Viewport);
+
+    const int Width = static_cast<int>(Viewport[2]);
+    const int Height = static_cast<int>(Viewport[3]);
+
+    (*pBkSurface)[uT("width")] = Width;
+    (*pBkSurface)[uT("height")] = Height;
+
+    return Size_t{ static_cast<GLint>(Width), static_cast<GLint>(Height) };
+  };
+
+  const fnBkSurfaceSize_t GetUserBkSurfaceSize = [=](void)
+  {
+    GLint Viewport[4] = { 0 };
+    glGetIntegerv(GL_VIEWPORT, Viewport);  // результат не используется, но 
+                                           // так проще тестировать
+
+    const int Width = (*pBkSurface)[uT("width")];
+    const int Height = (*pBkSurface)[uT("height")];
+
+    return Size_t{ static_cast<GLint>(Width), static_cast<GLint>(Height) };
+  };
+
+  const auto IsScaleBkSurfaceSize =
+    (*pBkSurface)[uT("scale")].IsType<float>();
+  const auto IsUserBkSurfaceSize =
+    (*pBkSurface)[uT("width")].IsType<int>() &&
+    (*pBkSurface)[uT("height")].IsType<int>();
+
+  const auto GetBkSurfaceSize =
+    (IsScaleBkSurfaceSize) ? GetScaleBkSurfaceSize :
+    (IsUserBkSurfaceSize) ? GetUserBkSurfaceSize :
+    GetWindowBkSurfaceSize;
+
+  const auto Size = GetBkSurfaceSize();
+  const auto Width = Size.first;
+  const auto Height = Size.second;
 
   const auto pFrameBuffer = ::std::make_shared<FrameBuffer>();
   pFrameBuffer->Bind();
@@ -659,8 +725,8 @@ auto OpenGLCommonShader::CreateBkSurface(
 
   const auto DoDataTexture = [&](const ComponentPtr_t & _pDataTexture)
   {
-    (*_pDataTexture)[uT("width")] = Viewport[2];
-    (*_pDataTexture)[uT("height")] = Viewport[3];
+    (*_pDataTexture)[uT("width")] = Width;
+    (*_pDataTexture)[uT("height")] = Height;
 
     const Component::Texture TextureData{ *_pDataTexture, uT("diffuse") };
 
@@ -670,7 +736,7 @@ auto OpenGLCommonShader::CreateBkSurface(
     if (pTexture->m_Format != GL_DEPTH_COMPONENT)
     {
       const auto Attachment = GL_COLOR_ATTACHMENT0 +
-        static_cast<int>(AttachmentIndexes.size());
+        static_cast<unsigned int>(AttachmentIndexes.size());
       AttachmentIndexes.push_back(Attachment);
       glFramebufferTexture2D(GL_FRAMEBUFFER, Attachment, GL_TEXTURE_2D,
         pTexture->m_TextureId, 0);
@@ -697,22 +763,24 @@ auto OpenGLCommonShader::CreateBkSurface(
 
   return [=](void)
   {
+    const auto [Width, Height] = GetBkSurfaceSize();
+
     if (m_IsResizeWindow)
     {
-      GLint ViewPort[4] = { 0 };
-      glGetIntegerv(GL_VIEWPORT, ViewPort);
-
       for (const auto & Texture : Textures)
       {
-        (*Texture.first)[uT("width")] = ViewPort[2];
-        (*Texture.first)[uT("height")] = ViewPort[3];
-        Texture.second->MakeContent(ViewPort[2], ViewPort[3], nullptr);
+        (*Texture.first)[uT("width")] = Width;
+        (*Texture.first)[uT("height")] = Height;
+        Texture.second->MakeContent(Width, Height, nullptr);
       }
     }
 
     pFrameBuffer->Bind();
     glDrawBuffers(static_cast<GLsizei>(AttachmentIndexes.size()),
       AttachmentIndexes.data());
+
+    // (0, 0) - левый нижний угол!
+    glViewport(0, 0, Width, Height - m_Top);
   };
 }
 
@@ -740,7 +808,8 @@ auto OpenGLCommonShader::CreateTexture(const ComponentPtr_t & _pComponent) -> Re
   const auto pTextureDataComponent = CapturingServiceComponent::Get(_pComponent, 
     { { uT("Texture"), _pComponent } })[0];
 
-  const Component::Texture TextureData{ *pTextureDataComponent, uT("diffuse") };
+  const auto pTextureData = 
+    ::std::make_shared<Component::Texture>(*pTextureDataComponent, uT("diffuse"));
 
   ::std::function<GLint(void)> GetTexMinFilter = 
     [=](void) { return m_TexParameters.MinFilter; };
@@ -749,9 +818,9 @@ auto OpenGLCommonShader::CreateTexture(const ComponentPtr_t & _pComponent) -> Re
     (*pTextureDataComponent)[uT("entity")].Default(Texture::Ptr_t{});
   if (pTexture == nullptr)
   {
-    pTexture = ::std::make_shared<Texture>(TextureData);
+    pTexture = ::std::make_shared<Texture>(*pTextureData);
 
-    if (TextureData.IsUsingMipmapping)
+    if (pTextureData->IsUsingMipmapping)
     {
       GetTexMinFilter = [](void) { return GL_LINEAR_MIPMAP_LINEAR; };
 
@@ -767,7 +836,7 @@ auto OpenGLCommonShader::CreateTexture(const ComponentPtr_t & _pComponent) -> Re
 
   const Render_t TextureRender = [=](void)
   {
-    auto Index = pTexture->m_Destination.first;
+    const auto Index = pTexture->m_Destination.first;
 
     glActiveTexture(GL_TEXTURE0 + Index);
     pTexture->Bind();
@@ -777,8 +846,7 @@ auto OpenGLCommonShader::CreateTexture(const ComponentPtr_t & _pComponent) -> Re
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, m_TexParameters.WrapS);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, m_TexParameters.WrapT);
 
-    GLint ProgramId = 0;
-    glGetIntegerv(GL_CURRENT_PROGRAM, &ProgramId);
+    const auto ProgramId = glGetProgramId();
 
     const auto LocationId = glGetUniformLocation(ProgramId,
       pTexture->m_Destination.second.c_str());
@@ -812,18 +880,18 @@ auto OpenGLCommonShader::CreateTexture(const ComponentPtr_t & _pComponent) -> Re
 
       auto * pData = reinterpret_cast<uint32_t *>(pTexture->m_ReadCopyData.data());
 
-      glReadPixels(0, 0, TextureData.Width, TextureData.Height, GL_RGBA,
+      glReadPixels(0, 0, pTextureData->Width, pTextureData->Height, GL_RGBA,
         GL_UNSIGNED_BYTE, pData);
 
       // Изображение в текстуре OpenGL перевернуто по Y, поэтому... 
-      for (int y = 0; y < TextureData.Height / 2; y++)
+      for (int y = 0; y < pTextureData->Height / 2; y++)
       {
         auto * pLineUp = 
-          pData + (static_cast<size_t>(y) * TextureData.Width);
+          pData + (static_cast<size_t>(y) * pTextureData->Width);
         auto * pLineDown = 
-          pData + ((static_cast<size_t>(TextureData.Height) - y - 1) * TextureData.Width);
+          pData + ((static_cast<size_t>(pTextureData->Height) - y - 1) * pTextureData->Width);
 
-        for (int x = 0; x < TextureData.Width; x++)
+        for (int x = 0; x < pTextureData->Width; x++)
         {
           auto & Up = *(pLineUp + x);
           auto & Down = *(pLineDown + x);
@@ -897,11 +965,12 @@ class OpenGLCommonShader::Programs final
         //const auto Size = static_cast<::std::size_t>(InfoLogLenght + 1);
         //::std::vector<GLchar> InfoLog(Size, (GLchar)0x00);
 
-        char InfoLog[512] = { 0 };
-        glGetShaderInfoLog(Id, sizeof(InfoLog), nullptr, InfoLog);
+        ::std::vector<GLchar> InfoLog(512, 0x00);
+        glGetShaderInfoLog(Id, InfoLog.size(), nullptr, InfoLog.data());
 
-        throw STD_EXCEPTION << "Compile shader fail: " << InfoLog
-          << " [header line: " << GetHeaderLines(m_Header) << "]";
+        throw STD_EXCEPTION << "Compile shader fail "
+          << "[header line: " << GetHeaderLines(m_Header) << "]: "
+          << InfoLog.data();
       };
     }
 
@@ -926,16 +995,16 @@ class OpenGLCommonShader::Programs final
   public:
     Programs & m_Programs;
     const GLenum Type;
-    const ::std::string m_Header;
     const GLuint Id;
+    const ::std::string m_Header;
 
   public:
     Shader(Programs & _Programs, const GLenum _Type, 
       const GLchar * _Header, const GLchar * _Body) :
       m_Programs{ _Programs },
       Type{ _Type },
-      m_Header(_Header),
-      Id{ glCreateShader(_Type) }
+      Id{ glCreateShader(_Type) },
+      m_Header(_Header)
     {
       const auto FullShaderBody = ::std::string{ _Header } +_Body;
       auto pFullShaderBody = FullShaderBody.c_str();
@@ -1078,6 +1147,7 @@ private:
   const GLuint InvalidId = static_cast<GLuint>(-1);
   GLuint m_VsShaderId = InvalidId;
   GLuint m_PsShaderId = InvalidId;
+  const uint8_t Align[4] = { 0 };
   Programs_t m_Programs;
 
 public:
@@ -1086,6 +1156,11 @@ public:
   {
 
   }
+  Programs(const Programs &) = delete;
+  Programs(Programs &&) = delete;
+  Programs & operator= (const Programs &) = delete;
+  Programs & operator= (Programs &&) = delete;
+  ~Programs(void) = default;
 };
 
 auto OpenGLCommonShader::CreateShader(const ComponentPtr_t & _pComponent) -> Render_t /*override*/
@@ -1265,7 +1340,7 @@ auto OpenGLCommonShader::CreateBuffer(const ComponentPtr_t & _pBuffer) -> Render
         cbBufferMapper(pData->data());
 
         pBuffer->UpdateData(pData->data(),
-          static_cast<GLsizeiptr>(pData->size() * sizeof(Type_t)));
+          static_cast<size_t>(pData->size() * sizeof(Type_t)));
       }
 
       pBuffer->SetVertexInputData();
@@ -1496,6 +1571,9 @@ auto OpenGLCommonShader::GetCameraCommon(void) -> Render_t
     glEnable(GL_CULL_FACE);
     glCullFace(GL_BACK);
     glFrontFace(GL_CCW);
+
+    // (0, 0) - левый нижний угол!
+    glViewport(0, 0, m_Width, m_Height - m_Top);
   };
 }
 

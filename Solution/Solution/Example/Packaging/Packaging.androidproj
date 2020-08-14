@@ -87,19 +87,6 @@
     <Content Include="assets\data\Data.pack">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="assets\data\fonts\CountryWestern.ttf" />
-    <Content Include="assets\data\fonts\fa-brands-400.ttf" />
-    <Content Include="assets\data\fonts\fa-regular-400.ttf" />
-    <Content Include="assets\data\fonts\fa-solid-900.ttf" />
-    <Content Include="assets\data\fonts\TimesNewRomanBold.ttf" />
-    <Content Include="assets\data\fonts\TimesNewRomanRegular.ttf" />
-    <Content Include="assets\data\fonts\Ubuntu.ttf" />
-    <Content Include="assets\data\fonts\Vollkorn-Black.ttf" />
-    <Content Include="assets\data\fonts\Vollkorn-Bold.ttf" />
-    <Content Include="assets\data\fonts\Vollkorn-BoldItalic.ttf" />
-    <Content Include="assets\data\fonts\Vollkorn-Italic.ttf" />
-    <Content Include="assets\data\fonts\Vollkorn-Regular.ttf" />
-    <Content Include="assets\data\fonts\Vollkorn-SemiBold.ttf" />
     <Content Include="res\drawable\icon.png" />
     <Content Include="res\values-v18\strings.xml" />
     <Content Include="res\values\strings.xml">

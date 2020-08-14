@@ -27,6 +27,9 @@
     <Filter Include="Assets\Data\Sounds">
       <UniqueIdentifier>{374c7686-2147-442e-8193-c2d5c863c3ab}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Assets\Data\Fonts">
+      <UniqueIdentifier>{c7ea1b7a-1f6c-437a-8a2f-d46c098dfc67}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -309,6 +312,12 @@
     <Image Include="Assets\Data\demo\demo.skybox.night.jpg">
       <Filter>Assets\Data\Demo</Filter>
     </Image>
+    <Image Include="Assets\Data\draw3dobject.title.normal.png">
+      <Filter>Assets\Data</Filter>
+    </Image>
+    <Image Include="Assets\Data\draw3dobject.title.reflection.png">
+      <Filter>Assets\Data</Filter>
+    </Image>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Assets\Data\shaders\Pbr.ps.fx">
@@ -346,5 +355,46 @@
     <Media Include="Assets\Data\Sounds\Ambient.night.mp3">
       <Filter>Assets\Data\Sounds</Filter>
     </Media>
+  </ItemGroup>
+  <ItemGroup>
+    <Font Include="Assets\Data\Fonts\CountryWestern.ttf">
+      <Filter>Assets\Data\Fonts</Filter>
+    </Font>
+    <Font Include="Assets\Data\Fonts\fa-brands-400.ttf">
+      <Filter>Assets\Data\Fonts</Filter>
+    </Font>
+    <Font Include="Assets\Data\Fonts\fa-regular-400.ttf">
+      <Filter>Assets\Data\Fonts</Filter>
+    </Font>
+    <Font Include="Assets\Data\Fonts\fa-solid-900.ttf">
+      <Filter>Assets\Data\Fonts</Filter>
+    </Font>
+    <Font Include="Assets\Data\Fonts\TimesNewRomanBold.ttf">
+      <Filter>Assets\Data\Fonts</Filter>
+    </Font>
+    <Font Include="Assets\Data\Fonts\TimesNewRomanRegular.ttf">
+      <Filter>Assets\Data\Fonts</Filter>
+    </Font>
+    <Font Include="Assets\Data\Fonts\Ubuntu.ttf">
+      <Filter>Assets\Data\Fonts</Filter>
+    </Font>
+    <Font Include="Assets\Data\Fonts\Vollkorn-Black.ttf">
+      <Filter>Assets\Data\Fonts</Filter>
+    </Font>
+    <Font Include="Assets\Data\Fonts\Vollkorn-Bold.ttf">
+      <Filter>Assets\Data\Fonts</Filter>
+    </Font>
+    <Font Include="Assets\Data\Fonts\Vollkorn-BoldItalic.ttf">
+      <Filter>Assets\Data\Fonts</Filter>
+    </Font>
+    <Font Include="Assets\Data\Fonts\Vollkorn-Italic.ttf">
+      <Filter>Assets\Data\Fonts</Filter>
+    </Font>
+    <Font Include="Assets\Data\Fonts\Vollkorn-Regular.ttf">
+      <Filter>Assets\Data\Fonts</Filter>
+    </Font>
+    <Font Include="Assets\Data\Fonts\Vollkorn-SemiBold.ttf">
+      <Filter>Assets\Data\Fonts</Filter>
+    </Font>
   </ItemGroup>
 </Project>

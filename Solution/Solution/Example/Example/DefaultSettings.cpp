@@ -22,7 +22,7 @@ template<>
   // при необходимости.
     
   (*pSettings).AddExtra(uT("PathToFontsDirectory"),
-    uT("data/fonts"));  // Путь к папке расположения шрифтов, которые 
+    uT("Data/Fonts"));  // Путь к папке расположения шрифтов, которые 
                         // используются в .rcss файлах.
   (*pSettings).AddExtra(uT("PathToTextureDirectory"),
     uT("Data"));        // Путь к папке расположения текстур, которые 

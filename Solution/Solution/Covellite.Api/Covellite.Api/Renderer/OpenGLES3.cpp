@@ -38,7 +38,7 @@ void OpenGLES3::PresentFrame(void) /*override*/
 
     glEnable(GL_SCISSOR_TEST);
 
-    // (x, y) - левый нижний угол!
+    // (0, 0) - левый нижний угол!
     glScissor(ViewPort[0], ViewPort[3], ViewPort[2], m_Top);
 
     // 22 Май 2020 10:58 (unicornum.verum@gmail.com)

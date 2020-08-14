@@ -27,28 +27,6 @@ TEST_F(OpenGLCommon_test, /*DISABLED_*/Test_NoEqMatrix)
 }
 
 // ************************************************************************** //
-TEST_F(OpenGLCommon_test, /*DISABLED_*/Test_ResizeWindow)
-{
-  using GLProxy_t = ::mock::GLProxy;
-  GLProxy_t GLProxy;
-  GLProxy_t::GetInstance() = &GLProxy;
-
-  const int Width = 1710291059;
-  const int Height = 1710291100;
-  const int Top = 1218;
-
-  Tested_t Example{ Data_t{ Top } };
-  ITested_t & IExample = Example;
-
-  using namespace ::testing;
-
-  EXPECT_CALL(GLProxy, Viewport(0, 0, Width, Height - Top))
-    .Times(1);
-
-  IExample.ResizeWindow(Width, Height);
-}
-
-// ************************************************************************** //
 TEST_F(OpenGLCommon_test, /*DISABLED_*/Test_State_Blend)
 {
   using GLProxy_t = ::mock::GLProxy;

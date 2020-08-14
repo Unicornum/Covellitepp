@@ -85,6 +85,10 @@
 #define GL_TEXTURE_COMPARE_FUNC           0x884D
 #define GL_COMPARE_REF_TO_TEXTURE         0x884E
 
+#define GL_RGBA32F                        0x8814
+#define GL_RGBA16F                        0x881A
+#define GL_HALF_FLOAT                     0x140B
+
 using GLchar = char;
 typedef signed   long  int     khronos_ssize_t;
 typedef khronos_ssize_t  GLsizeiptr;

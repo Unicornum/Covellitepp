@@ -24,7 +24,7 @@ class File_test :
 protected:
   using Tested_t = ::covellite::gui::File;
   using ITested_t = ::mock::CovelliteGui::Core::FileInterface;
-  using Data_t = ::boost::filesystem::binary::Data_t;
+  using Data_t = ::alicorn::extension::std::memory::BinaryData_t;
   using Handle_t = ::mock::CovelliteGui::Core::FileHandle;
 
   // Вызывается ПЕРЕД запуском каждого теста

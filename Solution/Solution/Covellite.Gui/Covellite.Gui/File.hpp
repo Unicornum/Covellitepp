@@ -32,7 +32,7 @@ class File final :
 {
   using Path_t = CovelliteGui::Core::String;
   using Handle_t = CovelliteGui::Core::FileHandle;
-  using Data_t = ::boost::filesystem::binary::Data_t;
+  using Data_t = ::alicorn::extension::std::memory::BinaryData_t;
 
   struct FileInfo
   {

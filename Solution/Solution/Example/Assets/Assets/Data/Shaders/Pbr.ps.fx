@@ -25,9 +25,23 @@ float3 SyncSaturate(float3 _Color)
   return _Color / MaxXYZ;
 }
 
-float4 GetLightsColor(float4 _AmbientDirection, float4 _WorldPos, float3 _Normal)
+float4 GetLightsColor(float4 _WorldPos, float3 _Normal)
 {
-  float4 Result = _AmbientDirection;
+  // Source: https://habr.com/ru/post/338254/
+
+  float4 Result = float4(0.0f, 0.0f, 0.0f, 0.0f);
+
+  if (ObjectData.Lights.Ambient.IsValid == 1) // Ambient
+  {
+    Result += ObjectData.Lights.Ambient.Color;
+  }
+
+  if (ObjectData.Lights.Direction.IsValid == 1) // Direction
+  {
+    float3 Direction = normalize(ToFloat3(ObjectData.Lights.Direction.Direction));
+    Result += max(dot(_Normal, Direction), 0.0f) *
+      ObjectData.Lights.Direction.Color;
+  }
 
   for (int i = 0; i < ObjectData.Lights.Points.UsedSlotCount; i++)
   {
@@ -40,39 +54,15 @@ float4 GetLightsColor(float4 _AmbientDirection, float4 _WorldPos, float3 _Normal
 
 // ************************************************************************** //
 
-// source: http://orsvarn.com/entry/pbr-shader-source/
-
 COVELLITE_DECLARE_TEX2D(TexAlbedo, 0);
-COVELLITE_DECLARE_TEX2D(TexMetalness, 1);
-COVELLITE_DECLARE_TEX2D(TexRoughness, 2);
-COVELLITE_DECLARE_TEX2D(TexNormal, 3);
-COVELLITE_DECLARE_TEX2D(TexOcclusion, 4);
+COVELLITE_DECLARE_TEX2D(TexReflection, 1);
+COVELLITE_DECLARE_TEX2D(TexNormal, 2);
+COVELLITE_DECLARE_TEX2D(TexEnvironment, 3);
 
 float4 psSimple(Pixel _Value)
 {
   return COVELLITE_TEX2D_COLOR(TexAlbedo, _Value.TexCoord) *
-    GetLightsColor(_Value.Color, _Value.WorldPos, _Value.Normal);
-}
-
-// Constants
-COVELLITE_DECLARE_STATIC const float Pi = 3.14159265359f;
-COVELLITE_DECLARE_STATIC const float OneDivPi = 1.0f / Pi;
-
-// Lys constants
-COVELLITE_DECLARE_STATIC const float k0 = 0.00098f, k1 = 0.9921f, fUserMaxSPow = 0.2425f;
-COVELLITE_DECLARE_STATIC const float g_fMaxT = (exp2(-10.0 / sqrt(fUserMaxSPow)) - k0) / k1;
-COVELLITE_DECLARE_STATIC const int nMipOffset = 0;
-
-// Lys function, copy/pasted from 
-// https://www.knaldtech.com/docs/doku.php?id=specular_lys
-float GetSpecPowToMip(float fSpecPow, int nMips)
-{
-  // This line was added because ShaderTool destroys mipmaps.
-  fSpecPow = 1.0f - pow(1.0f - fSpecPow, 8.0f);
-  // Default curve - Inverse of Toolbag 2 curve with adjusted constants.
-  float fSmulMaxT = (exp2(-10.0f / sqrt(fSpecPow)) - k0) / k1;
-  return float(nMips - 1 - nMipOffset) * 
-    (1.0f - clamp(fSmulMaxT / g_fMaxT, 0.0f, 1.0f));
+    GetLightsColor(_Value.WorldPos, _Value.Normal);
 }
 
 float3x3 cotangent_frame(float3 N, float3 p, float2 uv)
@@ -112,6 +102,10 @@ float3 perturb_normal(float3 N, float3 V, float2 texcoord)
 
 float4 psPbrSimple(Pixel _Value)
 {
+  // source: 
+  // http://orsvarn.com/entry/pbr-shader-source/
+  // https://www.jordanstevenstechart.com/physically-based-rendering
+
   float3 CameraPosition = COVELLITE_MATRIX_ROW(CameraData.ViewInverse, 3).xyz;
 
   float3 camToPixelRaw = _Value.WorldPos.xyz - CameraPosition;
@@ -122,24 +116,21 @@ float4 psPbrSimple(Pixel _Value)
   float3 camNormalReflect = reflect(camToPixel, -normal);
 
   float3 DiffuseLightColor =
-    GetLightsColor(_Value.Color, _Value.WorldPos, normal).rgb;
+    GetLightsColor(_Value.WorldPos, normal).rgb;
 
   float3 BaseColorSample = COVELLITE_TEX2D_COLOR(TexAlbedo, _Value.TexCoord).rgb;
-  float3 RoughnessSample = COVELLITE_TEX2D_COLOR(TexRoughness, _Value.TexCoord).rrr;
-  float3 OcclusionSample = COVELLITE_TEX2D_COLOR(TexOcclusion, _Value.TexCoord).rrr;
+  float RoughnessSample = COVELLITE_TEX2D_COLOR(TexReflection, _Value.TexCoord).g;
+  float OcclusionSample = COVELLITE_TEX2D_COLOR(TexReflection, _Value.TexCoord).b;
 
   float3 SpecularLightColor =
-    GetLightsColor(_Value.Color, _Value.WorldPos, camNormalReflect).rgb;
+    GetLightsColor(_Value.WorldPos, camNormalReflect).rgb;
 
-  float3 BaseColorSpecular = COVELLITE_TEX2D_COLOR(TexAlbedo, camNormalReflect.xy).rgb;
-  float3 MetalnessSample = COVELLITE_TEX2D_COLOR(TexMetalness, _Value.TexCoord).rrr;
+  float3 BaseColorSpecular = COVELLITE_TEX2D_COLOR(TexEnvironment, camNormalReflect.xy).rgb;
+  float MetalnessSample = COVELLITE_TEX2D_COLOR(TexReflection, _Value.TexCoord).r;
 
-  float3 PixelColor = DiffuseLightColor *
-
-    // !!! therefore Albedo, Roughness and Occlusion to one texture !!!
-    (BaseColorSample * RoughnessSample * OcclusionSample) +
-
-    SpecularLightColor * (BaseColorSpecular * MetalnessSample);
+  float3 PixelColor = BaseColorSample * OcclusionSample *
+    SyncSaturate(DiffuseLightColor * RoughnessSample * RoughnessSample +
+    SpecularLightColor * BaseColorSpecular * MetalnessSample);
 
   return float4(PixelColor, 1.0f);
 }

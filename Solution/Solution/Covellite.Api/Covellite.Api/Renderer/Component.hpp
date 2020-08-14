@@ -62,27 +62,38 @@ public:
   {
 
   }
+  Rasterizer(const Rasterizer &) = delete;
+  Rasterizer(Rasterizer &&) = delete;
+  Rasterizer & operator= (const Rasterizer &) = delete;
+  Rasterizer & operator= (Rasterizer &&) = delete;
+  ~Rasterizer(void) = default;
 };
 
 class Component::Scissor
 {
 public:
-  const bool IsEnabled;
   const int Left;
   const int Top;
   const int Right;
   const int Bottom;
+  const bool IsEnabled;
+  const uint8_t Align[3] = { 0 };
 
 public:
   explicit Scissor(Component_t & _Component) :
-    IsEnabled(_Component[uT("enabled")].Default(false)),
     Left(_Component[uT("left")].Default(0)),
     Top(_Component[uT("top")].Default(0)),
     Right(_Component[uT("right")].Default(0)),
-    Bottom(_Component[uT("bottom")].Default(0))
+    Bottom(_Component[uT("bottom")].Default(0)),
+    IsEnabled(_Component[uT("enabled")].Default(false))
   {
 
   }
+  Scissor(const Scissor &) = delete;
+  Scissor(Scissor &&) = delete;
+  Scissor & operator= (const Scissor &) = delete;
+  Scissor & operator= (Scissor &&) = delete;
+  ~Scissor(void) = default;
 };
 
 template<class T>
@@ -97,6 +108,7 @@ class Component::Buffer
 public:
   const Buffer_t<T> Data;
   const int Dimension;
+  const uint8_t Align[4] = { 0 };
 
 private:
   inline static Buffer_t<T> GetContent(
@@ -112,6 +124,11 @@ public:
     Dimension(_Component[uT("dimension")].Default(3))
   {
   }
+  Buffer(const Buffer &) = delete;
+  Buffer(Buffer &&) = delete;
+  Buffer & operator= (const Buffer &) = delete;
+  Buffer & operator= (Buffer &&) = delete;
+  ~Buffer(void) = default;
 };
 
 class Component::Texture :
@@ -121,9 +138,13 @@ public:
   const uint8_t * const pTextureData; // может быть nullptr 
   const int Width;
   const int Height;
+  const String_t Name;
   const String_t Destination;
+  const int Index;
+  const int Capacity;
   const bool IsUsingMipmapping;
   const bool IsMapping;
+  const uint8_t Align[6] = { 0 };
 
 public:
   Texture(Component_t & _Component, const String_t & _DefaultDestination) :
@@ -131,12 +152,20 @@ public:
     pTextureData(Data.empty() ? nullptr : Data.data()),
     Width(_Component[uT("width")].Default(0)),
     Height(_Component[uT("height")].Default(0)),
+    Name(_Component[uT("name")].Default(uT("Unknown"))),
     Destination(_Component[uT("destination")].Default(_DefaultDestination)),
+    Index(_Component[uT("index")].Default(-1)),
+    Capacity(_Component[uT("capacity")].Default(8)),
     IsUsingMipmapping(_Component[uT("mipmapping")].Default(false)),
     IsMapping(_Component[uT("mapper")].IsType<const cbBufferMap_t<const void> &>())
   {
 
   }
+  Texture(const Texture &) = delete;
+  Texture(Texture &&) = delete;
+  Texture & operator= (const Texture &) = delete;
+  Texture & operator= (Texture &&) = delete;
+  ~Texture(void) = default;
 };
 
 class Component::Shader :
@@ -169,12 +198,13 @@ private:
       }
 
       const ::std::string Line{ pLastBreak, pBreak };
-      const auto EntryPosition = Line.find(_Entry, 0);
+      const auto EntryPosition = Line.find(" " + _Entry + "(", 0);
       if (EntryPosition != ::std::string::npos)
       {
         _ReturnType = Line.substr(0, Line.find(" ", 0));
 
-        const auto TypeBegin = EntryPosition + _Entry.length() + 1;
+        const auto TypeBegin = EntryPosition + _Entry.length() 
+          + 2; // начальный пробел + скобка после
         const auto TypeEnd = Line.find(" ", TypeBegin);
 
         using namespace ::alicorn::extension::std;
@@ -269,6 +299,11 @@ public:
     Instance{ GetInstance(_Component[uT("instance")].Default(uT(""))) }
   {
   }
+  Shader(const Shader &) = delete;
+  Shader(Shader &&) = delete;
+  Shader & operator= (const Shader &) = delete;
+  Shader & operator= (Shader &&) = delete;
+  ~Shader(void) = default;
 };
 
 class Component::Transform
@@ -305,6 +340,11 @@ protected:
   {
 
   }
+  Transform(const Transform &) = delete;
+  Transform(Transform &&) = delete;
+  Transform & operator= (const Transform &) = delete;
+  Transform & operator= (Transform &&) = delete;
+  ~Transform(void) = default;
 };
 
 class Component::Position :
@@ -316,6 +356,11 @@ public:
   {
 
   }
+  Position(const Position &) = delete;
+  Position(Position &&) = delete;
+  Position & operator= (const Position &) = delete;
+  Position & operator= (Position &&) = delete;
+  ~Position(void) = default;
 };
 
 class Component::Rotation :
@@ -327,6 +372,11 @@ public:
   {
 
   }
+  Rotation(const Rotation &) = delete;
+  Rotation(Rotation &&) = delete;
+  Rotation & operator= (const Rotation &) = delete;
+  Rotation & operator= (Rotation &&) = delete;
+  ~Rotation(void) = default;
 };
 
 class Component::Scale :
@@ -338,6 +388,11 @@ public:
   {
 
   }
+  Scale(const Scale &) = delete;
+  Scale(Scale &&) = delete;
+  Scale & operator= (const Scale &) = delete;
+  Scale & operator= (Scale &&) = delete;
+  ~Scale(void) = default;
 };
 
 class Component::Fog
@@ -357,6 +412,11 @@ public:
   {
 
   }
+  Fog(const Fog &) = delete;
+  Fog(Fog &&) = delete;
+  Fog & operator= (const Fog &) = delete;
+  Fog & operator= (Fog &&) = delete;
+  ~Fog(void) = default;
 };
 
 } // namespace renderer

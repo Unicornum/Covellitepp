@@ -5,7 +5,11 @@
 #include <alicorn/patterns/factory.hpp>
 #include "Renderer/IGraphicApi.hpp"
 
-using namespace covellite::api;
+namespace covellite
+{
+
+namespace api
+{
 
 /*static*/ auto Window::GetRenderers(void) -> ::std::vector<String_t>
 {
@@ -46,3 +50,7 @@ using namespace covellite::api;
 
   throw STD_EXCEPTION << "Unknown Api: " << _Api;
 }
+
+} // namespace api
+
+} // namespace covellite

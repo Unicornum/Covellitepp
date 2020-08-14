@@ -59,9 +59,7 @@ TEST_F(System_test, /*DISABLED_*/Test_GetElapsedTime)
 {
   using Time_t = ::std::chrono::microseconds;
 
-  using Proxy_t = ::mock::std::chrono::system_clock::Proxy;
-  Proxy_t Proxy;
-  Proxy_t::GetInstance() = &Proxy;
+  ::mock::std::chrono::system_clock::Proxy Proxy;
 
   const Time_t Value0{ 1222333 };
   const Time_t Value1{ 4555666 };

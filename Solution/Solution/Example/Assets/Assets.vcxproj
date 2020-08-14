@@ -161,6 +161,8 @@ echo ... packed end.
     <Image Include="Assets\Data\demo\Human.Hand.Foot.png" />
     <Image Include="Assets\Data\demo\Human.Head.png" />
     <Image Include="Assets\Data\demo\Human.Outerwear.png" />
+    <Image Include="Assets\Data\draw3dobject.title.normal.png" />
+    <Image Include="Assets\Data\draw3dobject.title.reflection.png" />
     <Image Include="Assets\Data\gradient.png" />
     <Image Include="Assets\Data\simple2dgame.bricks.jpg" />
     <Image Include="Assets\Data\simple2dgame.clock.png" />
@@ -318,6 +320,21 @@ echo ... packed end.
   <ItemGroup>
     <Media Include="Assets\Data\Sounds\Ambient.day.mp3" />
     <Media Include="Assets\Data\Sounds\Ambient.night.mp3" />
+  </ItemGroup>
+  <ItemGroup>
+    <Font Include="Assets\Data\Fonts\CountryWestern.ttf" />
+    <Font Include="Assets\Data\Fonts\fa-brands-400.ttf" />
+    <Font Include="Assets\Data\Fonts\fa-regular-400.ttf" />
+    <Font Include="Assets\Data\Fonts\fa-solid-900.ttf" />
+    <Font Include="Assets\Data\Fonts\TimesNewRomanBold.ttf" />
+    <Font Include="Assets\Data\Fonts\TimesNewRomanRegular.ttf" />
+    <Font Include="Assets\Data\Fonts\Ubuntu.ttf" />
+    <Font Include="Assets\Data\Fonts\Vollkorn-Black.ttf" />
+    <Font Include="Assets\Data\Fonts\Vollkorn-Bold.ttf" />
+    <Font Include="Assets\Data\Fonts\Vollkorn-BoldItalic.ttf" />
+    <Font Include="Assets\Data\Fonts\Vollkorn-Italic.ttf" />
+    <Font Include="Assets\Data\Fonts\Vollkorn-Regular.ttf" />
+    <Font Include="Assets\Data\Fonts\Vollkorn-SemiBold.ttf" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

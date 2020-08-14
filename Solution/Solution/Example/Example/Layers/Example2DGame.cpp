@@ -8,27 +8,28 @@
 TODO("Недопустимая ссылка на заголовочный файл!");
 #include "../Basements/Simple2DGame.hpp"
 
-using namespace layers;
+namespace layers
+{
 
-static const auto DescriptionLayer =
-  uT("Окно демонстрации возможностей фреймворка по созданию простой ") +
-  uT("кроссплатформенной 2D игры.<br/>") +
-  uT("Часы со стрелками демонстрируют:<br/>") +
-  uT("- Использование единой текстуры для отображения нескольких объектов.<br/>") +
-  uT("- Использование смешения цвета вершин и текстуры.<br/>") +
-  uT("- Вращение объектов.<br/>") +
-  uT("- Совместное смещение дочерних объектов при смещении родительского.<br/>") +
-  uT("<br/>") +
-  uT("Правила игры:<br/>") +
-  uT("Двигайте квадрат в центре, избегая касания стен и движущихся ") +
-  uT("прямоугольников. Задача - продержаться как можно дольше.<br/>") +
-  uT("<br/>") +
-  uT("Для перезапуска игры выйдите на стартовый экран и снова зайдите ") +
-  uT("на экран игры.<br/>") +
-  uT("");
+static const auto Simple2DGameLayerDescription =
+uT("Окно демонстрации возможностей фреймворка по созданию простой ") +
+uT("кроссплатформенной 2D игры.<br/>") +
+uT("Часы со стрелками демонстрируют:<br/>") +
+uT("- Использование единой текстуры для отображения нескольких объектов.<br/>") +
+uT("- Использование смешения цвета вершин и текстуры.<br/>") +
+uT("- Вращение объектов.<br/>") +
+uT("- Совместное смещение дочерних объектов при смещении родительского.<br/>") +
+uT("<br/>") +
+uT("Правила игры:<br/>") +
+uT("Двигайте квадрат в центре, избегая касания стен и движущихся ") +
+uT("прямоугольников. Задача - продержаться как можно дольше.<br/>") +
+uT("<br/>") +
+uT("Для перезапуска игры выйдите на стартовый экран и снова зайдите ") +
+uT("на экран игры.<br/>") +
+uT("");
 
 Simple2DGame::Simple2DGame(IWindowGui_t & _Window) :
-  Layer(_Window, "simple2dgame.rml", uT("Простая 2D игра"), DescriptionLayer, true)
+  Layer(_Window, "simple2dgame.rml", uT("Простая 2D игра"), Simple2DGameLayerDescription, true)
 {
   using ::events::Simple2DGame;
   using ::covellite::events::Drawing;
@@ -50,7 +51,7 @@ Simple2DGame::Simple2DGame(IWindowGui_t & _Window) :
     const auto TimeSample = uT("Игровое время: {GAME_TIME_SEC}.") +
       (MilliSecond < 10 ? uT("0") : uT("")) + uT("{GAME_TIME_MILLI} сек.");
 
-    GetElement("id_game_time").SetMeaning(TimeSample      
+    GetElement("id_game_time").SetMeaning(TimeSample
       .Replace(uT("{GAME_TIME_SEC}"), (int)Second)
       .Replace(uT("{GAME_TIME_MILLI}"), MilliSecond));
   });
@@ -76,3 +77,5 @@ Simple2DGame::Simple2DGame(IWindowGui_t & _Window) :
     }
   });
 }
+
+} // namespace layers

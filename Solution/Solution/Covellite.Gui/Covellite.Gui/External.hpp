@@ -26,7 +26,49 @@ namespace CovelliteGui = ::Rocket;
 
 #else // __USING_GTEST
 
+#define FontDatabase FontDatabase_dummy
 #include <Rocket/Rocket.mock.hpp>
+#undef FontDatabase
+
+namespace mock
+{
+
+namespace Rocket
+{
+
+namespace Core
+{
+
+class FontDatabase
+{
+public:
+  class Proxy :
+    public ::alicorn::extension::testing::Proxy<Proxy>
+  {
+  public:
+    MOCK_METHOD1(LoadFontFace, bool(String));
+    MOCK_METHOD2(LoadFontFace, bool(::std::vector<byte>, String));
+  };
+
+public:
+  static bool LoadFontFace(const String & _Path)
+  {
+    return Proxy::GetInstance()->LoadFontFace(_Path);
+  }
+
+  static bool LoadFontFace(const ::std::vector<byte> & _Data,
+    const String & _Dummy)
+  {
+    return Proxy::GetInstance()->LoadFontFace(_Data, _Dummy);
+  }
+};
+
+} // namespace Core
+
+} // namespace Rocket
+
+} // namespace mock
+
 namespace CovelliteGui = ::mock::Rocket;
 
 namespace mock
@@ -86,6 +128,11 @@ inline void CovelliteGuiRemove(T * _pValue)
 inline void CovelliteGuiLoadFontFace(const ::std::string & _Path)
 {
   CovelliteGui::Core::FontDatabase::LoadFontFace(_Path.c_str());
+}
+
+inline void CovelliteGuiLoadFontFace(const ::std::vector<uint8_t> & _Data)
+{
+  CovelliteGui::Core::FontDatabase::LoadFontFace(_Data, "");
 }
 
 inline void CovelliteGuiSetProgressBarValue(
@@ -179,6 +226,13 @@ inline void CovelliteGuiRemove(CovelliteGui::Core::Context * _pContext)
 inline void CovelliteGuiLoadFontFace(const ::std::string & _Path)
 {
   CovelliteGui::Core::LoadFontFace(_Path.c_str());
+}
+
+inline void CovelliteGuiLoadFontFace(const ::std::vector<uint8_t> & _Data)
+{
+  CovelliteGui::Core::LoadFontFace(_Data.data(), static_cast<int>(_Data.size()), 
+    "", CovelliteGui::Core::Style::FontStyle::Normal, 
+    CovelliteGui::Core::Style::FontWeight::Normal);
 }
 
 inline void CovelliteGuiSetProgressBarValue(

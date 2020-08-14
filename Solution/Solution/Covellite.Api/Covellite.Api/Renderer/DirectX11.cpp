@@ -80,7 +80,7 @@ public:
   {
     D3D11_BUFFER_DESC Desc = { 0 };
     Desc.Usage = _IsDynamic ? D3D11_USAGE_DYNAMIC : D3D11_USAGE_DEFAULT;
-    Desc.CPUAccessFlags = _IsDynamic ? D3D11_CPU_ACCESS_WRITE : 0;
+    Desc.CPUAccessFlags = static_cast<UINT>(_IsDynamic ? D3D11_CPU_ACCESS_WRITE : 0);
     Desc.ByteWidth = static_cast<decltype(Desc.ByteWidth)>(sizeof(T) * _Count);
     Desc.BindFlags = Support<T>::Flag;
 
@@ -161,7 +161,7 @@ void DirectX11::PresentFrame(void) /*override*/
 void DirectX11::ResizeWindow(int32_t _Width, int32_t _Height) /*override*/
 {
   m_IsResizeWindow = true;
-  SetViewport(_Width, _Height);
+  SetRenderTargetSize(static_cast<UINT>(_Width), static_cast<UINT>(_Height));
 }
 
 void DirectX11::CreateDeviceAndSwapChain(const Data_t & _Data)
@@ -196,28 +196,16 @@ void DirectX11::CreateDeviceAndSwapChain(const Data_t & _Data)
     NULL,
     &m_pImmediateContext);
 
-  DXGI_SWAP_CHAIN_DESC Desc = { 0 };
-  DX_CHECK m_pSwapChain->GetDesc(&Desc);
-
-  SetViewport(Desc.BufferDesc.Width, Desc.BufferDesc.Height);
+  SetRenderTargetSize(static_cast<UINT>(_Data.Width), static_cast<UINT>(_Data.Height));
 }
 
-void DirectX11::SetViewport(int _Width, int _Height)
+void DirectX11::SetRenderTargetSize(const UINT _Width, const UINT _Height)
 {
-  D3D11_VIEWPORT ViewPort = { 0 };
-  ViewPort.TopLeftX = 0;
-  ViewPort.TopLeftY = 0;
-  ViewPort.Width = static_cast<FLOAT>(_Width);
-  ViewPort.Height = static_cast<FLOAT>(_Height);
-  ViewPort.MinDepth = 0.0f;
-  ViewPort.MaxDepth = 1.0f;
-  m_pImmediateContext->RSSetViewports(1, &ViewPort);
-
   CreateRenderTargetView(_Width, _Height);
   CreateDepthStencilView(_Width, _Height);
 }
 
-void DirectX11::CreateRenderTargetView(int _Width, int _Height)
+void DirectX11::CreateRenderTargetView(const UINT _Width, const UINT _Height)
 {
   if (m_pScreenRenderTargetView != nullptr)
   {
@@ -235,7 +223,7 @@ void DirectX11::CreateRenderTargetView(int _Width, int _Height)
     &m_pScreenRenderTargetView);
 }
 
-void DirectX11::CreateDepthStencilView(int _Width, int _Height)
+void DirectX11::CreateDepthStencilView(const UINT _Width, const UINT _Height)
 {
   m_pScreenDepthStencilView.Reset();
 
@@ -271,6 +259,18 @@ auto DirectX11::CreateCamera(const ComponentPtr_t & _pComponent) -> Render_t /*o
   {
     m_CurrentRenderTargets = { m_pScreenRenderTargetView.Get() };
     m_pCurrentDepthStencilView = m_pScreenDepthStencilView;
+
+    DXGI_SWAP_CHAIN_DESC Desc = { 0 };
+    DX_CHECK m_pSwapChain->GetDesc(&Desc);
+
+    D3D11_VIEWPORT ViewPort = { 0 };
+    ViewPort.TopLeftX = 0;
+    ViewPort.TopLeftY = 0;
+    ViewPort.Width = static_cast<FLOAT>(Desc.BufferDesc.Width);
+    ViewPort.Height = static_cast<FLOAT>(Desc.BufferDesc.Height);
+    ViewPort.MinDepth = 0.0f;
+    ViewPort.MaxDepth = 1.0f;
+    m_pImmediateContext->RSSetViewports(1, &ViewPort);
   };
 
   const auto DisabledBlendRender = CreateBlendState(false);
@@ -403,6 +403,7 @@ public:
   const ComponentWeakPtr_t  m_pDataTexture;
   const String_t            m_Destination;
   const UINT                m_iDestination;
+  const DXGI_FORMAT         m_Format;
   ComPtr_t<ID3D11Texture2D>          m_pTexture;
   ComPtr_t<ID3D11Texture2D>          m_pReadDataTexture;
   ComPtr_t<ID3D11RenderTargetView>   m_pRenderTargetView;
@@ -445,16 +446,16 @@ public:
       MakeRGBASource(_pDevice, _pImmediateContext, _Width, _Height, _pData);
   }
 
-  static ComPtr_t<ID3D11Texture2D> MakeRGBACopy(
+  ComPtr_t<ID3D11Texture2D> MakeRGBACopy(
     const ComPtr_t<ID3D11Device> & _pDevice,
-    const UINT _Width, const UINT _Height)
+    const UINT _Width, const UINT _Height) const
   {
     D3D11_TEXTURE2D_DESC textureDesc = { 0 };
     textureDesc.Width = _Width;
     textureDesc.Height = _Height;
     textureDesc.MipLevels = 1;
     textureDesc.ArraySize = 1;
-    textureDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+    textureDesc.Format = m_Format;
     textureDesc.Usage = D3D11_USAGE_STAGING;
     textureDesc.CPUAccessFlags = D3D11_CPU_ACCESS_READ;
     textureDesc.SampleDesc.Count = 1;
@@ -477,7 +478,7 @@ private:
     TextureDesc.Height = _Height;
     TextureDesc.MipLevels = 1;
     TextureDesc.ArraySize = 1;
-    TextureDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+    TextureDesc.Format = m_Format;
     TextureDesc.Usage = D3D11_USAGE_DEFAULT;
     TextureDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
     TextureDesc.MiscFlags = 0;
@@ -513,7 +514,7 @@ private:
     TextureDesc.Height = _Height;
     TextureDesc.MipLevels = 0;
     TextureDesc.ArraySize = 1;
-    TextureDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+    TextureDesc.Format = m_Format;
     TextureDesc.Usage = D3D11_USAGE_DEFAULT;
     TextureDesc.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
     TextureDesc.MiscFlags = D3D11_RESOURCE_MISC_GENERATE_MIPS;
@@ -549,7 +550,7 @@ private:
     TextureDesc.Height = _Height;
     TextureDesc.MipLevels = 1;
     TextureDesc.ArraySize = 1;
-    TextureDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+    TextureDesc.Format = m_Format;
     TextureDesc.Usage = D3D11_USAGE_DEFAULT;
     TextureDesc.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
     TextureDesc.MiscFlags = 0;
@@ -568,7 +569,7 @@ private:
       &m_pShaderResourceView);
 
     D3D11_RENDER_TARGET_VIEW_DESC TargetDesc = { 0 };
-    TargetDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
+    TargetDesc.Format = TextureDesc.Format;
     TargetDesc.ViewDimension = D3D11_RTV_DIMENSION_TEXTURE2D;
 
     ComPtr_t<ID3D11RenderTargetView> pRenderTargetView;
@@ -617,8 +618,11 @@ private:
   }
 
 private:
-  static UINT GetDestinationIndex(const String_t & _Destination)
+  static UINT GetDestinationIndex(const ComponentPtr_t & _pData)
   {
+    const int Index = (*_pData)[uT("index")].Default(-1);
+    if (Index >= 0) return static_cast<UINT>(Index);
+
     static const ::std::vector<String_t> Destinations =
     {
       uT("albedo"),
@@ -629,40 +633,115 @@ private:
       uT("depth"),
     };
 
+    const String_t Destination =
+      (*_pData)[uT("destination")].Default(uT("albedo"));
+
     const auto itDestination =
-      ::std::find(Destinations.cbegin(), Destinations.cend(), _Destination);
+      ::std::find(Destinations.cbegin(), Destinations.cend(), Destination);
     if (itDestination == Destinations.cend())
     {
-      throw STD_EXCEPTION << "Unexpected destination texture: " << _Destination;
+      throw STD_EXCEPTION << "Unexpected destination texture: " << Destination;
     }
 
     return static_cast<UINT>(
       ::std::distance(Destinations.cbegin(), itDestination));
   };
 
+  static DXGI_FORMAT GetFormat(const ComponentPtr_t & _pData)
+  {
+    const int Capacity = (*_pData)[uT("capacity")].Default(8);
+
+    return
+      (Capacity == 32) ? DXGI_FORMAT_R32G32B32A32_FLOAT :
+      (Capacity == 16) ? DXGI_FORMAT_R16G16B16A16_FLOAT :
+      DXGI_FORMAT_R8G8B8A8_UNORM;
+  }
+
 public:
   explicit Texture(const ComponentPtr_t & _pDataTexture) :
     m_pDataTexture{ _pDataTexture },
     m_Destination{ (*_pDataTexture)[uT("destination")].Default(uT("albedo")) },
-    m_iDestination{ GetDestinationIndex(m_Destination) }
+    m_iDestination{ GetDestinationIndex(_pDataTexture) },
+    m_Format{ GetFormat(_pDataTexture) }
   {
 
   }
+  Texture(const Texture &) = delete;
+  Texture(Texture &&) = delete;
+  Texture & operator= (const Texture &) = delete;
+  Texture & operator= (Texture &&) = delete;
+  ~Texture(void) = default;
 };
 
 auto DirectX11::CreateBkSurface(const ComponentPtr_t & _pComponent) -> Render_t /*override*/
 {
+  using Size_t = ::std::tuple<UINT, UINT>;
+  using fnBkSurfaceSize_t = ::std::function<Size_t(void)>;
+
+  const auto pBkSurface = _pComponent;
+
+  const fnBkSurfaceSize_t GetScaleBkSurfaceSize = [=](void)
+  {
+    DXGI_SWAP_CHAIN_DESC Desc = { 0 };
+    DX_CHECK m_pSwapChain->GetDesc(&Desc);
+
+    const float Scale = (*pBkSurface)[uT("scale")];
+
+    const int Width = static_cast<int>(Scale * Desc.BufferDesc.Width);
+    const int Height = static_cast<int>(Scale * Desc.BufferDesc.Height);
+
+    (*pBkSurface)[uT("width")] = Width;
+    (*pBkSurface)[uT("height")] = Height;
+
+    return Size_t{ static_cast<UINT>(Width), static_cast<UINT>(Height) };
+  };
+
+  const fnBkSurfaceSize_t GetWindowBkSurfaceSize = [=](void)
+  {
+    DXGI_SWAP_CHAIN_DESC Desc = { 0 };
+    DX_CHECK m_pSwapChain->GetDesc(&Desc);
+
+    const int Width = static_cast<int>(Desc.BufferDesc.Width);
+    const int Height = static_cast<int>(Desc.BufferDesc.Height);
+
+    (*pBkSurface)[uT("width")] = Width;
+    (*pBkSurface)[uT("height")] = Height;
+
+    return Size_t{ static_cast<UINT>(Width), static_cast<UINT>(Height) };
+  };
+
+  const fnBkSurfaceSize_t GetUserBkSurfaceSize = [=](void)
+  {
+    DXGI_SWAP_CHAIN_DESC Desc = { 0 };
+    DX_CHECK m_pSwapChain->GetDesc(&Desc); // результат не используется, но 
+                                           // так проще тестировать
+
+    const int Width = (*pBkSurface)[uT("width")];
+    const int Height = (*pBkSurface)[uT("height")];
+
+    return Size_t{ static_cast<UINT>(Width), static_cast<UINT>(Height) };
+  };
+
+  const auto IsScaleBkSurfaceSize =
+    (*pBkSurface)[uT("scale")].IsType<float>();
+  const auto IsUserBkSurfaceSize =
+    (*pBkSurface)[uT("width")].IsType<int>() &&
+    (*pBkSurface)[uT("height")].IsType<int>();
+
+  const auto GetBkSurfaceSize =
+    (IsScaleBkSurfaceSize) ? GetScaleBkSurfaceSize :
+    (IsUserBkSurfaceSize) ? GetUserBkSurfaceSize : 
+    GetWindowBkSurfaceSize;
+
+  const auto [Width, Height] = GetBkSurfaceSize();
+
   const auto pBkSurfaceTextures =
     ::std::make_shared<::std::vector<Texture::Ptr_t>>();
-
-  DXGI_SWAP_CHAIN_DESC Desc = { 0 };
-  DX_CHECK m_pSwapChain->GetDesc(&Desc);
 
   const auto DoDataTexture = [&](const ComponentPtr_t & _pDataTexture)
   {
     auto pTexture = ::std::make_shared<Texture>(_pDataTexture);
-    pTexture->MakeTarget(m_pDevice, 
-      Desc.BufferDesc.Width, Desc.BufferDesc.Height);
+    pTexture->MakeTarget(m_pDevice, Width, Height);
     (*_pDataTexture)[uT("entity")] = pTexture;
     pBkSurfaceTextures->push_back(pTexture);
   };
@@ -674,15 +753,13 @@ auto DirectX11::CreateBkSurface(const ComponentPtr_t & _pComponent) -> Render_t 
 
   return [=](void)
   {
+    const auto [Width, Height] = GetBkSurfaceSize();
+
     if (m_IsResizeWindow)
     {
-      DXGI_SWAP_CHAIN_DESC Desc = { 0 };
-      DX_CHECK m_pSwapChain->GetDesc(&Desc);
-
       for (auto & pTexture : *pBkSurfaceTextures)
       {
-        pTexture->MakeTarget(m_pDevice,
-          Desc.BufferDesc.Width, Desc.BufferDesc.Height);
+        pTexture->MakeTarget(m_pDevice, Width, Height);
       }
     }
 
@@ -713,6 +790,15 @@ auto DirectX11::CreateBkSurface(const ComponentPtr_t & _pComponent) -> Render_t 
     m_pImmediateContext->OMSetRenderTargets(
       static_cast<UINT>(m_CurrentRenderTargets.size()),
       &m_CurrentRenderTargets[0], nullptr);
+
+    D3D11_VIEWPORT ViewPort = { 0 };
+    ViewPort.TopLeftX = 0;
+    ViewPort.TopLeftY = 0;
+    ViewPort.Width = static_cast<FLOAT>(Width);
+    ViewPort.Height = static_cast<FLOAT>(Height);
+    ViewPort.MinDepth = 0.0f;
+    ViewPort.MaxDepth = 1.0f;
+    m_pImmediateContext->RSSetViewports(1, &ViewPort);
   };
 }
 
@@ -850,8 +936,9 @@ auto DirectX11::CreateTexture(const ComponentPtr_t & _pComponent) -> Render_t /*
   if (pTexture == nullptr)
   {
     pTexture = ::std::make_shared<Texture>(pTextureData);
-    pTexture->MakeSource(m_pDevice, m_pImmediateContext, TextureData.Width, 
-      TextureData.Height, TextureData.Data.data(), TextureData.IsUsingMipmapping);
+    pTexture->MakeSource(m_pDevice, m_pImmediateContext, 
+      static_cast<UINT>(TextureData.Width), static_cast<UINT>(TextureData.Height), 
+      TextureData.Data.data(), TextureData.IsUsingMipmapping);
   }
   else
   {

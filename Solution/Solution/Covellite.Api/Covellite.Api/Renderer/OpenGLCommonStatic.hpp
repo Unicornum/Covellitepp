@@ -61,11 +61,18 @@ private:
 
 private:
   template<class>
+  class Support;
+  template<class>
   class ConstantBuffer;
   Render_t m_DrawElements = [](void) {};
 
 public:
   OpenGLCommonStatic(const Data_t &, const String_t &);
+  OpenGLCommonStatic(const OpenGLCommonStatic &) = delete;
+  OpenGLCommonStatic(OpenGLCommonStatic &&) = delete;
+  OpenGLCommonStatic & operator= (const OpenGLCommonStatic &) = delete;
+  OpenGLCommonStatic & operator= (OpenGLCommonStatic &&) = delete;
+  ~OpenGLCommonStatic(void) = default;
 };
 
 } // namespace renderer

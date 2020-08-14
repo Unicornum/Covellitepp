@@ -104,11 +104,13 @@ protected:
 
 protected:
   bool m_IsResizeWindow = false;
+  const uint8_t Align1[7] = { 0 };
 
 private:
   using TimePoint_t = ::std::chrono::system_clock::time_point;
   const TimePoint_t m_StartProgram;
   float             m_CurrentFrameTime;
+  const uint8_t Align2[4] = { 0 };
 
 protected:
   class Constants;
@@ -129,6 +131,11 @@ private:
 
 protected:
   GraphicApi(void);
+  GraphicApi(const GraphicApi &) = delete;
+  GraphicApi(GraphicApi &&) = delete;
+  GraphicApi & operator= (const GraphicApi &) = delete;
+  GraphicApi & operator= (GraphicApi &&) = delete;
+  ~GraphicApi(void) = default;
 };
 
 } // namespace renderer

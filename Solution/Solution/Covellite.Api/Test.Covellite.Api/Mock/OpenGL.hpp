@@ -118,6 +118,10 @@
 #define GL_UNSIGNED_INT_24_8              0x84FA
 #define GL_DEPTH24_STENCIL8               0x88F0
 
+#define GL_RGBA32F                        0x8814
+#define GL_RGBA16F                        0x881A
+#define GL_HALF_FLOAT                     0x140B
+
 namespace mock
 {
 

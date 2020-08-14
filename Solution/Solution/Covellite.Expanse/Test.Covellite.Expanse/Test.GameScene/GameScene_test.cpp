@@ -334,6 +334,11 @@ TEST_F(GameScene_test, /*DISABLED_*/Test_Update)
 
   InSequence Dummy;
 
+  EXPECT_CALL(oProxy, Render(_))
+    .Times(0);
+
+  Example.Update();
+
   EXPECT_CALL(oProxy, CreateUpdater(uT("2006192058")))
     .Times(1);
 
@@ -430,6 +435,79 @@ TEST_F(GameScene_test, /*DISABLED_*/Test_Update)
       { uT("id"), uT("2006192100") },
       { uT("type"), uT("Updater") },
     }));
+}
+
+// ************************************************************************** //
+TEST_F(GameScene_test, /*DISABLED_*/Test_AddingUpdaterDuringUpdate)
+{
+  class Proxy :
+    public ::alicorn::extension::testing::Proxy<Proxy>
+  {
+  public:
+    MOCK_METHOD1(Update, void(String_t));
+  };
+
+  Proxy oProxy;
+
+  Tested_t * pExample = nullptr;
+
+  const auto UpdaterCreator = 
+    [&](const ComponentPtr_t & _pComponent) -> Renders_t::Render_t
+  {
+    return [&, _pComponent]() 
+    { 
+      oProxy.Update(_pComponent->Id);
+
+      if (pExample != nullptr)
+      {
+        pExample->CreateObject(
+          {
+            Component_t::Make(
+              {
+                { uT("id"), uT("2008041048") },
+                { uT("type"), uT("Updater") },
+              }),
+          });
+
+        pExample = nullptr;
+      }
+    };
+  };
+
+  const auto pRenders = ::std::make_shared<Renders_t>(Renders_t::Creators_t
+    {
+      { uT("Updater"), UpdaterCreator },
+    });
+
+  Produce3DObject oProduce3DObject;
+  Tested_t Example{ pRenders, oProduce3DObject };
+  pExample = &Example;
+
+  using namespace ::testing;
+
+  InSequence Dummy;
+
+  Example.CreateObject(
+    {
+      Component_t::Make(
+        {
+          { uT("id"), uT("2008041040") },
+          { uT("type"), uT("Updater") },
+        }),
+    });
+
+  EXPECT_CALL(oProxy, Update(uT("2008041040")))
+    .Times(1);
+
+  Example.Update();
+
+  EXPECT_CALL(oProxy, Update(uT("2008041040")))
+    .Times(1);
+
+  EXPECT_CALL(oProxy, Update(uT("2008041048")))
+    .Times(1);
+
+  Example.Update();
 }
 
 ALICORN_RESTORE_WARNINGS

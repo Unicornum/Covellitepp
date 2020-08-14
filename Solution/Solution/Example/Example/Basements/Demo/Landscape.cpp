@@ -142,7 +142,7 @@ Landscape::Landscape(const GameObject::Landscape::Value _Type,
   }
 }
 
-static const auto Random = [](const size_t _From, const size_t _To)
+static const auto RandomLandscape = [](const size_t _From, const size_t _To)
 {
   static ::std::mt19937 Generator{ ::std::random_device{}() };
   return static_cast<size_t>(::std::uniform_int_distribution<>{
@@ -172,7 +172,7 @@ auto Landscape::GetObject(const Any_t & _Value) const /*override*/ -> Objects_t
     //GetPointLight(CellPosition);
     GetUserConstantBuffer(CellPosition);
   String_t TransformId;
-  const auto & LodModels = m_Models[Random(0, m_Models.size() - 1)];
+  const auto & LodModels = m_Models[RandomLandscape(0, m_Models.size() - 1)];
 
   Objects_t Result =
   {
@@ -266,8 +266,8 @@ Object_t Landscape::GetTransform(
   const auto WorldPosition = _CellPosition.ToPlane();
 
   const auto Rotate = m_IsUsingRotate ?
-    Random(0, 5) * math::Constant<float>::Pi / 3.0f : 0.0f;
-  const auto Scale = 1.0f + (m_ScaleFactor - 1.0f) * Random(0, 100) / 100.0f;
+    RandomLandscape(0, 5) * math::Constant<float>::Pi / 3.0f : 0.0f;
+  const auto Scale = 1.0f + (m_ScaleFactor - 1.0f) * RandomLandscape(0, 100) / 100.0f;
 
   const Object_t Transform =
   {

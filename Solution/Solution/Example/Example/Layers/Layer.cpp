@@ -5,7 +5,8 @@
 #include <alicorn/version.hpp>
 #include "Description.hpp"
 
-using namespace layers;
+namespace layers
+{
 
 Layer::Layer(IWindowGui_t & _Window, const Path_t & _FileName,
   const String_t & _Title, const String_t & _Description, const bool _IsStopBasements) :
@@ -19,7 +20,7 @@ Layer::Layer(IWindowGui_t & _Window, const Path_t & _FileName,
   GetElement("id_help").SetMeaning(uT("\uF059"));
   GetElement("id_title").SetMeaning(_Title);
 
-  using namespace ::covellite;
+  namespace events = ::covellite::events;
 
   m_Events[Button.Help].Connect([&, _Title, _Description](void)
   {
@@ -32,3 +33,5 @@ Layer::Layer(IWindowGui_t & _Window, const Path_t & _FileName,
   m_Events[events::Click.DocumentId(GetId()).ElementId("id_back")]
     .Connect([&](void) { m_Events[Button.Back](m_IsStopBasements); });
 }
+
+} // namespace layers

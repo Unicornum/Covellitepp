@@ -31,31 +31,26 @@ namespace api
 namespace renderer
 {
 
-template<class>
-class Support
-{
-};
-
 template<>
-class Support<::Camera>
+class OpenGLCommonStatic::Support<::Camera>
 {
 public:
   static void Update(const ::Camera &) noexcept {}
 };
 
 template<>
-class Support<::Fog>
+class OpenGLCommonStatic::Support<::Fog>
 {
 public:
   static void Update(const ::Fog &) noexcept {}
 };
 
 template<>
-class Support<::Object>
+class OpenGLCommonStatic::Support<::Object>
 {
 public:
   template<class TLights>
-  static void Update(const TLights & Lights, const int _MaxPointLightCount)
+  static void Update(const TLights & Lights, const GLenum _MaxPointLightCount)
   {
     if (Lights.Ambient.IsValid == 0 &&
       Lights.Direction.IsValid == 0 &&
@@ -71,7 +66,7 @@ public:
     static const GLfloat DefaultAmbientColor[] = { 0.0f, 0.0f, 0.0f, 0.0f };
     glLightModelfv(GL_LIGHT_MODEL_AMBIENT, DefaultAmbientColor);
 
-    int Index = GL_LIGHT0;
+    GLenum Index = GL_LIGHT0;
 
     const auto SetLight = [&](
       const ::glm::vec4 & _Ambient,
@@ -132,14 +127,14 @@ public:
 };
 
 template<>
-class Support<::Matrices>
+class OpenGLCommonStatic::Support<::Matrices>
 {
 public:
   static void Update(const ::Matrices &) noexcept {}
 };
 
 template<>
-class Support<::SceneLights>
+class OpenGLCommonStatic::Support<::SceneLights>
 {
 public:
   static void Update(const ::SceneLights & Lights)
@@ -357,14 +352,14 @@ auto OpenGLCommonStatic::CreateBuffer(const ComponentPtr_t & _pBuffer) -> Render
       return CreateConstantLightsBuffer();
     }
 
-    const Component::Buffer<Type_t> Info{ *pBufferData };
+    const auto pInfo = ::std::make_shared<Component::Buffer<Type_t>>(*pBufferData);
 
     return [=](void)
     {
       m_DrawElements = [=](void) noexcept
       {
-        glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(Info.Data.size()),
-          GL_UNSIGNED_INT, Info.Data.data());
+        glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(pInfo->Data.size()),
+          GL_UNSIGNED_INT, pInfo->Data.data());
       };
     };
   };
@@ -477,19 +472,19 @@ auto OpenGLCommonStatic::CreateBuffer(const ComponentPtr_t & _pBuffer) -> Render
       return CreatePolyhedronVertexBuffer();
     }
 
-    const Component::Buffer<Type_t> Info{ *pBufferData };
+    const auto pInfo = ::std::make_shared<Component::Buffer<Type_t>>(*pBufferData);
 
     return [=](void) noexcept
     {
-      glVertexPointer(2, GL_FLOAT, sizeof(Type_t), &Info.Data[0].x);
+      glVertexPointer(2, GL_FLOAT, sizeof(Type_t), &pInfo->Data[0].x);
       glEnableClientState(GL_VERTEX_ARRAY);
 
-      glColorPointer(4, GL_UNSIGNED_BYTE, sizeof(Type_t), &Info.Data[0].ABGRColor);
+      glColorPointer(4, GL_UNSIGNED_BYTE, sizeof(Type_t), &pInfo->Data[0].ABGRColor);
       glEnableClientState(GL_COLOR_ARRAY);
 
       glDisableClientState(GL_NORMAL_ARRAY);
 
-      glTexCoordPointer(2, GL_FLOAT, sizeof(Type_t), &Info.Data[0].u);
+      glTexCoordPointer(2, GL_FLOAT, sizeof(Type_t), &pInfo->Data[0].u);
       glEnableClientState(GL_TEXTURE_COORD_ARRAY);
     };
   };
@@ -570,12 +565,12 @@ auto OpenGLCommonStatic::CreatePresentBuffer(const ComponentPtr_t &_pBuffer) -> 
   const auto pBufferData = CapturingServiceComponent::Get(_pBuffer, 
     { { uT("Buffer"), _pBuffer } })[0];
 
-  const Component::Buffer<int> Info{ *pBufferData };
+  const auto pInfo = ::std::make_shared<Component::Buffer<int>>(*pBufferData);
 
   return [=](void) noexcept
   {
-    glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(Info.Data.size()),
-      GL_UNSIGNED_INT, Info.Data.data());
+    glDrawElements(GL_TRIANGLES, static_cast<GLsizei>(pInfo->Data.size()),
+      GL_UNSIGNED_INT, pInfo->Data.data());
     glBindTexture(GL_TEXTURE_2D, 0);
 
     // Восстанавливаем матрицу вида, сформированную камерой.
@@ -682,6 +677,9 @@ auto OpenGLCommonStatic::GetCameraCommon(void) -> Render_t
     glEnable(GL_CULL_FACE);
     glCullFace(GL_BACK);
     glFrontFace(GL_CCW);
+
+    // (0, 0) - левый нижний угол!
+    glViewport(0, 0, m_Width, m_Height - m_Top);
   };
 }
 

@@ -46,15 +46,15 @@ class Shadows final :
     float IdX, IdY, dummy2, dummy3;
   };
 
+  struct Cursor_s
+  {
+    float X, Y, dummy2, dummy3;
+  };
+
   struct ShaderData
   {
     Light_s  Light;
-    Object_s Object;
-  };
-
-  struct Cursor
-  {
-    float X, Y, dummy2, dummy3;
+    Cursor_s Cursor;
   };
 
 public:
@@ -84,6 +84,7 @@ private:
   ComponentPtr_t m_pLightCamera;
   Object_t m_ShadowMap;
   Object_t m_SurfaceTextures;
+  ComponentPtr_t m_pBkSurface;
   ::std::shared_ptr<Lights_t> m_pLights;
   ::std::shared_ptr<ShaderData> m_pShaderData;
   mutable CursorDataPtr_t m_pCursorData;

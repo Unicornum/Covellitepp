@@ -1,10 +1,22 @@
 
-struct Cursor
+struct Light_s
+{
+  float4x4 View;
+  float4x4 Projection;
+};
+
+struct Cursor_s
 {
   float4 Position;
 };
 
-COVELLITE_DECLARE_CONST_USER_BUFFER(Cursor, cbCursor, oCursor);
+struct ShaderData
+{
+  Light_s  Light;
+  Cursor_s Cursor;
+};
+
+COVELLITE_DECLARE_CONST_USER_BUFFER(ShaderData, cbShaderData, oShaderData);
 
 #ifdef COVELLITE_SHADER_VERTEX /////////////////////////////////////////////////
 
@@ -25,9 +37,11 @@ Pixel vsFlat(Vertex _Value)
 #elif defined COVELLITE_SHADER_PIXEL ///////////////////////////////////////////
 
 COVELLITE_DECLARE_TEX2D(TexAlbedo, 0);
-COVELLITE_DECLARE_TEX2D(TexMetalness, 1);
-COVELLITE_DECLARE_TEX2D(TexRoughness, 2);
-COVELLITE_DECLARE_TEX2D(TexDepth, 5);
+COVELLITE_DECLARE_TEX2D(TexNormal, 1);
+COVELLITE_DECLARE_TEX2D(TexWorldPos, 2);
+COVELLITE_DECLARE_TEX2D(TexObjectId, 3);
+COVELLITE_DECLARE_TEX2D(TexSceneDepth, 4);
+COVELLITE_DECLARE_TEX2D(TexShadowDepth, 5);
 
 // ************************************************************************** //
 
@@ -58,6 +72,15 @@ float LinearDepthFromNearToFar(float _RawDepth, float _zNear, float _zFar)
   return B / (A + _RawDepth);
 }
 
+float LinearDepthFromNearToFar(float _RawDepth, float4x4 _Projection)
+{
+  float A = COVELLITE_MATRIX_ROW(_Projection, 2).z;
+  float B = COVELLITE_MATRIX_ROW(_Projection, 3).z;
+
+  // gl_FragDepth  = 0.5*(-A*depth + B) / depth + 0.5;
+  return B / (A + _RawDepth);
+}
+
 float4 CalculateColorFromDept(float _Depth, float _Min, float _Max)
 {
   float Depth = _Depth;
@@ -82,17 +105,8 @@ float4 CalculateColorFromRawDept(float _RawDepth, float _Min, float _Max,
 float4 psMonochrome(Pixel _Value)
 {
   float3 Color = COVELLITE_TEX2D_COLOR(TexAlbedo, _Value.TexCoord).rgb;
-  float3 Coefficients = float3(0.21f, 0.72f, 0.07f);
-  float Grey = dot(Coefficients, Color);
+  float Grey = dot(float3(0.21f, 0.72f, 0.07f), Color);
   return float4(Grey, Grey, Grey, 1.0f);
-}
-
-float3 GetTexColor(float2 _TexCoords)
-{
-  float R = COVELLITE_TEX2D_COLOR(TexAlbedo, _TexCoords).r;
-  float G = COVELLITE_TEX2D_COLOR(TexMetalness, _TexCoords).g;
-  float B = COVELLITE_TEX2D_COLOR(TexRoughness, _TexCoords).b;
-  return float3(R, G, B);
 }
 
 COVELLITE_DECLARE_STATIC const float PI = 3.14159265359f;
@@ -101,18 +115,42 @@ COVELLITE_DECLARE_STATIC const float SAMPLES = 4.0f;
 COVELLITE_DECLARE_STATIC const float stDevSquared2 = 2.0f * 0.25f * 0.25f;
 COVELLITE_DECLARE_STATIC const float BlurSize = 7.5f / 1024.0f;
 
-float4 SharpnessOfDepth(Pixel _Value)
+int IsSkyPixel(float3 _Color)
 {
-  float2 TexCoord = ConvertTexCoord(_Value.TexCoord);
+  return (_Color.r == 0.0f && _Color.g == 0.0f && _Color.b == 1.0f) ? 1 : 0;
+}
 
+float4 GetGouraudLightsColor(float3 _Normal)
+{
+  // Source: https://habr.com/ru/post/338254/
+
+  float4 Result = float4(0.0f, 0.0f, 0.0f, 0.0f);
+
+  if (ObjectData.Lights.Ambient.IsValid == 1) // Ambient
+  {
+    Result += ObjectData.Lights.Ambient.Color;
+  }
+
+  if (ObjectData.Lights.Direction.IsValid == 1) // Direction
+  {
+    float3 Direction =
+      normalize(ObjectData.Lights.Direction.Direction.xyz);
+    Result +=
+      max(dot(_Normal, Direction), 0.0f) * ObjectData.Lights.Direction.Color;
+  }
+
+  return Result;
+}
+
+float3 SharpnessOfDepth(float2 _TexCoord)
+{
+  float3 Color = COVELLITE_TEX2D_COLOR(TexAlbedo, _TexCoord).rgb;
   float Depth = 0.125f * LinearDepthFromNearToFar(
-    COVELLITE_TEX2D_COLOR(TexDepth, TexCoord).r, 20.0f, 0.5f);
+    COVELLITE_TEX2D_COLOR(TexSceneDepth, _TexCoord).r, 20.0f, 0.5f);
   if (Depth > 1.0f) Depth = 1.0f;
-  //return float4(Depth, Depth, Depth, 1.0f);
 
   // blur source: https://www.ronja-tutorials.com/2018/08/27/postprocessing-blur.html
 
-  float3 Color = GetTexColor(TexCoord);
   float3 BlurColor = float3(0.0f, 0.0f, 0.0f);
 
   float sum = 0.0f;
@@ -122,10 +160,14 @@ float4 SharpnessOfDepth(Pixel _Value)
     float offset = (i / (SAMPLES - 1.0f) - 0.5f) * BlurSize;
     float2 uv = float2(0.0f, offset);
 
-    float gauss = (1.0f / sqrt(PI * stDevSquared2)) * 
-      pow(E, -(offset * offset / stDevSquared2));
-    sum += gauss;
-    BlurColor += GetTexColor(TexCoord + uv) * gauss;
+    float3 Color = COVELLITE_TEX2D_COLOR(TexAlbedo, _TexCoord + uv).rgb;
+    if (IsSkyPixel(Color) == 0)
+    {
+      float gauss = (1.0f / sqrt(PI * stDevSquared2)) *
+        pow(E, -(offset * offset / stDevSquared2));
+      sum += gauss;
+      BlurColor += Color * gauss;
+    }
   }
 
   //return float4(BlurColor / sum, 1.0f);
@@ -136,45 +178,123 @@ float4 SharpnessOfDepth(Pixel _Value)
   float blurRate = 6.0f;
   float blur = clamp(pow(blurRate, Depth) / focalLengthSharpness, 0.0f, 1.0f);
 
-  return float4(lerp(Color, BlurColor / sum, blur), 1.0f);
-}
-
-float4 psExperimental(Pixel _Value)
-{
-  float4 Result = SharpnessOfDepth(_Value);
-
-  float2 CurrentPixelObjectId = 
-    COVELLITE_TEX2D_COLOR(TexAlbedo, ConvertTexCoord(_Value.TexCoord)).gb;
-  float2 CursorPixelObjectId = 
-    COVELLITE_TEX2D_COLOR(TexAlbedo, ConvertTexCoord(oCursor.Position.xy)).gb;
-
-  if (CurrentPixelObjectId.x == CursorPixelObjectId.x &&
-    CurrentPixelObjectId.y == CursorPixelObjectId.y)
-  {
-    Result += float4(0.2f, 0.2f, 0.2f, 0.0f);
-  }
-
-  return Result;
+  return lerp(Color, BlurColor / sum, blur);
 }
 
 float4 psSimpleShadowDept(Pixel _Value)
 {
-  float RawDepth = COVELLITE_TEX2D_COLOR(TexDepth, 
+  float RawDepth = COVELLITE_TEX2D_COLOR(TexShadowDepth,
     ConvertTexCoord(_Value.TexCoord)).r;
-  return CalculateColorFromRawDept(RawDepth, 95.0f, 105.0f, 200.0f, 90.0f);
+
+  float Depth = LinearDepthFromNearToFar(
+    ConvertDeptToScreenZ(RawDepth), oShaderData.Light.Projection);
+  return CalculateColorFromDept(Depth, 95.0f, 105.0f);
 }
 
 float4 psSimpleSceneDept(Pixel _Value)
 {
-  float RawDepth = COVELLITE_TEX2D_COLOR(TexDepth, 
+  float RawDepth = COVELLITE_TEX2D_COLOR(TexSceneDepth,
     ConvertTexCoord(_Value.TexCoord)).r;
   return CalculateColorFromRawDept(RawDepth, 2.0f, 11.0f, 20.0f, 0.5f);
 }
 
 float4 psSimpleTexture(Pixel _Value)
 {
-  return float4(COVELLITE_TEX2D_COLOR(TexAlbedo, 
+  //return float4(COVELLITE_TEX2D_COLOR(TexAlbedo,
+  //return float4(COVELLITE_TEX2D_COLOR(TexNormal,
+  return float4(COVELLITE_TEX2D_COLOR(TexWorldPos,
+  //return -12.7f + 25.5f * float4(COVELLITE_TEX2D_COLOR(TexObjectId,
     ConvertTexCoord(_Value.TexCoord)).rgb, 1.0f);
+}
+
+float3 Shadow(float3 _WorldPos, float3 _Normal)
+{
+  float4 LightColor = GetGouraudLightsColor(_Normal);
+
+  float4 LightPos = mul(float4(_WorldPos, 1.0f), 
+    mul(oShaderData.Light.View, oShaderData.Light.Projection));
+
+  //re-homogenize position after interpolation
+  LightPos.xyz /= LightPos.w;
+
+  //if position is not visible to the light - dont illuminate it
+  //results in hard light frustum
+  if (LightPos.x < -1.0f || LightPos.x > 1.0f ||
+    LightPos.y < -1.0f || LightPos.y > 1.0f ||
+    LightPos.z < 0.0f || LightPos.z > 1.0f)
+  {
+    return 
+      //float3(1.0f, 0.0f, 0.0f) * 
+      LightColor.rgb;
+  }
+
+  //transform clip space coords to texture space coords (-1:1 to 0:1)
+  LightPos.x = 0.5f * LightPos.x + 0.5f;
+  LightPos.y = 0.5f * LightPos.y + 0.5f;
+#ifdef COVELLITE_SHADER_HLSL
+  LightPos.y = 1.0f - LightPos.y;
+#endif
+
+  float3 normal = normalize(_Normal);
+  float3 lightDir = normalize(ObjectData.Lights.Direction.Direction.xyz);
+
+  float bias = 0.15f * (1.0f + dot(normal, lightDir));
+
+  float DepthFromLight =
+    LinearDepthFromNearToFar(LightPos.z, oShaderData.Light.Projection) - bias;
+
+  const float texelSize = 3.0f / 2048.0f;
+
+  float4 SoftShadow = float4(0.0f, 0.0f, 0.0f, 0.0f);
+  float4 ShadowColor = ObjectData.Lights.Ambient.Color;
+
+  for (int x = -1; x <= 1; ++x)
+  {
+    for (int y = -1; y <= 1; ++y)
+    {
+      float2 TexCoord = LightPos.xy +
+        clamp(float2(x, y), 0.0f, 1.0f) * texelSize;
+      float RawDepth = COVELLITE_TEX2D_COLOR(TexShadowDepth, TexCoord).r;
+      float DepthFromShadowMap = LinearDepthFromNearToFar(
+        ConvertDeptToScreenZ(RawDepth), oShaderData.Light.Projection);
+
+      SoftShadow += 
+        (DepthFromLight > DepthFromShadowMap) ? ShadowColor : LightColor;
+    }
+  }
+
+  return SoftShadow.rgb / 9.0f;
+}
+
+float4 psExperimental(Pixel _Value)
+{
+  //return psSimpleTexture(_Value);
+  //return psSimpleSceneDept(_Value);
+  //return psSimpleShadowDept(_Value);
+
+  float2 TexCoord = ConvertTexCoord(_Value.TexCoord);
+  float3 Albedo = COVELLITE_TEX2D_COLOR(TexAlbedo, TexCoord).rgb;
+  if (IsSkyPixel(Albedo) == 1) discard;
+
+  float4 WorldPos = 
+    10.0f * (COVELLITE_TEX2D_COLOR(TexWorldPos, TexCoord) - 0.5f);
+  float3 Normal = 
+    2.0f * COVELLITE_TEX2D_COLOR(TexNormal, TexCoord).xyz - 1.0f;
+  float3 Result = 
+    SharpnessOfDepth(TexCoord) *
+    Shadow(WorldPos.xyz, Normal);
+
+  float2 CurrentPixelObjectId = COVELLITE_TEX2D_COLOR(TexObjectId, TexCoord).xy;
+  float2 CursorPixelObjectId = COVELLITE_TEX2D_COLOR(TexObjectId, 
+    ConvertTexCoord(oShaderData.Cursor.Position.xy)).xy;
+
+  if (CurrentPixelObjectId.x == CursorPixelObjectId.x &&
+    CurrentPixelObjectId.y == CursorPixelObjectId.y)
+  {
+    Result += float3(0.2f, 0.2f, 0.2f);
+  }
+
+  return float4(Result, 1.0f);
 }
 
 #endif

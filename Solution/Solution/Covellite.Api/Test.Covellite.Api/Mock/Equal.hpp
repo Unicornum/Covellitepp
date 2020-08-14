@@ -39,12 +39,17 @@ inline bool operator== (
   static_assert(sizeof(_Left) ==
     (sizeof(_Left.Handle) + 
       sizeof(_Left.Top) +
-      sizeof(_Left.IsFullScreen) + 3 // Выравнивание
+      sizeof(_Left.Width) +
+      sizeof(_Left.Height) +
+      sizeof(_Left.IsFullScreen) + 
+      3 // Выравнивание
       ),
     "Unexpected Data size.");
 
   if (!(_Left.Handle == _Right.Handle)) return false;
   if (_Left.Top != _Right.Top) return false;
+  if (_Left.Width != _Right.Width) return false;
+  if (_Left.Height != _Right.Height) return false;
   if (_Left.IsFullScreen != _Right.IsFullScreen) return false;
   return true;
 }

@@ -20,6 +20,10 @@
 #include "../Mock/EventListener.inl"
 #include "../../Covellite.Gui/Window.cpp"
 
+#ifdef COVELLITE_GUI_TEST_WINDOW_ONLY
+#include "../../Covellite.Gui/Layer.windows.cpp"
+#endif
+
 #include <Covellite/App.mock.hpp>
 #include <Covellite/Os/Events.hpp>
 #include <Covellite/Api/Events.hpp>
@@ -278,7 +282,7 @@ TEST_F(Window_test, /*DISABLED_*/Test_Constructor)
     AddEventListener(Eq("change"), pEventListener.get(), false))
     .Times(1);
 
-  EXPECT_CALL(FontDatabaseProxy, LoadFontFace(_))
+  EXPECT_CALL(FontDatabaseProxy, LoadFontFace(_, _))
     .Times(AtLeast(1));
 
   const Tested_t Example{ IWindowApi };
@@ -396,18 +400,9 @@ TEST_F(Window_test, /*DISABLED_*/Test_Constructor_DebuggerInitialise)
 // ************************************************************************** //
 TEST_F(Window_test, /*DISABLED_*/Test_Constructor_LoadFontFace)
 {
-  using SectionImplProxy_t = ::mock::alicorn::modules::settings::SectionImplProxy;
-  SectionImplProxy_t SectionImplProxy;
-  SectionImplProxy_t::GetInstance() = &SectionImplProxy;
-
-  using CurrentModuleProxy_t = 
-    ::mock::alicorn::system::application::CurrentModule::Proxy;
-  CurrentModuleProxy_t CurrentModuleProxy;
-  CurrentModuleProxy_t::GetInstance() = &CurrentModuleProxy;
-
-  using FontDatabaseProxy_t = ::mock::CovelliteGui::Core::FontDatabase::Proxy;
-  FontDatabaseProxy_t FontDatabaseProxy;
-  FontDatabaseProxy_t::GetInstance() = &FontDatabaseProxy;
+  ::mock::alicorn::modules::settings::SectionImplProxy SectionImplProxy;
+  ::mock::alicorn::system::application::CurrentModule::Proxy CurrentModuleProxy;
+  ::mock::CovelliteGui::Core::FontDatabase::Proxy FontDatabaseProxy;
 
   const WindowOs_t WindowOs{ m_App };
   const WindowApi_t WindowApi{ WindowOs };
@@ -423,13 +418,21 @@ TEST_F(Window_test, /*DISABLED_*/Test_Constructor_LoadFontFace)
     .Times(1)
     .WillOnce(Return(string_cast<String>(m_PathToFontsDirectory)));
 
-  for (const auto FontFile : { "font1.ttf", "font2.ttf", "font3.ttf" })
+  const ::std::vector<::std::vector<uint8_t>> ExpectedFonts =
   {
-    const auto PathToFont = (m_PathToFontsDirectory / FontFile).string();
+    ::boost::filesystem::load_binary_file(THIS_DIRECTORY / "fonts" / "font1.ttf"),
+    ::boost::filesystem::load_binary_file(THIS_DIRECTORY / "fonts" / "font2.ttf"),
+    ::boost::filesystem::load_binary_file(THIS_DIRECTORY / "fonts" / "font3.ttf"),
+  };
 
-    EXPECT_CALL(FontDatabaseProxy, LoadFontFace(Eq(PathToFont.c_str())))
+  for (const auto & Font : ExpectedFonts)
+  {
+    EXPECT_CALL(FontDatabaseProxy, LoadFontFace(Font, Eq("")))
       .Times(1);
   }
+
+  EXPECT_CALL(FontDatabaseProxy, LoadFontFace(_, _))
+    .Times(0);
 
   Tested_t Example{ IWindowApi };
 }
@@ -496,6 +499,8 @@ TEST_F(Window_test, /*DISABLED_*/Test_LoadDocument)
   Tested_t Example{ IWindowApi };
   ITested_t & IExample = Example;
 
+  // Преобразование слешей в пути для Windows|Android версии тестируется
+  // у класса слоя.
   EXPECT_CALL(Context, LoadDocument(Eq(PathToFile)))
     .WillOnce(Return(nullptr))
     .WillOnce(Return(&Document));

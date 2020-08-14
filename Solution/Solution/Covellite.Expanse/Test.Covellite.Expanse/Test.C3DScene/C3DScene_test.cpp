@@ -152,7 +152,7 @@ TEST_F(C3DScene_test, /*DISABLED_*/Test_Produce3DObjects)
 } // namespace covellite
 
 // ************************************************************************** //
-TEST_F(C3DScene_test, /*DISABLED_*/Test_Render_Simple)
+TEST_F(C3DScene_test, /*DISABLED_*/Test_Render_OnePass)
 {
   Proxy oProxy;
 
@@ -191,6 +191,50 @@ TEST_F(C3DScene_test, /*DISABLED_*/Test_Render_Simple)
   Example.Render();
 
   IExample.Add(0, 2006191354);
+
+  EXPECT_THROW(Example.Render(), ::std::exception);
+}
+
+// ************************************************************************** //
+TEST_F(C3DScene_test, /*DISABLED_*/Test_Render_Simple)
+{
+  Proxy oProxy;
+
+  Tested_t Example;
+  I3DScene_t & IExample = Example;
+
+  for (int i = 0; i < 10; i++)
+  {
+    Example.Add(i, C3DObject_t
+      {
+        [&, i]() { oProxy.Call(i); },
+        [&, i]() { oProxy.Call(i); }
+      });
+  }
+
+  for (int i = 9; i >= 0; i--)
+  {
+    IExample.Add(i);
+  }
+
+  using namespace ::testing;
+
+  InSequence Dummy;
+
+  for (int i = 9; i >= 0; i--)
+  {
+    EXPECT_CALL(oProxy, Call(i))
+      .Times(2);
+  }
+
+  Example.Render();
+
+  EXPECT_CALL(oProxy, Call(_))
+    .Times(0);
+
+  Example.Render();
+
+  IExample.Add(2008042034);
 
   EXPECT_THROW(Example.Render(), ::std::exception);
 }

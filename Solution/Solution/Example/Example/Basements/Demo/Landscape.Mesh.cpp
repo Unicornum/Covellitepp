@@ -51,7 +51,7 @@ public:
   }
 
 private:
-  ::boost::filesystem::binary::Data_t m_Data;
+  ::alicorn::extension::std::memory::BinaryData_t m_Data;
 
 public:
   explicit MeshStreamBuffer(const Path_t & _PathToFile) :

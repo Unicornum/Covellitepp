@@ -8,10 +8,10 @@ namespace basement
 namespace model
 {
 
-static size_t Index = 0;
+static size_t MeshIndex = 0;
 
 GameObject::Mesh::Mesh(const ::std::vector<Triangle_t> & _Data) :
-  m_MeshId(uT("Demo.Mesh.%ID%").Replace(uT("%ID%"), ++Index))
+  m_MeshId(uT("Demo.Mesh.%ID%").Replace(uT("%ID%"), ++MeshIndex))
 {
   for (const auto & Triangle : _Data)
   {

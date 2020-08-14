@@ -98,10 +98,6 @@
     <ClCompile Include="Test.IGraphicApi\IGraphicApi_test.cpp" />
     <ClCompile Include="Test.IWindow\IWindow_test.cpp" />
     <ClCompile Include="Test.OpenGLES3\OpenGLES3_test.cpp" />
-    <ClCompile Include="Test.OpenGLES\OpenGLES_test.cpp">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-    </ClCompile>
     <ClCompile Include="Test.OpenGL\OpenGL_test.cpp" />
     <ClCompile Include="Test.Renders\Renders_test.cpp" />
     <ClCompile Include="Test.Window\Window_test.android.cpp" />
@@ -116,7 +112,6 @@
     <ClInclude Include="mock.hpp" />
     <ClInclude Include="OpenGLCommon_test.hpp" />
     <ClInclude Include="OpenGLShader_test.hpp" />
-    <ClInclude Include="OpenGLStatic_test.hpp" />
     <ClInclude Include="stdafx.h" />
   </ItemGroup>
   <ItemGroup>

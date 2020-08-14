@@ -73,6 +73,11 @@ private:
 
 public:
   OpenGLCommonShader(const Data_t &, const String_t &, const ::std::string &);
+  OpenGLCommonShader(const OpenGLCommonShader &) = delete;
+  OpenGLCommonShader(OpenGLCommonShader &&) = delete;
+  OpenGLCommonShader & operator= (const OpenGLCommonShader &) = delete;
+  OpenGLCommonShader & operator= (OpenGLCommonShader &&) = delete;
+  ~OpenGLCommonShader(void) = default;
 };
 
 } // namespace renderer

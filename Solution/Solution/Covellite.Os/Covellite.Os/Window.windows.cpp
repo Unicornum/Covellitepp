@@ -2,6 +2,8 @@
 #include "stdafx.h"
 #include <Covellite/Os/Window.hpp>
 #include <windowsx.h>
+#include <windef.h>
+#include <winuser.h>
 #include <alicorn/std/string.hpp>
 #include <alicorn/std/string-cast.hpp>
 #include <alicorn/platform/winapi-check.hpp>

@@ -36,7 +36,7 @@ inline /*static*/ VfsPtr_t Singleton<VfsCore_t>::Make(void)
     // папки этого самого файла.
     ::std::make_shared<FileSystem>(""),
     ::std::make_shared<FileSystem>(THIS_DIRECTORY / "Test.File"),
-    ::std::make_shared<FileSystem>(THIS_DIRECTORY / "Test.Renderer")
+    ::std::make_shared<FileSystem>(THIS_DIRECTORY / "Test.Renderer"),
   });
 }
 
@@ -58,3 +58,26 @@ inline /*static*/ VfsPtr_t Singleton<VfsCore_t>::Make(void)
 #include "Mock/CovelliteGuiInterfaces.hpp"
 #include "Mock/SystemToGuiKeyCode.inl"
 #include "Mock/Renderer.hpp"
+
+namespace alicorn
+{
+
+namespace extension
+{
+
+namespace std
+{
+
+using Section_t = alicorn::modules::settings::Section;
+using SectionPtr_t = ::std::unique_ptr<Section_t>;
+
+/*static*/ SectionPtr_t Singleton<Section_t>::Make(void)
+{
+  return ::std::make_unique<Section_t>(uT("Dummy"));
+}
+
+} // namespace std
+
+} // namespace extension
+
+} // namespace alicorn

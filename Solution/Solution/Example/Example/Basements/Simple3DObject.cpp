@@ -27,14 +27,12 @@ Simple3DObject::Simple3DObject(
   CreateObject(
     LoadTexture("draw3dobject.title.png",
       uT("Example.Texture.Albedo"), uT("albedo")) +
-    LoadTexture("draw3dobject.title.metalness.png",
-      uT("Example.Texture.Metalness"), uT("metalness")) +
-    LoadTexture("draw3dobject.title.roughness.png",
-      uT("Example.Texture.Roughness"), uT("roughness")) +
+    LoadTexture("draw3dobject.title.reflection.png",
+      uT("Example.Texture.Reflection"), uT("TexReflection"), 1) +
     LoadTexture("draw3dobject.title.normal.png",
-      uT("Example.Texture.Normal"), uT("normal")) +
-    LoadTexture("draw3dobject.title.occlusion.png",
-      uT("Example.Texture.Occlusion"), uT("occlusion")));
+      uT("Example.Texture.Normal"), uT("TexNormal"), 2) +
+    LoadTexture("demo.background.jpg",
+      uT("Example.Texture.Environment"), uT("TexEnvironment"), 3));
 
   const auto Step = static_cast<int>(sqrt(_CubesCount));
 
@@ -246,11 +244,7 @@ auto Simple3DObject::BuildShader(int _LightsFlags, bool _IsInstanceMode) -> Obje
       }),
       Component_t::Make(
       {
-        { uT("id"), uT("Example.Texture.Metalness") },
-      }),
-      Component_t::Make(
-      {
-        { uT("id"), uT("Example.Texture.Roughness") },
+        { uT("id"), uT("Example.Texture.Reflection") },
       }),
       Component_t::Make(
       {
@@ -258,7 +252,7 @@ auto Simple3DObject::BuildShader(int _LightsFlags, bool _IsInstanceMode) -> Obje
       }),
       Component_t::Make(
       {
-        { uT("id"), uT("Example.Texture.Occlusion") },
+        { uT("id"), uT("Example.Texture.Environment") },
       }),
       /// [Shader textured object]
     });
