@@ -6,15 +6,15 @@
   <!-- ======================================== -->
   <string name="CompanyName">UnicornumVerum</string>
   <string name="FileDescription">Кроссплатформенный фреймворк для разработки приложений на С++</string>
-  <string name="FileVersion">Version: 2.2.8 Revision: 2507 Platform: ARM Build: 22:52 14.08.2020</string>
-  <string name="FileVersionShort">2.2.8.2507 ARM</string>
+  <string name="FileVersion">Version: 2.2.8 Revision: 2508 Platform: ARM Build: 19:31 23.08.2020</string>
+  <string name="FileVersionShort">2.2.8.2508 ARM</string>
   <string name="LegalCopyright">© UnicornumVerum 2016 - 2020 (unicornum.verum@gmail.ru)</string>
   <string name="ProductName">Covellite++</string>
   <string name="ApplicationName">Covellite++</string>
-  <string name="ProductVersion">Version: 2.2.8 Revision: 2507 Platform: ARM Build: 22:52 14.08.2020</string>
+  <string name="ProductVersion">Version: 2.2.8 Revision: 2508 Platform: ARM Build: 19:31 23.08.2020</string>
   <string name="ProductVersionYear">2.2.8.2020</string>
   <string name="ProductVersionMajor">2</string>
   <string name="ProductVersionMinor">2</string>
   <string name="ProductVersionService">8</string>
-  <string name="ProductRevision">2507</string>
+  <string name="ProductRevision">2508</string>
 </resources>
