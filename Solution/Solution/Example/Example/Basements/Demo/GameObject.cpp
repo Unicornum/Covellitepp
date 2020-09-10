@@ -76,9 +76,9 @@ size_t GameObject::GetType(void) const /*final*/
   {
     return IGameObjectPtr_t{ new Particles };
   }
-  else if (_Type == Another::Shadows)
+  else if (Another::IsShadow(_Type))
   {
-    return IGameObjectPtr_t{ new Shadows };
+    return IGameObjectPtr_t{ new Shadows{ _Type } };
   }
 
   throw STD_EXCEPTION << "Unknown type object: Another::" << _Type;

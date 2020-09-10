@@ -16,7 +16,6 @@
 #include "../../Covellite.Expanse/GameScene.impl.hpp"
 #include "../../Covellite.Expanse/IProduce3DObject.impl.hpp"
 #include <Covellite/Api/Renders.hpp>
-#include <Covellite/Covellite.Api.lib.hpp>
 #pragma comment(lib, "opengl32.lib")
 
 // Общий тестовый класс класса GameScene

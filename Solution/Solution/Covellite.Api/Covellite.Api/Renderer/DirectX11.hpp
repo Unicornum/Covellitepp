@@ -58,7 +58,7 @@ public:
   // Èםעונפויס IGraphicApi:
   String_t GetUsingApi(void) const override;
   void PresentFrame(void) override;
-  void ResizeWindow(int32_t, int32_t) override;
+  void ResizeWindow(const Rect &) override;
 
 protected:
   // Èםעונפויס GraphicApi:

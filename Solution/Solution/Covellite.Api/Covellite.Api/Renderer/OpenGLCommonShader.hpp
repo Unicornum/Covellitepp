@@ -54,7 +54,7 @@ protected:
   Render_t CreateGeometry(const ComponentPtr_t &) override;
 
 private:
-  Render_t GetCameraCommon(void);
+  Render_t GetCameraCommon(const ComponentPtr_t &);
   Render_t GetCameraOrthographic(const ComponentPtr_t &);
   Render_t GetCameraPerspective(const ComponentPtr_t &);
 

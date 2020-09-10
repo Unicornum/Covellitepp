@@ -10,22 +10,22 @@
 
 #define SUBVERSION 2
 
-#define SUBSUBVERSION 8
+#define SUBSUBVERSION 9
 
 // Устанавливается автоматически
-#define REVISION_SOLUTION 2508
+#define REVISION_SOLUTION 2533
 
 // Устанавливается автоматически
 #define __PLATFORM__ x64
 
 // Устанавливается автоматически
-#define TIME "19:31"
+#define TIME "09:31"
 
 // Устанавливается автоматически
-#define DAY 23
+#define DAY 10
 
 // Устанавливается автоматически
-#define MONTH 08
+#define MONTH 09
 
 // Устанавливается автоматически
 #define YEAR 2020

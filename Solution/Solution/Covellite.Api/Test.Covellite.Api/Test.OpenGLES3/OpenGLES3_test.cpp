@@ -89,7 +89,7 @@ protected:
     explicit Data(int _Top = 0)
     {
       Handle = (ANativeWindow *)0;
-      Top = _Top;
+      ClientRect.Top = _Top;
       IsFullScreen = false;
     }
   };
@@ -257,16 +257,14 @@ TEST_F(OpenGLES3_test, /*DISABLED_*/Test_PresentFrame_FullScreen)
 // ************************************************************************** //
 TEST_F(OpenGLES3_test, /*DISABLED_*/Test_PresentFrame_ClearHeader)
 {
-  using GLProxy_t = ::mock::GLProxy;
-  GLProxy_t GLProxy;
-  GLProxy_t::GetInstance() = &GLProxy;
+  ::mock::GLProxy GLProxy;
+  ::mock::covellite::egl::Surface::Proxy SurfaceProxy;
 
-  using SurfaceProxy_t = ::mock::covellite::egl::Surface::Proxy;
-  SurfaceProxy_t SurfaceProxy;
-  SurfaceProxy_t::GetInstance() = &SurfaceProxy;
-
-  const ::mock::Id_t SurfaceId = 1808271225;
-  const int Top = 1221;
+  constexpr ::mock::Id_t SurfaceId = 1808271225;
+  Data_t Data;
+  Data.ClientRect.Width = 2009090931;
+  Data.ClientRect.Height = 2009090932;
+  Data.ClientRect.Top = 12345;
 
   using namespace ::testing;
 
@@ -274,34 +272,59 @@ TEST_F(OpenGLES3_test, /*DISABLED_*/Test_PresentFrame_ClearHeader)
     .Times(1)
     .WillOnce(Return(SurfaceId));
 
-  Tested_t Example{ Data_t{ Top } };
+  Tested_t Example{ Data };
   ITested_t & IExample = Example;
 
-  const int Viewport[4] = { 1213, 1214, 2005201215, 2005201216 };
+  {
+    EXPECT_CALL(GLProxy, Enable(GL_SCISSOR_TEST))
+      .Times(1);
 
-  EXPECT_CALL(GLProxy, GetIntegerv(GL_VIEWPORT))
-    .Times(1)
-    .WillOnce(Return(Viewport));
+    EXPECT_CALL(GLProxy, Scissor(0, Data.ClientRect.Height - Data.ClientRect.Top, 
+      Data.ClientRect.Width, Data.ClientRect.Top))
+      .Times(1);
 
-  EXPECT_CALL(GLProxy, Enable(GL_SCISSOR_TEST))
-    .Times(1);
+    EXPECT_CALL(GLProxy, ClearColor(0.0f, 0.0f, 0.0f, 1.0f))
+      .Times(1);
 
-  EXPECT_CALL(GLProxy, Scissor(Viewport[0], Viewport[3], Viewport[2], Top))
-    .Times(1);
+    EXPECT_CALL(GLProxy, Clear(GL_COLOR_BUFFER_BIT))
+      .Times(1);
 
-  EXPECT_CALL(GLProxy, ClearColor(0.0f, 0.0f, 0.0f, 1.0f))
-    .Times(1);
+    EXPECT_CALL(GLProxy, Disable(GL_SCISSOR_TEST))
+      .Times(1);
 
-  EXPECT_CALL(GLProxy, Clear(GL_COLOR_BUFFER_BIT))
-    .Times(1);
+    EXPECT_CALL(SurfaceProxy, SwapBuffers(SurfaceId))
+      .Times(1);
 
-  EXPECT_CALL(GLProxy, Disable(GL_SCISSOR_TEST))
-    .Times(1);
+    IExample.PresentFrame();
+  }
 
-  EXPECT_CALL(SurfaceProxy, SwapBuffers(SurfaceId))
-    .Times(1);
+  {
+    constexpr auto Top = 54321;
+    constexpr auto Width = 2009090935;
+    constexpr auto Height = 2009090936;
 
-  IExample.PresentFrame();
+    IExample.ResizeWindow(::covellite::Rect{ 0, Top, Width, Height });
+
+    EXPECT_CALL(GLProxy, Enable(GL_SCISSOR_TEST))
+      .Times(1);
+
+    EXPECT_CALL(GLProxy, Scissor(0, Height - Top, Width, Top))
+      .Times(1);
+
+    EXPECT_CALL(GLProxy, ClearColor(0.0f, 0.0f, 0.0f, 1.0f))
+      .Times(1);
+
+    EXPECT_CALL(GLProxy, Clear(GL_COLOR_BUFFER_BIT))
+      .Times(1);
+
+    EXPECT_CALL(GLProxy, Disable(GL_SCISSOR_TEST))
+      .Times(1);
+
+    EXPECT_CALL(SurfaceProxy, SwapBuffers(SurfaceId))
+      .Times(1);
+
+    IExample.PresentFrame();
+  }
 }
 
 #define OpenGLCommon_test OpenGLES3_test

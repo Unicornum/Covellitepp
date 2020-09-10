@@ -84,6 +84,7 @@ private:
   ComponentPtr_t m_pLightCamera;
   Object_t m_ShadowMap;
   Object_t m_SurfaceTextures;
+  ComponentPtr_t m_pSceneCamera;
   ComponentPtr_t m_pBkSurface;
   ::std::shared_ptr<Lights_t> m_pLights;
   ::std::shared_ptr<ShaderData> m_pShaderData;
@@ -92,7 +93,7 @@ private:
   Object_t m_SceneObjects_pass2;
 
 private:
-  explicit Shadows(void);
+  explicit Shadows(const Another::Value);
   friend GameObject;
 };
 

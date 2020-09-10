@@ -100,9 +100,9 @@ protected:
     Data(void)
     {
       Handle = (HWND)0;
-      Top = 0;
-      Width = 0;
-      Height = 0;
+      ClientRect.Top = 0;
+      ClientRect.Width = 0;
+      ClientRect.Height = 0;
       IsFullScreen = false;
     }
   };
@@ -617,8 +617,8 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_DeptBuffer)
   }
 
   Data_t Data;
-  Data.Width = Width;
-  Data.Height = Height;
+  Data.ClientRect.Width = Width;
+  Data.ClientRect.Height = Height;
 
   Tested_t oExample{ Data };
 
@@ -751,7 +751,7 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_ResizeWindow_SwapChain_ResizeBuffers_Fa
     .Times(1)
     .WillOnce(Return(E_FAIL));
 
-  EXPECT_THROW(IExample.ResizeWindow(0, 0), ::std::exception);
+  EXPECT_THROW(IExample.ResizeWindow(::covellite::Rect{ 0, 0, 0, 0 }), ::std::exception);
 }
 
 // ************************************************************************** //
@@ -776,7 +776,7 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_ResizeWindow_SwapChain_GetBuffer_Fail)
     .Times(1)
     .WillOnce(Return(E_FAIL));
 
-  EXPECT_THROW(IExample.ResizeWindow(0, 0), ::std::exception);
+  EXPECT_THROW(IExample.ResizeWindow(::covellite::Rect{ 0, 0, 0, 0 }), ::std::exception);
 }
 
 // ************************************************************************** //
@@ -819,7 +819,7 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_ResizeWindow_SwapChain_CreateRenderTarg
   EXPECT_CALL(Texture2D, Release())
     .Times(1);
 
-  EXPECT_THROW(IExample.ResizeWindow(0, 0), ::std::exception);
+  EXPECT_THROW(IExample.ResizeWindow(::covellite::Rect{ 0, 0, 0, 0 }), ::std::exception);
 }
 
 // ************************************************************************** //
@@ -855,7 +855,7 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_ResizeWindow_CreateTexture2D_Fail)
   EXPECT_CALL(Device, Release())
     .Times(1);
 
-  EXPECT_THROW(IExample.ResizeWindow(0, 0), ::std::exception);
+  EXPECT_THROW(IExample.ResizeWindow(::covellite::Rect{ 0, 0, 0, 0 }), ::std::exception);
 }
 
 // ************************************************************************** //
@@ -902,7 +902,7 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_ResizeWindow_CreateDepthStencilView_Fai
   EXPECT_CALL(Device, Release())
     .Times(1);
 
-  EXPECT_THROW(IExample.ResizeWindow(0, 0), ::std::exception);
+  EXPECT_THROW(IExample.ResizeWindow(::covellite::Rect{ 0, 0, 0, 0 }), ::std::exception);
 }
 
 // ************************************************************************** //
@@ -969,7 +969,7 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_ResizeWindow_RenderTargetView)
       EXPECT_CALL(Texture2D, Release())
         .Times(1);
 
-      IExample.ResizeWindow(Width, Height);
+      IExample.ResizeWindow(::covellite::Rect{ 0, 0, Width, Height });
     }
 
     EXPECT_CALL(RenderTargetView, Release())
@@ -1049,7 +1049,7 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_ResizeWindow_DeptBuffer)
     EXPECT_CALL(Texture2D, Release())
       .Times(1);
 
-    IExample.ResizeWindow(Width, Height);
+    IExample.ResizeWindow(::covellite::Rect{ 0, 0, Width, Height });
   }
 
   EXPECT_CALL(DepthStencilView, Release())
@@ -1060,81 +1060,6 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_ResizeWindow_DeptBuffer)
 
   EXPECT_CALL(Device, Release())
     .Times(1);
-}
-
-// ************************************************************************** //
-TEST_F(DirectX11_test, /*DISABLED_*/Test_BkSurface_SwapChain_GetDesc_Fail)
-{
-  using DirectXProxy_t = ::mock::DirectX11::Proxy;
-  DirectXProxy_t DirectXProxy;
-  DirectXProxy_t::GetInstance() = &DirectXProxy;
-
-  ::mock::DXGI::SwapChain SwapChain;
-
-  const D3D11_SUBRESOURCE_DATA ZeroData = { 0 };
-
-  const ::std::vector<String_t> Destinations =
-  {
-    uT("albedo"),
-    uT("metalness"),
-    uT("roughness"),
-    uT("normal"),
-    uT("occlusion"),
-    uT("depth"),
-  };
-
-  using namespace ::testing;
-
-  EXPECT_CALL(DirectXProxy, CreateSwapChain())
-    .Times(1)
-    .WillOnce(Return(&SwapChain));
-
-  Tested_t oExample{ Data_t{} };
-  ITested_t & IExample = oExample;
-
-  auto itCreator = IExample.GetCreators().find(uT("BkSurface"));
-  ASSERT_NE(IExample.GetCreators().end(), itCreator);
-
-  Object_t Data;
-
-  for (auto & Destination : Destinations)
-  {
-    Data.push_back(Component_t::Make(
-      {
-        { uT("kind"), uT("Texture")},
-        { uT("destination"), Destination },
-      }));
-  }
-
-  EXPECT_CALL(SwapChain, GetResult(Eq("GetDesc")))
-    .Times(1)
-    .WillOnce(Return(E_FAIL));
-
-  const auto pBkSurface = Component_t::Make(
-    {
-      { uT("service"), Data }
-    });
-
-  EXPECT_THROW(itCreator->second(pBkSurface), ::std::exception);
-
-  EXPECT_CALL(SwapChain, GetResult(Eq("GetDesc")))
-    .Times(1)
-    .WillOnce(Return(S_OK));
-
-  const auto Render = itCreator->second(Component_t::Make({}));
-  ASSERT_NE(nullptr, Render);
-
-  EXPECT_CALL(SwapChain, GetResult(_))
-    .Times(1)
-    .WillOnce(Return(S_OK));
-
-  IExample.ResizeWindow(0, 0);
-
-  EXPECT_CALL(SwapChain, GetResult(Eq("GetDesc")))
-    .Times(1)
-    .WillOnce(Return(E_FAIL));
-
-  EXPECT_THROW(Render(), ::std::exception);
 }
 
 void DirectX11_test::TestBkSurfaceColorCall(
@@ -1250,15 +1175,15 @@ void DirectX11_test::TestBkSurfaceColorCall(
   Object_t TextureComponents;
   ::std::vector<ID3D11RenderTargetView *> RenderTargetViewPtrs;
 
-  DXGI_SWAP_CHAIN_DESC Desc = { 0 };
-  Desc.BufferDesc.Width = _Width;
-  Desc.BufferDesc.Height = _Height;
-
   InSequence Dummy;
 
-  EXPECT_CALL(SwapChain, GetDesc())
+  D3D11_VIEWPORT Viewport = { 0 };
+  Viewport.Width = _Width;
+  Viewport.Height = _Height;
+
+  EXPECT_CALL(DeviceContext, RSGetViewports(1))
     .Times(1)
-    .WillOnce(Return(Desc));
+    .WillOnce(Return(Viewport));
 
   for (::std::size_t i = 0; i < Destinations.size(); i++)
   {
@@ -1286,16 +1211,16 @@ void DirectX11_test::TestBkSurfaceColorCall(
   EXPECT_EQ(_ExpectedHeight, (int)(*_pBkSurface)[uT("height")]);
 
   {
-    EXPECT_CALL(SwapChain, GetDesc())
+    EXPECT_CALL(DeviceContext, RSGetViewports(1))
       .Times(1)
-      .WillOnce(Return(Desc));
+      .WillOnce(Return(Viewport));
 
     for (::std::size_t i = 0; i < Destinations.size(); i++)
     {
-      const auto pTexture =
-        TextureComponents[i]->GetValue(uT("entity"), Tested_t::Texture::Ptr_t{});
+      const auto pTexture = TextureComponents[i]->GetValue(uT("entity"), 
+        ::std::weak_ptr<Tested_t::Texture>{}).lock();
       ASSERT_NE(nullptr, pTexture);
-      EXPECT_EQ(TextureComponents[i], pTexture->m_pDataTexture.lock());
+      EXPECT_EQ(TextureComponents[i], pTexture->m_pDataTexture);
       EXPECT_EQ(_ExpectedWidth, TextureComponents[i]->GetValue(uT("width"), 0));
       EXPECT_EQ(_ExpectedHeight, TextureComponents[i]->GetValue(uT("height"), 0));
 
@@ -1317,17 +1242,17 @@ void DirectX11_test::TestBkSurfaceColorCall(
 
     EXPECT_CALL(DeviceContext, RSSetViewports(::std::vector<D3D11_VIEWPORT>{ vp }))
       .Times(1);
-  }
 
-  Render();
+    Render();
+  }
 
   {
     // Второй вызов для проверки того, что список RenderTarget'ов очищается
     // и заполняется заново.
 
-    EXPECT_CALL(SwapChain, GetDesc())
+    EXPECT_CALL(DeviceContext, RSGetViewports(1))
       .Times(1)
-      .WillOnce(Return(Desc));
+      .WillOnce(Return(Viewport));
 
     EXPECT_CALL(DeviceContext, PSSetShaderResources(_, _))
       .Times(Destinations.size());
@@ -1335,19 +1260,11 @@ void DirectX11_test::TestBkSurfaceColorCall(
     EXPECT_CALL(DeviceContext, OMSetRenderTargets(RenderTargetViewPtrs, nullptr))
       .Times(1);
 
-    D3D11_VIEWPORT vp;
-    vp.Width = (FLOAT)_ExpectedWidth;
-    vp.Height = (FLOAT)_ExpectedHeight;
-    vp.MinDepth = 0.0f;
-    vp.MaxDepth = 1.0f;
-    vp.TopLeftX = 0;
-    vp.TopLeftY = 0;
-
-    EXPECT_CALL(DeviceContext, RSSetViewports(::std::vector<D3D11_VIEWPORT>{ vp }))
+    EXPECT_CALL(DeviceContext, RSSetViewports(_))
       .Times(1);
-  }
 
-  Render();
+    Render();
+  }
 
   for (::std::size_t i = 0; i < Destinations.size(); i++)
   {
@@ -1370,17 +1287,17 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_BkSurface_Color_UnknownFormat)
 {
   TestBkSurfaceColorCall(Component_t::Make({ }),
     -1, DXGI_FORMAT_R8G8B8A8_UNORM, false,
-    2008112323, 2008112324, 2008112323, 2008112324);
+    1024, 2048, 1024, 2048);
   TestBkSurfaceColorCall(Component_t::Make({ }),
     -1, DXGI_FORMAT_R8G8B8A8_UNORM, true,
-    2008112325, 2008112326, 2008112325, 2008112326);
+    2048, 1024, 2048, 1024);
 
   TestBkSurfaceColorCall(Component_t::Make({ }),
     2008111758, DXGI_FORMAT_R8G8B8A8_UNORM, false,
-    2008112327, 2008112328, 2008112327, 2008112328);
+    2048, 4096, 2048, 4096);
   TestBkSurfaceColorCall(Component_t::Make({ }),
     2008111818, DXGI_FORMAT_R8G8B8A8_UNORM, true,
-    2008112329, 2008112330, 2008112329, 2008112330);
+    4096, 2048, 4096, 2048);
 }
 
 // ************************************************************************** //
@@ -1388,10 +1305,10 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_BkSurface_Color_R8G8B8A8)
 {
   TestBkSurfaceColorCall(Component_t::Make({ }),
     8, DXGI_FORMAT_R8G8B8A8_UNORM, false,
-    2008112331, 2008112332, 2008112331, 2008112332);
+    2048, 1024, 2048, 1024);
   TestBkSurfaceColorCall(Component_t::Make({ }),
     8, DXGI_FORMAT_R8G8B8A8_UNORM, true,
-    2008112333, 2008112334, 2008112333, 2008112334);
+    1024, 2048, 1024, 2048);
 }
 
 // ************************************************************************** //
@@ -1399,10 +1316,10 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_BkSurface_Color_R16G16B16A16)
 {
   TestBkSurfaceColorCall(Component_t::Make({ }),
     16, DXGI_FORMAT_R16G16B16A16_FLOAT, false,
-    2008112335, 2008112336, 2008112335, 2008112336);
+    1024, 4096, 1024, 4096);
   TestBkSurfaceColorCall(Component_t::Make({ }),
     16, DXGI_FORMAT_R16G16B16A16_FLOAT, true,
-    2008112337, 2008112338, 2008112337, 2008112338);
+    4096, 512, 4096, 512);
 }
 
 // ************************************************************************** //
@@ -1410,10 +1327,10 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_BkSurface_Color_R32G32B32A32)
 {
   TestBkSurfaceColorCall(Component_t::Make({ }),
     32, DXGI_FORMAT_R32G32B32A32_FLOAT, false,
-    2008112339, 2008112340, 2008112339, 2008112340);
+    512, 1024, 512, 1024);
   TestBkSurfaceColorCall(Component_t::Make({ }),
     32, DXGI_FORMAT_R32G32B32A32_FLOAT, true,
-    2008112341, 2008112342, 2008112341, 2008112342);
+    1024, 512, 1024, 512);
 }
 
 // ************************************************************************** //
@@ -1817,15 +1734,15 @@ void DirectX11_test::TestBkSurfaceDepthCall(
       .WillOnce(Return(&DepthStencilView));
   };
 
-  DXGI_SWAP_CHAIN_DESC Desc = { 0 };
-  Desc.BufferDesc.Width = _Width;
-  Desc.BufferDesc.Height = _Height;
-
   InSequence Dummy;
 
-  EXPECT_CALL(SwapChain, GetDesc())
+  D3D11_VIEWPORT Viewport = { 0 };
+  Viewport.Width = _Width;
+  Viewport.Height = _Height;
+
+  EXPECT_CALL(DeviceContext, RSGetViewports(1))
     .Times(1)
-    .WillOnce(Return(Desc));
+    .WillOnce(Return(Viewport));
 
   const auto pTextureComponent = Component_t::Make(
     {
@@ -1843,15 +1760,15 @@ void DirectX11_test::TestBkSurfaceDepthCall(
   EXPECT_EQ(_ExpectedWidth, (int)(*_pBkSurface)[uT("width")]);
   EXPECT_EQ(_ExpectedHeight, (int)(*_pBkSurface)[uT("height")]);
 
-  EXPECT_CALL(SwapChain, GetDesc())
+  EXPECT_CALL(DeviceContext, RSGetViewports(1))
     .Times(1)
-    .WillOnce(Return(Desc));
+    .WillOnce(Return(Viewport));
 
   {
-    const auto pTexture =
-      pTextureComponent->GetValue(uT("entity"), Tested_t::Texture::Ptr_t{});
+    const auto pTexture = pTextureComponent->GetValue(uT("entity"), 
+      ::std::weak_ptr<Tested_t::Texture>{}).lock();
     ASSERT_NE(nullptr, pTexture);
-    EXPECT_EQ(pTextureComponent, pTexture->m_pDataTexture.lock());
+    EXPECT_EQ(pTextureComponent, pTexture->m_pDataTexture);
     EXPECT_EQ(_ExpectedWidth, pTextureComponent->GetValue(uT("width"), 0));
     EXPECT_EQ(_ExpectedHeight, pTextureComponent->GetValue(uT("height"), 0));
 
@@ -1896,7 +1813,7 @@ void DirectX11_test::TestBkSurfaceDepthCall(
 TEST_F(DirectX11_test, /*DISABLED_*/Test_BkSurface_Depth)
 {
   TestBkSurfaceDepthCall(Component_t::Make({ }),
-    2008121046, 2008121047, 2008121046, 2008121047);
+    1024, 4096, 1024, 4096);
 }
 
 // ************************************************************************** //
@@ -2096,14 +2013,14 @@ void DirectX11_test::TestBkSurfaceResizeCall(
 
   InSequence Dummy;
 
-  DXGI_SWAP_CHAIN_DESC Desc = { 0 };
-  Desc.BufferDesc.Width = _Width;
-  Desc.BufferDesc.Height = _Height;
-
   {
-    EXPECT_CALL(SwapChain, GetDesc())
+    D3D11_VIEWPORT Viewport = { 0 };
+    Viewport.Width = _Width;
+    Viewport.Height = _Height;
+
+    EXPECT_CALL(DeviceContext, RSGetViewports(1))
       .Times(1)
-      .WillOnce(Return(Desc));
+      .WillOnce(Return(Viewport));
 
     for (::std::size_t i = 0; i < Destinations.size(); i++)
     {
@@ -2147,9 +2064,13 @@ void DirectX11_test::TestBkSurfaceResizeCall(
   EXPECT_EQ(_ExpectedHeight, (int)(*_pBkSurface)[uT("height")]);
 
   {
-    EXPECT_CALL(SwapChain, GetDesc())
+    D3D11_VIEWPORT Viewport = { 0 };
+    Viewport.Width = _Width;
+    Viewport.Height = _Height;
+
+    EXPECT_CALL(DeviceContext, RSGetViewports(1))
       .Times(1)
-      .WillOnce(Return(Desc));
+      .WillOnce(Return(Viewport));
 
     EXPECT_CALL(Device, CreateTexture2DSize(_, _))
       .Times(0);
@@ -2180,15 +2101,16 @@ void DirectX11_test::TestBkSurfaceResizeCall(
   EXPECT_CALL(Device, CreateTexture2DSize(_, _))
     .Times(1);
 
-  IExample.ResizeWindow(0, 0);
-
-  Desc.BufferDesc.Width = _Width * 2;
-  Desc.BufferDesc.Height = _Height * 2;
+  IExample.ResizeWindow(::covellite::Rect{ 0, 0, 0, 0 });
 
   {
-    EXPECT_CALL(SwapChain, GetDesc())
+    D3D11_VIEWPORT Viewport = { 0 };
+    Viewport.Width = _Width * 2;
+    Viewport.Height = _Height * 2;
+
+    EXPECT_CALL(DeviceContext, RSGetViewports(1))
       .Times(1)
-      .WillOnce(Return(Desc));
+      .WillOnce(Return(Viewport));
 
     for (::std::size_t i = 0; i < Destinations.size(); i++)
     {
@@ -2263,9 +2185,13 @@ void DirectX11_test::TestBkSurfaceResizeCall(
   IExample.PresentFrame();
 
   {
-    EXPECT_CALL(SwapChain, GetDesc())
+    D3D11_VIEWPORT Viewport = { 0 };
+    Viewport.Width = _Width * 2;
+    Viewport.Height = _Height * 2;
+
+    EXPECT_CALL(DeviceContext, RSGetViewports(1))
       .Times(1)
-      .WillOnce(Return(Desc));
+      .WillOnce(Return(Viewport));
 
     EXPECT_CALL(Device, CreateTexture2DSize(_, _))
       .Times(0);
@@ -5548,9 +5474,10 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Texture_UsingExistsEntity_Default)
         { uT("service"), Object_t{ _pData } }
       });
 
+    const auto pTexture = ::std::make_shared<Tested_t::Texture>(_pData);
+
     {
-      const auto pTexture = ::std::make_shared<Tested_t::Texture>(_pData);
-      _pData->SetValue(uT("entity"), pTexture);
+      _pData->SetValue(uT("entity"), ::std::weak_ptr<Tested_t::Texture>{ pTexture });
 
       EXPECT_CALL(Device, CreateShaderResourceView(_, _))
         .Times(1)
@@ -5567,8 +5494,8 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Texture_UsingExistsEntity_Default)
 
     auto Render = itCreator->second(pTextureComponent);
     ASSERT_NE(nullptr, Render);
-    EXPECT_EQ(nullptr, 
-      _pData->GetValue(uT("entity"), Tested_t::Texture::Ptr_t{}));
+    EXPECT_EQ(nullptr, _pData->GetValue(uT("entity"), 
+      ::std::weak_ptr<Tested_t::Texture>{}).lock());
 
     EXPECT_CALL(DeviceContext, CopyResource(_, _))
       .Times(0);
@@ -5630,9 +5557,10 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Texture_UsingExistsEntity_Index)
         { uT("service"), Object_t{ _pData } }
       });
 
+    const auto pTexture = ::std::make_shared<Tested_t::Texture>(_pData);
+
     {
-      const auto pTexture = ::std::make_shared<Tested_t::Texture>(_pData);
-      _pData->SetValue(uT("entity"), pTexture);
+      _pData->SetValue(uT("entity"), ::std::weak_ptr<Tested_t::Texture>{ pTexture });
 
       EXPECT_CALL(Device, CreateShaderResourceView(_, _))
         .Times(1)
@@ -5649,8 +5577,8 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Texture_UsingExistsEntity_Index)
 
     auto Render = itCreator->second(pTextureComponent);
     ASSERT_NE(nullptr, Render);
-    EXPECT_EQ(nullptr,
-      _pData->GetValue(uT("entity"), Tested_t::Texture::Ptr_t{}));
+    EXPECT_EQ(nullptr, _pData->GetValue(uT("entity"), 
+      ::std::weak_ptr<Tested_t::Texture>{}).lock());
 
     EXPECT_CALL(DeviceContext, CopyResource(_, _))
       .Times(0);
@@ -5736,9 +5664,10 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Texture_UsingExistsEntity_Destination)
         { uT("service"), Object_t{ _pData } }
       });
 
+    const auto pTexture = ::std::make_shared<Tested_t::Texture>(_pData);
+
     {
-      const auto pTexture = ::std::make_shared<Tested_t::Texture>(_pData);
-      _pData->SetValue(uT("entity"), pTexture);
+      _pData->SetValue(uT("entity"), ::std::weak_ptr<Tested_t::Texture>{ pTexture });
 
       EXPECT_CALL(Device, CreateShaderResourceView(_, _))
         .Times(1)
@@ -5755,8 +5684,8 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Texture_UsingExistsEntity_Destination)
 
     auto Render = itCreator->second(pTextureComponent);
     ASSERT_NE(nullptr, Render);
-    EXPECT_EQ(nullptr,
-      _pData->GetValue(uT("entity"), Tested_t::Texture::Ptr_t{}));
+    EXPECT_EQ(nullptr, _pData->GetValue(uT("entity"), 
+      ::std::weak_ptr<Tested_t::Texture>{}).lock());
 
     EXPECT_CALL(DeviceContext, CopyResource(_, _))
       .Times(0);
@@ -5971,7 +5900,7 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Texture_ReadData_Index)
 
       const auto pTexture = ::std::make_shared<Tested_t::Texture>(pData);
       Textures.push_back(pTexture);
-      pData->SetValue(uT("entity"), pTexture);
+      pData->SetValue(uT("entity"), ::std::weak_ptr<Tested_t::Texture>{ pTexture });
 
       TestCall(pData, pTexture, Index);
     }
@@ -5987,21 +5916,19 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Texture_ReadData_Index)
 
     for (::std::size_t i = 0; i < Destinations.size(); i++)
     {
-      {
-        const auto pData = Component_t::Make(
-          {
-            { uT("kind"), uT("Texture") },
-            { uT("index"), Index },
-            { uT("destination"), Destinations.at(i) },
-            { uT("mapper"), Mapper },
-          });
+      const auto pData = Component_t::Make(
+        {
+          { uT("kind"), uT("Texture") },
+          { uT("index"), Index },
+          { uT("destination"), Destinations.at(i) },
+          { uT("mapper"), Mapper },
+        });
 
-        const auto pTexture = ::std::make_shared<Tested_t::Texture>(pData);
-        Textures.push_back(pTexture);
-        pData->SetValue(uT("entity"), pTexture);
+      const auto pTexture = ::std::make_shared<Tested_t::Texture>(pData);
+      Textures.push_back(pTexture);
+      pData->SetValue(uT("entity"), ::std::weak_ptr<Tested_t::Texture>{ pTexture });
 
-        TestCall(pData, pTexture, Index);
-      }
+      TestCall(pData, pTexture, Index);
     }
   }
 }
@@ -6192,7 +6119,7 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Texture_ReadData_Destination)
 
     const auto pTexture = ::std::make_shared<Tested_t::Texture>(pData);
     Textures.push_back(pTexture);
-    pData->SetValue(uT("entity"), pTexture);
+    pData->SetValue(uT("entity"), ::std::weak_ptr<Tested_t::Texture>{ pTexture });
 
     TestCall(pData, pTexture, i);
   }
@@ -9416,7 +9343,7 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Camera_Perspective)
 }
 
 // ************************************************************************** //
-TEST_F(DirectX11_test, /*DISABLED_*/Test_Camera_SetWindowViewport)
+TEST_F(DirectX11_test, /*DISABLED_*/Test_Camera_DefaultViewport)
 {
   ::mock::DirectX11::Proxy DirectXProxy;
   ::mock::DirectX11::DeviceContext DeviceContext;
@@ -9440,9 +9367,6 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Camera_SetWindowViewport)
 
   const auto TestCallRender = [&](const Component_t::ComponentPtr_t & _pCamera)
   {
-    auto Render = itCreator->second(_pCamera);
-    ASSERT_NE(nullptr, Render);
-
     DXGI_SWAP_CHAIN_DESC Desc = { 0 };
     Desc.BufferDesc.Width = 2008111126;
     Desc.BufferDesc.Height = 2008111127;
@@ -9464,11 +9388,197 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Camera_SetWindowViewport)
     EXPECT_CALL(DeviceContext, RSSetViewports(::std::vector<D3D11_VIEWPORT>{ vp }))
       .Times(1);
 
+    auto Render = itCreator->second(_pCamera);
+    ASSERT_NE(nullptr, Render);
+
+    EXPECT_CALL(SwapChain, GetDesc())
+      .Times(1)
+      .WillOnce(Return(Desc));
+
+    EXPECT_CALL(DeviceContext, RSSetViewports(::std::vector<D3D11_VIEWPORT>{ vp }))
+      .Times(1);
+
     Render();
   };
 
-  TestCallRender(Component_t::Make({ { uT("kind"), uT("Orthographic") } }));
-  TestCallRender(Component_t::Make({ { uT("kind"), uT("Perspective") } }));
+  TestCallRender(Component_t::Make(
+    { 
+      { uT("kind"), uT("Orthographic") } 
+    }));
+  TestCallRender(Component_t::Make(
+    { 
+      { uT("kind"), uT("Perspective") } 
+    }));
+  TestCallRender(Component_t::Make(
+    {
+      { uT("kind"), uT("Orthographic") },
+      { uT("width"), 2009081145 },
+    }));
+  TestCallRender(Component_t::Make(
+    {
+      { uT("kind"), uT("Perspective") },
+      { uT("height"), 2009081146 },
+    }));
+}
+
+// ************************************************************************** //
+TEST_F(DirectX11_test, /*DISABLED_*/Test_Camera_ScaleViewport)
+{
+  ::mock::DirectX11::Proxy DirectXProxy;
+  ::mock::DirectX11::DeviceContext DeviceContext;
+  ::mock::DXGI::SwapChain SwapChain;
+
+  using namespace ::testing;
+
+  EXPECT_CALL(DirectXProxy, CreateDeviceContext())
+    .Times(1)
+    .WillOnce(Return(&DeviceContext));
+
+  EXPECT_CALL(DirectXProxy, CreateSwapChain())
+    .Times(1)
+    .WillOnce(Return(&SwapChain));
+
+  const Tested_t oExample{ Data_t{} };
+  const ITested_t & IExample = oExample;
+
+  auto itCreator = IExample.GetCreators().find(uT("Camera"));
+  ASSERT_NE(IExample.GetCreators().end(), itCreator);
+
+  const auto TestCallRender = [&](const float _Scale,
+    const Component_t::ComponentPtr_t & _pCamera)
+  {
+    DXGI_SWAP_CHAIN_DESC Desc = { 0 };
+    Desc.BufferDesc.Width = 1024;
+    Desc.BufferDesc.Height = 2048;
+
+    D3D11_VIEWPORT vp;
+    vp.Width = _Scale * Desc.BufferDesc.Width;
+    vp.Height = _Scale * Desc.BufferDesc.Height;
+    vp.MinDepth = 0.0f;
+    vp.MaxDepth = 1.0f;
+    vp.TopLeftX = 0;
+    vp.TopLeftY = 0;
+
+    InSequence Dummy;
+
+    EXPECT_CALL(SwapChain, GetDesc())
+      .Times(1)
+      .WillOnce(Return(Desc));
+
+    EXPECT_CALL(DeviceContext, RSSetViewports(::std::vector<D3D11_VIEWPORT>{ vp }))
+      .Times(1);
+
+    auto Render = itCreator->second(_pCamera);
+    ASSERT_NE(nullptr, Render);
+
+    EXPECT_CALL(SwapChain, GetDesc())
+      .Times(1)
+      .WillOnce(Return(Desc));
+
+    EXPECT_CALL(DeviceContext, RSSetViewports(::std::vector<D3D11_VIEWPORT>{ vp }))
+      .Times(1);
+
+    Render();
+  };
+
+  TestCallRender(0.5f, Component_t::Make(
+    { 
+      { uT("kind"), uT("Orthographic") },
+      { uT("scale"), 0.5f },
+    }));
+  TestCallRender(2.0f, Component_t::Make(
+    { 
+      { uT("kind"), uT("Perspective") },
+      { uT("scale"), 2.0f },
+    }));
+  TestCallRender(0.25f, Component_t::Make(
+    {
+      { uT("kind"), uT("Orthographic") },
+      { uT("scale"), 0.25f },
+      { uT("width"), 2009081145 },
+      { uT("height"), 2009081146 },
+   }));
+  TestCallRender(4.0f, Component_t::Make(
+    {
+      { uT("kind"), uT("Perspective") },
+      { uT("scale"), 4.0f },
+      { uT("width"), 2009081147 },
+      { uT("height"), 2009081148 },
+   }));
+}
+
+// ************************************************************************** //
+TEST_F(DirectX11_test, /*DISABLED_*/Test_Camera_UserViewport)
+{
+  ::mock::DirectX11::Proxy DirectXProxy;
+  ::mock::DirectX11::DeviceContext DeviceContext;
+  ::mock::DXGI::SwapChain SwapChain;
+
+  using namespace ::testing;
+
+  EXPECT_CALL(DirectXProxy, CreateDeviceContext())
+    .Times(1)
+    .WillOnce(Return(&DeviceContext));
+
+  EXPECT_CALL(DirectXProxy, CreateSwapChain())
+    .Times(1)
+    .WillOnce(Return(&SwapChain));
+
+  const Tested_t oExample{ Data_t{} };
+  const ITested_t & IExample = oExample;
+
+  auto itCreator = IExample.GetCreators().find(uT("Camera"));
+  ASSERT_NE(IExample.GetCreators().end(), itCreator);
+
+  const auto TestCallRender = [&](const UINT _Width, const UINT _Height,
+    const Component_t::ComponentPtr_t & _pCamera)
+  {
+    DXGI_SWAP_CHAIN_DESC Desc = { 0 };
+    Desc.BufferDesc.Width = 2008111126;
+    Desc.BufferDesc.Height = 2008111127;
+
+    D3D11_VIEWPORT vp;
+    vp.Width = (FLOAT)_Width;
+    vp.Height = (FLOAT)_Height;
+    vp.MinDepth = 0.0f;
+    vp.MaxDepth = 1.0f;
+    vp.TopLeftX = 0;
+    vp.TopLeftY = 0;
+
+    InSequence Dummy;
+
+    EXPECT_CALL(SwapChain, GetDesc())
+      .Times(1)
+      .WillOnce(Return(Desc));
+
+    EXPECT_CALL(DeviceContext, RSSetViewports(::std::vector<D3D11_VIEWPORT>{ vp }))
+      .Times(1);
+
+    auto Render = itCreator->second(_pCamera);
+    ASSERT_NE(nullptr, Render);
+
+    EXPECT_CALL(SwapChain, GetDesc())
+      .Times(1)
+      .WillOnce(Return(Desc));
+
+    EXPECT_CALL(DeviceContext, RSSetViewports(::std::vector<D3D11_VIEWPORT>{ vp }))
+      .Times(1);
+
+    Render();
+  };
+
+  TestCallRender(1024, 2048, Component_t::Make(
+    { 
+      { uT("kind"), uT("Orthographic") },
+      { uT("width"), 1024 },
+      { uT("height"), 2048 },
+    }));
+  TestCallRender(2048, 4096, Component_t::Make(
+    { 
+      { uT("kind"), uT("Perspective") },
+      { uT("width"), 2048 },
+      { uT("height"), 4096 },
+    }));
 }
 
 // ************************************************************************** //

@@ -17,8 +17,6 @@
 // содержащие шейдеры, в противном случае не будут совпадать.
 #include "../../Covellite.Gui/Renderer.cpp"
 
-#include <Covellite/Covellite.Api.lib.hpp>
-
 namespace std
 {
 

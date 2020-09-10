@@ -71,7 +71,7 @@ protected:
   using String_t = ::alicorn::extension::std::String;
   using IWindowApi_t = ::covellite::api::IWindow;
   using WindowOs_t = ::mock::covellite::os::Window;
-  using Rect_t = ::covellite::os::IWindow::Rect;
+  using Rect_t = ::covellite::Rect;
   using Data_t = ::covellite::api::renderer::SettingsData;
 
   // Вызывается ПЕРЕД запуском каждого теста
@@ -148,9 +148,9 @@ TEST_F(Window_test, /*DISABLED_*/Test_Constructor)
   {
     Data_t Data;
     Data.Handle = (HWND)1808221257;
-    Data.Top = 1808271300;
-    Data.Width = 2008141048;
-    Data.Height = 2008141049;
+    Data.ClientRect.Top = 1808271300;
+    Data.ClientRect.Width = 2008141048;
+    Data.ClientRect.Height = 2008141049;
     Data.IsFullScreen = IsFullScreen;
 
     using namespace ::testing;
@@ -169,7 +169,7 @@ TEST_F(Window_test, /*DISABLED_*/Test_Constructor)
 
     EXPECT_CALL(WindowOsProxy, GetClientRect(WindowOsId))
       .Times(1)
-      .WillOnce(Return(Rect_t{ 0, Data.Top, Data.Width, Data.Height }));
+      .WillOnce(Return(Rect_t{ 0, Data.ClientRect.Top, Data.ClientRect.Width, Data.ClientRect.Height }));
 
     EXPECT_CALL(SettingsProxy, GetChildSectionImpl(_, uT("Window")))
       .Times(1);

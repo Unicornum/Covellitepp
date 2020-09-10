@@ -43,7 +43,7 @@ public:
 public:
   // Èםעונפויס IGraphicApi:
   String_t GetUsingApi(void) const override;
-  void ResizeWindow(int32_t, int32_t) noexcept final;
+  void ResizeWindow(const Rect &) noexcept final;
 
 protected:
   // Èםעופויס GraphicApi
@@ -67,7 +67,7 @@ protected:
   TexParameters m_TexParameters;
 
 protected:
-  const int       m_Top;
+  int             m_Top;
   int             m_Width = 0;
   int             m_Height = 0;
   const uint8_t   Align[4] = { 0 };

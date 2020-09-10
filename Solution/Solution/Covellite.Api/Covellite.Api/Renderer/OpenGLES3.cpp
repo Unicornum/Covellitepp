@@ -33,13 +33,10 @@ void OpenGLES3::PresentFrame(void) /*override*/
     // Для Android очищаем заголовок, иначе остается мусор под заголовком
     // при повороте устройства.
 
-    GLint ViewPort[4] = { 0 };
-    glGetIntegerv(GL_VIEWPORT, ViewPort);
-
     glEnable(GL_SCISSOR_TEST);
 
     // (0, 0) - левый нижний угол!
-    glScissor(ViewPort[0], ViewPort[3], ViewPort[2], m_Top);
+    glScissor(0, m_Height - m_Top, m_Width, m_Top);
 
     // 22 Май 2020 10:58 (unicornum.verum@gmail.com)
     TODO("Цвет заголовка Android - в настройках?");

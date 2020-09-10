@@ -25,8 +25,8 @@ static const auto RandomShadows = [](const size_t _From, const size_t _To)
     static_cast<int>(_From), static_cast<int>(_To) }(Generator));
 };
 
-Shadows::Shadows(void) :
-  GameObject(Another::Shadows)
+Shadows::Shadows(const Another::Value _Shadows) :
+  GameObject(_Shadows)
 {
   using Mesh_t = model::Landscape::Mesh;
 
@@ -78,6 +78,8 @@ Shadows::Shadows(void) :
       { uT("fov"), m_LightFov },
       { uT("znear"), 90.0f },
       { uT("zfar"), 200.0f },
+      { uT("width"), 2048 },
+      { uT("height"), 2048 },
     });
 
   m_ShadowMap =
@@ -91,6 +93,27 @@ Shadows::Shadows(void) :
       { uT("destination"), uT("depth") },
     }),
   };
+
+  m_pSceneCamera = Component_t::Make(
+    {
+      { uT("id"), uT("Demo.Shadows.Camera.Scene") },
+      { uT("type"), uT("Camera") },
+      { uT("kind"), uT("Perspective") },
+      { uT("distance"), 6.0f },
+      { uT("fov"), Constant::Camera::Fov * math::Constant<float>::RadianToDegree },
+      { uT("znear"), 0.5f },
+      { uT("zfar"), 20.0f },
+    });
+
+  if (_Shadows == Another::ShadowsScale)
+  {
+    (*m_pSceneCamera)[uT("scale")] = 0.25f;
+  }
+  else if (_Shadows == Another::ShadowsFixSize)
+  {
+    (*m_pSceneCamera)[uT("width")] = 1024;
+    (*m_pSceneCamera)[uT("height")] = 1024;
+  }
 
   m_SurfaceTextures =
   {
@@ -138,7 +161,6 @@ Shadows::Shadows(void) :
       { uT("id"), uT("Demo.Shadows.BkSurface") },
       { uT("type"), uT("BkSurface") },
       { uT("service"), m_SurfaceTextures },
-      //{ uT("scale"), 0.25f },
     });
 
   const auto ARGBtoFloat4 = [](uint32_t _HexColor)
@@ -225,9 +247,9 @@ auto Shadows::GetObject(const Any_t & _Value) const -> Objects_t /*override*/
 
   return
   {
-    GetPass1() // Только первый проход: 650 fps
-    + GetPass2() // Первый и второй вместе: 280 fps
-    + GetPass3() // Все три прохода: 220 fps
+    GetPass1() + // Только первый проход: 650 fps
+    GetPass2() + // Первый и второй вместе: 280 fps
+    GetPass3()   // Все три прохода: 220 fps
   };
 }
 
@@ -304,12 +326,13 @@ Object_t Shadows::GetTextureSurface(const bool _IsTarget) const
     });
 
   const auto pBkSurface = m_pBkSurface;
+  const auto pSceneCamera = m_pSceneCamera;
 
   const Updater_t UpdaterSource = [=](const float)
   {
     const int Width = (*pBkSurface)[uT("width")].Default(1280);
     const int Height = (*pBkSurface)[uT("height")].Default(720);
-    const float Scale = (*pBkSurface)[uT("scale")].Default(1.0f);
+    const float Scale = (*pSceneCamera)[uT("scale")].Default(1.0f);
 
     (*pScale)[uT("x")] = static_cast<float>(Width) / Scale;
     (*pScale)[uT("y")] = static_cast<float>(Height) / Scale;
@@ -398,8 +421,6 @@ Object_t Shadows::GetShadowCamera(void) const
       { uT("id"), uT("Demo.Shadows.BkSurface.ShadowMap") },
       { uT("type"), uT("BkSurface") },
       { uT("service"), m_ShadowMap },
-      { uT("width"), 2048 },
-      { uT("height"), 2048 },
     }),
     Component_t::Make(
     {
@@ -453,6 +474,8 @@ Object_t Shadows::GetSceneCamera(void) const
       { uT("z"), 2.0f },
     });
 
+  (*m_pSceneCamera)[uT("service")] = Object_t{ pCameraRotation };
+
   const Updater_t CameraUpdater = [=](const float _Time)
   {
     namespace math = ::alicorn::extension::cpp::math;
@@ -474,17 +497,7 @@ Object_t Shadows::GetSceneCamera(void) const
         { uT("type"), uT("Updater") },
         { uT("function"), CameraUpdater },
       }),
-      Component_t::Make(
-      {
-        { uT("id"), uT("Demo.Shadows.Camera.Scene") },
-        { uT("type"), uT("Camera") },
-        { uT("kind"), uT("Perspective") },
-        { uT("distance"), 6.0f },
-        { uT("fov"), Constant::Camera::Fov * math::Constant<float>::RadianToDegree },
-        { uT("znear"), 0.5f },
-        { uT("zfar"), 20.0f },
-        { uT("service"), Object_t{ pCameraRotation } },
-      })
+      m_pSceneCamera,
     } +
     GetTextureSurface(true) +
     Object_t

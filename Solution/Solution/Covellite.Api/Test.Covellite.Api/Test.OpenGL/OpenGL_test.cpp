@@ -87,7 +87,7 @@ protected:
     explicit Data(int _Top = 0)
     {
       Handle = (HWND)0;
-      Top = _Top;
+      ClientRect.Top = _Top;
       IsFullScreen = false;
     }
   };

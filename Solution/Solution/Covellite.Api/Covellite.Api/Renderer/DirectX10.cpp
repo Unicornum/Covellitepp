@@ -239,7 +239,8 @@ DirectX10::DirectX10(const Data_t & _Data)
   DX_CHECK m_pDevice->CreateRasterizerState(
     &RasterizerDesc, &m_pDefaultRasterizerState);
 
-  SetViewport(static_cast<UINT>(_Data.Width), static_cast<UINT>(_Data.Height));
+  SetViewport(static_cast<UINT>(_Data.ClientRect.Width), 
+    static_cast<UINT>(_Data.ClientRect.Height));
 
   MakeConstants<ConstantBuffer>(m_pDevice);
 }
@@ -258,14 +259,57 @@ void DirectX10::PresentFrame(void) /*override*/
   GraphicApi::PresentFrame();
 }
 
-void DirectX10::ResizeWindow(int32_t _Width, int32_t _Height) /*override*/
+void DirectX10::ResizeWindow(const Rect & _ClientRect) /*override*/
 {
-  m_IsResizeWindow = true;
-  SetViewport(static_cast<UINT>(_Width), static_cast<UINT>(_Height));
+  SetViewport(static_cast<UINT>(_ClientRect.Width), static_cast<UINT>(_ClientRect.Height));
 }
 
 auto DirectX10::CreateCamera(const ComponentPtr_t & _pComponent) -> Render_t /*override*/
 {
+  using Size_t = ::std::tuple<UINT, UINT>;
+  using fnViewportSize_t = ::std::function<Size_t(void)>;
+
+  const auto pCamera = _pComponent;
+
+  const fnViewportSize_t GetScaleViewportSize = [=](void)
+  {
+    DXGI_SWAP_CHAIN_DESC Desc = { 0 };
+    DX_CHECK m_pSwapChain->GetDesc(&Desc);
+
+    const float Scale = (*pCamera)[uT("scale")];
+    const auto Width = static_cast<UINT>(Scale * Desc.BufferDesc.Width);
+    const auto Height = static_cast<UINT>(Scale * Desc.BufferDesc.Height);
+
+    return Size_t{ Width, Height };
+  };
+
+  const fnViewportSize_t GetWindowViewportSize = [=](void)
+  {
+    DXGI_SWAP_CHAIN_DESC Desc = { 0 };
+    DX_CHECK m_pSwapChain->GetDesc(&Desc);
+
+    return Size_t{ Desc.BufferDesc.Width, Desc.BufferDesc.Height };
+  };
+
+  const fnViewportSize_t GetUserViewportSize = [=](void)
+  {
+    const int Width = (*pCamera)[uT("width")];
+    const int Height = (*pCamera)[uT("height")];
+
+    return Size_t{ static_cast<UINT>(Width), static_cast<UINT>(Height) };
+  };
+
+  const auto IsScaleViewportSize =
+    (*pCamera)[uT("scale")].IsType<float>();
+  const auto IsUserViewportSize =
+    (*pCamera)[uT("width")].IsType<int>() &&
+    (*pCamera)[uT("height")].IsType<int>();
+
+  const auto GetViewportSize =
+    (IsScaleViewportSize) ? GetScaleViewportSize :
+    (IsUserViewportSize) ? GetUserViewportSize :
+    GetWindowViewportSize;
+
   const auto SetDefaultRenderTarget = [=](void)
   {
     m_CurrentRenderTargets = { m_pScreenRenderTargetView.Get() };
@@ -276,14 +320,10 @@ auto DirectX10::CreateCamera(const ComponentPtr_t & _pComponent) -> Render_t /*o
 
     m_pDevice->RSSetState(m_pDefaultRasterizerState.Get());
 
-    DXGI_SWAP_CHAIN_DESC Desc = { 0 };
-    DX_CHECK m_pSwapChain->GetDesc(&Desc);
-
     D3D10_VIEWPORT ViewPort = { 0 };
     ViewPort.TopLeftX = 0;
     ViewPort.TopLeftY = 0;
-    ViewPort.Width = Desc.BufferDesc.Width;
-    ViewPort.Height = Desc.BufferDesc.Height;
+    ::std::tie(ViewPort.Width, ViewPort.Height) = GetViewportSize();
     ViewPort.MinDepth = 0.0f;
     ViewPort.MaxDepth = 1.0f;
     m_pDevice->RSSetViewports(1, &ViewPort);
@@ -404,7 +444,8 @@ public:
   const ComponentPtr_t      m_pDataTexture;
   const UINT                m_iDestination;
   const DXGI_FORMAT         m_Format;
-  const uint8_t Align[4] = { 0 };
+  int                       m_Width = 0;
+  int                       m_Height = 0;
   ComPtr_t<ID3D10Texture2D>          m_pTexture;
   ComPtr_t<ID3D10Texture2D>          m_pReadTexture;
   ComPtr_t<ID3D10RenderTargetView>   m_pRenderTargetView;
@@ -425,6 +466,9 @@ public:
       MakeRGBTarget(_pDevice, _Width, _Height) :
       MakeDepthTarget(_pDevice, _Width, _Height);
 
+    m_Width = _Width;
+    m_Height = _Height;
+
     if (TextureData.IsMapping)
     {
       m_pReadTexture = MakeRGBACopy(_pDevice, _Width, _Height);
@@ -435,6 +479,9 @@ public:
   {
     const Component::Texture TextureData{ *m_pDataTexture, uT("albedo") };
 
+    m_Width = TextureData.Width;
+    m_Height = TextureData.Height;
+
     m_pTexture = (TextureData.IsUsingMipmapping) ?
       MakeRGBAMipmapsSource(_pDevice, TextureData) :
       MakeRGBASource(_pDevice, TextureData);
@@ -442,8 +489,11 @@ public:
 
   ComPtr_t<ID3D10Texture2D> MakeRGBACopy(
     const ComPtr_t<ID3D10Device> & _pDevice,
-    const UINT _Width, const UINT _Height) const
+    const UINT _Width, const UINT _Height)
   {
+    m_Width = _Width;
+    m_Height = _Height;
+
     D3D10_TEXTURE2D_DESC textureDesc = { 0 };
     textureDesc.Width = _Width;
     textureDesc.Height = _Height;
@@ -702,60 +752,23 @@ public:
 
 auto DirectX10::CreateBkSurface(const ComponentPtr_t & _pComponent) -> Render_t /*override*/
 {
-  using Size_t = ::std::tuple<UINT, UINT>;
-  using fnBkSurfaceSize_t = ::std::function<Size_t(void)>;
-
   const auto pBkSurface = _pComponent;
 
-  const fnBkSurfaceSize_t GetScaleBkSurfaceSize = [=](void)
+  const auto GetViewportSize = [=](void)
   {
-    DXGI_SWAP_CHAIN_DESC Desc = { 0 };
-    DX_CHECK m_pSwapChain->GetDesc(&Desc);
+    using Size_t = ::std::tuple<UINT, UINT>;
 
-    const float Scale = (*pBkSurface)[uT("scale")];
+    D3D10_VIEWPORT ViewPort = { 0 };
+    UINT NumViewports = 1u;
+    m_pDevice->RSGetViewports(&NumViewports, &ViewPort);
 
-    const int Width = static_cast<int>(Scale * Desc.BufferDesc.Width) + 1;
-    const int Height = static_cast<int>(Scale * Desc.BufferDesc.Height) + 1;
+    (*pBkSurface)[uT("width")] = static_cast<int>(ViewPort.Width);
+    (*pBkSurface)[uT("height")] = static_cast<int>(ViewPort.Height);
 
-    (*pBkSurface)[uT("width")] = Width;
-    (*pBkSurface)[uT("height")] = Height;
-
-    return Size_t{ static_cast<UINT>(Width), static_cast<UINT>(Height) };
+    return Size_t{ ViewPort.Width, ViewPort.Height };
   };
 
-  const fnBkSurfaceSize_t GetWindowBkSurfaceSize = [=](void)
-  {
-    DXGI_SWAP_CHAIN_DESC Desc = { 0 };
-    DX_CHECK m_pSwapChain->GetDesc(&Desc);
-
-    const int Width = static_cast<int>(Desc.BufferDesc.Width);
-    const int Height = static_cast<int>(Desc.BufferDesc.Height);
-
-    (*pBkSurface)[uT("width")] = Width;
-    (*pBkSurface)[uT("height")] = Height;
-
-    return Size_t{ static_cast<UINT>(Width), static_cast<UINT>(Height) };
-  };
-
-  const fnBkSurfaceSize_t GetUserBkSurfaceSize = [=](void)
-  {
-    const int Width = (*pBkSurface)[uT("width")];
-    const int Height = (*pBkSurface)[uT("height")];
-
-    return Size_t{ static_cast<UINT>(Width), static_cast<UINT>(Height) };
-  };
-
-  const auto IsScaleBkSurfaceSize = 
-    (*pBkSurface)[uT("scale")].IsType<float>();
-  const auto IsUserBkSurfaceSize =
-    (*pBkSurface)[uT("width")].IsType<int>() &&
-    (*pBkSurface)[uT("height")].IsType<int>();
-
-  const auto GetBkSurfaceSize =
-    (IsScaleBkSurfaceSize) ? GetScaleBkSurfaceSize :
-    (IsUserBkSurfaceSize) ? GetUserBkSurfaceSize : GetWindowBkSurfaceSize;
-
-  const auto [Width, Height] = GetBkSurfaceSize();
+  const auto [Width, Height] = GetViewportSize();
 
   const auto pBkSurfaceTextures =
     ::std::make_shared<::std::vector<Texture::Ptr_t>>();
@@ -774,16 +787,15 @@ auto DirectX10::CreateBkSurface(const ComponentPtr_t & _pComponent) -> Render_t 
       { uT("Texture"), DoDataTexture },
     });
 
-
   return [=](void)
   {
-    const auto [Width, Height] = GetBkSurfaceSize();
+    const auto [Width, Height] = GetViewportSize();
 
     m_CurrentRenderTargets.clear();
 
     for (auto & pTexture : *pBkSurfaceTextures)
     {
-      if (m_IsResizeWindow)
+      if (pTexture->m_Width != Width || pTexture->m_Height != Height)
       {
         pTexture->MakeTarget(m_pDevice, Width, Height);
       }
@@ -811,15 +823,6 @@ auto DirectX10::CreateBkSurface(const ComponentPtr_t & _pComponent) -> Render_t 
     m_pDevice->OMSetRenderTargets(
       static_cast<UINT>(m_CurrentRenderTargets.size()),
       &m_CurrentRenderTargets[0], nullptr);
-
-    D3D10_VIEWPORT ViewPort = { 0 };
-    ViewPort.TopLeftX = 0;
-    ViewPort.TopLeftY = 0;
-    ViewPort.Width = Width;
-    ViewPort.Height = Height;
-    ViewPort.MinDepth = 0.0f;
-    ViewPort.MaxDepth = 1.0f;
-    m_pDevice->RSSetViewports(1, &ViewPort);
   };
 }
 

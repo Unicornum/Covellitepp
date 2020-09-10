@@ -58,7 +58,7 @@ public:
   public:
     MOCK_METHOD1(Constructor, Id_t(const IApplication_t *));
     MOCK_METHOD1(GetHandle, Any_t(Id_t));
-    MOCK_METHOD1(GetClientRect, Rect(Id_t));
+    MOCK_METHOD1(GetClientRect, ::covellite::Rect(Id_t));
   };
 
 public:
@@ -79,7 +79,7 @@ public:
     return Proxy::GetInstance()->GetHandle(m_Id);
   }
 
-  Rect GetClientRect(void) const override
+  ::covellite::Rect GetClientRect(void) const override
   {
     return Proxy::GetInstance()->GetClientRect(m_Id);
   }

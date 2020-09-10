@@ -52,7 +52,7 @@ public:
 
 public:
   // Èםעונפויס api::IWindow:
-  Rect_t GetClientRect(void) const override;
+  Rect GetClientRect(void) const override;
   RendersPtr_t GetRenders(void) const override;
 
 private:

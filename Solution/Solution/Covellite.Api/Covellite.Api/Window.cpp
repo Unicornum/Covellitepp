@@ -51,8 +51,7 @@ Window::Window(const WindowOs_t & _Window) :
 
   m_Events[events::Window.Resize].Connect([this](void)
   {
-    const auto Rect = GetClientRect();
-    m_pImpl->ResizeWindow(Rect.Width, Rect.Height);
+    m_pImpl->ResizeWindow(GetClientRect());
   });
 }
 
@@ -63,7 +62,7 @@ Window::operator Window::Events_t(void) const /*override*/
   return m_Events;
 }
 
-auto Window::GetClientRect(void) const /*override*/ -> Rect_t
+Rect Window::GetClientRect(void) const /*override*/
 {
   return m_WindowOs.GetClientRect();
 }
@@ -89,12 +88,7 @@ auto Window::GetRenders(void) const /*override*/ -> RendersPtr_t
 {
   renderer::SettingsData oSettingsData;
   oSettingsData.Handle = _Window.GetHandle();
-
-  const auto ClientRect = _Window.GetClientRect();
-
-  oSettingsData.Top = ClientRect.Top;
-  oSettingsData.Width = ClientRect.Width;
-  oSettingsData.Height = ClientRect.Height;
+  oSettingsData.ClientRect = _Window.GetClientRect();
 
   using String_t = ::alicorn::extension::std::String;
 

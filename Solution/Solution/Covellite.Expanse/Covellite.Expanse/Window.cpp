@@ -84,6 +84,10 @@ ObjectId_t Window::CreateObject(const GameObject_t & _Object) /*override*/
 }
 
 /**
+* \deprecated
+*  Функция устарела и будет удалена в следующей стабильной версии, вместо нее
+*  следует использовать функцию, получающую в качестве параметра
+*  fnObjectCreation_t.
 * \brief
 *  Функция создания 3D объекта.
 * \details
@@ -108,11 +112,44 @@ ObjectId_t Window::CreateObject(const GameObject_t & _Object) /*override*/
 */
 void Window::DeferredCreateObject(
   const GameObject_t & _Object,
-  const fnCreateObject_t & _Callback) /*override*/
+  const fnObjectCreationCompleted_t & _Callback) /*override*/
 {
   m_LoadingQueue.emplace([=](void)
   {
     _Callback(m_pScene->m_GameScene.CreateObject(_Object));
+  });
+}
+
+/**
+* \brief
+*  Функция создания 3D объекта.
+* \details
+*  - Функция помещает задание создания 3D объекта для указанного игрового
+*  объекта, после чего немедленно завершается (это действие выполняется очень
+*  быстро, поэтому таким образом можно сразу загрузить все объекты сцены,
+*  после чего рендерить их по мере создания).
+*  - Фактически объект будет создан позже (очередь создания объектов
+*  обрабатывается таким образом, чтобы слабо влиять на скорость рендеринга),
+*  после чего будет вызвана функция обратного вызова с идентификатором
+*  созданного объекта.
+*  - Полученный идентификатор может использоваться для рендеринга (реализация
+*  интерфеса I3DScene) и удаления объекта функцией RemoveObject().
+*  - Если в исходном наборе компонентов будет компонент \b Updater, для него
+*  будет создан отдельный рендер, который будет вызываться при обновлении сцены
+*  перед рендерингом кадра.
+*
+* \param [in] _fnObjectCreation
+*  Функция создания игрового объекта.
+* \param [in] _Callback
+*  Функция обратного вызова, которая вызывается после создания объекта.
+*/
+void Window::DeferredCreateObject(
+  const fnObjectCreation_t & _fnObjectCreation,
+  const fnObjectCreationCompleted_t & _Callback) /*override*/
+{
+  m_LoadingQueue.emplace([=](void)
+  {
+    _Callback(m_pScene->m_GameScene.CreateObject(_fnObjectCreation()));
   });
 }
 

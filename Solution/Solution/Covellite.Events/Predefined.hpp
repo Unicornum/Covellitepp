@@ -38,4 +38,13 @@ inline bool has_value(const Any_t & _Value) noexcept
 # endif
 }
 
+class Rect final
+{
+public:
+  int32_t Left;
+  int32_t Top;
+  int32_t Width;
+  int32_t Height;
+};
+
 } // namespace covellite

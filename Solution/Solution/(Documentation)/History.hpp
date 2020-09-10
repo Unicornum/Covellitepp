@@ -6,6 +6,49 @@
 *  =================
 *  <table frame=void><tr><td></td></tr></table>
 *  
+*  Version: 2.2.9.2531 Unknown
+*  -----
+*  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект \ref CovelliteApiPage : </td></tr></table>
+*  <table frame=void border=1 bordercolor=#FFFFFF cellpadding=5 cellspacing=0 width=98%><tr>
+*    <td width=10px></td>
+*    <td bgcolor=#B8CCE4 width=125px align=center> 09.09.2020 11:50 </td>
+*    <td bgcolor=#FFC0C0> fix: Android: некорректная установка viewport'a для окна без заголовка. </td>
+*  </tr></table>
+*  <table frame=void border=1 bordercolor=#FFFFFF cellpadding=5 cellspacing=0 width=98%><tr>
+*    <td width=10px></td>
+*    <td bgcolor=#B8CCE4 width=125px align=center> 08.09.2020 20:26 </td>
+*    <td bgcolor=#C0FFC0> Camera: параметры width, height и scale. </td>
+*  </tr></table>
+*  <table frame=void border=1 bordercolor=#FFFFFF cellpadding=5 cellspacing=0 width=98%><tr>
+*    <td width=10px></td>
+*    <td bgcolor=#B8CCE4 width=125px align=center> 06.09.2020 21:33 </td>
+*    <td bgcolor=#FFC0C0> fix: OpenGLES3: BkSurface - некорректная установка viewport'a при наличии заголовка. </td>
+*  </tr></table>
+*  <table frame=void border=1 bordercolor=#FFFFFF cellpadding=5 cellspacing=0 width=98%><tr>
+*    <td width=10px></td>
+*    <td bgcolor=#B8CCE4 width=125px align=center> 06.09.2020 18:56 </td>
+*    <td bgcolor=#C0FFC0> OpenGL: игнорирование отсутствующей в шейдере текстуры. </td>
+*  </tr></table>
+*  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект \ref CovelliteExpansePage : </td></tr></table>
+*  <table frame=void border=1 bordercolor=#FFFFFF cellpadding=5 cellspacing=0 width=98%><tr>
+*    <td width=10px></td>
+*    <td bgcolor=#B8CCE4 width=125px align=center> 06.09.2020 17:51 </td>
+*    <td bgcolor=#C0FFC0> Window: функция отложенного создания объектов с возможностью отложенной загрузки данных из файлов. </td>
+*  </tr></table>
+*  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект \ref CovelliteApiPage : </td></tr></table>
+*  <table frame=void border=1 bordercolor=#FFFFFF cellpadding=5 cellspacing=0 width=98%><tr>
+*    <td width=10px></td>
+*    <td bgcolor=#B8CCE4 width=125px align=center> 06.09.2020 12:37 </td>
+*    <td bgcolor=#FFC0C0> fix: DirectX11: некорректное пересоздание текстуры для чтения данных при изменении размеров окна программы. </td>
+*  </tr></table>
+*  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект \ref ExamplePage : </td></tr></table>
+*  <table frame=void border=1 bordercolor=#FFFFFF cellpadding=5 cellspacing=0 width=98%><tr>
+*    <td width=10px></td>
+*    <td bgcolor=#B8CCE4 width=125px align=center> 05.09.2020 20:37 </td>
+*    <td bgcolor=#FFC0C0> fix: Падение программы в демо-режиме при перемещении по игровому миру. </td>
+*  </tr></table>
+*  <table frame=void><tr><td></td></tr></table>
+*  
 *  Version: 2.2.8.2505 Unknown
 *  -----
 *  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект \ref CovelliteApiPage : </td></tr></table>

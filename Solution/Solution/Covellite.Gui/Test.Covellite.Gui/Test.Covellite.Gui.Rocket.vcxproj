@@ -118,6 +118,12 @@
     <ClInclude Include="mock.hpp" />
     <ClInclude Include="stdafx.h" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\Covellite.Api\Covellite.Api\Covellite.Api.vcxproj">
+      <Project>{6314e391-0a82-4703-a819-7bc337d46715}</Project>
+      <LinkLibraryDependencies>true</LinkLibraryDependencies>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

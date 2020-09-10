@@ -21,5 +21,6 @@ namespace any_location = ::boost;
 #endif
 
 using Any_t = any_location::any;
+class Rect;
 
 } // namespace covellite

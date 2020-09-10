@@ -64,9 +64,22 @@ GameWorld::GameWorld(const Events_t & _Events, DbComponents & _DbComponents) :
     PrepareAnimationScene(_pLoadingPercent);
   });
 
-  m_Events[::events::Demo.Shadows].Connect([this](const IntPtr_t & _pLoadingPercent)
+  m_Events[::events::Demo.ShadowsWindow].Connect([this](const IntPtr_t & _pLoadingPercent)
   {
-    PrepareShadowsScene(_pLoadingPercent);
+    RemoveAllObjects();
+    PrepareShadowsScene(_pLoadingPercent, GameObject::Another::ShadowsWindow);
+  });
+
+  m_Events[::events::Demo.ShadowsScale].Connect([this](const IntPtr_t & _pLoadingPercent)
+  {
+    RemoveAllObjects();
+    PrepareShadowsScene(_pLoadingPercent, GameObject::Another::ShadowsScale);
+  });
+
+  m_Events[::events::Demo.ShadowsFixSize].Connect([this](const IntPtr_t & _pLoadingPercent)
+  {
+    RemoveAllObjects();
+    PrepareShadowsScene(_pLoadingPercent, GameObject::Another::ShadowsFixSize);
   });
 
   m_Events[::events::Demo.Exit].Connect([this](void) 
@@ -213,7 +226,9 @@ void GameWorld::PrepareAnimationScene(const IntPtr_t & _pLoadingPercent)
   m_ProcessingMode = [](float) {};
 }
 
-void GameWorld::PrepareShadowsScene(const IntPtr_t & _pLoadingPercent)
+void GameWorld::PrepareShadowsScene(
+  const IntPtr_t & _pLoadingPercent,
+  const GameObject::Another::Value _Type)
 {
   const auto pCursorData = ::std::make_shared<Cursor>();
 
@@ -222,8 +237,7 @@ void GameWorld::PrepareShadowsScene(const IntPtr_t & _pLoadingPercent)
   PrepareLoader(_pLoadingPercent);
   m_pGameScene->CompleteReplace();
 
-  const auto pPrototype = 
-    GameObject::Create(GameObject::Another::Shadows, m_pGameScene);
+  const auto pPrototype = GameObject::Create(_Type, m_pGameScene);
 
   m_LoadingQueue.push([=](const float)
   {
@@ -698,15 +712,18 @@ auto GameWorld::GetCellLoader(const CubeCoords & _CellPosition) -> Updater_t
       _CellPosition.GetX() << ", " << _CellPosition.GetY() << "].";
 
     const auto ObjectType = GetGameObjectType(_CellPosition);
-    if (m_LandscapeObjects.find(ObjectType) == m_LandscapeObjects.end())
-    {
-      const auto pPrototype = GameObject::Create(ObjectType, this);
+    auto & LanscapeObjectInfo = m_LandscapeObjects[ObjectType];
 
-      LoadObject(pPrototype);
-      m_LandscapeObjects[ObjectType] = pPrototype;
+    if (LanscapeObjectInfo.first == nullptr)
+    {
+      LanscapeObjectInfo.first = GameObject::Create(ObjectType, this);
+      LanscapeObjectInfo.second = 0;
+      LoadObject(LanscapeObjectInfo.first);
     }
 
-    LoadObject(m_LandscapeObjects[ObjectType], _CellPosition);
+    m_ObjectTypes[_CellPosition.GetHash()] = ObjectType;
+    LoadObject(LanscapeObjectInfo.first, _CellPosition);
+    LanscapeObjectInfo.second++;
 
     if (ObjectType == GameObject::Landscape::None && 
       Constant::GetSettings<bool>(uT("IsNightMode")))
@@ -729,6 +746,15 @@ auto GameWorld::GetCellRemover(const CubeCoords & _CellPosition) -> Updater_t
     for (const auto & Object : Objects)
     {
       m_DbComponents.RemoveGameObject(Object);
+    }
+
+    const auto ObjectType = m_ObjectTypes[_CellPosition.GetHash()];
+    m_ObjectTypes.erase(_CellPosition.GetHash());
+    auto & LanscapeObjectInfo = m_LandscapeObjects[ObjectType];
+    LanscapeObjectInfo.second--;
+    if (LanscapeObjectInfo.second == 0)
+    {
+      LanscapeObjectInfo.first.reset();
     }
   };
 }

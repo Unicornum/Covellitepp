@@ -158,10 +158,10 @@ void DirectX11::PresentFrame(void) /*override*/
   GraphicApi::PresentFrame();
 }
 
-void DirectX11::ResizeWindow(int32_t _Width, int32_t _Height) /*override*/
+void DirectX11::ResizeWindow(const Rect & _ClientRect) /*override*/
 {
   m_IsResizeWindow = true;
-  SetRenderTargetSize(static_cast<UINT>(_Width), static_cast<UINT>(_Height));
+  SetRenderTargetSize(static_cast<UINT>(_ClientRect.Width), static_cast<UINT>(_ClientRect.Height));
 }
 
 void DirectX11::CreateDeviceAndSwapChain(const Data_t & _Data)
@@ -196,7 +196,8 @@ void DirectX11::CreateDeviceAndSwapChain(const Data_t & _Data)
     NULL,
     &m_pImmediateContext);
 
-  SetRenderTargetSize(static_cast<UINT>(_Data.Width), static_cast<UINT>(_Data.Height));
+  SetRenderTargetSize(static_cast<UINT>(_Data.ClientRect.Width), 
+    static_cast<UINT>(_Data.ClientRect.Height));
 }
 
 void DirectX11::SetRenderTargetSize(const UINT _Width, const UINT _Height)
@@ -255,19 +256,70 @@ auto DirectX11::CreateCamera(const ComponentPtr_t & _pComponent) -> Render_t /*o
 {
   const auto CameraId = _pComponent->Id;
 
+  using Size_t = ::std::tuple<UINT, UINT>;
+  using fnBkSurfaceSize_t = ::std::function<Size_t(void)>;
+
+  const auto pCamera = _pComponent;
+
+  const fnBkSurfaceSize_t GetScaleBkSurfaceSize = [=](void)
+  {
+    DXGI_SWAP_CHAIN_DESC Desc = { 0 };
+    DX_CHECK m_pSwapChain->GetDesc(&Desc);
+
+    const float Scale = (*pCamera)[uT("scale")];
+
+    return Size_t{ static_cast<UINT>(Scale * Desc.BufferDesc.Width), 
+      static_cast<UINT>(Scale * Desc.BufferDesc.Height) };
+  };
+
+  const fnBkSurfaceSize_t GetWindowBkSurfaceSize = [=](void)
+  {
+    DXGI_SWAP_CHAIN_DESC Desc = { 0 };
+    DX_CHECK m_pSwapChain->GetDesc(&Desc);
+
+    return Size_t{ Desc.BufferDesc.Width, Desc.BufferDesc.Height };
+  };
+
+  const fnBkSurfaceSize_t GetUserBkSurfaceSize = [=](void)
+  {
+    DXGI_SWAP_CHAIN_DESC Desc = { 0 };
+    DX_CHECK m_pSwapChain->GetDesc(&Desc); // результат не используется, но 
+                                           // так проще тестировать
+
+    const int Width = (*pCamera)[uT("width")];
+    const int Height = (*pCamera)[uT("height")];
+
+    return Size_t{ static_cast<UINT>(Width), static_cast<UINT>(Height) };
+  };
+
+  const auto IsScaleBkSurfaceSize =
+    (*pCamera)[uT("scale")].IsType<float>();
+  const auto IsUserBkSurfaceSize =
+    (*pCamera)[uT("width")].IsType<int>() &&
+    (*pCamera)[uT("height")].IsType<int>();
+
+  const auto GetBkSurfaceSize =
+    (IsScaleBkSurfaceSize) ? GetScaleBkSurfaceSize :
+    (IsUserBkSurfaceSize) ? GetUserBkSurfaceSize :
+    GetWindowBkSurfaceSize;
+
+  D3D11_VIEWPORT ViewPort = { 0 };
+  ViewPort.TopLeftX = 0;
+  ViewPort.TopLeftY = 0;
+  ::std::tie(ViewPort.Width, ViewPort.Height) = GetBkSurfaceSize();
+  ViewPort.MinDepth = 0.0f;
+  ViewPort.MaxDepth = 1.0f;
+  m_pImmediateContext->RSSetViewports(1, &ViewPort);
+
   const auto SetDefaultRenderTarget = [=](void)
   {
     m_CurrentRenderTargets = { m_pScreenRenderTargetView.Get() };
     m_pCurrentDepthStencilView = m_pScreenDepthStencilView;
 
-    DXGI_SWAP_CHAIN_DESC Desc = { 0 };
-    DX_CHECK m_pSwapChain->GetDesc(&Desc);
-
     D3D11_VIEWPORT ViewPort = { 0 };
     ViewPort.TopLeftX = 0;
     ViewPort.TopLeftY = 0;
-    ViewPort.Width = static_cast<FLOAT>(Desc.BufferDesc.Width);
-    ViewPort.Height = static_cast<FLOAT>(Desc.BufferDesc.Height);
+    ::std::tie(ViewPort.Width, ViewPort.Height) = GetBkSurfaceSize();
     ViewPort.MinDepth = 0.0f;
     ViewPort.MaxDepth = 1.0f;
     m_pImmediateContext->RSSetViewports(1, &ViewPort);
@@ -397,13 +449,13 @@ class DirectX11::Texture final
 {
 public:
   using Ptr_t = ::std::shared_ptr<Texture>;
-  using ComponentWeakPtr_t = ::std::weak_ptr<::covellite::api::Component>;
 
 public:
-  const ComponentWeakPtr_t  m_pDataTexture;
-  const String_t            m_Destination;
-  const UINT                m_iDestination;
-  const DXGI_FORMAT         m_Format;
+  const ComponentPtr_t  m_pDataTexture;
+  const String_t        m_Destination;
+  const UINT            m_iDestination;
+  const bool            m_IsUseMapper;
+  const DXGI_FORMAT     m_Format;
   ComPtr_t<ID3D11Texture2D>          m_pTexture;
   ComPtr_t<ID3D11Texture2D>          m_pReadDataTexture;
   ComPtr_t<ID3D11RenderTargetView>   m_pRenderTargetView;
@@ -420,16 +472,12 @@ public:
       MakeRGBATarget(_pDevice, _Width, _Height) :
       MakeDepthTarget(_pDevice, _Width, _Height);
 
-    const auto pDataTexture = m_pDataTexture.lock();
-    if (pDataTexture)
-    {
-      (*pDataTexture)[uT("width")] = static_cast<int>(_Width);
-      (*pDataTexture)[uT("height")] = static_cast<int>(_Height);
+    (*m_pDataTexture)[uT("width")] = static_cast<int>(_Width);
+    (*m_pDataTexture)[uT("height")] = static_cast<int>(_Height);
 
-      if ((*pDataTexture)[uT("mapper")].IsType<const cbBufferMap_t<const void> &>())
-      {
-        m_pReadDataTexture = MakeRGBACopy(_pDevice, _Width, _Height);
-      }
+    if (m_IsUseMapper)
+    {
+      m_pReadDataTexture = MakeRGBACopy(_pDevice, _Width, _Height);
     }
   }
 
@@ -662,6 +710,7 @@ public:
     m_pDataTexture{ _pDataTexture },
     m_Destination{ (*_pDataTexture)[uT("destination")].Default(uT("albedo")) },
     m_iDestination{ GetDestinationIndex(_pDataTexture) },
+    m_IsUseMapper{ (*_pDataTexture)[uT("mapper")].IsType<const cbBufferMap_t<const void> &>() },
     m_Format{ GetFormat(_pDataTexture) }
   {
 
@@ -682,13 +731,14 @@ auto DirectX11::CreateBkSurface(const ComponentPtr_t & _pComponent) -> Render_t 
 
   const fnBkSurfaceSize_t GetScaleBkSurfaceSize = [=](void)
   {
-    DXGI_SWAP_CHAIN_DESC Desc = { 0 };
-    DX_CHECK m_pSwapChain->GetDesc(&Desc);
+    UINT ViewportCount = 1;
+    D3D11_VIEWPORT Viewport = { 0 };
+    m_pImmediateContext->RSGetViewports(&ViewportCount, &Viewport);
 
     const float Scale = (*pBkSurface)[uT("scale")];
 
-    const int Width = static_cast<int>(Scale * Desc.BufferDesc.Width);
-    const int Height = static_cast<int>(Scale * Desc.BufferDesc.Height);
+    const int Width = static_cast<int>(Scale * Viewport.Width);
+    const int Height = static_cast<int>(Scale * Viewport.Height);
 
     (*pBkSurface)[uT("width")] = Width;
     (*pBkSurface)[uT("height")] = Height;
@@ -698,11 +748,12 @@ auto DirectX11::CreateBkSurface(const ComponentPtr_t & _pComponent) -> Render_t 
 
   const fnBkSurfaceSize_t GetWindowBkSurfaceSize = [=](void)
   {
-    DXGI_SWAP_CHAIN_DESC Desc = { 0 };
-    DX_CHECK m_pSwapChain->GetDesc(&Desc);
+    UINT ViewportCount = 1;
+    D3D11_VIEWPORT Viewport = { 0 };
+    m_pImmediateContext->RSGetViewports(&ViewportCount, &Viewport);
 
-    const int Width = static_cast<int>(Desc.BufferDesc.Width);
-    const int Height = static_cast<int>(Desc.BufferDesc.Height);
+    const int Width = static_cast<int>(Viewport.Width);
+    const int Height = static_cast<int>(Viewport.Height);
 
     (*pBkSurface)[uT("width")] = Width;
     (*pBkSurface)[uT("height")] = Height;
@@ -712,9 +763,10 @@ auto DirectX11::CreateBkSurface(const ComponentPtr_t & _pComponent) -> Render_t 
 
   const fnBkSurfaceSize_t GetUserBkSurfaceSize = [=](void)
   {
-    DXGI_SWAP_CHAIN_DESC Desc = { 0 };
-    DX_CHECK m_pSwapChain->GetDesc(&Desc); // результат не используется, но 
-                                           // так проще тестировать
+    UINT ViewportCount = 1;
+    D3D11_VIEWPORT Viewport = { 0 };
+    m_pImmediateContext->RSGetViewports(&ViewportCount, &Viewport); // результат не используется, но 
+                                                                    // так проще тестировать
 
     const int Width = (*pBkSurface)[uT("width")];
     const int Height = (*pBkSurface)[uT("height")];
@@ -742,7 +794,13 @@ auto DirectX11::CreateBkSurface(const ComponentPtr_t & _pComponent) -> Render_t 
   {
     auto pTexture = ::std::make_shared<Texture>(_pDataTexture);
     pTexture->MakeTarget(m_pDevice, Width, Height);
-    (*_pDataTexture)[uT("entity")] = pTexture;
+
+    // Лучше избавиться от weak_ptr<> и неопределенности с тем, что если
+    // объект текстуры внеэкранной поверхности не будет использован как
+    // source, то будет утечка памяти - см. как то же самое реализавано
+    // у OpenGL.
+    (*_pDataTexture)[uT("entity")] = ::std::weak_ptr<Texture>(pTexture);
+
     pBkSurfaceTextures->push_back(pTexture);
   };
 
@@ -754,6 +812,11 @@ auto DirectX11::CreateBkSurface(const ComponentPtr_t & _pComponent) -> Render_t 
   return [=](void)
   {
     const auto [Width, Height] = GetBkSurfaceSize();
+
+    // 08 Сентябрь 2020 11:25 (unicornum.verum@gmail.com)
+    TODO("Хранить размеры текстур в них самих и пересоздавать при расхождении размеров");
+    // Кстати, первый раз внеэкранную поверхность также можно создавать при
+    // первом вызове рендера.
 
     if (m_IsResizeWindow)
     {
@@ -791,6 +854,9 @@ auto DirectX11::CreateBkSurface(const ComponentPtr_t & _pComponent) -> Render_t 
       static_cast<UINT>(m_CurrentRenderTargets.size()),
       &m_CurrentRenderTargets[0], nullptr);
 
+    // deprecated
+    // Оставлено для обратной совместимости, удалить, когда будут удалены
+    // параметры scale, width и height у BkSurface.
     D3D11_VIEWPORT ViewPort = { 0 };
     ViewPort.TopLeftX = 0;
     ViewPort.TopLeftY = 0;
@@ -932,8 +998,11 @@ auto DirectX11::CreateTexture(const ComponentPtr_t & _pComponent) -> Render_t /*
 
   const Component::Texture TextureData{ *pTextureData, uT("albedo") };
 
-  Texture::Ptr_t pTexture = (*pTextureData)[uT("entity")].Default(Texture::Ptr_t{});
-  if (pTexture == nullptr)
+  Texture::Ptr_t pTexture;
+
+  ::std::weak_ptr<Texture> wpTexture = (*pTextureData)[uT("entity")]
+    .Default(::std::weak_ptr<Texture>{});
+  if (wpTexture.lock() == nullptr)
   {
     pTexture = ::std::make_shared<Texture>(pTextureData);
     pTexture->MakeSource(m_pDevice, m_pImmediateContext, 
@@ -942,7 +1011,8 @@ auto DirectX11::CreateTexture(const ComponentPtr_t & _pComponent) -> Render_t /*
   }
   else
   {
-    (*pTextureData)[uT("entity")] = Texture::Ptr_t{};
+    pTexture = wpTexture.lock();
+    (*pTextureData)[uT("entity")] = ::std::weak_ptr<Texture>{};
   }
 
   if (pTexture->m_pReadDataTexture == nullptr)

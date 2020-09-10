@@ -17,9 +17,9 @@ namespace renderer
 {
 
 OpenGLCommon::OpenGLCommon(const Data_t & _Data, const String_t & _PreVersion) :
-  m_Top{ _Data.Top },
-  m_Width{ _Data.Width },
-  m_Height{ _Data.Height },
+  m_Top{ _Data.ClientRect.Top },
+  m_Width{ _Data.ClientRect.Width },
+  m_Height{ _Data.ClientRect.Height },
   m_PreVersion{ _PreVersion }
 {
 }
@@ -34,10 +34,11 @@ OpenGLCommon::String_t OpenGLCommon::GetUsingApi(void) const /*override*/
   return m_PreVersion + string_cast<String, Encoding::Ascii128>(Version);
 }
 
-void OpenGLCommon::ResizeWindow(int32_t _Width, int32_t _Height) noexcept /*final*/
+void OpenGLCommon::ResizeWindow(const Rect & _ClientRect) noexcept /*final*/
 {
-  m_Width = _Width;
-  m_Height = _Height;
+  m_Top = _ClientRect.Top;
+  m_Width = _ClientRect.Width;
+  m_Height = _ClientRect.Height;
 
   m_IsResizeWindow = true;
 }

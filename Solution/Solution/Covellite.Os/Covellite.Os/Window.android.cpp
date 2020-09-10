@@ -8,7 +8,11 @@
 
 using AppInfo_t = ::alicorn::system::platform::AppInfo;
 
-using namespace covellite::os;
+namespace covellite
+{
+
+namespace os
+{
 
 Window::Window(const ::covellite::app::IApplication & _Application) :
   m_Events(_Application),
@@ -27,24 +31,24 @@ Window::~Window(void) = default;
 *  Функция получения размеров клиентской области окна.
 * \details
 *  - Для Android'a следует иметь в виду, что если в манифесте не отключено
-*  отображение системного заголовка, то \b Top будет содержать высоту этого 
-*  заголовка, а \b Height будет содержать высоту окна, включающую высоту 
+*  отображение системного заголовка, то \b Top будет содержать высоту этого
+*  заголовка, а \b Height будет содержать высоту окна, включающую высоту
 *  заголовка.
-*  - При вычислениях доступной для рисования 2D объектов области следует 
-*  учитывать, что реализации рендера для Android устанавливают viewport, который 
-*  уже учитывает высоту системного заголовка (т.е. точка с координатами (0,0) 
-*  находится в левом верхнем углу, непосредственно под заголовком, а высота 
+*  - При вычислениях доступной для рисования 2D объектов области следует
+*  учитывать, что реализации рендера для Android устанавливают viewport, который
+*  уже учитывает высоту системного заголовка (т.е. точка с координатами (0,0)
+*  находится в левом верхнем углу, непосредственно под заголовком, а высота
 *  viewport'a равна (Height - Top)).
-*  
+*
 * \return \b Value
 *  В случае (таком-то...).
-*  
+*
 * \exception std::exception
 *  - Действие невозможно (подробнее см. описание исключения).
 */
-Window::Rect Window::GetClientRect(void) const /*override*/
+Rect Window::GetClientRect(void) const /*override*/
 {
-  return 
+  return
   {
     0,
     ::alicorn::system::platform::Environment{}.GetStatusBarHeight(),
@@ -68,7 +72,7 @@ void Window::ActivateResizeEvents(void)
 
 void Window::ActivateMouseEvents(void)
 {
-  using AInputEvent_t = AInputEvent * ;
+  using AInputEvent_t = AInputEvent *;
 
   auto BuildMessage = [](int32_t _Type, int32_t _Value) -> int32_t
   {
@@ -117,7 +121,7 @@ void Window::ActivateMouseEvents(void)
 
 void Window::ActivateKeyEvents(void)
 {
-  using AInputEvent_t = AInputEvent * ;
+  using AInputEvent_t = AInputEvent *;
 
   auto BuildMessage = [](int32_t _Type, int32_t _Value) -> int32_t
   {
@@ -165,3 +169,7 @@ void Window::ActivateKeyEvents(void)
     }
   });
 }
+
+} // namespace os
+
+} // namespace covellite

@@ -51,7 +51,7 @@ public:
 private:
   void PrepareLanscapeScene(const IntPtr_t &);
   void PrepareAnimationScene(const IntPtr_t &);
-  void PrepareShadowsScene(const IntPtr_t &);
+  void PrepareShadowsScene(const IntPtr_t &, const GameObject::Another::Value);
   void RemoveAllObjects(void);
   Updater_t GetAutoProcessMoving(void);
   Updater_t GetManualProcessMoving(void);
@@ -97,7 +97,8 @@ private:
   CubeCoords m_Orientation{ 0, 1 };
   float      m_Pitch = 0.0f;
   ::std::queue<Step> m_Steps;
-  ::std::map<size_t, GameObject::IGameObjectPtr_t> m_LandscapeObjects;
+  ::std::map<size_t, ::std::pair<GameObject::IGameObjectPtr_t, int>> m_LandscapeObjects;
+  ::alicorn::extension::std::fast::unordered_map<uint64_t, int> m_ObjectTypes;
 
 public:
   GameWorld(const Events_t &, DbComponents &);

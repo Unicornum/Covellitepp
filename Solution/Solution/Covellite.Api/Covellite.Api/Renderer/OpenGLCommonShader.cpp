@@ -655,6 +655,7 @@ public:
 auto OpenGLCommonShader::CreateBkSurface(
   const ComponentPtr_t & _pComponent) -> Render_t /*override*/
 {
+  // !!!std::tuple не компилируется на Android!!!
   using Size_t = ::std::pair<GLint, GLint>;
   using fnBkSurfaceSize_t = ::std::function<Size_t(void)>;
 
@@ -662,10 +663,10 @@ auto OpenGLCommonShader::CreateBkSurface(
 
   const fnBkSurfaceSize_t GetScaleBkSurfaceSize = [=](void)
   {
+    const float Scale = (*pBkSurface)[uT("scale")];
+
     GLint Viewport[4] = { 0 };
     glGetIntegerv(GL_VIEWPORT, Viewport);
-
-    const float Scale = (*pBkSurface)[uT("scale")];
 
     const int Width = static_cast<int>(Scale * Viewport[2]);
     const int Height = static_cast<int>(Scale * Viewport[3]);
@@ -779,8 +780,7 @@ auto OpenGLCommonShader::CreateBkSurface(
     glDrawBuffers(static_cast<GLsizei>(AttachmentIndexes.size()),
       AttachmentIndexes.data());
 
-    // (0, 0) - левый нижний угол!
-    glViewport(0, 0, Width, Height - m_Top);
+    glViewport(0, 0, Width, Height);
   };
 }
 
@@ -850,13 +850,10 @@ auto OpenGLCommonShader::CreateTexture(const ComponentPtr_t & _pComponent) -> Re
 
     const auto LocationId = glGetUniformLocation(ProgramId,
       pTexture->m_Destination.second.c_str());
-    if (LocationId == -1)
-    {
-      // Нужна явная проверка, т.к. это не приведет к генерации ошибки
-      // для glGetError().
-      throw STD_EXCEPTION << "No texture declared in shader: " <<
-        pTexture->m_Destination.second << " [id: " << _pComponent->Id << "].";
-    }
+
+    // -1 означает, что в шейдере такой текстуры нет, но glGetError() при этом
+    // не возвращает ошибку, поэтому просто игнорируем ситуацию.
+    if (LocationId == -1) return;
 
     glUniform1i(LocationId, Index);
   };
@@ -1555,9 +1552,55 @@ auto OpenGLCommonShader::CreateGeometry(const ComponentPtr_t & _pComponent) -> R
   };
 }
 
-auto OpenGLCommonShader::GetCameraCommon(void) -> Render_t
+auto OpenGLCommonShader::GetCameraCommon(const ComponentPtr_t & _pComponent) -> Render_t
 {
   const auto DisableDepthRender = GetDepthRender(false, false, false);
+
+  using Size_t = ::std::tuple<GLint, GLint>;
+  using fnBkSurfaceSize_t = ::std::function<Size_t(void)>;
+
+  const auto pCamera = _pComponent;
+
+  const fnBkSurfaceSize_t GetScaleBkSurfaceSize = [=](void)
+  {
+    const float Scale = (*pCamera)[uT("scale")];
+
+    const auto Width = static_cast<GLint>(Scale * m_Width);
+    const auto Height = static_cast<GLint>(Scale * (m_Height - m_Top));
+
+    return Size_t{ Width, Height };
+  };
+
+  const fnBkSurfaceSize_t GetWindowBkSurfaceSize = [=](void)
+  {
+    return Size_t{ m_Width, m_Height - m_Top };
+  };
+
+  const fnBkSurfaceSize_t GetUserBkSurfaceSize = [=](void)
+  {
+    const int Width = (*pCamera)[uT("width")];
+    const int Height = (*pCamera)[uT("height")];
+
+    return Size_t{ static_cast<GLint>(Width), static_cast<GLint>(Height) };
+  };
+
+  const auto IsScaleBkSurfaceSize =
+    (*pCamera)[uT("scale")].IsType<float>();
+  const auto IsUserBkSurfaceSize =
+    (*pCamera)[uT("width")].IsType<int>() &&
+    (*pCamera)[uT("height")].IsType<int>();
+
+  const auto GetBkSurfaceSize =
+    (IsScaleBkSurfaceSize) ? GetScaleBkSurfaceSize :
+    (IsUserBkSurfaceSize) ? GetUserBkSurfaceSize :
+    GetWindowBkSurfaceSize;
+
+  const auto [Width, Height] = GetBkSurfaceSize();
+
+  // Функция должна обязательно вызываться не только при рендеринге, но и при
+  // создании камеры, чтобы внеэкранная поверхность создавалась с корректными
+  // размерами.
+  glViewport(0, 0, Width, Height); // (0, 0) - левый нижний угол!
 
   return [=](void)
   {
@@ -1572,15 +1615,16 @@ auto OpenGLCommonShader::GetCameraCommon(void) -> Render_t
     glCullFace(GL_BACK);
     glFrontFace(GL_CCW);
 
-    // (0, 0) - левый нижний угол!
-    glViewport(0, 0, m_Width, m_Height - m_Top);
+    const auto [Width, Height] = GetBkSurfaceSize();
+
+    glViewport(0, 0, Width, Height); // (0, 0) - левый нижний угол!
   };
 }
 
 auto OpenGLCommonShader::GetCameraOrthographic(
   const ComponentPtr_t & _pComponent) -> Render_t
 {
-  const auto CommonRender = GetCameraCommon();
+  const auto CommonRender = GetCameraCommon(_pComponent);
 
   const auto ServiceComponents = CapturingServiceComponent::Get(_pComponent,
     {
@@ -1618,7 +1662,7 @@ auto OpenGLCommonShader::GetCameraOrthographic(
 auto OpenGLCommonShader::GetCameraPerspective(
   const ComponentPtr_t & _pComponent) -> Render_t
 {
-  const auto CommonRender = GetCameraCommon();
+  const auto CommonRender = GetCameraCommon(_pComponent);
 
   const auto ServiceComponents = CapturingServiceComponent::Get(_pComponent,
     {

@@ -43,9 +43,9 @@ public:
     Proxy::GetInstance()->PresentFrame(m_Id);
   }
 
-  void ResizeWindow(int32_t _W, int32_t _H) override
+  void ResizeWindow(const ::covellite::Rect & _ClientRect) override
   {
-    Proxy::GetInstance()->ResizeWindow(m_Id, _W, _H);
+    Proxy::GetInstance()->ResizeWindow(m_Id, _ClientRect.Width, _ClientRect.Height);
   }
 
   const Creators_t & GetCreators(void) const override

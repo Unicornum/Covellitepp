@@ -27,7 +27,6 @@
 #include <Covellite/App.mock.hpp>
 #include <Covellite/Os/Events.hpp>
 #include <Covellite/Api/Events.hpp>
-#include <Covellite/Covellite.Api.lib.hpp>
 
 // Общий тестовый класс класса Window
 class Window_test :
@@ -59,7 +58,7 @@ protected:
     ::testing::DefaultValue<RenderInterfacePtr_t>::Set(m_pRenderInterface);
     ::testing::DefaultValue<String_t>::Set("DefaultString");
     ::testing::DefaultValue<String>::Set(string_cast<String>(m_PathToFontsDirectory));
-    ::testing::DefaultValue<WindowOs_t::Rect>::Set({ 0, 0, 1, 1});
+    ::testing::DefaultValue<::covellite::Rect>::Set({ 0, 0, 1, 1});
     ::testing::DefaultValue<Context_t *>::Set(&m_Context);
     ::testing::DefaultValue<RendersPtr_t>::Set(m_pRenders);
   }
@@ -73,7 +72,7 @@ protected:
     ::testing::DefaultValue<RenderInterfacePtr_t>::Clear();
     ::testing::DefaultValue<String_t>::Clear();
     ::testing::DefaultValue<String>::Clear();
-    ::testing::DefaultValue<WindowOs_t::Rect>::Clear();
+    ::testing::DefaultValue<::covellite::Rect>::Clear();
     ::testing::DefaultValue<Context_t *>::Clear();
     ::testing::DefaultValue<RendersPtr_t>::Clear();
   }
@@ -255,7 +254,7 @@ TEST_F(Window_test, /*DISABLED_*/Test_Constructor)
 
   EXPECT_CALL(WindowApiProxy, GetClientRect(WindowApiId))
     .Times(1)
-    .WillOnce(Return(WindowOs_t::Rect{ 0, StatusBarHeight, Width, Height }));
+    .WillOnce(Return(::covellite::Rect{ 0, StatusBarHeight, Width, Height }));
 
   EXPECT_CALL(CovelliteGuiCoreProxy, CreateContext(Eq("main"), ContextSize, nullptr))
     .Times(1)
@@ -776,7 +775,7 @@ TEST_F(Window_test, /*DISABLED_*/Test_OnResize)
 
   EXPECT_CALL(WindowApiProxy, GetClientRect(_))
     .Times(1)
-    .WillOnce(Return(WindowOs_t::Rect{ 0, StatusBarHeight, Width, Height }));
+    .WillOnce(Return(::covellite::Rect{ 0, StatusBarHeight, Width, Height }));
 
   EXPECT_CALL(Context, SetDimensions(ContextSize))
     .Times(1);
@@ -818,7 +817,7 @@ TEST_F(Window_test, /*DISABLED_*/Test_OnMotion)
 
   EXPECT_CALL(WindowApiProxy, GetClientRect(_))
     .Times(1)
-    .WillOnce(Return(WindowOs_t::Rect{ 0, StatusBarHeight, 0, 0 }));
+    .WillOnce(Return(::covellite::Rect{ 0, StatusBarHeight, 0, 0 }));
 
   EXPECT_CALL(Context, ProcessMouseMove(X, Y - StatusBarHeight, 0))
     .Times(1);

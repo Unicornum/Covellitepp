@@ -33,16 +33,6 @@ class IWindow :
   using Configuration_t = covellite::os::Configuration;
 
 public:
-  class Rect final
-  {
-  public:
-    int32_t Left;
-    int32_t Top;
-    int32_t Width;
-    int32_t Height;
-  };
-
-public:
   virtual Any_t GetHandle(void) const = 0;
   virtual Rect GetClientRect(void) const = 0;
   virtual const Configuration_t & GetConfiguration(void) const = 0;

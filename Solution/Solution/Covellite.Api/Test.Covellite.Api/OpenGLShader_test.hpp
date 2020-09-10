@@ -139,7 +139,7 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_BkSurface)
     ::mock::GLProxy GLProxy;
 
     Data_t SettingsData;
-    SettingsData.Top = 34;
+    SettingsData.ClientRect.Top = 34;
 
     Tested_t Example{ SettingsData };
     ITested_t & IExample = Example;
@@ -267,7 +267,7 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_BkSurface)
     EXPECT_CALL(GLProxy, DrawBuffers(AttachmentIndexes))
       .Times(1);
 
-    EXPECT_CALL(GLProxy, Viewport(0, 0, _ExpectedWidth, _ExpectedHeight - SettingsData.Top))
+    EXPECT_CALL(GLProxy, Viewport(0, 0, _ExpectedWidth, _ExpectedHeight))
       .Times(1);
 
     Render();
@@ -399,7 +399,7 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_BkSurface_ResizeWindow)
     ::mock::GLProxy GLProxy;
 
     Data_t SettingsData;
-    SettingsData.Top = 45;
+    SettingsData.ClientRect.Top = 45;
 
     Tested_t Example{ SettingsData };
     ITested_t & IExample = Example;
@@ -511,14 +511,11 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_BkSurface_ResizeWindow)
 
     Render();
 
-    EXPECT_CALL(GLProxy, GetIntegerv(GL_VIEWPORT))
-      .Times(1);
-
     IExample.PresentFrame();
 
     const int Viewport2[] = { 0, 0, _Width * 2, _Height * 2 };
 
-    IExample.ResizeWindow(_Width * 2, _Height * 2);
+    IExample.ResizeWindow(::covellite::Rect{ 0, 0, _Width * 2, _Height * 2 });
 
     EXPECT_CALL(GLProxy, GetIntegerv(GL_VIEWPORT))
       .Times(1)
@@ -547,13 +544,10 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_BkSurface_ResizeWindow)
     EXPECT_CALL(GLProxy, BindFramebuffer(GL_FRAMEBUFFER, _))
       .Times(1);
 
-    EXPECT_CALL(GLProxy, Viewport(0, 0, _ExpectedWidth2, _ExpectedHeight2 - SettingsData.Top))
+    EXPECT_CALL(GLProxy, Viewport(0, 0, _ExpectedWidth2, _ExpectedHeight2))
       .Times(1);
 
     Render();
-
-    EXPECT_CALL(GLProxy, GetIntegerv(GL_VIEWPORT))
-      .Times(1);
 
     IExample.PresentFrame();
 
@@ -589,9 +583,6 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_BkSurface_ResizeWindow)
       .Times(1);
 
     Render();
-
-    EXPECT_CALL(GLProxy, GetIntegerv(GL_VIEWPORT))
-      .Times(1);
 
     IExample.PresentFrame();
   };
@@ -6484,7 +6475,7 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Texture_NoDeclaredInShader)
     EXPECT_CALL(GLProxy, Uniform1i(_, _))
       .Times(0);
 
-    EXPECT_THROW(Render(), ::std::exception);
+    Render();
 
     EXPECT_CALL(GLProxy, DeleteTextures(1, TextureId))
       .Times(1);
@@ -8998,6 +8989,9 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Camera_Perspective)
         { uT("kind"), uT("Perspective") },
       });
 
+    EXPECT_CALL(GLProxy, Viewport(0, 0, _, _))
+      .Times(1);
+
     auto Render = itCreator->second(pCamera);
 
     auto Info = CameraInfos[0];
@@ -9029,6 +9023,9 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Camera_Perspective)
         { uT("service"), Object_t{ pPosition, pRotation } },
       });
 
+    EXPECT_CALL(GLProxy, Viewport(0, 0, _, _))
+      .Times(1);
+
     auto Render = itCreator->second(pCamera);
 
     auto Info = CameraInfos[0];
@@ -9049,6 +9046,9 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Camera_Perspective)
         { uT("kind"), uT("Perspective") },
         { uT("service"), Object_t{ pPosition, pRotation } },
       });
+
+    EXPECT_CALL(GLProxy, Viewport(0, 0, _, _))
+      .Times(1);
 
     auto Render = itCreator->second(pCamera);
 
@@ -9080,7 +9080,7 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Camera_Perspective)
 }
 
 // ************************************************************************** //
-TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Camera_SetViewport)
+TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Camera_SetWindowViewport)
 {
   const auto TestCall = [](const Component_t::ComponentPtr_t & _pCamera)
   {
@@ -9088,8 +9088,9 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Camera_SetViewport)
     ::mock::GLProxy GLProxy;
 
     Data_t Data;
-    Data.Width = 2008131258;
-    Data.Height = 2008131259;
+    Data.ClientRect.Top = 12345;
+    Data.ClientRect.Width = 2008131258;
+    Data.ClientRect.Height = 2008131259;
 
     using namespace ::testing;
 
@@ -9099,17 +9100,20 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Camera_SetViewport)
     auto itCreator = IExample.GetCreators().find(uT("Camera"));
     ASSERT_NE(IExample.GetCreators().end(), itCreator);
 
+    EXPECT_CALL(GLProxy, Viewport(0, 0, Data.ClientRect.Width, Data.ClientRect.Height - Data.ClientRect.Top))
+      .Times(1);
+
     auto Render = itCreator->second(_pCamera);
     ASSERT_NE(nullptr, Render);
 
-    EXPECT_CALL(GLProxy, Viewport(0, 0, Data.Width, Data.Height))
+    EXPECT_CALL(GLProxy, Viewport(0, 0, Data.ClientRect.Width, Data.ClientRect.Height - Data.ClientRect.Top))
       .Times(1);
 
     Render();
 
-    IExample.ResizeWindow(2008131300, 2008131301);
+    IExample.ResizeWindow(::covellite::Rect{ 0, 54321, 2008131300, 2008131301 });
 
-    EXPECT_CALL(GLProxy, Viewport(0, 0, 2008131300, 2008131301))
+    EXPECT_CALL(GLProxy, Viewport(0, 0, 2008131300, 2008131301 - 54321))
       .Times(1);
 
     Render();
@@ -9123,6 +9127,138 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Camera_SetViewport)
   TestCall(Component_t::Make(
     {
       { uT("kind"), uT("Perspective") },
+    }));
+}
+
+// ************************************************************************** //
+TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Camera_SetScaleViewport)
+{
+  const auto TestCall = [](const float _Scale, 
+    const Component_t::ComponentPtr_t & _pCamera)
+  {
+    ::mock::WindowsProxy WindowsProxy;
+    ::mock::GLProxy GLProxy;
+
+    Data_t Data;
+    Data.ClientRect.Top = 123;
+    Data.ClientRect.Width = 1024;
+    Data.ClientRect.Height = 2048;
+
+    const auto ExpectedWidth = static_cast<int>(_Scale * Data.ClientRect.Width);
+    const auto ExpectedHeight = static_cast<int>(_Scale * (Data.ClientRect.Height - Data.ClientRect.Top));
+
+    using namespace ::testing;
+
+    Tested_t Example{ Data };
+    ITested_t & IExample = Example;
+
+    auto itCreator = IExample.GetCreators().find(uT("Camera"));
+    ASSERT_NE(IExample.GetCreators().end(), itCreator);
+
+    EXPECT_CALL(GLProxy, Viewport(0, 0, ExpectedWidth, ExpectedHeight))
+      .Times(1);
+
+    auto Render = itCreator->second(_pCamera);
+    ASSERT_NE(nullptr, Render);
+
+    EXPECT_CALL(GLProxy, Viewport(0, 0, ExpectedWidth, ExpectedHeight))
+      .Times(1);
+
+    Render();
+
+    IExample.ResizeWindow(::covellite::Rect{ 0, 321, 2048, 4096 });
+
+    const auto ExpectedWidth2 = static_cast<int>(_Scale * 2048);
+    const auto ExpectedHeight2 = static_cast<int>(_Scale * (4096 - 321));
+
+    EXPECT_CALL(GLProxy, Viewport(0, 0, ExpectedWidth2, ExpectedHeight2))
+      .Times(1);
+
+    Render();
+  };
+
+  TestCall(0.5f, Component_t::Make(
+    {
+      { uT("kind"), uT("Orthographic") },
+      { uT("scale"), 0.5f },
+    }));
+
+  TestCall(2.0f, Component_t::Make(
+    {
+      { uT("kind"), uT("Perspective") },
+      { uT("scale"), 2.0f },
+    }));
+
+  TestCall(0.25f, Component_t::Make(
+    {
+      { uT("kind"), uT("Orthographic") },
+      { uT("scale"), 0.25f },
+      { uT("width"), 2009081959 },
+      { uT("height"), 2009082000 },
+   }));
+
+  TestCall(4.0f, Component_t::Make(
+    {
+      { uT("kind"), uT("Perspective") },
+      { uT("scale"), 4.0f },
+      { uT("width"), 2009081959 },
+      { uT("height"), 2009082000 },
+    }));
+}
+
+// ************************************************************************** //
+TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Camera_SetUserViewport)
+{
+  const auto TestCall = [](const int _Width, const int _Height,
+    const Component_t::ComponentPtr_t & _pCamera)
+  {
+    ::mock::WindowsProxy WindowsProxy;
+    ::mock::GLProxy GLProxy;
+
+    Data_t Data;
+    Data.ClientRect.Top = 345;
+    Data.ClientRect.Width = 2009082008;
+    Data.ClientRect.Height = 2009082009;
+
+    using namespace ::testing;
+
+    Tested_t Example{ Data };
+    ITested_t & IExample = Example;
+
+    auto itCreator = IExample.GetCreators().find(uT("Camera"));
+    ASSERT_NE(IExample.GetCreators().end(), itCreator);
+
+    EXPECT_CALL(GLProxy, Viewport(0, 0, _Width, _Height))
+      .Times(1);
+
+    auto Render = itCreator->second(_pCamera);
+    ASSERT_NE(nullptr, Render);
+
+    EXPECT_CALL(GLProxy, Viewport(0, 0, _Width, _Height))
+      .Times(1);
+
+    Render();
+
+    IExample.ResizeWindow(::covellite::Rect{ 0, 543, 2008131300, 2008131301 });
+
+    EXPECT_CALL(GLProxy, Viewport(0, 0, _Width, _Height))
+      .Times(1);
+
+    Render();
+  };
+
+  TestCall(1024, 2048, Component_t::Make(
+    {
+      { uT("kind"), uT("Orthographic") },
+      { uT("width"), 1024 },
+      { uT("height"), 2048 },
+    }));
+
+  TestCall(2048, 4096, Component_t::Make(
+    {
+      { uT("kind"), uT("Perspective") },
+      { uT("width"), 2048 },
+      { uT("height"), 4096 },
     }));
 }
 

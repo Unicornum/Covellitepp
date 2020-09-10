@@ -50,7 +50,7 @@ protected:
 public:
   virtual String_t GetUsingApi(void) const = 0;
   virtual void PresentFrame(void) = 0;
-  virtual void ResizeWindow(int32_t, int32_t) = 0;
+  virtual void ResizeWindow(const Rect &) = 0;
   virtual const Creators_t & GetCreators(void) const = 0;
 
 public:
@@ -62,11 +62,9 @@ class SettingsData final
 {
 public:
   Any_t Handle;       ///< Хэнд окна операционной системы.
-  int   Top;          ///< Смещение верхнего края клиентской части окна.
-  int   Width;        ///< Фактическая ширина клиентской области окна.
-  int   Height;       ///< Фактическая высота клиентской области окна.
+  Rect  ClientRect;   ///< Фактические размеры клиентской области окна.
   bool  IsFullScreen; ///< Признак работы программы в полноэкранном режиме.
-  uint8_t Align[3] = { 0 };
+  uint8_t Align[7] = { 0 };
 };
 
 } // namespace renderer

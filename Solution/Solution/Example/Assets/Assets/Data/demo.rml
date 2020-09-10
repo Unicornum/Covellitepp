@@ -23,6 +23,11 @@
     <form id="id_game_menu" class="hidden">
       <input type="text" id="id_fps" disabled="disabled" />
       <button class="fbutton" id="id_back_to_main_menu" />
+    </form>
+    <form id="id_shadow_selector" class="hidden">
+      <button id="id_shadow_window">x1</button>
+      <button id="id_shadow_scale">x0.25</button>
+      <button id="id_shadow_fix_size">1024x1024</button>
     </form>  
   </body>
 </rml>

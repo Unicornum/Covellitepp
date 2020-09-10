@@ -8,14 +8,11 @@
   </Options>
   <Process/>
   <Complete>
-    <Week6291>
-      <Task3 Text="Падение программы при создании нового updater'a во время вызова существующего." Type="Bug" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="true" ParentTaskText="false"/>
-      <Task4 Text="Функция добавления объектов в очередь рендеринга без сортировки." Type="Red" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="true" ParentTaskText="false"/>
-      <Task5 Text="Функция создания объектов через очередь загрузки." Type="Red" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="true" ParentTaskText="false"/>
-      <Task9 Text="Тест ограничения по времени загрузки объектов." Type="Red" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="false"/>
-    </Week6291>
-    <Week6290/>
-    <Week6289/>
-    <Week6288/>
+    <Week6296>
+      <Task6 Text="Window: функция отложенного создания объектов с возможностью отложенной загрузки данных из файлов." Type="Red" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="true" ParentTaskText="false"/>
+    </Week6296>
+    <Week6295/>
+    <Week6294/>
+    <Week6293/>
   </Complete>
 </Tasks>

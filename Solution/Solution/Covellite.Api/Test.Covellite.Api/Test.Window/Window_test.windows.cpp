@@ -55,7 +55,7 @@ protected:
   using WindowOs_t = ::mock::covellite::os::Window;
   using Data_t = ::covellite::api::renderer::SettingsData;
   using String_t = ::alicorn::extension::std::String;
-  using Rect_t = ::covellite::os::IWindow::Rect;
+  using Rect_t = ::covellite::Rect;
 
   // Вызывается ПЕРЕД запуском каждого теста
   void SetUp(void) override

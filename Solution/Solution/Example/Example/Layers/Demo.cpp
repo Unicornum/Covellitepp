@@ -90,7 +90,29 @@ void Demo::ActivateProcessMainMenuEvents(void)
   m_Events[Click.DocumentId(GetId()).ElementId("id_shadows")]
     .Connect([=](void)
   {
-    RunLoadScene(::events::Demo.Shadows);
+    RunLoadScene(::events::Demo.ShadowsWindow);
+    GetElement("id_shadow_selector").SetClassStyle(uT(""));
+  });
+
+  m_Events[Click.DocumentId(GetId()).ElementId("id_shadow_window")]
+    .Connect([=](void)
+  {
+    RunLoadScene(::events::Demo.ShadowsWindow);
+    GetElement("id_shadow_selector").SetClassStyle(uT(""));
+  });
+
+  m_Events[Click.DocumentId(GetId()).ElementId("id_shadow_scale")]
+    .Connect([=](void)
+  {
+    RunLoadScene(::events::Demo.ShadowsScale);
+    GetElement("id_shadow_selector").SetClassStyle(uT(""));
+  });
+
+  m_Events[Click.DocumentId(GetId()).ElementId("id_shadow_fix_size")]
+    .Connect([=](void)
+  {
+    RunLoadScene(::events::Demo.ShadowsFixSize);
+    GetElement("id_shadow_selector").SetClassStyle(uT(""));
   });
 
   m_Events[Click.DocumentId(GetId()).ElementId("id_help")]
@@ -123,6 +145,7 @@ void Demo::ActivateProcessGameMenuEvents(void)
     GetElement("id_main_menu").SetClassStyle(uT(""));
     GetElement("id_loading").SetClassStyle(uT("hidden"));
     GetElement("id_game_menu").SetClassStyle(uT("hidden"));
+    GetElement("id_shadow_selector").SetClassStyle(uT("hidden"));
 
     m_Events[::events::Demo.Exit]();
   });

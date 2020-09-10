@@ -14,7 +14,9 @@ public:
     Resize,
     Landscape,
     Animation,
-    Shadows,
+    ShadowsWindow,
+    ShadowsScale,
+    ShadowsFixSize,
     Exit,
 
     None,

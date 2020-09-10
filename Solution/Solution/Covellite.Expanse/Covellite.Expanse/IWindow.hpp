@@ -31,10 +31,14 @@ class IWindow :
   public ::covellite::expanse::I3DScene
 {
 protected:
-  using fnCreateObject_t = ::std::function<void(ObjectId_t)>;
+  using fnObjectCreation_t = ::std::function<GameObject_t(void)>;
+  using fnObjectCreationCompleted_t = ::std::function<void(ObjectId_t)>;
 
 public:
-  virtual void DeferredCreateObject(const GameObject_t &, const fnCreateObject_t &) = 0;
+  virtual void DeferredCreateObject(const GameObject_t &, 
+    const fnObjectCreationCompleted_t &) = 0;
+  virtual void DeferredCreateObject(const fnObjectCreation_t &, 
+    const fnObjectCreationCompleted_t &) = 0;
 };
 
 } // namespace expanse

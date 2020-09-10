@@ -3,7 +3,6 @@
 #include <memory>
 #include <alicorn/std/string.forward.hpp>
 #include <Covellite/Events/IEvents.hpp>
-#include <Covellite/Os/IWindow.hpp>
 #include <Covellite/Api/Renders.hpp>
 
 namespace covellite
@@ -35,12 +34,11 @@ class IWindow :
   public ::covellite::events::IEvents
 {
 protected:
-  using Rect_t = ::covellite::os::IWindow::Rect;
   using RendersPtr_t = ::std::shared_ptr<Component::Renders>;
 
 public:
   /// Функция получения размеров клиентской области окна.
-  virtual Rect_t GetClientRect(void) const = 0;
+  virtual Rect GetClientRect(void) const = 0;
   /// Функция получения объекта создания/удаления рендеров для компонентов.
   virtual RendersPtr_t GetRenders(void) const = 0;
 

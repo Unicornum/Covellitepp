@@ -81,10 +81,19 @@ public:
     {
       Animated = Extra::Invalid,
       Particles,
-      Shadows,
+      ShadowsWindow,
+      ShadowsScale,
+      ShadowsFixSize,
 
       Invalid,
     };
+
+  public:
+    static bool IsShadow(const Another::Value _Value)
+    {
+      return _Value >= Another::ShadowsWindow && 
+        _Value <= Another::ShadowsFixSize;
+    }
   };
 
 public:

@@ -4,66 +4,34 @@
     <X>620</X>
     <Y>43</Y>
     <Width>1750</Width>
-    <Height>964</Height>
+    <Height>968</Height>
   </Options>
   <Process/>
   <Complete>
-    <Week6292>
-      <Task23 Text="Назначение текстуры через параметры name и index." Type="Red" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="true" ParentTaskText="false">
-        <Task24 Text="Реализация DirectX10." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
-        <Task25 Text="Реализация DirectX11." Type="None" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
-        <Task26 Text="Реализация OpenGL|ES." Type="None" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
-      </Task23>
-      <Task27 Text="Текстуры высокой разрядности." Type="Red" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="true" ParentTaskText="false">
-        <Task28 Text="Реализация DirectX10." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
-        <Task29 Text="Реорганизация кода." Type="None" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
-        <Task30 Text="Реализация DirectX11." Type="None" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
-        <Task31 Text="Реализация OpenGL|ES." Type="None" Version="None" ExternalProgram="None" Expanded="false" Completed="true" History="false" ParentTaskText="true">
-          <Task32 Text="Тесты для 16 бит." Type="None" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
-          <Task33 Text="Тесты для 32 бита." Type="None" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
-        </Task31>
-      </Task27>
-      <Task34 Text="Дополнение тестов." Type="Red" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="false"/>
-      <Task35 Text="Передача размеров окна программы классам реализаций через конструктор." Type="Red" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="false">
-        <Task36 Text="Класс Window." Type="None" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
-        <Task37 Text="Реализация DirectX10." Type="None" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
-        <Task38 Text="Реализация DirectX11." Type="None" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
-        <Task39 Text="Реализация OpenGL|ES." Type="None" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
-      </Task35>
-      <Task1 Text="Пользовательские размеры внеэкранной поверхности." Type="Red" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="true" ParentTaskText="false">
-        <Task7 Text="Реализация DirectX10." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
-        <Task8 Text="Описание параметров." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
-        <Task9 Text="Реализация DirectX11." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true">
-          <Task10 Text="Перенос установки viewport'a в размер окна программы в рендер камеры." Type="None" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+    <Week6296>
+      <Task3 Text="DirectX11: некорректное пересоздание текстуры для чтения данных при изменении размеров окна программы." Type="Bug" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="true" ParentTaskText="false"/>
+      <Task4 Text="OpenGL: игнорирование отсутствующей в шейдере текстуры." Type="Red" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="true" ParentTaskText="false"/>
+      <Task5 Text="OpenGLES3: BkSurface - некорректная установка viewport'a при наличии заголовка." Type="Bug" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="true" ParentTaskText="false"/>
+      <Task6 Text="Camera: параметры width, height и scale." Type="Red" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="true" ParentTaskText="false">
+        <Task7 Text="Реализация DirectX10." Type="None" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="true">
+          <Task8 Text="Реорганизация кода." Type="None" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+        </Task7>
+        <Task9 Text="Описание использования." Type="None" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+        <Task10 Text="Реализация DirectX11." Type="None" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="true">
           <Task11 Text="Реорганизация кода." Type="None" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
-          <Task12 Text="Обобщение кода тестов." Type="None" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
-          <Task13 Text="Установка viewport'a в рендере внеэкранной поверхности." Type="None" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
-          <Task14 Text="Установка размеров созданной внеэкранной поверхности." Type="None" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
-          <Task15 Text="Параметр scale." Type="None" Version="None" ExternalProgram="None" Expanded="false" Completed="true" History="false" ParentTaskText="true">
-            <Task16 Text="Тесты создания цветовых текстур." Type="None" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
-          </Task15>
-          <Task17 Text="Параметры width и height." Type="None" Version="None" ExternalProgram="None" Expanded="false" Completed="true" History="false" ParentTaskText="true">
-            <Task18 Text="Тесты создания цветовых текстур." Type="None" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
-          </Task17>
-          <Task19 Text="Тесты создания буфера глубины." Type="None" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
-          <Task20 Text="Тесты изменения размеров." Type="None" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
-        </Task9>
-        <Task2 Text="Реализация OpenGL|ES." Type="None" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="true">
-          <Task3 Text="Установка viewport'a камерами." Type="None" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
-          <Task4 Text="Реорганизация кода." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
-          <Task5 Text="Установка viewport'a рендером." Type="None" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
-          <Task6 Text="Обобщение кода тестов." Type="None" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
-          <Task45 Text="Параметр scale." Type="None" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
-          <Task46 Text="Параметр width и height." Type="None" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
-          <Task47 Text="Установка размеров внеэкранной поверхности." Type="None" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
-        </Task2>
-      </Task1>
-    </Week6292>
-    <Week6291>
-      <Task41 Text="Ошибка при компиляции шейдера, если в файле есть две функции, имя одной из которых совпадает с началом имени другой." Type="Bug" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="true" ParentTaskText="false"/>
-      <Task42 Text="OpenGL|ES: Изменение диагностического сообщения при ошибке компиляции шейдера." Type="Red" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="false"/>
-    </Week6291>
-    <Week6290/>
-    <Week6289/>
+        </Task10>
+        <Task12 Text="Реализация OpenGL|ES." Type="None" Version="None" ExternalProgram="None" Expanded="false" Completed="true" History="false" ParentTaskText="true">
+          <Task13 Text="Корректная версия для Android и с заголовком и без." Type="None" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+          <Task14 Text="Тесты." Type="None" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+        </Task12>
+      </Task6>
+      <Task15 Text="OpenGLES3: изменение способа заливки цветом заголовка." Type="Red" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="false"/>
+      <Task19 Text="Изменение способа передачи данных о размерах окна программы." Type="Red" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="false"/>
+      <Task20 Text="Изменение способа передачи размеров окна при изменении его размеров." Type="Red" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="false"/>
+      <Task21 Text="Android: некорректная установка viewport'a для окна без заголовка." Type="Bug" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="true" ParentTaskText="false"/>
+    </Week6296>
+    <Week6295/>
+    <Week6294/>
+    <Week6293/>
   </Complete>
 </Tasks>

@@ -46,7 +46,6 @@ class Window :
 {
   using WindowOs_t = ::covellite::os::IWindow;
   using String_t = ::alicorn::extension::std::String;
-  using Rect_t = WindowOs_t::Rect;
 
 public:
   class Proxy :
@@ -54,7 +53,7 @@ public:
   {
   public:
     MOCK_METHOD1(Constructor, Id_t(Id_t));
-    MOCK_METHOD1(GetClientRect, Rect_t(Id_t));
+    MOCK_METHOD1(GetClientRect, ::covellite::Rect(Id_t));
     MOCK_METHOD1(GetRenders, RendersPtr_t(Id_t));
   };
 
@@ -70,7 +69,7 @@ public:
   }
 
 public:
-  Rect_t GetClientRect(void) const override
+  ::covellite::Rect GetClientRect(void) const override
   {
     return Proxy::GetInstance()->GetClientRect(m_Id);
   }

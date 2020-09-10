@@ -20,7 +20,8 @@
 *  
 * | Версия | Windows          | Android          | Комментарий        |
 * | :----: | :--------------: | :--------------: | :----------------- |
-* | 2.2.8  | [Windows]        | [Android]        |                    |
+* | 2.2.9  | [Windows]        | [Android]        |                    |
+* | 2.2.8  | [Windows v2.2.8] | [Android v2.2.8] |                    |
 * | 2.2.7  | [Windows v2.2.7] | [Android v2.2.7] |                    |
 * | 2.2.6  | [Windows v2.2.6] | [Android v2.2.6] |                    |
 * | 2.2.5  | [Windows v2.2.5] | [Android v2.2.5] | Используется RmlUi |
@@ -34,6 +35,8 @@
 *  
 *  [Windows]: https://github.com/Unicornum/Unicornum.github.io/releases/download/covellite/Covellitepp.zip "Covellite++ Windows example"
 *  [Android]: https://github.com/Unicornum/Unicornum.github.io/releases/download/covellite/Covellitepp.apk "Covellite++ Android example"
+*  [Windows v2.2.8]: https://github.com/Unicornum/Unicornum.github.io/releases/download/covellite/Covellitepp_v2.2.8.zip "Covellite++ Windows example"
+*  [Android v2.2.8]: https://github.com/Unicornum/Unicornum.github.io/releases/download/covellite/Covellitepp_v2.2.8.apk "Covellite++ Android example"
 *  [Windows v2.2.7]: https://github.com/Unicornum/Unicornum.github.io/releases/download/covellite/Covellitepp_v2.2.7.zip "Covellite++ Windows example"
 *  [Android v2.2.7]: https://github.com/Unicornum/Unicornum.github.io/releases/download/covellite/Covellitepp_v2.2.7.apk "Covellite++ Android example"
 *  [Windows v2.2.6]: https://github.com/Unicornum/Unicornum.github.io/releases/download/covellite/Covellitepp_v2.2.6.zip "Covellite++ Windows example"
