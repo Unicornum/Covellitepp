@@ -53,15 +53,9 @@ public:
   template<>
   class Support<::Camera> : public Constant<COVELLITE_BUFFER_INDEX_CAMERA> {};
   template<>
-  class Support<::Fog> : public Constant<COVELLITE_BUFFER_INDEX_FOG> {};
-  template<>
   class Support<::Object> : public Constant<COVELLITE_BUFFER_INDEX_OBJECT> {};
   template<>
   class Support<uint8_t> : public Constant<COVELLITE_BUFFER_INDEX_USER> {};
-  template<>
-  class Support<::Matrices> : public Constant<COVELLITE_BUFFER_INDEX_MATRICES> {};
-  template<>
-  class Support<::SceneLights> : public Constant<COVELLITE_BUFFER_INDEX_LIGHTS> {};
 
   template<class T>
   static Render_t GetRender(
@@ -1179,20 +1173,6 @@ auto DirectX10::CreateBuffer(const ComponentPtr_t & _pBuffer) -> Render_t /*over
       Buffer::GetCreator<::covellite::api::Vertex>(m_pDevice)(pBufferData) :
       Buffer::GetCreator<::covellite::api::Vertex>(m_pDevice, cbBufferMapper)(pBufferData);
   }
-  else if ((*_pBuffer)[uT("mapper")].IsType<const cbBufferMap_t<::Lights_t> &>())
-  {
-    const cbBufferMap_t<::Lights_t> cbBufferMapper =
-      (*_pBuffer)[uT("mapper")].Default(cbBufferMap_t<::Lights_t>{});
-    if (cbBufferMapper == nullptr)
-    {
-      throw STD_EXCEPTION << "Unexpected mapper nullptr: " << _pBuffer->Id;
-    }
-
-    return [=](void)
-    {
-      cbBufferMapper(&m_pConstants->Get<::Object>().Lights);
-    };
-  }
   else if ((*_pBuffer)[uT("mapper")].IsType<const cbBufferMap_t<void> &>())
   {
     using BufferMap_t = cbBufferMap_t<void>;
@@ -1252,7 +1232,8 @@ auto DirectX10::CreateTransform(const ComponentPtr_t & _pComponent) -> Render_t 
 
 auto DirectX10::CreatePresentBuffer(const ComponentPtr_t & _pBuffer) -> Render_t /*override*/
 {
-  using BufferMapper_t = cbBufferMap_t<void>;
+  using BufferMapperSize_t = ::std::function<bool(void *, ::std::size_t &)>;
+  using BufferMapperMaxSize_t = ::std::function<bool(void *)>;
 
   ComponentPtr_t pIndexBufferData = _pBuffer;
   ComponentPtr_t pInstanceBufferData = nullptr;
@@ -1263,7 +1244,11 @@ auto DirectX10::CreatePresentBuffer(const ComponentPtr_t & _pBuffer) -> Render_t
     {
       pIndexBufferData = _pBufferData;
     }
-    else if ((*_pBufferData)[uT("mapper")].IsType<const BufferMapper_t &>())
+    else if ((*_pBufferData)[uT("mapper")].IsType<const BufferMapperSize_t &>())
+    {
+      pInstanceBufferData = _pBufferData;
+    }
+    else if ((*_pBufferData)[uT("mapper")].IsType<const BufferMapperMaxSize_t &>())
     {
       pInstanceBufferData = _pBufferData;
     }
@@ -1294,10 +1279,9 @@ auto DirectX10::CreatePresentBuffer(const ComponentPtr_t & _pBuffer) -> Render_t
     };
   }
 
-  const ::std::size_t BufferSize =
-    (*pInstanceBufferData)[uT("size")].Default((::std::size_t)16);
-  const auto MaxInstanceCount = static_cast<UINT>(
-    (::std::size_t)(*pInstanceBufferData)[uT("count")].Default((::std::size_t)1));
+  const ::std::size_t BufferSize = (*pInstanceBufferData)[uT("size")];
+  const ::std::size_t MaxInstanceCount = (*pInstanceBufferData)[uT("count")];
+  const auto Stride = static_cast<UINT>(BufferSize / MaxInstanceCount);
 
   if (BufferSize % 16 != 0)
   {
@@ -1309,18 +1293,46 @@ auto DirectX10::CreatePresentBuffer(const ComponentPtr_t & _pBuffer) -> Render_t
     throw STD_EXCEPTION << _pBuffer->Id << ": size % count != 0";
   }
 
-  const auto Stride = static_cast<UINT>(BufferSize / MaxInstanceCount);
-
   const auto pInstanceBuffer =
     Buffer::CreateDynamic<int8_t>(m_pDevice, nullptr, BufferSize);
 
+  if ((*pInstanceBufferData)[uT("mapper")].IsType<BufferMapperSize_t>())
+  {
+    const BufferMapperSize_t cbBufferMapper =
+      (*pInstanceBufferData)[uT("mapper")];
+
+    return [=](void)
+    {
+      ::std::size_t InstanceCount = MaxInstanceCount;
+
+      const auto IsDirty = cbBufferMapper(nullptr, InstanceCount);
+      if (IsDirty)
+      {
+        void * pData = nullptr;
+        DX_CHECK pInstanceBuffer->Map(D3D10_MAP_WRITE_NO_OVERWRITE, 0, &pData);
+        cbBufferMapper(pData, InstanceCount);
+        pInstanceBuffer->Unmap();
+
+        InstanceCount = ::std::min(InstanceCount, MaxInstanceCount);
+      }
+
+      constexpr UINT Offset = 0;
+      m_pDevice->IASetVertexBuffers(
+        1, 1, pInstanceBuffer.GetAddressOf(), &Stride, &Offset);
+      m_pDevice->IASetIndexBuffer(
+        pIndexBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);
+      m_pDevice->IASetPrimitiveTopology(
+        D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+      m_pDevice->DrawIndexedInstanced(
+        IndexCount, static_cast<UINT>(InstanceCount), 0, 0, 0);
+    };
+  }
+
+  const BufferMapperMaxSize_t cbBufferMapper =
+    (*pInstanceBufferData)[uT("mapper")].Default(BufferMapperMaxSize_t{});
+
   return [=](void)
   {
-    const BufferMapper_t cbBufferMapper =
-      (*pInstanceBufferData)[uT("mapper")].Default(BufferMapper_t{});
-    const auto InstanceCount = ::std::min(MaxInstanceCount, static_cast<UINT>(
-      (::std::size_t)(*pInstanceBufferData)[uT("count")].Default((::std::size_t)0)));
-
     const auto IsDirty = cbBufferMapper(nullptr);
     if (IsDirty)
     {
@@ -1330,12 +1342,15 @@ auto DirectX10::CreatePresentBuffer(const ComponentPtr_t & _pBuffer) -> Render_t
       pInstanceBuffer->Unmap();
     }
 
-    constexpr UINT offset = 0;
-    m_pDevice->IASetVertexBuffers(1, 1,
-      pInstanceBuffer.GetAddressOf(), &Stride, &offset);
-    m_pDevice->IASetIndexBuffer(pIndexBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);
-    m_pDevice->IASetPrimitiveTopology(D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-    m_pDevice->DrawIndexedInstanced(IndexCount, InstanceCount, 0, 0, 0);
+    constexpr UINT Offset = 0;
+    m_pDevice->IASetVertexBuffers(
+      1, 1, pInstanceBuffer.GetAddressOf(), &Stride, &Offset);
+    m_pDevice->IASetIndexBuffer(
+      pIndexBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);
+    m_pDevice->IASetPrimitiveTopology(
+      D3D10_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+    m_pDevice->DrawIndexedInstanced(
+      IndexCount, static_cast<UINT>(MaxInstanceCount), 0, 0, 0);
   };
 }
 

@@ -70,7 +70,7 @@ template<>
   (*pSettings)[uT("Demo")].SetDefault(uT("PointLightsPercent"),
     5, uT("Количесто точечных источников света ночью в процентах от общей площади игровой сцены."));
   (*pSettings)[uT("Demo")].SetDefault(uT("IsAutoRun"),
-    false, uT("Включение/выключение автоматического перемещения по ландшафту."));
+    true, uT("Включение/выключение автоматического перемещения по ландшафту."));
 
   return pSettings;
 }

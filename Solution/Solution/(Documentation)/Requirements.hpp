@@ -44,7 +44,6 @@
 *   + \checked Windows (DirectX 10/11).
 *   + \unchecked Windows (DirectX 12).
 *   + \unchecked Windows (Vulkan).
-*   + \checked Android (OpenGL ES).
 *   + \checked Android (OpenGL ES3).
 *   + \unchecked Android (Vulkan).
 *   + \checked Автоматический выбор наиболее подходящей реализации для

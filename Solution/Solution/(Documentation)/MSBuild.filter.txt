@@ -1,7 +1,9 @@
-[\w\\.:-]+\([0-9]+\): .+\\(todo|bug).+\[[\w\\.:]+\]
-.+warning (?:LNK4(?:204|299|099)|D9007|C0000):.+
-.*: warning C(?:471[01]|5045|4514): .*
-.+GMOCK warning : .+
-.+_test\.cpp\([0-9]+\): warning C[0-9]+:.+
-.+error (?:MSB3073|C0000):.+
+.+_test\.[ch]pp\(.+\): warning C[0-9]+: .+
 .+\\[Ee]xternals\\.+
+.+: warning C(?:471[01]|5045|4514|4505|4464|0000): .+
+.+: warning LNK(?:4204|4299|4099): .+
+.+: warning D(?:9007): .+
+.+: warning : TODO: .+
+.+GMOCK warning : .+
+EXEC : warning : .+
+.+error (?:MSB3073|C0000):.+

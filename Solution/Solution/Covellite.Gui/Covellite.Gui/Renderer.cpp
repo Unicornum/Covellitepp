@@ -8,20 +8,7 @@
 #include <Covellite/App/Vfs.hpp>
 #include <Covellite/Api/Component.inl>
 #include <Covellite/Api/Renders.hpp>
-
-#if BOOST_COMP_MSVC 
-# pragma warning(push)
-# pragma warning(disable: 4996)
-#elif defined BOOST_COMP_GNUC
-# pragma GCC diagnostic push
-# pragma GCC diagnostic ignored "-Wdeprecated-declarations"
-#endif
 #include <Covellite/Api/Vertex.hpp>
-#if BOOST_COMP_MSVC 
-# pragma warning(pop)
-#elif defined BOOST_COMP_GNUC
-# pragma GCC diagnostic pop
-#endif
 
 namespace covellite
 {
@@ -102,6 +89,8 @@ CovelliteGui::Core::CompiledGeometryHandle Renderer::CompileGeometry(
     {
       { uT("type"), uT("Data") },
       { uT("kind"), uT("Position") },
+      { uT("x"), 0.0f },
+      { uT("y"), 0.0f },
     });
 
   using namespace ::alicorn::extension::std;
@@ -117,7 +106,7 @@ CovelliteGui::Core::CompiledGeometryHandle Renderer::CompileGeometry(
   }
   else
   {
-    const auto strTextureId = String_t{ uT("Covellite.Gui.Texture.%ID%") }
+    const auto strTextureId = uT("Covellite.Gui.Texture.%ID%")
       .Replace(uT("%ID%"), (size_t)_hTexture);
 
     Object += Renders_t
@@ -126,7 +115,7 @@ CovelliteGui::Core::CompiledGeometryHandle Renderer::CompileGeometry(
       {
         { uT("id"), uT("Covellite.Gui.Shader.Pixel.Textured") },
         { uT("type"), uT("Shader") },
-        { uT("entry"), uT("psLightened") },
+        { uT("entry"), uT("psTextured") },
       })),
       m_pRenders->Obtain(Component_t::Make(
       {

@@ -85,19 +85,6 @@ public:
   const Param & operator[] (const Name_t &) const;
   const Param & operator[] (const size_t &) const;
 
-public:
-  // deprecated
-  template<class T>
-  bool IsType(const Name_t &) const;
-  template<class T>
-  T GetValue(const Name_t &, const T &) const;
-  template<class T>
-  T GetValue(const size_t, const T &) const;
-  template<class T>
-  void SetValue(const Name_t &, const T &);
-  template<class T>
-  void SetValue(const size_t, const T &);
-
 private:
   static size_t GetHashId(void);
   static size_t GetHashType(void);

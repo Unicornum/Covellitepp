@@ -8,6 +8,7 @@
 #include <Covellite/Api/Constant.hpp>
 #include "Constants.hpp"
 #include "IGameWorld.hpp"
+#include "Lights.hpp"
 #include "PointLights.hpp"
 
 namespace basement
@@ -200,60 +201,6 @@ auto Landscape::GetObject(const Any_t & _Value) const /*override*/ -> Objects_t
   return Result;
 }
 
-// cppcheck-suppress unusedFunction
-Object_t Landscape::GetMaterial(const CubeCoords & _CellPosition) const
-{
-  const auto GetBright = [&](void)
-  {
-    const auto CurrentCellHeight = 
-      m_GameWorld.GetLandscapeHeight(_CellPosition);
-
-    for (int i = 1; i < 2 * Constant::CellRadius; i++)
-    {
-      const auto LastHeight = 
-        m_GameWorld.GetLandscapeHeight(_CellPosition + CubeCoords(0, -(i - 1)));
-      const auto Height = 
-        m_GameWorld.GetLandscapeHeight(_CellPosition + CubeCoords(0, -i));
-
-      if (LastHeight > Height + 0.1f) // Верхняя точка холма: (i - 1)
-      {
-        const auto Delta = LastHeight - CurrentCellHeight;
-
-        if (CurrentCellHeight >= Height ||
-          0.33f * Delta > static_cast<float>(i - 1)) return 1.0f;
-
-        const auto Bright = 1.0f - 0.75f * Delta;
-        if (Bright < 0.75f) return 0.75f;
-        if (Bright > 1.0f) return 1.0f;
-        return Bright;
-      }
-    }
-
-    return 1.0f;
-  };
-
-  const auto Bright = static_cast<uint32_t>(0xFF * GetBright());
-
-  const uint32_t MaterialColor = 0xFF000000
-    | (Bright << 16)
-    | (Bright << 8)
-    | (Bright << 0);
-
-  const auto Id = String_t{ uT("Demo.Material.Tile.%ID%") }
-    .Replace(uT("%ID%"), (size_t)MaterialColor);
-
-  return 
-  {
-    Component_t::Make(
-    {
-      { uT("id"), Id },
-      { uT("type"), uT("Material") },
-      { uT("ambient"), MaterialColor },
-      { uT("diffuse"), MaterialColor },
-    })
-  };
-}
-
 Object_t Landscape::GetTransform(
   const CubeCoords & _CellPosition,
   String_t & _TransformComponentId) const
@@ -305,37 +252,6 @@ Object_t Landscape::GetTransform(
   };
 }
 
-// cppcheck-suppress unusedFunction
-Object_t Landscape::GetPointLight(const CubeCoords & _CellPosition) const
-{
-  using BufferMapper_t = ::covellite::api::cbBufferMap_t<::Lights_t>;
-
-  static size_t Index = 0;
-
-  const auto Id = String_t{ uT("Demo.Light.Point.Tile.%ID%") }
-    .Replace(uT("%ID%"), Index++);
-
-  const auto WorldHeight = m_GameWorld.GetLandscapeHeight(_CellPosition);
-
-  const BufferMapper_t Mapper = [=](Lights_t * _pLights)
-  {
-    _pLights->Points = 
-      m_GameWorld.GetPointLights().Get(_CellPosition, WorldHeight);
-
-    return false;
-  };
-
-  return
-  {
-    Component_t::Make(
-    {
-      { uT("id"), Id },
-      { uT("type"), uT("Buffer") },
-      { uT("mapper"), Mapper },
-    }),
-  };
-}
-
 Object_t Landscape::GetUserConstantBuffer(const CubeCoords & _CellPosition) const
 {
   using BufferMapper_t = ::covellite::api::cbBufferMap_t<void>;
@@ -353,7 +269,7 @@ Object_t Landscape::GetUserConstantBuffer(const CubeCoords & _CellPosition) cons
   struct UserConstantBuffer
   {
     Fog Fog;
-    PointLights::Points PointLights;
+    Lights_t Lights;
   };
 
   const auto Far = 0.5f * math::Root<2>(Constant::Camera::FarClippingPlane);
@@ -364,9 +280,23 @@ Object_t Landscape::GetUserConstantBuffer(const CubeCoords & _CellPosition) cons
     .Replace(uT("%ID%"), Index++);
 
   const auto WorldHeight = m_GameWorld.GetLandscapeHeight(_CellPosition);
+  const auto IsNightMode = Constant::GetSettings<bool>(uT("IsNightMode"));
+
+  const auto ARGBtoFloat4 = [](uint32_t _HexColor)
+  {
+    return ::glm::vec4
+    {
+      ((_HexColor & 0x00FF0000) >> 16) / 255.0f,
+      ((_HexColor & 0x0000FF00) >> 8) / 255.0f,
+      ((_HexColor & 0x000000FF) >> 0) / 255.0f,
+      ((_HexColor & 0xFF000000) >> 24) / 255.0f
+    };
+  };
 
   const BufferMapper_t Mapper = [=](void * _pUserConstBuffer)
   {
+    // Захватывать здесь ::glm::vec4 нельзя, программа упадет в Release версии
+
     auto * pUserConstBuffer = 
       reinterpret_cast<UserConstantBuffer *>(_pUserConstBuffer);
 
@@ -378,8 +308,29 @@ Object_t Landscape::GetUserConstantBuffer(const CubeCoords & _CellPosition) cons
     pUserConstBuffer->Fog.Far = Far;
     pUserConstBuffer->Fog.Density = 0.1f;
 
-    pUserConstBuffer->PointLights = m_GameWorld.GetPointLights()
-      .GetUserConstantBuffer(_CellPosition, WorldHeight);
+    auto & Ambient = pUserConstBuffer->Lights.Ambient;
+    auto & Direction = pUserConstBuffer->Lights.Direction;
+    auto & Points = pUserConstBuffer->Lights.Points;
+
+    if (IsNightMode)
+    {
+      Ambient.IsValid = 1;
+      Ambient.Color = ARGBtoFloat4(0xFF202050);
+
+      Direction.IsValid = 0;
+      Points = m_GameWorld.GetPointLights()
+        .GetUserConstantBuffer(_CellPosition, WorldHeight);
+    }
+    else
+    {
+      Ambient.IsValid = 1;
+      Ambient.Color = ARGBtoFloat4(0xFF8080A0);
+
+      Direction.IsValid = 1;
+      Direction.Color = ARGBtoFloat4(0xFFF0F0B0);
+      Direction.Direction = { 0.0f, -1.0f, 0.33f, 1.0f };
+      Points.UsedSlotCount = 0;
+    }
 
     return false;
   };

@@ -49,19 +49,10 @@ public:
   class Support<::Camera> : public Constant<COVELLITE_BUFFER_INDEX_CAMERA> { };
 
   template<>
-  class Support<::Fog> : public Constant<COVELLITE_BUFFER_INDEX_FOG> { };
-
-  template<>
   class Support<::Object> : public Constant<COVELLITE_BUFFER_INDEX_OBJECT> { };
 
   template<>
   class Support<uint8_t> : public Constant<COVELLITE_BUFFER_INDEX_USER> { };
-
-  template<>
-  class Support<::Matrices> : public Constant<COVELLITE_BUFFER_INDEX_MATRICES> { };
-
-  template<>
-  class Support<::SceneLights> : public Constant<COVELLITE_BUFFER_INDEX_LIGHTS> { };
 
   template<>
   class Support<int>
@@ -328,11 +319,6 @@ auto DirectX11::CreateCamera(const ComponentPtr_t & _pComponent) -> Render_t /*o
   const auto DisabledBlendRender = CreateBlendState(false);
   const auto DisableDepthRender = GetDepthState(false, false, false);
 
-  const auto LightsRender = [=](void)
-  {
-    m_pConstants->SetCameraId(CameraId);
-  };
-
   const auto ServiceComponents = CapturingServiceComponent::Get(_pComponent,
     {
       { uT("Position"), api::Component::Make({}) },
@@ -346,7 +332,6 @@ auto DirectX11::CreateCamera(const ComponentPtr_t & _pComponent) -> Render_t /*o
     SetDefaultRenderTarget();
     DisabledBlendRender();
     DisableDepthRender();
-    LightsRender();
 
     UINT ViewportCount = 1;
     D3D11_VIEWPORT Viewport = { 0 };
@@ -364,10 +349,6 @@ auto DirectX11::CreateCamera(const ComponentPtr_t & _pComponent) -> Render_t /*o
     CameraMatrices.ViewInverse = ::glm::transpose(::glm::inverse(View));
     m_pConstants->Update<::Camera>();
 
-    m_pConstants->Get<::Matrices>().Projection = CameraMatrices.Projection;
-    m_pConstants->Get<::Matrices>().View = CameraMatrices.View;
-    m_pConstants->Get<::Matrices>().ViewInverse = CameraMatrices.ViewInverse;
-
     (*_pComponent)[uT("view")] = CameraMatrices.View;
     (*_pComponent)[uT("projection")] = CameraMatrices.Projection;
   };
@@ -377,7 +358,6 @@ auto DirectX11::CreateCamera(const ComponentPtr_t & _pComponent) -> Render_t /*o
     SetDefaultRenderTarget();
     DisabledBlendRender();
     DisableDepthRender();
-    LightsRender();
 
     UINT ViewportCount = 1;
     D3D11_VIEWPORT Viewport = { 0 };
@@ -435,10 +415,6 @@ auto DirectX11::CreateCamera(const ComponentPtr_t & _pComponent) -> Render_t /*o
 
     (*_pComponent)[uT("view")] = CameraMatrices.View;
     (*_pComponent)[uT("projection")] = CameraMatrices.Projection;
-
-    m_pConstants->Get<::Matrices>().Projection = CameraMatrices.Projection;
-    m_pConstants->Get<::Matrices>().View = CameraMatrices.View;
-    m_pConstants->Get<::Matrices>().ViewInverse = CameraMatrices.ViewInverse;
   };
 
   return (_pComponent->Kind == uT("Perspective")) ? 
@@ -729,24 +705,7 @@ auto DirectX11::CreateBkSurface(const ComponentPtr_t & _pComponent) -> Render_t 
 
   const auto pBkSurface = _pComponent;
 
-  const fnBkSurfaceSize_t GetScaleBkSurfaceSize = [=](void)
-  {
-    UINT ViewportCount = 1;
-    D3D11_VIEWPORT Viewport = { 0 };
-    m_pImmediateContext->RSGetViewports(&ViewportCount, &Viewport);
-
-    const float Scale = (*pBkSurface)[uT("scale")];
-
-    const int Width = static_cast<int>(Scale * Viewport.Width);
-    const int Height = static_cast<int>(Scale * Viewport.Height);
-
-    (*pBkSurface)[uT("width")] = Width;
-    (*pBkSurface)[uT("height")] = Height;
-
-    return Size_t{ static_cast<UINT>(Width), static_cast<UINT>(Height) };
-  };
-
-  const fnBkSurfaceSize_t GetWindowBkSurfaceSize = [=](void)
+  const fnBkSurfaceSize_t GetBkSurfaceSize = [=](void)
   {
     UINT ViewportCount = 1;
     D3D11_VIEWPORT Viewport = { 0 };
@@ -761,30 +720,6 @@ auto DirectX11::CreateBkSurface(const ComponentPtr_t & _pComponent) -> Render_t 
     return Size_t{ static_cast<UINT>(Width), static_cast<UINT>(Height) };
   };
 
-  const fnBkSurfaceSize_t GetUserBkSurfaceSize = [=](void)
-  {
-    UINT ViewportCount = 1;
-    D3D11_VIEWPORT Viewport = { 0 };
-    m_pImmediateContext->RSGetViewports(&ViewportCount, &Viewport); // результат не используется, но 
-                                                                    // так проще тестировать
-
-    const int Width = (*pBkSurface)[uT("width")];
-    const int Height = (*pBkSurface)[uT("height")];
-
-    return Size_t{ static_cast<UINT>(Width), static_cast<UINT>(Height) };
-  };
-
-  const auto IsScaleBkSurfaceSize =
-    (*pBkSurface)[uT("scale")].IsType<float>();
-  const auto IsUserBkSurfaceSize =
-    (*pBkSurface)[uT("width")].IsType<int>() &&
-    (*pBkSurface)[uT("height")].IsType<int>();
-
-  const auto GetBkSurfaceSize =
-    (IsScaleBkSurfaceSize) ? GetScaleBkSurfaceSize :
-    (IsUserBkSurfaceSize) ? GetUserBkSurfaceSize : 
-    GetWindowBkSurfaceSize;
-
   const auto [Width, Height] = GetBkSurfaceSize();
 
   const auto pBkSurfaceTextures =
@@ -797,7 +732,7 @@ auto DirectX11::CreateBkSurface(const ComponentPtr_t & _pComponent) -> Render_t 
 
     // Лучше избавиться от weak_ptr<> и неопределенности с тем, что если
     // объект текстуры внеэкранной поверхности не будет использован как
-    // source, то будет утечка памяти - см. как то же самое реализавано
+    // source, то будет утечка памяти - см. как то же самое реализовано
     // у OpenGL.
     (*_pDataTexture)[uT("entity")] = ::std::weak_ptr<Texture>(pTexture);
 
@@ -853,18 +788,6 @@ auto DirectX11::CreateBkSurface(const ComponentPtr_t & _pComponent) -> Render_t 
     m_pImmediateContext->OMSetRenderTargets(
       static_cast<UINT>(m_CurrentRenderTargets.size()),
       &m_CurrentRenderTargets[0], nullptr);
-
-    // deprecated
-    // Оставлено для обратной совместимости, удалить, когда будут удалены
-    // параметры scale, width и height у BkSurface.
-    D3D11_VIEWPORT ViewPort = { 0 };
-    ViewPort.TopLeftX = 0;
-    ViewPort.TopLeftY = 0;
-    ViewPort.Width = static_cast<FLOAT>(Width);
-    ViewPort.Height = static_cast<FLOAT>(Height);
-    ViewPort.MinDepth = 0.0f;
-    ViewPort.MaxDepth = 1.0f;
-    m_pImmediateContext->RSSetViewports(1, &ViewPort);
   };
 }
 
@@ -979,16 +902,6 @@ auto DirectX11::CreateState(const ComponentPtr_t & _pComponent) -> Render_t /*ov
   return Creators[_pComponent->Kind]();
 }
 
-auto DirectX11::CreateFog(const ComponentPtr_t & _pComponent) -> Render_t /*override*/
-{
-  return DoCreateFog<::Fog>(_pComponent, true);
-}
-
-auto DirectX11::CreateLight(const ComponentPtr_t & _pComponent) -> Render_t /*override*/
-{
-  return DoCreateLight<::SceneLights>(_pComponent);
-}
-
 auto DirectX11::CreateTexture(const ComponentPtr_t & _pComponent) -> Render_t /*override*/
 {
   using BufferMapper_t = cbBufferMap_t<const void>;
@@ -1053,18 +966,7 @@ auto DirectX11::CreateShader(const ComponentPtr_t & _pComponent) -> Render_t /*o
   const auto pShaderDataComponent = CapturingServiceComponent::Get(_pComponent, 
     { { uT("Shader"), _pComponent } })[0];
 
-  const auto GetShaderData = [&](void)
-  {
-    //try
-    //{
-    //  return Component::Shader{ *pShaderDataComponent, ::DefaultDeprecated };
-    //}
-    //catch (const ::std::exception &) {}
-
-    return Component::Shader{ *pShaderDataComponent, ::Default };
-  };
-
-  const auto ShaderData = GetShaderData();
+  const Component::Shader ShaderData{ *pShaderDataComponent, ::Default };
 
   ::std::string Define =
     "#define COVELLITE_SHADER_DESKTOP\r\n"
@@ -1158,6 +1060,7 @@ auto DirectX11::CreateShader(const ComponentPtr_t & _pComponent) -> Render_t /*o
         DXGI_FORMAT_UNKNOWN;
       const auto Size = i * 4 * static_cast<UINT>(
         (Type == uT("f")) ? sizeof(float) :
+        // cppcheck-suppress sizeofDereferencedVoidPointer
         (Type == uT("i")) ? sizeof(int) :
         0);
 
@@ -1178,70 +1081,15 @@ auto DirectX11::CreateShader(const ComponentPtr_t & _pComponent) -> Render_t /*o
   return [=](void)
   {
     m_pImmediateContext->PSSetShader(pPixelShader.Get(), NULL, 0);
-    m_pConstants->Update<::SceneLights>();
   };
 }
 
 auto DirectX11::CreateBuffer(const ComponentPtr_t & _pComponent) -> Render_t /*override*/
 {
-  namespace vertex = ::covellite::api::vertex;
-
   const auto pBufferData = CapturingServiceComponent::Get(_pComponent, 
     { { uT("Buffer"), _pComponent } })[0];
 
-  if ((*pBufferData)[uT("content")].IsType<::std::vector<vertex::Polygon>>())
-  {
-    const Component::Buffer<vertex::Polygon> VertexData{ *pBufferData };
-
-    auto pBuffer = Buffer::Create(m_pDevice, false, 
-      VertexData.Data.data(), VertexData.Data.size());
-
-    return [=](void)
-    {
-      constexpr UINT Stride = sizeof(vertex::Polygon);
-      constexpr UINT Offset = 0;
-      m_pImmediateContext->IASetVertexBuffers(0, 1,
-        pBuffer.GetAddressOf(), &Stride, &Offset);
-    };
-  }
-  else if ((*pBufferData)[uT("content")].IsType<::std::vector<vertex::Polyhedron>>())
-  {
-    using BufferMapper_t = cbBufferMap_t<vertex::Polyhedron>;
-
-    const Component::Buffer<vertex::Polyhedron> VertexData{ *pBufferData };
-
-    const BufferMapper_t & cbBufferMapper =
-      (*_pComponent)[uT("mapper")].Default(BufferMapper_t{});
-
-    auto pBuffer = Buffer::Create(m_pDevice, (cbBufferMapper != nullptr), 
-      VertexData.Data.data(), VertexData.Data.size());
-
-    const Render_t StaticRender = [=](void)
-    {
-      constexpr UINT Stride = sizeof(vertex::Polyhedron);
-      constexpr UINT Offset = 0;
-      m_pImmediateContext->IASetVertexBuffers(0, 1,
-        pBuffer.GetAddressOf(), &Stride, &Offset);
-    };
-
-    const Render_t DynamicRender = [=](void)
-    {
-      const auto IsDirty = cbBufferMapper(nullptr);
-      if (IsDirty)
-      {
-        D3D11_MAPPED_SUBRESOURCE Resource = { 0 };
-        DX_CHECK m_pImmediateContext->Map(pBuffer.Get(), 0,
-          D3D11_MAP_WRITE_NO_OVERWRITE, 0, &Resource);
-        cbBufferMapper(static_cast<vertex::Polyhedron *>(Resource.pData));
-        m_pImmediateContext->Unmap(pBuffer.Get(), 0);
-      }
-
-      StaticRender();
-    };
-
-    return (cbBufferMapper == nullptr) ? StaticRender : DynamicRender;
-  }
-  else if ((*pBufferData)[uT("content")].IsType<Buffer_t<::covellite::api::Vertex>>())
+  if ((*pBufferData)[uT("content")].IsType<Buffer_t<::covellite::api::Vertex>>())
   {
     using BufferMapper_t = cbBufferMap_t<::covellite::api::Vertex>;
 
@@ -1277,22 +1125,6 @@ auto DirectX11::CreateBuffer(const ComponentPtr_t & _pComponent) -> Render_t /*o
     };
 
     return (cbBufferMapper == nullptr) ? StaticRender : DynamicRender;
-  }
-  else if ((*_pComponent)[uT("mapper")].IsType<const cbBufferMap_t<::Lights_t> &>())
-  {
-    using BufferMapper_t = cbBufferMap_t<::Lights_t>;
-
-    const BufferMapper_t cbBufferMapper =
-      (*_pComponent)[uT("mapper")].Default(BufferMapper_t{});
-    if (!cbBufferMapper)
-    {
-      throw STD_EXCEPTION << "Unexpected empty mapper: " << _pComponent->Id;
-    }
-
-    return [=](void)
-    {
-      cbBufferMapper(&m_pConstants->Get<::Object>().Lights);
-    };
   }
   else if ((*_pComponent)[uT("mapper")].IsType<const cbBufferMap_t<void> &>())
   {
@@ -1336,16 +1168,7 @@ auto DirectX11::CreateBuffer(const ComponentPtr_t & _pComponent) -> Render_t /*o
     };
   }
 
-  const Component::Buffer<int> IndexData{ *pBufferData };
-
-  auto pBuffer = Buffer::Create(m_pDevice, false, 
-    IndexData.Data.data(), IndexData.Data.size());
-
-  return [=](void)
-  {
-    m_pImmediateContext->IASetIndexBuffer(
-      pBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);
-  };
+  throw STD_EXCEPTION << "Unexpected buffer type: " << _pComponent->Id;
 }
 
 auto DirectX11::CreateTransform(const ComponentPtr_t & _pComponent) -> Render_t /*override*/
@@ -1366,7 +1189,8 @@ auto DirectX11::CreateTransform(const ComponentPtr_t & _pComponent) -> Render_t 
 
 auto DirectX11::CreatePresentBuffer(const ComponentPtr_t & _pComponent) ->Render_t /*override*/
 {
-  using BufferMapper_t = cbBufferMap_t<void>;
+  using BufferMapperMaxSize_t = ::std::function<bool(void *)>;
+  using BufferMapperChangeSize_t = ::std::function<bool(void *, ::std::size_t &)>;
 
   ComponentPtr_t pIndexBufferData = _pComponent;
   ComponentPtr_t pInstanceBufferData = nullptr;
@@ -1377,7 +1201,11 @@ auto DirectX11::CreatePresentBuffer(const ComponentPtr_t & _pComponent) ->Render
     {
       pIndexBufferData = _pBufferData;
     }
-    else if ((*_pBufferData)[uT("mapper")].IsType<const BufferMapper_t &>())
+    else if ((*_pBufferData)[uT("mapper")].IsType<const BufferMapperMaxSize_t &>())
+    {
+      pInstanceBufferData = _pBufferData;
+    }
+    else if ((*_pBufferData)[uT("mapper")].IsType<const BufferMapperChangeSize_t &>())
     {
       pInstanceBufferData = _pBufferData;
     }
@@ -1410,78 +1238,80 @@ auto DirectX11::CreatePresentBuffer(const ComponentPtr_t & _pComponent) ->Render
     };
   }
 
-  const BufferMapper_t cbBufferMapper =
-    (*pInstanceBufferData)[uT("mapper")].Default(BufferMapper_t{});
+  const ::std::size_t BufferSize = (*pInstanceBufferData)[uT("size")];
+  if (BufferSize % 16 != 0)
+  {
+    throw STD_EXCEPTION << _pComponent->Id << ": size % 16 != 0";
+  }
 
-  // 23 Сентябрь 2019 22:29 (unicornum.verum@gmail.com)
-  TODO("Тест значений size и count по умолчанию");
-  const ::std::size_t BufferSize =
-    (*pInstanceBufferData)[uT("size")].Default((::std::size_t)16);
+  const ::std::size_t MaxInstanceCount = (*pInstanceBufferData)[uT("count")];
+  if (BufferSize % MaxInstanceCount != 0)
+  {
+    throw STD_EXCEPTION << _pComponent->Id << ": size % count != 0";
+  }
 
-  // 24 Сентябрь 2019 08:00 (unicornum.verum@gmail.com)
-  TODO("Перенести чтение параметра внутрь рендера для возможности его изменения");
-  const auto InstanceCount = static_cast<UINT>(
-    (::std::size_t)(*pInstanceBufferData)[uT("count")].Default((::std::size_t)1));
-
-  // 24 Сентябрь 2019 08:27 (unicornum.verum@gmail.com)
-  TODO("Проверки выравнивания BufferSize в 16 байт и делимости без остатка BufferSize / InstanceCount");
-  const auto Stride = static_cast<UINT>(
-    BufferSize / InstanceCount);
+  const auto Stride = static_cast<UINT>(BufferSize / MaxInstanceCount);
 
   const auto pInstanceBuffer = 
     Buffer::Create<int8_t>(m_pDevice, true, nullptr, BufferSize);
 
+  if ((*pInstanceBufferData)[uT("mapper")].IsType<BufferMapperMaxSize_t>())
+  {
+    const BufferMapperMaxSize_t cbBufferMapper =
+      (*pInstanceBufferData)[uT("mapper")];
+
+    return [=](void)
+    {
+      const auto IsDirty = cbBufferMapper(nullptr);
+      if (IsDirty)
+      {
+        D3D11_MAPPED_SUBRESOURCE Resource = { 0 };
+        DX_CHECK m_pImmediateContext->Map(pInstanceBuffer.Get(), 0,
+          D3D11_MAP_WRITE_NO_OVERWRITE, 0, &Resource);
+        cbBufferMapper(Resource.pData);
+        m_pImmediateContext->Unmap(pInstanceBuffer.Get(), 0);
+      }
+
+      constexpr UINT Offset = 0;
+      m_pImmediateContext->IASetVertexBuffers(
+        1, 1, pInstanceBuffer.GetAddressOf(), &Stride, &Offset);
+      m_pImmediateContext->IASetIndexBuffer(
+        pIndexBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);
+      m_pImmediateContext->IASetPrimitiveTopology(
+        D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+      m_pImmediateContext->DrawIndexedInstanced(
+        IndexCount, static_cast<UINT>(MaxInstanceCount), 0, 0, 0);
+    };
+  }
+
+  const BufferMapperChangeSize_t cbBufferMapper =
+    (*pInstanceBufferData)[uT("mapper")];
+
   return [=](void)
   {
-    const auto IsDirty = cbBufferMapper(nullptr);
+    auto InstanceCount = MaxInstanceCount;
+
+    const auto IsDirty = cbBufferMapper(nullptr, InstanceCount);
     if (IsDirty)
     {
       D3D11_MAPPED_SUBRESOURCE Resource = { 0 };
       DX_CHECK m_pImmediateContext->Map(pInstanceBuffer.Get(), 0,
         D3D11_MAP_WRITE_NO_OVERWRITE, 0, &Resource);
-      cbBufferMapper(Resource.pData);
+      cbBufferMapper(Resource.pData, InstanceCount);
       m_pImmediateContext->Unmap(pInstanceBuffer.Get(), 0);
     }
 
-    constexpr UINT offset = 0;
-    m_pImmediateContext->IASetVertexBuffers(1, 1,
-      pInstanceBuffer.GetAddressOf(), &Stride, &offset);
+    InstanceCount = ::std::min(InstanceCount, MaxInstanceCount);
+
+    constexpr UINT Offset = 0;
+    m_pImmediateContext->IASetVertexBuffers(
+      1, 1, pInstanceBuffer.GetAddressOf(), &Stride, &Offset);
     m_pImmediateContext->IASetIndexBuffer(
       pIndexBuffer.Get(), DXGI_FORMAT_R32_UINT, 0);
     m_pImmediateContext->IASetPrimitiveTopology(
       D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
     m_pImmediateContext->DrawIndexedInstanced(
-      IndexCount, InstanceCount, 0, 0, 0);
-  };
-}
-
-auto DirectX11::CreateGeometry(const ComponentPtr_t & _pComponent) -> Render_t /*override*/
-{
-  const String_t Variety = (*_pComponent)[uT("variety")].Default(uT("Default"));
-
-  // cppcheck-suppress internalAstError
-  const auto BuildTransformMatrix =
-    (Variety == uT("Default")) ? CreateDefaultTransformRender<::Matrices>(_pComponent) :
-    (Variety == uT("Static")) ? CreateStaticTransformRender<::Matrices>(_pComponent) :
-    (Variety == uT("Billboard")) ? CreateBillboardTransformRender<::Matrices, ::Matrices>(_pComponent) :
-      throw STD_EXCEPTION << "Unknown variety: " << Variety <<
-        " [id=" << _pComponent->Id << "].";
-
-  return [=](void)
-  {
-    BuildTransformMatrix();
-    m_pConstants->Update<::Matrices>();
-
-    ComPtr_t<ID3D11Buffer> pIndexBuffer;
-    DXGI_FORMAT Format = DXGI_FORMAT_UNKNOWN;
-    UINT Offset = 0;
-    m_pImmediateContext->IAGetIndexBuffer(&pIndexBuffer, &Format, &Offset);
-
-    D3D11_BUFFER_DESC Desc = { 0 };
-    pIndexBuffer->GetDesc(&Desc);
-
-    m_pImmediateContext->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
-    m_pImmediateContext->DrawIndexed((DWORD)(Desc.ByteWidth / sizeof(int)), 0, 0);
+      IndexCount, static_cast<UINT>(InstanceCount), 0, 0, 0);
   };
 }
 

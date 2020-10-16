@@ -32,7 +32,7 @@ Pixel vsScene(Vertex _Value)
 COVELLITE_DECLARE_TEX2D(TexDiffuse, 0);
 COVELLITE_DECLARE_MULTI_TARGET_STRUCTURE(PsOutput, 4);
 
-PsOutput psLightened(Pixel _Value)
+PsOutput psTextured(Pixel _Value)
 {
   PsOutput Result;
   Result.Target[0] = COVELLITE_TEX2D_COLOR(TexDiffuse, _Value.TexCoord);

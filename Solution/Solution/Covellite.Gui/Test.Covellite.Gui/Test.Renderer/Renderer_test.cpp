@@ -158,8 +158,8 @@ protected:
     template<class T>
     ComponentData & AddValue(const String_t & _Name, const T & _DefaultValue)
     {
-      m_Values.push_back(
-        Support<T>::GetValue(m_pComponent, _Name, _DefaultValue));
+      const auto Value = Support<T>::GetValue(m_pComponent, _Name, _DefaultValue);
+      m_Values.push_back(Value);
       return *this;
     }
 
@@ -352,42 +352,47 @@ TEST_F(Renderer_test, /*DISABLED_*/Test_RenderCompiledGeometry_Textured)
     throw ::std::exception{ "Unknown buffer type." };
   };
 
+  auto TransformCreator =
+    [&](const Component_t::ComponentPtr_t & _pComponent) -> Renders_t::Render_t
+  {
+    const Object_t Data = (*_pComponent)[uT("service")].Default(Object_t{});
+    if (Data.size() != 1) return nullptr;
+
+    const auto pPosition = Data.at(0);
+    const float X = (*pPosition)[uT("x")];
+    const float Y = (*pPosition)[uT("y")];
+
+    using namespace ::alicorn::extension::std;
+
+    return [&, _pComponent, pPosition]()
+    {
+      RenderProxy.Render(ComponentData{ _pComponent }
+        .AddValue(uT("id"), uT(""))
+        .AddValue(uT("type"), uT(""))
+        .AddValue(uT("kind"), uT(""))
+        .GetValues() +
+        ComponentData{ pPosition }
+        .AddValue(uT("type"), uT(""))
+        .AddValue(uT("kind"), uT(""))
+        .AddValue(uT("x"), 0.0f)
+        .AddValue(uT("y"), 0.0f)
+        .GetValues());
+    };
+  };
+
   auto SimpleCreator =
     [&](const Component_t::ComponentPtr_t & _pComponent) -> Renders_t::Render_t
   {
-    if (_pComponent->Type == uT("Transform"))
+    return [&, _pComponent]()
     {
-      const Object_t Data = (*_pComponent)[uT("service")].Default(Object_t{});
-      if (Data.size() != 1) return nullptr;
+      const auto Values = ComponentData{ _pComponent }
+        .AddValue(uT("id"), uT(""))
+        .AddValue(uT("type"), uT(""))
+        .AddValue(uT("kind"), uT(""))
+        .GetValues();
 
-      using namespace ::alicorn::extension::std;
-
-      return [&, _pComponent, Data]()
-      {
-        RenderProxy.Render(ComponentData{ _pComponent }
-          .AddValue(uT("id"), uT(""))
-          .AddValue(uT("type"), uT(""))
-          .AddValue(uT("kind"), uT(""))
-          .GetValues() +
-          ComponentData{ Data[0] }
-          .AddValue(uT("type"), uT(""))
-          .AddValue(uT("kind"), uT(""))
-          .AddValue(uT("x"), 0.0f)
-          .AddValue(uT("y"), 0.0f)
-          .GetValues());
-      };
-    }
-    else
-    {
-      return [&, _pComponent]()
-      {
-        RenderProxy.Render(ComponentData{ _pComponent }
-          .AddValue(uT("id"), uT(""))
-          .AddValue(uT("type"), uT(""))
-          .AddValue(uT("kind"), uT(""))
-          .GetValues());
-      };
-    }
+      RenderProxy.Render(Values);
+    };
   };
 
   const Renders_t::Creators_t Creators =
@@ -395,7 +400,7 @@ TEST_F(Renderer_test, /*DISABLED_*/Test_RenderCompiledGeometry_Textured)
     { uT("Texture"), SimpleCreator },
     { uT("Shader"), ShaderCreator },
     { uT("Buffer"), BufferCreator },
-    { uT("Transform"), SimpleCreator },
+    { uT("Transform"), TransformCreator },
     { uT("Present"), BufferCreator },
   };
 
@@ -440,14 +445,14 @@ TEST_F(Renderer_test, /*DISABLED_*/Test_RenderCompiledGeometry_Textured)
   {
     uT("Covellite.Gui.Shader.Pixel.Textured"),
     uT("Shader"),
-    uT("psLightened"),
+    uT("psTextured"),
   };
 
   const Values_t TextureValues =
   {
     uT("Covellite.Gui.Texture.{ID}").Replace(uT("{ID}"), TextureId),
     uT("Texture"),
-    uT("")
+    uT("Unknown")
   };
 
   const Values_t VertexBufferValues =
@@ -462,7 +467,7 @@ TEST_F(Renderer_test, /*DISABLED_*/Test_RenderCompiledGeometry_Textured)
   {
     uT("Covellite.Gui.Transform.") + strObjectId,
     uT("Transform"),
-    uT("")
+    uT("Unknown")
   };
 
   const Values_t PresentValues =
@@ -580,16 +585,20 @@ TEST_F(Renderer_test, /*DISABLED_*/Test_RenderCompiledGeometry_NonTextured)
       const Object_t Data = (*_pComponent)[uT("service")].Default(Object_t{});
       if (Data.size() != 1) return nullptr;
 
+      const auto pPosition = Data.at(0);
+      const float X = (*pPosition)[uT("x")];
+      const float Y = (*pPosition)[uT("y")];
+
       using namespace ::alicorn::extension::std;
 
-      return [&, _pComponent, Data]()
+      return [&, _pComponent, pPosition]()
       {
         RenderProxy.Render(ComponentData{ _pComponent }
           .AddValue(uT("id"), uT(""))
           .AddValue(uT("type"), uT(""))
           .AddValue(uT("kind"), uT(""))
           .GetValues() +
-          ComponentData{ Data[0] }
+          ComponentData{ pPosition }
           .AddValue(uT("type"), uT(""))
           .AddValue(uT("kind"), uT(""))
           .AddValue(uT("x"), 0.0f)
@@ -688,7 +697,7 @@ TEST_F(Renderer_test, /*DISABLED_*/Test_RenderCompiledGeometry_NonTextured)
   {
     uT("Covellite.Gui.Transform.") + strObjectId,
     uT("Transform"),
-    uT("")
+    uT("Unknown")
   };
 
   const Values_t PresentValues =
@@ -775,21 +784,21 @@ TEST_F(Renderer_test, /*DISABLED_*/Test_ReleaseCompiledGeometry_RemoveUniqueComp
   using namespace ::testing;
 
   {
-    auto Renders = pRenders->Obtain(
+    const Renders_t::Renders_t Renders
+    {
+      pRenders->Obtain(Component_t::Make(
       {
-        Component_t::Make(
-        {
-          { uT("id"), uT("Covellite.Gui.Buffer.Vertex.") + strObjectId },
-          { uT("type"), uT("Buffer") },
-          { uT("test_data"), uT("Vertex.1811161832") },
-         }),
-        Component_t::Make(
-        {
-          { uT("id"), uT("Covellite.Gui.Present.") + strObjectId },
-          { uT("type"), uT("Present") },
-          { uT("test_data"), uT("Present.1811261258") },
-         }),
-      });
+        { uT("id"), uT("Covellite.Gui.Buffer.Vertex.") + strObjectId },
+        { uT("type"), uT("Buffer") },
+        { uT("test_data"), uT("Vertex.1811161832") },
+      })),
+      pRenders->Obtain(Component_t::Make(
+      {
+        { uT("id"), uT("Covellite.Gui.Present.") + strObjectId },
+        { uT("type"), uT("Present") },
+        { uT("test_data"), uT("Present.1811261258") },
+      }))
+    };
 
     const Values_t ExpectedVertexBufferData =
     {
@@ -819,19 +828,19 @@ TEST_F(Renderer_test, /*DISABLED_*/Test_ReleaseCompiledGeometry_RemoveUniqueComp
     (::mock::CovelliteGui::Core::CompiledGeometryHandle)ObjectId);
 
   {
-    auto Renders = pRenders->Obtain(
+    const Renders_t::Renders_t Renders =
+    {
+      pRenders->Obtain(Component_t::Make(
       {
-        Component_t::Make(
-        {
-          { uT("id"), uT("Covellite.Gui.Buffer.Vertex.") + strObjectId },
-          { uT("type"), uT("Buffer") },
-         }),
-        Component_t::Make(
-        {
-          { uT("id"), uT("Covellite.Gui.Present.") + strObjectId },
-          { uT("type"), uT("Present") },
-         }),
-      });
+        { uT("id"), uT("Covellite.Gui.Buffer.Vertex.") + strObjectId },
+        { uT("type"), uT("Buffer") },
+      })),
+      pRenders->Obtain(Component_t::Make(
+      {
+        { uT("id"), uT("Covellite.Gui.Present.") + strObjectId },
+        { uT("type"), uT("Present") },
+      }))
+    };
 
     const Values_t ExpectedVertexBufferData =
     {
@@ -1236,14 +1245,14 @@ TEST_F(Renderer_test, /*DISABLED_*/Test_GenerateTexture)
     EXPECT_TRUE(Result);
     EXPECT_EQ(1, hTexture);
 
-    auto Renders = pRenders->Obtain(Component_t::Renders::Object_t
-      {
-        Component_t::Make(
-          {
-            { uT("id"), uT("Covellite.Gui.Texture.1") },
-            { uT("type"), uT("Texture") },
-          }),
-      });
+    const Renders_t::Renders_t Renders = 
+    {
+      pRenders->Obtain(Component_t::Make(
+        {
+          { uT("id"), uT("Covellite.Gui.Texture.1") },
+          { uT("type"), uT("Texture") },
+        }))
+    };
     ASSERT_EQ(1, Renders.size());
 
     const Values_t ExpectedTextureData =
@@ -1285,14 +1294,14 @@ TEST_F(Renderer_test, /*DISABLED_*/Test_GenerateTexture)
     EXPECT_TRUE(Result);
     EXPECT_EQ(2, hTexture);
 
-    auto Renders = pRenders->Obtain(Component_t::Renders::Object_t
-      {
-        Component_t::Make(
-          {
-            { uT("id"), uT("Covellite.Gui.Texture.2") },
-            { uT("type"), uT("Texture") },
-          }),
-      });
+    const Renders_t::Renders_t Renders = 
+    {
+      pRenders->Obtain(Component_t::Make(
+        {
+          { uT("id"), uT("Covellite.Gui.Texture.2") },
+          { uT("type"), uT("Texture") },
+        }))
+    };
     ASSERT_EQ(1, Renders.size());
 
     const Values_t ExpectedTextureData =
@@ -1354,17 +1363,17 @@ TEST_F(Renderer_test, /*DISABLED_*/Test_ReleaseTexture)
   using namespace ::testing;
 
   {
-    auto Renders = pRenders->Obtain(Component_t::Renders::Object_t
-      {
-          Component_t::Make(
-          {
-            { uT("id"), uT("Covellite.Gui.Texture.1811071543") },
-            { uT("type"), uT("Texture") },
-            { uT("content"), Data },
-            { uT("width"), Width },
-            { uT("height"), Height },
-           })
-      });
+    const Renders_t::Renders_t Renders = 
+    {
+      pRenders->Obtain(Component_t::Make(
+        {
+          { uT("id"), uT("Covellite.Gui.Texture.1811071543") },
+          { uT("type"), uT("Texture") },
+          { uT("content"), Data },
+          { uT("width"), Width },
+          { uT("height"), Height },
+        }))
+    };
 
     ASSERT_EQ(1, Renders.size());
 
@@ -1384,14 +1393,14 @@ TEST_F(Renderer_test, /*DISABLED_*/Test_ReleaseTexture)
   IExample.ReleaseTexture(1811071543);
 
   {
-    auto Renders = pRenders->Obtain(Component_t::Renders::Object_t
-      {
-          Component_t::Make(
-          {
-            { uT("id"), uT("Covellite.Gui.Texture.1811071543") },
-            { uT("type"), uT("Texture") },
-           })
-      });
+    const Renders_t::Renders_t Renders = 
+    {
+      pRenders->Obtain(Component_t::Make(
+        {
+          { uT("id"), uT("Covellite.Gui.Texture.1811071543") },
+          { uT("type"), uT("Texture") },
+        }))
+    };
 
     ASSERT_EQ(1, Renders.size());
 

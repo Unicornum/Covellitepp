@@ -103,7 +103,7 @@ TEST_F(Updater_test, /*DISABLED_*/Test_Updater_ReplaceFunction)
 
   const ::covellite::api::Updater_t Updater1 = [&](const float)
   {
-    pComponent->SetValue(uT("function"), Updater2);
+    (*pComponent)[uT("function")] = Updater2;
 
     theProxy.Update(1);
   };
@@ -131,14 +131,14 @@ TEST_F(Updater_test, /*DISABLED_*/Test_Updater_ReplaceFunction)
 
   Render();
 
-  pComponent->SetValue(uT("function"), Updater0);
+  (*pComponent)[uT("function")] = Updater0;
 
   EXPECT_CALL(theProxy, Update(0))
     .Times(1);
 
   Render();
 
-  pComponent->SetValue(uT("function"), Updater1);
+  (*pComponent)[uT("function")] = Updater1;
 
   EXPECT_CALL(theProxy, Update(1))
     .Times(1);

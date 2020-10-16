@@ -136,7 +136,7 @@ public:
   Simple2DGame(Simple2DGame &&) = delete;
   const Simple2DGame & operator= (const Simple2DGame &) = delete;
   Simple2DGame & operator= (Simple2DGame &&) = delete;
-  ~Simple2DGame(void) noexcept;
+  ~Simple2DGame(void);
 };
 
 } // namespace basement

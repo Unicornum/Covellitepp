@@ -11,7 +11,7 @@ class PointLights::Data
 public:
   ::std::map<uint64_t, Point_t> m_Lights;
   ::std::map<uint64_t, Points_t> m_CellLights;
-  ::std::map<uint64_t, Points> m_CellLights2;
+  ::std::map<uint64_t, Points_t> m_CellLights2;
 };
 
 PointLights::PointLights(void) :
@@ -119,7 +119,7 @@ Points_t PointLights::Get(const CubeCoords & _CellPosition, const float _Height)
   return m_pData->m_CellLights[_CellPosition.GetHash()];
 }
 
-const PointLights::Points & PointLights::GetUserConstantBuffer(
+const Points_t & PointLights::GetUserConstantBuffer(
   const CubeCoords & _CellPosition, 
   const float _Height) const
 {

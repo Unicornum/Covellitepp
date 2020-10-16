@@ -49,7 +49,6 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "BuildAll", "Solution\Build\
 		{AFAEDCA2-A3C6-4FC3-A972-525CD8E75A57} = {AFAEDCA2-A3C6-4FC3-A972-525CD8E75A57}
 		{12B6D0D0-7936-4680-9800-2F145C6A7F17} = {12B6D0D0-7936-4680-9800-2F145C6A7F17}
 		{54315DD6-D9F6-4423-8712-B8DEFEEB6CD8} = {54315DD6-D9F6-4423-8712-B8DEFEEB6CD8}
-		{5CE5F7F0-37B7-4B34-933B-D8CD56079CAE} = {5CE5F7F0-37B7-4B34-933B-D8CD56079CAE}
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Clean", "Solution\Build\Clean\Clean.vcxproj", "{9BFFECD0-7F8D-45B4-8834-4637D0BA8DB1}"
@@ -72,8 +71,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "(Documentation)", "(Documen
 	ProjectSection(SolutionItems) = preProject
 		Solution\Solution\Example\(Documentation)\DemoPage.hpp = Solution\Solution\Example\(Documentation)\DemoPage.hpp
 		Solution\Solution\Example\(Documentation)\ExampleDemo.classes.txt = Solution\Solution\Example\(Documentation)\ExampleDemo.classes.txt
+		Solution\Solution\Example\(Documentation)\ManualTesting.Demo.hpp = Solution\Solution\Example\(Documentation)\ManualTesting.Demo.hpp
+		Solution\Solution\Example\(Documentation)\ManualTesting.hpp = Solution\Solution\Example\(Documentation)\ManualTesting.hpp
 		Solution\Solution\Example\(Documentation)\ProjectPage.hpp = Solution\Solution\Example\(Documentation)\ProjectPage.hpp
-		Solution\Solution\Example\(Documentation)\Screenshots.hpp = Solution\Solution\Example\(Documentation)\Screenshots.hpp
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Covellite.Egl", "Covellite.Egl", "{25032860-0A3E-4C4A-9523-20B30546044A}"
@@ -143,9 +143,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Covellite.Api", "Covellite.
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "(Documentation)", "(Documentation)", "{798C693D-A334-4F98-B44C-801BA0546BFD}"
 	ProjectSection(SolutionItems) = preProject
+		Solution\Solution\Covellite.Api\(Documentation)\Api.Classes.png = Solution\Solution\Covellite.Api\(Documentation)\Api.Classes.png
+		Solution\Solution\Covellite.Api\(Documentation)\Api.Classes.txt = Solution\Solution\Covellite.Api\(Documentation)\Api.Classes.txt
 		Solution\Solution\Covellite.Api\(Documentation)\BkSurface.hpp = Solution\Solution\Covellite.Api\(Documentation)\BkSurface.hpp
-		Solution\Solution\Covellite.Api\(Documentation)\Classes.png = Solution\Solution\Covellite.Api\(Documentation)\Classes.png
-		Solution\Solution\Covellite.Api\(Documentation)\Classes.txt = Solution\Solution\Covellite.Api\(Documentation)\Classes.txt
 		Solution\Solution\Covellite.Api\(Documentation)\ComponentSystem.hpp = Solution\Solution\Covellite.Api\(Documentation)\ComponentSystem.hpp
 		Solution\Solution\Covellite.Api\(Documentation)\Instancing.hpp = Solution\Solution\Covellite.Api\(Documentation)\Instancing.hpp
 		Solution\Solution\Covellite.Api\(Documentation)\ProjectPage.hpp = Solution\Solution\Covellite.Api\(Documentation)\ProjectPage.hpp
@@ -253,8 +253,6 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Launcher", "Solution\Build\
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Settings", "Solution\Solution\Externals\Tools\Settings\Settings.vcxproj", "{9734D0DB-DD79-4943-9EA3-187721FCCC5F}"
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ProcessingMetrics", "Solution\Solution\Externals\Tools\ProcessingMetrics\ProcessingMetrics.vcxproj", "{5CE5F7F0-37B7-4B34-933B-D8CD56079CAE}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Documentation", "Solution\Solution\Externals\Tools\Documentation\Documentation.vcxproj", "{AFAEDCA2-A3C6-4FC3-A972-525CD8E75A57}"
 EndProject
@@ -386,7 +384,6 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Covellite.Gui.Android", "Solution\Solution\Covellite.Gui\Covellite.Gui\Covellite.Gui.Android.vcxproj", "{5F10F7EC-C470-499A-AB96-C19485CCD7AC}"
 	ProjectSection(ProjectDependencies) = postProject
 		{567C1123-ED58-483C-B6EF-B49DF7A250EC} = {567C1123-ED58-483C-B6EF-B49DF7A250EC}
-		{34D52A6C-DF78-40FA-9AA3-3B1C1B1C6B97} = {34D52A6C-DF78-40FA-9AA3-3B1C1B1C6B97}
 		{58191CAB-A5F1-480E-9823-14B4906BBF0C} = {58191CAB-A5F1-480E-9823-14B4906BBF0C}
 		{1EAD4BB7-397C-4193-8404-1CF9B9C0394C} = {1EAD4BB7-397C-4193-8404-1CF9B9C0394C}
 		{865103D0-5229-4780-9F44-CF404A7E91D9} = {865103D0-5229-4780-9F44-CF404A7E91D9}
@@ -424,7 +421,6 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Test.Window", "Solution\Sol
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Test.Component", "Solution\Solution\Covellite.Api\Test.Covellite.Api\Test.Component\Test.Component.vcxproj", "{88FE23D4-4503-4748-AE23-98852B13CCA2}"
 	ProjectSection(ProjectDependencies) = postProject
-		{34D52A6C-DF78-40FA-9AA3-3B1C1B1C6B97} = {34D52A6C-DF78-40FA-9AA3-3B1C1B1C6B97}
 		{6314E391-0A82-4703-A819-7BC337D46715} = {6314E391-0A82-4703-A819-7BC337D46715}
 		{58191CAB-A5F1-480E-9823-14B4906BBF0C} = {58191CAB-A5F1-480E-9823-14B4906BBF0C}
 	EndProjectSection
@@ -461,26 +457,6 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Assets", "Solution\Solution
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Test.OpenGLES3", "Solution\Solution\Covellite.Api\Test.Covellite.Api\Test.OpenGLES3\Test.OpenGLES3.vcxproj", "{0DE63BD5-AF8C-4FC8-8918-F546DB63DAA4}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Covellite.Api.es.Android", "Solution\Solution\Covellite.Api\Covellite.Api\Covellite.Api.es.Android.vcxproj", "{34D52A6C-DF78-40FA-9AA3-3B1C1B1C6B97}"
-	ProjectSection(ProjectDependencies) = postProject
-		{567C1123-ED58-483C-B6EF-B49DF7A250EC} = {567C1123-ED58-483C-B6EF-B49DF7A250EC}
-		{58191CAB-A5F1-480E-9823-14B4906BBF0C} = {58191CAB-A5F1-480E-9823-14B4906BBF0C}
-		{1EAD4BB7-397C-4193-8404-1CF9B9C0394C} = {1EAD4BB7-397C-4193-8404-1CF9B9C0394C}
-		{865103D0-5229-4780-9F44-CF404A7E91D9} = {865103D0-5229-4780-9F44-CF404A7E91D9}
-		{D8056CDA-DC04-485E-999E-57F22FAF4180} = {D8056CDA-DC04-485E-999E-57F22FAF4180}
-	EndProjectSection
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Example.es.Android", "Solution\Solution\Example\Example\Example.Android.es.vcxproj", "{E7E13F1B-5211-48A7-B8F3-2BF4C924F446}"
-	ProjectSection(ProjectDependencies) = postProject
-		{567C1123-ED58-483C-B6EF-B49DF7A250EC} = {567C1123-ED58-483C-B6EF-B49DF7A250EC}
-		{C546623F-DF78-442F-B16D-9FBA30708605} = {C546623F-DF78-442F-B16D-9FBA30708605}
-		{34D52A6C-DF78-40FA-9AA3-3B1C1B1C6B97} = {34D52A6C-DF78-40FA-9AA3-3B1C1B1C6B97}
-		{1EAD4BB7-397C-4193-8404-1CF9B9C0394C} = {1EAD4BB7-397C-4193-8404-1CF9B9C0394C}
-		{865103D0-5229-4780-9F44-CF404A7E91D9} = {865103D0-5229-4780-9F44-CF404A7E91D9}
-		{D8056CDA-DC04-485E-999E-57F22FAF4180} = {D8056CDA-DC04-485E-999E-57F22FAF4180}
-		{5F10F7EC-C470-499A-AB96-C19485CCD7AC} = {5F10F7EC-C470-499A-AB96-C19485CCD7AC}
-	EndProjectSection
-EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Test.SystemToGuiKeyCode", "Solution\Solution\Covellite.Gui\Test.Covellite.Gui\Test.SystemToGuiKeyCode\Test.SystemToGuiKeyCode.vcxproj", "{0D1DC4E2-B6A1-4C77-92D0-6655FEC80A91}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Test.Covellite.Gui.Rocket", "Solution\Solution\Covellite.Gui\Test.Covellite.Gui\Test.Covellite.Gui.Rocket.vcxproj", "{AD41D24C-8E0A-4F31-B5D7-C2BEE07BFD06}"
@@ -491,7 +467,6 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Test.Covellite.Gui.Rocket",
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Test.Component.Speed", "Solution\Solution\Covellite.Api\Test.Covellite.Api\Test.Component.Speed\Test.Component.Speed.vcxproj", "{D9072A49-6646-44AB-A763-3BD33473ABD9}"
 	ProjectSection(ProjectDependencies) = postProject
-		{34D52A6C-DF78-40FA-9AA3-3B1C1B1C6B97} = {34D52A6C-DF78-40FA-9AA3-3B1C1B1C6B97}
 		{6314E391-0A82-4703-A819-7BC337D46715} = {6314E391-0A82-4703-A819-7BC337D46715}
 		{58191CAB-A5F1-480E-9823-14B4906BBF0C} = {58191CAB-A5F1-480E-9823-14B4906BBF0C}
 	EndProjectSection
@@ -504,8 +479,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Covellite.Expanse", "Covell
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "(Documentation)", "(Documentation)", "{DCD40BCD-3A0C-4A08-84A4-E387BFF2ECE9}"
 	ProjectSection(SolutionItems) = preProject
-		Solution\Solution\Covellite.Expanse\(Documentation)\Classes.png = Solution\Solution\Covellite.Expanse\(Documentation)\Classes.png
-		Solution\Solution\Covellite.Expanse\(Documentation)\Classes.txt = Solution\Solution\Covellite.Expanse\(Documentation)\Classes.txt
+		Solution\Solution\Covellite.Expanse\(Documentation)\Expanse.Classes.png = Solution\Solution\Covellite.Expanse\(Documentation)\Expanse.Classes.png
+		Solution\Solution\Covellite.Expanse\(Documentation)\Expanse.Classes.txt = Solution\Solution\Covellite.Expanse\(Documentation)\Expanse.Classes.txt
 		Solution\Solution\Covellite.Expanse\(Documentation)\ProjectPage.hpp = Solution\Solution\Covellite.Expanse\(Documentation)\ProjectPage.hpp
 	EndProjectSection
 EndProject
@@ -520,7 +495,6 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Covellite.Expanse.Android", "Solution\Solution\Covellite.Expanse\Covellite.Expanse\Covellite.Expanse.Android.vcxproj", "{C546623F-DF78-442F-B16D-9FBA30708605}"
 	ProjectSection(ProjectDependencies) = postProject
 		{567C1123-ED58-483C-B6EF-B49DF7A250EC} = {567C1123-ED58-483C-B6EF-B49DF7A250EC}
-		{34D52A6C-DF78-40FA-9AA3-3B1C1B1C6B97} = {34D52A6C-DF78-40FA-9AA3-3B1C1B1C6B97}
 		{58191CAB-A5F1-480E-9823-14B4906BBF0C} = {58191CAB-A5F1-480E-9823-14B4906BBF0C}
 		{1EAD4BB7-397C-4193-8404-1CF9B9C0394C} = {1EAD4BB7-397C-4193-8404-1CF9B9C0394C}
 		{865103D0-5229-4780-9F44-CF404A7E91D9} = {865103D0-5229-4780-9F44-CF404A7E91D9}
@@ -571,6 +545,10 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Test.IProduce3DObject", "Solution\Solution\Covellite.Expanse\Test.Covellite.Expanse\Test.IProduce3DObject\Test.IProduce3DObject.vcxproj", "{10DD724F-414E-4681-A84A-EFEB83BBFBCE}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Launcher", "Launcher", "{450CE346-03F3-424E-A151-4236F4EE6928}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Covellite.Api.Least", "Solution\Solution\Covellite.Api\Covellite.Api\Covellite.Api.Least.vcxproj", "{834EAA44-E0DB-476E-9D26-DA27F845E3D1}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Test.OpenGL.Present", "Solution\Solution\Covellite.Api\Test.Covellite.Api\Test.OpenGL\Test.OpenGL.Present.vcxproj", "{0DA08785-A170-4321-8B8B-13EF61FA36D7}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -1043,20 +1021,6 @@ Global
 		{9734D0DB-DD79-4943-9EA3-187721FCCC5F}.Release|Win32.ActiveCfg = Release|x64
 		{9734D0DB-DD79-4943-9EA3-187721FCCC5F}.Release|x64.ActiveCfg = Release|x64
 		{9734D0DB-DD79-4943-9EA3-187721FCCC5F}.Release|x64.Build.0 = Release|x64
-		{5CE5F7F0-37B7-4B34-933B-D8CD56079CAE}.Debug.Product|ARM.ActiveCfg = Debug|x64
-		{5CE5F7F0-37B7-4B34-933B-D8CD56079CAE}.Debug.Product|Win32.ActiveCfg = Release|x64
-		{5CE5F7F0-37B7-4B34-933B-D8CD56079CAE}.Debug.Product|x64.ActiveCfg = Debug|x64
-		{5CE5F7F0-37B7-4B34-933B-D8CD56079CAE}.Debug|ARM.ActiveCfg = Debug|x64
-		{5CE5F7F0-37B7-4B34-933B-D8CD56079CAE}.Debug|Win32.ActiveCfg = Debug|x64
-		{5CE5F7F0-37B7-4B34-933B-D8CD56079CAE}.Debug|x64.ActiveCfg = Debug|x64
-		{5CE5F7F0-37B7-4B34-933B-D8CD56079CAE}.Debug|x64.Build.0 = Debug|x64
-		{5CE5F7F0-37B7-4B34-933B-D8CD56079CAE}.Release.Product|ARM.ActiveCfg = Release|x64
-		{5CE5F7F0-37B7-4B34-933B-D8CD56079CAE}.Release.Product|Win32.ActiveCfg = Release|x64
-		{5CE5F7F0-37B7-4B34-933B-D8CD56079CAE}.Release.Product|x64.ActiveCfg = Release|x64
-		{5CE5F7F0-37B7-4B34-933B-D8CD56079CAE}.Release|ARM.ActiveCfg = Release|x64
-		{5CE5F7F0-37B7-4B34-933B-D8CD56079CAE}.Release|Win32.ActiveCfg = Release|x64
-		{5CE5F7F0-37B7-4B34-933B-D8CD56079CAE}.Release|x64.ActiveCfg = Release|x64
-		{5CE5F7F0-37B7-4B34-933B-D8CD56079CAE}.Release|x64.Build.0 = Release|x64
 		{AFAEDCA2-A3C6-4FC3-A972-525CD8E75A57}.Debug.Product|ARM.ActiveCfg = Release|x64
 		{AFAEDCA2-A3C6-4FC3-A972-525CD8E75A57}.Debug.Product|ARM.Build.0 = Release|x64
 		{AFAEDCA2-A3C6-4FC3-A972-525CD8E75A57}.Debug.Product|Win32.ActiveCfg = Release|x64
@@ -1845,44 +1809,6 @@ Global
 		{0DE63BD5-AF8C-4FC8-8918-F546DB63DAA4}.Release|Win32.ActiveCfg = Release|x64
 		{0DE63BD5-AF8C-4FC8-8918-F546DB63DAA4}.Release|x64.ActiveCfg = Release|x64
 		{0DE63BD5-AF8C-4FC8-8918-F546DB63DAA4}.Release|x64.Build.0 = Release|x64
-		{34D52A6C-DF78-40FA-9AA3-3B1C1B1C6B97}.Debug.Product|ARM.ActiveCfg = Debug|ARM
-		{34D52A6C-DF78-40FA-9AA3-3B1C1B1C6B97}.Debug.Product|ARM.Build.0 = Debug|ARM
-		{34D52A6C-DF78-40FA-9AA3-3B1C1B1C6B97}.Debug.Product|Win32.ActiveCfg = Debug|ARM
-		{34D52A6C-DF78-40FA-9AA3-3B1C1B1C6B97}.Debug.Product|x64.ActiveCfg = Debug|ARM
-		{34D52A6C-DF78-40FA-9AA3-3B1C1B1C6B97}.Debug.Product|x64.Build.0 = Debug|ARM
-		{34D52A6C-DF78-40FA-9AA3-3B1C1B1C6B97}.Debug|ARM.ActiveCfg = Debug|ARM
-		{34D52A6C-DF78-40FA-9AA3-3B1C1B1C6B97}.Debug|ARM.Build.0 = Debug|ARM
-		{34D52A6C-DF78-40FA-9AA3-3B1C1B1C6B97}.Debug|Win32.ActiveCfg = Debug|ARM
-		{34D52A6C-DF78-40FA-9AA3-3B1C1B1C6B97}.Debug|x64.ActiveCfg = Debug|ARM
-		{34D52A6C-DF78-40FA-9AA3-3B1C1B1C6B97}.Debug|x64.Build.0 = Debug|ARM
-		{34D52A6C-DF78-40FA-9AA3-3B1C1B1C6B97}.Release.Product|ARM.ActiveCfg = Release|ARM
-		{34D52A6C-DF78-40FA-9AA3-3B1C1B1C6B97}.Release.Product|ARM.Build.0 = Release|ARM
-		{34D52A6C-DF78-40FA-9AA3-3B1C1B1C6B97}.Release.Product|Win32.ActiveCfg = Debug|ARM
-		{34D52A6C-DF78-40FA-9AA3-3B1C1B1C6B97}.Release.Product|x64.ActiveCfg = Release|ARM
-		{34D52A6C-DF78-40FA-9AA3-3B1C1B1C6B97}.Release|ARM.ActiveCfg = Release|ARM
-		{34D52A6C-DF78-40FA-9AA3-3B1C1B1C6B97}.Release|ARM.Build.0 = Release|ARM
-		{34D52A6C-DF78-40FA-9AA3-3B1C1B1C6B97}.Release|Win32.ActiveCfg = Release|ARM
-		{34D52A6C-DF78-40FA-9AA3-3B1C1B1C6B97}.Release|x64.ActiveCfg = Release|ARM
-		{34D52A6C-DF78-40FA-9AA3-3B1C1B1C6B97}.Release|x64.Build.0 = Release|ARM
-		{E7E13F1B-5211-48A7-B8F3-2BF4C924F446}.Debug.Product|ARM.ActiveCfg = Debug|ARM
-		{E7E13F1B-5211-48A7-B8F3-2BF4C924F446}.Debug.Product|ARM.Build.0 = Debug|ARM
-		{E7E13F1B-5211-48A7-B8F3-2BF4C924F446}.Debug.Product|Win32.ActiveCfg = Release|ARM
-		{E7E13F1B-5211-48A7-B8F3-2BF4C924F446}.Debug.Product|x64.ActiveCfg = Debug|ARM
-		{E7E13F1B-5211-48A7-B8F3-2BF4C924F446}.Debug.Product|x64.Build.0 = Debug|ARM
-		{E7E13F1B-5211-48A7-B8F3-2BF4C924F446}.Debug|ARM.ActiveCfg = Debug|ARM
-		{E7E13F1B-5211-48A7-B8F3-2BF4C924F446}.Debug|ARM.Build.0 = Debug|ARM
-		{E7E13F1B-5211-48A7-B8F3-2BF4C924F446}.Debug|Win32.ActiveCfg = Debug|ARM
-		{E7E13F1B-5211-48A7-B8F3-2BF4C924F446}.Debug|x64.ActiveCfg = Debug|ARM
-		{E7E13F1B-5211-48A7-B8F3-2BF4C924F446}.Debug|x64.Build.0 = Debug|ARM
-		{E7E13F1B-5211-48A7-B8F3-2BF4C924F446}.Release.Product|ARM.ActiveCfg = Release|ARM
-		{E7E13F1B-5211-48A7-B8F3-2BF4C924F446}.Release.Product|ARM.Build.0 = Release|ARM
-		{E7E13F1B-5211-48A7-B8F3-2BF4C924F446}.Release.Product|Win32.ActiveCfg = Release|ARM
-		{E7E13F1B-5211-48A7-B8F3-2BF4C924F446}.Release.Product|x64.ActiveCfg = Release|ARM
-		{E7E13F1B-5211-48A7-B8F3-2BF4C924F446}.Release|ARM.ActiveCfg = Release|ARM
-		{E7E13F1B-5211-48A7-B8F3-2BF4C924F446}.Release|ARM.Build.0 = Release|ARM
-		{E7E13F1B-5211-48A7-B8F3-2BF4C924F446}.Release|Win32.ActiveCfg = Release|ARM
-		{E7E13F1B-5211-48A7-B8F3-2BF4C924F446}.Release|x64.ActiveCfg = Release|ARM
-		{E7E13F1B-5211-48A7-B8F3-2BF4C924F446}.Release|x64.Build.0 = Release|ARM
 		{0D1DC4E2-B6A1-4C77-92D0-6655FEC80A91}.Debug.Product|ARM.ActiveCfg = Release|x64
 		{0D1DC4E2-B6A1-4C77-92D0-6655FEC80A91}.Debug.Product|ARM.Build.0 = Release|x64
 		{0D1DC4E2-B6A1-4C77-92D0-6655FEC80A91}.Debug.Product|Win32.ActiveCfg = Release|x64
@@ -2166,6 +2092,43 @@ Global
 		{10DD724F-414E-4681-A84A-EFEB83BBFBCE}.Release|Win32.ActiveCfg = Release|x64
 		{10DD724F-414E-4681-A84A-EFEB83BBFBCE}.Release|x64.ActiveCfg = Release|x64
 		{10DD724F-414E-4681-A84A-EFEB83BBFBCE}.Release|x64.Build.0 = Release|x64
+		{834EAA44-E0DB-476E-9D26-DA27F845E3D1}.Debug.Product|ARM.ActiveCfg = Debug|x64
+		{834EAA44-E0DB-476E-9D26-DA27F845E3D1}.Debug.Product|Win32.ActiveCfg = Debug|x64
+		{834EAA44-E0DB-476E-9D26-DA27F845E3D1}.Debug.Product|Win32.Build.0 = Debug|x64
+		{834EAA44-E0DB-476E-9D26-DA27F845E3D1}.Debug.Product|x64.ActiveCfg = Debug|x64
+		{834EAA44-E0DB-476E-9D26-DA27F845E3D1}.Debug.Product|x64.Build.0 = Debug|x64
+		{834EAA44-E0DB-476E-9D26-DA27F845E3D1}.Debug|ARM.ActiveCfg = Debug|x64
+		{834EAA44-E0DB-476E-9D26-DA27F845E3D1}.Debug|Win32.ActiveCfg = Debug|x64
+		{834EAA44-E0DB-476E-9D26-DA27F845E3D1}.Debug|x64.ActiveCfg = Debug|x64
+		{834EAA44-E0DB-476E-9D26-DA27F845E3D1}.Debug|x64.Build.0 = Debug|x64
+		{834EAA44-E0DB-476E-9D26-DA27F845E3D1}.Release.Product|ARM.ActiveCfg = Release|x64
+		{834EAA44-E0DB-476E-9D26-DA27F845E3D1}.Release.Product|Win32.ActiveCfg = Debug|x64
+		{834EAA44-E0DB-476E-9D26-DA27F845E3D1}.Release.Product|x64.ActiveCfg = Release|x64
+		{834EAA44-E0DB-476E-9D26-DA27F845E3D1}.Release.Product|x64.Build.0 = Release|x64
+		{834EAA44-E0DB-476E-9D26-DA27F845E3D1}.Release|ARM.ActiveCfg = Release|x64
+		{834EAA44-E0DB-476E-9D26-DA27F845E3D1}.Release|Win32.ActiveCfg = Release|x64
+		{834EAA44-E0DB-476E-9D26-DA27F845E3D1}.Release|x64.ActiveCfg = Release|x64
+		{834EAA44-E0DB-476E-9D26-DA27F845E3D1}.Release|x64.Build.0 = Release|x64
+		{0DA08785-A170-4321-8B8B-13EF61FA36D7}.Debug.Product|ARM.ActiveCfg = Debug|x64
+		{0DA08785-A170-4321-8B8B-13EF61FA36D7}.Debug.Product|ARM.Build.0 = Debug|x64
+		{0DA08785-A170-4321-8B8B-13EF61FA36D7}.Debug.Product|Win32.ActiveCfg = Debug|x64
+		{0DA08785-A170-4321-8B8B-13EF61FA36D7}.Debug.Product|Win32.Build.0 = Debug|x64
+		{0DA08785-A170-4321-8B8B-13EF61FA36D7}.Debug.Product|x64.ActiveCfg = Debug|x64
+		{0DA08785-A170-4321-8B8B-13EF61FA36D7}.Debug.Product|x64.Build.0 = Debug|x64
+		{0DA08785-A170-4321-8B8B-13EF61FA36D7}.Debug|ARM.ActiveCfg = Debug|x64
+		{0DA08785-A170-4321-8B8B-13EF61FA36D7}.Debug|Win32.ActiveCfg = Debug|x64
+		{0DA08785-A170-4321-8B8B-13EF61FA36D7}.Debug|x64.ActiveCfg = Debug|x64
+		{0DA08785-A170-4321-8B8B-13EF61FA36D7}.Debug|x64.Build.0 = Debug|x64
+		{0DA08785-A170-4321-8B8B-13EF61FA36D7}.Release.Product|ARM.ActiveCfg = Debug|x64
+		{0DA08785-A170-4321-8B8B-13EF61FA36D7}.Release.Product|ARM.Build.0 = Debug|x64
+		{0DA08785-A170-4321-8B8B-13EF61FA36D7}.Release.Product|Win32.ActiveCfg = Debug|x64
+		{0DA08785-A170-4321-8B8B-13EF61FA36D7}.Release.Product|Win32.Build.0 = Debug|x64
+		{0DA08785-A170-4321-8B8B-13EF61FA36D7}.Release.Product|x64.ActiveCfg = Release|x64
+		{0DA08785-A170-4321-8B8B-13EF61FA36D7}.Release.Product|x64.Build.0 = Release|x64
+		{0DA08785-A170-4321-8B8B-13EF61FA36D7}.Release|ARM.ActiveCfg = Release|x64
+		{0DA08785-A170-4321-8B8B-13EF61FA36D7}.Release|Win32.ActiveCfg = Release|x64
+		{0DA08785-A170-4321-8B8B-13EF61FA36D7}.Release|x64.ActiveCfg = Release|x64
+		{0DA08785-A170-4321-8B8B-13EF61FA36D7}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -2215,7 +2178,6 @@ Global
 		{4C92DB96-4375-4787-90FF-EFF44901A3C1} = {1F96C2FF-25A3-410A-BFA2-CB48EA78FBB8}
 		{B0FD6DE1-7A2E-4AD3-A81C-775B83D5569B} = {450CE346-03F3-424E-A151-4236F4EE6928}
 		{9734D0DB-DD79-4943-9EA3-187721FCCC5F} = {450CE346-03F3-424E-A151-4236F4EE6928}
-		{5CE5F7F0-37B7-4B34-933B-D8CD56079CAE} = {398C88AF-2486-4B73-8E6E-096FC51F9CC5}
 		{AFAEDCA2-A3C6-4FC3-A972-525CD8E75A57} = {398C88AF-2486-4B73-8E6E-096FC51F9CC5}
 		{574A3BDA-C658-48CF-92A1-B5B2453F4724} = {E4463267-802E-423D-8D5A-7243F92CBA2D}
 		{BA3E4AEF-BDA4-478F-9CAE-198145BD4747} = {574A3BDA-C658-48CF-92A1-B5B2453F4724}
@@ -2266,8 +2228,6 @@ Global
 		{AFA055CB-4667-4848-9FF4-CA94F925AB8C} = {A0DCE822-E808-4D68-823E-3A186DB4D134}
 		{14D39672-98C5-490C-AABB-26FA695435E9} = {E3477710-C400-4202-8B7B-B4B3860F4854}
 		{0DE63BD5-AF8C-4FC8-8918-F546DB63DAA4} = {A1625B89-EE05-4E0A-8A19-62CD2C243E8A}
-		{34D52A6C-DF78-40FA-9AA3-3B1C1B1C6B97} = {F3C7AFB5-D5F6-4460-AB5F-AF218F350A43}
-		{E7E13F1B-5211-48A7-B8F3-2BF4C924F446} = {E3477710-C400-4202-8B7B-B4B3860F4854}
 		{0D1DC4E2-B6A1-4C77-92D0-6655FEC80A91} = {A0DCE822-E808-4D68-823E-3A186DB4D134}
 		{AD41D24C-8E0A-4F31-B5D7-C2BEE07BFD06} = {B00B04CF-F9C1-4A57-9275-0D296A90B5C0}
 		{D9072A49-6646-44AB-A763-3BD33473ABD9} = {A1625B89-EE05-4E0A-8A19-62CD2C243E8A}
@@ -2286,6 +2246,8 @@ Global
 		{76FF5762-18EA-4FEA-A92E-F7D18C6D950E} = {25EA8B89-FB80-42AD-8242-4B4BEDBA59FE}
 		{10DD724F-414E-4681-A84A-EFEB83BBFBCE} = {25EA8B89-FB80-42AD-8242-4B4BEDBA59FE}
 		{450CE346-03F3-424E-A151-4236F4EE6928} = {B8769225-58BD-4972-B1D2-C406404FC3FD}
+		{834EAA44-E0DB-476E-9D26-DA27F845E3D1} = {F3C7AFB5-D5F6-4460-AB5F-AF218F350A43}
+		{0DA08785-A170-4321-8B8B-13EF61FA36D7} = {A1625B89-EE05-4E0A-8A19-62CD2C243E8A}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {C1363F25-17E1-4DB1-AE71-7921BFCA0645}

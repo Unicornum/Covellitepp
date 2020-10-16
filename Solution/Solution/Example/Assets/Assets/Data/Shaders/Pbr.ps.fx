@@ -1,4 +1,41 @@
 
+#define COVELLITE_MAX_LIGHT_POINT_OBJECT_COUNT 8
+
+struct Ambient_t
+{
+  float4 Color;
+  int IsValid, align1, align2, align3;
+};
+
+struct Direction_t
+{
+  float4 Color;
+  float4 Direction;
+  int IsValid, align1, align2, align3;
+};
+
+struct Point_t
+{
+  float4 Color;
+  float4 Position;
+  float4 Attenuation; // Const, Linear, Exponent, Radius;
+};
+
+struct Points_t
+{
+  Point_t Lights[COVELLITE_MAX_LIGHT_POINT_OBJECT_COUNT];
+  int     UsedSlotCount;
+};
+
+struct Lights_t
+{
+  Ambient_t   Ambient;
+  Direction_t Direction;
+  Points_t    Points;
+};
+
+COVELLITE_DECLARE_CONST_USER_BUFFER(Lights_t, cbLights, Lights);
+
 // ************************************************************************** //
 
 float4 CalcPointLight(Point_t _Light, float4 _Position, float3 _Normal)
@@ -31,22 +68,22 @@ float4 GetLightsColor(float4 _WorldPos, float3 _Normal)
 
   float4 Result = float4(0.0f, 0.0f, 0.0f, 0.0f);
 
-  if (ObjectData.Lights.Ambient.IsValid == 1) // Ambient
+  if (Lights.Ambient.IsValid == 1) // Ambient
   {
-    Result += ObjectData.Lights.Ambient.Color;
+    Result += Lights.Ambient.Color;
   }
 
-  if (ObjectData.Lights.Direction.IsValid == 1) // Direction
+  if (Lights.Direction.IsValid == 1) // Direction
   {
-    float3 Direction = normalize(ToFloat3(ObjectData.Lights.Direction.Direction));
+    float3 Direction = normalize(ToFloat3(Lights.Direction.Direction));
     Result += max(dot(_Normal, Direction), 0.0f) *
-      ObjectData.Lights.Direction.Color;
+      Lights.Direction.Color;
   }
 
-  for (int i = 0; i < ObjectData.Lights.Points.UsedSlotCount; i++)
+  for (int i = 0; i < Lights.Points.UsedSlotCount; i++)
   {
     Result += CalcPointLight(
-      ObjectData.Lights.Points.Lights[i], _WorldPos, _Normal);
+      Lights.Points.Lights[i], _WorldPos, _Normal);
   }
 
   return float4(SyncSaturate(Result.rgb), 1.0f);

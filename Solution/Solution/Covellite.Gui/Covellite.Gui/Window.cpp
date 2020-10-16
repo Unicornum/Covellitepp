@@ -227,24 +227,12 @@ void Window::LoadFonts(void)
   const auto & Vfs = 
     ::covellite::app::Vfs_t::GetInstance();
 
-  try
+  Vfs.BrowsingFiles(PathToFontsDirectory, [&](const Path_t & _FontFile)
   {
-    Vfs.BrowsingFiles(PathToFontsDirectory, [&](const Path_t & _FontFile)
-    {
-      // RmlUi не сохраняет копию переданных данных, поэтому прочитанные
-      // файлы следует хранить до конца использования.
-      m_RawDataFonts[_FontFile] = ::std::move(Vfs.GetData(_FontFile));
+    // RmlUi не сохраняет копию переданных данных, поэтому прочитанные
+    // файлы следует хранить до конца использования.
+    m_RawDataFonts[_FontFile] = ::std::move(Vfs.GetData(_FontFile));
 
-      CovelliteGuiLoadFontFace(m_RawDataFonts[_FontFile]);
-    });
-  }
-  catch (const ::std::exception &)
-  {
-    // 03 Август 2020 15:52 (unicornum.verum@gmail.com)
-    TODO("Удалить перехват исключения, когда будет исправлен код Vfs.");
-
-    // Перехват исключения понадобился из-за некоррекной работы реализации
-    // чтения файлов для Vfs, которая бросает исключение для не существующей
-    // папки.
-  }
+    CovelliteGuiLoadFontFace(m_RawDataFonts[_FontFile]);
+  });
 }

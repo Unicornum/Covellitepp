@@ -168,6 +168,9 @@
     <ClInclude Include="Basements\Empty.hpp">
       <Filter>Basements</Filter>
     </ClInclude>
+    <ClInclude Include="Basements\Demo\Lights.hpp">
+      <Filter>Basements\Demo</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">

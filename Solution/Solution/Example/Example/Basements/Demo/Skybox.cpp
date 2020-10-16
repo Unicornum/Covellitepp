@@ -77,7 +77,6 @@ auto Skybox::GetObject(const Any_t & _Value) const /*override*/ -> Objects_t
 {
   namespace math = ::alicorn::extension::cpp::math;
   using namespace ::alicorn::extension::std;
-  using BufferMapper_t = ::covellite::api::cbBufferMap_t<::Lights_t>;
 
   auto & GameWorld = *::boost::any_cast<IGameWorld *>(_Value);
   auto & DbComponents = GameWorld.GetDbComponents();
@@ -97,25 +96,28 @@ auto Skybox::GetObject(const Any_t & _Value) const /*override*/ -> Objects_t
   };
 
   const auto pAmbient = GetAmbientSound();
+  const auto & Vfs = ::covellite::app::Vfs_t::GetInstance();
 
-  const BufferMapper_t LightMapper = [=](Lights_t * _pLights)
+  const ::covellite::api::Updater_t AmbientUpdater = [=](const float _Time)
   {
     pAmbient->Dummy();
+  };
 
-    _pLights->Ambient.IsValid = 1;
-    _pLights->Ambient.Color = { 1.0f, 1.0f, 1.0f, 1.0f };
-
-    _pLights->Direction.IsValid = 0;
-    _pLights->Points.UsedSlotCount = 0;
-
-    return false;
+  const Object_t Service
+  {
+    DbComponents.GetComponent(Constant::Player::ComponentRotationId)
   };
 
   return
   {
     Object_t
     {
-      DbComponents.GetComponent(Constant::Player::ComponentRotationId),
+      Component_t::Make(
+      {
+        { uT("id"), uT("Demo.Camera.Skybox.Updater.Ambient") },
+        { uT("type"), uT("Updater") },
+        { uT("function"), AmbientUpdater },
+      }),
       Component_t::Make(
       {
         { uT("id"), uT("Demo.Camera.Skybox") },
@@ -123,12 +125,7 @@ auto Skybox::GetObject(const Any_t & _Value) const /*override*/ -> Objects_t
         { uT("kind"), uT("Perspective") },
         { uT("distance"), 0.0f },
         { uT("fov"), Constant::Camera::Fov * math::Constant<float>::RadianToDegree },
-      }),
-      Component_t::Make(
-      {
-        { uT("id"), uT("Demo.Light.Skybox") },
-        { uT("type"), uT("Buffer") },
-        { uT("mapper"), LightMapper },
+        { uT("service"), Service },
       }),
       Component_t::Make(
       {
@@ -153,7 +150,8 @@ auto Skybox::GetObject(const Any_t & _Value) const /*override*/ -> Objects_t
       {
         { uT("id"), uT("Demo.Shader.Pixel.Skybox") },
         { uT("type"), uT("Shader") },
-        { uT("entry"), uT("psLightened") },
+        { uT("content"), Vfs.GetData("Data\\Shaders\\Example.fx") },
+        { uT("entry"), uT("psTextured") },
       }),
       Component_t::Make(
       {

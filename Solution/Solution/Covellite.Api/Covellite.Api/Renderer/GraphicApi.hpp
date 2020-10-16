@@ -51,19 +51,11 @@ protected:
   virtual Render_t CreateTransform(const ComponentPtr_t &) = 0;
   virtual Render_t CreatePresentBuffer(const ComponentPtr_t &) = 0;
 
-protected:
-  // deprecated
-  virtual Render_t CreateFog(const ComponentPtr_t &) = 0;
-  virtual Render_t CreateMaterial(const ComponentPtr_t &) = 0;
-  virtual Render_t CreateLight(const ComponentPtr_t &) = 0;
-  virtual Render_t CreateGeometry(const ComponentPtr_t &) = 0;
-
 public:
   template<class TColor>
   static TColor ARGBtoFloat4(uint32_t);
 
 private:
-  Render_t CreatePresent(const ComponentPtr_t &);
   Render_t CreateUpdater(const ComponentPtr_t &) const;
 
 protected:
@@ -117,14 +109,6 @@ protected:
   ::std::shared_ptr<Constants> m_pConstants;
   template<template <class> class TBuffer, class ... TArgs>
   void MakeConstants(TArgs && ...);
-
-protected:
-  template<class TCamera>
-  Render_t DoCreateCamera(const ComponentPtr_t &);
-  template<class TFog>
-  Render_t DoCreateFog(const ComponentPtr_t &, const bool = false);
-  template<class TLight>
-  Render_t DoCreateLight(const ComponentPtr_t &, const bool = false);
 
 private:
   Creators_t m_Creators;

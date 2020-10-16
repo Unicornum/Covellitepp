@@ -59,9 +59,6 @@
       <Filter>Renderer</Filter>
     </ClInclude>
     <ClInclude Include="Defines.hpp" />
-    <ClInclude Include="Renderer\OpenGLCommonStatic.hpp">
-      <Filter>Renderer</Filter>
-    </ClInclude>
     <ClInclude Include="Renderer\OpenGLCommonShader.hpp">
       <Filter>Renderer</Filter>
     </ClInclude>
@@ -113,9 +110,6 @@
       <Filter>Renderer</Filter>
     </ClCompile>
     <ClCompile Include="Window.windows.cpp" />
-    <ClCompile Include="Renderer\OpenGLCommonStatic.cpp">
-      <Filter>Renderer</Filter>
-    </ClCompile>
     <ClCompile Include="Renderer\OpenGLCommonShader.cpp">
       <Filter>Renderer</Filter>
     </ClCompile>
@@ -131,9 +125,6 @@
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Renderer\shaders\Input.fx">
-      <Filter>Renderer\shaders</Filter>
-    </FxCompile>
-    <FxCompile Include="Renderer\shaders\DefaultDeprecated.fx">
       <Filter>Renderer\shaders</Filter>
     </FxCompile>
     <FxCompile Include="Renderer\shaders\Default.fx">

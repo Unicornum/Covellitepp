@@ -121,7 +121,7 @@ auto Common::CreateObject(const GameObject_t & _Object) -> ObjectId_t
   return Id;
 }
 
-void Common::AddToRenderQueue(const ObjectId_t _Id, const size_t _Hash)
+void Common::AddToRenderQueue(const ObjectId_t _Id)
 {
-  m_pWindowExpanse->Add(0, _Id, _Hash);
+  m_pWindowExpanse->Add(_Id);
 }

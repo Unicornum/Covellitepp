@@ -99,7 +99,6 @@
     <ClInclude Include="Renderer\OpenGLCommon.hpp" />
     <ClInclude Include="Renderer\OpenGLCommon.Texture.hpp" />
     <ClInclude Include="Renderer\OpenGLCommonShader.hpp" />
-    <ClInclude Include="Renderer\OpenGLCommonStatic.hpp" />
     <ClInclude Include="Renderer\shaders\Data.h" />
     <ClInclude Include="Renderer\shaders\Data.hpp" />
     <ClInclude Include="Renderer\shaders\Shaders.hpp" />
@@ -131,7 +130,6 @@
     <ClCompile Include="Renderer\OpenGLCommon.cpp" />
     <ClCompile Include="Renderer\OpenGLCommon.Texture.cpp" />
     <ClCompile Include="Renderer\OpenGLCommonShader.cpp" />
-    <ClCompile Include="Renderer\OpenGLCommonStatic.cpp" />
     <ClCompile Include="Renders.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
@@ -144,10 +142,6 @@
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Renderer\shaders\Default.fx">
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
-      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
-    </FxCompile>
-    <FxCompile Include="Renderer\shaders\DefaultDeprecated.fx">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </FxCompile>

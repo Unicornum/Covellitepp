@@ -35,8 +35,6 @@ protected:
   using fnObjectCreationCompleted_t = ::std::function<void(ObjectId_t)>;
 
 public:
-  virtual void DeferredCreateObject(const GameObject_t &, 
-    const fnObjectCreationCompleted_t &) = 0;
   virtual void DeferredCreateObject(const fnObjectCreation_t &, 
     const fnObjectCreationCompleted_t &) = 0;
 };

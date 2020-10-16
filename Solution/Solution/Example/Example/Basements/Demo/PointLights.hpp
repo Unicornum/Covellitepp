@@ -1,6 +1,6 @@
 
 #pragma once
-#include <Covellite/Api/Constant.hpp>
+#include "Lights.hpp"
 
 namespace basement
 {
@@ -28,17 +28,10 @@ class CubeCoords;
 class PointLights final
 {
 public:
-  struct Points
-  {
-    Point_t Lights[8];
-    int     UsedSlotCount;
-  };
-
-public:
   void Add(const CubeCoords &, const float);
   void Remove(const CubeCoords &);
   Points_t Get(const CubeCoords &, const float) const;
-  const Points & GetUserConstantBuffer(const CubeCoords &, const float) const;
+  const Points_t & GetUserConstantBuffer(const CubeCoords &, const float) const;
 
 private:
   class Data;

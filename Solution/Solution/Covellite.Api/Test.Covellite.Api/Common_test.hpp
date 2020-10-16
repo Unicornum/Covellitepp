@@ -5,7 +5,6 @@
 TEST_F(Common_test, /*DISABLED_*/Test_StructSizeAlign16Bytes)
 {
   EXPECT_EQ(0, sizeof(::Camera) % 16);
-  EXPECT_EQ(0, sizeof(::Fog) % 16);
   EXPECT_EQ(0, sizeof(::Object) % 16);
 }
 
@@ -60,51 +59,66 @@ TEST_F(Common_test, /*DISABLED_*/Test_State_AlphaTest)
 }
 
 // ************************************************************************** //
-TEST_F(Common_test, /*DISABLED_*/Test_Material)
-{
-  const Tested_t Example{ Data_t{} };
-  const ITested_t & IExample = Example;
-
-  auto itCreator = IExample.GetCreators().find(uT("Material"));
-  ASSERT_NE(IExample.GetCreators().end(), itCreator);
-
-  auto Render = itCreator->second(Component_t::Make({ }));
-  EXPECT_EQ(nullptr, Render);
-}
-
-
-////////////////////////////////////////////////////////////////////////////////
-
-
-// ************************************************************************** //
-TEST_F(Common_test, /*DISABLED_*/Test_Light_Points_LimitCount_deprecated)
+TEST_F(Common_test, /*DISABLED_*/Test_Transform_UnknownKind)
 {
   const Tested_t oExample{ Data_t{} };
   const ITested_t & IExample = oExample;
 
-  auto itLightCreator = IExample.GetCreators().find(uT("Light"));
-  ASSERT_NE(IExample.GetCreators().end(), itLightCreator);
+  auto itCreator = IExample.GetCreators().find(uT("Transform"));
+  ASSERT_NE(IExample.GetCreators().end(), itCreator);
 
-  auto pLight = Component_t::Make(
+  const auto pComponent = Component_t::Make(
     {
-      { uT("kind"), uT("Point") },
+      { uT("kind"), uT("Unknow1908061947") },
     });
 
-  auto LightRender = itLightCreator->second(pLight);
-  ASSERT_NE(nullptr, LightRender);
-
-  for (size_t i = 0; i < COVELLITE_MAX_LIGHT_POINT_SCENE_COUNT; i++)
-  {
-    LightRender();
-  }
-
-  // Лишний источник света - не должно упасть.
-  LightRender();
+  EXPECT_THROW(itCreator->second(pComponent), ::std::exception);
 }
 
 // ************************************************************************** //
-TEST_F(Common_test, /*DISABLED_*/Test_StructSizeAlign16Bytes_deprecated)
+TEST_F(Common_test, /*DISABLED_*/Test_Buffer_Constant_User_EmptyMapper)
 {
-  EXPECT_EQ(0, sizeof(::Matrices) % 16);
-  EXPECT_EQ(0, sizeof(::SceneLights) % 16);
+  using BufferMapper_t = ::covellite::api::cbBufferMap_t<void>;
+
+  const Tested_t oExample{ Data_t{} };
+  const ITested_t & IExample = oExample;
+
+  auto itCreator = IExample.GetCreators().find(uT("Buffer"));
+  ASSERT_NE(IExample.GetCreators().end(), itCreator);
+
+  // Тип буфера выводится из переданного mapper'a
+  //EXPECT_THROW(itCreator->second(Component_t::Make({ })), ::std::exception);
+
+  const auto pComponent1 = Component_t::Make(
+    {
+      { uT("mapper"), BufferMapper_t{ } },
+    });
+
+  EXPECT_THROW(itCreator->second(pComponent1), ::std::exception);
+
+  const auto pComponent2 = Component_t::Make(
+    {
+      { uT("mapper"), BufferMapper_t{ nullptr } },
+    });
+
+  EXPECT_THROW(itCreator->second(pComponent2), ::std::exception);
+}
+
+// ************************************************************************** //
+TEST_F(Common_test, /*DISABLED_*/Test_Buffer_Constant_User_EmptySize)
+{
+  using BufferMapper_t = ::covellite::api::cbBufferMap_t<void>;
+
+  const Tested_t oExample{ Data_t{} };
+  const ITested_t & IExample = oExample;
+
+  auto itCreator = IExample.GetCreators().find(uT("Buffer"));
+  ASSERT_NE(IExample.GetCreators().end(), itCreator);
+
+  const auto pComponent = Component_t::Make(
+    {
+      { uT("mapper"), BufferMapper_t{ [](void *) { return false; } } },
+    });
+
+  EXPECT_THROW(itCreator->second(pComponent), ::std::exception);
 }

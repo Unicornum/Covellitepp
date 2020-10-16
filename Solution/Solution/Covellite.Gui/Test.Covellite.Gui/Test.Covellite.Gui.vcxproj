@@ -59,7 +59,7 @@
       <FloatingPointModel>Precise</FloatingPointModel>
       <WarningLevel>Level4</WarningLevel>
       <SDLCheck>false</SDLCheck>
-      <DisableSpecificWarnings>6326</DisableSpecificWarnings>
+      <DisableSpecificWarnings>6326;%(DisableSpecificWarnings)</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -75,7 +75,7 @@
       <FloatingPointModel>Precise</FloatingPointModel>
       <WarningLevel>Level4</WarningLevel>
       <SDLCheck>false</SDLCheck>
-      <DisableSpecificWarnings>6326</DisableSpecificWarnings>
+      <DisableSpecificWarnings>6326;%(DisableSpecificWarnings)</DisableSpecificWarnings>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -119,8 +119,8 @@
     <ClInclude Include="stdafx.h" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\Covellite.Api\Covellite.Api\Covellite.Api.vcxproj">
-      <Project>{6314e391-0a82-4703-a819-7bc337d46715}</Project>
+    <ProjectReference Include="..\..\Covellite.Api\Covellite.Api\Covellite.Api.Least.vcxproj">
+      <Project>{834eaa44-e0db-476e-9d26-da27f845e3d1}</Project>
       <LinkLibraryDependencies>true</LinkLibraryDependencies>
     </ProjectReference>
   </ItemGroup>

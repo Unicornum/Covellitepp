@@ -1,8 +1,37 @@
 
-struct PointLights
+#define COVELLITE_MAX_LIGHT_POINT_OBJECT_COUNT 8
+
+struct Ambient_t
 {
-  Point_t Lights[8];
+  float4 Color;
+  int IsValid, align1, align2, align3;
+};
+
+struct Direction_t
+{
+  float4 Color;
+  float4 Direction;
+  int IsValid, align1, align2, align3;
+};
+
+struct Point_t
+{
+  float4 Color;
+  float4 Position;
+  float4 Attenuation; // Const, Linear, Exponent, Radius;
+};
+
+struct Points_t
+{
+  Point_t Lights[COVELLITE_MAX_LIGHT_POINT_OBJECT_COUNT];
   int     UsedSlotCount;
+};
+
+struct Lights_t
+{
+  Ambient_t   Ambient;
+  Direction_t Direction;
+  Points_t    Points;
 };
 
 struct FogRecord
@@ -17,7 +46,7 @@ struct FogRecord
 struct UserConstantBuffer
 {
   FogRecord Fog;
-  PointLights Lights;
+  Lights_t  Lights;
 };
 
 COVELLITE_DECLARE_CONST_USER_BUFFER(UserConstantBuffer, cbUserData, UserData);
@@ -28,7 +57,7 @@ COVELLITE_DECLARE_TEX2D(TexDiffuse, 0);
 
 float4 DiscardTransparentPixel(Pixel _Value, float4 _Color)
 {
-  if (_Color.a < 0.5f) discard;
+  if (_Color.a < 0.25f) discard;
   return _Color;
 }
 
@@ -60,19 +89,31 @@ float3 SyncSaturate(float3 _Color)
 
 float4 CalculateLights(Pixel _Value, float4 _Color)
 {
-  float4 LightColor = _Value.Color; // Ambient + Direction
+  float4 Result = float4(0.0f, 0.0f, 0.0f, 0.0f);
+
+  if (UserData.Lights.Ambient.IsValid == 1) // Ambient
+  {
+    Result += UserData.Lights.Ambient.Color;
+  }
+
+  if (UserData.Lights.Direction.IsValid == 1) // Direction
+  {
+    float3 Direction = normalize(ToFloat3(UserData.Lights.Direction.Direction));
+    Result += max(dot(_Value.Normal, Direction), 0.0f) *
+      UserData.Lights.Direction.Color;
+  }
 
   // Points
 
-  for (int i = 0; i < UserData.Lights.UsedSlotCount; i++)
+  for (int i = 0; i < UserData.Lights.Points.UsedSlotCount; i++)
   {
-    LightColor += CalcPointLight(UserData.Lights.Lights[i],
+    Result += CalcPointLight(UserData.Lights.Points.Lights[i],
       _Value.WorldPos, _Value.Normal);
   }
 
-  LightColor = float4(SyncSaturate(LightColor.rgb), 1.0f);
+  Result = float4(SyncSaturate(Result.rgb), 1.0f);
 
-  return LightColor * _Color;
+  return Result * _Color;
 }
 
 float CalculateFogLinear(float _Distance)
@@ -100,6 +141,18 @@ float4 CalculateFog(Pixel _Value, float4 _Color)
   return FogFactor * _Color + (1.0f - FogFactor) * UserData.Fog.Color;
 }
 
+float4 psTextured(Pixel _Value)
+{
+  return COVELLITE_TEX2D_COLOR(TexDiffuse, _Value.TexCoord);
+}
+
+float4 psLight(Pixel _Value)
+{
+  float4 Color = COVELLITE_TEX2D_COLOR(TexDiffuse, _Value.TexCoord);
+  Color = CalculateLights(_Value, Color);
+  return Color;
+}
+
 float4 psExample(Pixel _Value)
 {
   float4 Color = COVELLITE_TEX2D_COLOR(TexDiffuse, _Value.TexCoord);
@@ -108,7 +161,7 @@ float4 psExample(Pixel _Value)
   Color = CalculateLights(_Value, Color);
   Color = CalculateFog(_Value, Color);
 
-  return Color;
+  return float4(Color.rgb, 1.0f);
 }
 
 #endif /////////////////////////////////////////////////////////////////////////

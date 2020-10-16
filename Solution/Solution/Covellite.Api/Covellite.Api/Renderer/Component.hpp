@@ -144,6 +144,7 @@ public:
   const int Capacity;
   const bool IsUsingMipmapping;
   const bool IsMapping;
+  // cppcheck-suppress duplInheritedMember
   const uint8_t Align[6] = { 0 };
 
 public:

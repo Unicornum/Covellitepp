@@ -8,40 +8,6 @@ namespace covellite
 namespace api
 {
 
-namespace vertex
-{
-
-/// \deprecated
-///  Класс устарел и будет удален в следующей стабильной версии, вместо него
-///  следует использовать класс covellite::api::Vertex.
-/// \brief
-///  Описание одной вершины меша для рендеринга плоских объектов.
-/// \details
-///  - Формат вершины для минимизации операций копирования данных буфера 
-/// (должнен соответствовать формату Rocket::Core::Vertex).
-class [[deprecated]] Polygon
-{
-public:
-  float x, y;
-  uint32_t ABGRColor;
-  float u, v;
-};
-
-/// \deprecated
-///  Класс устарел и будет удален в следующей стабильной версии, вместо него
-///  следует использовать класс covellite::api::Vertex.
-/// \brief
-///  Описание одной вершины для рендеринга объемных моделей.
-class [[deprecated]] Polyhedron
-{
-public:
-  float x, y, z;
-  float nx, ny, nz;
-  float tu, tv;
-};
-
-} // namespace vertex
-
 /**
 * \ingroup CovelliteApiGroup
 * \brief
@@ -66,33 +32,6 @@ public:
 */
 class Vertex final
 {
-public:
-  /**
-  *\deprecated
-  *  Класс устарел и будет удален в следующей стабильной версии, вместо
-  *  них следует использовать класс covellite::api::Vertex.
-  */
-  class [[deprecated]] Polygon
-  {
-  public:
-    float x, y;
-    uint32_t ABGRColor;
-    float u, v;
-  };
-
-  /**
-  *\deprecated
-  *  Класс устарел и будет удален в следующей стабильной версии, вместо
-  *  них следует использовать класс covellite::api::Vertex.
-  */
-  class [[deprecated]] Polyhedron
-  {
-  public:
-    float x, y, z;
-    float nx, ny, nz;
-    float tu, tv;
-  };
-
 public:
   float px, py, pz, pw; ///< Position
   float tu, tv;         ///< Texture coords

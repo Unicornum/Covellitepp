@@ -37,14 +37,6 @@ public:
   Render_t Obtain(const ComponentPtr_t &);
   void Remove(const ComponentPtr_t &);
 
-public:
-  // deprecated
-  Renders_t Obtain(const Object_t &);
-  void Remove(const Object_t &);
-
-private:
-  Render_t Create(const ComponentPtr_t &);
-
 private:
   Creators_t m_Creators;
   ::std::map<Id_t, ::std::pair<size_t, Render_t>> m_AllExistingRenders;

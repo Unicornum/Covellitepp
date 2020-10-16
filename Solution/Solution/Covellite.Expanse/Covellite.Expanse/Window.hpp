@@ -47,14 +47,11 @@ public:
 
 public:
   // Èםעונפויס IWindow:
-  void DeferredCreateObject(const GameObject_t &,
-    const fnObjectCreationCompleted_t &) override;
   void DeferredCreateObject(const fnObjectCreation_t &,
     const fnObjectCreationCompleted_t &) override;
 
 public:
   // Èםעונפויס I3DScene:
-  void Add(const size_t, const ObjectId_t, const size_t = 0) override;
   void Add(const ObjectId_t) override;
 
 private:

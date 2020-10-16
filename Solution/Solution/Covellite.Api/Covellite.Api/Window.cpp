@@ -20,11 +20,7 @@
 
 # elif BOOST_PLAT_ANDROID
 
-#if __ANDROID_API__ >= 18
 #include "Renderer/OpenGLES3.hpp"
-#endif
-
-#include "Renderer/OpenGLES.hpp"
 
 # endif // BOOST_OS_...
 

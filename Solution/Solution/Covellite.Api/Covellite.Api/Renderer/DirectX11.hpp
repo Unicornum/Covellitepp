@@ -72,13 +72,6 @@ protected:
   Render_t CreatePresentBuffer(const ComponentPtr_t &) override;
 
 private:
-  // deprecated
-  Render_t CreateFog(const ComponentPtr_t &) override;
-  Render_t CreateMaterial(const ComponentPtr_t &) noexcept override { return nullptr; }
-  Render_t CreateLight(const ComponentPtr_t &) override;
-  Render_t CreateGeometry(const ComponentPtr_t &) override;
-
-private:
   void CreateDeviceAndSwapChain(const Data_t &);
   void SetRenderTargetSize(const UINT, const UINT);
   void CreateRenderTargetView(const UINT, const UINT);

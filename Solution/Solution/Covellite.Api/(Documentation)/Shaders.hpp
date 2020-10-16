@@ -47,8 +47,6 @@
 *
 * \code
 
-Pixel entry(Polygon _Value); // Вертексный шейдер для рендеринга 2D объектов (deprecated)
-Pixel entry(Polyhedron _Value); // Вертексный шейдер для рендеринга 3D объектов (deprecated)
 Pixel entry(Vertex _Value); // Вертексный шейдер
 float4 entry(Pixel _Value); // Пиксельный шейдер
 

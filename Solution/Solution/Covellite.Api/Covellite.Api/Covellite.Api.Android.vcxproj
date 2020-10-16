@@ -73,8 +73,6 @@
     <ClInclude Include="Renderer\OpenGLCommon.hpp" />
     <ClInclude Include="Renderer\OpenGLCommon.Texture.hpp" />
     <ClInclude Include="Renderer\OpenGLCommonShader.hpp" />
-    <ClInclude Include="Renderer\OpenGLCommonStatic.hpp" />
-    <ClInclude Include="Renderer\OpenGLES.hpp" />
     <ClInclude Include="Renderer\OpenGLES3.hpp" />
     <ClInclude Include="Renderer\stdafx.h" />
     <ClInclude Include="Renders.hpp" />
@@ -89,8 +87,6 @@
     <ClCompile Include="Renderer\OpenGLCommon.cpp" />
     <ClCompile Include="Renderer\OpenGLCommon.Texture.cpp" />
     <ClCompile Include="Renderer\OpenGLCommonShader.cpp" />
-    <ClCompile Include="Renderer\OpenGLCommonStatic.cpp" />
-    <ClCompile Include="Renderer\OpenGLES.cpp" />
     <ClCompile Include="Renderer\OpenGLES3.cpp" />
     <ClCompile Include="Renders.cpp" />
     <ClCompile Include="Window.android.cpp" />

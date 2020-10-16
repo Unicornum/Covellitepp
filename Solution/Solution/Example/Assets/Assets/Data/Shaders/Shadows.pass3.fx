@@ -1,4 +1,39 @@
 
+#define COVELLITE_MAX_LIGHT_POINT_OBJECT_COUNT 8
+
+struct Ambient_t
+{
+  float4 Color;
+  int IsValid, align1, align2, align3;
+};
+
+struct Direction_t
+{
+  float4 Color;
+  float4 Direction;
+  int IsValid, align1, align2, align3;
+};
+
+struct Point_t
+{
+  float4 Color;
+  float4 Position;
+  float4 Attenuation; // Const, Linear, Exponent, Radius;
+};
+
+struct Points_t
+{
+  Point_t Lights[COVELLITE_MAX_LIGHT_POINT_OBJECT_COUNT];
+  int     UsedSlotCount;
+};
+
+struct Lights_t
+{
+  Ambient_t   Ambient;
+  Direction_t Direction;
+  Points_t    Points;
+};
+
 struct Light_s
 {
   float4x4 View;
@@ -14,6 +49,7 @@ struct ShaderData
 {
   Light_s  Light;
   Cursor_s Cursor;
+  Lights_t Lights;
 };
 
 COVELLITE_DECLARE_CONST_USER_BUFFER(ShaderData, cbShaderData, oShaderData);
@@ -126,17 +162,17 @@ float4 GetGouraudLightsColor(float3 _Normal)
 
   float4 Result = float4(0.0f, 0.0f, 0.0f, 0.0f);
 
-  if (ObjectData.Lights.Ambient.IsValid == 1) // Ambient
+  if (oShaderData.Lights.Ambient.IsValid == 1) // Ambient
   {
-    Result += ObjectData.Lights.Ambient.Color;
+    Result += oShaderData.Lights.Ambient.Color;
   }
 
-  if (ObjectData.Lights.Direction.IsValid == 1) // Direction
+  if (oShaderData.Lights.Direction.IsValid == 1) // Direction
   {
     float3 Direction =
-      normalize(ObjectData.Lights.Direction.Direction.xyz);
+      normalize(oShaderData.Lights.Direction.Direction.xyz);
     Result +=
-      max(dot(_Normal, Direction), 0.0f) * ObjectData.Lights.Direction.Color;
+      max(dot(_Normal, Direction), 0.0f) * oShaderData.Lights.Direction.Color;
   }
 
   return Result;
@@ -236,7 +272,7 @@ float3 Shadow(float3 _WorldPos, float3 _Normal)
 #endif
 
   float3 normal = normalize(_Normal);
-  float3 lightDir = normalize(ObjectData.Lights.Direction.Direction.xyz);
+  float3 lightDir = normalize(oShaderData.Lights.Direction.Direction.xyz);
 
   float bias = 0.15f * (1.0f + dot(normal, lightDir));
 
@@ -246,7 +282,7 @@ float3 Shadow(float3 _WorldPos, float3 _Normal)
   const float texelSize = 3.0f / 2048.0f;
 
   float4 SoftShadow = float4(0.0f, 0.0f, 0.0f, 0.0f);
-  float4 ShadowColor = ObjectData.Lights.Ambient.Color;
+  float4 ShadowColor = oShaderData.Lights.Ambient.Color;
 
   for (int x = -1; x <= 1; ++x)
   {

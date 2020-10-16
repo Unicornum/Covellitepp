@@ -451,6 +451,7 @@ static const ::std::string ShaderHeader =
 
 #define OpenGLShader_test OpenGL_test
 #include "../OpenGLShader_test.hpp"
+#include "../OpenGLShader.Present_test.hpp"
 
 #define Updater_test OpenGL_test
 #include "../Updater_test.hpp"

@@ -145,10 +145,10 @@ TEST_F(OpenGLCommon_test, /*DISABLED_*/Test_State_Scissor_Enable)
   {
     const int Yo = _WindowHeight - (_Y + _Height);
 
-    pScissorData->SetValue(uT("left"), _X);
-    pScissorData->SetValue(uT("top"), _Y);
-    pScissorData->SetValue(uT("right"), _X + _Width);
-    pScissorData->SetValue(uT("bottom"), _Y + _Height);
+    (*pScissorData)[uT("left")] = _X;
+    (*pScissorData)[uT("top")] = _Y;
+    (*pScissorData)[uT("right")] = _X + _Width;
+    (*pScissorData)[uT("bottom")] = _Y + _Height;
 
     using namespace ::testing;
 
@@ -650,26 +650,6 @@ TEST_F(OpenGLCommon_test, /*DISABLED_*/Test_Buffer_UnknownType)
       "type: type.1905082000, "
       "kind: kind.1905082000\\]\\.");
   }
-}
-
-////////////////////////////////////////////////////////////////////////////////
-
-// ************************************************************************** //
-TEST_F(OpenGLCommon_test, /*DISABLED_*/Test_Present_Geometry_UnknownVariety_deprecated)
-{
-  const Tested_t Example{ Data_t{} };
-  const ITested_t & IExample = Example;
-
-  auto itPresentCreator = IExample.GetCreators().find(uT("Present"));
-  ASSERT_NE(IExample.GetCreators().end(), itPresentCreator);
-
-  const auto pComponent = Component_t::Make(
-    {
-      { uT("kind"), uT("Geometry") },
-      { uT("variety"), uT("Unknown1908071150") },
-    });
-
-  EXPECT_THROW(itPresentCreator->second(pComponent), ::std::exception);
 }
 
 } // unnamed namespace

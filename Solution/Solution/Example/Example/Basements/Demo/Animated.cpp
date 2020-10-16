@@ -9,6 +9,7 @@
 #include <Covellite/Api/Constant.hpp>
 #include "Constants.hpp"
 #include "GameScene.hpp"
+#include "Lights.hpp"
 
 namespace basement
 {
@@ -72,8 +73,8 @@ auto Animated::GetObject(const Any_t & _Value) const /*override*/ -> Objects_t
     return   
     {
       GetCameraObject(m_pGameScene) +
-      GetLightsObject() +
-      GetShaderObject(true)
+      GetShaderObject(true) +
+      GetLightsObject()
     };
   }
 
@@ -181,7 +182,23 @@ auto Animated::GetObject(const Any_t & _Value) const /*override*/ -> Objects_t
 
 /*static*/ Object_t Animated::GetLightsObject(void)
 {
-  using BufferMapper_t = ::covellite::api::cbBufferMap_t<::Lights_t>;
+  using BufferMapper_t = ::covellite::api::cbBufferMap_t<void>;
+
+  struct Fog
+  {
+    float Color[4];
+    float Near;
+    float Far;
+    float Density;
+    // cppcheck-suppress unusedStructMember
+    float Dummy;
+  };
+
+  struct UserConstantBuffer
+  {
+    Fog Fog;
+    Lights_t Lights;
+  };
 
   const auto ARGBtoFloat4 = [](uint32_t _HexColor)
   {
@@ -194,18 +211,24 @@ auto Animated::GetObject(const Any_t & _Value) const /*override*/ -> Objects_t
     };
   };
 
-  const BufferMapper_t Mapper = [=](Lights_t * _pLights)
+  const BufferMapper_t Mapper = [=](void * _pUserConstBuffer)
   {
     // Захватывать здесь ::glm::vec4 нельзя, программа упадет в Release версии
 
-    _pLights->Ambient.IsValid = 1;
-    _pLights->Ambient.Color = ARGBtoFloat4(0xFF8080A0);
+    auto * pUserConstBuffer =
+      reinterpret_cast<UserConstantBuffer *>(_pUserConstBuffer);
+    auto & Ambient = pUserConstBuffer->Lights.Ambient;
+    auto & Direction = pUserConstBuffer->Lights.Direction;
+    auto & Points = pUserConstBuffer->Lights.Points;
 
-    _pLights->Direction.IsValid = 1;
-    _pLights->Direction.Color = ARGBtoFloat4(0xFFF0F0B0);
-    _pLights->Direction.Direction = ::glm::vec4{ 0.0f, 1.0f, 0.33f, 1.0f };
+    Ambient.IsValid = 1;
+    Ambient.Color = ARGBtoFloat4(0xFF8080A0);
 
-    _pLights->Points.UsedSlotCount = 0;
+    Direction.IsValid = 1;
+    Direction.Color = ARGBtoFloat4(0xFFF0F0B0);
+    Direction.Direction = ::glm::vec4{ 0.0f, 1.0f, 0.33f, 1.0f };
+
+    Points.UsedSlotCount = 0;
 
     return false;
   };
@@ -217,6 +240,7 @@ auto Animated::GetObject(const Any_t & _Value) const /*override*/ -> Objects_t
       { uT("id"), uT("Demo.Animated.Lights") },
       { uT("type"), uT("Buffer") },
       { uT("mapper"), Mapper },
+      { uT("size"), sizeof(UserConstantBuffer) },
     }),
   };
 }

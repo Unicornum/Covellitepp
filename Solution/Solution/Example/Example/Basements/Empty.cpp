@@ -14,7 +14,7 @@ Empty::Empty(WindowExpanse_t & _Window) :
   {
     for (const auto & ObjectId : m_Objects)
     {
-      AddToRenderQueue(ObjectId, rand() % 10000);
+      AddToRenderQueue(ObjectId);
     }
   };
 

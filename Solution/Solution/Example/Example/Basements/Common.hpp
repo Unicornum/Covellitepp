@@ -61,7 +61,7 @@ protected:
   static GameObject_t LoadTexture(const Path_t &, const String_t &,
     const String_t &, const int);
   ObjectId_t CreateObject(const GameObject_t &);
-  void AddToRenderQueue(const ObjectId_t, const size_t = 0);
+  void AddToRenderQueue(const ObjectId_t);
 
 private:
   static GameObject_t LoadTexture(const Path_t &, const String_t &,

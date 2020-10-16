@@ -93,7 +93,8 @@ size_t GameObject::GetType(void) const /*final*/
       {
         { uT("type"), uT("Data") },
         { uT("kind"), uT("Shader") },
-        { uT("entry"), uT("psLightened") },
+        { uT("entry"), uT("psLight") },
+        { uT("content"), Vfs.GetData("Data\\Shaders\\Example.fx") },
       }) :
     Component_t::Make(
       {
@@ -116,13 +117,6 @@ size_t GameObject::GetType(void) const /*final*/
       { uT("id"), uT("Demo.Shader.Pixel") },
       { uT("type"), uT("Shader") },
       { uT("service"), Object_t{ pShaderData } },
-    }),
-    Component_t::Make(
-    {
-      { uT("id"), uT("Demo.State.AlphaTest") },
-      { uT("type"), uT("State") },
-      { uT("kind"), uT("AlphaTest") },
-      { uT("discard"), 0.45f },
     }),
   };
 }

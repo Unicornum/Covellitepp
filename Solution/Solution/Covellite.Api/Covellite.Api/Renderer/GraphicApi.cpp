@@ -1,21 +1,7 @@
 
 #include "stdafx.h"
 #include "GraphicApi.hpp"
-
-#if BOOST_COMP_MSVC 
-# pragma warning(push)
-# pragma warning(disable: 4996)
-#elif defined BOOST_COMP_GNUC
-# pragma GCC diagnostic push
-# pragma GCC diagnostic ignored "-Wdeprecated-declarations"
-#endif
 #include <Covellite/Api/Vertex.hpp>
-#if BOOST_COMP_MSVC 
-# pragma warning(pop)
-#elif defined BOOST_COMP_GNUC
-# pragma GCC diagnostic pop
-#endif
-
 #include <Covellite/Api/Defines.hpp>
 #include <Covellite/Api/Component.inl>
 
@@ -42,12 +28,6 @@ GraphicApi::GraphicApi(void) :
       { return CreateBkSurface(_pComponent); } },
     { uT("State"), [=](const ComponentPtr_t & _pComponent)
       { return CreateState(_pComponent); } },
-    { uT("Fog"), [=](const ComponentPtr_t & _pComponent)
-      { return CreateFog(_pComponent); } },
-    { uT("Material"), [=](const ComponentPtr_t & _pComponent)
-      { return CreateMaterial(_pComponent); } },
-    { uT("Light"), [=](const ComponentPtr_t & _pComponent)
-      { return CreateLight(_pComponent); } },
     { uT("Texture"), [=](const ComponentPtr_t & _pComponent)
       { return CreateTexture(_pComponent); } },
     { uT("Shader"), [=](const ComponentPtr_t & _pComponent)
@@ -57,7 +37,7 @@ GraphicApi::GraphicApi(void) :
     { uT("Transform"), [this](const ComponentPtr_t & _pComponent)
       { return CreateTransform(_pComponent); } },
     { uT("Present"), [=](const ComponentPtr_t & _pComponent)
-      { return CreatePresent(_pComponent); } },
+      { return CreatePresentBuffer(_pComponent); } },
     { uT("Updater"), [this](const ComponentPtr_t & _pComponent)
       { return CreateUpdater(_pComponent); } },
   };
@@ -76,38 +56,25 @@ auto GraphicApi::GetCreators(void) const noexcept -> const Creators_t & /*final*
   return m_Creators;
 }
 
-auto GraphicApi::CreatePresent(const ComponentPtr_t & _pComponent) -> Render_t
-{
-  if (_pComponent->Kind == uT("Geometry"))
-  {
-    return CreateGeometry(_pComponent);
-  }
-
-  // 13 Сентябрь 2019 12:20 (unicornum.verum@gmail.com)
-  TODO("При удалении устаревшего кода заменить здесь вызов на CreateBuffer()");
-  return CreatePresentBuffer(_pComponent);
-}
-
 auto GraphicApi::CreateUpdater(const ComponentPtr_t & _pComponent) const -> Render_t
 {
   using ::covellite::api::Updater_t;
+  using ::covellite::api::Component;
 
-  static const auto hFunctionName =
-    ::covellite::api::Component::GetHash(uT("function"));
-
+  static const auto hFunctionName = Component::GetHash(uT("function"));
   static const Updater_t Empty = [](const float) {};
 
+  // 11.10.2020: Вероятно, это уже неактуально после замены интерфейса:
   // Если переданный функциональный объект захватить здесь, то оверхед
-  // будет меньше (55kk против 12kk вызовов в секунду), но даже так оверхед
-  // достаточно мал, чтобы оказывать какое-либо существенное влияние
-  // (updater'ов в приципе не может быть много).
+  // будет существенно меньше (55kk против 12kk вызовов в секунду), но даже так
+  // оверхед достаточно мал, чтобы оказывать какое-либо существенное влияние
+  // на время рендеринга кадра (updater'ов в приципе не может быть много).
 
   return [=](void)
   {
     // Создание здесь объекта, а не ссылки позволяет релизовать замену
     // функции обратного вызова внутри самой функции обратного вызова.
-    const Updater_t Updater =
-      (*_pComponent)[hFunctionName].Default(Empty);
+    const Updater_t Updater = (*_pComponent)[hFunctionName].Default(Empty);
 
     Updater(m_CurrentFrameTime);
   };

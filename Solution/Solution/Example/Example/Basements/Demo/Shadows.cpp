@@ -174,15 +174,13 @@ Shadows::Shadows(const Another::Value _Shadows) :
     };
   };
 
-  m_pLights = ::std::make_shared<Lights_t>();
-  m_pLights->Ambient.IsValid = 1;
-  m_pLights->Ambient.Color = ARGBtoFloat4(0xFF8080A0);
-  m_pLights->Direction.IsValid = 1;
-  m_pLights->Direction.Color = ARGBtoFloat4(0xFFF0F0B0);
-  m_pLights->Direction.Direction = ::glm::vec4{ 0.0f, 1.0f, 0.66f, 0.0f };
-  m_pLights->Points.UsedSlotCount = 0;
-
   m_pShaderData = ::std::make_shared<ShaderData>();
+  m_pShaderData->Lights.Ambient.IsValid = 1;
+  m_pShaderData->Lights.Ambient.Color = ARGBtoFloat4(0xFF8080A0);
+  m_pShaderData->Lights.Direction.IsValid = 1;
+  m_pShaderData->Lights.Direction.Color = ARGBtoFloat4(0xFFF0F0B0);
+  m_pShaderData->Lights.Direction.Direction = ::glm::vec4{ 0.0f, 1.0f, 0.66f, 0.0f };
+  m_pShaderData->Lights.Points.UsedSlotCount = 0;
 
   constexpr auto CellSceneRadius = 6;
   constexpr auto CellRockRadius = 4;
@@ -287,7 +285,6 @@ Object_t Shadows::GetPass3(void) const
   return
     GetFlatCamera() +
     GetFlatShaders() + 
-    GetSceneLights() +
     GetTextureSurface(false) +
     GetMesh(5).GetObject() +
 
@@ -377,7 +374,8 @@ Object_t Shadows::GetTextureSurface(const bool _IsTarget) const
 
 Object_t Shadows::GetShadowCamera(void) const
 {
-  const auto pLights = m_pLights;
+  const auto pLightCamera = m_pLightCamera;
+  const auto pShaderData = m_pShaderData;
 
   const auto pCameraRotation = Component_t::Make(
     {
@@ -385,7 +383,7 @@ Object_t Shadows::GetShadowCamera(void) const
       { uT("kind"), uT("Rotation") },
     });
 
-  const auto Pitch = pLights->Direction.Direction.z;
+  const auto Pitch = pShaderData->Lights.Direction.Direction.z;
 
   (*pCameraRotation)[uT("x")] = 0.0f;
   (*pCameraRotation)[uT("y")] = -Pitch;
@@ -399,8 +397,15 @@ Object_t Shadows::GetShadowCamera(void) const
     const float Direction = math::Constant<float>::Pi *
       (fmod(_Time / 5.0f, 2.0f) - 1.0f);
 
-    pLights->Direction.Direction.x = math::radian::Cos(Direction);
-    pLights->Direction.Direction.y = math::radian::Sin(Direction);
+    pShaderData->Lights.Direction.Direction.x = 
+      math::radian::Cos(Direction);
+    pShaderData->Lights.Direction.Direction.y = 
+      math::radian::Sin(Direction);
+
+    pShaderData->Light.Projection =
+      (*pLightCamera)[uT("projection")].Default(::glm::mat4{ 0.0f });
+    pShaderData->Light.View =
+      (*pLightCamera)[uT("view")].Default(::glm::mat4{ 0.0f });
 
     (*pCameraRotation)[uT("z")] = Direction;
   };
@@ -550,38 +555,8 @@ Object_t Shadows::GetSceneCamera(void) const
     {
       { uT("id"), uT("Demo.Shadows.Scene.Shader.Pixel") },
       { uT("type"), uT("Shader") },
-      { uT("entry"), uT("psLightened") },
+      { uT("entry"), uT("psTextured") },
       { uT("content"), ShaderData },
-    }),
-  };
-}
-
-Object_t Shadows::GetSceneLights(void) const
-{
-  using BufferMapper_t = ::covellite::api::cbBufferMap_t<::Lights_t>;
-
-  const auto pLightCamera = m_pLightCamera;
-  const auto pLights = m_pLights;
-  const auto pShaderData = m_pShaderData;
-
-  const BufferMapper_t LightsMapper = [=](Lights_t * _pLights)
-  {
-    memcpy(_pLights, &(*pLights), sizeof(Lights_t));
-
-    pShaderData->Light.Projection = 
-      (*pLightCamera)[uT("projection")].Default(::glm::mat4{ 0.0f });
-    pShaderData->Light.View = 
-      (*pLightCamera)[uT("view")].Default(::glm::mat4{ 0.0f });
-    return false;
-  };
-
-  return
-  {
-    Component_t::Make(
-    {
-      { uT("id"), uT("Demo.Shadows.Lights") },
-      { uT("type"), uT("Buffer") },
-      { uT("mapper"), LightsMapper },
     }),
   };
 }
@@ -702,6 +677,7 @@ Object_t Shadows::GetFlatShaders(const String_t & _psEntryPoint) const
     pDestCursor->Light = pSrcShaderData->Light;
     pDestCursor->Cursor.X = pCursorData->X / pCursorData->WindowX;
     pDestCursor->Cursor.Y = pCursorData->Y / pCursorData->WindowY;
+    pDestCursor->Lights = pSrcShaderData->Lights;
     return false;
   };
 

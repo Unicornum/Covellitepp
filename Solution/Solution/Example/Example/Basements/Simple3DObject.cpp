@@ -7,6 +7,7 @@
 #include <glm/glm.force.hpp>
 #include <Covellite/Api/Constant.hpp>
 #include "Demo/Constants.hpp"
+#include "Demo/Lights.hpp"
 
 using namespace basement;
 namespace math = ::alicorn::extension::cpp::math;
@@ -31,7 +32,8 @@ Simple3DObject::Simple3DObject(
       uT("Example.Texture.Reflection"), uT("TexReflection"), 1) +
     LoadTexture("draw3dobject.title.normal.png",
       uT("Example.Texture.Normal"), uT("TexNormal"), 2) +
-    LoadTexture("demo.background.jpg",
+    //LoadTexture("draw3dobject.title.environment.png",
+    LoadTexture("draw3dobject.title.environment2.jpg",
       uT("Example.Texture.Environment"), uT("TexEnvironment"), 3));
 
   const auto Step = static_cast<int>(sqrt(_CubesCount));
@@ -180,7 +182,7 @@ auto Simple3DObject::BuildCamera(void) -> ObjectId_t
       {
         { uT("id"), uT("Example.Shader.Pixel.Default") },
         { uT("type"), uT("Shader") },
-        { uT("entry"), uT("psLightened") },
+        { uT("entry"), uT("psTextured") },
       }),
       Component_t::Make(
       {
@@ -289,8 +291,7 @@ auto Simple3DObject::BuildShader(int _LightsFlags, bool _IsInstanceMode) -> Obje
 
 auto Simple3DObject::BuildLights(int _LightsFlags) -> ObjectId_t
 {
-  using Lights_t = ::Lights_t;
-  using BufferMapper_t = ::covellite::api::cbBufferMap_t<Lights_t>;
+  using BufferMapper_t = ::covellite::api::cbBufferMap_t<void>;
 
   const auto IsActive = [=](Lights::Type _Type)
   {
@@ -308,9 +309,9 @@ auto Simple3DObject::BuildLights(int _LightsFlags) -> ObjectId_t
     };
   };
 
-  const auto pLights = ::std::make_shared<Lights_t>();
+  const auto pLights = ::std::make_shared<::Lights_t>();
   auto & Lights = *pLights;
-  memset(&Lights, 0x00, sizeof(Lights_t));
+  memset(&Lights, 0x00, sizeof(::Lights_t));
 
   const float X = 5.0f;
   const float Y = 1.0f;
@@ -361,9 +362,9 @@ auto Simple3DObject::BuildLights(int _LightsFlags) -> ObjectId_t
 
   const Id Id;
 
-  const BufferMapper_t Mapper = [pLights](Lights_t * _pLights)
+  const BufferMapper_t Mapper = [pLights](void * _pLights)
   {
-    *_pLights = *pLights;
+    memcpy(_pLights, pLights.get(), sizeof(::Lights_t));
     return false;
   };
 
@@ -374,6 +375,8 @@ auto Simple3DObject::BuildLights(int _LightsFlags) -> ObjectId_t
         { uT("id"), uT("Example.3DCube.Lights.") +  Id.GetStringId() },
         { uT("type"), uT("Buffer") },
         { uT("mapper"), Mapper },
+        { uT("name"), uT("cbLights") },
+        { uT("size"), sizeof(::Lights_t) },
       }),
     });
 }

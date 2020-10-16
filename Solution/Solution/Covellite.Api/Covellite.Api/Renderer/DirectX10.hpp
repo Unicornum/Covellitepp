@@ -69,13 +69,6 @@ protected:
   Render_t CreatePresentBuffer(const ComponentPtr_t &) override;
 
 private:
-  // deprecated
-  Render_t CreateFog(const ComponentPtr_t &) noexcept override { return nullptr; }
-  Render_t CreateMaterial(const ComponentPtr_t &) noexcept override { return nullptr; }
-  Render_t CreateLight(const ComponentPtr_t &) noexcept override { return nullptr; }
-  Render_t CreateGeometry(const ComponentPtr_t &) noexcept override { return nullptr; }
-
-private:
   void SetViewport(const UINT, const UINT);
   Render_t CreateBlendState(bool);
   Render_t GetDepthState(bool, bool, bool);

@@ -1,6 +1,6 @@
 
 // Так нужно - для тестов.
-#ifndef COVELLITE_ROCKET_SYSTEMTORGUIKEYCODE_HPP
+#ifndef COVELLITE_ROCKET_SYSTEMTOGUIKEYCODE_HPP
 #define COVELLITE_ROCKET_SYSTEMTOGUIKEYCODE_HPP
 
 namespace covellite
@@ -24,4 +24,4 @@ KeyCode_t SystemToGuiKeyCode(int32_t);
 
 } // namespace covellite
 
-#endif // COVELLITE_ROCKET_SYSTEMTORGUIKEYCODE_HPP
+#endif // COVELLITE_ROCKET_SYSTEMTOGUIKEYCODE_HPP

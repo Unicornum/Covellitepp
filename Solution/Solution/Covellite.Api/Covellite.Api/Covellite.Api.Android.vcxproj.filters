@@ -36,17 +36,11 @@
     <ClInclude Include="Renderer\Component.hpp">
       <Filter>Renderer</Filter>
     </ClInclude>
-    <ClInclude Include="Renderer\OpenGLES.hpp">
-      <Filter>Renderer</Filter>
-    </ClInclude>
     <ClInclude Include="Renderer\OpenGLCommon.hpp">
       <Filter>Renderer</Filter>
     </ClInclude>
     <ClInclude Include="Vertex.hpp" />
     <ClInclude Include="Defines.hpp" />
-    <ClInclude Include="Renderer\OpenGLCommonStatic.hpp">
-      <Filter>Renderer</Filter>
-    </ClInclude>
     <ClInclude Include="Renderer\OpenGLCommonShader.hpp">
       <Filter>Renderer</Filter>
     </ClInclude>
@@ -67,16 +61,10 @@
   <ItemGroup>
     <ClCompile Include="Window.cpp" />
     <ClCompile Include="Renders.cpp" />
-    <ClCompile Include="Renderer\OpenGLES.cpp">
-      <Filter>Renderer</Filter>
-    </ClCompile>
     <ClCompile Include="Renderer\OpenGLCommon.cpp">
       <Filter>Renderer</Filter>
     </ClCompile>
     <ClCompile Include="Window.android.cpp" />
-    <ClCompile Include="Renderer\OpenGLCommonStatic.cpp">
-      <Filter>Renderer</Filter>
-    </ClCompile>
     <ClCompile Include="Renderer\OpenGLCommonShader.cpp">
       <Filter>Renderer</Filter>
     </ClCompile>

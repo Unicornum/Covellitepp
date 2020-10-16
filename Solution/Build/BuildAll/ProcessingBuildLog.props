@@ -13,7 +13,7 @@ set PATH=%PATH%;$(BinaryRootDir)$(TypeProjectDir)\x64
 set PathToBuildLog=$(SolutionDir)Solution\Solution\(Documentation)\MSBuild.result.txt
 set PathToBuildLogFilter=$(SolutionDir)Solution\Solution\(Documentation)\MSBuild.filter.txt
 
-Documentation.exe --process-report=build --file="%PathToBuildLog%" --path-to-solution="$(SolutionDir)" --exclude="%PathToBuildLogFilter%"
+Documentation.exe --process-report=build --file="%PathToBuildLog%" --path-to-solution=$(SolutionDir) --exclude="%PathToBuildLogFilter%"
 </Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>

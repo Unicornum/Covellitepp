@@ -59,10 +59,7 @@ TEST_F(C3DScene_test, /*DISABLED_*/Test_Destructor)
   EXPECT_TRUE(::std::is_nothrow_destructible<Tested_t>::value);
 }
 
-namespace covellite
-{
-
-namespace expanse
+namespace covellite::expanse
 {
 
 // ************************************************************************** //
@@ -147,53 +144,7 @@ TEST_F(C3DScene_test, /*DISABLED_*/Test_Produce3DObjects)
   IExample.Remove(2006191830);
 }
 
-} // namespace expanse
-
-} // namespace covellite
-
-// ************************************************************************** //
-TEST_F(C3DScene_test, /*DISABLED_*/Test_Render_OnePass)
-{
-  Proxy oProxy;
-
-  Tested_t Example;
-  I3DScene_t & IExample = Example;
-
-  for (int i = 0; i < 10; i++)
-  {
-    Example.Add(i, C3DObject_t
-      { 
-        [&, i]() { oProxy.Call(i); },
-        [&, i]() { oProxy.Call(i); }
-      });
-  }
-
-  for (int i = 9; i >= 0; i--)
-  {
-    IExample.Add(0, i);
-  }
-
-  using namespace ::testing;
-
-  InSequence Dummy;
-
-  for (int i = 9; i >= 0; i--)
-  {
-    EXPECT_CALL(oProxy, Call(i))
-      .Times(2);
-  }
-
-  Example.Render();
-
-  EXPECT_CALL(oProxy, Call(_))
-    .Times(0);
-
-  Example.Render();
-
-  IExample.Add(0, 2006191354);
-
-  EXPECT_THROW(Example.Render(), ::std::exception);
-}
+} // namespace covellite::expanse
 
 // ************************************************************************** //
 TEST_F(C3DScene_test, /*DISABLED_*/Test_Render_Simple)
@@ -235,156 +186,6 @@ TEST_F(C3DScene_test, /*DISABLED_*/Test_Render_Simple)
   Example.Render();
 
   IExample.Add(2008042034);
-
-  EXPECT_THROW(Example.Render(), ::std::exception);
-}
-
-// ************************************************************************** //
-TEST_F(C3DScene_test, /*DISABLED_*/Test_Render_MultiPass)
-{
-  Proxy oProxy;
-
-  Tested_t Example;
-  I3DScene_t & IExample = Example;
-
-  for (int i = 0; i < 10; i++)
-  {
-    Example.Add(i, C3DObject_t
-      {
-        [&, i]() { oProxy.Call(i); },
-        [&, i]() { oProxy.Call(i); },
-        [&, i]() { oProxy.Call(i); }
-      });
-  }
-
-  IExample.Add(1, 0);
-  IExample.Add(1, 1);
-  IExample.Add(0, 2);
-  IExample.Add(8, 3);
-  IExample.Add(8, 4);
-  IExample.Add(0, 5);
-  IExample.Add(0, 6);
-  IExample.Add(0, 7);
-  IExample.Add(1, 8);
-  IExample.Add(1, 9);
-
-  using namespace ::testing;
-
-  InSequence Dummy;
-
-  EXPECT_CALL(oProxy, Call(2))
-    .Times(3);
-
-  EXPECT_CALL(oProxy, Call(5))
-    .Times(3);
-
-  EXPECT_CALL(oProxy, Call(6))
-    .Times(3);
-
-  EXPECT_CALL(oProxy, Call(7))
-    .Times(3);
-
-  EXPECT_CALL(oProxy, Call(0))
-    .Times(3);
-
-  EXPECT_CALL(oProxy, Call(1))
-    .Times(3);
-
-  EXPECT_CALL(oProxy, Call(8))
-    .Times(3);
-
-  EXPECT_CALL(oProxy, Call(9))
-    .Times(3);
-
-  EXPECT_CALL(oProxy, Call(3))
-    .Times(3);
-
-  EXPECT_CALL(oProxy, Call(4))
-    .Times(3);
-
-  Example.Render();
-
-  EXPECT_CALL(oProxy, Call(_))
-    .Times(0);
-
-  Example.Render();
-
-  IExample.Add(10, 2006191726);
-
-  EXPECT_THROW(Example.Render(), ::std::exception);
-}
-
-// ************************************************************************** //
-TEST_F(C3DScene_test, /*DISABLED_*/Test_Render_Sort)
-{
-  Proxy oProxy;
-
-  Tested_t Example;
-  I3DScene_t & IExample = Example;
-
-  for (int i = 0; i < 10; i++)
-  {
-    Example.Add(i, C3DObject_t
-      {
-        [&, i]() { oProxy.Call(i); },
-        [&, i]() { oProxy.Call(i); },
-        [&, i]() { oProxy.Call(i); }
-      });
-  }
-
-  IExample.Add(1, 0);
-  IExample.Add(1, 1);
-  IExample.Add(0, 2, 4);
-  IExample.Add(8, 3);
-  IExample.Add(8, 4);
-  IExample.Add(0, 5, 3);
-  IExample.Add(0, 6, 2);
-  IExample.Add(0, 7, 1);
-  IExample.Add(1, 8);
-  IExample.Add(1, 9);
-
-  using namespace ::testing;
-
-  InSequence Dummy;
-
-  EXPECT_CALL(oProxy, Call(7))
-    .Times(3);
-
-  EXPECT_CALL(oProxy, Call(6))
-    .Times(3);
-
-  EXPECT_CALL(oProxy, Call(5))
-    .Times(3);
-
-  EXPECT_CALL(oProxy, Call(2))
-    .Times(3);
-
-  EXPECT_CALL(oProxy, Call(0))
-    .Times(3);
-
-  EXPECT_CALL(oProxy, Call(1))
-    .Times(3);
-
-  EXPECT_CALL(oProxy, Call(8))
-    .Times(3);
-
-  EXPECT_CALL(oProxy, Call(9))
-    .Times(3);
-
-  EXPECT_CALL(oProxy, Call(3))
-    .Times(3);
-
-  EXPECT_CALL(oProxy, Call(4))
-    .Times(3);
-
-  Example.Render();
-
-  EXPECT_CALL(oProxy, Call(_))
-    .Times(0);
-
-  Example.Render();
-
-  IExample.Add(10, 2006191726);
 
   EXPECT_THROW(Example.Render(), ::std::exception);
 }

@@ -11,7 +11,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{B885A83F-64F1-4261-B74D-B1B6BF1B82F2}</ProjectGuid>
+    <ProjectGuid>{0DA08785-A170-4321-8B8B-13EF61FA36D7}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>TestClass</RootNamespace>
   </PropertyGroup>
@@ -77,15 +77,14 @@
     <ResourceCompile Include="Resources.rc" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="OpenGLES_test.cpp" />
+    <ClCompile Include="OpenGL.Present_test.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\OpenGLCommon_test.hpp" />
-    <ClInclude Include="..\OpenGLStatic_test.hpp" />
+    <ClInclude Include="..\OpenGLShader.Present_test.hpp" />
     <ClInclude Include="stdafx.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

@@ -249,18 +249,9 @@ TEST_F(Window_test, /*DISABLED_*/Test_DoApplicationUpdate)
 // ************************************************************************** //
 TEST_F(Window_test, /*DISABLED_*/Test_DoWindowResize)
 {
-  using WindowOsProxy_t = ::mock::covellite::os::Window::Proxy;
-  WindowOsProxy_t WindowOsProxy;
-  WindowOsProxy_t::GetInstance() = &WindowOsProxy;
-
-  using SettingsProxy_t = ::mock::alicorn::modules::settings::SectionImplProxy;
-  SettingsProxy_t SettingsProxy;
-  SettingsProxy_t::GetInstance() = &SettingsProxy;
-
-  using RendererImplProxy_t = ::mock::RendererImpl::Proxy;
-  RendererImplProxy_t RendererImplProxy;
-  RendererImplProxy_t::GetInstance() = &RendererImplProxy;
-
+  ::mock::covellite::os::Window::Proxy WindowOsProxy;
+  ::mock::alicorn::modules::settings::SectionImplProxy SettingsProxy;
+  ::mock::RendererImpl::Proxy RendererImplProxy;
   const ::mock::Id_t RenderId = 1808221411;
   const auto Width = 1808221412;
   const auto Height = 1808221413;
@@ -297,10 +288,7 @@ TEST_F(Window_test, /*DISABLED_*/Test_DoWindowResize)
 // ************************************************************************** //
 TEST_F(Window_test, /*DISABLED_*/Test_Events)
 {
-  using SettingsProxy_t = ::mock::alicorn::modules::settings::SectionImplProxy;
-  SettingsProxy_t SettingsProxy;
-  SettingsProxy_t::GetInstance() = &SettingsProxy;
-
+  ::mock::alicorn::modules::settings::SectionImplProxy SettingsProxy;
   const auto Message = 1807201322;
 
   using namespace ::testing;
@@ -328,14 +316,8 @@ TEST_F(Window_test, /*DISABLED_*/Test_Events)
 // ************************************************************************** //
 TEST_F(Window_test, /*DISABLED_*/Test_GetClientRect)
 {
-  using WindowOsProxy_t = ::mock::covellite::os::Window::Proxy;
-  WindowOsProxy_t WindowOsProxy;
-  WindowOsProxy_t::GetInstance() = &WindowOsProxy;
-
-  using SettingsProxy_t = ::mock::alicorn::modules::settings::SectionImplProxy;
-  SettingsProxy_t SettingsProxy;
-  SettingsProxy_t::GetInstance() = &SettingsProxy;
-
+  ::mock::covellite::os::Window::Proxy WindowOsProxy;
+  ::mock::alicorn::modules::settings::SectionImplProxy SettingsProxy;
   const ::mock::Id_t WindowOsId = 1807201251;
   const Rect_t Rect = { 1807201252, 1807201253, 1807201254, 1807201255 };
 
@@ -372,14 +354,8 @@ TEST_F(Window_test, /*DISABLED_*/Test_GetRenders)
   using Creator_t = ::std::function<Render_t(const ComponentPtr_t &)>;
   using Creators_t = ::std::map<String_t, Creator_t>;
 
-  using SettingsProxy_t = ::mock::alicorn::modules::settings::SectionImplProxy;
-  SettingsProxy_t SettingsProxy;
-  SettingsProxy_t::GetInstance() = &SettingsProxy;
-
-  using RendererImplProxy_t = ::mock::RendererImpl::Proxy;
-  RendererImplProxy_t RendererImplProxy;
-  RendererImplProxy_t::GetInstance() = &RendererImplProxy;
-
+  ::mock::alicorn::modules::settings::SectionImplProxy SettingsProxy;
+  ::mock::RendererImpl::Proxy RendererImplProxy;
   const ::mock::Id_t ImplId = 1905031704;
 
   const Creator_t Creator = [](const ComponentPtr_t &) { return [](void) {}; };
@@ -415,22 +391,18 @@ TEST_F(Window_test, /*DISABLED_*/Test_GetRenders)
     .WillOnce(ReturnRef(Creators1));
 
   const auto pResult1 = IExample.GetRenders();
-  const auto Result1 = pResult1->Obtain(::covellite::api::Component::Renders::Object_t
-    { 
-      ::covellite::api::Component::Make({ { uT("type"), uT("Type1") } }),
-    });
+  const auto Result1 = pResult1->Obtain(
+    ::covellite::api::Component::Make({ { uT("type"), uT("Type1") } }));
 
   EXPECT_CALL(RendererImplProxy, GetCreators(ImplId))
     .Times(1)
     .WillOnce(ReturnRef(Creators2));
 
   const auto pResult2 = IExample.GetRenders();
-  const auto Result2 = pResult2->Obtain(::covellite::api::Component::Renders::Object_t
-    { 
-      ::covellite::api::Component::Make({ { uT("type"), uT("Type2") } }),
-    });
+  const auto Result2 = pResult2->Obtain(
+    ::covellite::api::Component::Make({ { uT("type"), uT("Type2") } }));
 
   EXPECT_NE(pResult1, pResult2);
-  EXPECT_EQ(1, Result1.size());
-  EXPECT_EQ(1, Result2.size());
+  EXPECT_TRUE(Result1);
+  EXPECT_TRUE(Result2);
 }

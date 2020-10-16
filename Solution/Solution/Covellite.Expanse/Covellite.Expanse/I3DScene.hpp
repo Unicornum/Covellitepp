@@ -32,14 +32,6 @@ public:
   * \details
   *  Подробнее см. в описании класса C3DScene.
   */
-  virtual void Add(const size_t, const ObjectId_t, const size_t = 0) = 0;
-
-  /**
-  * \brief
-  *  Функция добавления идентификатора объекта в очередь рендеринга.
-  * \details
-  *  Подробнее см. в описании класса C3DScene.
-  */
   virtual void Add(const ObjectId_t) = 0;
 
 public:

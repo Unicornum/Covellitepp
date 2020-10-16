@@ -3,8 +3,7 @@
 #include "GameObject.hpp"
 #include "CubeCoords.hpp"
 #include "Defines.hpp"
-
-struct Lights_t;
+#include "Lights.hpp"
 
 namespace basement
 {
@@ -55,6 +54,7 @@ class Shadows final :
   {
     Light_s  Light;
     Cursor_s Cursor;
+    Lights_t Lights;
   };
 
 public:
@@ -71,7 +71,6 @@ private:
   static Object_t GetShadowShaders(void);
   Object_t GetSceneCamera(void) const;
   static Object_t GetSceneShaders(void);
-  Object_t GetSceneLights(void) const;
   Object_t GetShaderData(const CubeCoords &) const;
   Object_t GetTransformData(const CubeCoords &) const;
   static Object_t GetTransform(const Object_t &);
@@ -86,7 +85,6 @@ private:
   Object_t m_SurfaceTextures;
   ComponentPtr_t m_pSceneCamera;
   ComponentPtr_t m_pBkSurface;
-  ::std::shared_ptr<Lights_t> m_pLights;
   ::std::shared_ptr<ShaderData> m_pShaderData;
   mutable CursorDataPtr_t m_pCursorData;
   Object_t m_SceneObjects_pass1;

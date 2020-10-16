@@ -46,13 +46,6 @@ protected:
   Render_t CreateTransform(const ComponentPtr_t &) override;
   Render_t CreatePresentBuffer(const ComponentPtr_t &) override;
 
-protected:
-  // deprecated
-  Render_t CreateFog(const ComponentPtr_t &) override;
-  Render_t CreateMaterial(const ComponentPtr_t &) noexcept override { return nullptr; }
-  Render_t CreateLight(const ComponentPtr_t &) override;
-  Render_t CreateGeometry(const ComponentPtr_t &) override;
-
 private:
   Render_t GetCameraCommon(const ComponentPtr_t &);
   Render_t GetCameraOrthographic(const ComponentPtr_t &);

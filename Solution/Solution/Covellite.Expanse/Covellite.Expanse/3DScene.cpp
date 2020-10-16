@@ -57,10 +57,6 @@ void C3DScene::Remove(const ObjectId_t _Id) /*override*/
 }
 
 /**
-* \deprecated
-*  Функция устарела и будет удалена в следующей стабильной версии, вместо
-*  нее следует использовать Add() с одним параметром и сортировку на стороне
-*  клиентского кода.
 * \brief
 *  Функция добавления идентификатора объекта в очередь рендеринга указанного
 *  прохода.
@@ -70,45 +66,8 @@ void C3DScene::Remove(const ObjectId_t _Id) /*override*/
 *  очередь рендеринга, в которой объекты отсортированы в порядке возрастания
 *  их хешей.
 *
-* \param [in] _Pass
-*  Номер прохода.
 * \param [in] _Id
 *  Идентификатор объекта.
-* \param [in] _HashForSort
-*  Хеш для сортировки.
-*/
-void C3DScene::Add(
-  const size_t _Pass,
-  const ObjectId_t _Id,
-  const size_t _HashForSort) /*override*/
-{
-  if (_Pass >= m_RenderQueueDepracated.size()) m_RenderQueueDepracated.resize(_Pass + 1);
-
-  // Если использовать vector<Object_t>, то простое добавление объекта в конец
-  // работает гораздо быстрее, но для реалистичного количества ~500 ВИДИМЫХ
-  // объектов в сцене - накладные расходы совершенно мизерные, а при 50к
-  // объектах на ноутбуке 2013-го года выпуска эта вставка занимает ~33%
-  // времени при рендеринге пустых рендеров (при этом Pass.clear() занимает 10%).
-  // Телефон 2016-го года выпуска отстает всего лишь в 2 раза.
-  m_RenderQueueDepracated[_Pass].emplace(Object_t{ _HashForSort, _Id });
-}
-
-/**
-* \brief
-*  Функция добавления идентификатора объекта в очередь рендеринга указанного
-*  прохода.
-* \details
-*  - Подразумевается, что рендеринг будет производиться в несколько проходов
-*  (в порядке возрастания их номеров), каждый из которых представляет собой
-*  очередь рендеринга, в которой объекты отсортированы в порядке возрастания
-*  их хешей.
-*
-* \param [in] _Pass
-*  Номер прохода.
-* \param [in] _Id
-*  Идентификатор объекта.
-* \param [in] _HashForSort
-*  Хеш для сортировки.
 */
 void C3DScene::Add(const ObjectId_t _Id) /*override*/
 {
@@ -129,19 +88,6 @@ void C3DScene::Add(const ObjectId_t _Id) /*override*/
 */
 void C3DScene::Render(void)
 {
-  for (auto & Pass : m_RenderQueueDepracated)
-  {
-    for (const auto & Object : Pass)
-    {
-      for (const auto & Render : Get(Object.second))
-      {
-        Render();
-      }
-    }
-
-    Pass.clear();
-  }
-
   for (const auto & Id : m_RenderQueue)
   {
     for (const auto & Render : Get(Id))

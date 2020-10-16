@@ -17,5 +17,4 @@
 #include "Gui\IWindow.hpp"
 #include "Gui\Window.hpp"
 #include "Gui\Window.inl"
-#include "Gui\Vfs.hpp"
 #include "Covellite.Gui.lib.hpp"

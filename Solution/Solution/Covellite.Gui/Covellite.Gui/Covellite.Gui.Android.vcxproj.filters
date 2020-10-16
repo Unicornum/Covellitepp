@@ -30,7 +30,6 @@
     <ClInclude Include="Events.hpp" />
     <ClInclude Include="Renderer.hpp" />
     <ClInclude Include="EventListener.hpp" />
-    <ClInclude Include="Vfs.hpp" />
     <ClInclude Include="SystemToGuiKeyCode.hpp" />
     <ClInclude Include="External.hpp" />
   </ItemGroup>

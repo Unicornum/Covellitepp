@@ -30,7 +30,6 @@ public:
   T & Get(void);
   template<class>
   void Update(void);
-  void SetCameraId(const CameraId_t &);
 
 private:
   template<class, template <class> class, class ... TArgs>
@@ -41,7 +40,6 @@ private:
 
 private:
   ::alicorn::extension::std::fast::unordered_map<::std::size_t, ::covellite::Any_t> m_Data;
-  ::std::map<CameraId_t, ::SceneLights>  m_Lights;
   CameraId_t                        m_CurrentCameraId;
 };
 
@@ -78,24 +76,10 @@ inline T & GraphicApi::Constants::Get(void)
   return GetBuffer<T>().m_Data;
 }
 
-template<>
-inline ::SceneLights & GraphicApi::Constants::Get(void)
-{
-  return m_Lights[m_CurrentCameraId];
-}
-
 template<class T>
 inline void GraphicApi::Constants::Update(void)
 {
   GetBuffer<T>().Update();
-}
-
-inline void GraphicApi::Constants::SetCameraId(const CameraId_t & _CameraId)
-{
-  m_CurrentCameraId = _CameraId;
-  GetBuffer<::SceneLights>().m_Data = Get<::SceneLights>();
-
-  memset(&Get<::SceneLights>(), 0, sizeof(::SceneLights));
 }
 
 template<class T>
@@ -118,11 +102,6 @@ void GraphicApi::MakeConstants(TArgs && ... _Args)
   m_pConstants = ::std::make_shared<Constants>();
   m_pConstants->Create<::Camera, TBuffer>(_Args ...);
   m_pConstants->Create<::Object, TBuffer>(_Args ...);
-
-  // deprecated
-  m_pConstants->Create<::Fog, TBuffer>(_Args ...);
-  m_pConstants->Create<::Matrices, TBuffer>(_Args ...);
-  m_pConstants->Create<::SceneLights, TBuffer>(_Args ...);
 }
 
 template<class TColor>
@@ -135,141 +114,6 @@ template<class TColor>
     ((_HexColor & 0x000000FF) >> 0) / 255.0f,
     ((_HexColor & 0xFF000000) >> 24) / 255.0f
   };
-}
-
-template<class TFog>
-auto GraphicApi::DoCreateFog(
-  const ComponentPtr_t & _pComponent, 
-  const bool _IsUpdate) -> Render_t
-{
-  const auto pFogData = CapturingServiceComponent::Get(_pComponent, 
-    { { uT("Fog"), _pComponent } })[0];
-
-  const Render_t NoUpdateRender = [=](void)
-  {
-    const Component::Fog RawFogData{ *pFogData };
-
-    auto & Fog = m_pConstants->Get<TFog>();
-    Fog.Color = ARGBtoFloat4<color_t>(RawFogData.Color);
-    Fog.Near = RawFogData.Near;
-    Fog.Far = RawFogData.Far;
-    Fog.Density = RawFogData.Density;
-  };
-
-  const Render_t UpdateRender = [=](void)
-  {
-    const Component::Fog RawFogData{ *pFogData };
-
-    auto & Fog = m_pConstants->Get<TFog>();
-    Fog.Color = ARGBtoFloat4<color_t>(RawFogData.Color);
-    Fog.Near = RawFogData.Near;
-    Fog.Far = RawFogData.Far;
-    Fog.Density = RawFogData.Density;
-
-    m_pConstants->Update<TFog>();
-  };
-
-  return _IsUpdate ? UpdateRender : NoUpdateRender;
-}
-
-template<class TLight>
-auto GraphicApi::DoCreateLight(
-  const ComponentPtr_t & _pComponent,
-  const bool _IsStatic) -> Render_t
-{
-  const auto GetColor = [=](void)
-  {
-    return ARGBtoFloat4<color_t>((*_pComponent)[uT("color")].Default(0xFF000000));
-  };
-
-  // 15 Август 2019 00:19 (unicornum.verum@gmail.com)
-  TODO("??? Почему версия для статического конвеера отличается ???");
-  const auto ServiceComponents = _IsStatic ?
-    CapturingServiceComponent::Get(_pComponent,
-    {
-      { uT("Position"), api::Component::Make({ { uT("z"), 1.0f }, { uT("w"), 0.0f } }) },
-      { uT("Direction"), api::Component::Make({ { uT("z"), 1.0f } }) },
-      { uT("Attenuation"), api::Component::Make({ }) },
-    }) :
-    CapturingServiceComponent::Get(_pComponent,
-    {
-      { uT("Position"), api::Component::Make({ }) },
-      { uT("Direction"), api::Component::Make({ { uT("x"), 1.0f } }) },
-      { uT("Attenuation"), api::Component::Make({ }) },
-    });
-
-  auto CreateAmbient = [&](void)
-  {
-    return [=](void)
-    {
-      auto & Light = m_pConstants->Get<TLight>().Ambient;
-
-      Light.IsValid = 1;
-      Light.Color = GetColor();
-    };
-  };
-
-  auto CreateDirection = [&](void)
-  {
-    const auto pDirection = ServiceComponents[1];
-
-    return [=](void)
-    {
-      auto & Light = m_pConstants->Get<TLight>().Direction;
-
-      Light.IsValid = 1;
-      Light.Color = GetColor();
-
-      const Component::Position Direction{ *pDirection };
-      Light.Direction = { Direction.X, Direction.Y, Direction.Z, 0.0f };
-    };
-  };
-
-  auto CreatePoint = [&](void)
-  {
-    auto pPosition = ServiceComponents[0];
-    auto pAttenuation = ServiceComponents[2];
-
-    return [=](void)
-    {
-      const Component::Position Position{ *pPosition };
-
-      auto & Lights = m_pConstants->Get<TLight>().Points;
-
-      if (Lights.UsedSlotCount >= COVELLITE_MAX_LIGHT_POINT_SCENE_COUNT)
-      {
-        // 04 Январь 2019 19:30 (unicornum.verum@gmail.com)
-        TODO("Запись в лог информации об избыточных источниках света.");
-        return;
-      }
-
-      auto & Light = Lights.Lights[Lights.UsedSlotCount++];
-
-      Light.Color = GetColor();
-      Light.Position = { Position.X, Position.Y, Position.Z,
-        (*pPosition)[uT("w")].Default(1.0f) }; // w == 1.0f - point light
-                                      // Такой сложный способ из-за того,
-                                      // что здесь должен быть 0.0f, если
-                                      // pPosition не задан.
-
-      Light.Attenuation =
-      {
-        (*pAttenuation)[uT("const")].Default(1.0f),
-        (*pAttenuation)[uT("linear")].Default(0.0f),
-        (*pAttenuation)[uT("exponent")].Default(0.0f),
-        0.0f
-      };
-    };
-  };
-
-  ::std::map<String_t, ::std::function<Render_t(void)>> Creators =
-  {
-    { uT("Ambient"), CreateAmbient },
-    { uT("Direction"), CreateDirection },
-    { uT("Point"), CreatePoint },
-  };
-
-  return Creators[_pComponent->Kind]();
 }
 
 } // namespace renderer

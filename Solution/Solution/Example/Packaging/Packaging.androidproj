@@ -88,7 +88,6 @@
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
     <Content Include="res\drawable\icon.png" />
-    <Content Include="res\values-v18\strings.xml" />
     <Content Include="res\values\strings.xml">
       <SubType>Designer</SubType>
     </Content>
@@ -107,7 +106,6 @@
     <JavaCompile Include="src\externals\MainActivity.java" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Example\Example.Android.es.vcxproj" />
     <ProjectReference Include="..\Example\Example.Android.vcxproj" />
   </ItemGroup>
   <Import Project="$(AndroidTargetsPath)\Android.targets" />

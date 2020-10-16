@@ -40,7 +40,6 @@ public:
 
 public:
   // Èםעונפויס I3DScene:
-  void Add(const size_t, const ObjectId_t, const size_t = 0) override;
   void Add(const ObjectId_t) override;
 
 public:
@@ -59,7 +58,6 @@ private:
   };
 
   ::std::vector<C3DObject_t> m_Renders;
-  ::std::vector<::std::multiset<Object_t, CombinationLess>> m_RenderQueueDepracated;
   ::std::vector<ObjectId_t> m_RenderQueue;
 
 public:

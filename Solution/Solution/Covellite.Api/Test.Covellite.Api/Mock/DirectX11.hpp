@@ -134,42 +134,6 @@ inline bool operator== (
 }
 
 inline bool operator== (
-  const ::float4 & _Left,
-  const ::float4 & _Right)
-{
-  return DirectX::operator== (_Left, _Right);
-}
-
-inline bool operator== (
-  const ::Ambient_t & _Left,
-  const ::Ambient_t & _Right)
-{
-  if (!(_Left.IsValid == _Right.IsValid)) return false;
-  if (!(_Left.Color == _Right.Color)) return false;
-  return true;
-}
-
-inline bool operator== (
-  const ::Direction_t & _Left,
-  const ::Direction_t & _Right)
-{
-  if (!(_Left.IsValid == _Right.IsValid)) return false;
-  if (!(_Left.Color == _Right.Color)) return false;
-  if (!(_Left.Direction == _Right.Direction)) return false;
-  return true;
-}
-
-inline bool operator== (
-  const ::Point_t & _Left,
-  const ::Point_t & _Right)
-{
-  if (!(_Left.Color == _Right.Color)) return false;
-  if (!(_Left.Position == _Right.Position)) return false;
-  if (!(_Left.Attenuation == _Right.Attenuation)) return false;
-  return true;
-}
-
-inline bool operator== (
   const ::Camera & _Left,
   const ::Camera & _Right)
 {
@@ -180,53 +144,10 @@ inline bool operator== (
 }
 
 inline bool operator== (
-  const ::Fog & _Left,
-  const ::Fog & _Right)
-{
-  if (!(_Left.Color == _Right.Color)) return false;
-  if (!(_Left.Density == _Right.Density)) return false;
-  if (!(_Left.Far == _Right.Far)) return false;
-  if (!(_Left.Near == _Right.Near)) return false;
-  return true;
-}
-
-inline bool operator== (
   const ::Object & _Left,
   const ::Object & _Right)
 {
   if (!(_Left.World == _Right.World)) return false;
-  if (!(_Left.Lights.Ambient == _Right.Lights.Ambient)) return false;
-  if (!(_Left.Lights.Direction == _Right.Lights.Direction)) return false;
-  if (_Left.Lights.Points.UsedSlotCount != _Right.Lights.Points.UsedSlotCount) return false;
-
-  for (int i = 0; i < COVELLITE_MAX_LIGHT_POINT_OBJECT_COUNT; i++)
-  {
-    if (!(_Left.Lights.Points.Lights[i] == _Right.Lights.Points.Lights[i])) return false;
-  }
-
-  return true;
-}
-
-inline bool operator== (
-  const ::Matrices & _Left,
-  const ::Matrices & _Right)
-{
-  return DirectX::operator== (_Left, _Right);
-}
-
-inline bool operator== (
-  const ::SceneLights & _Left,
-  const ::SceneLights & _Right)
-{
-  if (!(_Left.Ambient == _Right.Ambient)) return false;
-  if (!(_Left.Direction == _Right.Direction)) return false;
-  if (_Left.Points.UsedSlotCount != _Right.Points.UsedSlotCount) return false;
-
-  for (int i = 0; i < COVELLITE_MAX_LIGHT_POINT_SCENE_COUNT; i++)
-  {
-    if (!(_Left.Points.Lights[i] == _Right.Points.Lights[i])) return false;
-  }
-
   return true;
 }
 
@@ -1189,12 +1110,6 @@ public:
   MOCK_METHOD6(UpdateSubresource, void(ID3D11Resource *, UINT,
     const D3D11_BOX *, ::Object, UINT, UINT));
   MOCK_METHOD6(UpdateSubresource, void(ID3D11Resource *, UINT,
-    const D3D11_BOX *, ::Fog, UINT, UINT));
-  MOCK_METHOD6(UpdateSubresource, void(ID3D11Resource *, UINT,
-    const D3D11_BOX *, ::SceneLights, UINT, UINT));
-  MOCK_METHOD6(UpdateSubresource, void(ID3D11Resource *, UINT, 
-    const D3D11_BOX *, ::Matrices, UINT, UINT));
-  MOCK_METHOD6(UpdateSubresource, void(ID3D11Resource *, UINT,
     const D3D11_BOX *, ::std::vector<uint8_t>, UINT, UINT));
   MOCK_METHOD7(UpdateSubresource, void(ID3D11Resource *, UINT,
     const D3D11_BOX *, const void *, UINT, UINT, int));
@@ -1238,12 +1153,6 @@ public:
         *reinterpret_cast<const ::Camera *>(pSrcData),
         SrcRowPitch, SrcDepthPitch);
     }
-    else if (dynamic_cast<FogBuffer *>(pDstResource) != nullptr)
-    {
-      UpdateSubresource(pDstResource, DstSubresource, pDstBox,
-        *reinterpret_cast<const ::Fog *>(pSrcData),
-        SrcRowPitch, SrcDepthPitch);
-    }
     else if (dynamic_cast<ObjectBuffer *>(pDstResource) != nullptr)
     {
       UpdateSubresource(pDstResource, DstSubresource, pDstBox,
@@ -1264,20 +1173,10 @@ public:
       UpdateSubresource(pDstResource, DstSubresource, pDstBox,
         Uint8Data, SrcRowPitch, SrcDepthPitch);
     }
-    else if (dynamic_cast<LightsBuffer *>(pDstResource) != nullptr)
-    {
-      UpdateSubresource(pDstResource, DstSubresource, pDstBox,
-        *reinterpret_cast<const ::SceneLights *>(pSrcData),
-        SrcRowPitch, SrcDepthPitch);
-    }
     else
     {
       UpdateSubresource(pDstResource, DstSubresource, pDstBox,
         *reinterpret_cast<const ::Object *>(pSrcData),
-        SrcRowPitch, SrcDepthPitch);
-
-      UpdateSubresource(pDstResource, DstSubresource, pDstBox,
-        *reinterpret_cast<const ::Matrices *>(pSrcData),
         SrcRowPitch, SrcDepthPitch);
     }
   }

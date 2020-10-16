@@ -42,7 +42,7 @@
 *  - Рендеринг в несколько проходов для отрисовки теней, отложенного освещения
 *  и постобработки.
 *  
-* \image html ".\Solution\Covellite.Expanse\(Documentation)\Classes.png"
+* \image html ".\Solution\Covellite.Expanse\(Documentation)\Expanse.Classes.png"
 *  
 *  Использование
 *  -------------

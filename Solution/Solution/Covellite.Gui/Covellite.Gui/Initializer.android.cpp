@@ -43,7 +43,7 @@ Initializer::Initializer(const Data & _Data) :
   Helper::GetInstance();
 }
 
-Initializer::~Initializer(void) noexcept
+Initializer::~Initializer(void)
 {
   CovelliteGui::Core::SetFileInterface(nullptr);
   CovelliteGui::Core::SetSystemInterface(nullptr);

@@ -4,21 +4,7 @@
 #include <glm/glm.force.hpp>
 #include <alicorn/std/vector.hpp>
 #include <alicorn/std.fast/unordered-map.hpp>
-
-#if BOOST_COMP_MSVC 
-# pragma warning(push)
-# pragma warning(disable: 4996)
-#elif defined BOOST_COMP_GNUC
-# pragma GCC diagnostic push
-# pragma GCC diagnostic ignored "-Wdeprecated-declarations"
-#endif
 #include <Covellite/Api/Vertex.hpp>
-#if BOOST_COMP_MSVC 
-# pragma warning(pop)
-#elif defined BOOST_COMP_GNUC
-# pragma GCC diagnostic pop
-#endif
-
 #include <Covellite/Api/Defines.hpp>
 #include "OpenGLCommon.Texture.hpp"
 #include "Shaders/Shaders.hpp"
@@ -92,111 +78,10 @@ public:
 };
 
 template<>
-class Support<::Fog>
-{
-public:
-  static const GLuint Index = COVELLITE_BUFFER_INDEX_FOG;
-
-public:
-  static void Update(const GLuint _ProgramId, const ::Fog & _Fog)
-  {
-    const auto ColorId = glGetUniformLocation(_ProgramId, "FogData.Color");
-    glUniform4fv(ColorId, 1, ::glm::value_ptr(_Fog.Color));
-
-    const auto NearId = glGetUniformLocation(_ProgramId, "FogData.Near");
-    glUniform1f(NearId, _Fog.Near);
-
-    const auto FarId = glGetUniformLocation(_ProgramId, "FogData.Far");
-    glUniform1f(FarId, _Fog.Far);
-
-    const auto DensityId = glGetUniformLocation(_ProgramId, "FogData.Density");
-    glUniform1f(DensityId, _Fog.Density);
-  }
-};
-
-template<>
 class Support<::Object>
 {
 public:
   static const GLuint Index = COVELLITE_BUFFER_INDEX_OBJECT;
-
-  static void Update(const GLuint _ProgramId, const ::Ambient_t & _Light)
-  {
-    const auto IsValidId =
-      glGetUniformLocation(_ProgramId, "ObjectData.Lights.Ambient.IsValid");
-    const auto ColorId =
-      glGetUniformLocation(_ProgramId, "ObjectData.Lights.Ambient.Color");
-
-    glUniform1i(IsValidId, _Light.IsValid);
-    glUniform4fv(ColorId, 1, ::glm::value_ptr(_Light.Color));
-  }
-
-  static void Update(const GLuint _ProgramId, const ::Direction_t & _Light)
-  {
-    const auto IsValidId =
-      glGetUniformLocation(_ProgramId, "ObjectData.Lights.Direction.IsValid");
-    const auto ColorId =
-      glGetUniformLocation(_ProgramId, "ObjectData.Lights.Direction.Color");
-    const auto DirectionId =
-      glGetUniformLocation(_ProgramId, "ObjectData.Lights.Direction.Direction");
-
-    glUniform1i(IsValidId, _Light.IsValid);
-    glUniform4fv(ColorId, 1, ::glm::value_ptr(_Light.Color));
-    glUniform4fv(DirectionId, 1, ::glm::value_ptr(_Light.Direction));
-  }
-
-  static void Update(const GLuint _ProgramId, const ::Points_t & _Lights)
-  {
-    static const ::std::string LightsDataPoints[] =
-    {
-      "ObjectData.Lights.Points.Lights[0]",
-      "ObjectData.Lights.Points.Lights[1]",
-      "ObjectData.Lights.Points.Lights[2]",
-      "ObjectData.Lights.Points.Lights[3]",
-      "ObjectData.Lights.Points.Lights[4]",
-      "ObjectData.Lights.Points.Lights[5]",
-      "ObjectData.Lights.Points.Lights[6]",
-      "ObjectData.Lights.Points.Lights[7]",
-      "ObjectData.Lights.Points.Lights[8]",
-      "ObjectData.Lights.Points.Lights[9]",
-      "ObjectData.Lights.Points.Lights[10]",
-      "ObjectData.Lights.Points.Lights[11]",
-      "ObjectData.Lights.Points.Lights[12]",
-      "ObjectData.Lights.Points.Lights[13]",
-      "ObjectData.Lights.Points.Lights[14]",
-      "ObjectData.Lights.Points.Lights[15]",
-    };
-
-    constexpr auto LightCount =
-      sizeof(LightsDataPoints) / sizeof(LightsDataPoints[0]);
-    static_assert(LightCount >= COVELLITE_MAX_LIGHT_POINT_OBJECT_COUNT,
-      "Unexpected LightsDataPoints array size.");
-
-    const auto UsedSlotCountId =
-      glGetUniformLocation(_ProgramId, "ObjectData.Lights.Points.UsedSlotCount");
-    glUniform1i(UsedSlotCountId, _Lights.UsedSlotCount);
-
-    for (int i = 0; i < _Lights.UsedSlotCount; i++)
-    {
-      auto & Light = _Lights.Lights[i];
-
-      using namespace ::alicorn::extension::std;
-
-      const auto & Point = LightsDataPoints[i];
-
-      const auto ColorId =
-        glGetUniformLocation(_ProgramId, (Point + ".Color").c_str());
-      glUniform4fv(ColorId, 1, ::glm::value_ptr(Light.Color));
-
-      const auto PositionId =
-        glGetUniformLocation(_ProgramId, (Point + ".Position").c_str());
-      glUniform4fv(PositionId, 1, ::glm::value_ptr(Light.Position));
-
-      const auto AttenuationId =
-        glGetUniformLocation(_ProgramId, (Point + ".Attenuation").c_str());
-      glUniform4fv(AttenuationId, 1, ::glm::value_ptr(Light.Attenuation));
-    }
-  }
 
 public:
   static void Update(const GLuint _ProgramId, const ::Object & _Object)
@@ -205,10 +90,6 @@ public:
       glGetUniformLocation(_ProgramId, "ObjectData.World");
     glUniformMatrix4fv(MatrixWorldId, 1, GL_FALSE,
       ::glm::value_ptr(_Object.World));
-
-    Update(_ProgramId, _Object.Lights.Ambient);
-    Update(_ProgramId, _Object.Lights.Direction);
-    Update(_ProgramId, _Object.Lights.Points);
   }
 };
 
@@ -217,116 +98,6 @@ class Support<uint8_t>
 {
 public:
   static const GLuint Index = COVELLITE_BUFFER_INDEX_USER;
-};
-
-template<>
-class Support<::Matrices>
-{
-public:
-  static const GLuint Index = COVELLITE_BUFFER_INDEX_MATRICES;
-
-public:
-  static void Update(const GLuint _ProgramId, const ::Matrices & _Matrices)
-  {
-    const auto MatrixWorldId = 
-      glGetUniformLocation(_ProgramId, "MatricesData.World");
-    glUniformMatrix4fv(MatrixWorldId, 1, GL_FALSE, 
-      ::glm::value_ptr(_Matrices.World));
-  }
-};
-
-template<>
-class Support<::SceneLights>
-{
-public:
-  static const GLuint Index = COVELLITE_BUFFER_INDEX_LIGHTS;
-
-private:
-  static void Update(const GLuint _ProgramId, const ::Ambient_t & _Light)
-  {
-    const auto IsValidId =
-      glGetUniformLocation(_ProgramId, "LightsData.Ambient.IsValid");
-    const auto ColorId =
-      glGetUniformLocation(_ProgramId, "LightsData.Ambient.Color");
-
-    glUniform1i(IsValidId, _Light.IsValid);
-    glUniform4fv(ColorId, 1, ::glm::value_ptr(_Light.Color));
-  }
-
-  static void Update(const GLuint _ProgramId, const ::Direction_t & _Light)
-  {
-    const auto IsValidId =
-      glGetUniformLocation(_ProgramId, "LightsData.Direction.IsValid");
-    const auto ColorId =
-      glGetUniformLocation(_ProgramId, "LightsData.Direction.Color");
-    const auto DirectionId =
-      glGetUniformLocation(_ProgramId, "LightsData.Direction.Direction");
-
-    glUniform1i(IsValidId, _Light.IsValid);
-    glUniform4fv(ColorId, 1, ::glm::value_ptr(_Light.Color));
-    glUniform4fv(DirectionId, 1, ::glm::value_ptr(_Light.Direction));
-  }
-
-  static void Update(const GLuint _ProgramId, const ::ScenePoints & _Lights)
-  {
-    static const ::std::string LightsDataPoints[] =
-    {
-      "LightsData.Points.Lights[0]",
-      "LightsData.Points.Lights[1]",
-      "LightsData.Points.Lights[2]",
-      "LightsData.Points.Lights[3]",
-      "LightsData.Points.Lights[4]",
-      "LightsData.Points.Lights[5]",
-      "LightsData.Points.Lights[6]",
-      "LightsData.Points.Lights[7]",
-      "LightsData.Points.Lights[8]",
-      "LightsData.Points.Lights[9]",
-      "LightsData.Points.Lights[10]",
-      "LightsData.Points.Lights[11]",
-      "LightsData.Points.Lights[12]",
-      "LightsData.Points.Lights[13]",
-      "LightsData.Points.Lights[14]",
-      "LightsData.Points.Lights[15]",
-    };
-
-    constexpr auto LightCount = 
-      sizeof(LightsDataPoints) / sizeof(LightsDataPoints[0]);
-    static_assert(LightCount >= COVELLITE_MAX_LIGHT_POINT_SCENE_COUNT,
-      "Unexpected LightsDataPoints array size.");
-
-    const auto UsedSlotCountId =
-      glGetUniformLocation(_ProgramId, "LightsData.Points.UsedSlotCount");
-    glUniform1i(UsedSlotCountId, _Lights.UsedSlotCount);
-
-    for (int i = 0; i < _Lights.UsedSlotCount; i++)
-    {
-      auto & Light = _Lights.Lights[i];
-
-      using namespace ::alicorn::extension::std;
-
-      const auto & Point = LightsDataPoints[i];
-
-      const auto ColorId =
-        glGetUniformLocation(_ProgramId, (Point + ".Color").c_str());
-      glUniform4fv(ColorId, 1, ::glm::value_ptr(Light.Color));
-
-      const auto PositionId =
-        glGetUniformLocation(_ProgramId, (Point + ".Position").c_str());
-      glUniform4fv(PositionId, 1, ::glm::value_ptr(Light.Position));
-
-      const auto AttenuationId =
-        glGetUniformLocation(_ProgramId, (Point + ".Attenuation").c_str());
-      glUniform4fv(AttenuationId, 1, ::glm::value_ptr(Light.Attenuation));
-    }
-  }
-
-public:
-  static void Update(const GLuint _ProgramId, const ::SceneLights & _Lights)
-  {
-    Update(_ProgramId, _Lights.Ambient);
-    Update(_ProgramId, _Lights.Direction);
-    Update(_ProgramId, _Lights.Points);
-  }
 };
 
 class OpenGLCommonShader::Buffer
@@ -611,8 +382,6 @@ auto OpenGLCommonShader::CreateCamera(const ComponentPtr_t & _pComponent) -> Ren
   return [=](void)
   {
     CameraRender();
-
-    m_pConstants->SetCameraId(CameraId);
   };
 }
 
@@ -661,23 +430,7 @@ auto OpenGLCommonShader::CreateBkSurface(
 
   const auto pBkSurface = _pComponent;
 
-  const fnBkSurfaceSize_t GetScaleBkSurfaceSize = [=](void)
-  {
-    const float Scale = (*pBkSurface)[uT("scale")];
-
-    GLint Viewport[4] = { 0 };
-    glGetIntegerv(GL_VIEWPORT, Viewport);
-
-    const int Width = static_cast<int>(Scale * Viewport[2]);
-    const int Height = static_cast<int>(Scale * Viewport[3]);
-
-    (*pBkSurface)[uT("width")] = Width;
-    (*pBkSurface)[uT("height")] = Height;
-
-    return Size_t{ static_cast<GLint>(Width), static_cast<GLint>(Height) };
-  };
-
-  const fnBkSurfaceSize_t GetWindowBkSurfaceSize = [=](void)
+  const fnBkSurfaceSize_t GetBkSurfaceSize = [=](void)
   {
     GLint Viewport[4] = { 0 };
     glGetIntegerv(GL_VIEWPORT, Viewport);
@@ -690,29 +443,6 @@ auto OpenGLCommonShader::CreateBkSurface(
 
     return Size_t{ static_cast<GLint>(Width), static_cast<GLint>(Height) };
   };
-
-  const fnBkSurfaceSize_t GetUserBkSurfaceSize = [=](void)
-  {
-    GLint Viewport[4] = { 0 };
-    glGetIntegerv(GL_VIEWPORT, Viewport);  // результат не используется, но 
-                                           // так проще тестировать
-
-    const int Width = (*pBkSurface)[uT("width")];
-    const int Height = (*pBkSurface)[uT("height")];
-
-    return Size_t{ static_cast<GLint>(Width), static_cast<GLint>(Height) };
-  };
-
-  const auto IsScaleBkSurfaceSize =
-    (*pBkSurface)[uT("scale")].IsType<float>();
-  const auto IsUserBkSurfaceSize =
-    (*pBkSurface)[uT("width")].IsType<int>() &&
-    (*pBkSurface)[uT("height")].IsType<int>();
-
-  const auto GetBkSurfaceSize =
-    (IsScaleBkSurfaceSize) ? GetScaleBkSurfaceSize :
-    (IsUserBkSurfaceSize) ? GetUserBkSurfaceSize :
-    GetWindowBkSurfaceSize;
 
   const auto Size = GetBkSurfaceSize();
   const auto Width = Size.first;
@@ -779,8 +509,6 @@ auto OpenGLCommonShader::CreateBkSurface(
     pFrameBuffer->Bind();
     glDrawBuffers(static_cast<GLsizei>(AttachmentIndexes.size()),
       AttachmentIndexes.data());
-
-    glViewport(0, 0, Width, Height);
   };
 }
 
@@ -789,16 +517,6 @@ auto OpenGLCommonShader::CreateState(const ComponentPtr_t & _pComponent) -> Rend
   if (_pComponent->Kind == uT("AlphaTest")) return nullptr;
 
   return OpenGLCommon::CreateState(_pComponent);
-}
-
-auto OpenGLCommonShader::CreateFog(const ComponentPtr_t & _pComponent) -> Render_t /*override*/
-{
-  return DoCreateFog<::Fog>(_pComponent);
-}
-
-auto OpenGLCommonShader::CreateLight(const ComponentPtr_t & _pComponent) -> Render_t /*override*/
-{
-  return DoCreateLight<::SceneLights>(_pComponent);
 }
 
 auto OpenGLCommonShader::CreateTexture(const ComponentPtr_t & _pComponent) -> Render_t /*override*/
@@ -1191,8 +909,6 @@ auto OpenGLCommonShader::CreateShader(const ComponentPtr_t & _pComponent) -> Ren
 #     endif
 
       TEST_CALL_IF(1) m_pConstants->Update<::Camera>();
-      TEST_CALL_IF(2) m_pConstants->Update<::Fog>();
-      TEST_CALL_IF(3) m_pConstants->Update<::SceneLights>();
 
 #     undef TEST_CALL_IF
     };
@@ -1247,53 +963,6 @@ auto OpenGLCommonShader::CreateBuffer(const ComponentPtr_t & _pBuffer) -> Render
     };
   };
 
-  auto CreateConstantLightsBuffer = [&](void) -> Render_t
-  {
-    using Type_t = cbBufferMap_t<::Lights_t>;
-
-    if (!(*_pBuffer)[uT("mapper")].IsType<const Type_t &>())
-    {
-      return CreateConstantUserBuffer();
-    }
-
-    const Type_t cbBufferMapper = (*_pBuffer)[uT("mapper")].Default(Type_t{});
-    if (!cbBufferMapper)
-    {
-      throw STD_EXCEPTION << "Unexpected empty mapper: " << _pBuffer->Id;
-    }
-
-    return [=](void)
-    {
-      cbBufferMapper(&m_pConstants->Get<::Object>().Lights);
-    };
-  };
-
-  auto CreateIndexBuffer = [&](void) -> Render_t
-  {
-    using Type_t = int;
-
-    if (!(*pBufferData)[uT("content")].IsType<Buffer_t<Type_t>>())
-    {
-      return CreateConstantLightsBuffer();
-    }
-
-    const Component::Buffer<Type_t> Info{ *pBufferData };
-
-    const auto pBuffer = ::std::make_shared<Buffer>(GL_ELEMENT_ARRAY_BUFFER,
-      Info.Data.data(), Info.Data.size() * sizeof(Type_t), GL_STATIC_DRAW);
-    const auto Size = static_cast<GLsizei>(Info.Data.size());
-
-    return [=](void)
-    {
-      pBuffer->Bind();
-
-      m_DrawElements = [=](void) noexcept
-      { 
-        glDrawElements(GL_TRIANGLES, Size, GL_UNSIGNED_INT, nullptr);
-      };
-    };
-  };
-
   const auto CreateVertexBuffer = [&](void) -> Render_t
   {
     using Type_t = ::covellite::api::Vertex;
@@ -1301,7 +970,7 @@ auto OpenGLCommonShader::CreateBuffer(const ComponentPtr_t & _pBuffer) -> Render
 
     if (!(*pBufferData)[uT("content")].IsType<Buffer_t<Type_t>>())
     {
-      return CreateIndexBuffer();
+      return CreateConstantUserBuffer();
     }
 
     const Component::Buffer<Type_t> Info{ *pBufferData };
@@ -1411,7 +1080,8 @@ auto OpenGLCommonShader::CreateTransform(const ComponentPtr_t & _pComponent) -> 
 
 auto OpenGLCommonShader::CreatePresentBuffer(const ComponentPtr_t & _pComponent) -> Render_t /*override*/
 {
-  using BufferMapper_t = cbBufferMap_t<void>;
+  using BufferMapperMaxCount_t = ::std::function<bool(void *)>;
+  using BufferMapperChangeCount_t = ::std::function<bool(void *, ::std::size_t &)>;
 
   ComponentPtr_t pIndexBufferData = _pComponent;
   ComponentPtr_t pInstanceBufferData = nullptr;
@@ -1422,14 +1092,18 @@ auto OpenGLCommonShader::CreatePresentBuffer(const ComponentPtr_t & _pComponent)
     {
       pIndexBufferData = _pBufferData;
     }
-    else if ((*_pBufferData)[uT("mapper")].IsType<const BufferMapper_t &>())
+    else if ((*_pBufferData)[uT("mapper")].IsType<const BufferMapperMaxCount_t &>())
+    {
+      pInstanceBufferData = _pBufferData;
+    }
+    else if ((*_pBufferData)[uT("mapper")].IsType<const BufferMapperChangeCount_t &>())
     {
       pInstanceBufferData = _pBufferData;
     }
     else
     {
-      // 23 Сентябрь 2019 13:26 (unicornum.verum@gmail.com)
-      TODO("Здесь требуется диагностика (warning) компонента буфера, содержащего данные неожиданного типа");
+      throw STD_EXCEPTION << "Unexpected Presend data component: id = " <<
+        _pComponent->Id;
     }
   };
 
@@ -1454,101 +1128,66 @@ auto OpenGLCommonShader::CreatePresentBuffer(const ComponentPtr_t & _pComponent)
     };
   }
 
-  const BufferMapper_t cbBufferMapper =
-    (*pInstanceBufferData)[uT("mapper")].Default(BufferMapper_t{});
-  const ::std::size_t BufferSize =
-    (*pInstanceBufferData)[uT("size")].Default((::std::size_t)16);
-  const auto InstanceCount = static_cast<GLint>(
-    (::std::size_t)(*pInstanceBufferData)[uT("count")].Default((::std::size_t)1));
-  const auto Stride = static_cast<GLsizei>(
-    BufferSize / InstanceCount);
+  const ::std::size_t BufferSize = (*pInstanceBufferData)[uT("size")];
+  if (BufferSize % 16 != 0)
+  {
+    throw STD_EXCEPTION << _pComponent->Id << ": size % 16 != 0";
+  }
 
-  // 23 Сентябрь 2019 18:53 (unicornum.verum@gmail.com)
-  TODO("Проверка делимости BufferSize / InstanceCount без остатка");
+  const ::std::size_t MaxInstanceCount = (*pInstanceBufferData)[uT("count")];
+  if (BufferSize % MaxInstanceCount != 0)
+  {
+    throw STD_EXCEPTION << _pComponent->Id << ": size % count != 0";
+  }
 
-  // 23 Сентябрь 2019 18:53 (unicornum.verum@gmail.com)
-  TODO("Проверка того, что Stride кратно 16");
+  const auto Stride = static_cast<GLsizei>(BufferSize / MaxInstanceCount);
 
   const auto pData =
     ::std::make_shared<BinaryData_t>(BufferSize, (uint8_t)0x00);
   const auto pInstanceBuffer = ::std::make_shared<Buffer>(GL_ARRAY_BUFFER,
     nullptr, BufferSize, GL_DYNAMIC_DRAW);
 
+  if ((*pInstanceBufferData)[uT("mapper")].IsType<BufferMapperMaxCount_t>())
+  {
+    const BufferMapperMaxCount_t cbBufferMapper =
+      (*pInstanceBufferData)[uT("mapper")];
+
+    return [=](void)
+    {
+      const auto IsDirty = cbBufferMapper(nullptr);
+      if (IsDirty)
+      {
+        cbBufferMapper(pData->data());
+        pInstanceBuffer->SetInstanceData(pData->data(), pData->size(), Stride);
+      }
+
+      pIndexBuffer->Bind();
+      glDrawElementsInstanced(GL_TRIANGLES, IndexCount, GL_UNSIGNED_INT, nullptr,
+        static_cast<GLsizei>(MaxInstanceCount));
+      pIndexBuffer->Bind(false);
+    };
+  }
+
+  const BufferMapperChangeCount_t cbBufferMapper =
+    (*pInstanceBufferData)[uT("mapper")];
+
   return [=](void)
   {
-    const auto IsDirty = cbBufferMapper(nullptr);
+    auto InstanceCount = MaxInstanceCount;
+
+    const auto IsDirty = cbBufferMapper(nullptr, InstanceCount);
     if (IsDirty)
     {
-      cbBufferMapper(pData->data());
+      cbBufferMapper(pData->data(), InstanceCount);
       pInstanceBuffer->SetInstanceData(pData->data(), pData->size(), Stride);
     }
 
+    InstanceCount = ::std::min(InstanceCount, MaxInstanceCount);
+
     pIndexBuffer->Bind();
-    glDrawElementsInstanced(GL_TRIANGLES, IndexCount, GL_UNSIGNED_INT, nullptr, 
-      InstanceCount);
+    glDrawElementsInstanced(GL_TRIANGLES, IndexCount, GL_UNSIGNED_INT, nullptr,
+      static_cast<GLsizei>(InstanceCount));
     pIndexBuffer->Bind(false);
-  };
-}
-
-auto OpenGLCommonShader::CreateGeometry(const ComponentPtr_t & _pComponent) -> Render_t /*override*/
-{
-  using PreRender_t = ::std::function<void(void)>;
-
-  const auto GetPreRenderDefaultGeometry = [&](void) -> PreRender_t
-  {
-    const auto PreRender = GetPreRenderGeometry(_pComponent);
-
-    return [=](void)
-    {
-      auto & World = m_pConstants->Get<::Matrices>().World;
-      World = ::glm::identity<::glm::mat4>();
-      PreRender(World);
-      World = ::glm::transpose(World);
-    };
-  };
-
-  const auto GetPreRenderStaticGeometry = [&](void) -> PreRender_t
-  {
-    ::glm::mat4 World = ::glm::identity<::glm::mat4>();
-    GetPreRenderGeometry(_pComponent)(World);
-    World = ::glm::transpose(World);
-
-    return [=](void)
-    {
-      m_pConstants->Get<::Matrices>().World = World;
-    };
-  };
-
-  const auto GetPreRenderBillboardGeometry = [&](void) -> PreRender_t
-  {
-    const auto PreRender = 
-      OpenGLCommonShader::GetPreRenderBillboardGeometry(_pComponent);
-
-    return [=](void)
-    {
-      auto & World = m_pConstants->Get<::Matrices>().World;
-      World = m_pConstants->Get<::Camera>().View;
-      PreRender(World);
-      World = ::glm::transpose(World);
-    };
-  };
-
-  const String_t Variety = (*_pComponent)[uT("variety")].Default(uT("Default"));
-
-  const auto PreRender =
-    (Variety == uT("Default")) ? GetPreRenderDefaultGeometry() :
-    (Variety == uT("Static")) ? GetPreRenderStaticGeometry() :
-    (Variety == uT("Billboard")) ? GetPreRenderBillboardGeometry() :
-      throw STD_EXCEPTION << "Unexpected variety: " << Variety <<
-      " [id=" << _pComponent->Id << "].";
-
-  return [=](void)
-  {
-    PreRender();
-
-    m_pConstants->Update<::Matrices>();
-    m_DrawElements();
-    glBindTexture(GL_TEXTURE_2D, 0);
   };
 }
 

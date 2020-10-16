@@ -133,6 +133,7 @@ set EXCLUDE=-x!Package -x!Test -x!arm -x!x86 -x!*.apk -x!*.apk.recipe* -x!*.zip 
     <ClInclude Include="Basements\Demo\IGameObject.hpp" />
     <ClInclude Include="Basements\Demo\IGameWorld.hpp" />
     <ClInclude Include="Basements\Demo\Landscape.hpp" />
+    <ClInclude Include="Basements\Demo\Lights.hpp" />
     <ClInclude Include="Basements\Demo\Loader.hpp" />
     <ClInclude Include="Basements\Demo\Model.hpp" />
     <ClInclude Include="Basements\Demo\Particles.hpp" />

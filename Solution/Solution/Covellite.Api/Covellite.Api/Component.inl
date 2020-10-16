@@ -73,9 +73,9 @@ inline /*static*/ size_t Component::GetHash(const Name_t & _Value)
 */
 inline Component::Component(const Params_t & _Params, ConstructorTag _Tag) :
   m_Params(_Params),
-  Id(GetValue(GetHashId(), uT("Unknown"))),
-  Type(GetValue(GetHashType(), uT("Unknown"))),
-  Kind(GetValue(GetHashKind(), uT("Unknown")))
+  Id((*this)[GetHashId()].Default(uT("Unknown"))),
+  Type((*this)[GetHashType()].Default(uT("Unknown"))),
+  Kind((*this)[GetHashKind()].Default(uT("Unknown")))
 {
   ::boost::ignore_unused(_Tag);
 }
@@ -216,6 +216,12 @@ Component::Param & Component::Param::operator= (const T & _Value)
 {
   try
   {
+    // 09 Октябрь 2020 10:43 (unicornum.verum@gmail.com)
+    TODO("Убрать оптимизацию присваивания по ссылке для std::any");
+    // Оптимизация присваивания по ссылке была сделана из-за того, что 
+    // boost::any создавал новый объект (оператором new!) КАЖДЫЙ раз при
+    // присваивании нового значения, для std::any это не так.
+
     ::covellite::any_cast<T &>(this->Value) = _Value;
     return *this;
   }
@@ -295,163 +301,6 @@ inline const Component::Param & Component::operator[] (const size_t & _Hash) con
   }
 
   return itParam->second;
-}
-
-/**
-* \deprecated
-*  Функция устарела и будет удалена в следующей стабильной версии, вместо
-*  нее следует использовать функцию IsType() через operator[].
-* \brief
-*  Функция проверки совпадения указанного типа с типом значения с указанным
-*  именем.
-* \details
-*  - Функция не проверяет возможность конвертации параметра в указанный тип.
-*
-* \param [in] _Name
-*  Строковое имя проверяемого параметра.
-*
-* \return \b false
-*  - Тип параметра не совпадает с указанным.
-*  - У компонента нет параметра с указанным именем.
-*/
-template<class T>
-inline bool Component::IsType(const Name_t & _Name) const
-{
-  auto itValue = m_Params.find(GetHash(_Name));
-  return (itValue != ::std::end(m_Params)) ? itValue->second.IsType<T>() : false;
-}
-
-/**
-* \deprecated
-*  Функция устарела и будет удалена в следующей стабильной версии, вместо
-*  нее следует использовать operator[].
-* \brief
-*  Функция получения значения параметра.
-* \details
-*  - Функция предназначена для получения значения параметра указанного типа 
-*  с указанным именем.
-*  - Если параметра с указанным именем не существует, функция вернет указанное 
-*  значение по умолчанию.
-*  - Если параметр с указанным именем хранит строковое значение, оно будет 
-*  преобразовано в значение указанного типа.
-*  
-* \param [in] _Name
-*  Строковое имя параметра.
-* \param [in] _DefaultValue
-*  Значение по умолчанию.
-*  
-* \return \b Value
-*  Значение параметра указанного типа.
-*  
-* \exception std::exception
-*  - Параметр с указанным именем содержит значение, тип которого не совпадает
-*  с указанным.
-*  - Параметр с указанным именем содержит строковое значение, которое не 
-*  может быть преобразовано в указанный тип.
-*/
-template<class T>
-inline T Component::GetValue(const Name_t & _Name, const T & _DefaultValue) const
-{
-  return GetValue<T>(GetHash(_Name), _DefaultValue);
-}
-
-/**
-* \deprecated
-*  Функция устарела и будет удалена в следующей стабильной версии, вместо
-*  нее следует использовать operator[].
-* \brief
-*  Функция получения значения параметра.
-* \details
-*  - Функция предназначена для быстрого получения значения параметра указанного 
-*  типа с указанным хэшем имени (для параметра имя которого заранее известно,
-*  хеш можно вычислить заранее - один раз - и использовать в дальнейшем).
-*  - Если параметра с указанным хэшем не существует, функция вернет указанное
-*  значение по умолчанию.
-*  - Если параметр с указанным хэшем хранит строковое значение, оно будет
-*  преобразовано в значение указанного типа.
-*
-* \param [in] _Hash
-*  Хэш имени параметра.
-* \param [in] _DefaultValue
-*  Значение по умолчанию.
-*
-* \return \b Value
-*  Значение параметра указанного типа.
-*
-* \exception std::exception
-*  - Параметр с указанным именем содержит значение, тип которого не совпадает
-*  с указанным.
-*  - Параметр с указанным именем содержит строковое значение, которое не
-*  может быть преобразовано в указанный тип.
-*/
-template<class T>
-T Component::GetValue(const size_t _Hash, const T & _DefaultValue) const
-{
-  auto itValue = m_Params.find(_Hash);
-  if (itValue == m_Params.end()) return _DefaultValue;
-
-  const auto & Data = itValue->second;
-
-  static const auto hTypeString = typeid(String_t).hash_code();
-
-  if (Data.hType == hTypeString)
-  {
-    constexpr auto IsConvertable = 
-      !::std::is_pointer<T>::value &&
-      !::std::is_reference<T>::value &&
-      is_streamable<::std::iostream, T>::value;
-
-    return Convertor<IsConvertable>::template To<T>(
-      ::covellite::any_cast<const String_t &>(Data.Value));
-  }
-
-  return ::covellite::any_cast<const T &>(Data.Value);
-}
-
-/**
-* \deprecated
-*  Функция устарела и будет удалена в следующей стабильной версии, вместо
-*  нее следует использовать operator[].
-* \brief
-*  Функция установки значения параметра.
-* \details
-*  - Одному  и тому же параметру можно устанавливать значения разных типов,
-*  но при этом следует учитывать, что функция получения значения параметра
-*  преобразует в указанный тип только строковые значения, все остальные
-*  типы не преобразуются.
-*  
-* \param [in] _Name
-*  Имя параметра.
-* \param [in] _Value
-*  Новое значение параметра.
-*/
-template<class T>
-inline void Component::SetValue(const Name_t & _Name, const T & _Value)
-{
-  SetValue(GetHash(_Name), _Value);
-}
-
-/**
-* \deprecated
-*  Функция устарела и будет удалена в следующей стабильной версии, вместо
-*  нее следует использовать operator[].
-* \brief
-*  Функция установки значения параметра.
-* \details
-*  - Одному  и тому же параметру можно устанавливать значения разных типов,
-*  но при этом следует учитывать, что функция получения значения параметра
-*  преобразует в указанный тип только строковые значения, все остальные
-*  типы не преобразуются.
-*
-* \param [in] _hName
-*  Хэш имени параметра.
-* \param [in] _Value
-*  Новое значение параметра.
-*/
-template<class T>
-inline void Component::SetValue(const size_t _hName, const T & _Value)
-{
-  m_Params[_hName] = _Value;
 }
 
 inline /*static*/ size_t Component::GetHashId(void)

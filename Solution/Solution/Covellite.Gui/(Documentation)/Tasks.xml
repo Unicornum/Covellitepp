@@ -8,14 +8,11 @@
   </Options>
   <Process/>
   <Complete>
-    <Week6291>
-      <Task1 Text="Загрузка шрифтов средствами виртуальной файловой системы." Type="Red" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="true" ParentTaskText="false">
-        <Task2 Text="Использование в тестах главного файла RmlUi.mock.hpp." Type="None" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
-        <Task3 Text="Отключение вывода в лог fps." Type="None" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
-      </Task1>
-    </Week6291>
-    <Week6290/>
-    <Week6289/>
-    <Week6288/>
+    <Week6300>
+      <Task6 Text="Исключения bad_any_cast при любых изменениях в активном слое." Type="Bug" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="true" ParentTaskText="false"/>
+    </Week6300>
+    <Week6299/>
+    <Week6298/>
+    <Week6297/>
   </Complete>
 </Tasks>

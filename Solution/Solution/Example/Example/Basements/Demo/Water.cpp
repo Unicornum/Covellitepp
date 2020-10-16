@@ -35,6 +35,8 @@ auto Water::GetObject(const Any_t &) const /*override*/ -> Objects_t
 {
   using namespace ::alicorn::extension::std;
 
+  const auto & Vfs = ::covellite::app::Vfs_t::GetInstance();
+
   return
   {
     Object_t
@@ -49,11 +51,12 @@ auto Water::GetObject(const Any_t &) const /*override*/ -> Objects_t
       {
         { uT("id"), uT("Demo.Shader.Pixel.Water") },
         { uT("type"), uT("Shader") },
-        { uT("entry"), uT("psLightened") },
+        { uT("entry"), uT("psTextured") },
+        { uT("content"), Vfs.GetData("Data\\Shaders\\Example.fx") },
       }),
       Component_t::Make(
       {
-        { uT("id"), uT("Example.Transform.Skybox") },
+        { uT("id"), uT("Example.Transform.Water") },
         { uT("type"), uT("Transform") },
       }),
     } +

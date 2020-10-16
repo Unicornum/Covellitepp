@@ -24,7 +24,7 @@
 *  - Проект, создающий результатирующий APK файл программы следует создавать
 *  как "Простое приложение Android":
 *  
-* \image html ".\Solution\(Documentation)\Manual\Vs2015.Android.png"
+* \image html ".\Solution\(Documentation)\Manual\Vs2019.Android.png"
 *  
 *  - В java коде этого проекта унаследовать класс от NativeActivity и 
 *  переопределить в нем функцию dispatchKeyEvent():

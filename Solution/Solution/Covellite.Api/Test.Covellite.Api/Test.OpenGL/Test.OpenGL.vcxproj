@@ -86,6 +86,7 @@
   <ItemGroup>
     <ClInclude Include="..\Common_test.hpp" />
     <ClInclude Include="..\OpenGLCommon_test.hpp" />
+    <ClInclude Include="..\OpenGLShader.Present_test.hpp" />
     <ClInclude Include="..\OpenGLShader_test.hpp" />
     <ClInclude Include="stdafx.h" />
   </ItemGroup>

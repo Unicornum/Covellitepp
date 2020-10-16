@@ -35,13 +35,6 @@ protected:
 // что и тестируемый класс).
 // FRIEND_TEST(FxDefaultVertex_test, Test_Function);
 
-// ************************************************************************** //
-TEST_F(FxDefaultVertex_test, /*DISABLED_*/Test_Default_Deprecated)
-{
-  EXPECT_FILES_STREQ(THIS_DIRECTORY / L"DefaultDeprecated.expected.fx",
-    THIS_DIRECTORY / L"../../Covellite.Api/Renderer/Shaders/DefaultDeprecated.fx");
-}
-
 #define lowp
 #define mediump
 
@@ -92,40 +85,8 @@ TEST_F(FxDefaultVertex_test, /*DISABLED_*/Test_vsFlat)
 }
 
 // ************************************************************************** //
-TEST_F(FxDefaultVertex_test, /*DISABLED_*/Test_GetAmbientDirectionColor)
-{
-  ObjectData.Lights.Ambient.IsValid = 0;
-  ObjectData.Lights.Direction.IsValid = 0;
-
-  auto Result = GetAmbientDirectionColor(float3(1.0f, 2.0f, 3.0f));
-  EXPECT_EQ(float4(0.0f, 0.0f, 0.0f, 0.0f), Result);
-
-  ObjectData.Lights.Ambient.IsValid = 1;
-  ObjectData.Lights.Ambient.Color = { 1.91f, 0.13f, 0.20f, 0.13f };
-
-  Result = GetAmbientDirectionColor(float3(1.0f, 2.0f, 3.0f));
-  EXPECT_EQ(ObjectData.Lights.Ambient.Color, Result);
-
-  ObjectData.Lights.Direction.IsValid = 1;
-  ObjectData.Lights.Direction.Color = { 19.1f, 0.1f, 3.20f, 18.0f };
-  ObjectData.Lights.Direction.Direction = { -1.0f, -1.0f, -1.0f, 0.0f };
-  Result = GetAmbientDirectionColor(float3(1.0f, 1.0f, 1.0f));
-  EXPECT_EQ(ObjectData.Lights.Ambient.Color, Result);
-
-  const auto ExpectedColor = ObjectData.Lights.Ambient.Color +
-    ObjectData.Lights.Direction.Color * 0.7071067811865f;
-
-  ObjectData.Lights.Direction.Direction = { 0.0f, 1.0f, 1.0f, 0.0f };
-  Result = GetAmbientDirectionColor(float3(0.0f, 0.0f, 1.0f));
-  EXPECT_EQ(ExpectedColor, Result);
-}
-
-// ************************************************************************** //
 TEST_F(FxDefaultVertex_test, /*DISABLED_*/Test_vsVolume)
 {
-  ObjectData.Lights.Ambient.IsValid = 1;
-  ObjectData.Lights.Direction.IsValid = 1;
-
   Vertex Input;
   Input.Position = { 1.90f, 8.20f, 1.1f, 4.9f };
   Input.TexCoord = { 19.0820f, 11.50f };
@@ -135,16 +96,16 @@ TEST_F(FxDefaultVertex_test, /*DISABLED_*/Test_vsVolume)
   CameraData.View = ::glm::mat4{ 19082.01153f };
   CameraData.Projection = ::glm::mat4{ 19082.01154f };
 
-  const auto ExpectedScreenPos = Input.Position *
-    (ObjectData.World * (CameraData.View * CameraData.Projection));
   const auto ExpectedNormal = normalize(
     mul(ToFloat3(Input.Extra), ToMatrix3x3(ObjectData.World)));
   float4 ExpectedWorldPos =
     mul(Input.Position, ObjectData.World);
+  const auto ExpectedScreenPos = ExpectedWorldPos *
+    (CameraData.View * CameraData.Projection);
 
   const auto Result = vsVolume(Input);
   EXPECT_EQ(ExpectedScreenPos, Result.ScreenPos);
-  EXPECT_EQ(GetAmbientDirectionColor(ExpectedNormal), Result.Color);
+  //EXPECT_EQ(GetAmbientDirectionColor(ExpectedNormal), Result.Color);
   EXPECT_EQ(ExpectedNormal, Result.Normal);
   EXPECT_EQ(Input.TexCoord, Result.TexCoord);
   EXPECT_EQ(ExpectedWorldPos, Result.WorldPos);
