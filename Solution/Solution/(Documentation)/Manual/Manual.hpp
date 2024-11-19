@@ -2,17 +2,24 @@
 /**
 * \page UsingFrameworkPage Manual
 *  
-*  Подключение фреймворка к решению
-*  --------------------------------
-*
-*  - Установить свойство svn:externals с именем Externals и путем
-* \code
-
-https://svn/svn/Prebuilt.no.backup/Solution/Properties/Utilities/Externals/Alicorn/Covellite/_Root
-
-* \endcode
-*  - Подключить к страницам свойств решения файл Covellite.props из папки
-*  Externals/Covellite.
+*  Сборка Covellite++ SDK
+*  ----------------------
+*  
+*  [Скачать](https://github.com/Unicornum/Covellitepp/releases) последнюю
+*  версию Covellite++ SDK и распаковать архив в папку Solution\\Solution\\Externals.
+*  
+* \note
+*  Архив Covellite++ SDK содержит нужные ему версии сборок сторонних библиотек,
+*  поэтому для получения идентичной сборки для какой-либо версии нужно
+*  переключить репозиторий на tag этой версии и скачать готовую сборку
+*  Covellite++ SDK этой же версии.
+*  
+*  Использование
+*  =============
+*  
+* \todo
+*  Добавить ссылку на репозиторий образца приложения с описанием подключения
+*  Covellite++ SDK.
 *  
 *  Создание базового проекта приложения
 *  ------------------------------------

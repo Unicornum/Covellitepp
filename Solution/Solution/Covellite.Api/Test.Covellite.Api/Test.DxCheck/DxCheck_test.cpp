@@ -50,13 +50,13 @@ TEST_F(DxCheck_test, /*DISABLED_*/Test_Successfull)
 // ************************************************************************** //
 TEST_F(DxCheck_test, /*DISABLED_*/Test_Failed1)
 {
-  EXPECT_STDEXCEPTION(DX_CHECK Test(DXGI_ERROR_INVALID_CALL),
-    ".+[Dd]x[Cc]heck_test\\.cpp \\([0-9]+\\): Unknown error 0x887A0001");
+  EXPECT_STDEXCEPTION(DX_CHECK Test(D3D10_ERROR_FILE_NOT_FOUND - 2),
+    ".+[Dd]x[Cc]heck_test\\.cpp \\([0-9]+\\): Unknown error 0x88790000");
 }
 
 // ************************************************************************** //
 TEST_F(DxCheck_test, /*DISABLED_*/Test_Failed2)
 {
-  EXPECT_STDEXCEPTION(DX_CHECK Test(DXGI_ERROR_ACCESS_DENIED),
-    ".+[Dd]x[Cc]heck_test\\.cpp \\([0-9]+\\): Unknown error 0x887A002B");
+  EXPECT_STDEXCEPTION(DX_CHECK Test(D3D10_ERROR_FILE_NOT_FOUND - 3),
+    ".+[Dd]x[Cc]heck_test\\.cpp \\([0-9]+\\): Unknown error 0x8878FFFF");
 }
