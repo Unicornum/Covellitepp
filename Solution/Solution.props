@@ -4,9 +4,18 @@
     <Import Project="Solution\Externals.doxygen.ignore\TinyObjLoader\TinyObjLoader.props" />
     <Import Project="Solution\Externals\Assimp\Assimp.props" />
     <Import Project="Solution\Externals\MiniAudio\MiniAudio.props" />
+    <Import Project="Solution\Externals\GLM\GLM.props" />
+    <Import Project="Solution\Externals\FreeType\FreeType.props" />
+    <Import Project="Solution\Externals\RmlUi\RmlUi.props" />
   </ImportGroup>
-  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Label="UserMacros">
+    <LibraryName>Covellite</LibraryName>
+  </PropertyGroup>
   <PropertyGroup />
   <ItemDefinitionGroup />
-  <ItemGroup />
+  <ItemGroup>
+    <BuildMacro Include="LibraryName">
+      <Value>$(LibraryName)</Value>
+    </BuildMacro>
+  </ItemGroup>
 </Project>

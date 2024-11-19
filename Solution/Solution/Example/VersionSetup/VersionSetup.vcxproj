@@ -79,7 +79,7 @@ set PathToVersionFile="$(SolutionDir)Solution\Version.hpp"
 set PathToAndroidManifest="$(ProjectDir)..\Packaging\AndroidManifest.xml"
 set PathToAndroidVersionFile="$(ProjectDir)..\Packaging\res\values\version.auto.xml"
 
-Version.exe --file=%PathToVersionFile% --update-android-manifest=%PathToAndroidManifest% --build-android-version=%PathToAndroidVersionFile% --platform=ARM
+rem Version.exe --file=%PathToVersionFile% --update-android-manifest=%PathToAndroidManifest% --build-android-version=%PathToAndroidVersionFile% --platform=ARM
 
 rem Удаление .apk файла, чтобы в случае ошибки присборке не запускался результат предыдущей сборки
 del $(ResultDir)..\..\Example.apk

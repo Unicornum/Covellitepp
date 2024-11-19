@@ -1,3 +1,6 @@
 [submodule "Solution/Solution/Externals"]
 	path = Solution/Solution/Externals
 	url = https://github.com/Unicornum/Properties.Utilities.git
+[submodule "Solution/Solution/Example/Packaging/src/externals"]
+	path = Solution/Solution/Example/Packaging/src/externals
+	url = https://github.com/Unicornum/Common.Android.git
