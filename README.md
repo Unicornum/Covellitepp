@@ -1,7 +1,10 @@
 # Covellite++
 
-Описание фреймворка и его использования см. в 
-[документации](http://unicornum.github.io/Covellitepp/index.html).
+Кроссплатформенный фреймворк для разработки приложений на С++, позволяющий
+писать один и тот же код, дающий визуально одинаковый результат независимо
+от платформы (Windows/Android) и графического API (DirectX/OpenGL),
+использующий для рендеринга GUI библиотеку
+[RmlUi](https://github.com/mikke89/RmlUi) (близкий по возможностям аналог CSS).
 
-[Базовый каркас](https://github.com/Unicornum/Example.Covellitepp) 
-приложения, использующего Covellite++ SDK.
+Описание фреймворка, его сборки, подключения и использование см. в 
+[документации](http://unicornum.github.io/Covellitepp/index.html).
