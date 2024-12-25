@@ -8,12 +8,10 @@
 
 //*
 
-syntaxError:*\*test.cpp
-unusedFunction:*\*_test.cpp
-shadowFunction:*\Test.Covellite.Os\Test.Window\Window.android_test.cpp
-functionStatic:*\Test.Covellite.Gui\Mock\*.hpp
+missingIncludeSystem:*
+missingInclude:*
 
-passedByValue:*\shaders\*.fx
-pureVirtualCall:*\Covellite.Api\Renderer\GraphicApi.hpp
-virtualCallInConstructor:*\Covellite.Api\Renderer\GraphicApi.hpp
-constParameter:*\Covellite.Os\Window.android.cpp
+unusedFunction:*\Mock\*.hpp
+unusedFunction:*.mock.*
+unusedFunction:*\Renderer\GLExt.hpp
+unusedFunction:*\Platform\Event.hpp
