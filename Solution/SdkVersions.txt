@@ -1,8 +1,8 @@
-Android compiler:        Android clang version 5.0.300080  (based on LLVM 5.0.300080)
+Android compiler:        Android (8481493, based on r416183c2) clang version 12.0.9 (https
 Android stl library:     ;c++_shared;c++abi;
-Android API Level:       android-21
+Android API Level:       android-31
 Android SDK build tools: 29.0.2
 Android SDK platform:    android-29
-Android NDK:             android-ndk-r16b
+Android NDK:             android-ndk-r23c
 JDK:                     1.8.0-25
 Apache Ant:              1.10.6
