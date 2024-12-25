@@ -70,7 +70,7 @@
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
     <Import Project="..\..\Solution.x64.props" />
-    <Import Project="Android.Run.props" />
+    <Import Project="..\..\Solution\Externals\Android.Run.props" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
@@ -79,7 +79,7 @@
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
     <Import Project="..\..\Solution.x64.props" />
-    <Import Project="Android.Run.props" />
+    <Import Project="..\..\Solution\Externals\Android.Run.props" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -127,8 +127,6 @@
 set ANDROID_PROJECT_NAME=Example
 set ANDROID_ACTIVITY_NAME=com.Covellitepp.Example
 
-call $(BinaryRootDir)set_android_ndk_root.cmd
-
 %(Command)
 </Command>
     </PostBuildEvent>
@@ -173,8 +171,6 @@ call $(BinaryRootDir)set_android_ndk_root.cmd
       <Command>set ADB_CLEAR_LOG=1
 set ANDROID_PROJECT_NAME=Example
 set ANDROID_ACTIVITY_NAME=com.Covellitepp.Example
-
-call $(BinaryRootDir)set_android_ndk_root.cmd
 
 %(Command)
 </Command>
