@@ -19,19 +19,19 @@
 #define __PLATFORM__ x64
 
 // Устанавливается автоматически
-#define TIME "12:11"
+#define TIME "23:13"
 
 // Устанавливается автоматически
-#define DAY 06
+#define DAY 04
 
 // Устанавливается автоматически
-#define MONTH 12
+#define MONTH 01
 
 // Устанавливается автоматически
-#define YEAR 2024
+#define YEAR 2025
 
 // Текущий год устанавливается автоматически
-#define __COPYRIGHT_STR__ "© UnicornumVerum 2016 - 2024 (unicornum.verum@gmail.ru)"
+#define __COPYRIGHT_STR__ "© UnicornumVerum 2016 - 2025 (unicornum.verum@gmail.ru)"
 
 #define __COMPANY_NAME__ "UnicornumVerum"
 

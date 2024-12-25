@@ -28,9 +28,9 @@ namespace gui
 *  © CTAPOBEP 2016 - 2018
 */
 class Window::EventListener final :
-  public CovelliteGui::Core::EventListener
+  public CovelliteGui::EventListener
 {
-  using Event_t = CovelliteGui::Core::Event;
+  using Event_t = CovelliteGui::Event;
 
 public:
   // Èםעונפויס EventListener:

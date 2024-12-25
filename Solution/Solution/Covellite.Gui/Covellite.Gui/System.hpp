@@ -31,16 +31,16 @@ namespace gui
 *  © CTAPOBEP 2016 - 2017
 */
 class System final :
-  public CovelliteGui::Core::SystemInterface
+  public CovelliteGui::SystemInterface
 {
-  using String_t = CovelliteGui::Core::String;
+  using String_t = CovelliteGui::String;
   using StringTranslatorPtr_t = ::std::shared_ptr<IStringTranslator>;
 
 public:
   CovelliteGuiTime_t GetElapsedTime(void) override;
   int TranslateString(String_t &, const String_t &) override;
-  bool LogMessage(CovelliteGui::Core::Log::Type, const String_t &) override;
-  void ActivateKeyboard(void) override;
+  bool LogMessage(CovelliteGui::Log::Type, const String_t &) override;
+  void ActivateKeyboard(CovelliteGui::Vector2f, float) override;
   void DeactivateKeyboard(void) override;
 
 private:

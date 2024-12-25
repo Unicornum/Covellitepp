@@ -115,8 +115,13 @@ protected:
 // что и тестируемый класс).
 // FRIEND_TEST(OpenGL_test, Test_Function);
 
+// Это чтобы Test_EmptyFormatDescriptor выполнялся раньше остальных, с некоторых
+// пор GTest стала выполнять тесты в каком-то отличном от порядка их объявления
+// порядке.
+class AAAAAA_test : public OpenGL_test { };
+
 // ************************************************************************** //
-TEST_F(OpenGL_test, /*DISABLED_*/Test_EmptyFormatDescriptor)
+TEST_F(AAAAAA_test, /*DISABLED_*/Test_EmptyFormatDescriptor)
 {
   // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! ВАЖНО !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! //
   // Эта функция должна выполняться до создания первого объекта!

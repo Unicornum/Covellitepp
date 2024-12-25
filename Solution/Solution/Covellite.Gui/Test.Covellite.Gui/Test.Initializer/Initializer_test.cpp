@@ -52,13 +52,9 @@ TEST_F(Initializer_test, /*DISABLED_*/Test_Windows)
 {
   using Tested_t = ::covellite::gui::Initializer;
 
-  using Proxy_t = ::mock::CovelliteGui::Core::Proxy;
+  using Proxy_t = ::mock::CovelliteGui::Proxy;
   Proxy_t Proxy;
   Proxy_t::GetInstance() = &Proxy;
-
-  using PluginProxy_t = ::mock::CovelliteGui::Plugin::Proxy;
-  PluginProxy_t PluginProxy;
-  PluginProxy_t::GetInstance() = &PluginProxy;
 
   using InterfacesProxy_t = ::mock::covellite::InterfacesProxy;
   InterfacesProxy_t InterfacesProxy;
@@ -120,9 +116,6 @@ TEST_F(Initializer_test, /*DISABLED_*/Test_Windows)
     EXPECT_CALL(Proxy, Initialise())
       .Times(1);
 
-    EXPECT_CALL(PluginProxy, Initialise())
-      .Times(1);
-
     {
       Tested_t Example(Data);
 
@@ -145,20 +138,22 @@ TEST_F(Initializer_test, /*DISABLED_*/Test_Windows)
 #undef Initializer
 #define Initializer Initializer_android
 #include <Covellite/Gui/Initializer.hpp>
+
+// Замена Shutdown потребовалалсь из-за того, что после замены версии GTest
+// до v1.15.2 запуск тестов стал падать при завершении работы из-за вызова
+// подставной функции в деструкторе статического объекта.
+#define Shutdown AndroidShutdown
 #include "../../Covellite.Gui/Initializer.android.cpp"
+#undef Shutdown
 
 // ************************************************************************** //
 TEST_F(Initializer_test, /*DISABLED_*/Test_Android)
 {
   using Tested_t = ::covellite::gui::Initializer;
 
-  using Proxy_t = ::mock::CovelliteGui::Core::Proxy;
+  using Proxy_t = ::mock::CovelliteGui::Proxy;
   Proxy_t Proxy;
   Proxy_t::GetInstance() = &Proxy;
-
-  using PluginProxy_t = ::mock::CovelliteGui::Plugin::Proxy;
-  PluginProxy_t PluginProxy;
-  PluginProxy_t::GetInstance() = &PluginProxy;
 
   using InterfacesProxy_t = ::mock::covellite::InterfacesProxy;
   InterfacesProxy_t InterfacesProxy;
@@ -218,9 +213,6 @@ TEST_F(Initializer_test, /*DISABLED_*/Test_Android)
       .Times(1);
 
     EXPECT_CALL(Proxy, Initialise())
-      .Times((i == 0) ? 1 : 0);
-
-    EXPECT_CALL(PluginProxy, Initialise())
       .Times((i == 0) ? 1 : 0);
 
     {

@@ -39,7 +39,7 @@ void Layer::Element::SetMeaning(const float _Meaning)
   const auto Tag =
     m_pElement->GetTagName();
 
-  if (Tag == "progressbar" || Tag == "circularbar")
+  if (Tag == "progress" || Tag == "circular")
   {
     CovelliteGuiSetProgressBarValue(m_pElement, _Meaning);
   }
@@ -68,7 +68,7 @@ void Layer::Element::SetMeaning(const String_t & _Meaning)
   const auto Tag =
     m_pElement->GetTagName();
   const auto Type =
-    m_pElement->GetAttribute("type", CovelliteGui::Core::String{ "unknown" });
+    m_pElement->GetAttribute("type", CovelliteGui::String{ "unknown" });
 
   using namespace ::alicorn::extension::std;
 
@@ -79,7 +79,7 @@ void Layer::Element::SetMeaning(const String_t & _Meaning)
     (Tag == "input" && (Type == "range" || Type == "text")))
   {
     auto & Control =
-      dynamic_cast<CovelliteGui::Controls::ElementFormControl &>(*m_pElement);
+      dynamic_cast<CovelliteGui::ElementFormControl &>(*m_pElement);
 
     // Для select это не работает (как и ElementFormControlSelect::SetSelection(),
     // выглядит так, как будто список строк просто удаляется), как устанавливать 
@@ -108,7 +108,7 @@ void Layer::Element::SetMeaning(const String_t & _Meaning)
 */
 auto Layer::Element::GetMeaning(void) const -> String_t
 {
-  const CovelliteGui::Core::String Unknown = "unknown";
+  const CovelliteGui::String Unknown = "unknown";
 
   const auto Tag = m_pElement->GetTagName();
   const auto Type = m_pElement->GetAttribute("type", Unknown);
@@ -122,7 +122,7 @@ auto Layer::Element::GetMeaning(void) const -> String_t
     (Tag == "input" && (Type == "text" || Type == "range")))
   {
     const auto & Control =
-      dynamic_cast<CovelliteGui::Controls::ElementFormControl &>(*m_pElement);
+      dynamic_cast<CovelliteGui::ElementFormControl &>(*m_pElement);
 
     return string_cast<String, Encoding::UTF8>(
       CovelliteGuiStringToUtf8(Control.GetValue()));

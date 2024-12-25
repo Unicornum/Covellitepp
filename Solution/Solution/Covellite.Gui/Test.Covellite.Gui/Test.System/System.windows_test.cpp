@@ -15,6 +15,13 @@
 #define System_test System_windows_test
 #define System System_windows
 
+namespace covellite
+{
+
+namespace std = ::mock::std;
+
+} // namespace covellite
+
 // Расположение класса System
 #include "..\..\Covellite.Gui\System.windows.cpp"
 #include "..\..\Covellite.Gui\System.cpp"
@@ -27,7 +34,7 @@ class System_test :
 {
 protected:
   using Tested_t = ::covellite::gui::System;
-  using ITested_t = ::mock::CovelliteGui::Core::SystemInterface;
+  using ITested_t = ::mock::CovelliteGui::SystemInterface;
 
   // Вызывается ПЕРЕД запуском каждого теста
   void SetUp(void) override

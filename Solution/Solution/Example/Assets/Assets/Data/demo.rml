@@ -17,7 +17,7 @@
     <form id="id_loading" class="hidden">
       <!--<circularbar id="id_circular" value="0.667"/>-->
       <form>
-        <progressbar id="id_progress"/>
+        <progress id="id_progress"/>
       </form>
     </form>
     <form id="id_game_menu" class="hidden">

@@ -30,7 +30,7 @@ class IWindow :
   public ::covellite::events::IEvents
 {
 protected:
-  using Document_t = CovelliteGui::Core::ElementDocument;
+  using Document_t = CovelliteGui::ElementDocument;
   using DocumentPtr_t = ::std::unique_ptr<Document_t, void(*)(Document_t *)>;
   using PathToFile_t = ::boost::filesystem::path;
 

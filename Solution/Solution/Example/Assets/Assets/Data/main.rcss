@@ -49,7 +49,9 @@ p {
   p#id_description,
   p#id_copyright {
     font-size: 0.975em;
-    margin: 0 0.75em;
+    width: 95%;
+    margin-left: auto;
+    margin-right: auto;
   }
 
   p#id_description {
@@ -70,16 +72,19 @@ p {
   }
 
 selector {
-  display: inline-block;
+  display: block;
   margin-top: 1em;
   margin-bottom: 1em;
+  margin-left: auto;
+  margin-right: auto;
   text-align: center;
+  width: 95%;
   position: fixed;
   bottom: 0;
 }
 
 button {
-  font-size: 3.5em;
+  font-size: 3.4em;
   padding-top: 0.1em;
   padding-bottom: 0.1em;
   padding-left: 0.2em;

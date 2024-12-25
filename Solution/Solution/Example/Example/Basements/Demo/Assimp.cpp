@@ -111,8 +111,7 @@ inline /*static*/ ::glm::mat4 Assimp::aiMatrix4x4ToGlm(const aiMatrix4x4 & from)
   //_Importer.SetPropertyInteger(AI_CONFIG_PP_LBW_MAX_WEIGHTS, 1);
 
   const auto * const pScene = _Importer.ReadFileFromMemory(
-    reinterpret_cast<const char *>(RawData.data()),
-    static_cast<unsigned int>(RawData.size()),
+    RawData.data(), RawData.size(),
     aiProcess_ValidateDataStructure |
     aiProcess_FindInvalidData |
     aiProcess_JoinIdenticalVertices |
@@ -124,7 +123,7 @@ inline /*static*/ ::glm::mat4 Assimp::aiMatrix4x4ToGlm(const aiMatrix4x4 & from)
     //aiProcess_OptimizeMeshes |
     //aiProcess_RemoveRedundantMaterials |
     //aiProcess_OptimizeGraph |
-    0, "");
+    0, _FileName.extension().string().c_str());
 
   if (pScene == nullptr)
   {

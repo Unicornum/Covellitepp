@@ -29,7 +29,7 @@ protected:
   using Tested_t = ::covellite::gui::Window::EventListener;
 # undef EventListener
 
-  using ITested_t = ::mock::CovelliteGui::Core::EventListener;
+  using ITested_t = ::mock::CovelliteGui::EventListener;
   using Events_t = ::covellite::events::Events;
 
   // Вызывается ПЕРЕД запуском каждого теста
@@ -142,7 +142,7 @@ TEST_F(EventListener_test, /*DISABLED_*/Test_ProcessEvent_TargetElementNullptr)
   auto pExample = Tested_t::Make(Events);
   ITested_t & IExample = *pExample;
 
-  ::mock::CovelliteGui::Core::Event Event;
+  ::mock::CovelliteGui::Event Event;
 
   using namespace ::testing;
 
@@ -176,8 +176,8 @@ TEST_F(EventListener_test, /*DISABLED_*/Test_ProcessEvent_OwnerDocument_Nullptr)
   auto pExample = Tested_t::Make(Events);
   ITested_t & IExample = *pExample;
 
-  ::mock::CovelliteGui::Core::Element TargetElement;
-  ::mock::CovelliteGui::Core::Event Event;
+  ::mock::CovelliteGui::Element TargetElement;
+  ::mock::CovelliteGui::Event Event;
 
   using namespace ::testing;
 
@@ -203,8 +203,8 @@ TEST_F(EventListener_test, /*DISABLED_*/Test_ProcessEvent_OwnerDocument_Nullptr)
 // ************************************************************************** //
 TEST_F(EventListener_test, /*DISABLED_*/Test_ProcessEvent_OnClick_Exception)
 {
-  ::mock::CovelliteGui::Core::Element TargetElement;
-  ::mock::CovelliteGui::Core::ElementDocument OwnerDocument;
+  ::mock::CovelliteGui::Element TargetElement;
+  ::mock::CovelliteGui::ElementDocument OwnerDocument;
   const char * Type = "click";
   const char * DocumentId = "Id1807271203";
   const char * TargetElementId = "Id1710112259";
@@ -222,7 +222,7 @@ TEST_F(EventListener_test, /*DISABLED_*/Test_ProcessEvent_OnClick_Exception)
   auto pExample = Tested_t::Make(Events);
   ITested_t & IExample = *pExample;
 
-  ::mock::CovelliteGui::Core::Event Event;
+  ::mock::CovelliteGui::Event Event;
 
   using namespace ::testing;
 
@@ -261,8 +261,8 @@ TEST_F(EventListener_test, /*DISABLED_*/Test_ProcessEvent_OnClick_Exception)
 // ************************************************************************** //
 TEST_F(EventListener_test, /*DISABLED_*/Test_ProcessEvent_OnChange_Exception)
 {
-  ::mock::CovelliteGui::Core::Element TargetElement;
-  ::mock::CovelliteGui::Core::ElementDocument OwnerDocument;
+  ::mock::CovelliteGui::Element TargetElement;
+  ::mock::CovelliteGui::ElementDocument OwnerDocument;
   const char * Type = "change";
   const char * DocumentId = "Id1807271203";
   const char * TargetElementId = "Id1710112259";
@@ -280,7 +280,7 @@ TEST_F(EventListener_test, /*DISABLED_*/Test_ProcessEvent_OnChange_Exception)
   auto pExample = Tested_t::Make(Events);
   ITested_t & IExample = *pExample;
 
-  ::mock::CovelliteGui::Core::Event Event;
+  ::mock::CovelliteGui::Event Event;
 
   using namespace ::testing;
 
@@ -319,8 +319,8 @@ TEST_F(EventListener_test, /*DISABLED_*/Test_ProcessEvent_OnChange_Exception)
 // ************************************************************************** //
 TEST_F(EventListener_test, /*DISABLED_*/Test_ProcessEvent_OnClick)
 {
-  ::mock::CovelliteGui::Core::Element TargetElement;
-  ::mock::CovelliteGui::Core::ElementDocument OwnerDocument;
+  ::mock::CovelliteGui::Element TargetElement;
+  ::mock::CovelliteGui::ElementDocument OwnerDocument;
   const char * Type = "click";
   const char * TargetElementId = "Id1710112311";
   const char * OwnerDocumentId = "Id1710112312";
@@ -337,7 +337,7 @@ TEST_F(EventListener_test, /*DISABLED_*/Test_ProcessEvent_OnClick)
   auto pExample = Tested_t::Make(Events);
   ITested_t & IExample = *pExample;
 
-  ::mock::CovelliteGui::Core::Event Event;
+  ::mock::CovelliteGui::Event Event;
 
   using namespace ::testing;
 
@@ -375,8 +375,8 @@ TEST_F(EventListener_test, /*DISABLED_*/Test_ProcessEvent_OnClick)
 // ************************************************************************** //
 TEST_F(EventListener_test, /*DISABLED_*/Test_ProcessEvent_OnChamge)
 {
-  ::mock::CovelliteGui::Core::Element TargetElement;
-  ::mock::CovelliteGui::Core::ElementDocument OwnerDocument;
+  ::mock::CovelliteGui::Element TargetElement;
+  ::mock::CovelliteGui::ElementDocument OwnerDocument;
   const char * Type = "change";
   const char * TargetElementId = "Id1710112311";
   const char * OwnerDocumentId = "Id1710112312";
@@ -393,7 +393,7 @@ TEST_F(EventListener_test, /*DISABLED_*/Test_ProcessEvent_OnChamge)
   auto pExample = Tested_t::Make(Events);
   ITested_t & IExample = *pExample;
 
-  ::mock::CovelliteGui::Core::Event Event;
+  ::mock::CovelliteGui::Event Event;
 
   using namespace ::testing;
 

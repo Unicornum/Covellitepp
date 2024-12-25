@@ -43,9 +43,9 @@ class Layer :
 
 protected:
   using IWindowGui_t = gui::IWindow;
-  using Document_t = CovelliteGui::Core::ElementDocument;
+  using Document_t = CovelliteGui::ElementDocument;
   using DocumentPtr_t = ::std::unique_ptr<Document_t, void(*)(Document_t *)>;
-  using Element_t = CovelliteGui::Core::Element;
+  using Element_t = CovelliteGui::Element;
   using Path_t = ::boost::filesystem::path;
   using String_t = ::alicorn::extension::std::String;
 

@@ -7,10 +7,10 @@ class Layer_test :
 protected:
   using Tested_t = ::covellite::gui::Layer;
   using ITested_t = ::covellite::gui::ILayer;
-  using Context_t = ::mock::CovelliteGui::Core::Context;
-  using Document_t = ::mock::CovelliteGui::Core::ElementDocument;
+  using Context_t = ::mock::CovelliteGui::Context;
+  using Document_t = ::mock::CovelliteGui::ElementDocument;
   using DocumentPtr_t = ::std::unique_ptr<Document_t, void(*)(Document_t *)>;
-  using String_t = ::mock::CovelliteGui::Core::String;
+  using String_t = ::mock::CovelliteGui::String;
   using Path_t = ::boost::filesystem::path;
 
   // Вызывается ПЕРЕД запуском каждого теста

@@ -135,7 +135,7 @@ TEST_F(Layer_test, /*DISABLED_*/Test_Constructor_Title)
   Window Window;
   const char * PathToFile = "Path1710040013";
   Document_t Document;
-  ::mock::CovelliteGui::Core::Element Title;
+  ::mock::CovelliteGui::Element Title;
   const char * TitleId = "TitleId1612201119";
   const char * DocumentTitle = "Title1612201121";
 
@@ -169,7 +169,7 @@ TEST_F(Layer_test, /*DISABLED_*/Test_Constructor_Title_Events)
   Window Window;
   ::covellite::gui::IWindow & IWindow = Window;
   Document_t Document;
-  ::mock::CovelliteGui::Core::Element Title;
+  ::mock::CovelliteGui::Element Title;
 
   using namespace ::testing;
 
@@ -270,7 +270,7 @@ TEST_F(Layer_test, /*DISABLED_*/Test_GetElement)
   Window Window;
   ::covellite::gui::IWindow & IWindow = Window;
   Document_t Document;
-  ::mock::CovelliteGui::Core::Element Element;
+  ::mock::CovelliteGui::Element Element;
   const char * Id = "1701031206";
 
   using namespace ::testing;
@@ -299,7 +299,7 @@ TEST_F(Layer_test, /*DISABLED_*/Test_GetWidth)
   Window Window;
   ::covellite::gui::IWindow & IWindow = Window;
   Document_t Document;
-  const ::mock::CovelliteGui::Core::Vector2i Size = { 1701131210, 0 };
+  const ::mock::CovelliteGui::Vector2i Size = { 1701131210, 0 };
 
   using namespace ::testing;
 
@@ -333,7 +333,7 @@ TEST_F(Layer_test, /*DISABLED_*/Test_GetHeight)
   Window Window;
   ::covellite::gui::IWindow & IWindow = Window;
   Document_t Document;
-  const ::mock::CovelliteGui::Core::Vector2i Size = { 0, 1701131212 };
+  const ::mock::CovelliteGui::Vector2i Size = { 0, 1701131212 };
 
   using namespace ::testing;
 
@@ -366,7 +366,7 @@ TEST_F(Layer_test, /*DISABLED_*/Test_EmployFontSize_UnexpectedDocumentTag)
   Window Window;
   ::covellite::gui::IWindow & IWindow = Window;
   Document_t Document;
-  const ::mock::CovelliteGui::Core::String TagName = "Tag1702091254";
+  const ::mock::CovelliteGui::String TagName = "Tag1702091254";
 
   using namespace ::testing;
 
@@ -413,7 +413,7 @@ TEST_F(Layer_test, /*DISABLED_*/Test_EmployFontSize)
     InSequence Dummy;
 
     const double Percent = 2.0;
-    const ::mock::CovelliteGui::Core::Vector2i Size = { 0, 800 };
+    const ::mock::CovelliteGui::Vector2i Size = { 0, 800 };
 
     EXPECT_CALL(Context, GetDimensions())
       .Times(2)
@@ -430,7 +430,7 @@ TEST_F(Layer_test, /*DISABLED_*/Test_EmployFontSize)
     InSequence Dummy;
 
     const double Percent = 1.0;
-    const ::mock::CovelliteGui::Core::Vector2i Size = { 765, 0 };
+    const ::mock::CovelliteGui::Vector2i Size = { 765, 0 };
 
     EXPECT_CALL(Context, GetDimensions())
       .Times(2)
@@ -450,7 +450,7 @@ TEST_F(Layer_test, /*DISABLED_*/Test_Element_Focus)
   Window Window;
   ::covellite::gui::IWindow & IWindow = Window;
   Document_t Document;
-  ::mock::CovelliteGui::Core::Element Element;
+  ::mock::CovelliteGui::Element Element;
 
   using namespace ::testing;
 
@@ -483,8 +483,8 @@ TEST_F(Layer_test, /*DISABLED_*/Test_Element_SetMeaning_ProgressBar_RmlUi)
   ::covellite::gui::IWindow & IWindow = Window;
 
   Document_t Document;
-  ::mock::CovelliteGui::Controls::ElementProgressBar Element;
-  const char * Tag = "progressbar";
+  ::mock::CovelliteGui::ElementProgress Element;
+  const char * Tag = "progress";
   const float Value = 200527.1625f;
 
   using namespace ::testing;
@@ -524,7 +524,7 @@ TEST_F(Layer_test, /*DISABLED_*/Test_Element_SetMeaning_Textarea)
   ::covellite::gui::IWindow & IWindow = Window;
 
   Document_t Document;
-  ::mock::CovelliteGui::Controls::ElementFormControl Element;
+  ::mock::CovelliteGui::ElementFormControl Element;
   const char * Tag = "textarea";
   const char * Type = "Type1902041652";
   const char * Value = u8"ValueÇíà÷åíèå1902041653";
@@ -566,7 +566,7 @@ TEST_F(Layer_test, /*DISABLED_*/Test_Element_SetMeaning_Input_Text)
   ::covellite::gui::IWindow & IWindow = Window;
 
   Document_t Document;
-  ::mock::CovelliteGui::Controls::ElementFormControl Element;
+  ::mock::CovelliteGui::ElementFormControl Element;
   const char * Tag = "input";
   const char * Type = "text";
   const char * Value = u8"ValueÇíà÷åíèå1902041658";
@@ -608,7 +608,7 @@ TEST_F(Layer_test, /*DISABLED_*/Test_Element_SetMeaning_Input_Range)
   ::covellite::gui::IWindow & IWindow = Window;
 
   Document_t Document;
-  ::mock::CovelliteGui::Controls::ElementFormControl Element;
+  ::mock::CovelliteGui::ElementFormControl Element;
   const char * Tag = "input";
   const char * Type = "range";
   const char * Value = u8"ValueÇíà÷åíèå1902041659";
@@ -650,7 +650,7 @@ TEST_F(Layer_test, /*DISABLED_*/Test_Element_SetMeaning_InnerRml)
   ::covellite::gui::IWindow & IWindow = Window;
 
   Document_t Document;
-  ::mock::CovelliteGui::Core::Element Element;
+  ::mock::CovelliteGui::Element Element;
   const char * Tag = "Tag1902041640";
   const char * Type = "Type1902041641";
   const char * Value = u8"Value1902041642Òåêñò";
@@ -692,7 +692,7 @@ TEST_F(Layer_test, /*DISABLED_*/Test_Element_GetMeaning_Textarea)
   ::covellite::gui::IWindow & IWindow = Window;
 
   Document_t Document;
-  ::mock::CovelliteGui::Controls::ElementFormControl Element;
+  ::mock::CovelliteGui::ElementFormControl Element;
   const char * Tag = "textarea";
   const char * Type = "Type1902041715";
   const char * Value = u8"ValueÒåêñò1902041716";
@@ -736,7 +736,7 @@ TEST_F(Layer_test, /*DISABLED_*/Test_Element_GetMeaning_Input_Text)
   ::covellite::gui::IWindow & IWindow = Window;
 
   Document_t Document;
-  ::mock::CovelliteGui::Controls::ElementFormControl Element;
+  ::mock::CovelliteGui::ElementFormControl Element;
   const char * Tag = "input";
   const char * Type = "text";
   const char * Value = u8"ValueÒåêñò1902041717";
@@ -780,7 +780,7 @@ TEST_F(Layer_test, /*DISABLED_*/Test_Element_GetMeaning_Input_Range)
   ::covellite::gui::IWindow & IWindow = Window;
 
   Document_t Document;
-  ::mock::CovelliteGui::Controls::ElementFormControl Element;
+  ::mock::CovelliteGui::ElementFormControl Element;
   const char * Tag = "input";
   const char * Type = "range";
   const char * Value = u8"ValueÒåêñò1902041718";
@@ -824,7 +824,7 @@ TEST_F(Layer_test, /*DISABLED_*/Test_Element_GetMeaning_Select)
   ::covellite::gui::IWindow & IWindow = Window;
 
   Document_t Document;
-  ::mock::CovelliteGui::Controls::ElementFormControl Element;
+  ::mock::CovelliteGui::ElementFormControl Element;
   const char * Tag = "select";
   const char * Type = "Type1902041719";
   const char * Value = u8"ValueÒåêñò1902041720";
@@ -868,7 +868,7 @@ TEST_F(Layer_test, /*DISABLED_*/Test_Element_GetMeaning_InnerRml)
   ::covellite::gui::IWindow & IWindow = Window;
 
   Document_t Document;
-  ::mock::CovelliteGui::Core::Element Element;
+  ::mock::CovelliteGui::Element Element;
   const char * Tag = "Tag1902041709";
   const char * Type = "Type1902041710";
   const char * Value = u8"ValueÒåêñò1902041711";
@@ -912,7 +912,7 @@ TEST_F(Layer_test, /*DISABLED_*/Test_Element_SetClassStyle)
   ::covellite::gui::IWindow & IWindow = Window;
 
   Document_t Document;
-  ::mock::CovelliteGui::Core::Element Element;
+  ::mock::CovelliteGui::Element Element;
   const char * Value = u8"ValueÒåêñò1902041733";
 
   using namespace ::testing;

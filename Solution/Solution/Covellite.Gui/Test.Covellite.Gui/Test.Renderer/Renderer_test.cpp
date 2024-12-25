@@ -102,7 +102,7 @@ class Renderer_test :
 {
 protected:
   using Tested_t = ::covellite::gui::Renderer;
-  using RenderInterface_t = ::mock::CovelliteGui::Core::RenderInterface;
+  using RenderInterface_t = ::mock::CovelliteGui::RenderInterface;
   using String_t = ::alicorn::extension::std::String;
   using Component_t = ::covellite::api::Component;
   using Renders_t = Component_t::Renders;
@@ -188,7 +188,7 @@ private:
 
 protected:
   ::std::vector<Vertex_t> Convert(
-    const ::std::vector<::mock::CovelliteGui::Core::Vertex> & _Source)
+    const ::std::vector<::mock::CovelliteGui::Vertex> & _Source)
   {
     ::std::vector<::covellite::api::Vertex> Result{ _Source.size() };
 
@@ -234,10 +234,10 @@ TEST_F(Renderer_test, /*DISABLED_*/Test_RenderGeometry)
     public Tested_t
   {
     using Renders_t = ::covellite::api::Component::Renders;
-    using CGHandle_t = ::mock::CovelliteGui::Core::CompiledGeometryHandle;
-    using Vertex_t = ::mock::CovelliteGui::Core::Vertex;
-    using THandle_t = ::mock::CovelliteGui::Core::TextureHandle;
-    using Vector2f_t = ::mock::CovelliteGui::Core::Vector2f;
+    using CGHandle_t = ::mock::CovelliteGui::CompiledGeometryHandle;
+    using Vertex_t = ::mock::CovelliteGui::Vertex;
+    using THandle_t = ::mock::CovelliteGui::TextureHandle;
+    using Vector2f_t = ::mock::CovelliteGui::Vector2f;
 
   public:
     MOCK_METHOD5(CompileGeometry, CGHandle_t(Vertex_t *, int, int *, int, THandle_t));
@@ -252,13 +252,13 @@ TEST_F(Renderer_test, /*DISABLED_*/Test_RenderGeometry)
     }
   };
 
-  ::std::vector<::mock::CovelliteGui::Core::Vertex> Vertices{ 10 };
+  ::std::vector<::mock::CovelliteGui::Vertex> Vertices{ 10 };
   const int VertexSize = 1808251051;
   ::std::vector<int> Index{ 20 };
   const int IndexSize = 1808251052;
-  ::mock::CovelliteGui::Core::TextureHandle hTexture = 1808251053;
-  ::mock::CovelliteGui::Core::CompiledGeometryHandle hGeometry = (void *)1808251054;
-  ::mock::CovelliteGui::Core::Vector2f Position = { 1808251056.0f, 1808251057.0f };
+  ::mock::CovelliteGui::TextureHandle hTexture = 1808251053;
+  ::mock::CovelliteGui::CompiledGeometryHandle hGeometry = (void *)1808251054;
+  ::mock::CovelliteGui::Vector2f Position = { 1808251056.0f, 1808251057.0f };
 
   Tested Example;
   RenderInterface_t & IExample = Example;
@@ -288,7 +288,7 @@ TEST_F(Renderer_test, /*DISABLED_*/Test_CompileGeometry_UniqueHahdlers)
   Tested_t Example{ ::std::make_shared<Renders_t>(Renders_t::Creators_t{}) };
   RenderInterface_t & IExample = Example;
 
-  ::std::set<::mock::CovelliteGui::Core::CompiledGeometryHandle> Handles;
+  ::std::set<::mock::CovelliteGui::CompiledGeometryHandle> Handles;
 
   const size_t RepeatCount = 10;
 
@@ -407,7 +407,7 @@ TEST_F(Renderer_test, /*DISABLED_*/Test_RenderCompiledGeometry_Textured)
   Tested_t Example{ ::std::make_shared<Renders_t>(Creators) };
   RenderInterface_t & IExample = Example;
 
-  ::std::vector<::mock::CovelliteGui::Core::Vertex> Vertexes =
+  ::std::vector<::mock::CovelliteGui::Vertex> Vertexes =
   {
     {
       { 190.8202318f, 1908.202319f },
@@ -630,7 +630,7 @@ TEST_F(Renderer_test, /*DISABLED_*/Test_RenderCompiledGeometry_NonTextured)
   Tested_t Example{ ::std::make_shared<Renders_t>(Creators) };
   RenderInterface_t & IExample = Example;
 
-  ::std::vector<::mock::CovelliteGui::Core::Vertex> Vertexes =
+  ::std::vector<::mock::CovelliteGui::Vertex> Vertexes =
   {
     {
       { 190.8202318f, 1908.202319f },
@@ -825,7 +825,7 @@ TEST_F(Renderer_test, /*DISABLED_*/Test_ReleaseCompiledGeometry_RemoveUniqueComp
   }
 
   IExample.ReleaseCompiledGeometry(
-    (::mock::CovelliteGui::Core::CompiledGeometryHandle)ObjectId);
+    (::mock::CovelliteGui::CompiledGeometryHandle)ObjectId);
 
   {
     const Renders_t::Renders_t Renders =
@@ -1068,8 +1068,8 @@ TEST_F(Renderer_test, /*DISABLED_*/Test_SetScissorRegion)
 // ************************************************************************** //
 TEST_F(Renderer_test, /*DISABLED_*/Test_LoadTexture_NotExistsFile)
 {
-  using TextureHandle_t = ::mock::CovelliteGui::Core::TextureHandle;
-  using TextureDimensions_t = ::mock::CovelliteGui::Core::Vector2i;
+  using TextureHandle_t = ::mock::CovelliteGui::TextureHandle;
+  using TextureDimensions_t = ::mock::CovelliteGui::Vector2i;
 
   class Tested :
     public Tested_t
@@ -1081,7 +1081,7 @@ TEST_F(Renderer_test, /*DISABLED_*/Test_LoadTexture_NotExistsFile)
 
   public:
     bool GenerateTexture(TextureHandle_t &,
-      const ::mock::CovelliteGui::Core::byte *,
+      const ::mock::CovelliteGui::byte *,
       const TextureDimensions_t &) override
     {
       return DoGenerateTexture();
@@ -1119,9 +1119,9 @@ TEST_F(Renderer_test, /*DISABLED_*/Test_LoadTexture_NotExistsFile)
 // ************************************************************************** //
 TEST_F(Renderer_test, /*DISABLED_*/Test_LoadTexture)
 {
-  using TextureHandle_t = ::mock::CovelliteGui::Core::TextureHandle;
-  using TextureData_t = ::std::vector<::mock::CovelliteGui::Core::byte>;
-  using TextureDimensions_t = ::mock::CovelliteGui::Core::Vector2i;
+  using TextureHandle_t = ::mock::CovelliteGui::TextureHandle;
+  using TextureData_t = ::std::vector<::mock::CovelliteGui::byte>;
+  using TextureDimensions_t = ::mock::CovelliteGui::Vector2i;
 
   class Tested :
     public Tested_t
@@ -1133,7 +1133,7 @@ TEST_F(Renderer_test, /*DISABLED_*/Test_LoadTexture)
 
   public:
     bool GenerateTexture(TextureHandle_t & _hTexture,
-      const ::mock::CovelliteGui::Core::byte * _pData,
+      const ::mock::CovelliteGui::byte * _pData,
       const TextureDimensions_t & _TextureDimensions) override
     {
       _hTexture = m_hHandle;
@@ -1180,8 +1180,8 @@ TEST_F(Renderer_test, /*DISABLED_*/Test_LoadTexture)
       .Times(1)
       .WillOnce(Return(IsGenerate));
 
-    ::mock::CovelliteGui::Core::TextureHandle hTexture = 0;
-    ::mock::CovelliteGui::Core::Vector2i TextureDimensions{ 0, 0 };
+    ::mock::CovelliteGui::TextureHandle hTexture = 0;
+    ::mock::CovelliteGui::Vector2i TextureDimensions{ 0, 0 };
 
     EXPECT_FALSE(hTexture == static_cast<TextureHandle_t>(TextureId));
     EXPECT_FALSE(ExpectTextureDimensions == TextureDimensions);
@@ -1240,7 +1240,7 @@ TEST_F(Renderer_test, /*DISABLED_*/Test_GenerateTexture)
     const int Width = 3;
     const int Height = 6;
 
-    ::mock::CovelliteGui::Core::TextureHandle hTexture = 0;
+    ::mock::CovelliteGui::TextureHandle hTexture = 0;
     auto Result = IExample.GenerateTexture(hTexture, Data.data(), { Width, Height });
     EXPECT_TRUE(Result);
     EXPECT_EQ(1, hTexture);
@@ -1289,7 +1289,7 @@ TEST_F(Renderer_test, /*DISABLED_*/Test_GenerateTexture)
     const int Width = 2;
     const int Height = 10;
 
-    ::mock::CovelliteGui::Core::TextureHandle hTexture = 0;
+    ::mock::CovelliteGui::TextureHandle hTexture = 0;
     auto Result = IExample.GenerateTexture(hTexture, Data.data(), { Width, Height });
     EXPECT_TRUE(Result);
     EXPECT_EQ(2, hTexture);

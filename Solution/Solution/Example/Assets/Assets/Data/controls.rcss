@@ -6,9 +6,9 @@
 /*div,*/
 /*name,*/
 /*value,*/
-/*control-panel,
-control,
-.control,*/
+/*control-panel,*/
+/*control,*/
+/*.control,*/
 /*select,*/
 dummy {
   border-width: 1px;
@@ -106,7 +106,7 @@ value {
 
 control-panel {
   display: inline;
-  max-width: 8em;
+  width: 50%;
   padding-right: 0.25em;
   float: right;
 }

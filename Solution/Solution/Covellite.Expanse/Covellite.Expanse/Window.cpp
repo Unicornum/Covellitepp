@@ -6,7 +6,8 @@
 #include "GameScene.impl.hpp"
 #include "3DScene.impl.hpp"
 
-using namespace covellite::expanse;
+namespace covellite::expanse
+{
 
 class Window::Scene
 {
@@ -33,11 +34,13 @@ Window::Window(const WindowApi_t & _WindowApi) :
 {
   m_Events[::covellite::events::Drawing.Do].Connect([=](void)
   {
-    using namespace ::std::chrono;
+    using USING_MOCK ::std::chrono::system_clock;
+    using ::std::chrono::milliseconds;
+    using ::std::chrono::duration_cast;
 
-    const auto GetTime = [Begin = std::chrono::system_clock::now()](void)
+    const auto GetTime = [Begin = system_clock::now()](void)
     {
-      return duration_cast<milliseconds>(std::chrono::system_clock::now() - Begin);
+      return duration_cast<milliseconds>(system_clock::now() - Begin);
     };
 
     while (!m_LoadingQueue.empty() && GetTime() < milliseconds{ 10 })
@@ -62,19 +65,19 @@ Window::operator Events_t (void) const noexcept /*override*/
 * \brief
 *  Функция создания 3D объекта.
 * \details
-*  - Функция создает 3D объект для указанного игрового объекта, после чего 
+*  - Функция создает 3D объект для указанного игрового объекта, после чего
 *  возвращает его идентификатор, который используется для рендеринга
 *  (реализация интерфеса I3DScene) и удаления объекта функцией RemoveObject().
 *  - Если в исходном наборе компонентов будет компонент \b Updater, для него
 *  будет создан отдельный рендер, который будет вызываться при обновлении сцены
 *  перед рендерингом кадра.
-*  
+*
 * \param [in] _Object
 *  Игровой объект.
-*  
+*
 * \return
 *  Идентификатор созданного объекта.
-*  
+*
 * \exception std::exception
 *  - Действие невозможно (подробнее см. описание исключения).
 */
@@ -145,3 +148,5 @@ void Window::Add(const ObjectId_t _Id) /*override*/
 {
   m_pScene->m_3DScene.Add(_Id);
 }
+
+} // covellite::expanse

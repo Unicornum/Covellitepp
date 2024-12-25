@@ -22,13 +22,7 @@
 #include "Mock/GameScene.hpp"
 #include "Mock/3DScene.hpp"
 
-namespace alicorn
-{
-
-namespace extension
-{
-
-namespace std
+namespace alicorn::extension::std
 {
 
 using Section_t = alicorn::modules::settings::Section;
@@ -39,8 +33,4 @@ using SectionPtr_t = ::std::unique_ptr<Section_t>;
   return ::std::make_unique<Section_t>(uT("Dummy"));
 }
 
-} // namespace std
-
-} // namespace extension
-
-} // namespace alicorn
+} // namespace alicorn::extension::std

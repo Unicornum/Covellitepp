@@ -55,7 +55,7 @@ TEST_F(Layer_test, /*DISABLED_*/Test_Constructor_Title)
   Window Window;
   ::covellite::gui::IWindow & IWindow = Window;
   Document_t Document;
-  ::mock::CovelliteGui::Core::Element Title;
+  ::mock::CovelliteGui::Element Title;
 
   const char * SourcePathToFile = "Path\\To\\File/1710301248";
   const char * ExpectedPathToFile = "Path/To/File/1710301248";
