@@ -9,7 +9,7 @@ namespace covellite
 namespace gui
 {
 
-using KeyCode_t = CovelliteGui::Core::Input::KeyIdentifier;
+using KeyCode_t = CovelliteGui::Input::KeyIdentifier;
 
 /**
 * \ingroup CovelliteGuiGroup

@@ -11,5 +11,3 @@ cd %PathToExternals%
 echo Archived...
 %Run7z% a "%PathToResultFile%" -ir!* -x!*.* -x!LICENSE -x!Android -x!Utilities -x!Tools -xr!*.pdb -xr!*.idb -xr!*.recipe
 %Run7z% a "%PathToResultFile%" Externals.props
-
-%Run7z% a "%PathToBackupPropsFile%" -ir!Covellite\*.props

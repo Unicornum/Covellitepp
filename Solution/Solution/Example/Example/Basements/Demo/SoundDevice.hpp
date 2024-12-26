@@ -37,7 +37,7 @@ public:
       }
 
       // Длина композиции в кадрах
-      m_Lenght = ma_decoder_get_length_in_pcm_frames(&m_Decoder);
+      m_Lenght = ma_decoder_get_length_in_pcm_frames(&m_Decoder, &m_Lenght);
 
       ::std::lock_guard<::std::mutex> lock(m_pDevice->m_Mutex);
       m_pDevice->m_Decoders.push_back(this);
@@ -55,7 +55,7 @@ public:
       }
 
       // Длина композиции в кадрах
-      m_Lenght = ma_decoder_get_length_in_pcm_frames(&m_Decoder);
+      m_Lenght = ma_decoder_get_length_in_pcm_frames(&m_Decoder, &m_Lenght);
 
       ::std::lock_guard<::std::mutex> lock(m_pDevice->m_Mutex);
       m_pDevice->m_Decoders.push_back(this);
@@ -97,8 +97,9 @@ private:
 
     for (auto * pSound : pSoundDevice->m_Decoders)
     {
-      const auto FrameCount =
-        ma_decoder_read_pcm_frames(&pSound->m_Decoder, Buffer.data(), _FrameCount);
+      ma_uint64 FramesRead = 0;
+      const auto FrameCount = ma_decoder_read_pcm_frames(&pSound->m_Decoder, 
+        Buffer.data(), _FrameCount, &FramesRead);
 
       if (FrameCount == 0)
       {

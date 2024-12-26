@@ -36,27 +36,27 @@ int System::TranslateString(String_t & _Translated,
 *  Функция записи в лог сообщений/предупреждений/ошибок, произошедших во время 
 *  работы используемой библиотки GUI.
 */
-bool System::LogMessage(CovelliteGui::Core::Log::Type _Type,
+bool System::LogMessage(CovelliteGui::Log::Type _Type,
   const String_t & _Message) /*override*/
 {
-  if (_Type == CovelliteGui::Core::Log::LT_ERROR)
+  if (_Type == CovelliteGui::Log::LT_ERROR)
   {
     LOGGER(Error) << CovelliteGuiStringToUtf8(_Message);
   }
-  else if (_Type == CovelliteGui::Core::Log::LT_WARNING)
+  else if (_Type == CovelliteGui::Log::LT_WARNING)
   {
     LOGGER(Warning) << CovelliteGuiStringToUtf8(_Message);
   }
-  else if (_Type == CovelliteGui::Core::Log::LT_INFO)
+  else if (_Type == CovelliteGui::Log::LT_INFO)
   {
     LOGGER(Info) << CovelliteGuiStringToUtf8(_Message);
   }
-  else if (_Type == CovelliteGui::Core::Log::LT_ASSERT ||
-    _Type == CovelliteGui::Core::Log::LT_ALWAYS)
+  else if (_Type == CovelliteGui::Log::LT_ASSERT ||
+    _Type == CovelliteGui::Log::LT_ALWAYS)
   {
     LOGGER(Trace) << CovelliteGuiStringToUtf8(_Message);
   }
-  else if (_Type == CovelliteGui::Core::Log::LT_DEBUG)
+  else if (_Type == CovelliteGui::Log::LT_DEBUG)
   {
     LOGGER_DEBUG(Trace) << CovelliteGuiStringToUtf8(_Message);
   }

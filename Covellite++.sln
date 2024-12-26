@@ -14,6 +14,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "(Documentation)", "(Documen
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution", "Solution", "{E4463267-802E-423D-8D5A-7243F92CBA2D}"
+	ProjectSection(SolutionItems) = preProject
+		Solution\Solution\vcpkg.json = Solution\Solution\vcpkg.json
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "(Documentation)", "(Documentation)", "{99A8DB18-AF88-4112-AAF4-D2AEEE09D803}"
 	ProjectSection(SolutionItems) = preProject

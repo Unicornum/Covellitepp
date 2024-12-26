@@ -22,7 +22,7 @@ namespace gui
 *  Класс обобщенной логики рендеринга GUI.
 * \details
 *  - Задача класса - скрыть от клиентского кода ссылку на код библиотеки GUI 
-*  (в разделе используется CovelliteGui::Core::RenderererInterface).
+*  (в разделе используется CovelliteGui::RenderererInterface).
 * \todo
 *  Класс используется для внутренней реализации и не должен попадать в Externals.
 *  
@@ -40,7 +40,7 @@ namespace gui
 *  © CTAPOBEP 2018
 */
 class Renderer final :
-  public CovelliteGui::Core::RenderInterface
+  public CovelliteGui::RenderInterface
 {
   using String_t = ::alicorn::extension::std::String;
   using Render_t = ::std::function<void(void)>;
@@ -51,21 +51,23 @@ class Renderer final :
   using Object_t = ::std::vector<ComponentPtr_t>;
 
 public:
-  // Интерфейс CovelliteGui::Core::RenderererInterface
-  void RenderGeometry(CovelliteGui::Core::Vertex *, int, int *, int,
-    CovelliteGui::Core::TextureHandle, const CovelliteGui::Core::Vector2f &) override;
-  CovelliteGui::Core::CompiledGeometryHandle CompileGeometry(CovelliteGui::Core::Vertex *,
-    int, int *, int, CovelliteGui::Core::TextureHandle) override;
-  void RenderCompiledGeometry(CovelliteGui::Core::CompiledGeometryHandle,
-    const CovelliteGui::Core::Vector2f &) override;
-  void ReleaseCompiledGeometry(CovelliteGui::Core::CompiledGeometryHandle) override;
+  // Интерфейс CovelliteGui::RenderererInterface
+  CovelliteGui::CompiledGeometryHandle CompileGeometry(
+    CovelliteGui::Span<const CovelliteGui::Vertex>, 
+    CovelliteGui::Span<const int>) override;
+  void RenderGeometry(CovelliteGui::CompiledGeometryHandle,
+    CovelliteGui::Vector2f, CovelliteGui::TextureHandle) override;
+  void ReleaseGeometry(CovelliteGui::CompiledGeometryHandle) override;
+
+  CovelliteGui::TextureHandle LoadTexture(CovelliteGui::Vector2i &,
+    const CovelliteGui::String &) override;
+  CovelliteGui::TextureHandle GenerateTexture(
+    CovelliteGui::Span<const CovelliteGui::byte>,
+    CovelliteGui::Vector2i) override;
+  void ReleaseTexture(CovelliteGui::TextureHandle) override;
+
   void EnableScissorRegion(bool) override;
-  void SetScissorRegion(int, int, int, int) override;
-  bool LoadTexture(CovelliteGui::Core::TextureHandle &, CovelliteGui::Core::Vector2i &,
-    const CovelliteGui::Core::String &) override;
-  bool GenerateTexture(CovelliteGui::Core::TextureHandle &,
-    const CovelliteGui::Core::byte *, const CovelliteGui::Core::Vector2i &) override;
-  void ReleaseTexture(CovelliteGui::Core::TextureHandle) override;
+  void SetScissorRegion(CovelliteGui::Rectanglei) override;
 
 public:
   void RenderScene(void);

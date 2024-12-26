@@ -60,29 +60,14 @@ Renderer::Renderer(const RendersPtr_t & _pRenders) :
   // m_pRenders->Remove(...);
 //}
 
-void Renderer::RenderGeometry(
-  CovelliteGui::Core::Vertex * _pVertex, int _VertexCount,
-  int * _pIndex, int _IndexCount,
-  CovelliteGui::Core::TextureHandle _hTexture,
-  const CovelliteGui::Core::Vector2f & _Position) /*override*/
-{
-  const auto hGeometry = CompileGeometry(
-    _pVertex, _VertexCount,
-    _pIndex, _IndexCount,
-    _hTexture);
-  RenderCompiledGeometry(hGeometry, _Position);
-  ReleaseCompiledGeometry(hGeometry);
-}
-
-CovelliteGui::Core::CompiledGeometryHandle Renderer::CompileGeometry(
-  CovelliteGui::Core::Vertex * _pVertex, int _VertexCount,
-  int * _pIndex, int _IndexCount,
-  CovelliteGui::Core::TextureHandle _hTexture) /*override*/
+CovelliteGui::CompiledGeometryHandle Renderer::CompileGeometry(
+  CovelliteGui::Span<const CovelliteGui::Vertex> _Vertices,
+  CovelliteGui::Span<const int> _Indices) /*override*/
 {
   static size_t ObjectId = 0;
 
   const auto strObjectId = String_t{ uT("%ID%") }
-    .Replace(uT("%ID%"), (size_t)++ObjectId);
+  .Replace(uT("%ID%"), (size_t)++ObjectId);
 
   Renders_t & Object = m_Objects[ObjectId].Renders;
   m_Objects[ObjectId].pPosition = Component_t::Make(
@@ -95,38 +80,8 @@ CovelliteGui::Core::CompiledGeometryHandle Renderer::CompileGeometry(
 
   using namespace ::alicorn::extension::std;
 
-  if (_hTexture == 0)
-  {
-    Object.push_back(m_pRenders->Obtain(Component_t::Make(
-      {
-        { uT("id"), uT("Covellite.Gui.Shader.Pixel.Colored") },
-        { uT("type"), uT("Shader") },
-        { uT("entry"), uT("psColored") },
-      })));
-  }
-  else
-  {
-    const auto strTextureId = uT("Covellite.Gui.Texture.%ID%")
-      .Replace(uT("%ID%"), (size_t)_hTexture);
-
-    Object += Renders_t
-    {
-      m_pRenders->Obtain(Component_t::Make(
-      {
-        { uT("id"), uT("Covellite.Gui.Shader.Pixel.Textured") },
-        { uT("type"), uT("Shader") },
-        { uT("entry"), uT("psTextured") },
-      })),
-      m_pRenders->Obtain(Component_t::Make(
-      {
-        { uT("id"), strTextureId },
-        { uT("type"), uT("Texture") },
-      }))
-    };
-  }
-
-  const auto Convert = 
-    [](CovelliteGui::Core::Vertex * _pVertex, const ::std::size_t _VertexCount)
+  const auto Convert =
+    [](const CovelliteGui::Vertex * _pVertex, const ::std::size_t _VertexCount)
   {
     ::std::vector<::covellite::api::Vertex> Result{ _VertexCount };
 
@@ -157,7 +112,7 @@ CovelliteGui::Core::CompiledGeometryHandle Renderer::CompileGeometry(
     {
       { uT("id"), uT("Covellite.Gui.Buffer.Vertex.") + strObjectId },
       { uT("type"), uT("Buffer") },
-      { uT("content"), Convert(_pVertex, static_cast<::std::size_t>(_VertexCount)) },
+      { uT("content"), Convert(_Vertices.data(), _Vertices.size())},
       { uT("dimension"), 2 },
     })),
     m_pRenders->Obtain(Component_t::Make(
@@ -170,16 +125,15 @@ CovelliteGui::Core::CompiledGeometryHandle Renderer::CompileGeometry(
     {
       { uT("id"), uT("Covellite.Gui.Present.") + strObjectId },
       { uT("type"), uT("Present") },
-      { uT("content"), ::std::vector<int>{ _pIndex, _pIndex + _IndexCount } },
+      { uT("content"), ::std::vector<int>{ _Indices.begin(), _Indices.end() }},
     }))
   };
 
-  return (CovelliteGui::Core::CompiledGeometryHandle)ObjectId;
+  return (CovelliteGui::CompiledGeometryHandle)ObjectId;
 }
 
-void Renderer::RenderCompiledGeometry(
-  CovelliteGui::Core::CompiledGeometryHandle _hGeometry,
-  const CovelliteGui::Core::Vector2f & _Position) /*override*/
+void Renderer::RenderGeometry(CovelliteGui::CompiledGeometryHandle _hGeometry,
+  CovelliteGui::Vector2f _Position, CovelliteGui::TextureHandle _hTexture) /*override*/
 {
   const auto itObject = m_Objects.find((size_t)_hGeometry);
   if (itObject == m_Objects.end()) return;
@@ -191,11 +145,44 @@ void Renderer::RenderCompiledGeometry(
 
   using namespace ::alicorn::extension::std;
 
+  Renders_t TextureObject;
+
+  if (_hTexture == 0)
+  {
+    TextureObject.push_back(m_pRenders->Obtain(Component_t::Make(
+      {
+        { uT("id"), uT("Covellite.Gui.Shader.Pixel.Colored") },
+        { uT("type"), uT("Shader") },
+        { uT("entry"), uT("psColored") },
+      })));
+  }
+  else
+  {
+    const auto strTextureId = uT("Covellite.Gui.Texture.%ID%")
+      .Replace(uT("%ID%"), (size_t)_hTexture);
+
+    TextureObject += Renders_t
+    {
+      m_pRenders->Obtain(Component_t::Make(
+      {
+        { uT("id"), uT("Covellite.Gui.Shader.Pixel.Textured") },
+        { uT("type"), uT("Shader") },
+        { uT("entry"), uT("psTextured") },
+      })),
+      m_pRenders->Obtain(Component_t::Make(
+      {
+        { uT("id"), strTextureId },
+        { uT("type"), uT("Texture") },
+      }))
+    };
+  }
+
+  m_RenderQueue += TextureObject;
   m_RenderQueue += itObject->second.Renders;
 }
 
-void Renderer::ReleaseCompiledGeometry(
-  CovelliteGui::Core::CompiledGeometryHandle _hGeometry) /*override*/
+void Renderer::ReleaseGeometry(
+  CovelliteGui::CompiledGeometryHandle _hGeometry) /*override*/
 {
   const auto strObjectId = String_t{ uT("%ID%") }
     .Replace(uT("%ID%"), (size_t)_hGeometry);
@@ -227,16 +214,16 @@ void Renderer::EnableScissorRegion(bool _IsEnable) /*override*/
     })));
 }
 
-void Renderer::SetScissorRegion(int _X, int _Y, int _Width, int _Height) /*override*/
+void Renderer::SetScissorRegion(CovelliteGui::Rectanglei _Area) /*override*/
 {
-  m_RenderQueue.push_back([&, _X, _Y, _Width, _Height]()
+  m_RenderQueue.push_back([&, _Area]()
   {
     auto & ScissorRect = *m_pScissorRect;
 
-    ScissorRect[uT("left")] = _X;
-    ScissorRect[uT("right")] = _X + _Width;
-    ScissorRect[uT("top")] = _Y;
-    ScissorRect[uT("bottom")] = _Y + _Height;
+    ScissorRect[uT("left")] = _Area.Left();
+    ScissorRect[uT("right")] = _Area.Right();
+    ScissorRect[uT("top")] = _Area.Top();
+    ScissorRect[uT("bottom")] = _Area.Bottom();
   });
 
   using namespace ::alicorn::extension::std;
@@ -251,10 +238,9 @@ void Renderer::SetScissorRegion(int _X, int _Y, int _Width, int _Height) /*overr
     })));
 }
 
-bool Renderer::LoadTexture(
-  CovelliteGui::Core::TextureHandle & _hTexture,
-  CovelliteGui::Core::Vector2i & _TextureDimensions,
-  const CovelliteGui::Core::String & _PathToFile) /*override*/
+CovelliteGui::TextureHandle Renderer::LoadTexture(
+  CovelliteGui::Vector2i & _TextureDimensions,
+  const CovelliteGui::String & _PathToFile) /*override*/
 {
   // В Android'e файлы грузятся из 'папки' assets, кроме того, возможно
   // использование виртуальной файловой системы, поэтому exists использовать 
@@ -275,11 +261,8 @@ bool Renderer::LoadTexture(
     _TextureDimensions.x = static_cast<int>(Image.GetData().Width);
     _TextureDimensions.y = static_cast<int>(Image.GetData().Height);
 
-    // 13 Июнь 2020 22:06 (unicornum.verum@gmail.com)
-    TODO("Лишнее копирование данных текстуры.");
-
-    return GenerateTexture(_hTexture,
-      Image.GetData().Buffer.data(), _TextureDimensions);
+    return GenerateTexture({ Image.GetData().Buffer.data(),
+      Image.GetData().Buffer.size() }, _TextureDimensions);
   }
   catch (const ::std::exception &)
   {
@@ -288,15 +271,14 @@ bool Renderer::LoadTexture(
     // сделает сама).
   }
 
-  return false;
+  return 0;
 }
 
-bool Renderer::GenerateTexture(
-  CovelliteGui::Core::TextureHandle & _hTexture,
-  const CovelliteGui::Core::byte * _pSource,
-  const CovelliteGui::Core::Vector2i & _SourceDimensions) /*override*/
+CovelliteGui::TextureHandle Renderer::GenerateTexture(
+  CovelliteGui::Span<const CovelliteGui::byte> _Source,
+  CovelliteGui::Vector2i _SourceDimensions) /*override*/
 {
-  static CovelliteGui::Core::TextureHandle TextureId = 0;
+  static CovelliteGui::TextureHandle TextureId = 0;
 
   const auto strTextureId = String_t{ uT("Covellite.Gui.Texture.%ID%") }
     .Replace(uT("%ID%"), (size_t)++TextureId);
@@ -307,17 +289,15 @@ bool Renderer::GenerateTexture(
     {
       { uT("id"), strTextureId },
       { uT("type"), uT("Texture") },
-      { uT("content"), ::std::vector<uint8_t>{ _pSource, _pSource + Count } },
+      { uT("content"), ::std::vector<uint8_t>{ _Source.begin(), _Source.end() }},
       { uT("width"), _SourceDimensions.x },
       { uT("height"), _SourceDimensions.y },
     }));
 
-  _hTexture = TextureId;
-
-  return true;
+  return TextureId;
 }
 
-void Renderer::ReleaseTexture(CovelliteGui::Core::TextureHandle _hTexture) /*override*/
+void Renderer::ReleaseTexture(CovelliteGui::TextureHandle _hTexture) /*override*/
 {
   const auto strTextureId = String_t{ uT("Covellite.Gui.Texture.%ID%") }
     .Replace(uT("%ID%"), (size_t)_hTexture);
