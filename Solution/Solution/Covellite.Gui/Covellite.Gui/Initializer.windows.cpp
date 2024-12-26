@@ -13,7 +13,6 @@ Initializer::Initializer(const Data & _Data) :
   CovelliteGui::SetRenderInterface(m_pRenderInterface.get());
 
   CovelliteGui::Initialise();
-  //CovelliteGui::Plugin::Initialise();
 }
 
 Initializer::~Initializer(void)

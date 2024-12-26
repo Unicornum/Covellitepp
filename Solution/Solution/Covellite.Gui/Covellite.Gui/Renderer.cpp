@@ -145,23 +145,24 @@ void Renderer::RenderGeometry(CovelliteGui::CompiledGeometryHandle _hGeometry,
 
   using namespace ::alicorn::extension::std;
 
-  Renders_t TextureObject;
-
   if (_hTexture == 0)
   {
-    TextureObject.push_back(m_pRenders->Obtain(Component_t::Make(
+    m_RenderQueue += Renders_t
+    {
+      m_pRenders->Obtain(Component_t::Make(
       {
         { uT("id"), uT("Covellite.Gui.Shader.Pixel.Colored") },
         { uT("type"), uT("Shader") },
         { uT("entry"), uT("psColored") },
-      })));
+      }))
+    };
   }
   else
   {
     const auto strTextureId = uT("Covellite.Gui.Texture.%ID%")
       .Replace(uT("%ID%"), (size_t)_hTexture);
 
-    TextureObject += Renders_t
+    m_RenderQueue += Renders_t
     {
       m_pRenders->Obtain(Component_t::Make(
       {
@@ -177,7 +178,6 @@ void Renderer::RenderGeometry(CovelliteGui::CompiledGeometryHandle _hGeometry,
     };
   }
 
-  m_RenderQueue += TextureObject;
   m_RenderQueue += itObject->second.Renders;
 }
 
@@ -197,6 +197,76 @@ void Renderer::ReleaseGeometry(
     }));
 
   m_Objects.erase((size_t)_hGeometry);
+}
+
+CovelliteGui::TextureHandle Renderer::LoadTexture(
+  CovelliteGui::Vector2i & _TextureDimensions,
+  const CovelliteGui::String & _PathToFile) /*override*/
+{
+  // В Android'e файлы грузятся из 'папки' assets, кроме того, возможно
+  // использование виртуальной файловой системы, поэтому exists использовать 
+  // НЕЛЬЗЯ!!!
+  //if (!::boost::filesystem::exists(_PathToFile.CString())) return false;
+
+  // Один файл грузится один раз, оптимизировать загрузку не нужно.
+
+  using namespace ::alicorn::source;
+
+  try
+  {
+    const image::Universal_t<image::pixel::RGBA> Image
+    {
+      app::Vfs_t::GetInstance().GetData(CovelliteGuiStringToUtf8(_PathToFile))
+    };
+
+    _TextureDimensions.x = static_cast<int>(Image.GetData().Width);
+    _TextureDimensions.y = static_cast<int>(Image.GetData().Height);
+
+    return GenerateTexture(Image.GetData().Buffer, _TextureDimensions);
+  }
+  catch (const ::std::exception &)
+  {
+    // Сюда попадаем, если нет файла текстуры или он имеет невалидый формат
+    // (записывать в лог ничего не нужно, это используемая библиотека GUI
+    // сделает сама).
+  }
+
+  return 0;
+}
+
+CovelliteGui::TextureHandle Renderer::GenerateTexture(
+  CovelliteGui::Span<const CovelliteGui::byte> _Source,
+  CovelliteGui::Vector2i _SourceDimensions) /*override*/
+{
+  static CovelliteGui::TextureHandle TextureId = 0;
+
+  const auto strTextureId = String_t{ uT("Covellite.Gui.Texture.%ID%") }
+    .Replace(uT("%ID%"), (size_t)++TextureId);
+
+  //const auto Count = 4 * _SourceDimensions.x * _SourceDimensions.y;
+
+  m_pRenders->Obtain(Component_t::Make(
+    {
+      { uT("id"), strTextureId },
+      { uT("type"), uT("Texture") },
+      { uT("content"), ::std::vector<uint8_t>{ _Source.begin(), _Source.end() } },
+      { uT("width"), _SourceDimensions.x },
+      { uT("height"), _SourceDimensions.y },
+    }));
+
+  return TextureId;
+}
+
+void Renderer::ReleaseTexture(CovelliteGui::TextureHandle _hTexture) /*override*/
+{
+  const auto strTextureId = String_t{ uT("Covellite.Gui.Texture.%ID%") }
+    .Replace(uT("%ID%"), (size_t)_hTexture);
+
+  m_pRenders->Remove(Component_t::Make(
+    {
+      { uT("id"), strTextureId },
+      { uT("type"), uT("Texture") },
+    }));
 }
 
 void Renderer::EnableScissorRegion(bool _IsEnable) /*override*/
@@ -236,77 +306,6 @@ void Renderer::SetScissorRegion(CovelliteGui::Rectanglei _Area) /*override*/
       { uT("enabled"), uT("true") },
       { uT("service"), Object_t{ m_pScissorRect } }
     })));
-}
-
-CovelliteGui::TextureHandle Renderer::LoadTexture(
-  CovelliteGui::Vector2i & _TextureDimensions,
-  const CovelliteGui::String & _PathToFile) /*override*/
-{
-  // В Android'e файлы грузятся из 'папки' assets, кроме того, возможно
-  // использование виртуальной файловой системы, поэтому exists использовать 
-  // НЕЛЬЗЯ!!!
-  //if (!::boost::filesystem::exists(_PathToFile.CString())) return false;
-
-  // Один файл грузится один раз, оптимизировать загрузку не нужно.
-
-  using namespace ::alicorn::source;
-
-  try
-  {
-    const image::Universal_t<image::pixel::RGBA> Image
-    {
-      app::Vfs_t::GetInstance().GetData(CovelliteGuiStringToUtf8(_PathToFile))
-    };
-
-    _TextureDimensions.x = static_cast<int>(Image.GetData().Width);
-    _TextureDimensions.y = static_cast<int>(Image.GetData().Height);
-
-    return GenerateTexture({ Image.GetData().Buffer.data(),
-      Image.GetData().Buffer.size() }, _TextureDimensions);
-  }
-  catch (const ::std::exception &)
-  {
-    // Сюда попадаем, если нет файла текстуры или он имеет невалидый формат
-    // (записывать в лог ничего не нужно, это используемая библиотека GUI
-    // сделает сама).
-  }
-
-  return 0;
-}
-
-CovelliteGui::TextureHandle Renderer::GenerateTexture(
-  CovelliteGui::Span<const CovelliteGui::byte> _Source,
-  CovelliteGui::Vector2i _SourceDimensions) /*override*/
-{
-  static CovelliteGui::TextureHandle TextureId = 0;
-
-  const auto strTextureId = String_t{ uT("Covellite.Gui.Texture.%ID%") }
-    .Replace(uT("%ID%"), (size_t)++TextureId);
-
-  const auto Count = 4 * _SourceDimensions.x * _SourceDimensions.y;
-
-  m_pRenders->Obtain(Component_t::Make(
-    {
-      { uT("id"), strTextureId },
-      { uT("type"), uT("Texture") },
-      { uT("content"), ::std::vector<uint8_t>{ _Source.begin(), _Source.end() }},
-      { uT("width"), _SourceDimensions.x },
-      { uT("height"), _SourceDimensions.y },
-    }));
-
-  return TextureId;
-}
-
-void Renderer::ReleaseTexture(CovelliteGui::TextureHandle _hTexture) /*override*/
-{
-  const auto strTextureId = String_t{ uT("Covellite.Gui.Texture.%ID%") }
-    .Replace(uT("%ID%"), (size_t)_hTexture);
-
-  m_pRenders->Remove(Component_t::Make(
-    {
-      { uT("id"), strTextureId },
-      { uT("type"), uT("Texture") },
-    }));
 }
 
 void Renderer::RenderScene(void)

@@ -31,7 +31,7 @@ CovelliteGuiTime_t System::GetElapsedTime(void) /*override*/
 * \brief
 *  Функция активации экранной клавиатуры.
 */
-void System::ActivateKeyboard(void) /*override*/
+void System::ActivateKeyboard(Rml::Vector2f, float) /*override*/
 {
   ::alicorn::system::platform::Environment{}.ShowSoftKeyboard();
 }

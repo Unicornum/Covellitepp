@@ -12,6 +12,7 @@
 #include "PointLights.hpp"
 #include "Constants.hpp"
 #include "SoundDevice.hpp"
+#include <miniaudio/miniaudio.impl.hpp>
 
 // 17 Март 2019 11:45 (unicornum.verum@gmail.com)
 TODO("Недопустимая ссылка на заголовочный файл!");

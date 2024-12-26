@@ -44,8 +44,6 @@ Window::Window(const WindowApi_t & _Window) :
     throw STD_EXCEPTION << "Create context failed.";
   }
 
-  CovelliteGui::Initialise();
-
   if (::alicorn::extension::cpp::IS_DEBUG_CONFIGURATION)
   {
     // Инициализация через установку контекста сделана из-за того, что 
