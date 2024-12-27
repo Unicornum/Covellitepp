@@ -6,6 +6,7 @@
 #include <alicorn/std.memory/unique-ptr.hpp>
 #include <Covellite/Predefined.hpp>
 #include <Covellite/Api/Component.hpp>
+#include <RmlUi/Core/RenderInterfaceCompatibility.h>
 
 namespace covellite
 {
@@ -40,7 +41,7 @@ namespace gui
 *  © CTAPOBEP 2018
 */
 class Renderer final :
-  public CovelliteGui::RenderInterface
+  public CovelliteGui::RenderInterfaceCompatibility
 {
   using String_t = ::alicorn::extension::std::String;
   using Render_t = ::std::function<void(void)>;
@@ -52,22 +53,20 @@ class Renderer final :
 
 public:
   // Интерфейс CovelliteGui::RenderererInterface
-  CovelliteGui::CompiledGeometryHandle CompileGeometry(
-    CovelliteGui::Span<const CovelliteGui::Vertex>, 
-    CovelliteGui::Span<const int>) override;
-  void RenderGeometry(CovelliteGui::CompiledGeometryHandle,
-    CovelliteGui::Vector2f, CovelliteGui::TextureHandle) override;
-  void ReleaseGeometry(CovelliteGui::CompiledGeometryHandle) override;
-
-  CovelliteGui::TextureHandle LoadTexture(CovelliteGui::Vector2i &,
-    const CovelliteGui::String &) override;
-  CovelliteGui::TextureHandle GenerateTexture(
-    CovelliteGui::Span<const CovelliteGui::byte>,
-    CovelliteGui::Vector2i) override;
-  void ReleaseTexture(CovelliteGui::TextureHandle) override;
-
+  void RenderGeometry(CovelliteGui::Vertex *, int, int *, int,
+    CovelliteGui::TextureHandle, const CovelliteGui::Vector2f &) override;
+  CovelliteGui::CompiledGeometryHandle CompileGeometry(CovelliteGui::Vertex *,
+    int, int *, int, CovelliteGui::TextureHandle) override;
+  void RenderCompiledGeometry(CovelliteGui::CompiledGeometryHandle,
+    const CovelliteGui::Vector2f &) override;
+  void ReleaseCompiledGeometry(CovelliteGui::CompiledGeometryHandle) override;
   void EnableScissorRegion(bool) override;
-  void SetScissorRegion(CovelliteGui::Rectanglei) override;
+  void SetScissorRegion(int, int, int, int) override;
+  bool LoadTexture(CovelliteGui::TextureHandle &, CovelliteGui::Vector2i &,
+    const CovelliteGui::String &) override;
+  bool GenerateTexture(CovelliteGui::TextureHandle &,
+    const CovelliteGui::byte *, const CovelliteGui::Vector2i &) override;
+  void ReleaseTexture(CovelliteGui::TextureHandle) override;
 
 public:
   void RenderScene(void);

@@ -6,6 +6,8 @@
 #include <Covellite\Gui\System.hpp>
 #include <memory>
 
+namespace Rml { class RenderInterfaceCompatibility; }
+
 namespace covellite
 {
 
@@ -40,7 +42,7 @@ class IStringTranslator;
 class Initializer final
 {
   using RenderInterfacePtr_t = 
-    ::std::shared_ptr<CovelliteGui::RenderInterface>;
+    ::std::shared_ptr<CovelliteGui::RenderInterfaceCompatibility>;
   using StringTranslatorPtr_t = 
     ::std::shared_ptr<covellite::gui::IStringTranslator>;
   class Helper;

@@ -1,6 +1,7 @@
 ﻿
 #include "stdafx.h"
 #include <Covellite\Gui\Initializer.hpp>
+#include <RmlUi/Core/RenderInterfaceCompatibility.h>
 
 using namespace covellite::gui;
 
@@ -30,7 +31,7 @@ Initializer::Initializer(const Data & _Data) :
 {
   CovelliteGui::SetFileInterface(&m_File);
   CovelliteGui::SetSystemInterface(&m_System);
-  CovelliteGui::SetRenderInterface(m_pRenderInterface.get());
+  CovelliteGui::SetRenderInterface(m_pRenderInterface->GetAdaptedInterface());
 
   // Инициализация сделана через статический объект из-за того, что
   // CovelliteGui::Core::Initialise() в рамках одного модуля можно запускать

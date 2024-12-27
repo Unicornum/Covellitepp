@@ -10,6 +10,7 @@
 /// [Constructor main application class]
 ExampleApp::ExampleApp(void) noexcept :
   Application(Continuous{})
+  //Application(EventBased{})
 {
   namespace events = ::covellite::events;
     

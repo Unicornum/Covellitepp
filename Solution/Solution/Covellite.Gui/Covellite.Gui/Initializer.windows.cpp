@@ -1,6 +1,7 @@
 ﻿
 #include "stdafx.h"
 #include <Covellite\Gui\Initializer.hpp>
+#include <RmlUi/Core/RenderInterfaceCompatibility.h>
 
 using namespace covellite::gui;
 
@@ -10,7 +11,7 @@ Initializer::Initializer(const Data & _Data) :
 {
   CovelliteGui::SetFileInterface(&m_File);
   CovelliteGui::SetSystemInterface(&m_System);
-  CovelliteGui::SetRenderInterface(m_pRenderInterface.get());
+  CovelliteGui::SetRenderInterface(m_pRenderInterface->GetAdaptedInterface());
 
   CovelliteGui::Initialise();
 }
