@@ -23,8 +23,6 @@
 # include <alicorn\logger.hpp>
 #endif
 
-#include <FreeType/FreeType.lib.hpp>
-
 using namespace covellite::gui;
 
 Window::Window(const WindowApi_t & _Window) :
@@ -38,15 +36,13 @@ Window::Window(const WindowApi_t & _Window) :
       m_pRenderer,
       m_pStringTranslator
     })),
-  m_pContext(CovelliteGui::Core::CreateContext("main", GetContextSize()),
-    [](CovelliteGui::Core::Context * _pContext) { CovelliteGuiRemove(_pContext); })
+  m_pContext(CovelliteGui::CreateContext("main", GetContextSize()),
+    [](CovelliteGui::Context * _pContext) { CovelliteGuiRemove(_pContext); })
 {
   if (m_pContext == nullptr)
   {
     throw STD_EXCEPTION << "Create context failed.";
   }
-
-  CovelliteGui::Controls::Initialise();
 
   if (::alicorn::extension::cpp::IS_DEBUG_CONFIGURATION)
   {

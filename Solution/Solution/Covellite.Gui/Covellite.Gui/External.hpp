@@ -111,10 +111,10 @@ namespace gui
 {
 
 using CovelliteGuiTime_t = float;
-using CovelliteGuiUnicode_t = CovelliteGui::Core::word;
+using CovelliteGuiUnicode_t = CovelliteGui::word;
 
 inline ::std::string CovelliteGuiStringToUtf8(
-  const CovelliteGui::Core::String & _String)
+  const CovelliteGui::String & _String)
 {
   return _String.CString();
 }
@@ -127,16 +127,16 @@ inline void CovelliteGuiRemove(T * _pValue)
 
 inline void CovelliteGuiLoadFontFace(const ::std::string & _Path)
 {
-  CovelliteGui::Core::FontDatabase::LoadFontFace(_Path.c_str());
+  CovelliteGui::FontDatabase::LoadFontFace(_Path.c_str());
 }
 
 inline void CovelliteGuiLoadFontFace(const ::std::vector<uint8_t> & _Data)
 {
-  CovelliteGui::Core::FontDatabase::LoadFontFace(_Data, "");
+  CovelliteGui::FontDatabase::LoadFontFace(_Data, "");
 }
 
 inline void CovelliteGuiSetProgressBarValue(
-  CovelliteGui::Core::Element * _pProgressBar,
+  CovelliteGui::Element * _pProgressBar,
   const float _Value)
 {
   using namespace ::alicorn::extension::std;
@@ -157,7 +157,6 @@ inline void CovelliteGuiSetProgressBarValue(
 #ifndef __USING_GTEST
 
 #include <RmlUi/RmlUi.hpp>
-namespace Rml { namespace Plugin { inline void Initialise(void) {} } }
 namespace CovelliteGui = ::Rml;
 
 #else // __USING_GTEST
@@ -205,42 +204,42 @@ namespace gui
 {
 
 using CovelliteGuiTime_t = double;
-using CovelliteGuiUnicode_t = CovelliteGui::Core::Character;
+using CovelliteGuiUnicode_t = CovelliteGui::Character;
 
 inline ::std::string CovelliteGuiStringToUtf8(
-  const CovelliteGui::Core::String & _String)
+  const CovelliteGui::String & _String)
 {
   return _String;
 }
 
-inline void CovelliteGuiRemove(CovelliteGui::Core::ElementDocument * _pDocument)
+inline void CovelliteGuiRemove(CovelliteGui::ElementDocument * _pDocument)
 {
   _pDocument->Close();
 }
 
-inline void CovelliteGuiRemove(CovelliteGui::Core::Context * _pContext)
+inline void CovelliteGuiRemove(CovelliteGui::Context * _pContext)
 {
-  CovelliteGui::Core::RemoveContext(_pContext->GetName());
+  CovelliteGui::RemoveContext(_pContext->GetName());
 }
 
 inline void CovelliteGuiLoadFontFace(const ::std::string & _Path)
 {
-  CovelliteGui::Core::LoadFontFace(_Path.c_str());
+  CovelliteGui::LoadFontFace(_Path.c_str());
 }
 
 inline void CovelliteGuiLoadFontFace(const ::std::vector<uint8_t> & _Data)
 {
-  CovelliteGui::Core::LoadFontFace(_Data.data(), static_cast<int>(_Data.size()), 
-    "", CovelliteGui::Core::Style::FontStyle::Normal, 
-    CovelliteGui::Core::Style::FontWeight::Normal);
+  CovelliteGui::LoadFontFace(_Data.data(), static_cast<int>(_Data.size()), 
+    "", CovelliteGui::Style::FontStyle::Normal, 
+    CovelliteGui::Style::FontWeight::Normal);
 }
 
 inline void CovelliteGuiSetProgressBarValue(
-  CovelliteGui::Core::Element * _pProgressBar,
+  CovelliteGui::Element * _pProgressBar,
   const float _Value)
 {
   auto & Control =
-    dynamic_cast<CovelliteGui::Controls::ElementProgressBar &>(*_pProgressBar);
+    dynamic_cast<CovelliteGui::ElementProgress &>(*_pProgressBar);
 
   Control.SetValue(_Value);
 }
@@ -254,16 +253,11 @@ inline void CovelliteGuiSetProgressBarValue(
 namespace CovelliteGui
 {
 
-namespace Core
-{
-
 template<typename> class Vector2;
 using Vector2i = Vector2<int>;
 class ElementDocument;
 class Element;
 class Context;
-
-} // namespace Core
 
 } // namespace CovelliteGui
 

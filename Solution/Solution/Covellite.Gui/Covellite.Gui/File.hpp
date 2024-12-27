@@ -28,10 +28,10 @@ namespace gui
 *  © CTAPOBEP 2016
 */
 class File final :
-  public CovelliteGui::Core::FileInterface
+  public CovelliteGui::FileInterface
 {
-  using Path_t = CovelliteGui::Core::String;
-  using Handle_t = CovelliteGui::Core::FileHandle;
+  using Path_t = CovelliteGui::String;
+  using Handle_t = CovelliteGui::FileHandle;
   using Data_t = ::alicorn::extension::std::memory::BinaryData_t;
 
   struct FileInfo

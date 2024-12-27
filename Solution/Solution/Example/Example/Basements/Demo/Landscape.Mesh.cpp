@@ -10,7 +10,7 @@
 #include <alicorn/cpp/disable-warnings.hpp>
 ALICORN_DISABLE_ALL_WARNINGS
 #define TINYOBJLOADER_IMPLEMENTATION
-#include <tinyobj/tiny_obj_loader.h>
+#include <tiny_obj_loader.h>
 ALICORN_RESTORE_WARNINGS
 
 namespace basement

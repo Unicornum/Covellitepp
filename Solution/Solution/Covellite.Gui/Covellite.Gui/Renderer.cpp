@@ -61,10 +61,10 @@ Renderer::Renderer(const RendersPtr_t & _pRenders) :
 //}
 
 void Renderer::RenderGeometry(
-  CovelliteGui::Core::Vertex * _pVertex, int _VertexCount,
+  CovelliteGui::Vertex * _pVertex, int _VertexCount,
   int * _pIndex, int _IndexCount,
-  CovelliteGui::Core::TextureHandle _hTexture,
-  const CovelliteGui::Core::Vector2f & _Position) /*override*/
+  CovelliteGui::TextureHandle _hTexture,
+  const CovelliteGui::Vector2f & _Position) /*override*/
 {
   const auto hGeometry = CompileGeometry(
     _pVertex, _VertexCount,
@@ -74,10 +74,10 @@ void Renderer::RenderGeometry(
   ReleaseCompiledGeometry(hGeometry);
 }
 
-CovelliteGui::Core::CompiledGeometryHandle Renderer::CompileGeometry(
-  CovelliteGui::Core::Vertex * _pVertex, int _VertexCount,
+CovelliteGui::CompiledGeometryHandle Renderer::CompileGeometry(
+  CovelliteGui::Vertex * _pVertex, int _VertexCount,
   int * _pIndex, int _IndexCount,
-  CovelliteGui::Core::TextureHandle _hTexture) /*override*/
+  CovelliteGui::TextureHandle _hTexture) /*override*/
 {
   static size_t ObjectId = 0;
 
@@ -126,7 +126,7 @@ CovelliteGui::Core::CompiledGeometryHandle Renderer::CompileGeometry(
   }
 
   const auto Convert = 
-    [](CovelliteGui::Core::Vertex * _pVertex, const ::std::size_t _VertexCount)
+    [](CovelliteGui::Vertex * _pVertex, const ::std::size_t _VertexCount)
   {
     ::std::vector<::covellite::api::Vertex> Result{ _VertexCount };
 
@@ -174,12 +174,12 @@ CovelliteGui::Core::CompiledGeometryHandle Renderer::CompileGeometry(
     }))
   };
 
-  return (CovelliteGui::Core::CompiledGeometryHandle)ObjectId;
+  return (CovelliteGui::CompiledGeometryHandle)ObjectId;
 }
 
 void Renderer::RenderCompiledGeometry(
-  CovelliteGui::Core::CompiledGeometryHandle _hGeometry,
-  const CovelliteGui::Core::Vector2f & _Position) /*override*/
+  CovelliteGui::CompiledGeometryHandle _hGeometry,
+  const CovelliteGui::Vector2f & _Position) /*override*/
 {
   const auto itObject = m_Objects.find((size_t)_hGeometry);
   if (itObject == m_Objects.end()) return;
@@ -195,7 +195,7 @@ void Renderer::RenderCompiledGeometry(
 }
 
 void Renderer::ReleaseCompiledGeometry(
-  CovelliteGui::Core::CompiledGeometryHandle _hGeometry) /*override*/
+  CovelliteGui::CompiledGeometryHandle _hGeometry) /*override*/
 {
   const auto strObjectId = String_t{ uT("%ID%") }
     .Replace(uT("%ID%"), (size_t)_hGeometry);
@@ -252,9 +252,9 @@ void Renderer::SetScissorRegion(int _X, int _Y, int _Width, int _Height) /*overr
 }
 
 bool Renderer::LoadTexture(
-  CovelliteGui::Core::TextureHandle & _hTexture,
-  CovelliteGui::Core::Vector2i & _TextureDimensions,
-  const CovelliteGui::Core::String & _PathToFile) /*override*/
+  CovelliteGui::TextureHandle & _hTexture,
+  CovelliteGui::Vector2i & _TextureDimensions,
+  const CovelliteGui::String & _PathToFile) /*override*/
 {
   // В Android'e файлы грузятся из 'папки' assets, кроме того, возможно
   // использование виртуальной файловой системы, поэтому exists использовать 
@@ -292,11 +292,11 @@ bool Renderer::LoadTexture(
 }
 
 bool Renderer::GenerateTexture(
-  CovelliteGui::Core::TextureHandle & _hTexture,
-  const CovelliteGui::Core::byte * _pSource,
-  const CovelliteGui::Core::Vector2i & _SourceDimensions) /*override*/
+  CovelliteGui::TextureHandle & _hTexture,
+  const CovelliteGui::byte * _pSource,
+  const CovelliteGui::Vector2i & _SourceDimensions) /*override*/
 {
-  static CovelliteGui::Core::TextureHandle TextureId = 0;
+  static CovelliteGui::TextureHandle TextureId = 0;
 
   const auto strTextureId = String_t{ uT("Covellite.Gui.Texture.%ID%") }
     .Replace(uT("%ID%"), (size_t)++TextureId);
@@ -317,7 +317,7 @@ bool Renderer::GenerateTexture(
   return true;
 }
 
-void Renderer::ReleaseTexture(CovelliteGui::Core::TextureHandle _hTexture) /*override*/
+void Renderer::ReleaseTexture(CovelliteGui::TextureHandle _hTexture) /*override*/
 {
   const auto strTextureId = String_t{ uT("Covellite.Gui.Texture.%ID%") }
     .Replace(uT("%ID%"), (size_t)_hTexture);

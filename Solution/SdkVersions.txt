@@ -1,5 +1,5 @@
 Android compiler:        Android (8481493, based on r416183c2) clang version 12.0.9 (https
-Android stl library:     ;c++_shared;c++abi;
+Android stl library:     ;c++_static;c++abi;
 Android API Level:       android-31
 Android SDK build tools: 29.0.2
 Android SDK platform:    android-29

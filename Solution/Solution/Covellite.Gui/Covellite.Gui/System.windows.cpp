@@ -27,7 +27,7 @@ CovelliteGuiTime_t System::GetElapsedTime(void) /*override*/
 * \brief
 *  Функция активации экранной клавиатуры.
 */
-void System::ActivateKeyboard(void) /*override*/
+void System::ActivateKeyboard(CovelliteGui::Vector2f, float) /*override*/
 {
 }
 
