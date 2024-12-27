@@ -19,10 +19,10 @@
 #define __PLATFORM__ x64
 
 // Устанавливается автоматически
-#define TIME "13:56"
+#define TIME "13:09"
 
 // Устанавливается автоматически
-#define DAY 26
+#define DAY 27
 
 // Устанавливается автоматически
 #define MONTH 12
