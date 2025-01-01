@@ -15,6 +15,13 @@
 #define System_test System_windows_test
 #define System System_windows
 
+namespace covellite
+{
+
+namespace std = ::mock::std;
+
+} // namespace covellite
+
 // Расположение класса System
 #include "..\..\Covellite.Gui\System.windows.cpp"
 #include "..\..\Covellite.Gui\System.cpp"

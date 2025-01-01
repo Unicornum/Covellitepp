@@ -171,13 +171,9 @@ TEST_F(Window_test, /*DISABLED_*/Test_Constructor)
   InitializerProxy_t InitializerProxy;
   InitializerProxy_t::GetInstance() = &InitializerProxy;
 
-  using CovelliteGuiCoreProxy_t = ::mock::CovelliteGui::Proxy;
-  CovelliteGuiCoreProxy_t CovelliteGuiCoreProxy;
-  CovelliteGuiCoreProxy_t::GetInstance() = &CovelliteGuiCoreProxy;
-
-  using CovelliteGuiControlsProxy_t = ::mock::CovelliteGui::Proxy;
-  CovelliteGuiControlsProxy_t CovelliteGuiControlsProxy;
-  CovelliteGuiControlsProxy_t::GetInstance() = &CovelliteGuiControlsProxy;
+  using CovelliteGuiProxy_t = ::mock::CovelliteGui::Proxy;
+  CovelliteGuiProxy_t CovelliteGuiProxy;
+  CovelliteGuiProxy_t::GetInstance() = &CovelliteGuiProxy;
 
   using CovelliteGuiDebuggerProxy_t = ::mock::CovelliteGui::Debugger::Proxy;
   CovelliteGuiDebuggerProxy_t CovelliteGuiDebuggerProxy;
@@ -206,20 +202,14 @@ TEST_F(Window_test, /*DISABLED_*/Test_Constructor)
     .Times(1)
     .WillOnce(Return(RendererId));
 
-  RenderInterfacePtr_t pRenderInterface =
-    ::std::make_shared<::mock::covellite::gui::Renderer>(pRenders);
-
   EXPECT_CALL(StringTranslatorProxy, Constructor())
     .Times(1)
     .WillRepeatedly(Return(StringTranslatorId));
 
-  auto pStringTranslator =
-    ::std::make_shared<::mock::covellite::gui::StringTranslator>();
-
   ::mock::covellite::gui::Initializer::Data Data =
   {
-    pRenderInterface,
-    pStringTranslator
+    ::std::make_shared<::mock::covellite::gui::Renderer>(pRenders),
+    ::std::make_shared<::mock::covellite::gui::StringTranslator>()
   };
 
   EXPECT_CALL(WindowApiProxy, Constructor(_))
@@ -256,12 +246,9 @@ TEST_F(Window_test, /*DISABLED_*/Test_Constructor)
     .Times(1)
     .WillOnce(Return(::covellite::Rect{ 0, StatusBarHeight, Width, Height }));
 
-  EXPECT_CALL(CovelliteGuiCoreProxy, CreateContext(Eq("main"), ContextSize, nullptr))
+  EXPECT_CALL(CovelliteGuiProxy, CreateContext(Eq("main"), ContextSize, nullptr))
     .Times(1)
     .WillOnce(Return(&Context));
-
-  EXPECT_CALL(CovelliteGuiControlsProxy, Initialise())
-    .Times(1);
 
   if (::alicorn::extension::cpp::IS_DEBUG_CONFIGURATION)
   {
@@ -298,26 +285,14 @@ TEST_F(Window_test, /*DISABLED_*/Test_Constructor)
     RemoveEventListener(Eq("change"), pEventListener.get(), false))
     .Times(1);
 
-# ifdef COVELLITE_GUI_ROCKET
-
-  EXPECT_CALL(Context, RemoveReference())
-    .Times(1);
-
-# elif defined COVELLITE_GUI_RMLUI
-
   const CovelliteGui::String Name = "Name2005271214";
 
   EXPECT_CALL(Context, GetName())
     .Times(1)
     .WillOnce(Return(Name));
 
-  EXPECT_CALL(CovelliteGuiCoreProxy, RemoveContext(Name))
+  EXPECT_CALL(CovelliteGuiProxy, RemoveContext(Name))
     .Times(1);
-
-# else
-#   error "Need COVELLITE_GUI_ROCKET or COVELLITE_GUI_RMLUI."
-# endif
-
 }
 
 // ************************************************************************** //

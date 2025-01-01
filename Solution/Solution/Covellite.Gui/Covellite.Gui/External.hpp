@@ -25,7 +25,11 @@ namespace CovelliteGui = ::Rml;
 
 #else // __USING_GTEST
 
-#include "..\Test.Covellite.Gui\Mock\RmlUi.mock.hpp"
+// 01 Январь 2025 17:58 (unicornum.verum@gmail.com)
+TODO("Заменить ссылку, когда в Alicorn SDK попадет исправленый файл RmlUi.mock.hpp");
+//#include <RmlUi\RmlUi.mock.hpp>
+#include <Externals\Alicorn\Externals\include\rmlui\RmlUi.mock.hpp>
+
 namespace CovelliteGui = ::mock::Rml;
 
 namespace mock
