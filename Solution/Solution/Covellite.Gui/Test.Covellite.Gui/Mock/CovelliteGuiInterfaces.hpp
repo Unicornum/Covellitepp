@@ -20,10 +20,10 @@ namespace gui
 {
 
 class File :
-  public ::mock::CovelliteGui::Core::FileInterface
+  public ::mock::CovelliteGui::FileInterface
 {
-  using FileHandle_t = ::mock::CovelliteGui::Core::FileHandle;
-  using String_t = ::mock::CovelliteGui::Core::String;
+  using FileHandle_t = ::mock::CovelliteGui::FileHandle;
+  using String_t = ::mock::CovelliteGui::String;
 
 public:
   FileHandle_t Open(const String_t &) override { throw ::std::exception(); }
@@ -41,7 +41,7 @@ public:
 };
 
 class System :
-  public ::mock::CovelliteGui::Core::SystemInterface
+  public ::mock::CovelliteGui::SystemInterface
 {
   using StringTranslatorPtr_t = ::std::shared_ptr<IStringTranslator>;
 
@@ -61,11 +61,11 @@ namespace api
 {
 
 class RenderOpenGL :
-  public ::mock::CovelliteGui::Core::RenderInterface
+  public ::mock::CovelliteGui::RenderInterface
 {
-  using Vertex_t = ::mock::CovelliteGui::Core::Vertex;
-  using TextureHandle_t = ::mock::CovelliteGui::Core::TextureHandle;
-  using Vector2f_t = ::mock::CovelliteGui::Core::Vector2f;
+  using Vertex_t = ::mock::CovelliteGui::Vertex;
+  using TextureHandle_t = ::mock::CovelliteGui::TextureHandle;
+  using Vector2f_t = ::mock::CovelliteGui::Vector2f;
 
 public:
   void RenderGeometry(Vertex_t *, int, int *, int, TextureHandle_t,

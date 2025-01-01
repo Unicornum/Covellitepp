@@ -12,7 +12,7 @@ namespace gui
 {
 
 class Renderer final :
-  public CovelliteGui::Core::RenderInterface
+  public CovelliteGui::RenderInterface
 {
   using Component_t = ::covellite::api::Component;
   using RendersPtr_t = ::std::shared_ptr<Component_t::Renders>;
@@ -28,22 +28,22 @@ public:
 
 public:
   // Интерфейс CovelliteGui::Core::RenderererInterface
-  void RenderGeometry(CovelliteGui::Core::Vertex *, int, int *, int,
-    CovelliteGui::Core::TextureHandle, const CovelliteGui::Core::Vector2f &) override
+  void RenderGeometry(CovelliteGui::Vertex *, int, int *, int,
+    CovelliteGui::TextureHandle, const CovelliteGui::Vector2f &) override
   {
     throw ::std::exception{};
   }
-  CovelliteGui::Core::CompiledGeometryHandle CompileGeometry(CovelliteGui::Core::Vertex *,
-    int, int *, int, CovelliteGui::Core::TextureHandle) override
+  CovelliteGui::CompiledGeometryHandle CompileGeometry(CovelliteGui::Vertex *,
+    int, int *, int, CovelliteGui::TextureHandle) override
   {
     throw ::std::exception{};
   }
-  void RenderCompiledGeometry(CovelliteGui::Core::CompiledGeometryHandle,
-    const CovelliteGui::Core::Vector2f &) override
+  void RenderCompiledGeometry(CovelliteGui::CompiledGeometryHandle,
+    const CovelliteGui::Vector2f &) override
   {
     throw ::std::exception{};
   }
-  void ReleaseCompiledGeometry(CovelliteGui::Core::CompiledGeometryHandle) override
+  void ReleaseCompiledGeometry(CovelliteGui::CompiledGeometryHandle) override
   {
     throw ::std::exception{};
   }
@@ -55,17 +55,17 @@ public:
   {
     throw ::std::exception{};
   }
-  bool LoadTexture(CovelliteGui::Core::TextureHandle &, CovelliteGui::Core::Vector2i &,
-    const CovelliteGui::Core::String &) override
+  bool LoadTexture(CovelliteGui::TextureHandle &, CovelliteGui::Vector2i &,
+    const CovelliteGui::String &) override
   {
     throw ::std::exception{};
   }
-  bool GenerateTexture(CovelliteGui::Core::TextureHandle &,
-    const CovelliteGui::Core::byte *, const CovelliteGui::Core::Vector2i &) override
+  bool GenerateTexture(CovelliteGui::TextureHandle &,
+    const CovelliteGui::byte *, const CovelliteGui::Vector2i &) override
   {
     throw ::std::exception{};
   }
-  void ReleaseTexture(CovelliteGui::Core::TextureHandle) override
+  void ReleaseTexture(CovelliteGui::TextureHandle) override
   {
     throw ::std::exception{};
   }

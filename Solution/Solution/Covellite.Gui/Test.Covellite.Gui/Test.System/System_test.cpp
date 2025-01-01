@@ -24,7 +24,7 @@ class System_test :
 {
 protected:
   using Tested_t = ::covellite::gui::System;
-  using ITested_t = ::mock::CovelliteGui::Core::SystemInterface;
+  using ITested_t = ::mock::CovelliteGui::SystemInterface;
 
   // Вызывается ПЕРЕД запуском каждого теста
   void SetUp(void) override
@@ -81,7 +81,7 @@ TEST_F(System_test, /*DISABLED_*/Test_TranslateString)
     .Times(1)
     .WillOnce(Return(Translate));
 
-  ::mock::CovelliteGui::Core::String Result;
+  ::mock::CovelliteGui::String Result;
   const auto Return = IExample.TranslateString(Result, Source);
   EXPECT_EQ(0, Return);
   EXPECT_EQ(Result, Translate);
@@ -94,7 +94,7 @@ TEST_F(System_test, /*DISABLED_*/Test_LogMessage)
   LoggerProxy_t LoggerProxy;
   LoggerProxy_t::GetInstance() = &LoggerProxy;
 
-  using Log_t = ::mock::CovelliteGui::Core::Log;
+  using Log_t = ::mock::CovelliteGui::Log;
 
   const auto pStringTranslator = ::std::make_shared<StringTranslator>();
 

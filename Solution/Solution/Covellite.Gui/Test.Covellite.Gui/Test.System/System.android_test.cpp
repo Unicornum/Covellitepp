@@ -30,7 +30,7 @@ class System_test :
 {
 protected:
   using Tested_t = ::covellite::gui::System;
-  using ITested_t = ::mock::CovelliteGui::Core::SystemInterface;
+  using ITested_t = ::mock::CovelliteGui::SystemInterface;
   using AppInfo_t = ::alicorn::system::platform::AppInfo;
 
   // Вызывается ПЕРЕД запуском каждого теста
@@ -119,7 +119,7 @@ TEST_F(System_test, /*DISABLED_*/Test_ActivateKeyboard)
   EXPECT_CALL(EnvironmentProxy, ShowSoftKeyboard(Id))
     .Times(1);
 
-  IExample.ActivateKeyboard();
+  IExample.ActivateKeyboard({ 0.0f, 0.0f }, 0.0f);
 }
 
 // ************************************************************************** //

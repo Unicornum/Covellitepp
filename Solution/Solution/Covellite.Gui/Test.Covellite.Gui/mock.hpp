@@ -59,13 +59,7 @@ inline /*static*/ VfsPtr_t Singleton<VfsCore_t>::Make(void)
 #include "Mock/SystemToGuiKeyCode.inl"
 #include "Mock/Renderer.hpp"
 
-namespace alicorn
-{
-
-namespace extension
-{
-
-namespace std
+namespace alicorn::extension::std
 {
 
 using Section_t = alicorn::modules::settings::Section;
@@ -76,8 +70,4 @@ using SectionPtr_t = ::std::unique_ptr<Section_t>;
   return ::std::make_unique<Section_t>(uT("Dummy"));
 }
 
-} // namespace std
-
-} // namespace extension
-
-} // namespace alicorn
+} // namespace alicorn::extension::std

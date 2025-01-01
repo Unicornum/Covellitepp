@@ -47,7 +47,7 @@ TEST_F(SystemToGuiKeyCode_test, /*DISABLED_*/Test_Windows_UnknownCode)
   using namespace ::covellite::gui;
 
   const auto Result = SystemToGuiKeyCode(1807241220);
-  EXPECT_EQ(::mock::CovelliteGui::Core::Input::KI_UNKNOWN, Result);
+  EXPECT_EQ(::mock::CovelliteGui::Input::KI_UNKNOWN, Result);
 }
 
 // ************************************************************************** //
@@ -57,14 +57,14 @@ TEST_F(SystemToGuiKeyCode_test, /*DISABLED_*/Test_Windows)
 
   static const ::std::map<int32_t, KeyCode_t> Keys =
   {
-    { VK_BACK, ::mock::CovelliteGui::Core::Input::KI_BACK }, // Backspace
-    { VK_END, ::mock::CovelliteGui::Core::Input::KI_END }, // End
-    { VK_HOME, ::mock::CovelliteGui::Core::Input::KI_HOME }, // Home
-    { VK_LEFT, ::mock::CovelliteGui::Core::Input::KI_LEFT }, // Left
-    { VK_UP, ::mock::CovelliteGui::Core::Input::KI_UP }, // Up
-    { VK_RIGHT, ::mock::CovelliteGui::Core::Input::KI_RIGHT }, // Right
-    { VK_DOWN, ::mock::CovelliteGui::Core::Input::KI_DOWN }, // Down
-    { VK_DELETE, ::mock::CovelliteGui::Core::Input::KI_DELETE }, // Del
+    { VK_BACK, ::mock::CovelliteGui::Input::KI_BACK }, // Backspace
+    { VK_END, ::mock::CovelliteGui::Input::KI_END }, // End
+    { VK_HOME, ::mock::CovelliteGui::Input::KI_HOME }, // Home
+    { VK_LEFT, ::mock::CovelliteGui::Input::KI_LEFT }, // Left
+    { VK_UP, ::mock::CovelliteGui::Input::KI_UP }, // Up
+    { VK_RIGHT, ::mock::CovelliteGui::Input::KI_RIGHT }, // Right
+    { VK_DOWN, ::mock::CovelliteGui::Input::KI_DOWN }, // Down
+    { VK_DELETE, ::mock::CovelliteGui::Input::KI_DELETE }, // Del
   };
 
   for (const auto Key : Keys)
@@ -90,7 +90,7 @@ TEST_F(SystemToGuiKeyCode_test, /*DISABLED_*/Test_Android_UnknownCode)
 
   // cppcheck-suppress ConfigurationNotChecked
   const auto Result = SystemToGuiKeyCode(1807241224);
-  EXPECT_EQ(::mock::CovelliteGui::Core::Input::KI_UNKNOWN, Result);
+  EXPECT_EQ(::mock::CovelliteGui::Input::KI_UNKNOWN, Result);
 }
 
 // ************************************************************************** //
@@ -100,7 +100,7 @@ TEST_F(SystemToGuiKeyCode_test, /*DISABLED_*/Test_Android)
 
   // cppcheck-suppress ConfigurationNotChecked
   const auto Result = SystemToGuiKeyCode(AKEYCODE_DEL);
-  EXPECT_EQ(::mock::CovelliteGui::Core::Input::KI_BACK, Result);
+  EXPECT_EQ(::mock::CovelliteGui::Input::KI_BACK, Result);
 }
 
 #include "..\..\Covellite.Gui\SystemToGuiKeyCode.android.cpp"
