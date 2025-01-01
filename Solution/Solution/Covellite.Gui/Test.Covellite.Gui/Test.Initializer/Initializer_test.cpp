@@ -138,7 +138,13 @@ TEST_F(Initializer_test, /*DISABLED_*/Test_Windows)
 #undef Initializer
 #define Initializer Initializer_android
 #include <Covellite/Gui/Initializer.hpp>
+
+// Замена Shutdown потребовалалсь из-за того, что после замены версии GTest
+// до v1.15.2 запуск тестов стал падать при завершении работы из-за вызова
+// подставной функции в деструкторе статического объекта.
+#define Shutdown AndroidShutdown
 #include "../../Covellite.Gui/Initializer.android.cpp"
+#undef Shutdown
 
 // ************************************************************************** //
 TEST_F(Initializer_test, /*DISABLED_*/Test_Android)

@@ -34,10 +34,3 @@ using SectionPtr_t = ::std::unique_ptr<Section_t>;
 }
 
 } // namespace alicorn::extension::std
-
-namespace covellite::expanse
-{
-
-namespace std = ::std;
-
-} // namespace covellite::expanse

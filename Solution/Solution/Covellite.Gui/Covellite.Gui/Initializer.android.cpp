@@ -33,8 +33,8 @@ Initializer::Initializer(const Data & _Data) :
   CovelliteGui::SetRenderInterface(m_pRenderInterface.get());
 
   // Инициализация сделана через статический объект из-за того, что
-  // CovelliteGui::Core::Initialise() в рамках одного модуля можно запускать
-  // только один раз (CovelliteGui::Core::Shutdown() не поможет, повторная
+  // CovelliteGui::Initialise() в рамках одного модуля можно запускать
+  // только один раз (CovelliteGui::Shutdown() не поможет, повторная
   // инициализация даже в этом случае приводит к падению программы),
   // а android-приложение загружает главный .so модуль только один раз при
   // первом старте программы, а затем при каждой активации программы просто
