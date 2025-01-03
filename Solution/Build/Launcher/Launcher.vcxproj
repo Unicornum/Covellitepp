@@ -128,7 +128,13 @@ set ANDROID_PROJECT_NAME=Example
 set ANDROID_ACTIVITY_NAME=com.Covellitepp.Example
 
 %(Command)
-</Command>
+
+if "%FILE_DEVICES_SIZE%" NEQ "28" (
+rem Почему здесь не работает TIMEOUT???
+rem timeout /T 5 /NOBREAK
+ping 127.0.0.1 -n 15 &gt; nul
+%RUN_ADB% logcat -d -s "threaded_app" -s "Alicorn" -s "Covellite++"
+)</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -173,7 +179,13 @@ set ANDROID_PROJECT_NAME=Example
 set ANDROID_ACTIVITY_NAME=com.Covellitepp.Example
 
 %(Command)
-</Command>
+
+if "%FILE_DEVICES_SIZE%" NEQ "28" (
+rem Почему здесь не работает TIMEOUT???
+rem timeout /T 5 /NOBREAK
+ping 127.0.0.1 -n 15 &gt; nul
+%RUN_ADB% logcat -d -s "threaded_app" -s "Alicorn" -s "Covellite++"
+)</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
