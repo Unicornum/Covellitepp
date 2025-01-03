@@ -49,7 +49,9 @@ p {
   p#id_description,
   p#id_copyright {
     font-size: 0.975em;
-    margin: 0 0.75em;
+    width: 95%;
+    margin-left: auto;
+    margin-right: auto;
   }
 
   p#id_description {
@@ -70,10 +72,13 @@ p {
   }
 
 selector {
-  display: inline-block;
+  display: block;
   margin-top: 1em;
   margin-bottom: 1em;
+  margin-left: auto;
+  margin-right: auto;
   text-align: center;
+  width: 95%;
   position: fixed;
   bottom: 0;
 }
