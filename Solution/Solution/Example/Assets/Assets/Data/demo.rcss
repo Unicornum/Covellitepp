@@ -1,7 +1,7 @@
 
 /*form,*/
 /*button,*/
-/*progressbar,*/
+/*progress,*/
 /*circularbar,*/
 /*label,*/
 dummy {
@@ -34,6 +34,7 @@ body {
 form {
   display: block;
   position: absolute;
+  width: 100%;
   right: 0;
   bottom: 0;
   font-family: Times New Roman;
@@ -63,7 +64,7 @@ button#id_animation,
 button#id_shadows,
 button#id_help,
 button#id_back {
-  max-width: 51%;
+  width: 51%;
   float: right;
   font-size: 2em;
   text-align: right;
@@ -107,8 +108,9 @@ form#id_loading {
   decorator: image(background-demo);
 }
 
-progressbar {
+progress {
   display: block;
+  width: 79%;
   margin-left: 10%;
   margin-right: 10%;
   margin-bottom: 1em;
@@ -116,7 +118,7 @@ progressbar {
   decorator: tiled-horizontal(progress-bk-left, progress-bk-center, progress-bk-right);
 }
 
-  progressbar fill {
+  progress fill {
     decorator: tiled-horizontal(progress-start, progress-center, progress-end);
     margin: 0 2%;
   }

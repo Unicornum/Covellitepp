@@ -39,7 +39,7 @@ void Layer::Element::SetMeaning(const float _Meaning)
   const auto Tag =
     m_pElement->GetTagName();
 
-  if (Tag == "progressbar" || Tag == "circularbar")
+  if (Tag == "progress" || Tag == "circular")
   {
     CovelliteGuiSetProgressBarValue(m_pElement, _Meaning);
   }

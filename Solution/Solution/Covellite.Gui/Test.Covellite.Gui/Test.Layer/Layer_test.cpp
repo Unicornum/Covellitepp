@@ -484,7 +484,7 @@ TEST_F(Layer_test, /*DISABLED_*/Test_Element_SetMeaning_ProgressBar_RmlUi)
 
   Document_t Document;
   ::mock::CovelliteGui::ElementProgress Element;
-  const char * Tag = "progressbar";
+  const char * Tag = "progress";
   const float Value = 200527.1625f;
 
   using namespace ::testing;
