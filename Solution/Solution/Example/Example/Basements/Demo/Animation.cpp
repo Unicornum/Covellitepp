@@ -53,7 +53,8 @@ Animation::Frame_t Animation::GetFrame(
   if (m_Frames[_iFrame].empty())
   {
     m_Frames[_iFrame].resize(_Skeleton.size());
-    Frame_t BoneTransformParents{ _Skeleton.size() };
+    Frame_t BoneTransformParents;
+    BoneTransformParents.resize(_Skeleton.size());
 
     // !!! Здесь параллелить обработку нельзя !!!
     for (::std::size_t i = 0; i < _Skeleton.size(); i++)
