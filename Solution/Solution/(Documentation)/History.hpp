@@ -4,6 +4,12 @@
 *  
 *  История изменений
 *  =================
+*  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект \ref CovelliteApiPage : </td></tr></table>
+*  <table frame=void border=1 bordercolor=#FFFFFF cellpadding=5 cellspacing=0 width=98%><tr>
+*    <td width=10px></td>
+*    <td bgcolor=#B8CCE4 width=125px align=center> 01.04.2025 12:58 </td>
+*    <td bgcolor=#FFC0C0> fix: DirectX11: предупреждение при старте программы из-за флага DXGI_SWAP_EFFECT_DISCARD. </td>
+*  </tr></table>
 *  <table frame=void><tr><td></td></tr></table>
 *  
 *  Version: 2.3.0.2579 Unknown
