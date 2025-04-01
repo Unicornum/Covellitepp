@@ -2506,10 +2506,7 @@ public:
     return GetResult("GetBuffer");
   }
 
-  virtual HRESULT STDMETHODCALLTYPE SetFullscreenState(
-    /* [in] */ BOOL Fullscreen,
-    /* [annotation][in] */
-    _In_opt_  IDXGIOutput *pTarget){ return E_FAIL; }
+  MOCK_METHOD2(SetFullscreenState, HRESULT(BOOL, IDXGIOutput *));
 
   virtual HRESULT STDMETHODCALLTYPE GetFullscreenState(
     /* [annotation][out] */

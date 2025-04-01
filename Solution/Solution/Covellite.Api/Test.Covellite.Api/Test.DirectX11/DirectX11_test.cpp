@@ -685,7 +685,31 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Create_ConstantBuffer_Fail)
 }
 
 // ************************************************************************** //
+TEST_F(DirectX11_test, /*DISABLED_*/Test_DisableFullscreenOnExit)
+{
+  using DirectXProxy_t = ::mock::DirectX11::Proxy;
+  DirectXProxy_t DirectXProxy;
+  DirectXProxy_t::GetInstance() = &DirectXProxy;
+
+  ::mock::DXGI::SwapChain SwapChain;
+
+  using namespace ::testing;
+
+  EXPECT_CALL(DirectXProxy, CreateSwapChain())
+    .Times(1)
+    .WillOnce(Return(&SwapChain));
+
+  {
+    Tested_t oExample{ Data_t{} };
+
+    EXPECT_CALL(SwapChain, SetFullscreenState(FALSE, nullptr))
+      .Times(1);
+  }
+}
+
+// ************************************************************************** //
 TEST_F(DirectX11_test, /*DISABLED_*/Test_GetUsingApi)
+
 {
   const Tested_t oExample{ Data_t{} };
   const ITested_t & IExample = oExample;

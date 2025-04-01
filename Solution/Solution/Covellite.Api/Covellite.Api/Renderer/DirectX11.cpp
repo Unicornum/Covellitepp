@@ -135,7 +135,17 @@ DirectX11::DirectX11(const Data_t & _Data)
   MakeConstants<ConstantBuffer>(m_pDevice, m_pImmediateContext);
 }
 
-DirectX11::~DirectX11(void) = default;
+DirectX11::~DirectX11(void)
+{
+  // Если при вызове Release() для SwapChain'a он будет в полноэкранном
+  // режиме, это вызовет падение программы (и зависание Visual Studio,
+  // если программа запускалась в режиме отладки). Любопытно было бы узнать,
+  // почему нельзя было это сделать самостоятельно и почему это переключение
+  // спихнули на пользователей DirectX'a.
+  // https://stackoverflow.com/questions/27116521/switch-swapchain-to-windowed-mode
+
+  m_pSwapChain->SetFullscreenState(FALSE, nullptr);
+}
 
 DirectX11::String_t DirectX11::GetUsingApi(void) const /*override*/
 {
@@ -312,6 +322,7 @@ auto DirectX11::CreateCamera(const ComponentPtr_t & _pComponent) -> Render_t /*o
     ViewPort.TopLeftX = 0;
     ViewPort.TopLeftY = 0;
     ::std::tie(ViewPort.Width, ViewPort.Height) = GetBkSurfaceSize();
+    //ViewPort.Height /= 2;
     ViewPort.MinDepth = 0.0f;
     ViewPort.MaxDepth = 1.0f;
     m_pImmediateContext->RSSetViewports(1, &ViewPort);

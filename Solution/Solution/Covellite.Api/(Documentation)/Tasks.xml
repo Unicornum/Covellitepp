@@ -9,7 +9,8 @@
   <Process/>
   <Complete>
     <Week6534>
-      <Task6 Text="DirectX11: предупреждение при старте программы из-за флага DXGI_SWAP_EFFECT_DISCARD." Type="Bug" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="true" ParentTaskText="false"/>
+      <Task3 Text="DirectX11: предупреждение при старте программы из-за флага DXGI_SWAP_EFFECT_DISCARD." Type="Bug" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="true" ParentTaskText="false"/>
+      <Task7 Text="DirectX11: DXGI ERROR: IDXGISwapChain::Release: Swapchain Released while fullscreen..." Type="Bug" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="true" ParentTaskText="false"/>
     </Week6534>
     <Week6533/>
     <Week6532/>
