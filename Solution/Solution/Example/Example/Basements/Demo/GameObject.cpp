@@ -127,6 +127,12 @@ size_t GameObject::AddTexture(const Path_t & _FileName)
   return m_Textures.size() - 1;
 }
 
+size_t GameObject::AddTexture(const ::std::vector<Path_t> & _FileNames)
+{
+  m_Textures.push_back(::std::make_unique<Texture>(_FileNames));
+  return m_Textures.size() - 1;
+}
+
 const GameObject::Texture & GameObject::GetTexture(const size_t _Index) const
 {
   if (_Index >= m_Textures.size())

@@ -33,8 +33,13 @@
 #define COVELLITE_DECLARE_TEX2D(name, index) \
   Texture2D name : register(t##index); \
   SamplerState TexSampler##index : register(s##index);
+#define COVELLITE_DECLARE_TEX2D_ARRAY(name, count, index) \
+  Texture2D name[count] : register(t##index); \
+  SamplerState TexSampler##index : register(s##index);
 #define COVELLITE_TEX2D_COLOR(tex, uv) \
   tex.Sample(TexSampler0, uv)
+#define COVELLITE_TEX2D_ARRAY_COLOR(tex, i, uv) \
+  tex[i].Sample(TexSampler0, uv)
 #define COVELLITE_DECLARE_MULTI_TARGET_STRUCTURE(name, count) \
   struct name { float4 Target[count] : SV_Target; }
   
@@ -72,8 +77,12 @@ precision highp int;
   
 #define COVELLITE_DECLARE_TEX2D(name, index) \
   uniform sampler2D name
+#define COVELLITE_DECLARE_TEX2D_ARRAY(name, count, index) \
+  uniform highp sampler2DArray name
 #define COVELLITE_TEX2D_COLOR(tex, uv) \
   texture(tex, uv)
+#define COVELLITE_TEX2D_ARRAY_COLOR(tex, i, uv) \
+  texture(tex, vec3(uv, i))
 #define COVELLITE_DECLARE_MULTI_TARGET_STRUCTURE(name, count) \
   struct name { float4 Target[count]; }; \
   out float4 Covellite_MultiOutPixelColor[count]

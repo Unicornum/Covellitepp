@@ -3,17 +3,12 @@
 #include <alicorn/std/string.hpp>
 #include <alicorn/std/string/encoding.hpp>
 #include <alicorn/std/regex.hpp>
+#include <alicorn/std/vector.hpp>
 #include <boost/algorithm/string/replace.hpp>
 #include <Covellite/Api/Component.inl>
 #include <Covellite/Api/Defines.hpp>
 
-namespace covellite
-{
-
-namespace api
-{
-
-namespace renderer
+namespace covellite::api::renderer
 {
 
 /**
@@ -99,6 +94,8 @@ public:
 template<class T>
 class Component::Buffer
 {
+  using Buffers_t = ::std::vector<Buffer_t<T>>;
+
   static const Buffer_t<T> & GetFakeData(void) noexcept
   {
     static const Buffer_t<T> FakeData;
@@ -106,20 +103,43 @@ class Component::Buffer
   };
 
 public:
+  const size_t      DataCount;
   const Buffer_t<T> Data;
-  const int Dimension;
+  const int         Dimension;
   const uint8_t Align[4] = { 0 };
 
 private:
+  inline static size_t GetDataCount(
+    Component_t & _Component,
+    const Buffer_t<T> & _Data)
+  {
+    return _Component[uT("content")].IsType<Buffers_t>() ?
+      ::std::size((Buffers_t &)_Component[uT("content")].Default(Buffers_t{ _Data })) : 1;
+  }
+
   inline static Buffer_t<T> GetContent(
     Component_t & _Component, 
     const Buffer_t<T> & _Data)
   {
-    return ::std::move((Buffer_t<T> &)_Component[uT("content")].Default(_Data));
+    if (_Component[uT("content")].IsType<Buffer_t<T>>())
+    {
+      return ::std::move((Buffer_t<T> &)_Component[uT("content")].Default(_Data));
+    }
+
+    using namespace ::alicorn::extension::std;
+
+    const Buffers_t Buffers =
+      ::std::move((Buffers_t &)_Component[uT("content")].Default(Buffers_t{ _Data }));
+
+    Buffer_t<T> AllTextureArrayData;
+    for (const auto & Data : Buffers) AllTextureArrayData += Data;
+
+    return AllTextureArrayData;
   }
 
 public:
   explicit Buffer(Component_t & _Component, const Buffer_t<T> & _Data = GetFakeData()) :
+    DataCount(GetDataCount(_Component, _Data)),
     Data(GetContent(_Component, _Data)),
     Dimension(_Component[uT("dimension")].Default(3))
   {
@@ -420,8 +440,4 @@ public:
   ~Fog(void) = default;
 };
 
-} // namespace renderer
-
-} // namespace api
-
-} // namespace covellite
+} // namespace covellite::api::renderer

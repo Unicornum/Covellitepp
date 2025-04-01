@@ -451,6 +451,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Manual", "Manual", "{22D2BC
 		Solution\Solution\(Documentation)\Manual\GuiCode.hpp = Solution\Solution\(Documentation)\Manual\GuiCode.hpp
 		Solution\Solution\(Documentation)\Manual\InputRussianLetters.hpp = Solution\Solution\(Documentation)\Manual\InputRussianLetters.hpp
 		Solution\Solution\(Documentation)\Manual\Manual.hpp = Solution\Solution\(Documentation)\Manual\Manual.hpp
+		Solution\Solution\(Documentation)\Manual\Manual.Using.hpp = Solution\Solution\(Documentation)\Manual\Manual.Using.hpp
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Test.EventListener", "Solution\Solution\Covellite.Gui\Test.Covellite.Gui\Test.EventListener\Test.EventListener.vcxproj", "{AFA055CB-4667-4848-9FF4-CA94F925AB8C}"
@@ -1397,12 +1398,12 @@ Global
 		{0D1DC4E2-B6A1-4C77-92D0-6655FEC80A91}.Release|ARM64.ActiveCfg = Release|x64
 		{0D1DC4E2-B6A1-4C77-92D0-6655FEC80A91}.Release|x64.ActiveCfg = Release|x64
 		{0D1DC4E2-B6A1-4C77-92D0-6655FEC80A91}.Release|x64.Build.0 = Release|x64
-		{D9072A49-6646-44AB-A763-3BD33473ABD9}.Debug.Product|ARM64.ActiveCfg = Release|x64
-		{D9072A49-6646-44AB-A763-3BD33473ABD9}.Debug.Product|x64.ActiveCfg = Release|x64
-		{D9072A49-6646-44AB-A763-3BD33473ABD9}.Debug.Product|x64.Build.0 = Release|x64
-		{D9072A49-6646-44AB-A763-3BD33473ABD9}.Debug|ARM64.ActiveCfg = Release|x64
-		{D9072A49-6646-44AB-A763-3BD33473ABD9}.Debug|x64.ActiveCfg = Release|x64
-		{D9072A49-6646-44AB-A763-3BD33473ABD9}.Debug|x64.Build.0 = Release|x64
+		{D9072A49-6646-44AB-A763-3BD33473ABD9}.Debug.Product|ARM64.ActiveCfg = Debug|x64
+		{D9072A49-6646-44AB-A763-3BD33473ABD9}.Debug.Product|x64.ActiveCfg = Debug|x64
+		{D9072A49-6646-44AB-A763-3BD33473ABD9}.Debug.Product|x64.Build.0 = Debug|x64
+		{D9072A49-6646-44AB-A763-3BD33473ABD9}.Debug|ARM64.ActiveCfg = Debug|x64
+		{D9072A49-6646-44AB-A763-3BD33473ABD9}.Debug|x64.ActiveCfg = Debug|x64
+		{D9072A49-6646-44AB-A763-3BD33473ABD9}.Debug|x64.Build.0 = Debug|x64
 		{D9072A49-6646-44AB-A763-3BD33473ABD9}.Release.Product|ARM64.ActiveCfg = Release|x64
 		{D9072A49-6646-44AB-A763-3BD33473ABD9}.Release.Product|x64.ActiveCfg = Release|x64
 		{D9072A49-6646-44AB-A763-3BD33473ABD9}.Release.Product|x64.Build.0 = Release|x64
@@ -1551,7 +1552,7 @@ Global
 		{834EAA44-E0DB-476E-9D26-DA27F845E3D1}.Release|ARM64.ActiveCfg = Release|x64
 		{834EAA44-E0DB-476E-9D26-DA27F845E3D1}.Release|x64.ActiveCfg = Release|x64
 		{834EAA44-E0DB-476E-9D26-DA27F845E3D1}.Release|x64.Build.0 = Release|x64
-		{0DA08785-A170-4321-8B8B-13EF61FA36D7}.Debug.Product|ARM64.ActiveCfg = Release|x64
+		{0DA08785-A170-4321-8B8B-13EF61FA36D7}.Debug.Product|ARM64.ActiveCfg = Debug|x64
 		{0DA08785-A170-4321-8B8B-13EF61FA36D7}.Debug.Product|x64.ActiveCfg = Debug|x64
 		{0DA08785-A170-4321-8B8B-13EF61FA36D7}.Debug.Product|x64.Build.0 = Debug|x64
 		{0DA08785-A170-4321-8B8B-13EF61FA36D7}.Debug|ARM64.ActiveCfg = Debug|x64

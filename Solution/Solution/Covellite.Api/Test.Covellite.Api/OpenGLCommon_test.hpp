@@ -59,7 +59,7 @@ TEST_F(OpenGLCommon_test, /*DISABLED_*/Test_State_Blend)
 }
 
 // ************************************************************************** //
-TEST_F(OpenGLCommon_test, /*DISABLED_*/Test_State_Sampler)
+TEST_F(OpenGLCommon_test, /*DISABLED_*/Test_State_Sampler_Texture)
 {
   using GLProxy_t = ::mock::GLProxy;
   GLProxy_t GLProxy;
@@ -107,6 +107,60 @@ TEST_F(OpenGLCommon_test, /*DISABLED_*/Test_State_Sampler)
     .Times(1);
 
   EXPECT_CALL(GLProxy, TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT))
+    .Times(1);
+
+  TextureRender();
+}
+
+// ************************************************************************** //
+TEST_F(OpenGLCommon_test, /*DISABLED_*/Test_State_Sampler_TextureArray)
+{
+  using GLProxy_t = ::mock::GLProxy;
+  GLProxy_t GLProxy;
+  GLProxy_t::GetInstance() = &GLProxy;
+
+  const Tested_t Example{ Data_t{} };
+  const ITested_t & IExample = Example;
+
+  auto itStateCreator = IExample.GetCreators().find(uT("State"));
+  ASSERT_NE(IExample.GetCreators().end(), itStateCreator);
+
+  auto itTextureCreator = IExample.GetCreators().find(uT("TextureArray"));
+  ASSERT_NE(IExample.GetCreators().end(), itTextureCreator);
+
+  auto SamplerRender = itStateCreator->second(Component_t::Make(
+    {
+      { uT("kind"), uT("Sampler") }
+    }));
+  ASSERT_NE(nullptr, SamplerRender);
+
+  auto TextureRender = itTextureCreator->second(Component_t::Make({ }));
+  ASSERT_NE(nullptr, TextureRender);
+
+  using namespace ::testing;
+
+  EXPECT_CALL(GLProxy, TexParameteri(_, _, _))
+    .Times(0);
+
+  SamplerRender();
+
+  InSequence Dummy;
+
+  EXPECT_CALL(GLProxy, BindTexture(GL_TEXTURE_2D_ARRAY, _))
+    .Times(1);
+
+  EXPECT_CALL(GLProxy, TexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER,
+    GL_LINEAR))
+    .Times(1);
+
+  EXPECT_CALL(GLProxy, TexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER,
+    GL_LINEAR))
+    .Times(1);
+
+  EXPECT_CALL(GLProxy, TexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_REPEAT))
+    .Times(1);
+
+  EXPECT_CALL(GLProxy, TexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_REPEAT))
     .Times(1);
 
   TextureRender();
@@ -593,6 +647,113 @@ TEST_F(OpenGLCommon_test, /*DISABLED_*/Test_Texture_UnknownDestination)
         { uT("kind"), uT("Texture") },
         { uT("destination"), uT("1907251103") },
      });
+
+    TestCall(Component_t::Make({ { uT("service"), Object_t{ pData } } }));
+  }
+}
+
+// ************************************************************************** //
+TEST_F(OpenGLCommon_test, /*DISABLED_*/Test_TextureArray_Create_Fail)
+{
+  using GLProxy_t = ::mock::GLProxy;
+  GLProxy_t GLProxy;
+  GLProxy_t::GetInstance() = &GLProxy;
+
+  const ::mock::GLuint TextureId = 2504062041;
+
+  const Tested_t Example{ Data_t{} };
+  const ITested_t & IExample = Example;
+
+  auto itCreator = IExample.GetCreators().find(uT("TextureArray"));
+  ASSERT_NE(IExample.GetCreators().end(), itCreator);
+
+  using namespace ::testing;
+
+  InSequence Dummy;
+
+  EXPECT_CALL(GLProxy, GenTextures(1))
+    .Times(1)
+    .WillOnce(Return(TextureId));
+
+  EXPECT_CALL(GLProxy, BindTexture(GL_TEXTURE_2D_ARRAY, TextureId))
+    .Times(1);
+
+  EXPECT_CALL(GLProxy, TexStorage3D(_, _, _, _, _, _))
+    .Times(1);
+
+  EXPECT_CALL(GLProxy, TexSubImage3D_1(_, _, _, _, _, _, _))
+    .Times(1);
+
+  EXPECT_CALL(GLProxy, TexSubImage3D_2(_, _, _, _))
+    .Times(1);
+
+  EXPECT_CALL(GLProxy, BindTexture(GL_TEXTURE_2D_ARRAY, 0))
+    .Times(1);
+
+  EXPECT_CALL(GLProxy, GetError())
+    .Times(1)
+    .WillOnce(Return(2504062042));
+
+  EXPECT_THROW(itCreator->second(Component_t::Make({})), ::std::exception);
+}
+
+// ************************************************************************** //
+TEST_F(OpenGLCommon_test, /*DISABLED_*/Test_TextureArray_UnknownDestination)
+{
+  using GLProxy_t = ::mock::GLProxy;
+  GLProxy_t GLProxy;
+  GLProxy_t::GetInstance() = &GLProxy;
+
+  const Tested_t Example{ Data_t{} };
+  const ITested_t & IExample = Example;
+
+  auto itCreator = IExample.GetCreators().find(uT("TextureArray"));
+  ASSERT_NE(IExample.GetCreators().end(), itCreator);
+
+  const auto TestCall = [&](const Component_t::ComponentPtr_t & _pTexture)
+  {
+    const ::mock::GLuint TextureId = 2504062208;
+
+    using namespace ::testing;
+
+    InSequence Dummy;
+
+    EXPECT_CALL(GLProxy, GenTextures(_))
+      .Times(0);
+
+    EXPECT_CALL(GLProxy, BindTexture(_, _))
+      .Times(0);
+
+    EXPECT_CALL(GLProxy, TexStorage3D(_, _, _, _, _, _))
+      .Times(0);
+
+    EXPECT_CALL(GLProxy, TexSubImage3D_1(_, _, _, _, _, _, _))
+      .Times(0);
+
+    EXPECT_CALL(GLProxy, TexSubImage3D_2(_, _, _, _))
+      .Times(0);
+
+    EXPECT_CALL(GLProxy, GetError())
+      .Times(0);
+
+    EXPECT_THROW(itCreator->second(_pTexture), ::std::exception);
+  };
+
+  {
+    const auto pTexture = Component_t::Make(
+      {
+        { uT("destination"), uT("2504062206") },
+      });
+
+    TestCall(pTexture);
+  }
+
+  {
+    const auto pData = Component_t::Make(
+      {
+        { uT("kind"), uT("TextureArray") },
+        { uT("destination"), uT("2504062207") },
+      });
 
     TestCall(Component_t::Make({ { uT("service"), Object_t{ pData } } }));
   }

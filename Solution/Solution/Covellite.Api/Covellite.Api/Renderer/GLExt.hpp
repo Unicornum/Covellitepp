@@ -52,6 +52,7 @@
 #define GL_TEXTURE30                      0x84DE
 #define GL_TEXTURE31                      0x84DF
 #define GL_ACTIVE_TEXTURE                 0x84E0
+#define GL_TEXTURE_2D_ARRAY               0x8C1A
 
 /* Buffer Objects */
 #define GL_ARRAY_BUFFER                   0x8892
@@ -224,6 +225,26 @@ inline void glActiveTexture(GLenum texture)
   static auto glCall = GetProcAddress<Call_t>("glActiveTexture");
 
   glCall(texture);
+}
+
+inline void glTexStorage3D(GLenum target, GLsizei levels, GLenum internalformat,
+  GLsizei width, GLsizei height, GLsizei depth)
+{
+  using Call_t = void(*)(GLenum, GLsizei, GLenum, GLsizei, GLsizei, GLsizei);
+  static auto glCall = GetProcAddress<Call_t>("glTexStorage3D");
+
+  glCall(target, levels, internalformat, width, height, depth);
+}
+
+inline void glTexSubImage3D(GLenum target, GLint level, GLint xoffset, GLint yoffset,
+  GLint zoffset, GLsizei width, GLsizei height, GLsizei depth, GLenum format,
+  GLenum type, const void * pixels)
+{
+  using Call_t = void(*)(GLenum, GLint, GLint, GLint, GLint, GLsizei, GLsizei, GLsizei, GLenum, GLenum, const void *);
+  static auto glCall = GetProcAddress<Call_t>("glTexSubImage3D");
+
+  glCall(target, level, xoffset, yoffset, zoffset, width, height, depth, format,
+    type, pixels);
 }
 
 inline void glBindBuffer(GLenum target, GLuint buffer)

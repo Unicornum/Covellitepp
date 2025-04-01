@@ -16,13 +16,7 @@
 #include "Component.hpp"
 #include "GraphicApi.Constants.hpp"
 
-namespace covellite
-{
-
-namespace api
-{
-
-namespace renderer
+namespace covellite::api::renderer
 {
 
 // ************************************************************************** //
@@ -135,7 +129,17 @@ DirectX11::DirectX11(const Data_t & _Data)
   MakeConstants<ConstantBuffer>(m_pDevice, m_pImmediateContext);
 }
 
-DirectX11::~DirectX11(void) = default;
+DirectX11::~DirectX11(void)
+{
+  // Если при вызове Release() для SwapChain'a он будет в полноэкранном
+  // режиме, это вызовет падение программы (и зависание Visual Studio,
+  // если программа запускалась в режиме отладки). Любопытно было бы узнать,
+  // почему нельзя было это сделать самостоятельно и почему это переключение
+  // спихнули на пользователей DirectX'a.
+  // https://stackoverflow.com/questions/27116521/switch-swapchain-to-windowed-mode
+
+  m_pSwapChain->SetFullscreenState(FALSE, nullptr);
+}
 
 DirectX11::String_t DirectX11::GetUsingApi(void) const /*override*/
 {
@@ -170,6 +174,7 @@ void DirectX11::CreateDeviceAndSwapChain(const Data_t & _Data)
   sd.BufferDesc.Format = DXGI_FORMAT_R8G8B8A8_UNORM;
   sd.BufferUsage = DXGI_USAGE_RENDER_TARGET_OUTPUT;
   sd.SampleDesc.Count = 1;
+  sd.SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
   //sd.SampleDesc.Quality = 0;
 
   using ::alicorn::extension::cpp::IS_RELEASE_CONFIGURATION;
@@ -641,7 +646,7 @@ private:
     return pTexture2D;
   }
 
-private:
+public:
   static UINT GetDestinationIndex(const ComponentPtr_t & _pData)
   {
     const int Index = (*_pData)[uT("index")].Default(-1);
@@ -956,6 +961,42 @@ auto DirectX11::CreateTexture(const ComponentPtr_t & _pComponent) -> Render_t /*
 
     m_pImmediateContext->PSSetShaderResources(pTexture->m_iDestination, 1,
       pTexture->m_pShaderResourceView.GetAddressOf());
+  };
+}
+
+auto DirectX11::CreateTextureArray(const ComponentPtr_t & _pComponent) -> Render_t /*override*/
+{
+  using Buffers_t = ::std::vector<::alicorn::extension::std::memory::BinaryData_t>;
+
+  const auto pTextureArrayData = CapturingServiceComponent::Get(_pComponent,
+    { { uT("TextureArray"), _pComponent } })[0];
+
+  const Buffers_t ArrayData =
+    ::std::move((Buffers_t &)(*pTextureArrayData)[uT("content")]);
+
+  const Component::Texture TextureArrayData{ *pTextureArrayData, uT("albedo") };
+
+  ::std::vector<::std::shared_ptr<Texture>> Textures;
+  ::std::vector<ID3D11ShaderResourceView *> ShaderResourceViews;
+
+  for (const auto & TextureData : ArrayData)
+  {
+    auto pTexture = ::std::make_shared<Texture>(pTextureArrayData);
+    pTexture->MakeSource(m_pDevice, m_pImmediateContext,
+      static_cast<UINT>(TextureArrayData.Width),
+      static_cast<UINT>(TextureArrayData.Height),
+      ::std::data(TextureData), TextureArrayData.IsUsingMipmapping);
+
+    Textures.push_back(pTexture);
+    ShaderResourceViews.push_back(pTexture->m_pShaderResourceView.Get());
+  }
+
+  return [=](void)
+  {
+    m_pImmediateContext->PSSetShaderResources(
+      Textures[0]->m_iDestination,
+      ::std::size(ShaderResourceViews),
+      ::std::data(ShaderResourceViews));
   };
 }
 
@@ -1530,8 +1571,5 @@ auto DirectX11::CreateBillboardTransformRender(const ComponentPtr_t & _pComponen
   };
 }
 
-} // namespace renderer
+} // namespace covellite::api::renderer
 
-} // namespace api
-
-} // namespace covellite

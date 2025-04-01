@@ -47,6 +47,7 @@ protected:
   virtual Render_t CreateState(const ComponentPtr_t &) = 0;
   virtual Render_t CreateShader(const ComponentPtr_t &) = 0;
   virtual Render_t CreateTexture(const ComponentPtr_t &) = 0;
+  virtual Render_t CreateTextureArray(const ComponentPtr_t &) = 0;
   virtual Render_t CreateBuffer(const ComponentPtr_t &) = 0;
   virtual Render_t CreateTransform(const ComponentPtr_t &) = 0;
   virtual Render_t CreatePresentBuffer(const ComponentPtr_t &) = 0;

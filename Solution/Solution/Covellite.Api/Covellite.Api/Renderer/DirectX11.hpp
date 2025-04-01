@@ -66,6 +66,7 @@ protected:
   Render_t CreateBkSurface(const ComponentPtr_t &) override;
   Render_t CreateState(const ComponentPtr_t &) override;
   Render_t CreateTexture(const ComponentPtr_t &) override;
+  Render_t CreateTextureArray(const ComponentPtr_t &) override;
   Render_t CreateShader(const ComponentPtr_t &) override;
   Render_t CreateBuffer(const ComponentPtr_t &) override;
   Render_t CreateTransform(const ComponentPtr_t &) override;

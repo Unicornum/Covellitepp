@@ -152,6 +152,7 @@ echo ... packed end.
     <Image Include="Assets\Data\demo\demo.skybox.day.jpg" />
     <Image Include="Assets\Data\demo\demo.skybox.night.jpg" />
     <Image Include="Assets\Data\demo\demo.stone.jpg" />
+    <Image Include="Assets\Data\demo\demo.stone.sand.jpg" />
     <Image Include="Assets\Data\demo\demo.tree.jpg" />
     <Image Include="Assets\Data\demo\demo.tree.png" />
     <Image Include="Assets\Data\demo\demo.water.png" />

@@ -107,16 +107,25 @@ public:
     float GetRatioXY(void) const { return m_RatioXY; }
 
   private:
+    static size_t GetUniqueIndex(void)
+    {
+      static size_t Index = 0;
+      return Index++;
+    }
+
+  private:
     Component_t::ComponentPtr_t m_pTexture;
     float m_RatioXY;
 
   public:
     explicit Texture(const Path_t &);
+    explicit Texture(const ::std::vector<Path_t> &);
   };
 
 protected:
   static Object_t GetShaderObject(const bool = false);
   size_t AddTexture(const Path_t &);
+  size_t AddTexture(const ::std::vector<Path_t> &);
   const Texture & GetTexture(const size_t) const;
   template<class TMesh, class TData>
   size_t AddMesh(const TData &) const;

@@ -318,6 +318,9 @@
     <Image Include="Assets\Data\draw3dobject.title.reflection.png">
       <Filter>Assets\Data</Filter>
     </Image>
+    <Image Include="Assets\Data\demo\demo.stone.sand.jpg">
+      <Filter>Assets\Data\Demo</Filter>
+    </Image>
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Assets\Data\shaders\Pbr.ps.fx">

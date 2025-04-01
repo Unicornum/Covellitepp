@@ -107,6 +107,13 @@
 *  | ^                            | mipmapping                  | bool (false)                          | Генерировать mip'ы для текстуры; только для текстур, не используемых как внеэкранные поверхности         |
 *  | ^                            | mapper                      | std::function<bool(const void *)>     | Функция обратного вызова для чтения данных текстуры (каждый пиксель - это число uint32_t в формате ABGR) |
 *  | ^                            | capacity                    | int (8)                               | Количество бит на каждый канал цвета (8, 16, 32)                                                         |
+*  | TextureArray                 | content (\ref Footnote "4") | Buffer_t<Buffer_t<uint8_t>>           | Бинарные данные набора текстур в формате R8G8B8A8                                                        |
+*  | ^                            | width                       | int                                   | Ширина изображения в пикселях                                                                            |
+*  | ^                            | height                      | int                                   | Высота изображения в пикселях                                                                            |
+*  | ^                            | name                        | String_t                              | Имя текстуры в шейдере GLSL                                                                              |
+*  | ^                            | index                       | int                                   | Индекс текстуры tX в шейдере HLSL                                                                        |
+*  | ^                            | destination                 | String_t (albedo)                     | Назначение текстуры (albedo, metalness, roughness, normal, occlusion, depth)                             |
+*  | ^                            | mipmapping                  | bool (false)                          | Генерировать mip'ы для текстуры; только для текстур, не используемых как внеэкранные поверхности         |
 *  | Shader                       | content (\ref Footnote "4") | covellite::api::Buffer_t<uint8_t>     | Содержимое текстового файла шейдера в бинарном виде                                                      |
 *  | ^                            | entry                       | String_t                              | Имя функции точки входа шейдера                                                                          |
 *  | ^                            | instance                    | String_t                              | Описатель (вида 'f4f4i4') структуры [инстанс-буфера](\ref CovelliteApiInstancing)                        |
@@ -317,6 +324,41 @@ COVELLITE_DECLARE_TEX2D(TexDiffuse, 0);
 *  использовать в качестве особой, разовой операции; например, при обработке
 *  клика мышью.
 *  
+* ### TextureArray
+*
+*  Компонент массива текстур.
+*
+*  | kind      | Параметры | Тип параметра                         |
+*  | --------- | --------- | ------------------------------------- |
+*  | -         | service   | Data.TextureArray (\ref Footnote "3") |
+*
+*  В шейдерных реализациях для рендеринга требуется специальный пиксельный
+*  шейдер, т.к. текстуры просто передаются шейдеру в слоты в соотвествии со
+*  следующей логикой:
+*  - Если заданы параметры \b name как TexEnvironment и \b index как 4, то
+*  текстуры будут переданы слоту, который для унификации шейдера под HLSL и GLSL
+*  следует объявлять и использовать как
+* \code
+COVELLITE_DECLARE_TEX2D_ARRAY(TexEnvironment, TexArrayCount, 4); // объявление
+
+float3 Color = COVELLITE_TEX2D_ARRAY_COLOR(TexEnvironment, i, TexCoord).rgb; // использование
+* \endcode
+*  - Если параметры \b name и \b index не указаны, слот текстур в шейдере
+*  определяется по значению параметра \b destination
+* \code
+COVELLITE_DECLARE_TEX2D_ARRAY(TexAlbedo, TexArrayCount, 0); // albedo
+COVELLITE_DECLARE_TEX2D_ARRAY(TexMetalness, TexArrayCount, 1); // metalness
+COVELLITE_DECLARE_TEX2D_ARRAY(TexRoughness, TexArrayCount, 2); // roughness
+COVELLITE_DECLARE_TEX2D_ARRAY(TexNormal, TexArrayCount, 3); // normal
+COVELLITE_DECLARE_TEX2D_ARRAY(TexOcclusion, TexArrayCount, 4); // occlusion
+COVELLITE_DECLARE_TEX2D_ARRAY(TexDepth, TexArrayCount, 5); // depth
+* \endcode
+*  - Если не указаны параметры \b name, \b index и \b destination, слот текстур
+*  в шейдере будет установлен как
+* \code
+COVELLITE_DECLARE_TEX2D_ARRAY(TexDiffuse, TexArrayCount, 0);
+* \endcode
+*
 * ### Buffer
 *  
 *  Компонент буферов геометрии меша и констант шейдера.

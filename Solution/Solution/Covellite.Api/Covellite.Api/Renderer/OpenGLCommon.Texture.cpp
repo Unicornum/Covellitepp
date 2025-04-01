@@ -1,28 +1,47 @@
 
 #include "stdafx.h"
 #include "OpenGLCommon.Texture.hpp"
+#include <alicorn/std.hpp>
 
 #ifndef GL_DEPTH_COMPONENT
 # define GL_DEPTH_COMPONENT 0
 #endif
 
-namespace covellite
-{
-
-namespace api
-{
-
-namespace renderer
+namespace covellite::api::renderer
 {
 
 OpenGLCommon::Texture::Texture(const Component::Texture & _Data) :
-  m_Destination(GetDestination(_Data)),
+  m_Destination(GetDestination(_Data.Index, _Data.Destination, _Data.Name)),
   m_Format(GetFormat(_Data.Destination)),
   m_TextureId(BuildTexture()),
   m_IsMapping(_Data.IsMapping),
-  m_Capacity(_Data.Capacity)
+  m_Capacity(_Data.Capacity),
+  m_Target(GL_TEXTURE_2D)
 {
   MakeContent(_Data.Width, _Data.Height, _Data.pTextureData);
+}
+
+OpenGLCommon::Texture::Texture(const Component::Texture & _Data, bool) :
+  m_Destination(GetDestination(_Data.Index, _Data.Destination, _Data.Name)),
+  m_Format(GL_RGBA),
+  m_TextureId(BuildTexture()),
+  m_IsMapping(_Data.IsMapping),
+  m_Capacity(_Data.Capacity),
+  m_Target(GL_TEXTURE_2D_ARRAY)
+{
+  Bind();
+  glTexStorage3D(GL_TEXTURE_2D_ARRAY, _Data.IsUsingMipmapping ? 8 : 1, GL_RGBA8,
+    _Data.Width, _Data.Height, _Data.DataCount);
+  glTexSubImage3D(GL_TEXTURE_2D_ARRAY, 0, 0, 0, 0, _Data.Width, _Data.Height,
+    _Data.DataCount, m_Format, GL_UNSIGNED_BYTE, ::std::data(_Data.Data));
+  if (_Data.IsUsingMipmapping) glGenerateMipmap(GL_TEXTURE_2D_ARRAY);
+  Bind(false);
+
+  const auto Error = glGetError();
+  if (Error != GL_NO_ERROR)
+  {
+    throw STD_EXCEPTION << "Create texture error: " << Error;
+  }
 }
 
 /*virtual*/ OpenGLCommon::Texture::~Texture(void) noexcept
@@ -33,7 +52,7 @@ OpenGLCommon::Texture::Texture(const Component::Texture & _Data) :
 // cppcheck-suppress unusedFunction
 void OpenGLCommon::Texture::Bind(const bool _IsActivate) noexcept
 {
-  glBindTexture(GL_TEXTURE_2D, _IsActivate ? m_TextureId : 0);
+  glBindTexture(m_Target, _IsActivate ? m_TextureId : 0);
 }
 
 void OpenGLCommon::Texture::MakeContent(
@@ -105,19 +124,17 @@ void OpenGLCommon::Texture::MakeContent(
   }
 }
 
-/*static*/ auto OpenGLCommon::Texture::GetDestination(
-  const Component::Texture & _TextureData) -> Destination_t
+/*static*/ auto OpenGLCommon::Texture::GetDestination(const int _Index,
+  const String_t & _Destination, const String_t & _Name) -> Destination_t
 {
-  if (_TextureData.Index >= 0)
+  if (_Index >= 0)
   {
     using namespace ::alicorn::extension::std;
 
-    const auto Name = 
-      string_cast<::std::string, Encoding::Ascii128>(_TextureData.Name);
-    return { _TextureData.Index, Name };
+    return { _Index, string_cast<::std::string, Encoding::Ascii128>(_Name) };
   }
 
-  if (_TextureData.Destination == uT("diffuse")) return { 0, "TexDiffuse" };
+  if (_Destination == uT("diffuse")) return { 0, "TexDiffuse" };
 
   static const ::std::vector<::std::pair<String_t, const char *>> Destinations =
   {
@@ -132,12 +149,12 @@ void OpenGLCommon::Texture::MakeContent(
   const auto itValue = ::std::find_if(Destinations.cbegin(),
     Destinations.cend(), [&](const ::std::pair<String_t, const char *> & _Dest)
   {
-    return (_TextureData.Destination == _Dest.first);
+    return (_Destination == _Dest.first);
   });
   if (itValue == Destinations.cend())
   {
     throw STD_EXCEPTION << "Unexpected destination texture: " <<
-      _TextureData.Destination << uT(" [id=???") /*<< _pComponent->Id*/ << uT("].");
+      _Destination << uT(" [id=???") /*<< _pComponent->Id*/ << uT("].");
   }
 
   const auto IndexDestination = 
@@ -157,8 +174,4 @@ void OpenGLCommon::Texture::MakeContent(
   return TextureId;
 }
 
-} // namespace renderer
-
-} // namespace api
-
-} // namespace covellite
+} // namespace covellite::api::renderer

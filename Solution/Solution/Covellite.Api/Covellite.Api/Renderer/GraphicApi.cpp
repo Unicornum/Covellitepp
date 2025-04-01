@@ -30,6 +30,8 @@ GraphicApi::GraphicApi(void) :
       { return CreateState(_pComponent); } },
     { uT("Texture"), [=](const ComponentPtr_t & _pComponent)
       { return CreateTexture(_pComponent); } },
+    { uT("TextureArray"), [=](const ComponentPtr_t & _pComponent)
+      { return CreateTextureArray(_pComponent); } },
     { uT("Shader"), [=](const ComponentPtr_t & _pComponent)
       { return CreateShader(_pComponent); } },
     { uT("Buffer"), [=](const ComponentPtr_t & _pComponent)
