@@ -7,6 +7,16 @@
 *  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект \ref CovelliteApiPage : </td></tr></table>
 *  <table frame=void border=1 bordercolor=#FFFFFF cellpadding=5 cellspacing=0 width=98%><tr>
 *    <td width=10px></td>
+*    <td bgcolor=#B8CCE4 width=125px align=center> 03.04.2025 21:15 </td>
+*    <td bgcolor=#FFC0C0> fix: OpenGL: ошибка при замене в шейдере структуры пикселя на кастомную. </td>
+*  </tr></table>
+*  <table frame=void border=1 bordercolor=#FFFFFF cellpadding=5 cellspacing=0 width=98%><tr>
+*    <td width=10px></td>
+*    <td bgcolor=#B8CCE4 width=125px align=center> 01.04.2025 20:08 </td>
+*    <td bgcolor=#FFC0C0> fix: DirectX11: DXGI ERROR: IDXGISwapChain::Release: Swapchain Released while fullscreen... </td>
+*  </tr></table>
+*  <table frame=void border=1 bordercolor=#FFFFFF cellpadding=5 cellspacing=0 width=98%><tr>
+*    <td width=10px></td>
 *    <td bgcolor=#B8CCE4 width=125px align=center> 01.04.2025 12:58 </td>
 *    <td bgcolor=#FFC0C0> fix: DirectX11: предупреждение при старте программы из-за флага DXGI_SWAP_EFFECT_DISCARD. </td>
 *  </tr></table>

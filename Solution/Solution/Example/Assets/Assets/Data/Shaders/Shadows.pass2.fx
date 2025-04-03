@@ -6,8 +6,18 @@ struct Object_s
 
 COVELLITE_DECLARE_CONST_USER_BUFFER(Object_s, cbObject, oObject);
 
-#ifdef COVELLITE_SHADER_VERTEX /////////////////////////////////////////////////
+struct PixelShadows
+{
+  float4 ScreenPos        COVELLITE_INPUT_SEMANTIC(SV_POSITION);
+  float3 Normal           COVELLITE_INPUT_SEMANTIC(NORMAL);
+  mediump float2 TexCoord COVELLITE_INPUT_SEMANTIC(TEXCOORD0);
+  float4 WorldPos         COVELLITE_INPUT_SEMANTIC(POSITION0);
+};
 
+// Демонстрация замены стандартной структуры пикселя пользовательской
+#define Pixel PixelShadows
+
+#ifdef COVELLITE_SHADER_VERTEX /////////////////////////////////////////////////
 
 Pixel vsScene(Vertex _Value)
 {

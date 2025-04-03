@@ -636,16 +636,24 @@ class OpenGLCommonShader::Programs final
 
       GLint Result = GL_FALSE;
       glGetProgramiv(Id, GL_LINK_STATUS, &Result);
-      if (Result == GL_FALSE)
+      if (Result == GL_TRUE)
       {
+        Use = [=](void) { glUseProgram(Id); };
+      }
+      else
+      {
+        Use = [](void) {};
+
         char InfoLog[512] = { 0 };
         glGetProgramInfoLog(Id, sizeof(InfoLog), NULL, InfoLog);
 
-        throw STD_EXCEPTION << "Link program fail: " << InfoLog;
+        LOGGER(Warning) << "Link program fail: " << InfoLog;
       }
     }
 
-  public:
+    ::std::function<void(void)> Use;
+
+  private:
     const GLuint Id;
 
   public:
@@ -830,7 +838,7 @@ public:
       pProgram->Link(m_VsShaderId, m_PsShaderId);
     }
 
-    glUseProgram(pProgram->Id);
+    pProgram->Use();
   }
 
   void Clear(const GLuint _ShaderId)

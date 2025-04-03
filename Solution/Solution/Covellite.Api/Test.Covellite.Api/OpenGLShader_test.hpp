@@ -1771,11 +1771,19 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Shader_UsingProgram_DeletePixelShade
 // ************************************************************************** //
 TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Shader_UsingProgram_LinkProgramFail)
 {
+  using namespace ::alicorn::extension::std;
+
   const ::std::string ShaderData =
     "Pixel vs(Vertex _Value)\r\n"
     "float4 ps(Pixel _Value)\r\n";
 
   const ::std::string ErrorText = "Error1908291952";
+  const auto LinkFailLogText = uT("Warning: Link program fail: ") +
+    string_cast<String, Encoding::UTF8>(ErrorText);
+
+  using LoggerProxy_t = ::mock::alicorn::modules::logger::LoggerProxy;
+  LoggerProxy_t LoggerProxy;
+  LoggerProxy_t::GetInstance() = &LoggerProxy;
 
   using GLProxy_t = ::mock::GLProxy;
   GLProxy_t GLProxy;
@@ -1875,8 +1883,10 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Shader_UsingProgram_LinkProgramFail)
         .Times(1)
         .WillOnce(Return(ErrorText.c_str()));
 
-      EXPECT_STDEXCEPTION(_Render(),
-        (".*Link program fail: " + ErrorText).c_str());
+      EXPECT_CALL(LoggerProxy, ToLog(Eq(LinkFailLogText)))
+        .Times(1);
+
+      _Render();
     };
 
     EXPECT_CALL(GLProxy, CreateProgram())
@@ -8018,6 +8028,10 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Camera_Orthographic_DefaultPosition)
 
   InSequence Dummy;
 
+  EXPECT_CALL(GLProxy, GetProgramiv(_, _))
+    .Times(1)
+    .WillOnce(Return(GL_TRUE));
+
   EXPECT_CALL(GLProxy, UseProgram(_))
     .Times(1);
 
@@ -8173,6 +8187,10 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Camera_Orthographic)
   VsRender(); // Нужно, чтобы сформировалась шейдерная программа, иначе
               // не будет вызывана функция glUseProgram().
 
+  EXPECT_CALL(GLProxy, GetProgramiv(_, _))
+    .Times(1)
+    .WillOnce(Return(GL_TRUE));
+
   EXPECT_CALL(GLProxy, UseProgram(_))
     .Times(1);
 
@@ -8225,6 +8243,8 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Camera_Orthographic)
 // ************************************************************************** //
 TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Camera_Perspective)
 {
+  ::testing::DefaultValue<int>::Set(GL_TRUE);
+
   Tested::GetValue() = 1;
 
   using GLProxy_t = ::mock::GLProxy;
@@ -8388,6 +8408,8 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Camera_Perspective)
       .Times(1);
 
     PsRender(); // Передача матриц вида и проекции шейдеру
+
+    ::testing::DefaultValue<int>::Clear();
   };
 
   auto itCreator = IExample.GetCreators().find(uT("Camera"));

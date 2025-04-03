@@ -468,16 +468,20 @@ void glCompileShader(GLuint shader)
 void glGetProgramInfoLog(GLuint program, GLsizei maxLength, GLsizei *length,
   GLchar *infoLog)
 {
-  const auto * Log = GLProxy::GetInstance()->GetProgramInfoLog(
-    program, maxLength, length);
+  const auto * Log =
+    GLProxy::GetInstance()->GetProgramInfoLog(program, maxLength, length);
+  if (Log == nullptr) return;
+
   memcpy(infoLog, Log, ::std::min((::std::size_t)maxLength, strlen(Log) + 1));
 }
 
 void glGetShaderInfoLog(GLuint shader, GLsizei maxLength, GLsizei *length,
   GLchar *infoLog)
 {
-  const auto * Log = GLProxy::GetInstance()->GetShaderInfoLog(
-    shader, maxLength, length);
+  const auto * Log =
+    GLProxy::GetInstance()->GetShaderInfoLog(shader, maxLength, length);
+  if (Log == nullptr) return;
+
   memcpy(infoLog, Log, ::std::min((::std::size_t)maxLength, strlen(Log) + 1));
 }
 
