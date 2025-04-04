@@ -229,16 +229,16 @@ auto Simple3DObject::BuildShader(int _LightsFlags, bool _IsInstanceMode) -> Obje
       pVertexShader,
       Component_t::Make(
       {
-        { uT("id"), uT("Example.Buffer.Vertex.Cube") },
-        { uT("type"), uT("Buffer") },
-        { uT("content"), m_VertexData },
-      }),
-      Component_t::Make(
-      {
         { uT("id"), uT("Example.Shader.Pixel.Cube.PBR") },
         { uT("type"), uT("Shader") },
         { uT("content"), PixelShaderData },
         { uT("entry"), uT("psPbrSimple") },
+      }),
+      Component_t::Make(
+      {
+        { uT("id"), uT("Example.Buffer.Vertex.Cube") },
+        { uT("type"), uT("Buffer") },
+        { uT("content"), m_VertexData },
       }),
       Component_t::Make(
       {
@@ -271,16 +271,16 @@ auto Simple3DObject::BuildShader(int _LightsFlags, bool _IsInstanceMode) -> Obje
       pVertexShader,
       Component_t::Make(
       {
-        { uT("id"), uT("Example.Buffer.Vertex.Cube") },
-        { uT("type"), uT("Buffer") },
-        { uT("content"), m_VertexData },
-      }),
-      Component_t::Make(
-      {
         { uT("id"), uT("Example.Shader.Pixel.Cube.Textured") },
         { uT("type"), uT("Shader") },
         { uT("entry"), uT("psSimple") },
         { uT("content"), PixelShaderData },
+      }),
+      Component_t::Make(
+      {
+        { uT("id"), uT("Example.Buffer.Vertex.Cube") },
+        { uT("type"), uT("Buffer") },
+        { uT("content"), m_VertexData },
       }),
       Component_t::Make(
       {

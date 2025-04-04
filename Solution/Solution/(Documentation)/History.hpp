@@ -4,6 +4,12 @@
 *  
 *  История изменений
 *  =================
+*  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект \ref ExamplePage : </td></tr></table>
+*  <table frame=void border=1 bordercolor=#FFFFFF cellpadding=5 cellspacing=0 width=98%><tr>
+*    <td width=10px></td>
+*    <td bgcolor=#B8CCE4 width=125px align=center> 04.04.2025 20:50 </td>
+*    <td bgcolor=#FFC0C0> fix: OpenGL: у куба в PBR окне корректно рендерится только один треугольник. </td>
+*  </tr></table>
 *  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект \ref CovelliteApiPage : </td></tr></table>
 *  <table frame=void border=1 bordercolor=#FFFFFF cellpadding=5 cellspacing=0 width=98%><tr>
 *    <td width=10px></td>
