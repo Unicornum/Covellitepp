@@ -5,46 +5,21 @@
 *  Сборка Covellite++ SDK
 *  ----------------------
 *  
-*  [Скачать](https://github.com/Unicornum/Covellitepp/releases) последнюю
-*  версию Covellite++ SDK и распаковать архив в папку Solution\\Solution\\Externals.
-*  
-* \note
-*  Архив Covellite++ SDK содержит нужные ему версии сборок сторонних библиотек,
-*  поэтому для получения идентичной сборки для какой-либо версии нужно
-*  переключить репозиторий на tag этой версии и скачать готовую сборку
-*  Covellite++ SDK этой же версии.
+*  - В файле Solution\Directory.Build.targets найти нужную для сборки версию
+*  Alicorn SDK (макрос UNICORNUM_ALICORN_SDK_Vxxx).
+*  - [Скачать](https://github.com/Unicornum/Covellitepp/releases) Alicorn SDK
+*  этой версии и распаковать архив (рекомендуется структура папок вида
+*  C:\SDK\Alicorn\vX.X.X).
+*  - В этой папке выполнить cmd команду
+* \code
+setx UNICORNUM_ALICORN_SDK_Vxxx %CD%
+* \endcode
 *  
 *  Использование
-*  =============
+*  -------------
 *
-*  Настроенный [базовый каркас](https://github.com/Unicornum/Example.Covellitepp)
+*  Готовый [базовый каркас](https://github.com/Unicornum/Example.Covellitepp)
 *  простейшего приложения, использующего Covellite++ SDK.
 *
-*  Создание базового проекта приложения
-*  ------------------------------------
-*  
-* \copydoc CreateBaseProjectBriefPage
-*  
-* \subpage CreateBaseProjectPage
-*  
-*  Создание кода панелей GUI
-*  -------------------------
-*  
-* \copydoc CreateGuiCodeBriefPage
-*  
-* \subpage CreateGuiCodePage
-*  
-*  Отрисовка сцены из 2D объектов
-*  ------------------------------
-*  
-* \copydoc Draw2DSceneBriefPage
-*  
-* \subpage Draw2DScenePage
-*  
-*  Отрисовка сцены из 3D объектов
-*  ------------------------------
-*  
-* \copydoc Draw3DSceneBriefPage
-*  
-* \subpage Draw3DScenePage
+* \subpage UsingManualFrameworkPage
 */

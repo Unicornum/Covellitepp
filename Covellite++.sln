@@ -451,6 +451,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Manual", "Manual", "{22D2BC
 		Solution\Solution\(Documentation)\Manual\GuiCode.hpp = Solution\Solution\(Documentation)\Manual\GuiCode.hpp
 		Solution\Solution\(Documentation)\Manual\InputRussianLetters.hpp = Solution\Solution\(Documentation)\Manual\InputRussianLetters.hpp
 		Solution\Solution\(Documentation)\Manual\Manual.hpp = Solution\Solution\(Documentation)\Manual\Manual.hpp
+		Solution\Solution\(Documentation)\Manual\Manual.Using.hpp = Solution\Solution\(Documentation)\Manual\Manual.Using.hpp
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Test.EventListener", "Solution\Solution\Covellite.Gui\Test.Covellite.Gui\Test.EventListener\Test.EventListener.vcxproj", "{AFA055CB-4667-4848-9FF4-CA94F925AB8C}"
