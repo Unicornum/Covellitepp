@@ -30,7 +30,11 @@ Shadows::Shadows(const Another::Value _Shadows) :
 {
   using Mesh_t = model::Landscape::Mesh;
 
-  AddTexture("demo.stone.jpg");
+  AddTexture(
+    {
+      Path_t("demo.stone.sand.jpg"),
+      Path_t("demo.stone.jpg"),
+    });
 
   const auto TextureRatioXY = GetTexture(0).GetRatioXY();
 

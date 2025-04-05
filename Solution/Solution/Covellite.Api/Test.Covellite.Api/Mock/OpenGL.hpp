@@ -1,6 +1,7 @@
 
 #pragma once
 #include <glm/glm.force.hpp>
+#include <alicorn/std/vector.hpp>
 
 #define GL_NONE                           0
 #define GL_TRUE                           1
@@ -44,6 +45,7 @@
 #define GL_COLOR_ARRAY                    0x8076
 #define GL_TEXTURE_COORD_ARRAY            0x8078
 #define GL_TEXTURE_2D                     0x0DE1
+#define GL_TEXTURE_2D_ARRAY               0x8C1A
 #define GL_TRIANGLES                      0x0004
 #define GL_TEXTURE_MAG_FILTER             0x2800
 #define GL_TEXTURE_MIN_FILTER             0x2801
@@ -53,6 +55,7 @@
 #define GL_TEXTURE_WRAP_T                 0x2803
 #define GL_REPEAT                         0x2901
 #define GL_RGBA                           0x1908
+#define GL_RGBA8                          0x8058
 #define GL_SCISSOR_TEST                   0x0C11
 #define GL_VIEWPORT                       0x0BA2
 #define GL_MODELVIEW_MATRIX               0x0BA6
@@ -179,6 +182,9 @@ public:
   MOCK_METHOD3(TexParameteri, void (GLenum, GLenum, GLfixed));
   MOCK_METHOD9(TexImage2D, void (GLenum, GLint, GLint, GLsizei, GLsizei, GLint, 
     GLenum, GLenum, ::std::vector<uint8_t>));
+  MOCK_METHOD6(TexStorage3D, void(GLenum, GLsizei, GLenum, GLsizei, GLsizei, GLsizei));
+  MOCK_METHOD7(TexSubImage3D_1, void(GLenum, GLint, GLint, GLint, GLint, GLsizei, GLsizei));
+  MOCK_METHOD4(TexSubImage3D_2, void(GLsizei, GLenum, GLenum, ::std::vector<uint8_t>));
   MOCK_METHOD2(DeleteTextures, void(GLsizei, GLuint));
   MOCK_METHOD2(BlendFunc, void(GLenum, GLenum));
   MOCK_METHOD4(Viewport, void (GLint, GLint, GLsizei, GLsizei));
@@ -770,6 +776,42 @@ void glTexImage2D(GLenum _Param1, GLint _Param2, GLint _Param3, GLsizei _Param4,
     _Param5, _Param6, _Param7, _Param8, Data);
 }
 
+void glTexStorage3D(GLenum _Param1, GLsizei _Param2, GLenum _Param3,
+  GLsizei _Param4, GLsizei _Param5, GLsizei _Param6)
+{
+  GLProxy::GetInstance()->TexStorage3D(
+    _Param1, _Param2, _Param3, _Param4, _Param5, _Param6);
+}
+
+void glTexSubImage3D(GLenum _Param1, GLint _Param2, GLint _Param3, GLint _Param4,
+  GLint _Param5, GLsizei _Param6, GLsizei _Param7, GLsizei _Param8, GLenum _Param9,
+  GLenum _Param10, const void * _Param11)
+{
+  ::std::vector<uint8_t> Data;
+
+  if (_Param11 != nullptr)
+  {
+    const auto * pData = reinterpret_cast<const uint8_t *>(_Param11);
+
+    while (true)
+    {
+      using namespace ::alicorn::extension::std;
+
+      const auto Size = *reinterpret_cast<const size_t *>(pData);
+      const auto IsLastData = *reinterpret_cast<const bool *>(pData + sizeof(size_t));
+      Data += ::std::vector<uint8_t>{ pData, pData + Size };
+
+      pData += Size;
+      if (IsLastData) break;
+    }
+  }
+
+  GLProxy::GetInstance()->TexSubImage3D_1(
+    _Param1, _Param2, _Param3, _Param4, _Param5, _Param6, _Param7);
+  GLProxy::GetInstance()->TexSubImage3D_2(
+    _Param8, _Param9, _Param10, Data);
+}
+
 void glDeleteTextures(GLsizei _Param1, const GLuint * _Param2)
 {
   GLProxy::GetInstance()->DeleteTextures(_Param1, *_Param2);
@@ -938,10 +980,7 @@ void glFogi(GLenum pname, GLint param)
 
 } // namespace mock
 
-namespace covellite
-{
-
-namespace api
+namespace covellite::api
 {
 
 using ::mock::GLenum;
@@ -985,6 +1024,8 @@ using ::mock::glDrawElements;
 using ::mock::glGenTextures;
 using ::mock::glTexParameteri;
 using ::mock::glTexImage2D;
+using ::mock::glTexStorage3D;
+using ::mock::glTexSubImage3D;
 using ::mock::glDeleteTextures;
 using ::mock::glBlendFunc;
 using ::mock::glViewport;
@@ -1052,6 +1093,4 @@ using ::mock::glDrawBuffers;
 using ::mock::glGenerateMipmap;
 using ::mock::glReadPixels;
 
-} // namespace api
-
-} // namespace covellite
+} // namespace covellite::api

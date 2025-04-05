@@ -5820,7 +5820,7 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Shader_Compile_Fail)
     .WillOnce(Return(0));
 
   EXPECT_STDEXCEPTION(itCreator->second(pShader),
-    (".+\\.cpp\\([0-9]+\\): Failed: -2147467259 \\[header line: 163, " +
+    (".+\\.cpp\\([0-9]+\\): Failed: -2147467259 \\[header line: 172, " +
       ::std::string{ Error } +"\\]\\.").c_str());
 }
 

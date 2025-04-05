@@ -22,9 +22,9 @@ public:
 public:
   void Bind(const bool = true) noexcept;
   void MakeContent(const GLsizei, const GLsizei, const GLvoid *);
+  static Destination_t GetDestination(const int, const String_t &, const String_t &);
 
 protected:
-  static Destination_t GetDestination(const Component::Texture &);
   static GLint GetFormat(const String_t &);
   static GLuint BuildTexture(void) noexcept;
 
@@ -35,10 +35,12 @@ public:
   const GLuint        m_TextureId;
   const bool          m_IsMapping;
   const GLenum        m_Capacity;
-  const uint8_t Align[7] = { 0 };
+  const GLenum        m_Target;
+  const uint8_t Align[3] = { 0 };
 
 public:
   explicit Texture(const Component::Texture &);
+  Texture(const Component::Texture &, bool /*_IsTextureArray*/);
   Texture(const Texture &) = delete;
   Texture(Texture &&) = delete;
   Texture & operator= (const Texture &) = delete;

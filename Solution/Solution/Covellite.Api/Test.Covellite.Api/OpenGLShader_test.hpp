@@ -19,7 +19,7 @@ namespace
 {
 
 // ************************************************************************** //
-TEST_F(OpenGLShader_test, /*DISABLED_*/Test_State_Sampler_Mipmapping)
+TEST_F(OpenGLShader_test, /*DISABLED_*/Test_State_Sampler_Texture_Mipmapping)
 {
   using GLProxy_t = ::mock::GLProxy;
   GLProxy_t GLProxy;
@@ -70,6 +70,63 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_State_Sampler_Mipmapping)
     .Times(1);
 
   EXPECT_CALL(GLProxy, TexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT))
+    .Times(1);
+
+  TextureRender();
+}
+
+// ************************************************************************** //
+TEST_F(OpenGLShader_test, /*DISABLED_*/Test_State_Sampler_TextureArray_Mipmapping)
+{
+  using GLProxy_t = ::mock::GLProxy;
+  GLProxy_t GLProxy;
+  GLProxy_t::GetInstance() = &GLProxy;
+
+  const Tested_t Example{ Data_t{} };
+  const ITested_t & IExample = Example;
+
+  auto itStateCreator = IExample.GetCreators().find(uT("State"));
+  ASSERT_NE(IExample.GetCreators().end(), itStateCreator);
+
+  auto itTextureCreator = IExample.GetCreators().find(uT("TextureArray"));
+  ASSERT_NE(IExample.GetCreators().end(), itTextureCreator);
+
+  auto SamplerRender = itStateCreator->second(Component_t::Make(
+    {
+      { uT("kind"), uT("Sampler") }
+    }));
+  ASSERT_NE(nullptr, SamplerRender);
+
+  auto TextureRender = itTextureCreator->second(Component_t::Make(
+    {
+      { uT("mipmapping"), true }
+    }));
+  ASSERT_NE(nullptr, TextureRender);
+
+  using namespace ::testing;
+
+  EXPECT_CALL(GLProxy, TexParameteri(_, _, _))
+    .Times(0);
+
+  SamplerRender();
+
+  InSequence Dummy;
+
+  EXPECT_CALL(GLProxy, BindTexture(GL_TEXTURE_2D_ARRAY, _))
+    .Times(1);
+
+  EXPECT_CALL(GLProxy, TexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER,
+    GL_LINEAR_MIPMAP_LINEAR))
+    .Times(1);
+
+  EXPECT_CALL(GLProxy, TexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER,
+    GL_LINEAR))
+    .Times(1);
+
+  EXPECT_CALL(GLProxy, TexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, GL_REPEAT))
+    .Times(1);
+
+  EXPECT_CALL(GLProxy, TexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, GL_REPEAT))
     .Times(1);
 
   TextureRender();
@@ -688,7 +745,7 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Shader_CompileFail)
       .Times(1);
 
     EXPECT_STDEXCEPTION(itCreator->second(_pShader),
-      (".*Compile shader fail \\[header line: 164\\]: " + ErrorText).c_str());
+      (".*Compile shader fail \\[header line: 173\\]: " + ErrorText).c_str());
   };
 
   {
@@ -6456,6 +6513,1168 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Texture_NoDeclaredInShader)
       TestCall(Component_t::Make({ { uT("service"), Object_t{ pData } } }),
         Source, Width, Height, i, Destinations[i].second);
     }
+  }
+}
+
+// ************************************************************************** //
+TEST_F(OpenGLShader_test, /*DISABLED_*/Test_TextureArray_Default)
+{
+  using GLProxy_t = ::mock::GLProxy;
+  GLProxy_t GLProxy;
+  GLProxy_t::GetInstance() = &GLProxy;
+
+  const Tested_t Example{ Data_t{} };
+  const ITested_t & IExample = Example;
+
+  auto itCreator = IExample.GetCreators().find(uT("TextureArray"));
+  ASSERT_NE(IExample.GetCreators().end(), itCreator);
+
+  const ::mock::GLuint TextureId = 1812181809;
+  const ::mock::GLint ProgramId = 1908221258;
+  const ::mock::GLint LocationId = 1908221259;
+
+  const auto TestCall = [&](const Component_t::ComponentPtr_t & _pTexture,
+    const ::std::vector<uint8_t> & _Source, const int _Width, const int _Height)
+  {
+    using namespace ::testing;
+
+    InSequence Dummy;
+
+    EXPECT_CALL(GLProxy, GenTextures(1))
+      .Times(1)
+      .WillOnce(Return(TextureId));
+
+    EXPECT_CALL(GLProxy, BindTexture(GL_TEXTURE_2D_ARRAY, TextureId))
+      .Times(1);
+
+    EXPECT_CALL(GLProxy, TexStorage3D(GL_TEXTURE_2D_ARRAY, 1, GL_RGBA8,
+      _Width, _Height, 1))
+      .Times(1);
+
+    EXPECT_CALL(GLProxy, TexSubImage3D_1(GL_TEXTURE_2D_ARRAY, 0, 0, 0, 0,
+      _Width, _Height))
+      .Times(1);
+
+    EXPECT_CALL(GLProxy, TexSubImage3D_2(1, GL_RGBA,
+      GL_UNSIGNED_BYTE, _Source))
+      .Times(1);
+
+    EXPECT_CALL(GLProxy, BindTexture(GL_TEXTURE_2D_ARRAY, 0))
+      .Times(1);
+
+    EXPECT_CALL(GLProxy, GetError())
+      .Times(1)
+      .WillOnce(Return(GL_NO_ERROR));
+
+    auto Render = itCreator->second(_pTexture);
+    ASSERT_NE(nullptr, Render);
+
+    EXPECT_CALL(GLProxy, ActiveTexture(GL_TEXTURE0))
+      .Times(1);
+
+    EXPECT_CALL(GLProxy, BindTexture(GL_TEXTURE_2D_ARRAY, TextureId))
+      .Times(1);
+
+    EXPECT_CALL(GLProxy, GetIntegerv(GL_CURRENT_PROGRAM))
+      .Times(1)
+      .WillOnce(Return(&ProgramId));
+
+    EXPECT_CALL(GLProxy, GetUniformLocation(ProgramId, Eq("TexDiffuse")))
+      .Times(1)
+      .WillOnce(Return(LocationId));
+
+    EXPECT_CALL(GLProxy, Uniform1i(LocationId, 0))
+      .Times(1);
+
+    Render();
+
+    EXPECT_CALL(GLProxy, DeleteTextures(1, TextureId))
+      .Times(1);
+  };
+
+  {
+    ::std::vector<uint8_t> Source =
+    {
+      0x20, 0x06, 0x15, 0x12, 0x28,
+      0x20, 0x06, 0x15, 0x12, 0x28,
+      0x20, 0x06, 0x15, 0x12, 0x28,
+      0x20, 0x06, 0x15, 0x12, 0x28,
+      0x20, 0x06, 0x15, 0x12, 0x28,
+      0x20, 0x06, 0x15, 0x12, 0x28,
+      0x20, 0x06, 0x15, 0x12, 0x28,
+      0x20, 0x06, 0x15, 0x12, 0x28,
+    };
+    IntroduceBufferSize(Source);
+
+    const int Width = 1812181807;
+    const int Height = 1812181808;
+
+    const auto pTexture = Component_t::Make(
+      {
+        { uT("content"), ::std::vector{ Source } },
+        { uT("width"), Width },
+        { uT("height"), Height },
+      });
+
+    TestCall(pTexture, Source, Width, Height);
+  }
+
+  {
+    ::std::vector<uint8_t> Source =
+    {
+      0x20, 0x06, 0x15, 0x12, 0x29,
+      0x20, 0x06, 0x15, 0x12, 0x29,
+      0x20, 0x06, 0x15, 0x12, 0x29,
+      0x25, 0x04, 0x07, 0x21, 0x03,
+      0x25, 0x04, 0x07, 0x21, 0x04,
+      0x25, 0x04, 0x07, 0x21, 0x05,
+      0x25, 0x04, 0x07, 0x21, 0x06
+    };
+    IntroduceBufferSize(Source);
+
+    const int Width = 1907251057;
+    const int Height = 1907251058;
+
+    const auto pData = Component_t::Make(
+      {
+        { uT("kind"), uT("TextureArray") },
+        { uT("content"), ::std::vector{ Source } },
+        { uT("width"), Width },
+        { uT("height"), Height },
+      });
+
+    TestCall(Component_t::Make({ { uT("service"), Object_t{ pData } } }),
+      Source, Width, Height);
+  }
+}
+
+// ************************************************************************** //
+TEST_F(OpenGLShader_test, /*DISABLED_*/Test_TextureArray_NameAndIndex)
+{
+  using GLProxy_t = ::mock::GLProxy;
+  GLProxy_t GLProxy;
+  GLProxy_t::GetInstance() = &GLProxy;
+
+  const Tested_t Example{ Data_t{} };
+  const ITested_t & IExample = Example;
+
+  auto itCreator = IExample.GetCreators().find(uT("TextureArray"));
+  ASSERT_NE(IExample.GetCreators().end(), itCreator);
+
+  const ::mock::GLuint TextureId = 1908221839;
+  const ::mock::GLint ProgramId = 1908221840;
+  const ::mock::GLint LocationId = 1908221841;
+
+  const auto TestCall = [&](
+    const Component_t::ComponentPtr_t & _pTexture,
+    const ::std::vector<uint8_t> & _Source,
+    const int _Width, const int _Height,
+    const ::std::size_t _Index,
+    const ::std::string & _TexName)
+  {
+    const auto Index = static_cast<::mock::GLint>(_Index);
+
+    using namespace ::testing;
+
+    InSequence Dummy;
+
+    EXPECT_CALL(GLProxy, GenTextures(1))
+      .Times(1)
+      .WillOnce(Return(TextureId));
+
+    EXPECT_CALL(GLProxy, BindTexture(GL_TEXTURE_2D_ARRAY, TextureId))
+      .Times(1);
+
+    EXPECT_CALL(GLProxy, TexStorage3D(GL_TEXTURE_2D_ARRAY, 1, GL_RGBA8,
+      _Width, _Height, 1))
+      .Times(1);
+
+    EXPECT_CALL(GLProxy, TexSubImage3D_1(GL_TEXTURE_2D_ARRAY, 0, 0, 0, 0,
+      _Width, _Height))
+      .Times(1);
+
+    EXPECT_CALL(GLProxy, TexSubImage3D_2(1, GL_RGBA,
+      GL_UNSIGNED_BYTE, _Source))
+      .Times(1);
+
+    EXPECT_CALL(GLProxy, BindTexture(GL_TEXTURE_2D_ARRAY, 0))
+      .Times(1);
+
+    EXPECT_CALL(GLProxy, GetError())
+      .Times(1)
+      .WillOnce(Return(GL_NO_ERROR));
+
+    auto Render = itCreator->second(_pTexture);
+    ASSERT_NE(nullptr, Render);
+
+    EXPECT_CALL(GLProxy, ActiveTexture(GL_TEXTURE0 + Index))
+      .Times(1);
+
+    EXPECT_CALL(GLProxy, BindTexture(GL_TEXTURE_2D_ARRAY, TextureId))
+      .Times(1);
+
+    EXPECT_CALL(GLProxy, GetIntegerv(GL_CURRENT_PROGRAM))
+      .Times(1)
+      .WillOnce(Return(&ProgramId));
+
+    EXPECT_CALL(GLProxy, GetUniformLocation(ProgramId, _TexName))
+      .Times(1)
+      .WillOnce(Return(LocationId));
+
+    EXPECT_CALL(GLProxy, GetUniformLocation(_, Eq("TexDiffuse")))
+      .Times(0);
+
+    EXPECT_CALL(GLProxy, Uniform1i(LocationId, Index))
+      .Times(1);
+
+    Render();
+
+    EXPECT_CALL(GLProxy, DeleteTextures(1, TextureId))
+      .Times(1);
+  };
+
+  const ::std::vector<::std::pair<String_t, ::std::string>> Names =
+  {
+    { uT("TexEnvironment"), "TexEnvironment" },
+    { uT("TexReflection"), "TexReflection" },
+    { uT("TexBaseColor"), "TexBaseColor" },
+  };
+
+  for (int Index = 0; Index < Names.size(); Index++)
+  {
+    ::std::vector<uint8_t> Source =
+    {
+      0x20, 0x06, 0x15, 0x12, 0x30,
+      0x20, 0x06, 0x15, 0x12, 0x30,
+      0x20, 0x06, 0x15, 0x12, 0x30,
+      0x20, 0x06, 0x15, 0x12, 0x30,
+      0x20, 0x06, 0x15, 0x12, 0x30,
+    };
+    IntroduceBufferSize(Source);
+
+    {
+      const int Width = 1908221843;
+      const int Height = 1908221844;
+
+      const auto pTexture = Component_t::Make(
+        {
+          { uT("content"), ::std::vector{ Source } },
+          { uT("width"), Width },
+          { uT("height"), Height },
+          { uT("name"), Names[Index].first },
+          { uT("index"), Index },
+        });
+
+      TestCall(pTexture,
+        Source, Width, Height, Index, Names[Index].second);
+    }
+
+    {
+      const int Width = 1908221845;
+      const int Height = 1908221847;
+
+      const auto pData = Component_t::Make(
+        {
+          { uT("kind"), uT("TextureArray") },
+          { uT("content"), ::std::vector{ Source } },
+          { uT("width"), Width },
+          { uT("height"), Height },
+          { uT("name"), Names[Index].first },
+          { uT("index"), Index },
+        });
+
+      TestCall(Component_t::Make({ { uT("service"), Object_t{ pData } } }),
+        Source, Width, Height, Index, Names[Index].second);
+    }
+
+    {
+      const int Width = 1908221843;
+      const int Height = 1908221844;
+
+      const auto pTexture = Component_t::Make(
+        {
+          { uT("content"), ::std::vector{ Source } },
+          { uT("width"), Width },
+          { uT("height"), Height },
+          { uT("name"), Names[Index].first },
+          { uT("index"), Index },
+          { uT("mipmapping"), false },
+        });
+
+      TestCall(pTexture,
+        Source, Width, Height, Index, Names[Index].second);
+    }
+
+    {
+      const int Width = 1908221845;
+      const int Height = 1908221847;
+
+      const auto pData = Component_t::Make(
+        {
+          { uT("kind"), uT("TextureArray") },
+          { uT("content"), ::std::vector{ Source } },
+          { uT("width"), Width },
+          { uT("height"), Height },
+          { uT("name"), Names[Index].first },
+          { uT("index"), Index },
+          { uT("mipmapping"), false },
+        });
+
+      TestCall(Component_t::Make({ { uT("service"), Object_t{ pData } } }),
+        Source, Width, Height, Index, Names[Index].second);
+    }
+
+    const ::std::vector<::std::pair<String_t, ::std::string>> Destinations =
+    {
+      { uT("albedo"),    "TexAlbedo" },
+      { uT("metalness"), "TexMetalness" },
+      { uT("roughness"), "TexRoughness" },
+      { uT("normal"),    "TexNormal" },
+      { uT("occlusion"), "TexOcclusion" },
+      //{ uT("depth"),     "TexDepth" }, // другой формат
+    };
+
+    for (::std::size_t i = 0; i < Destinations.size(); i++)
+    {
+      {
+        const int Width = 1908221843;
+        const int Height = 1908221844;
+
+        const auto pTexture = Component_t::Make(
+          {
+            { uT("content"), ::std::vector{ Source } },
+            { uT("width"), Width },
+            { uT("height"), Height },
+            { uT("name"), Names[Index].first },
+            { uT("index"), Index },
+            { uT("destination"), Destinations[i].first },
+          });
+
+        TestCall(pTexture,
+          Source, Width, Height, Index, Names[Index].second);
+      }
+
+      {
+        const int Width = 1908221845;
+        const int Height = 1908221847;
+
+        const auto pData = Component_t::Make(
+          {
+            { uT("kind"), uT("TextureArray") },
+            { uT("content"), ::std::vector{ Source } },
+            { uT("width"), Width },
+            { uT("height"), Height },
+            { uT("name"), Names[Index].first },
+            { uT("index"), Index },
+            { uT("destination"), Destinations[i].first },
+          });
+
+        TestCall(Component_t::Make({ { uT("service"), Object_t{ pData } } }),
+          Source, Width, Height, Index, Names[Index].second);
+      }
+
+      {
+        const int Width = 1908221843;
+        const int Height = 1908221844;
+
+        const auto pTexture = Component_t::Make(
+          {
+            { uT("content"), ::std::vector{ Source } },
+            { uT("width"), Width },
+            { uT("height"), Height },
+            { uT("name"), Names[Index].first },
+            { uT("index"), Index },
+            { uT("destination"), Destinations[i].first },
+            { uT("mipmapping"), false },
+          });
+
+        TestCall(pTexture,
+          Source, Width, Height, Index, Names[Index].second);
+      }
+
+      {
+        const int Width = 1908221845;
+        const int Height = 1908221847;
+
+        const auto pData = Component_t::Make(
+          {
+            { uT("kind"), uT("TextureArray") },
+            { uT("content"), ::std::vector{ Source } },
+            { uT("width"), Width },
+            { uT("height"), Height },
+            { uT("name"), Names[Index].first },
+            { uT("index"), Index },
+            { uT("destination"), Destinations[i].first },
+            { uT("mipmapping"), false },
+          });
+
+        TestCall(Component_t::Make({ { uT("service"), Object_t{ pData } } }),
+          Source, Width, Height, Index, Names[Index].second);
+      }
+    }
+  }
+}
+
+// ************************************************************************** //
+TEST_F(OpenGLShader_test, /*DISABLED_*/Test_TextureArray_Destination)
+{
+  using GLProxy_t = ::mock::GLProxy;
+  GLProxy_t GLProxy;
+  GLProxy_t::GetInstance() = &GLProxy;
+
+  const Tested_t Example{ Data_t{} };
+  const ITested_t & IExample = Example;
+
+  auto itCreator = IExample.GetCreators().find(uT("TextureArray"));
+  ASSERT_NE(IExample.GetCreators().end(), itCreator);
+
+  const ::mock::GLuint TextureId = 1908221839;
+  const ::mock::GLint ProgramId = 1908221840;
+  const ::mock::GLint LocationId = 1908221841;
+
+  const auto TestCall = [&](
+    const Component_t::ComponentPtr_t & _pTexture,
+    const ::std::vector<uint8_t> & _Source,
+    const int _Width, const int _Height,
+    const ::std::size_t _Index,
+    const ::std::string & _TexName)
+  {
+    const auto Index = static_cast<::mock::GLint>(_Index);
+
+    using namespace ::testing;
+
+    InSequence Dummy;
+
+    EXPECT_CALL(GLProxy, GenTextures(1))
+      .Times(1)
+      .WillOnce(Return(TextureId));
+
+    EXPECT_CALL(GLProxy, BindTexture(GL_TEXTURE_2D_ARRAY, TextureId))
+      .Times(1);
+
+    EXPECT_CALL(GLProxy, TexStorage3D(GL_TEXTURE_2D_ARRAY, 1, GL_RGBA8,
+      _Width, _Height, 1))
+      .Times(1);
+
+    EXPECT_CALL(GLProxy, TexSubImage3D_1(GL_TEXTURE_2D_ARRAY, 0, 0, 0, 0,
+      _Width, _Height))
+      .Times(1);
+
+    EXPECT_CALL(GLProxy, TexSubImage3D_2(1, GL_RGBA,
+      GL_UNSIGNED_BYTE, _Source))
+      .Times(1);
+
+    EXPECT_CALL(GLProxy, BindTexture(GL_TEXTURE_2D_ARRAY, 0))
+      .Times(1);
+
+    EXPECT_CALL(GLProxy, GetError())
+      .Times(1)
+      .WillOnce(Return(GL_NO_ERROR));
+
+    auto Render = itCreator->second(_pTexture);
+    ASSERT_NE(nullptr, Render);
+
+    EXPECT_CALL(GLProxy, ActiveTexture(GL_TEXTURE0 + Index))
+      .Times(1);
+
+    EXPECT_CALL(GLProxy, BindTexture(GL_TEXTURE_2D_ARRAY, TextureId))
+      .Times(1);
+
+    EXPECT_CALL(GLProxy, GetIntegerv(GL_CURRENT_PROGRAM))
+      .Times(1)
+      .WillOnce(Return(&ProgramId));
+
+    EXPECT_CALL(GLProxy, GetUniformLocation(ProgramId, _TexName))
+      .Times(1)
+      .WillOnce(Return(LocationId));
+
+    EXPECT_CALL(GLProxy, GetUniformLocation(_, Eq("TexDiffuse")))
+      .Times(0);
+
+    EXPECT_CALL(GLProxy, Uniform1i(LocationId, Index))
+      .Times(1);
+
+    Render();
+
+    EXPECT_CALL(GLProxy, DeleteTextures(1, TextureId))
+      .Times(1);
+  };
+
+  const ::std::vector<::std::pair<String_t, ::std::string>> Destinations =
+  {
+    { uT("albedo"),    "TexAlbedo" },
+    { uT("metalness"), "TexMetalness" },
+    { uT("roughness"), "TexRoughness" },
+    { uT("normal"),    "TexNormal" },
+    { uT("occlusion"), "TexOcclusion" },
+    //{ uT("depth"),     "TexDepth" }, // другой формат
+  };
+
+  ::std::vector<uint8_t> Source =
+  {
+    0x20, 0x06, 0x15, 0x12, 0x30,
+    0x20, 0x06, 0x15, 0x12, 0x30,
+    0x20, 0x06, 0x15, 0x12, 0x30,
+    0x20, 0x06, 0x15, 0x12, 0x30,
+    0x20, 0x06, 0x15, 0x12, 0x30,
+  };
+  IntroduceBufferSize(Source);
+
+  for (::std::size_t i = 0; i < Destinations.size(); i++)
+  {
+    {
+      const int Width = 1908221843;
+      const int Height = 1908221844;
+
+      const auto pTexture = Component_t::Make(
+        {
+          { uT("content"), ::std::vector{ Source } },
+          { uT("width"), Width },
+          { uT("height"), Height },
+          { uT("destination"), Destinations[i].first },
+        });
+
+      TestCall(pTexture,
+        Source, Width, Height, i, Destinations[i].second);
+    }
+
+    {
+      const int Width = 1908221845;
+      const int Height = 1908221847;
+
+      const auto pData = Component_t::Make(
+        {
+          { uT("kind"), uT("TextureArray") },
+          { uT("content"), ::std::vector{ Source } },
+          { uT("width"), Width },
+          { uT("height"), Height },
+          { uT("destination"), Destinations[i].first },
+        });
+
+      TestCall(Component_t::Make({ { uT("service"), Object_t{ pData } } }),
+        Source, Width, Height, i, Destinations[i].second);
+    }
+
+    {
+      const int Width = 1908221843;
+      const int Height = 1908221844;
+
+      const auto pTexture = Component_t::Make(
+        {
+          { uT("content"), ::std::vector{ Source } },
+          { uT("width"), Width },
+          { uT("height"), Height },
+          { uT("destination"), Destinations[i].first },
+          { uT("mipmapping"), false },
+        });
+
+      TestCall(pTexture,
+        Source, Width, Height, i, Destinations[i].second);
+    }
+
+    {
+      const int Width = 1908221845;
+      const int Height = 1908221847;
+
+      const auto pData = Component_t::Make(
+        {
+          { uT("kind"), uT("TextureArray") },
+          { uT("content"), ::std::vector{ Source } },
+          { uT("width"), Width },
+          { uT("height"), Height },
+          { uT("destination"), Destinations[i].first },
+          { uT("mipmapping"), false },
+        });
+
+      TestCall(Component_t::Make({ { uT("service"), Object_t{ pData } } }),
+        Source, Width, Height, i, Destinations[i].second);
+    }
+  }
+}
+
+// ************************************************************************** //
+TEST_F(OpenGLShader_test, /*DISABLED_*/Test_TextureArray_Mipmapping_NameAndIndex)
+{
+  using GLProxy_t = ::mock::GLProxy;
+  GLProxy_t GLProxy;
+  GLProxy_t::GetInstance() = &GLProxy;
+
+  const Tested_t Example{ Data_t{} };
+  const ITested_t & IExample = Example;
+
+  auto itCreator = IExample.GetCreators().find(uT("TextureArray"));
+  ASSERT_NE(IExample.GetCreators().end(), itCreator);
+
+  const ::mock::GLuint TextureId = 1908221839;
+  const ::mock::GLint ProgramId = 1908221840;
+  const ::mock::GLint LocationId = 1908221841;
+
+  const auto TestCall = [&](
+    const Component_t::ComponentPtr_t & _pTexture,
+    const ::std::vector<uint8_t> & _Source,
+    const int _Width, const int _Height,
+    const ::std::size_t _Index,
+    const ::std::string & _TexName)
+  {
+    const auto Index = static_cast<::mock::GLint>(_Index);
+
+    using namespace ::testing;
+
+    InSequence Dummy;
+
+    EXPECT_CALL(GLProxy, GenTextures(1))
+      .Times(1)
+      .WillOnce(Return(TextureId));
+
+    EXPECT_CALL(GLProxy, BindTexture(GL_TEXTURE_2D_ARRAY, TextureId))
+      .Times(1);
+
+    EXPECT_CALL(GLProxy, TexStorage3D(GL_TEXTURE_2D_ARRAY, 8, GL_RGBA8,
+      _Width, _Height, 1))
+      .Times(1);
+
+    EXPECT_CALL(GLProxy, TexSubImage3D_1(GL_TEXTURE_2D_ARRAY, 0, 0, 0, 0,
+      _Width, _Height))
+      .Times(1);
+
+    EXPECT_CALL(GLProxy, TexSubImage3D_2(1, GL_RGBA,
+      GL_UNSIGNED_BYTE, _Source))
+      .Times(1);
+
+    EXPECT_CALL(GLProxy, GenerateMipmap(GL_TEXTURE_2D_ARRAY))
+      .Times(1);
+
+    EXPECT_CALL(GLProxy, BindTexture(GL_TEXTURE_2D_ARRAY, 0))
+      .Times(1);
+
+    EXPECT_CALL(GLProxy, GetError())
+      .Times(1)
+      .WillOnce(Return(GL_NO_ERROR));
+
+    auto Render = itCreator->second(_pTexture);
+    ASSERT_NE(nullptr, Render);
+
+    EXPECT_CALL(GLProxy, ActiveTexture(GL_TEXTURE0 + Index))
+      .Times(1);
+
+    EXPECT_CALL(GLProxy, BindTexture(GL_TEXTURE_2D_ARRAY, TextureId))
+      .Times(1);
+
+    EXPECT_CALL(GLProxy, GetIntegerv(GL_CURRENT_PROGRAM))
+      .Times(1)
+      .WillOnce(Return(&ProgramId));
+
+    EXPECT_CALL(GLProxy, GetUniformLocation(ProgramId, _TexName))
+      .Times(1)
+      .WillOnce(Return(LocationId));
+
+    EXPECT_CALL(GLProxy, GetUniformLocation(_, Eq("TexDiffuse")))
+      .Times(0);
+
+    EXPECT_CALL(GLProxy, Uniform1i(LocationId, Index))
+      .Times(1);
+
+    Render();
+
+    EXPECT_CALL(GLProxy, DeleteTextures(1, TextureId))
+      .Times(1);
+  };
+
+  const ::std::vector<::std::pair<String_t, ::std::string>> Names =
+  {
+    { uT("TexEnvironment"), "TexEnvironment" },
+    { uT("TexReflection"), "TexReflection" },
+    { uT("TexBaseColor"), "TexBaseColor" },
+  };
+
+  for (int Index = 0; Index < Names.size(); Index++)
+  {
+    ::std::vector<uint8_t> Source =
+    {
+      0x20, 0x06, 0x15, 0x12, 0x31,
+      0x20, 0x06, 0x15, 0x12, 0x31,
+      0x20, 0x06, 0x15, 0x12, 0x31,
+      0x20, 0x06, 0x15, 0x12, 0x31,
+      0x20, 0x06, 0x15, 0x12, 0x31,
+    };
+    IntroduceBufferSize(Source);
+
+    {
+      const int Width = 1908221843;
+      const int Height = 1908221844;
+
+      const auto pTexture = Component_t::Make(
+        {
+          { uT("content"), ::std::vector{ Source } },
+          { uT("width"), Width },
+          { uT("height"), Height },
+          { uT("name"), Names[Index].first },
+          { uT("index"), Index },
+          { uT("mipmapping"), true },
+        });
+
+      TestCall(pTexture,
+        Source, Width, Height, Index, Names[Index].second);
+    }
+
+    {
+      const int Width = 1908221845;
+      const int Height = 1908221847;
+
+      const auto pData = Component_t::Make(
+        {
+          { uT("kind"), uT("TextureArray") },
+          { uT("content"), ::std::vector{ Source } },
+          { uT("width"), Width },
+          { uT("height"), Height },
+          { uT("name"), Names[Index].first },
+          { uT("index"), Index },
+          { uT("mipmapping"), true },
+        });
+
+      TestCall(Component_t::Make({ { uT("service"), Object_t{ pData } } }),
+        Source, Width, Height, Index, Names[Index].second);
+    }
+
+    const ::std::vector<::std::pair<String_t, ::std::string>> Destinations =
+    {
+      { uT("albedo"),    "TexAlbedo" },
+      { uT("metalness"), "TexMetalness" },
+      { uT("roughness"), "TexRoughness" },
+      { uT("normal"),    "TexNormal" },
+      { uT("occlusion"), "TexOcclusion" },
+    };
+
+    for (::std::size_t i = 0; i < Destinations.size(); i++)
+    {
+      {
+        const int Width = 1908221843;
+        const int Height = 1908221844;
+
+        const auto pTexture = Component_t::Make(
+          {
+            { uT("content"), ::std::vector{ Source } },
+            { uT("width"), Width },
+            { uT("height"), Height },
+            { uT("name"), Names[Index].first },
+            { uT("index"), Index },
+            { uT("destination"), Destinations[i].first },
+            { uT("mipmapping"), true },
+          });
+
+        TestCall(pTexture,
+          Source, Width, Height, Index, Names[Index].second);
+      }
+
+      {
+        const int Width = 1908221845;
+        const int Height = 1908221847;
+
+        const auto pData = Component_t::Make(
+          {
+            { uT("kind"), uT("TextureArray") },
+            { uT("content"), ::std::vector{ Source } },
+            { uT("width"), Width },
+            { uT("height"), Height },
+            { uT("name"), Names[Index].first },
+            { uT("index"), Index },
+            { uT("destination"), Destinations[i].first },
+            { uT("mipmapping"), true },
+          });
+
+        TestCall(Component_t::Make({ { uT("service"), Object_t{ pData } } }),
+          Source, Width, Height, Index, Names[Index].second);
+      }
+    }
+  }
+}
+
+// ************************************************************************** //
+TEST_F(OpenGLShader_test, /*DISABLED_*/Test_TextureArray_Mipmapping_Destination)
+{
+  using GLProxy_t = ::mock::GLProxy;
+  GLProxy_t GLProxy;
+  GLProxy_t::GetInstance() = &GLProxy;
+
+  const Tested_t Example{ Data_t{} };
+  const ITested_t & IExample = Example;
+
+  auto itCreator = IExample.GetCreators().find(uT("TextureArray"));
+  ASSERT_NE(IExample.GetCreators().end(), itCreator);
+
+  const ::mock::GLuint TextureId = 1908221839;
+  const ::mock::GLint ProgramId = 1908221840;
+  const ::mock::GLint LocationId = 1908221841;
+
+  const auto TestCall = [&](
+    const Component_t::ComponentPtr_t & _pTexture,
+    const ::std::vector<uint8_t> & _Source,
+    const int _Width, const int _Height,
+    const ::std::size_t _Index,
+    const ::std::string & _TexName)
+  {
+    const auto Index = static_cast<::mock::GLint>(_Index);
+
+    using namespace ::testing;
+
+    InSequence Dummy;
+
+    EXPECT_CALL(GLProxy, GenTextures(1))
+      .Times(1)
+      .WillOnce(Return(TextureId));
+
+    EXPECT_CALL(GLProxy, BindTexture(GL_TEXTURE_2D_ARRAY, TextureId))
+      .Times(1);
+
+    EXPECT_CALL(GLProxy, TexStorage3D(GL_TEXTURE_2D_ARRAY, 8, GL_RGBA8,
+      _Width, _Height, 1))
+      .Times(1);
+
+    EXPECT_CALL(GLProxy, TexSubImage3D_1(GL_TEXTURE_2D_ARRAY, 0, 0, 0, 0,
+      _Width, _Height))
+      .Times(1);
+
+    EXPECT_CALL(GLProxy, TexSubImage3D_2(1, GL_RGBA,
+      GL_UNSIGNED_BYTE, _Source))
+      .Times(1);
+
+    EXPECT_CALL(GLProxy, GenerateMipmap(GL_TEXTURE_2D_ARRAY))
+      .Times(1);
+
+    EXPECT_CALL(GLProxy, BindTexture(GL_TEXTURE_2D_ARRAY, 0))
+      .Times(1);
+
+    EXPECT_CALL(GLProxy, GetError())
+      .Times(1)
+      .WillOnce(Return(GL_NO_ERROR));
+
+    auto Render = itCreator->second(_pTexture);
+    ASSERT_NE(nullptr, Render);
+
+    EXPECT_CALL(GLProxy, ActiveTexture(GL_TEXTURE0 + Index))
+      .Times(1);
+
+    EXPECT_CALL(GLProxy, BindTexture(GL_TEXTURE_2D_ARRAY, TextureId))
+      .Times(1);
+
+    EXPECT_CALL(GLProxy, GetIntegerv(GL_CURRENT_PROGRAM))
+      .Times(1)
+      .WillOnce(Return(&ProgramId));
+
+    EXPECT_CALL(GLProxy, GetUniformLocation(ProgramId, _TexName))
+      .Times(1)
+      .WillOnce(Return(LocationId));
+
+    EXPECT_CALL(GLProxy, GetUniformLocation(_, Eq("TexDiffuse")))
+      .Times(0);
+
+    EXPECT_CALL(GLProxy, Uniform1i(LocationId, Index))
+      .Times(1);
+
+    Render();
+
+    EXPECT_CALL(GLProxy, DeleteTextures(1, TextureId))
+      .Times(1);
+  };
+
+  const ::std::vector<::std::pair<String_t, ::std::string>> Destinations =
+  {
+    { uT("albedo"),    "TexAlbedo" },
+    { uT("metalness"), "TexMetalness" },
+    { uT("roughness"), "TexRoughness" },
+    { uT("normal"),    "TexNormal" },
+    { uT("occlusion"), "TexOcclusion" },
+  };
+
+  ::std::vector<uint8_t> Source =
+  {
+    0x20, 0x06, 0x15, 0x12, 0x31,
+    0x20, 0x06, 0x15, 0x12, 0x31,
+    0x20, 0x06, 0x15, 0x12, 0x31,
+    0x20, 0x06, 0x15, 0x12, 0x31,
+    0x20, 0x06, 0x15, 0x12, 0x31,
+  };
+  IntroduceBufferSize(Source);
+
+  for (::std::size_t i = 0; i < Destinations.size(); i++)
+  {
+    {
+      const int Width = 1908221843;
+      const int Height = 1908221844;
+
+      const auto pTexture = Component_t::Make(
+        {
+          { uT("content"), ::std::vector{ Source } },
+          { uT("width"), Width },
+          { uT("height"), Height },
+          { uT("destination"), Destinations[i].first },
+          { uT("mipmapping"), true },
+        });
+
+      TestCall(pTexture,
+        Source, Width, Height, i, Destinations[i].second);
+    }
+
+    {
+      const int Width = 1908221845;
+      const int Height = 1908221847;
+
+      const auto pData = Component_t::Make(
+        {
+          { uT("kind"), uT("TextureArray") },
+          { uT("content"), ::std::vector{ Source } },
+          { uT("width"), Width },
+          { uT("height"), Height },
+          { uT("destination"), Destinations[i].first },
+          { uT("mipmapping"), true },
+        });
+
+      TestCall(Component_t::Make({ { uT("service"), Object_t{ pData } } }),
+        Source, Width, Height, i, Destinations[i].second);
+    }
+  }
+}
+
+// ************************************************************************** //
+TEST_F(OpenGLShader_test, /*DISABLED_*/Test_TextureArray_NoDeclaredInShader)
+{
+  using GLProxy_t = ::mock::GLProxy;
+  GLProxy_t GLProxy;
+  GLProxy_t::GetInstance() = &GLProxy;
+
+  const Tested_t Example{ Data_t{} };
+  const ITested_t & IExample = Example;
+
+  auto itCreator = IExample.GetCreators().find(uT("TextureArray"));
+  ASSERT_NE(IExample.GetCreators().end(), itCreator);
+
+  const ::mock::GLuint TextureId = 1908221839;
+
+  const auto TestCall = [&](
+    const Component_t::ComponentPtr_t & _pTexture,
+    const ::std::vector<uint8_t> & /*_Source*/,
+    const int /*_Width*/, const int /*_Height*/,
+    const ::std::size_t _Index,
+    const ::std::string & _TexName)
+  {
+    const auto Index = static_cast<::mock::GLint>(_Index);
+
+    using namespace ::testing;
+
+    InSequence Dummy;
+
+    EXPECT_CALL(GLProxy, GenTextures(1))
+      .Times(1)
+      .WillOnce(Return(TextureId));
+
+    auto Render = itCreator->second(_pTexture);
+    ASSERT_NE(nullptr, Render);
+
+    EXPECT_CALL(GLProxy, GetUniformLocation(_, _TexName))
+      .Times(1)
+      .WillOnce(Return(-1));
+
+    EXPECT_CALL(GLProxy, Uniform1i(_, _))
+      .Times(0);
+
+    Render();
+
+    EXPECT_CALL(GLProxy, DeleteTextures(1, TextureId))
+      .Times(1);
+  };
+
+  const ::std::vector<::std::pair<String_t, ::std::string>> Destinations =
+  {
+    { uT("albedo"),    "TexAlbedo" },
+    { uT("metalness"), "TexMetalness" },
+    { uT("roughness"), "TexRoughness" },
+    { uT("normal"),    "TexNormal" },
+    { uT("occlusion"), "TexOcclusion" },
+    { uT("depth"),     "TexDepth" },
+  };
+
+  ::std::vector<uint8_t> Source =
+  {
+    0x20, 0x06, 0x15, 0x12, 0x34,
+    0x20, 0x06, 0x15, 0x12, 0x34,
+    0x20, 0x06, 0x15, 0x12, 0x34,
+    0x20, 0x06, 0x15, 0x12, 0x34,
+    0x20, 0x06, 0x15, 0x12, 0x34,
+  };
+  IntroduceBufferSize(Source);
+
+  for (::std::size_t i = 0; i < Destinations.size(); i++)
+  {
+    {
+      const uint8_t * pSource = (uint8_t *)1908221842;
+      const int Width = 1908221843;
+      const int Height = 1908221844;
+
+      const auto pTexture = Component_t::Make(
+        {
+          { uT("content"), ::std::vector{ Source } },
+          { uT("width"), Width },
+          { uT("height"), Height },
+          { uT("destination"), Destinations[i].first },
+        });
+
+      TestCall(pTexture,
+        Source, Width, Height, i, Destinations[i].second);
+    }
+
+    {
+      const uint8_t * pSource = (uint8_t *)1908221846;
+      const int Width = 1908221845;
+      const int Height = 1908221847;
+
+      const auto pData = Component_t::Make(
+        {
+          { uT("kind"), uT("TextureArray") },
+          { uT("content"), ::std::vector{ Source } },
+          { uT("width"), Width },
+          { uT("height"), Height },
+          { uT("destination"), Destinations[i].first },
+        });
+
+      TestCall(Component_t::Make({ { uT("service"), Object_t{ pData } } }),
+        Source, Width, Height, i, Destinations[i].second);
+    }
+  }
+}
+
+// ************************************************************************** //
+TEST_F(OpenGLShader_test, /*DISABLED_*/Test_TextureArray_MultiTextureData)
+{
+  using namespace ::alicorn::extension::std;
+
+  using GLProxy_t = ::mock::GLProxy;
+  GLProxy_t GLProxy;
+  GLProxy_t::GetInstance() = &GLProxy;
+
+  const Tested_t Example{ Data_t{} };
+  const ITested_t & IExample = Example;
+
+  auto itCreator = IExample.GetCreators().find(uT("TextureArray"));
+  ASSERT_NE(IExample.GetCreators().end(), itCreator);
+
+  const ::mock::GLuint TextureId = 1812181809;
+  const ::mock::GLint ProgramId = 1908221258;
+  const ::mock::GLint LocationId = 1908221259;
+
+  const auto TestCall = [&](const Component_t::ComponentPtr_t & _pTexture,
+    const ::std::vector<uint8_t> & _Source, const size_t _ArrayCount,
+    const int _Width, const int _Height)
+  {
+    using namespace ::testing;
+
+    InSequence Dummy;
+
+    EXPECT_CALL(GLProxy, GenTextures(1))
+      .Times(1)
+      .WillOnce(Return(TextureId));
+
+    EXPECT_CALL(GLProxy, BindTexture(_, _))
+      .Times(1);
+
+    EXPECT_CALL(GLProxy, TexStorage3D(_, _, _, _, _, _ArrayCount))
+      .Times(1);
+
+    EXPECT_CALL(GLProxy, TexSubImage3D_1(_, 0, 0, 0, 0, _, _))
+      .Times(1);
+
+    EXPECT_CALL(GLProxy, TexSubImage3D_2(_ArrayCount, _, _, _Source))
+      .Times(1);
+
+    EXPECT_CALL(GLProxy, BindTexture(_, 0))
+      .Times(1);
+
+    EXPECT_CALL(GLProxy, GetError())
+      .Times(1)
+      .WillOnce(Return(GL_NO_ERROR));
+
+    auto Render = itCreator->second(_pTexture);
+    ASSERT_NE(nullptr, Render);
+  };
+
+  {
+    ::std::vector<uint8_t> Source1 =
+    {
+      0x20, 0x06, 0x15, 0x12, 0x28,
+      0x20, 0x06, 0x15, 0x12, 0x28,
+      0x20, 0x06, 0x15, 0x12, 0x28,
+      0x20, 0x06, 0x15, 0x12, 0x28,
+      0x20, 0x06, 0x15, 0x12, 0x28,
+    };
+    IntroduceBufferSize(Source1, false);
+
+    ::std::vector<uint8_t> Source2 =
+    {
+      0x20, 0x06, 0x15, 0x12, 0x28,
+      0x20, 0x06, 0x15, 0x12, 0x28,
+      0x20, 0x06, 0x15, 0x12, 0x28,
+      0x20, 0x06, 0x15, 0x12, 0x28,
+      0x20, 0x06, 0x15, 0x12, 0x28,
+      0x20, 0x06, 0x15, 0x12, 0x28,
+    };
+    IntroduceBufferSize(Source2, false);
+
+    ::std::vector<uint8_t> Source3 =
+    {
+      0x20, 0x06, 0x15, 0x12, 0x28,
+      0x20, 0x06, 0x15, 0x12, 0x28,
+      0x20, 0x06, 0x15, 0x12, 0x28,
+      0x20, 0x06, 0x15, 0x12, 0x28,
+      0x20, 0x06, 0x15, 0x12, 0x28,
+      0x20, 0x06, 0x15, 0x12, 0x28,
+      0x20, 0x06, 0x15, 0x12, 0x28,
+      0x20, 0x06, 0x15, 0x12, 0x28,
+    };
+    IntroduceBufferSize(Source3);
+
+    const int Width = 1812181807;
+    const int Height = 1812181808;
+
+    const auto pTexture = Component_t::Make(
+      {
+        { uT("content"), ::std::vector{ Source1, Source2, Source3 } },
+        { uT("width"), Width },
+        { uT("height"), Height },
+      });
+
+    TestCall(pTexture, Source1 + Source2 + Source3, 3, Width, Height);
+  }
+
+  {
+    ::std::vector<uint8_t> Source1 =
+    {
+      0x20, 0x06, 0x15, 0x12, 0x29,
+      0x20, 0x06, 0x15, 0x12, 0x29,
+      0x20, 0x06, 0x15, 0x12, 0x29,
+    };
+    IntroduceBufferSize(Source1, false);
+
+    ::std::vector<uint8_t> Source2 =
+    {
+      0x25, 0x04, 0x07, 0x21, 0x03,
+      0x25, 0x04, 0x07, 0x21, 0x04,
+      0x25, 0x04, 0x07, 0x21, 0x05,
+      0x25, 0x04, 0x07, 0x21, 0x06
+    };
+    IntroduceBufferSize(Source2, true);
+
+    const int Width = 1907251057;
+    const int Height = 1907251058;
+
+    const auto pData = Component_t::Make(
+      {
+        { uT("kind"), uT("TextureArray") },
+        { uT("content"), ::std::vector{ Source1, Source2 } },
+        { uT("width"), Width },
+        { uT("height"), Height },
+      });
+
+    TestCall(Component_t::Make({ { uT("service"), Object_t{ pData } } }),
+      Source1 + Source2, 2, Width, Height);
   }
 }
 

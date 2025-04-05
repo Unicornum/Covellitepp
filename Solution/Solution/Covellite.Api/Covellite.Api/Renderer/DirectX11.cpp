@@ -322,7 +322,6 @@ auto DirectX11::CreateCamera(const ComponentPtr_t & _pComponent) -> Render_t /*o
     ViewPort.TopLeftX = 0;
     ViewPort.TopLeftY = 0;
     ::std::tie(ViewPort.Width, ViewPort.Height) = GetBkSurfaceSize();
-    //ViewPort.Height /= 2;
     ViewPort.MinDepth = 0.0f;
     ViewPort.MaxDepth = 1.0f;
     m_pImmediateContext->RSSetViewports(1, &ViewPort);
@@ -653,7 +652,7 @@ private:
     return pTexture2D;
   }
 
-private:
+public:
   static UINT GetDestinationIndex(const ComponentPtr_t & _pData)
   {
     const int Index = (*_pData)[uT("index")].Default(-1);
@@ -968,6 +967,47 @@ auto DirectX11::CreateTexture(const ComponentPtr_t & _pComponent) -> Render_t /*
 
     m_pImmediateContext->PSSetShaderResources(pTexture->m_iDestination, 1,
       pTexture->m_pShaderResourceView.GetAddressOf());
+  };
+}
+
+auto DirectX11::CreateTextureArray(const ComponentPtr_t & _pComponent) -> Render_t /*override*/
+{
+  using Data_t = ::alicorn::extension::std::memory::BinaryData_t;
+
+  const auto pTextureArrayData = CapturingServiceComponent::Get(_pComponent,
+    { { uT("TextureArray"), _pComponent } })[0];
+
+  const ::std::vector<Data_t> & ArrayData = (*pTextureArrayData)[uT("content")];
+  const int Width = (*pTextureArrayData)[uT("width")];
+  const int Height = (*pTextureArrayData)[uT("height")];
+  const bool IsUsingMipmapping = (*pTextureArrayData)[uT("mipmapping")];
+  const auto Destination = Texture::GetDestinationIndex(pTextureArrayData);
+
+  ::std::vector<::std::shared_ptr<Texture>> Textures;
+
+  for (const auto & TextureData : ArrayData)
+  {
+    auto pTexture = ::std::make_shared<Texture>(pTextureArrayData);
+    pTexture->MakeSource(m_pDevice, m_pImmediateContext,
+      static_cast<UINT>(Width), static_cast<UINT>(Height),
+      ::std::data(TextureData), IsUsingMipmapping);
+
+    Textures.push_back(pTexture);
+  }
+
+  return [=](void)
+  {
+    ::std::vector<ID3D11ShaderResourceView *> ShaderResourceViews(::std::size(Textures));
+
+    for (size_t i = 0; i < ::std::size(Textures); i++)
+    {
+      ShaderResourceViews[i] = Textures[i]->m_pShaderResourceView.Get();
+    }
+
+    m_pImmediateContext->PSSetShaderResources(
+      Destination,
+      ::std::size(ShaderResourceViews),
+      ::std::data(ShaderResourceViews));
   };
 }
 

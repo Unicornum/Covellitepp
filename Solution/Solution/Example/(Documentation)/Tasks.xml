@@ -1,10 +1,10 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Tasks>
   <Options>
-    <Width>1746</Width>
-    <Height>970</Height>
-    <X>623</X>
-    <Y>44</Y>
+    <Width>2054</Width>
+    <Height>988</Height>
+    <X>349</X>
+    <Y>39</Y>
   </Options>
   <Process>
     <Task1 Text="Вспомогательные." Type="Info" Version="None" ExternalProgram="Solution" Expanded="true" Completed="false" History="false" ParentTaskText="false">

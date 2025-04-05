@@ -623,6 +623,45 @@ auto OpenGLCommonShader::CreateTexture(const ComponentPtr_t & _pComponent) -> Re
   };
 }
 
+auto OpenGLCommonShader::CreateTextureArray(
+  const ComponentPtr_t & _pComponent) -> Render_t /*override*/
+{
+  const auto pTextureArrayData = CapturingServiceComponent::Get(_pComponent,
+    { { uT("TextureArray"), _pComponent } })[0];
+
+  const Component::Texture TextureData(*pTextureArrayData, uT("diffuse"));
+  auto pTexture = ::std::make_shared<Texture>(TextureData, true);
+
+  ::std::function<GLint(void)> GetTexMinFilter =
+    [=](void) { return m_TexParameters.MinFilter; } ;
+  if (TextureData.IsUsingMipmapping) GetTexMinFilter =
+    [](void) { return GL_LINEAR_MIPMAP_LINEAR; };
+
+  return [=](void)
+  {
+    const auto Index = pTexture->m_Destination.first;
+
+    glActiveTexture(GL_TEXTURE0 + Index);
+    pTexture->Bind();
+
+    glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MIN_FILTER, GetTexMinFilter());
+    glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_MAG_FILTER, m_TexParameters.MagFilter);
+    glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_S, m_TexParameters.WrapS);
+    glTexParameteri(GL_TEXTURE_2D_ARRAY, GL_TEXTURE_WRAP_T, m_TexParameters.WrapT);
+
+    const auto ProgramId = glGetProgramId();
+
+    const auto LocationId = glGetUniformLocation(ProgramId,
+      pTexture->m_Destination.second.c_str());
+
+    // -1 означает, что в шейдере такой текстуры нет, но glGetError() при этом
+    // не возвращает ошибку, поэтому просто игнорируем ситуацию.
+    if (LocationId == -1) return;
+
+    glUniform1i(LocationId, Index);
+  };
+}
+
 class OpenGLCommonShader::Programs final
 {
   class Program final

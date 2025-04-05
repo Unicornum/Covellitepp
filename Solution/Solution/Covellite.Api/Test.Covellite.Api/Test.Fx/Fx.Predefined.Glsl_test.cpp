@@ -54,6 +54,7 @@ TEST_F(FxPredefinedGlsl_test, /*DISABLED_*/Test_Predefined)
   //EXPECT_EQ(2, BaseIndex);
   //EXPECT_EQ(typeid(float), typeid(highp20));
   //EXPECT_EQ(typeid(int), typeid(highp21));
+# undef highp
 
   EXPECT_STREQ("ivec4", __TO_STR(int4));
   EXPECT_STREQ("vec4", __TO_STR(float4));
@@ -87,8 +88,12 @@ TEST_F(FxPredefinedGlsl_test, /*DISABLED_*/Test_Predefined)
 
   EXPECT_STREQ("uniform sampler2D name1909031230", 
     __TO_STR(COVELLITE_DECLARE_TEX2D(name1909031230, 0)));
+  EXPECT_STREQ("uniform highp sampler2DArray name2504061812",
+    __TO_STR(COVELLITE_DECLARE_TEX2D_ARRAY(name2504061812, 0, 0)));
   EXPECT_STREQ("texture(tex1909031232, uv1909031233)", 
     __TO_STR(COVELLITE_TEX2D_COLOR(tex1909031232, uv1909031233)));
+  EXPECT_STREQ("texture(tex2504061813, vec3(uv2504061815, i2504061814))",
+    __TO_STR(COVELLITE_TEX2D_ARRAY_COLOR(tex2504061813, i2504061814, uv2504061815)));
   EXPECT_STREQ("struct n1910131354 { vec4 Target[c1910131355]; }; "
     "out vec4 Covellite_MultiOutPixelColor[c1910131355]",
     __TO_STR(COVELLITE_DECLARE_MULTI_TARGET_STRUCTURE(n1910131354, c1910131355)));

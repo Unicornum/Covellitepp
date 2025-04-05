@@ -97,9 +97,14 @@ protected:
   using Data_t = Data;
 
   template<class T>
-  void IntroduceBufferSize(::std::vector<T> & _Data)
+  void IntroduceBufferSize(::std::vector<T> & _Data, const bool _IsLastData = true)
   {
     (*reinterpret_cast<size_t *>(_Data.data())) = _Data.size() * sizeof(T);
+
+    if (_Data.size() > 8)
+    {
+      (*reinterpret_cast<bool *>(_Data.data() + sizeof(size_t))) = _IsLastData;
+    }
   }
 
   template<class T>
