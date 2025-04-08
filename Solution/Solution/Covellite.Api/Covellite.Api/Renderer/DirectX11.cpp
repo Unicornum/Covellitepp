@@ -16,13 +16,7 @@
 #include "Component.hpp"
 #include "GraphicApi.Constants.hpp"
 
-namespace covellite
-{
-
-namespace api
-{
-
-namespace renderer
+namespace covellite::api::renderer
 {
 
 // ************************************************************************** //
@@ -972,40 +966,35 @@ auto DirectX11::CreateTexture(const ComponentPtr_t & _pComponent) -> Render_t /*
 
 auto DirectX11::CreateTextureArray(const ComponentPtr_t & _pComponent) -> Render_t /*override*/
 {
-  using Data_t = ::alicorn::extension::std::memory::BinaryData_t;
+  using Buffers_t = ::std::vector<::alicorn::extension::std::memory::BinaryData_t>;
 
   const auto pTextureArrayData = CapturingServiceComponent::Get(_pComponent,
     { { uT("TextureArray"), _pComponent } })[0];
 
-  const ::std::vector<Data_t> & ArrayData = (*pTextureArrayData)[uT("content")];
-  const int Width = (*pTextureArrayData)[uT("width")];
-  const int Height = (*pTextureArrayData)[uT("height")];
-  const bool IsUsingMipmapping = (*pTextureArrayData)[uT("mipmapping")];
-  const auto Destination = Texture::GetDestinationIndex(pTextureArrayData);
+  const Buffers_t ArrayData =
+    ::std::move((Buffers_t &)(*pTextureArrayData)[uT("content")]);
+
+  const Component::Texture TextureArrayData{ *pTextureArrayData, uT("albedo") };
 
   ::std::vector<::std::shared_ptr<Texture>> Textures;
+  ::std::vector<ID3D11ShaderResourceView *> ShaderResourceViews;
 
   for (const auto & TextureData : ArrayData)
   {
     auto pTexture = ::std::make_shared<Texture>(pTextureArrayData);
     pTexture->MakeSource(m_pDevice, m_pImmediateContext,
-      static_cast<UINT>(Width), static_cast<UINT>(Height),
-      ::std::data(TextureData), IsUsingMipmapping);
+      static_cast<UINT>(TextureArrayData.Width),
+      static_cast<UINT>(TextureArrayData.Height),
+      ::std::data(TextureData), TextureArrayData.IsUsingMipmapping);
 
     Textures.push_back(pTexture);
+    ShaderResourceViews.push_back(pTexture->m_pShaderResourceView.Get());
   }
 
   return [=](void)
   {
-    ::std::vector<ID3D11ShaderResourceView *> ShaderResourceViews(::std::size(Textures));
-
-    for (size_t i = 0; i < ::std::size(Textures); i++)
-    {
-      ShaderResourceViews[i] = Textures[i]->m_pShaderResourceView.Get();
-    }
-
     m_pImmediateContext->PSSetShaderResources(
-      Destination,
+      Textures[0]->m_iDestination,
       ::std::size(ShaderResourceViews),
       ::std::data(ShaderResourceViews));
   };
@@ -1582,8 +1571,5 @@ auto DirectX11::CreateBillboardTransformRender(const ComponentPtr_t & _pComponen
   };
 }
 
-} // namespace renderer
+} // namespace covellite::api::renderer
 
-} // namespace api
-
-} // namespace covellite

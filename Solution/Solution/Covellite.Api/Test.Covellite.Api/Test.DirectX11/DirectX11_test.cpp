@@ -154,6 +154,20 @@ protected:
     const ::std::size_t,
     const DXGI_FORMAT);
 
+  void TestTextureArrayCall(
+    const Component_t::ComponentPtr_t &,
+    const ::std::vector<::std::vector<uint8_t>> &,
+    const int, const int,
+    const ::std::size_t,
+    const DXGI_FORMAT);
+
+  void TestTextureArrayMipmappingCall(
+    const Component_t::ComponentPtr_t &,
+    const ::std::vector<::std::vector<uint8_t>> &,
+    const int, const int,
+    const ::std::size_t,
+    const DXGI_FORMAT);
+
   void TestBkSurfaceColorCall(
     const Component_t::ComponentPtr_t &,
     const int,
@@ -5735,6 +5749,1096 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Texture_ReadData_Destination)
     (*pData)[uT("entity")] = TextureWeakPtr_t{ pTexture };
 
     TestCall(pData, pTexture, i);
+  }
+}
+
+// ************************************************************************** //
+TEST_F(DirectX11_test, /*DISABLED_*/Test_TextureArray_CreateTexture2D_Fail)
+{
+  using DirectXProxy_t = ::mock::DirectX11::Proxy;
+  DirectXProxy_t DirectXProxy;
+  DirectXProxy_t::GetInstance() = &DirectXProxy;
+
+  ::mock::DirectX11::Device Device;
+
+  using namespace ::testing;
+
+  EXPECT_CALL(DirectXProxy, CreateDevice())
+    .Times(1)
+    .WillOnce(Return(&Device));
+
+  const Tested_t oExample{ Data_t{} };
+  const ITested_t & IExample = oExample;
+
+  auto itCreator = IExample.GetCreators().find(uT("TextureArray"));
+  ASSERT_NE(IExample.GetCreators().end(), itCreator);
+
+  {
+    InSequence Dummy;
+
+    EXPECT_CALL(Device, CreateTexture2D(_, _))
+      .Times(1);
+
+    EXPECT_CALL(Device, GetResult(Eq("CreateTexture2D")))
+      .Times(AtLeast(1))
+      .WillOnce(Return(E_FAIL));
+
+    const ::std::vector<uint8_t> BinaryData = { 0x25, 0x04, 0x08, 0x12, 0x52 };
+
+    const auto pComponent = Component_t::Make(
+      {
+        { uT("content"), ::std::vector{ BinaryData, BinaryData } },
+      });
+
+    EXPECT_THROW(itCreator->second(pComponent), ::std::exception);
+  }
+
+  {
+    InSequence Dummy;
+
+    EXPECT_CALL(Device, CreateTexture2D(_, _))
+      .Times(1);
+
+    EXPECT_CALL(Device, GetResult(Eq("CreateTexture2D")))
+      .Times(AtLeast(1))
+      .WillOnce(Return(E_FAIL));
+
+    const ::std::vector<uint8_t> BinaryData = { 0x25, 0x04, 0x08, 0x12, 0x52 };
+
+    const auto Service = Object_t 
+    {
+      Component_t::Make(
+      {
+        { uT("kind"), uT("TextureArray")},
+        { uT("content"), ::std::vector{ BinaryData, BinaryData } },
+      })
+    };
+
+    const auto pComponent = Component_t::Make({ { uT("service"), Service } });
+
+    EXPECT_THROW(itCreator->second(pComponent), ::std::exception);
+  }
+
+  {
+    InSequence Dummy;
+
+    EXPECT_CALL(Device, CreateTexture2D(_, _))
+      .Times(1);
+
+    EXPECT_CALL(Device, GetResult(Eq("CreateTexture2D")))
+      .Times(AtLeast(1))
+      .WillOnce(Return(S_OK));
+
+    EXPECT_CALL(Device, GetResult(_))
+      .Times(AtLeast(1))
+      .WillOnce(Return(S_OK));
+
+    EXPECT_CALL(Device, CreateTexture2D(_, _))
+      .Times(1);
+
+    EXPECT_CALL(Device, GetResult(Eq("CreateTexture2D")))
+      .Times(AtLeast(1))
+      .WillOnce(Return(E_FAIL));
+
+    const ::std::vector<uint8_t> BinaryData = { 0x25, 0x04, 0x08, 0x12, 0x52 };
+
+    const auto pComponent = Component_t::Make(
+      {
+        { uT("content"), ::std::vector{ BinaryData, BinaryData } },
+      });
+
+    EXPECT_THROW(itCreator->second(pComponent), ::std::exception);
+  }
+
+  {
+    InSequence Dummy;
+
+    EXPECT_CALL(Device, CreateTexture2D(_, _))
+      .Times(1);
+
+    EXPECT_CALL(Device, GetResult(Eq("CreateTexture2D")))
+      .Times(AtLeast(1))
+      .WillOnce(Return(S_OK));
+
+    EXPECT_CALL(Device, GetResult(_))
+      .Times(AtLeast(1))
+      .WillOnce(Return(S_OK));
+
+    EXPECT_CALL(Device, CreateTexture2D(_, _))
+      .Times(1);
+
+    EXPECT_CALL(Device, GetResult(Eq("CreateTexture2D")))
+      .Times(AtLeast(1))
+      .WillOnce(Return(E_FAIL));
+
+    const ::std::vector<uint8_t> BinaryData = { 0x25, 0x04, 0x08, 0x12, 0x52 };
+
+    const auto Service = Object_t
+    {
+      Component_t::Make(
+      {
+        { uT("kind"), uT("TextureArray")},
+        { uT("content"), ::std::vector{ BinaryData, BinaryData } },
+      })
+    };
+
+    const auto pComponent = Component_t::Make({ { uT("service"), Service } });
+
+    EXPECT_THROW(itCreator->second(pComponent), ::std::exception);
+  }
+
+}
+
+// ************************************************************************** //
+TEST_F(DirectX11_test, /*DISABLED_*/Test_TextureArray_CreateShaderResourceView_Fail_1)
+{
+  using DirectXProxy_t = ::mock::DirectX11::Proxy;
+  DirectXProxy_t DirectXProxy;
+  DirectXProxy_t::GetInstance() = &DirectXProxy;
+
+  ::mock::DirectX11::Device Device;
+  ::mock::DirectX11::Texture2D Texture2D;
+
+  using namespace ::testing;
+
+  EXPECT_CALL(DirectXProxy, CreateDevice())
+    .Times(1)
+    .WillOnce(Return(&Device));
+
+  const Tested_t oExample{ Data_t{} };
+  const ITested_t & IExample = oExample;
+
+  auto itCreator = IExample.GetCreators().find(uT("TextureArray"));
+  ASSERT_NE(IExample.GetCreators().end(), itCreator);
+
+  {
+    InSequence Dummy;
+
+    EXPECT_CALL(Device, CreateTexture2D(_, _))
+      .Times(1)
+      .WillOnce(Return(&Texture2D));
+
+    EXPECT_CALL(Device, GetResult(Eq("CreateTexture2D")))
+      .Times(1);
+
+    EXPECT_CALL(Device, CreateShaderResourceView(_, _))
+      .Times(1)
+      .WillOnce(Return(nullptr));
+
+    EXPECT_CALL(Device, GetResult(Eq("CreateShaderResourceView")))
+      .Times(1)
+      .WillOnce(Return(E_FAIL));
+
+    EXPECT_CALL(Texture2D, Release())
+      .Times(1);
+
+    const ::std::vector<uint8_t> BinaryData = { 0x25, 0x04, 0x08, 0x12, 0x52 };
+
+    const auto pComponent = Component_t::Make(
+      {
+        { uT("content"), ::std::vector{ BinaryData, BinaryData } },
+      });
+
+    EXPECT_THROW(itCreator->second(pComponent), ::std::exception);
+  }
+
+  {
+    InSequence Dummy;
+
+    EXPECT_CALL(Device, CreateTexture2D(_, _))
+      .Times(1)
+      .WillOnce(Return(&Texture2D));
+
+    EXPECT_CALL(Device, GetResult(Eq("CreateTexture2D")))
+      .Times(1);
+
+    EXPECT_CALL(Device, CreateShaderResourceView(_, _))
+      .Times(1)
+      .WillOnce(Return(nullptr));
+
+    EXPECT_CALL(Device, GetResult(Eq("CreateShaderResourceView")))
+      .Times(1)
+      .WillOnce(Return(E_FAIL));
+
+    EXPECT_CALL(Texture2D, Release())
+      .Times(1);
+
+    const ::std::vector<uint8_t> BinaryData = { 0x25, 0x04, 0x08, 0x12, 0x52 };
+
+    const auto Service = Object_t
+    {
+      Component_t::Make(
+      {
+        { uT("kind"), uT("TextureArray")},
+        { uT("content"), ::std::vector{ BinaryData, BinaryData } },
+      })
+    };
+
+    const auto pComponent = Component_t::Make({ { uT("service"), Service } });
+
+    EXPECT_THROW(itCreator->second(pComponent), ::std::exception);
+  }
+}
+
+// ************************************************************************** //
+TEST_F(DirectX11_test, /*DISABLED_*/Test_TextureArray_CreateShaderResourceView_Fail_2)
+{
+  using DirectXProxy_t = ::mock::DirectX11::Proxy;
+  DirectXProxy_t DirectXProxy;
+  DirectXProxy_t::GetInstance() = &DirectXProxy;
+
+  ::mock::DirectX11::Device Device;
+  ::mock::DirectX11::Texture2D Texture2D;
+
+  using namespace ::testing;
+
+  EXPECT_CALL(DirectXProxy, CreateDevice())
+    .Times(1)
+    .WillOnce(Return(&Device));
+
+  const Tested_t oExample{ Data_t{} };
+  const ITested_t & IExample = oExample;
+
+  auto itCreator = IExample.GetCreators().find(uT("TextureArray"));
+  ASSERT_NE(IExample.GetCreators().end(), itCreator);
+
+  {
+    InSequence Dummy;
+
+    EXPECT_CALL(Device, CreateTexture2D(_, _))
+      .Times(1)
+      .WillOnce(Return(&Texture2D));
+
+    EXPECT_CALL(Device, GetResult(Eq("CreateTexture2D")))
+      .Times(1);
+
+    EXPECT_CALL(Device, CreateShaderResourceView(_, _))
+      .Times(1)
+      .WillOnce(Return(nullptr));
+
+    EXPECT_CALL(Device, GetResult(Eq("CreateShaderResourceView")))
+      .Times(1)
+      .WillOnce(Return(S_OK));
+
+    EXPECT_CALL(Device, CreateTexture2D(_, _))
+      .Times(1)
+      .WillOnce(Return(&Texture2D));
+
+    EXPECT_CALL(Device, GetResult(Eq("CreateTexture2D")))
+      .Times(1);
+
+    EXPECT_CALL(Device, CreateShaderResourceView(_, _))
+      .Times(1)
+      .WillOnce(Return(nullptr));
+
+    EXPECT_CALL(Device, GetResult(Eq("CreateShaderResourceView")))
+      .Times(1)
+      .WillOnce(Return(E_FAIL));
+
+    EXPECT_CALL(Texture2D, Release())
+      .Times(2);
+
+    const ::std::vector<uint8_t> BinaryData = { 0x25, 0x04, 0x08, 0x12, 0x52 };
+
+    const auto pComponent = Component_t::Make(
+      {
+        { uT("content"), ::std::vector{ BinaryData, BinaryData } },
+      });
+
+    EXPECT_THROW(itCreator->second(pComponent), ::std::exception);
+  }
+
+  {
+    InSequence Dummy;
+
+    EXPECT_CALL(Device, CreateTexture2D(_, _))
+      .Times(1)
+      .WillOnce(Return(&Texture2D));
+
+    EXPECT_CALL(Device, GetResult(Eq("CreateTexture2D")))
+      .Times(1);
+
+    EXPECT_CALL(Device, CreateShaderResourceView(_, _))
+      .Times(1)
+      .WillOnce(Return(nullptr));
+
+    EXPECT_CALL(Device, GetResult(Eq("CreateShaderResourceView")))
+      .Times(1)
+      .WillOnce(Return(S_OK));
+
+    EXPECT_CALL(Device, CreateTexture2D(_, _))
+      .Times(1)
+      .WillOnce(Return(&Texture2D));
+
+    EXPECT_CALL(Device, GetResult(Eq("CreateTexture2D")))
+      .Times(1);
+
+    EXPECT_CALL(Device, CreateShaderResourceView(_, _))
+      .Times(1)
+      .WillOnce(Return(nullptr));
+
+    EXPECT_CALL(Device, GetResult(Eq("CreateShaderResourceView")))
+      .Times(1)
+      .WillOnce(Return(E_FAIL));
+
+    EXPECT_CALL(Texture2D, Release())
+      .Times(2);
+
+    const ::std::vector<uint8_t> BinaryData = { 0x25, 0x04, 0x08, 0x12, 0x52 };
+
+    const auto Service = Object_t
+    {
+      Component_t::Make(
+      {
+        { uT("kind"), uT("TextureArray")},
+        { uT("content"), ::std::vector{ BinaryData, BinaryData } },
+      })
+    };
+
+    const auto pComponent = Component_t::Make({ { uT("service"), Service } });
+
+    EXPECT_THROW(itCreator->second(pComponent), ::std::exception);
+  }
+}
+
+// ************************************************************************** //
+TEST_F(DirectX11_test, /*DISABLED_*/Test_TextureArray_UnknownDestination)
+{
+  using DirectXProxy_t = ::mock::DirectX11::Proxy;
+  DirectXProxy_t DirectXProxy;
+  DirectXProxy_t::GetInstance() = &DirectXProxy;
+
+  ::mock::DirectX11::Device Device;
+  const ::std::vector<uint8_t> BinaryData = { 0x25, 0x04, 0x08, 0x12, 0x52 };
+
+  using namespace ::testing;
+
+  EXPECT_CALL(DirectXProxy, CreateDevice())
+    .Times(1)
+    .WillOnce(Return(&Device));
+
+  const Tested_t oExample{ Data_t{} };
+  const ITested_t & IExample = oExample;
+
+  auto itCreator = IExample.GetCreators().find(uT("TextureArray"));
+  ASSERT_NE(IExample.GetCreators().end(), itCreator);
+
+  const auto TestCall = [&](const Component_t::ComponentPtr_t & _pTexture)
+  {
+    InSequence Dummy;
+
+    EXPECT_CALL(Device, CreateTexture2D(_, _))
+      .Times(0);
+
+    EXPECT_CALL(Device, CreateShaderResourceView(_, _))
+      .Times(0);
+
+    EXPECT_THROW(itCreator->second(_pTexture), ::std::exception);
+  };
+
+  {
+    const auto pComponent = Component_t::Make(
+      {
+        { uT("content"), ::std::vector{ BinaryData, BinaryData } },
+        { uT("destination"), uT("destination1907251219") },
+      });
+
+    TestCall(pComponent);
+  }
+
+  {
+    const Object_t Data = { Component_t::Make(
+      {
+        { uT("kind"), uT("TextureArray")},
+        { uT("content"), ::std::vector{ BinaryData, BinaryData } },
+        { uT("destination"), uT("destination1907251220") },
+      }) };
+
+    TestCall(Component_t::Make(
+      {
+        { uT("service"), Data }
+      }));
+  }
+}
+
+void DirectX11_test::TestTextureArrayCall(
+  const Component_t::ComponentPtr_t & _pTexture,
+  const ::std::vector<::std::vector<uint8_t>> & _BinaryData,
+  const int _Width, const int _Height,
+  const ::std::size_t _Slot,
+  const DXGI_FORMAT _Format)
+{
+  ::mock::DirectX11::Proxy DirectXProxy;
+  ::mock::DirectX11::Device Device;
+  ::mock::DirectX11::DeviceContext DeviceContext;
+
+  using namespace ::testing;
+
+  EXPECT_CALL(DirectXProxy, CreateDevice())
+    .Times(1)
+    .WillOnce(Return(&Device));
+
+  EXPECT_CALL(DirectXProxy, CreateDeviceContext())
+    .Times(1)
+    .WillOnce(Return(&DeviceContext));
+
+  const Tested_t oExample{ Data_t{} };
+  const ITested_t & IExample = oExample;
+
+  auto itCreator = IExample.GetCreators().find(uT("TextureArray"));
+  ASSERT_NE(IExample.GetCreators().end(), itCreator);
+
+  ::std::vector<::mock::DirectX11::Texture2D> Texture2D(::std::size(_BinaryData));
+  ::std::vector<::mock::DirectX11::ShaderResourceView> ShaderResourceView(::std::size(_BinaryData));
+  ::std::vector<ID3D11ShaderResourceView *> ShaderResourceViews;
+
+  D3D11_TEXTURE2D_DESC TextureDesc = { 0 };
+  TextureDesc.Width = _Width;
+  TextureDesc.Height = _Height;
+  TextureDesc.MipLevels = 1;
+  TextureDesc.ArraySize = 1;
+  TextureDesc.Format = _Format;
+  TextureDesc.Usage = D3D11_USAGE_DEFAULT;
+  TextureDesc.BindFlags = D3D11_BIND_SHADER_RESOURCE;
+  TextureDesc.MiscFlags = 0;
+  TextureDesc.SampleDesc.Count = 1;
+  TextureDesc.SampleDesc.Quality = 0;
+
+  D3D11_SHADER_RESOURCE_VIEW_DESC SrvDesc = { 0 };
+  SrvDesc.Format = _Format;
+  SrvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+  SrvDesc.Texture2D.MipLevels = 1;
+
+  {
+    InSequence Dummy;
+
+    for (size_t i = 0; i < ::std::size(_BinaryData); i++)
+    {
+      EXPECT_CALL(Device, CreateTexture2D(TextureDesc, D3D11_SUBRESOURCE_DATA{ 0 }))
+        .Times(1)
+        .WillOnce(Return(&Texture2D[i]));
+
+      EXPECT_CALL(DeviceContext, UpdateSubresource(&Texture2D[i], 0, nullptr,
+        _BinaryData[i], _Width * 4, 0))
+        .Times(1);
+
+      EXPECT_CALL(Device, CreateShaderResourceView(&Texture2D[i], SrvDesc))
+        .Times(1)
+        .WillOnce(Return(&ShaderResourceView[i]));
+
+      ShaderResourceViews.push_back(&ShaderResourceView[i]);
+    }
+  }
+
+  EXPECT_CALL(DeviceContext, GenerateMips(_))
+    .Times(0);
+
+  auto Render = itCreator->second(_pTexture);
+  ASSERT_NE(nullptr, Render);
+
+  EXPECT_CALL(DeviceContext, CopyResource(_, _))
+    .Times(0);
+
+  EXPECT_CALL(DeviceContext, PSSetShaderResources(Eq(_Slot), ShaderResourceViews))
+    .Times(1);
+
+  Render();
+
+  for (size_t i = 0; i < ::std::size(_BinaryData); i++)
+  {
+    EXPECT_CALL(ShaderResourceView[i], Release())
+      .Times(1);
+
+    EXPECT_CALL(Texture2D[i], Release())
+      .Times(1);
+  }
+};
+
+// ************************************************************************** //
+TEST_F(DirectX11_test, /*DISABLED_*/Test_TextureArray_Default)
+{
+  constexpr int Width = 7251149;
+  constexpr int Height = 1907251150;
+
+  {
+    const ::std::vector BinaryData =
+    {
+      ::std::vector<uint8_t>{ 0x19, 0x07, 0x25, 0x11, 0x51, 0x00 },
+      ::std::vector<uint8_t>{ 0x25, 0x04, 0x08, 0x16, 0x52, 0x00 }
+    };
+
+    const auto pComponent = Component_t::Make(
+      {
+        { uT("width"), Width },
+        { uT("height"), Height },
+        { uT("content"), BinaryData },
+      });
+
+    TestTextureArrayCall(pComponent, BinaryData,
+      Width, Height, 0, DXGI_FORMAT_R8G8B8A8_UNORM);
+  }
+
+  {
+    const ::std::vector BinaryData =
+    {
+      ::std::vector<uint8_t>{ 0x19, 0x07, 0x25, 0x11, 0x51, 0x00 },
+      ::std::vector<uint8_t>{ 0x25, 0x04, 0x08, 0x16, 0x52, 0x00 },
+      ::std::vector<uint8_t>{ 0x25, 0x04, 0x08, 0x16, 0x53, 0x00 }
+    };
+
+    const auto pComponent = Component_t::Make(
+      {
+        { uT("width"), Width },
+        { uT("height"), Height },
+        { uT("content"), BinaryData },
+        { uT("mipmapping"), false },
+      });
+
+    TestTextureArrayCall(pComponent, BinaryData,
+      Width, Height, 0, DXGI_FORMAT_R8G8B8A8_UNORM);
+  }
+
+  {
+    const ::std::vector BinaryData =
+    {
+      ::std::vector<uint8_t>{ 0x19, 0x07, 0x25, 0x11, 0x51, 0x00 },
+      ::std::vector<uint8_t>{ 0x25, 0x04, 0x08, 0x16, 0x52, 0x00 },
+      ::std::vector<uint8_t>{ 0x25, 0x04, 0x08, 0x16, 0x53, 0x00 },
+      ::std::vector<uint8_t>{ 0x25, 0x04, 0x08, 0x16, 0x54, 0x00 }
+    };
+
+    const Object_t TextureData = { Component_t::Make(
+      {
+        { uT("kind"), uT("TextureArray")},
+        { uT("width"), Width },
+        { uT("height"), Height },
+        { uT("content"), BinaryData },
+      }) };
+
+    TestTextureArrayCall(Component_t::Make({ { uT("service"), TextureData } }),
+      BinaryData, Width, Height, 0, DXGI_FORMAT_R8G8B8A8_UNORM);
+  }
+
+  {
+    const ::std::vector BinaryData =
+    {
+      ::std::vector<uint8_t>{ 0x19, 0x07, 0x25, 0x11, 0x51, 0x00 },
+      ::std::vector<uint8_t>{ 0x25, 0x04, 0x08, 0x16, 0x52, 0x00 },
+      ::std::vector<uint8_t>{ 0x25, 0x04, 0x08, 0x16, 0x53, 0x00 },
+      ::std::vector<uint8_t>{ 0x25, 0x04, 0x08, 0x16, 0x54, 0x00 },
+      ::std::vector<uint8_t>{ 0x25, 0x04, 0x08, 0x16, 0x55, 0x00 }
+    };
+
+    const Object_t TextureData = { Component_t::Make(
+      {
+        { uT("kind"), uT("TextureArray")},
+        { uT("width"), Width },
+        { uT("height"), Height },
+        { uT("content"), BinaryData },
+        { uT("mipmapping"), false },
+      }) };
+
+    TestTextureArrayCall(Component_t::Make({ { uT("service"), TextureData } }),
+      BinaryData, Width, Height, 0, DXGI_FORMAT_R8G8B8A8_UNORM);
+  }
+}
+
+// ************************************************************************** //
+TEST_F(DirectX11_test, /*DISABLED_*/Test_TextureArray_Index)
+{
+  const ::std::vector BinaryData =
+  {
+    ::std::vector<uint8_t>{ 0x19, 0x07, 0x25, 0x12, 0x06, 0x20, 0x08, 0x09, 0x10, 0x48, 0x00 },
+    ::std::vector<uint8_t>{ 0x19, 0x07, 0x25, 0x12, 0x06, 0x20, 0x08, 0x09, 0x10, 0x49, 0x00 },
+  };
+  constexpr int Width = 8091050;
+  constexpr int Height = 2008091049;
+
+  const ::std::vector<String_t> Destinations =
+  {
+    uT("albedo"),
+    uT("metalness"),
+    uT("roughness"),
+    uT("normal"),
+    uT("occlusion"),
+    uT("depth"),
+  };
+
+  for (int Index = 0; Index < 8; Index++)
+  {
+    {
+      const auto pComponent = Component_t::Make(
+        {
+          { uT("width"), Width },
+          { uT("height"), Height },
+          { uT("content"), BinaryData },
+          { uT("index"), Index },
+        });
+
+      TestTextureArrayCall(pComponent,
+        BinaryData, Width, Height, Index, DXGI_FORMAT_R8G8B8A8_UNORM);
+    }
+
+    {
+      const auto pComponent = Component_t::Make(
+        {
+          { uT("mipmapping"), false },
+          { uT("width"), Width },
+          { uT("height"), Height },
+          { uT("content"), BinaryData },
+          { uT("index"), Index },
+        });
+
+      TestTextureArrayCall(pComponent,
+        BinaryData, Width, Height, Index, DXGI_FORMAT_R8G8B8A8_UNORM);
+    }
+
+    {
+      const Object_t TextureData = { Component_t::Make(
+          {
+          { uT("kind"), uT("TextureArray")},
+          { uT("width"), Width },
+          { uT("height"), Height },
+          { uT("content"), BinaryData },
+          { uT("index"), Index },
+        }) };
+
+      TestTextureArrayCall(Component_t::Make({ { uT("service"), TextureData } }),
+        BinaryData, Width, Height, Index, DXGI_FORMAT_R8G8B8A8_UNORM);
+    }
+
+    {
+      const Object_t TextureData = { Component_t::Make(
+          {
+          { uT("kind"), uT("TextureArray")},
+          { uT("mipmapping"), false },
+          { uT("width"), Width },
+          { uT("height"), Height },
+          { uT("content"), BinaryData },
+          { uT("index"), Index },
+        }) };
+
+      TestTextureArrayCall(Component_t::Make({ { uT("service"), TextureData } }),
+        BinaryData, Width, Height, Index, DXGI_FORMAT_R8G8B8A8_UNORM);
+    }
+
+    for (::std::size_t i = 0; i < Destinations.size(); i++)
+    {
+      {
+        const auto pComponent = Component_t::Make(
+          {
+            { uT("width"), Width },
+            { uT("height"), Height },
+            { uT("content"), BinaryData },
+            { uT("index"), Index },
+            { uT("destination"), Destinations.at(i) },
+          });
+
+        TestTextureArrayCall(pComponent,
+          BinaryData, Width, Height, Index, DXGI_FORMAT_R8G8B8A8_UNORM);
+      }
+
+      {
+        const auto pComponent = Component_t::Make(
+          {
+            { uT("mipmapping"), false },
+            { uT("width"), Width },
+            { uT("height"), Height },
+            { uT("content"), BinaryData },
+            { uT("index"), Index },
+            { uT("destination"), Destinations.at(i) },
+          });
+
+        TestTextureArrayCall(pComponent,
+          BinaryData, Width, Height, Index, DXGI_FORMAT_R8G8B8A8_UNORM);
+      }
+
+      {
+        const Object_t TextureData = { Component_t::Make(
+            {
+            { uT("kind"), uT("TextureArray")},
+            { uT("width"), Width },
+            { uT("height"), Height },
+            { uT("content"), BinaryData },
+            { uT("index"), Index },
+            { uT("destination"), Destinations.at(i) },
+          }) };
+
+        TestTextureArrayCall(Component_t::Make({ { uT("service"), TextureData } }),
+          BinaryData, Width, Height, Index, DXGI_FORMAT_R8G8B8A8_UNORM);
+      }
+
+      {
+        const Object_t TextureData = { Component_t::Make(
+            {
+            { uT("kind"), uT("TextureArray")},
+            { uT("mipmapping"), false },
+            { uT("width"), Width },
+            { uT("height"), Height },
+            { uT("content"), BinaryData },
+            { uT("index"), Index },
+            { uT("destination"), Destinations.at(i) },
+          }) };
+
+        TestTextureArrayCall(Component_t::Make({ { uT("service"), TextureData } }),
+          BinaryData, Width, Height, Index, DXGI_FORMAT_R8G8B8A8_UNORM);
+      }
+    }
+  }
+}
+
+// ************************************************************************** //
+TEST_F(DirectX11_test, /*DISABLED_*/Test_TextureArray_Destination)
+{
+  const ::std::vector BinaryData =
+  {
+    ::std::vector<uint8_t>{ 0x19, 0x07, 0x25, 0x12, 0x06, 0x00 },
+    ::std::vector<uint8_t>{ 0x19, 0x07, 0x25, 0x12, 0x07, 0x00 },
+  };
+  const int Width = 7251202;
+  const int Height = 1907251203;
+
+  const ::std::vector<String_t> Destinations =
+  {
+    uT("albedo"),
+    uT("metalness"),
+    uT("roughness"),
+    uT("normal"),
+    uT("occlusion"),
+    uT("depth"),
+  };
+
+  for (::std::size_t i = 0; i < Destinations.size(); i++)
+  {
+    {
+      const auto pComponent = Component_t::Make(
+        {
+          { uT("width"), Width },
+          { uT("height"), Height },
+          { uT("content"), BinaryData },
+          { uT("destination"), Destinations.at(i) },
+        });
+
+      TestTextureArrayCall(pComponent,
+        BinaryData, Width, Height, i, DXGI_FORMAT_R8G8B8A8_UNORM);
+    }
+
+    {
+      const auto pComponent = Component_t::Make(
+        {
+          { uT("mipmapping"), false },
+          { uT("width"), Width },
+          { uT("height"), Height },
+          { uT("content"), BinaryData },
+          { uT("destination"), Destinations.at(i) },
+        });
+
+      TestTextureArrayCall(pComponent,
+        BinaryData, Width, Height, i, DXGI_FORMAT_R8G8B8A8_UNORM);
+    }
+
+    {
+      const Object_t TextureData = { Component_t::Make(
+          {
+          { uT("kind"), uT("TextureArray")},
+          { uT("width"), Width },
+          { uT("height"), Height },
+          { uT("content"), BinaryData },
+          { uT("destination"), Destinations.at(i) },
+        }) };
+
+      TestTextureArrayCall(Component_t::Make({ { uT("service"), TextureData } }),
+        BinaryData, Width, Height, i, DXGI_FORMAT_R8G8B8A8_UNORM);
+    }
+
+    {
+      const Object_t TextureData = { Component_t::Make(
+          {
+          { uT("kind"), uT("TextureArray")},
+          { uT("mipmapping"), false },
+          { uT("width"), Width },
+          { uT("height"), Height },
+          { uT("content"), BinaryData },
+          { uT("destination"), Destinations.at(i) },
+        }) };
+
+      TestTextureArrayCall(Component_t::Make({ { uT("service"), TextureData } }),
+        BinaryData, Width, Height, i, DXGI_FORMAT_R8G8B8A8_UNORM);
+    }
+  }
+}
+
+void DirectX11_test::TestTextureArrayMipmappingCall(
+  const Component_t::ComponentPtr_t & _pTexture,
+  const ::std::vector<::std::vector<uint8_t>> & _BinaryData,
+  const int _Width, const int _Height,
+  const ::std::size_t _Slot,
+  const DXGI_FORMAT _Format)
+{
+  ::mock::DirectX11::Proxy DirectXProxy;
+  ::mock::DirectX11::Device Device;
+  ::mock::DirectX11::DeviceContext DeviceContext;
+
+  using namespace ::testing;
+
+  EXPECT_CALL(DirectXProxy, CreateDevice())
+    .Times(1)
+    .WillOnce(Return(&Device));
+
+  EXPECT_CALL(DirectXProxy, CreateDeviceContext())
+    .Times(1)
+    .WillOnce(Return(&DeviceContext));
+
+  const Tested_t oExample{ Data_t{} };
+  const ITested_t & IExample = oExample;
+
+  auto itCreator = IExample.GetCreators().find(uT("TextureArray"));
+  ASSERT_NE(IExample.GetCreators().end(), itCreator);
+
+  ::std::vector<::mock::DirectX11::Texture2D> Texture2D(::std::size(_BinaryData));
+  ::std::vector<::mock::DirectX11::ShaderResourceView> ShaderResourceView(::std::size(_BinaryData));
+  ::std::vector<ID3D11ShaderResourceView *> ShaderResourceViews;
+
+  D3D11_TEXTURE2D_DESC TextureDesc = { 0 };
+  TextureDesc.Width = _Width;
+  TextureDesc.Height = _Height;
+  TextureDesc.MipLevels = 0;
+  TextureDesc.ArraySize = 1;
+  TextureDesc.Format = _Format;
+  TextureDesc.Usage = D3D11_USAGE_DEFAULT;
+  TextureDesc.BindFlags = D3D11_BIND_RENDER_TARGET | D3D11_BIND_SHADER_RESOURCE;
+  TextureDesc.MiscFlags = D3D11_RESOURCE_MISC_GENERATE_MIPS;
+  TextureDesc.SampleDesc.Count = 1;
+  TextureDesc.SampleDesc.Quality = 0;
+
+  D3D11_SHADER_RESOURCE_VIEW_DESC SrvDesc = { 0 };
+  SrvDesc.Format = _Format;
+  SrvDesc.ViewDimension = D3D11_SRV_DIMENSION_TEXTURE2D;
+  SrvDesc.Texture2D.MipLevels = static_cast<UINT>(-1);
+
+  {
+    InSequence Dummy;
+
+    for (size_t i = 0; i < ::std::size(_BinaryData); i++)
+    {
+      EXPECT_CALL(Device, CreateTexture2D(TextureDesc, D3D11_SUBRESOURCE_DATA{ 0 }))
+        .Times(1)
+        .WillOnce(Return(&Texture2D[i]));
+
+      EXPECT_CALL(DeviceContext, UpdateSubresource(&Texture2D[i], 0, nullptr,
+        _BinaryData[i], _Width * 4, 0))
+        .Times(1);
+
+      EXPECT_CALL(Device, CreateShaderResourceView(&Texture2D[i], SrvDesc))
+        .Times(1)
+        .WillOnce(Return(&ShaderResourceView[i]));
+
+      EXPECT_CALL(DeviceContext, GenerateMips(&ShaderResourceView[i]))
+        .Times(1);
+
+      ShaderResourceViews.push_back(&ShaderResourceView[i]);
+    }
+  }
+
+  auto Render = itCreator->second(_pTexture);
+  ASSERT_NE(nullptr, Render);
+
+  EXPECT_CALL(DeviceContext, CopyResource(_, _))
+    .Times(0);
+
+  EXPECT_CALL(DeviceContext, PSSetShaderResources(Eq(_Slot), ShaderResourceViews))
+    .Times(1);
+
+  Render();
+
+  for (size_t i = 0; i < ::std::size(_BinaryData); i++)
+  {
+    EXPECT_CALL(ShaderResourceView[i], Release())
+      .Times(1);
+
+    EXPECT_CALL(Texture2D[i], Release())
+      .Times(1);
+  }
+};
+
+// ************************************************************************** //
+TEST_F(DirectX11_test, /*DISABLED_*/Test_TextureArray_Mipmapping_Default)
+{
+  const ::std::vector BinaryData =
+  {
+    ::std::vector<uint8_t>{ 0x19, 0x07, 0x25, 0x11, 0x51, 0x00 },
+    ::std::vector<uint8_t>{ 0x19, 0x07, 0x25, 0x11, 0x52, 0x00 },
+  };
+  const int Width = 7251149;
+  const int Height = 1907251150;
+
+  {
+    const auto pComponent = Component_t::Make(
+      {
+        { uT("mipmapping"), true },
+        { uT("width"), Width },
+        { uT("height"), Height },
+        { uT("content"), BinaryData },
+      });
+
+    TestTextureArrayMipmappingCall(pComponent,
+      BinaryData, Width, Height, 0, DXGI_FORMAT_R8G8B8A8_UNORM);
+  }
+
+  {
+    const Object_t TextureData = { Component_t::Make(
+    {
+        { uT("kind"), uT("TextureArray")},
+        { uT("mipmapping"), true },
+        { uT("width"), Width },
+        { uT("height"), Height },
+        { uT("content"), BinaryData },
+      }) };
+
+    TestTextureArrayMipmappingCall(Component_t::Make({ { uT("service"), TextureData } }),
+      BinaryData, Width, Height, 0, DXGI_FORMAT_R8G8B8A8_UNORM);
+  }
+}
+
+// ************************************************************************** //
+TEST_F(DirectX11_test, /*DISABLED_*/Test_TextureArray_Mipmapping_Index)
+{
+  const ::std::vector BinaryData =
+  {
+    ::std::vector<uint8_t>{ 0x19, 0x07, 0x25, 0x11, 0x53, 0x00 },
+    ::std::vector<uint8_t>{ 0x19, 0x07, 0x25, 0x11, 0x54, 0x00 },
+  };
+  const int Width = 7251202;
+  const int Height = 1907251203;
+
+  const ::std::vector<String_t> Destinations =
+  {
+    uT("albedo"),
+    uT("metalness"),
+    uT("roughness"),
+    uT("normal"),
+    uT("occlusion"),
+    uT("depth"),
+  };
+
+  for (int Index = 0; Index < 8; Index++)
+  {
+    {
+      const auto pComponent = Component_t::Make(
+        {
+          { uT("width"), Width },
+          { uT("mipmapping"), true },
+          { uT("height"), Height },
+          { uT("content"), BinaryData },
+          { uT("index"), Index },
+        });
+
+      TestTextureArrayMipmappingCall(pComponent,
+        BinaryData, Width, Height, Index, DXGI_FORMAT_R8G8B8A8_UNORM);
+    }
+
+    {
+      const Object_t TextureData = { Component_t::Make(
+        {
+          { uT("kind"), uT("TextureArray")},
+          { uT("mipmapping"), true },
+          { uT("width"), Width },
+          { uT("height"), Height },
+          { uT("content"), BinaryData },
+          { uT("index"), Index },
+        }) };
+
+      TestTextureArrayMipmappingCall(Component_t::Make({ { uT("service"), TextureData } }),
+        BinaryData, Width, Height, Index, DXGI_FORMAT_R8G8B8A8_UNORM);
+    }
+
+    for (::std::size_t i = 0; i < Destinations.size(); i++)
+    {
+      {
+        const auto pComponent = Component_t::Make(
+          {
+            { uT("width"), Width },
+            { uT("mipmapping"), true },
+            { uT("height"), Height },
+            { uT("content"), BinaryData },
+            { uT("index"), Index },
+            { uT("destination"), Destinations.at(i) },
+          });
+
+        TestTextureArrayMipmappingCall(pComponent,
+          BinaryData, Width, Height, Index, DXGI_FORMAT_R8G8B8A8_UNORM);
+      }
+
+      {
+        const Object_t TextureData = { Component_t::Make(
+          {
+            { uT("kind"), uT("TextureArray")},
+            { uT("mipmapping"), true },
+            { uT("width"), Width },
+            { uT("height"), Height },
+            { uT("content"), BinaryData },
+            { uT("index"), Index },
+            { uT("destination"), Destinations.at(i) },
+          }) };
+
+        TestTextureArrayMipmappingCall(Component_t::Make({ { uT("service"), TextureData } }),
+          BinaryData, Width, Height, Index, DXGI_FORMAT_R8G8B8A8_UNORM);
+      }
+    }
+  }
+}
+
+// ************************************************************************** //
+TEST_F(DirectX11_test, /*DISABLED_*/Test_TextureArray_Mipmapping_Destination)
+{
+  const ::std::vector BinaryData =
+  {
+    ::std::vector<uint8_t>{ 0x19, 0x07, 0x25, 0x11, 0x55, 0x00 },
+    ::std::vector<uint8_t>{ 0x19, 0x07, 0x25, 0x11, 0x56, 0x00 },
+  };
+  const int Width = 7251202;
+  const int Height = 1907251203;
+
+  const ::std::vector<String_t> Destinations =
+  {
+    uT("albedo"),
+    uT("metalness"),
+    uT("roughness"),
+    uT("normal"),
+    uT("occlusion"),
+    uT("depth"),
+  };
+
+  for (::std::size_t i = 0; i < Destinations.size(); i++)
+  {
+    {
+      const auto pComponent = Component_t::Make(
+        {
+          { uT("width"), Width },
+          { uT("mipmapping"), true },
+          { uT("height"), Height },
+          { uT("content"), BinaryData },
+          { uT("destination"), Destinations.at(i) },
+        });
+
+      TestTextureArrayMipmappingCall(pComponent,
+        BinaryData, Width, Height, i, DXGI_FORMAT_R8G8B8A8_UNORM);
+    }
+
+    {
+      const Object_t TextureData = { Component_t::Make(
+        {
+          { uT("kind"), uT("TextureArray")},
+          { uT("mipmapping"), true },
+          { uT("width"), Width },
+          { uT("height"), Height },
+          { uT("content"), BinaryData },
+          { uT("destination"), Destinations.at(i) },
+        }) };
+
+      TestTextureArrayMipmappingCall(Component_t::Make({ { uT("service"), TextureData } }),
+        BinaryData, Width, Height, i, DXGI_FORMAT_R8G8B8A8_UNORM);
+    }
   }
 }
 
