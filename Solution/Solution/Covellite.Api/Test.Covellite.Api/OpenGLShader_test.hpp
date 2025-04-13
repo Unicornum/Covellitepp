@@ -518,6 +518,10 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_BkSurface_ResizeWindow)
 
     Render();
 
+    EXPECT_CALL(GLProxy, GetError())
+      .Times(1)
+      .WillOnce(Return(GL_NO_ERROR));
+
     IExample.PresentFrame();
 
     const int Viewport2[] = { 0, 0, _Width * 2, _Height * 2 };
@@ -556,6 +560,10 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_BkSurface_ResizeWindow)
 
     Render();
 
+    EXPECT_CALL(GLProxy, GetError())
+      .Times(1)
+      .WillOnce(Return(GL_NO_ERROR));
+
     IExample.PresentFrame();
 
     EXPECT_EQ(_ExpectedWidth2, (int)(*_pBkSurface)[uT("width")]);
@@ -590,6 +598,10 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_BkSurface_ResizeWindow)
       .Times(0);
 
     Render();
+
+    EXPECT_CALL(GLProxy, GetError())
+      .Times(1)
+      .WillOnce(Return(GL_NO_ERROR));
 
     IExample.PresentFrame();
   };

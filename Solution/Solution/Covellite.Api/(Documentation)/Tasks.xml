@@ -8,31 +8,34 @@
   </Options>
   <Process/>
   <Complete>
+    <Week6536>
+      <Task3 Text="DirectX11: некорректная установка массивов текстур, если их больше одного." Type="Bug" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="true" ParentTaskText="false"/>
+      <Task24 Text="OpenGL: очистка ошибок в начале рендеринга кадра." Type="None" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="true" ParentTaskText="false"/>
+    </Week6536>
     <Week6535>
-      <Task1 Text="Массивы текстур." Type="Red" Version="None" ExternalProgram="None" Expanded="false" Completed="true" History="false" ParentTaskText="false">
-        <Task5 Text="Тесты макросов для использования в шейдерах." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
-        <Task6 Text="OpenGL." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="true" ParentTaskText="true">
-          <Task7 Text="Create fail." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
-          <Task8 Text="Unknown destination." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
-          <Task9 Text="Параметры по умолчанию." Type="None" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
-          <Task10 Text="name + index." Type="None" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
-          <Task11 Text="Mipmapping." Type="None" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
-          <Task12 Text="Sampler." Type="None" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
-          <Task13 Text="Данные нескольких текстур." Type="None" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
-        </Task6>
-        <Task2 Text="DirectX11." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="true" ParentTaskText="true">
-          <Task3 Text="Обработка ошибок." Type="None" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
-          <Task4 Text="default, index, destination." Type="None" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
-          <Task22 Text="mipmapping." Type="None" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
-        </Task2>
-      </Task1>
+      <Task5 Text="Массивы текстур." Type="Red" Version="None" ExternalProgram="None" Expanded="false" Completed="true" History="false" ParentTaskText="false">
+        <Task6 Text="Тесты макросов для использования в шейдерах." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+        <Task7 Text="OpenGL." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="true" ParentTaskText="true">
+          <Task8 Text="Create fail." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+          <Task9 Text="Unknown destination." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+          <Task10 Text="Параметры по умолчанию." Type="None" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+          <Task11 Text="name + index." Type="None" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+          <Task12 Text="Mipmapping." Type="None" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+          <Task13 Text="Sampler." Type="None" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+          <Task14 Text="Данные нескольких текстур." Type="None" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+        </Task7>
+        <Task15 Text="DirectX11." Type="None" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="true" ParentTaskText="true">
+          <Task16 Text="Обработка ошибок." Type="None" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+          <Task17 Text="default, index, destination." Type="None" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+          <Task18 Text="mipmapping." Type="None" Version="None" ExternalProgram="Project" Expanded="false" Completed="true" History="false" ParentTaskText="true"/>
+        </Task15>
+      </Task5>
     </Week6535>
     <Week6534>
-      <Task17 Text="DirectX11: предупреждение при старте программы из-за флага DXGI_SWAP_EFFECT_DISCARD." Type="Bug" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="true" ParentTaskText="false"/>
-      <Task18 Text="DirectX11: DXGI ERROR: IDXGISwapChain::Release: Swapchain Released while fullscreen..." Type="Bug" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="true" ParentTaskText="false"/>
-      <Task19 Text="OpenGL: ошибка при замене в шейдере структуры пикселя на кастомную." Type="Bug" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="true" ParentTaskText="false"/>
+      <Task20 Text="DirectX11: предупреждение при старте программы из-за флага DXGI_SWAP_EFFECT_DISCARD." Type="Bug" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="true" ParentTaskText="false"/>
+      <Task21 Text="DirectX11: DXGI ERROR: IDXGISwapChain::Release: Swapchain Released while fullscreen..." Type="Bug" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="true" ParentTaskText="false"/>
+      <Task22 Text="OpenGL: ошибка при замене в шейдере структуры пикселя на кастомную." Type="Bug" Version="None" ExternalProgram="Solution" Expanded="false" Completed="true" History="true" ParentTaskText="false"/>
     </Week6534>
     <Week6533/>
-    <Week6532/>
   </Complete>
 </Tasks>

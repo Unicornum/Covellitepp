@@ -369,7 +369,10 @@ void OpenGLCommonShader::PresentFrame(void) /*override*/
 {
   OpenGLCommon::PresentFrame();
 
-  //GL_CHECK;
+  // При отложенной загрузке первый вызов Present() произойдет для пустой
+  // очереди рендеринга, что породит ошибку, которая будет детектирована
+  // позже, при создании какого-то объекта.
+  while (glGetError() != GL_NO_ERROR) {}
 }
 
 auto OpenGLCommonShader::CreateCamera(const ComponentPtr_t & _pComponent) -> Render_t /*override*/

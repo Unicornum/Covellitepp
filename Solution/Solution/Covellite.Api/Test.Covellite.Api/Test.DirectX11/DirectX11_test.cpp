@@ -6239,7 +6239,8 @@ void DirectX11_test::TestTextureArrayCall(
   EXPECT_CALL(DeviceContext, CopyResource(_, _))
     .Times(0);
 
-  EXPECT_CALL(DeviceContext, PSSetShaderResources(Eq(_Slot), ShaderResourceViews))
+  EXPECT_CALL(DeviceContext, PSSetShaderResources(Eq(_Slot * ::std::size(Texture2D)),
+    ShaderResourceViews))
     .Times(1);
 
   Render();
@@ -6646,7 +6647,8 @@ void DirectX11_test::TestTextureArrayMipmappingCall(
   EXPECT_CALL(DeviceContext, CopyResource(_, _))
     .Times(0);
 
-  EXPECT_CALL(DeviceContext, PSSetShaderResources(Eq(_Slot), ShaderResourceViews))
+  EXPECT_CALL(DeviceContext, PSSetShaderResources(Eq(_Slot * ::std::size(Texture2D)),
+    ShaderResourceViews))
     .Times(1);
 
   Render();

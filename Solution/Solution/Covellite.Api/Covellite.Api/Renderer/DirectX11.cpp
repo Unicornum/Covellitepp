@@ -994,7 +994,7 @@ auto DirectX11::CreateTextureArray(const ComponentPtr_t & _pComponent) -> Render
   return [=](void)
   {
     m_pImmediateContext->PSSetShaderResources(
-      Textures[0]->m_iDestination,
+      Textures[0]->m_iDestination * ::std::size(Textures),
       ::std::size(ShaderResourceViews),
       ::std::data(ShaderResourceViews));
   };

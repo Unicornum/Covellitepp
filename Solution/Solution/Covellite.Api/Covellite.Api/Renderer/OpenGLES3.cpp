@@ -3,13 +3,7 @@
 #include "OpenGLES3.hpp"
 #include <Covellite.Egl\Egl.hpp>
 
-namespace covellite
-{
-
-namespace api
-{
-
-namespace renderer
+namespace covellite::api::renderer
 {
 
 OpenGLES3::OpenGLES3(const Data_t & _Data) :
@@ -51,8 +45,4 @@ void OpenGLES3::PresentFrame(void) /*override*/
   OpenGLCommonShader::PresentFrame();
 }
 
-} // namespace renderer
-
-} // namespace api
-
-} // namespace covellite
+} // nnamespace covellite::api::renderer

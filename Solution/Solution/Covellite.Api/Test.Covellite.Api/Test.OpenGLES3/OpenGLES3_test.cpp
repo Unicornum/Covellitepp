@@ -256,6 +256,12 @@ TEST_F(OpenGLES3_test, /*DISABLED_*/Test_PresentFrame_FullScreen)
   EXPECT_CALL(SurfaceProxy, SwapBuffers(SurfaceId))
     .Times(1);
 
+  EXPECT_CALL(GLProxy, GetError())
+    .Times(3)
+    .WillOnce(Return(2))
+    .WillOnce(Return(1))
+    .WillOnce(Return(GL_NO_ERROR));
+
   IExample.PresentFrame();
 }
 
@@ -300,6 +306,11 @@ TEST_F(OpenGLES3_test, /*DISABLED_*/Test_PresentFrame_ClearHeader)
     EXPECT_CALL(SurfaceProxy, SwapBuffers(SurfaceId))
       .Times(1);
 
+    EXPECT_CALL(GLProxy, GetError())
+      .Times(2)
+      .WillOnce(Return(1))
+      .WillOnce(Return(GL_NO_ERROR));
+
     IExample.PresentFrame();
   }
 
@@ -327,6 +338,11 @@ TEST_F(OpenGLES3_test, /*DISABLED_*/Test_PresentFrame_ClearHeader)
 
     EXPECT_CALL(SurfaceProxy, SwapBuffers(SurfaceId))
       .Times(1);
+
+    EXPECT_CALL(GLProxy, GetError())
+      .Times(2)
+      .WillOnce(Return(1))
+      .WillOnce(Return(GL_NO_ERROR));
 
     IExample.PresentFrame();
   }

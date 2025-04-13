@@ -433,6 +433,10 @@ TEST_F(OpenGL_test, /*DISABLED_*/Test_PresentFrame)
   WindowsProxy_t WindowsProxy;
   WindowsProxy_t::GetInstance() = &WindowsProxy;
 
+  using GLProxy_t = ::mock::GLProxy;
+  GLProxy_t GLProxy;
+  GLProxy_t::GetInstance() = &GLProxy;
+
   const HDC hDC = (HDC)1808261819;
 
   using namespace ::testing;
@@ -445,11 +449,21 @@ TEST_F(OpenGL_test, /*DISABLED_*/Test_PresentFrame)
   ITested_t & IExample = Example;
 
   EXPECT_CALL(WindowsProxy, SwapBuffers(hDC))
-    .WillOnce(Return(TRUE))
     .WillOnce(Return(FALSE));
 
-  IExample.PresentFrame();
   EXPECT_THROW(IExample.PresentFrame(), ::std::exception);
+
+  EXPECT_CALL(WindowsProxy, SwapBuffers(hDC))
+    .WillOnce(Return(TRUE));
+
+  EXPECT_CALL(GLProxy, GetError())
+    .Times(4)
+    .WillOnce(Return(3))
+    .WillOnce(Return(2))
+    .WillOnce(Return(1))
+    .WillOnce(Return(GL_NO_ERROR));
+
+  IExample.PresentFrame();
 }
 
 #define OpenGLCommon_test OpenGL_test
