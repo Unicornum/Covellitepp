@@ -9,4 +9,6 @@
 Описание фреймворка, его сборки, подключения и использования см. в 
 [документации](http://unicornum.github.io/Covellitepp/index.html).
 
+[Технологическое демо игры](https://www.youtube.com/watch?v=QFx0RrqEG5g) на базе Covellite++.
+
 [7.12.2024] Выложил код в открытый доступ - **Hello, World!**
