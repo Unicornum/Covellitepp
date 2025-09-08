@@ -1,6 +1,6 @@
 <Project>
   <PropertyGroup>
-    <AlicornSDKPath>$(UNICORNUM_ALICORN_SDK_V3101)</AlicornSDKPath>
+    <AlicornSDKPath>$(UNICORNUM_ALICORN_SDK_V31002)</AlicornSDKPath>
   </PropertyGroup>
   <Import Project="$(AlicornSDKPath)\Externals.props" Condition="Exists('$(AlicornSDKPath)\Externals.props')" />
   <Import Project="Externals.Error.props" Condition="!Exists('$(AlicornSDKPath)\Externals.props')" />

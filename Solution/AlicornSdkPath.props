@@ -17,7 +17,7 @@ echo rem !                This is an automatically generated file               
 echo rem !                    all changes will be overwritten                     !
 echo rem !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 echo.
-echo set AlicornSdkPath="$(ExternalsVcpkgDirectory)"
+echo set AlicornSdkPath="$(AlicornSdkPath)"
 
 ) &gt; %AlicornSdkPathCmd%
 

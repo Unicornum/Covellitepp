@@ -1223,6 +1223,9 @@ auto DirectX11::CreateTransform(const ComponentPtr_t & _pComponent) -> Render_t 
 
   return [=](void)
   {
+    m_pConstants->Get<::Object>().Extra =
+      (*_pComponent)[uT("extra")].Default(::glm::vec4{});
+
     BuildTransformMatrix();
     m_pConstants->Update<::Object>();
   };

@@ -34,8 +34,11 @@ call %PathToExternals%\BuildSolution.cmd "Debug.Product:x64,Release.Product:x64"
 call %PathToExternals%\BuildSolution.cmd "Debug.Product:ARM64,Release.Product:ARM64" "Prebuild:Rebuild,BuildAll:Rebuild"
 rename .\Release\Example.apk Covellitepp_ARM64.apk
 
+copy /Y .\Solution\Solution\SDK\build.cmd .\Solution\Solution\SDK\build.auto.cmd
+.\Release\Bin\x64\Version.exe --file=.\Solution\Version.hpp --replace=.\Solution\Solution\SDK\build.auto.cmd --find=SDK_vX.Y.Z --format="SDK_v%%1%%.%%2%%.%%3%%"
+
 cd .\Solution\Solution\SDK
-call build.cmd
+call build.auto.cmd
 
 goto End
 

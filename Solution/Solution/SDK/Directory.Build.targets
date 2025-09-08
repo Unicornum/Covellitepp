@@ -1,0 +1,7 @@
+<Project>
+  <PropertyGroup>
+    <CovelliteSDKPath>$(UNICORNUM_COVELLITEPP_SDK_VXYYZZ)</CovelliteSDKPath>
+  </PropertyGroup>
+  <Import Project="$(CovelliteSDKPath)\Externals.props" Condition="Exists('$(CovelliteSDKPath)\Externals.props')" />
+  <Import Project="Externals.Error.props" Condition="!Exists('$(CovelliteSDKPath)\Externals.props')" />
+</Project>

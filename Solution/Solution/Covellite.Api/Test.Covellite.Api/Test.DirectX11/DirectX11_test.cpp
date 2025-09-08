@@ -6926,7 +6926,7 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Shader_Compile_Fail)
     .WillOnce(Return(0));
 
   EXPECT_STDEXCEPTION(itCreator->second(pShader),
-    (".+\\.cpp\\([0-9]+\\): Failed: -2147467259 \\[header line: 172, " +
+    (".+\\.cpp\\([0-9]+\\): Failed: -2147467259 \\[header line: 174, " +
       ::std::string{ Error } +"\\]\\.").c_str());
 }
 
@@ -8490,7 +8490,8 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Transform_Default)
   auto TestCallRender = [&](
     float _X, float _Y, float _Z,
     float _A, float _B, float _C,
-    float _Sx, float _Sy, float _Sz)
+    float _Sx, float _Sy, float _Sz,
+    const ::glm::vec4 & _Extra)
   {
     (*pPosition)[uT("x")] = _X;
     (*pPosition)[uT("y")] = _Y;
@@ -8515,6 +8516,7 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Transform_Default)
     ::Object ExpectMatrices;
     memset(&ExpectMatrices, 0, sizeof(ExpectMatrices));
     ExpectMatrices.World = WorldMatrix;
+    ExpectMatrices.Extra = _Extra;
 
     EXPECT_CALL(DeviceContext, UpdateSubresource(&ConstantBuffer, 0, nullptr,
       ExpectMatrices, 0, 0))
@@ -8529,12 +8531,17 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Transform_Default)
   TestCallRender(
     1956.0f, 1957.0f, 1958.0f,
     1204.0f, 1205.0f, 1206.0f,
-    1152.0f, 1153.0f, 1154.0f);
+    1152.0f, 1153.0f, 1154.0f,
+    ::glm::vec4());
+
+  const ::glm::vec4 Extra(1959.0f, 1960.0f, 1961.0f, 1962.0f);
+  (*pTransform)[uT("extra")] = Extra;
 
   TestCallRender(
     1959.0f, 1960.0f, 1961.0f,
     1145.0f, 1146.0f, 1147.0f,
-    1155.0f, 1157.0f, 1158.0f);
+    1155.0f, 1157.0f, 1158.0f,
+    Extra);
 
   EXPECT_CALL(ConstantBuffer, Release())
     .Times(1);
@@ -8641,11 +8648,12 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Transform_Static)
     const auto Render = itCreator->second(_pTransform);
     ASSERT_NE(nullptr, Render);
 
-    auto TestCallRender = [&](void)
+    auto TestCallRender = [&](const ::glm::vec4 & _Extra)
     {
       ::Object ExpectMatrices;
       memset(&ExpectMatrices, 0, sizeof(ExpectMatrices));
       ExpectMatrices.World = WorldMatrix;
+      ExpectMatrices.Extra = _Extra;
 
       EXPECT_CALL(DeviceContext,
         UpdateSubresource(&ConstantBuffer, 0, nullptr, ExpectMatrices, 0, 0))
@@ -8657,14 +8665,17 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Transform_Static)
     // Два вызова, чтобы убедиться, что изменение исходных данных не приводит 
     // к изменению результата рендеринга.
 
-    TestCallRender();
+    TestCallRender(::glm::vec4());
 
     SetValues(false,
       1959.0f, 1960.0f, 1961.0f,
       1145.0f, 1146.0f, 1147.0f,
       1155.0f, 1157.0f, 1158.0f);
 
-    TestCallRender();
+    const  ::glm::vec4 Extra(1959.0f, 1960.0f, 1961.0f, 1962.0f);
+    (*_pTransform)[uT("extra")] = Extra;
+
+    TestCallRender(Extra);
   };
 
   const auto pTransform = Component_t::Make(
@@ -8744,7 +8755,8 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Transform_Billboard)
 
     auto WorldMatrix = ::glm::identity<::glm::mat4>();
 
-    auto TestCallRender = [&](float _X, float _Y, float _Z)
+    auto TestCallRender = [&](float _X, float _Y, float _Z,
+      const ::glm::vec4 & _Extra)
     {
       (*pPosition)[uT("x")] = _X;
       (*pPosition)[uT("y")] = _Y;
@@ -8779,6 +8791,7 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Transform_Billboard)
       ::Object ExpectMatrices;
       memset(&ExpectMatrices, 0, sizeof(ExpectMatrices));
       ExpectMatrices.World = WorldMatrix;
+      ExpectMatrices.Extra = _Extra;
 
       EXPECT_CALL(DeviceContext,
         UpdateSubresource(&ConstantBuffer, 0, nullptr, ExpectMatrices, 0, 0))
@@ -8790,8 +8803,12 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Transform_Billboard)
     // Два вызова, чтобы убедиться, что изменение исходных данных приводит 
     // к изменению результата рендеринга.
 
-    TestCallRender(1956.0f, 1957.0f, 1958.0f);
-    TestCallRender(1959.0f, 1960.0f, 1961.0f);
+    TestCallRender(1956.0f, 1957.0f, 1958.0f, ::glm::vec4());
+
+    const ::glm::vec4 Extra(1963.0f, 1964.0f, 1965.0f, 1966.0f);
+    (*_pTransform)[uT("extra")] = Extra;
+
+    TestCallRender(1959.0f, 1960.0f, 1961.0f, Extra);
   };
 
   const auto pTransform = Component_t::Make(
@@ -8907,6 +8924,7 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Transform_DefaultValues)
     ::Object ExpectMatrices;
     memset(&ExpectMatrices, 0, sizeof(ExpectMatrices));
     ExpectMatrices.World = WorldMatrix;
+    ExpectMatrices.Extra = ::glm::vec4();
 
     EXPECT_CALL(DeviceContext,
       UpdateSubresource(&ConstantBuffer, 0, nullptr, ExpectMatrices, 0, 0))

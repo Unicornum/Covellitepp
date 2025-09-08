@@ -9,4 +9,9 @@
 Описание фреймворка, его сборки, подключения и использования см. в 
 [документации](http://unicornum.github.io/Covellitepp/index.html).
 
+> Для сборки используется Visual Studio 2022 и [следующие](https://github.com/Unicornum/Backup.Data/releases/tag/android_vs2022)
+> версии инструментов Android.
+
+[Технологическое демо игры](https://www.youtube.com/watch?v=bwtrzUZTDPk) на базе Covellite++.
+
 [7.12.2024] Выложил код в открытый доступ - **Hello, World!**

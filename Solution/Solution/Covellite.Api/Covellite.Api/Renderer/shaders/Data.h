@@ -5,6 +5,7 @@
 #ifdef GLM_VERSION
 
 using float4x4 = ::glm::mat4;
+using float4 = ::glm::vec4;
 #define mediump
 #define lowp
 
@@ -24,6 +25,7 @@ struct Camera
 struct Object
 {
   float4x4 World;
+  float4 Extra;
 };
 
 #endif // COVELLITE_API_CONSTANT_BUFFERS_HEADER

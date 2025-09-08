@@ -12,6 +12,7 @@
     <LocalDebuggerCommand>cmd.exe</LocalDebuggerCommand>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
     <LocalDebuggerCommandArguments>/c "exit"</LocalDebuggerCommandArguments>
+    <LocalDebuggerCommandArgumentsHistory>/c "exit"|</LocalDebuggerCommandArgumentsHistory>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LocalDebuggerCommand>cmd.exe</LocalDebuggerCommand>
