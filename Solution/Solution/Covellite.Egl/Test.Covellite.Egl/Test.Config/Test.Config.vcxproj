@@ -14,7 +14,7 @@
     <ProjectGuid>{7C1B0952-3483-4C05-A69D-528D6E50E15C}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>TestClass</RootNamespace>
-    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
