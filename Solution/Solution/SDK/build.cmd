@@ -2,7 +2,7 @@
 @echo off
 
 set PathToExternals=.\..\Externals
-set Run7z=.\Utilities\Compression\7zip\7za.exe
+set Run7z=%PathToExternals%\Utilities\Compression\7zip\7za.exe
 set PathToResultFile=.\..\..\..\CovelliteSDK_vX.Y.Z.0.7z
 
 echo ===================== Archived =====================
@@ -20,7 +20,7 @@ echo Archived Covellite++...
 %Run7z% a "%PathToResultFile%" -ir!Covellite -xr!*.pdb -xr!*.idb -xr!*.recipe
 
 echo Archived Alicorn...
-%Run7z% a "%PathToResultFile%" %AlicornSdkPath%\*
+%Run7z% a "%PathToResultFile%" %AlicornSdkPath%\* -xr!ReadMe.txt -xr!Externals.props -xr!install.cmd -xr!*Directory.Build.targets
 
 goto :EndOfFile
 
