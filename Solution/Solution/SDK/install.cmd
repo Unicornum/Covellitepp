@@ -1,0 +1,4 @@
+@echo off
+
+setx UNICORNUM_COVELLITEPP_SDK_VXYYZZ %CD%
+pause
