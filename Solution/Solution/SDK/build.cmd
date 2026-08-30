@@ -3,7 +3,7 @@
 
 set PathToExternals=.\..\Externals
 set Run7z=.\Utilities\Compression\7zip\7za.exe
-set PathToResultFile=.\..\..\..\CovelliteSDK_v0.0.0.0.7z
+set PathToResultFile=.\..\..\..\CovelliteSDK_vX.Y.Z.0.7z
 
 call AlicornSdkPath.auto.cmd
 
