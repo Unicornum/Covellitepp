@@ -1225,6 +1225,9 @@ auto DirectX10::CreateTransform(const ComponentPtr_t & _pComponent) -> Render_t 
 
   return [=](void)
   {
+    m_pConstants->Get<::Object>().Extra =
+      (*_pComponent)[uT("Extra")].Default(::glm::vec4{});
+
     PreRender();
     m_pConstants->Update<::Object>();
   };

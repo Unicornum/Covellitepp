@@ -757,7 +757,7 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Shader_CompileFail)
       .Times(1);
 
     EXPECT_STDEXCEPTION(itCreator->second(_pShader),
-      (".*Compile shader fail \\[header line: 173\\]: " + ErrorText).c_str());
+      (".*Compile shader fail \\[header line: 175\\]: " + ErrorText).c_str());
   };
 
   {
@@ -8395,6 +8395,7 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Transform_Default)
 
   const ::mock::GLint ProgramId = 1908241203;
   const ::mock::GLint MatrixWorldLocationId = 1908241207;
+  const ::mock::GLint ExtraLocationId = 2608311427;
 
   auto itCreator = IExample.GetCreators().find(uT("Transform"));
   ASSERT_NE(IExample.GetCreators().end(), itCreator);
@@ -8402,7 +8403,7 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Transform_Default)
   auto pPosition = Component_t::Make({ { uT("kind"), uT("Position") } });
   auto pRotation = Component_t::Make({ { uT("kind"), uT("Rotation") } });
   auto pScale = Component_t::Make({ { uT("kind"), uT("Scale") } });
-  const auto pTransform = Component_t::Make(
+  auto pTransform = Component_t::Make(
     {
       { uT("service"), Object_t{ pPosition, pRotation, pScale } }
     });
@@ -8415,7 +8416,8 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Transform_Default)
   auto TestCallRender = [&](
     float _X, float _Y, float _Z,
     float _A, float _B, float _C,
-    float _Sx, float _Sy, float _Sz)
+    float _Sx, float _Sy, float _Sz,
+    const ::glm::vec4 & _Extra)
   {
     (*pPosition)[uT("x")] = _X;
     (*pPosition)[uT("y")] = _Y;
@@ -8453,6 +8455,14 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Transform_Default)
       UniformMatrix4fv(MatrixWorldLocationId, 1, GL_FALSE, WorldMatrix))
       .Times(1);
 
+    EXPECT_CALL(GLProxy, GetUniformLocation(ProgramId, Eq("ObjectData.Extra")))
+      .Times(1)
+      .WillOnce(Return(ExtraLocationId));
+
+    EXPECT_CALL(GLProxy,
+      Uniform4fv(ExtraLocationId, 1, _Extra))
+      .Times(1);
+
     Render();
   };
 
@@ -8462,12 +8472,17 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Transform_Default)
   TestCallRender(
     1956.0f, 1957.0f, 1958.0f,
     1204.0f, 1205.0f, 1206.0f,
-    1152.0f, 1153.0f, 1154.0f);
+    1152.0f, 1153.0f, 1154.0f,
+    ::glm::vec4());
+
+  const auto Extra = ::glm::vec4(1959.0f, 1960.0f, 1961.0f, 1962.0f);
+  (*pTransform)[uT("extra")] = Extra;
 
   TestCallRender(
     1959.0f, 1960.0f, 1961.0f,
     1145.0f, 1146.0f, 1147.0f,
-    1155.0f, 1157.0f, 1158.0f);
+    1155.0f, 1157.0f, 1158.0f,
+    Extra);
 }
 
 // ************************************************************************** //
@@ -8482,6 +8497,7 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Transform_Static)
 
   const ::mock::GLint ProgramId = 1908241203;
   const ::mock::GLint MatrixWorldLocationId = 1908241207;
+  const ::mock::GLint ExtraLocationId = 2608311426;
 
   auto itCreator = IExample.GetCreators().find(uT("Transform"));
   ASSERT_NE(IExample.GetCreators().end(), itCreator);
@@ -8549,6 +8565,14 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Transform_Static)
         UniformMatrix4fv(MatrixWorldLocationId, 1, GL_FALSE, WorldMatrix))
         .Times(1);
 
+      EXPECT_CALL(GLProxy, GetUniformLocation(ProgramId, Eq("ObjectData.Extra")))
+        .Times(1)
+        .WillOnce(Return(ExtraLocationId));
+
+      EXPECT_CALL(GLProxy,
+        Uniform4fv(ExtraLocationId, 1, ::glm::vec4()))
+        .Times(1);
+
       Render();
     };
 
@@ -8586,6 +8610,7 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Transform_Billboard)
 
   const ::mock::GLint ProgramId = 1908241203;
   const ::mock::GLint MatrixWorldLocationId = 1908241207;
+  const ::mock::GLint ExtraLocationId = 2608311425;
 
   auto itCreator = IExample.GetCreators().find(uT("Transform"));
   ASSERT_NE(IExample.GetCreators().end(), itCreator);
@@ -8645,6 +8670,14 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Transform_Billboard)
 
       EXPECT_CALL(GLProxy,
         UniformMatrix4fv(MatrixWorldLocationId, 1, GL_FALSE, WorldMatrix))
+        .Times(1);
+
+      EXPECT_CALL(GLProxy, GetUniformLocation(ProgramId, Eq("ObjectData.Extra")))
+        .Times(1)
+        .WillOnce(Return(ExtraLocationId));
+
+      EXPECT_CALL(GLProxy,
+        Uniform4fv(ExtraLocationId, 1, ::glm::vec4()))
         .Times(1);
 
       Render();

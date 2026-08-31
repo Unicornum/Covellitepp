@@ -90,6 +90,10 @@ public:
       glGetUniformLocation(_ProgramId, "ObjectData.World");
     glUniformMatrix4fv(MatrixWorldId, 1, GL_FALSE,
       ::glm::value_ptr(_Object.World));
+
+    const auto ExtraId =
+      glGetUniformLocation(_ProgramId, "ObjectData.Extra");
+    glUniform4fv(ExtraId, 1, ::glm::value_ptr(_Object.Extra));
   }
 };
 
@@ -1123,6 +1127,9 @@ auto OpenGLCommonShader::CreateTransform(const ComponentPtr_t & _pComponent) -> 
 
   return [=](void)
   {
+    m_pConstants->Get<::Object>().Extra =
+      (*_pComponent)[uT("extra")].Default(::glm::vec4{});
+
     TransformRender();
     m_pConstants->Update<::Object>();
   };

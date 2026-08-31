@@ -148,6 +148,7 @@ inline bool operator== (
   const ::Object & _Right)
 {
   if (!(_Left.World == _Right.World)) return false;
+  if (!(_Left.Extra == _Right.Extra)) return false;
   return true;
 }
 
