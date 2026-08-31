@@ -18,6 +18,8 @@ struct PixelShadows
 // Демонстрация замены стандартной структуры пикселя пользовательской
 #define Pixel PixelShadows
 
+#define kSandDistance (ObjectData.Extra.x)
+
 #ifdef COVELLITE_SHADER_VERTEX /////////////////////////////////////////////////
 
 Pixel vsScene(Vertex _Value)
@@ -35,7 +37,7 @@ Pixel vsScene(Vertex _Value)
   Result.ScreenPos = mul(WorldPos, ViewProjection);
   Result.Normal = Normal;
   Result.TexCoord = _Value.TexCoord;
-  Result.kBiome = (distance(WorldPos.xy, float2(0.0f, 0.0f)) < 3.0f) ? 0.0f : 1.0f;
+  Result.kBiome = length(WorldPos.xy) < kSandDistance ? 0.0f : 1.0f;
   return Result;
 }
 

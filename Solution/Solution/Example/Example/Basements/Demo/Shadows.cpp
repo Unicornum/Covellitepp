@@ -642,6 +642,7 @@ Object_t Shadows::GetTransformData(const CubeCoords & _CellPosition) const
       { uT("id"), uT("Demo.Shadows.Transform.") + Id },
       { uT("type"), uT("Transform") },
       { uT("service"), _Data },
+      { uT("extra"), ::glm::vec4(3.5f, 0.0f, 0.0f, 0.0f) },
     }),
   };
 }
