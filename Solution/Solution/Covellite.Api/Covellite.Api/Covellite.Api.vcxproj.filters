@@ -84,6 +84,7 @@
       <Filter>Renderer\shaders</Filter>
     </ClInclude>
     <ClInclude Include="Constant.hpp" />
+    <ClInclude Include="CompileShader.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -122,6 +123,7 @@
     <ClCompile Include="Renderer\GraphicApi.CapturingServiceComponent.cpp">
       <Filter>Renderer</Filter>
     </ClCompile>
+    <ClCompile Include="CompileShader.cpp" />
   </ItemGroup>
   <ItemGroup>
     <FxCompile Include="Renderer\shaders\Input.fx">

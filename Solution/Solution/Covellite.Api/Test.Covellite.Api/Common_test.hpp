@@ -122,3 +122,44 @@ TEST_F(Common_test, /*DISABLED_*/Test_Buffer_Constant_User_EmptySize)
 
   EXPECT_THROW(itCreator->second(pComponent), ::std::exception);
 }
+
+// ************************************************************************** //
+TEST_F(Common_test, /*DISABLED_*/Test_GetDrawCallCount)
+{
+  const auto pComponent = Component_t::Make(
+    {
+      //{ uT("function"), Updater },
+    });
+
+  Tested_t oExample{ Data_t{} };
+  ITested_t & IExample = oExample;
+  EXPECT_EQ(0, IExample.GetDrawCallCount());
+
+  auto itCreator = IExample.GetCreators().find(uT("Present"));
+  ASSERT_NE(IExample.GetCreators().end(), itCreator);
+  EXPECT_EQ(0, IExample.GetDrawCallCount());
+
+  auto Render = itCreator->second(pComponent);
+  ASSERT_NE(nullptr, Render);
+  EXPECT_EQ(0, IExample.GetDrawCallCount());
+
+  const auto Count = 10;
+
+  for (auto i = 0; i < Count; i++)
+  {
+    Render();
+    EXPECT_EQ(0, IExample.GetDrawCallCount());
+  }
+
+  IExample.PresentFrame();
+  EXPECT_EQ(Count, IExample.GetDrawCallCount());
+
+  for (auto i = 0; i < 2 * Count; i++)
+  {
+    Render();
+    EXPECT_EQ(Count, IExample.GetDrawCallCount());
+  }
+
+  IExample.PresentFrame();
+  EXPECT_EQ(2 * Count, IExample.GetDrawCallCount());
+}

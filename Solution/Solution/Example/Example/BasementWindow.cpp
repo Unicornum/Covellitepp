@@ -1,5 +1,6 @@
 ﻿
 #include "stdafx.h"
+#include <alicorn/logger.hpp>
 #include "BasementWindow.hpp"
 #include "Basements/Dummy.hpp"
 #include "Basements/Empty.hpp"
@@ -16,9 +17,11 @@ BasementWindow::BasementWindow(
 {
   const auto * const pWindowApi = &_WindowApi;
   auto * const pWindowExpanse = &_Window;
+  auto pDrawCallMax = ::std::make_shared<size_t>(0);
 
   m_Events[::covellite::events::Drawing.Do].Connect([=](void)
   {
+    *pDrawCallMax = ::glm::max(*pDrawCallMax, pWindowApi->GetDrawCallCount());
     m_pBasement->Render();
   });
 
@@ -81,6 +84,8 @@ BasementWindow::BasementWindow(
 
   m_Events[::events::Basement.Stop].Connect([=](void)
   {
+    LOGGER(Info) << "Max draw call count: " << *pDrawCallMax;
+    *pDrawCallMax = 0;
     m_pBasement = ::std::make_shared<::basement::Dummy>();
   });
 }

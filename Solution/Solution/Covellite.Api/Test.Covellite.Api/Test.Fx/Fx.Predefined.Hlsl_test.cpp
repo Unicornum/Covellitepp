@@ -48,16 +48,23 @@ TEST_F(FxPredefinedHlsl_test, /*DISABLED_*/Test_Predefined)
   EXPECT_STREQ("", "" __TO_STR(lowp));
 
   EXPECT_STREQ("int4", __TO_STR(ivec4));
+  EXPECT_STREQ("int3", __TO_STR(ivec3));
+  EXPECT_STREQ("int2", __TO_STR(ivec2));
   EXPECT_STREQ("float4", __TO_STR(vec4));
   EXPECT_STREQ("float3", __TO_STR(vec3));
   EXPECT_STREQ("float2", __TO_STR(vec2));
   EXPECT_STREQ("float4x4", __TO_STR(mat4));
   EXPECT_STREQ("float3x3", __TO_STR(mat3));
+  EXPECT_STREQ("float2x2", __TO_STR(mat2));
   EXPECT_STREQ("(float3x3)m1909031226", __TO_STR(ToMatrix3x3(m1909031226)));
 
+  EXPECT_STREQ("((a) - (b) * floor((a) / (b)))", __TO_STR(mod(a, b)));
+  EXPECT_STREQ("lerp(a, b, c)", __TO_STR(mix(a, b, c)));
+  EXPECT_STREQ("frac(2609161845)", __TO_STR(fract(2609161845)));
+  EXPECT_STREQ("rsqrt(2609161846)", __TO_STR(inversesqrt(2609161846)));
+  EXPECT_STREQ("atan2(a, b)", __TO_STR(atan(a, b)));
   EXPECT_STREQ("ddx(1909031227)", __TO_STR(dFdx(1909031227)));
   EXPECT_STREQ("ddy(1909031228)", __TO_STR(dFdy(1909031228)));
-  EXPECT_STREQ("lerp(a, b, c)", __TO_STR(mix(a, b, c)));
 
   EXPECT_STREQ(": 1909031229", 
     __TO_STR(COVELLITE_INPUT_SEMANTIC(1909031229)));

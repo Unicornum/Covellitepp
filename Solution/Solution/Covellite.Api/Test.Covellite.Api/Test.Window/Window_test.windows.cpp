@@ -78,6 +78,8 @@ protected:
   App_t m_App{ App_t::EventBased{} };
 };
 
+ALICORN_DISABLE_GTEST_WARNINGS
+
 // Образец макроса для подстановки в класс Renderer 
 // для доступа тестовой функции к закрытым функциям класса (чтобы это сработало, 
 // нужно чтобы тестовая функция была расположена В ТОМ ЖЕ ПРОСТРАНСТВЕ ИМЕН, 
@@ -211,3 +213,5 @@ TEST_F(Window_windows_test, /*DISABLED_*/Test_Constructor_Auto_Nothing)
   WindowOs_t WindowOs{ m_App };
   EXPECT_THROW(Tested_t{ WindowOs }, ::std::exception);
 }
+
+ALICORN_RESTORE_WARNINGS

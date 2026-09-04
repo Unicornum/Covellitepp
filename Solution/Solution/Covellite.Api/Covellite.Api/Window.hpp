@@ -27,15 +27,17 @@ namespace renderer { class SettingsData; }
 *  2.0.0.0        \n
 *  3.0.0.0        \n
 *  3.1.0.0        \n
+*  3.2.0.0        \n
 * \date
 *  16 Октябрь 2017    \n
 *  10 Июнь 2018    \n
 *  20 Август 2018    \n
 *  19 Ноябрь 2018    \n
+*  18 Сентябрь 2026    \n
 * \author
 *  CTAPOBEP (unicornum.verum@gmail.com)
 * \copyright
-*  © CTAPOBEP 2017 - 2018
+*  © CTAPOBEP 2017 - 2026
 */
 class Window final :
   public ::covellite::app::IWindow,
@@ -54,6 +56,7 @@ public:
   // Интерфейс api::IWindow:
   Rect GetClientRect(void) const override;
   RendersPtr_t GetRenders(void) const override;
+  size_t GetDrawCallCount(void) const final;
 
 private:
   static IGraphicApiPtr_t MakeImpl(const WindowOs_t &);

@@ -18,4 +18,5 @@
 #include "Api\Renders.hpp"
 #include "Api\IWindow.hpp"
 #include "Api\Window.hpp"
+#include "Api\CompileShader.hpp"
 #include "Covellite.Api.lib.hpp"

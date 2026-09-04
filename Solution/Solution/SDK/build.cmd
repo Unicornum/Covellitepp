@@ -3,12 +3,13 @@
 
 set PathToExternals=.\..\Externals
 set Run7z=%PathToExternals%\Utilities\Compression\7zip\7za.exe
-set PathToResultFile=.\..\..\..\CovelliteSDK_vX.Y.Z.0.7z
+set PathToResultFile=.\..\..\..\CovelliteSDK_vX.Y.Z.R.7z
 
 echo ===================== Archived =====================
 
 %Run7z% a "%PathToResultFile%" ReadMe.txt
 %Run7z% a "%PathToResultFile%" Externals.props
+%Run7z% a "%PathToResultFile%" Externals.Error.props
 call :SetVersionAndAddToArchive install.cmd
 call :SetVersionAndAddToArchive Directory.Build.targets
 
@@ -17,10 +18,13 @@ call AlicornSdkPath.auto.cmd
 cd %PathToExternals%
 
 echo Archived Covellite++...
+copy .\..\..\..\LICENSE.txt %PathToExternals%\Covellite /Y
 %Run7z% a "%PathToResultFile%" -ir!Covellite -xr!*.pdb -xr!*.idb -xr!*.recipe
+del %PathToExternals%\Covellite\LICENSE.txt
 
 echo Archived Alicorn...
-%Run7z% a "%PathToResultFile%" %AlicornSdkPath%\* -xr!ReadMe.txt -xr!Externals.props -xr!install.cmd -xr!*Directory.Build.targets
+%Run7z% a "%PathToResultFile%" %AlicornSdkPath%\Alicorn
+%Run7z% a "%PathToResultFile%" %AlicornSdkPath%\Externals
 
 goto :EndOfFile
 

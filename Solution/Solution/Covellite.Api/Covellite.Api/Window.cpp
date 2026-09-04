@@ -80,6 +80,12 @@ auto Window::GetRenders(void) const /*override*/ -> RendersPtr_t
   return ::std::make_shared<Component::Renders>(m_pImpl->GetCreators());
 }
 
+/// Количество drawcall'ов в последнем кадре.
+size_t Window::GetDrawCallCount(void) const /*final*/
+{
+  return m_pImpl->GetDrawCallCount();
+}
+
 /*static*/ auto Window::MakeImpl(const WindowOs_t & _Window) -> IGraphicApiPtr_t
 {
   renderer::SettingsData oSettingsData;

@@ -10,10 +10,7 @@
 *  - [Скачать](https://github.com/Unicornum/Covellitepp/releases) Alicorn SDK
 *  этой версии и распаковать архив (рекомендуется структура папок вида
 *  C:\SDK\Alicorn\vX.X.X).
-*  - В этой папке выполнить cmd команду
-* \code
-setx UNICORNUM_ALICORN_SDK_Vxxx %CD%
-* \endcode
+*  - В этой папке запустить install.cmd.
 *  
 *  Использование
 *  -------------
