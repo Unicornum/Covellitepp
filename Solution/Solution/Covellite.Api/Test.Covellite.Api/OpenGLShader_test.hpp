@@ -757,7 +757,7 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Shader_CompileFail)
       .Times(1);
 
     EXPECT_STDEXCEPTION(itCreator->second(_pShader),
-      (".*Compile shader fail \\[header line: 175\\]: " + ErrorText).c_str());
+      (".*Compile shader fail \\[header line: 193\\]: " + ErrorText).c_str());
   };
 
   {

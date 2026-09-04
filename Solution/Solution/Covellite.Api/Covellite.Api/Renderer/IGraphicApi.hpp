@@ -52,6 +52,7 @@ public:
   virtual void PresentFrame(void) = 0;
   virtual void ResizeWindow(const Rect &) = 0;
   virtual const Creators_t & GetCreators(void) const = 0;
+  virtual size_t GetDrawCallCount(void) const = 0;
 
 public:
   virtual ~IGraphicApi(void) = default;

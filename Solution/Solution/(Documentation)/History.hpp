@@ -4,6 +4,10 @@
 *  
 *  История изменений
 *  =================
+*  <table frame=void><tr><td></td></tr></table>
+*  
+*  Version: 2.3.3.2583 Unknown
+*  -----
 *  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект \ref CovelliteApiPage : </td></tr></table>
 *  <table frame=void border=1 bordercolor=#FFFFFF cellpadding=5 cellspacing=0 width=98%><tr>
 *    <td width=10px></td>

@@ -27,6 +27,7 @@ public:
     MOCK_METHOD1(PresentFrame, void(::mock::Id_t));
     MOCK_METHOD3(ResizeWindow, void(::mock::Id_t, int32_t, int32_t));
     MOCK_METHOD1(GetCreators, const Creators_t &(::mock::Id_t));
+    MOCK_METHOD1(GetDrawCallCount, size_t(::mock::Id_t));
   };
 
 public:
@@ -51,6 +52,11 @@ public:
   const Creators_t & GetCreators(void) const override
   {
     return Proxy::GetInstance()->GetCreators(m_Id);
+  }
+
+  size_t GetDrawCallCount(void) const override
+  {
+    return Proxy::GetInstance()->GetDrawCallCount(m_Id);
   }
 
 public:

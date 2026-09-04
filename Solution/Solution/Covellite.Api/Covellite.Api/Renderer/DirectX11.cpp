@@ -1000,14 +1000,14 @@ auto DirectX11::CreateTextureArray(const ComponentPtr_t & _pComponent) -> Render
   };
 }
 
-auto DirectX11::CreateShader(const ComponentPtr_t & _pComponent) -> Render_t /*override*/
+/*static*/ auto DirectX11::CompileShader(
+  const ComponentPtr_t & _pComponent,
+  String_t * _pKind,
+  ::std::vector<String_t> * _pInstance) -> ComPtr_t<ID3DBlob>
 {
   using namespace ::alicorn::extension::std;
 
-  const auto pShaderDataComponent = CapturingServiceComponent::Get(_pComponent, 
-    { { uT("Shader"), _pComponent } })[0];
-
-  const Component::Shader ShaderData{ *pShaderDataComponent, ::Default };
+  const Component::Shader ShaderData(*_pComponent, ::Default);
 
   ::std::string Define =
     "#define COVELLITE_SHADER_DESKTOP\r\n"
@@ -1025,7 +1025,7 @@ auto DirectX11::CreateShader(const ComponentPtr_t & _pComponent) -> Render_t /*o
       "#define COVELLITE_SHADER_HLSL\r\n"
       "#define COVELLITE_SHADER_PIXEL\r\n";
 
-    if (ShaderData.ReturnType == "float4" || 
+    if (ShaderData.ReturnType == "float4" ||
       ShaderData.ReturnType == "vec4")
     {
       ShaderText += DirectX::Shader::Convert(
@@ -1037,9 +1037,30 @@ auto DirectX11::CreateShader(const ComponentPtr_t & _pComponent) -> Render_t /*o
     }
   }
 
-  const auto pCompiledShader = DirectX::Shader::Compile(
-    DirectX::Shader::Convert(Define) + HeaderShaderText, ShaderText, 
+  if (_pKind != nullptr)
+  {
+    *_pKind = ShaderData.Kind;
+  }
+
+  if (_pInstance != nullptr)
+  {
+    *_pInstance = ::std::move(ShaderData.Instance);
+  }
+
+  return DirectX::Shader::Compile(
+    DirectX::Shader::Convert(Define) + HeaderShaderText, ShaderText,
     Entry.c_str(), DirectX::Shader::GetVersion(ShaderData.Kind).c_str());
+}
+
+auto DirectX11::CreateShader(const ComponentPtr_t & _pComponent) -> Render_t /*override*/
+{
+  const auto pShaderDataComponent = CapturingServiceComponent::Get(_pComponent, 
+    { { uT("Shader"), _pComponent } })[0];
+
+  String_t Kind;
+  ::std::vector<String_t> Instance;
+  const auto pCompiledShader =
+    CompileShader(pShaderDataComponent, &Kind, &Instance);
 
   const auto VertexShader = 
     [&](const ::std::vector<D3D11_INPUT_ELEMENT_DESC> & _LayoutDesc)
@@ -1065,7 +1086,7 @@ auto DirectX11::CreateShader(const ComponentPtr_t & _pComponent) -> Render_t /*o
     };
   };
 
-  if (ShaderData.Kind == uT("Polygon"))
+  if (Kind == uT("Polygon"))
   {
     return VertexShader(
     {
@@ -1074,7 +1095,7 @@ auto DirectX11::CreateShader(const ComponentPtr_t & _pComponent) -> Render_t /*o
       { "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 12, D3D11_INPUT_PER_VERTEX_DATA, 0 },
     });
   }
-  else if (ShaderData.Kind == uT("Polyhedron"))
+  else if (Kind == uT("Polyhedron"))
   {
     return VertexShader(
     {
@@ -1083,7 +1104,7 @@ auto DirectX11::CreateShader(const ComponentPtr_t & _pComponent) -> Render_t /*o
       { "TEXCOORD", 0, DXGI_FORMAT_R32G32_FLOAT, 0, 24, D3D11_INPUT_PER_VERTEX_DATA, 0 },
     });
   }
-  else if (ShaderData.Kind == uT("Vertex"))
+  else if (Kind == uT("Vertex"))
   {
     ::std::vector<D3D11_INPUT_ELEMENT_DESC> LayoutDesc =
     {
@@ -1092,9 +1113,9 @@ auto DirectX11::CreateShader(const ComponentPtr_t & _pComponent) -> Render_t /*o
         { "NORMAL",   0, DXGI_FORMAT_R32G32B32A32_FLOAT, 0, 24, D3D11_INPUT_PER_VERTEX_DATA, 0 },
     };
 
-    for (UINT i = 0; i < static_cast<UINT>(ShaderData.Instance.size()); i++)
+    for (UINT i = 0; i < static_cast<UINT>(Instance.size()); i++)
     {
-      const auto Type = ShaderData.Instance[i];
+      const auto Type = Instance[i];
       const auto Format =
         (Type == uT("f")) ? DXGI_FORMAT_R32G32B32A32_FLOAT :
         (Type == uT("i")) ? DXGI_FORMAT_R32G32B32A32_SINT :

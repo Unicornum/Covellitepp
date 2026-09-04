@@ -41,6 +41,8 @@ public:
   virtual Rect GetClientRect(void) const = 0;
   /// Функция получения объекта создания/удаления рендеров для компонентов.
   virtual RendersPtr_t GetRenders(void) const = 0;
+  /// Количество drawcall'ов в последнем кадре.
+  virtual size_t GetDrawCallCount(void) const = 0;
 
 public:
   virtual ~IWindow(void) = default;

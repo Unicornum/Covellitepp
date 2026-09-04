@@ -40,6 +40,7 @@ public:
   // Èםעונפויס IGraphicApi:
   void PresentFrame(void) override;
   const Creators_t & GetCreators(void) const noexcept final;
+  size_t GetDrawCallCount(void) const final;
 
 protected:
   virtual Render_t CreateCamera(const ComponentPtr_t &) = 0;
@@ -104,6 +105,8 @@ private:
   const TimePoint_t m_StartProgram;
   float             m_CurrentFrameTime;
   const uint8_t Align2[4] = { 0 };
+  size_t            m_DrawCallCount = 0;
+  size_t            m_DrawCallCounter = 0;
 
 protected:
   class Constants;

@@ -53,9 +53,7 @@ namespace renderer
 static PIXELFORMATDESCRIPTOR PixelFormatDescriptor = { 0 };
 
 OpenGL::OpenGL(const Data_t & _Data) :
-  OpenGLCommonShader(_Data, uT("OpenGL "), 
-    "#version 330 core\r\n"
-    "#define COVELLITE_SHADER_DESKTOP\r\n"),
+  OpenGLCommonShader(_Data, uT("OpenGL "), DesktopShaderHeader),
   m_hWnd(::covellite::any_cast<HWND>(_Data.Handle)),
   m_hDeviceContex(USING_MOCK ::GetDC(m_hWnd))
 {
