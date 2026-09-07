@@ -17,7 +17,7 @@
 *  Описание раздела \subpage BuildPage
 *
 *  Проекты решения
-*  ---------------
+*  ===============
 *  
 *  ### Covellite.Gui
 *
@@ -60,8 +60,18 @@
 * \copydoc CovelliteEventsBriefPage
 *
 *  Страница проекта \subpage CovelliteEventsPage
-*
-*  ### Example
+* 
+*  ## Раздел Tools
+*  
+*  Вспомогательные утилиты.
+*  
+*  ### CheckShaderCompilation.App
+*  
+* \copydoc CheckShaderCompilationAppBriefPage
+*  
+*  Страница проекта \subpage CheckShaderCompilationAppPage
+*  
+*  ## Example
 *
 * \copydoc ExampleBriefPage
 *
