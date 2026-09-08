@@ -2,8 +2,35 @@
 #include "stdafx.h"
 #include <iostream>
 #include <boost/program_options.hpp>
+#include <alicorn/std/exception.hpp>
 
-int main(int _Argc, char * _ppArgv[])
+class ShaderFiles
+{
+  using Path_t = ::boost::filesystem::path;
+
+public:
+  void CompileAsHLSL(void) const
+  {
+    throw ::std::runtime_error("CompileAsHLSL(): not implemented");
+  }
+
+  void CompileAsGLSL(void) const
+  {
+    throw ::std::runtime_error("CompileAsGLSL(): not implemented");
+  }
+
+public:
+  ShaderFiles(const Path_t & _PathToFile)
+  {
+    if (!::boost::filesystem::exists(_PathToFile))
+    {
+      throw EXCEPTION_NO_FILE_LINE(::std::runtime_error) <<
+        _PathToFile.string() << "(): error C0000: not exists file";
+    }
+  }
+};
+
+int main(const int _Argc, const char * const _ppArgv[])
 {
   using Path_t = ::boost::filesystem::path;
   using namespace ::boost::program_options;
@@ -27,8 +54,6 @@ int main(int _Argc, char * _ppArgv[])
   catch (const ::std::exception & _Ex)
   {
     ::std::cout << "(): error C0000: " << _Ex.what() << ::std::endl;
-    //::std::cout << Description << ::std::endl;
-    //return -1;
   }
 
   if (Options.count("help"))
@@ -39,15 +64,21 @@ int main(int _Argc, char * _ppArgv[])
 
   if (Options.count("file"))
   {
-    // Process the source file
-  }
-
-  if (Options.count("hlsl"))
-  {
     try
     {
-      //CompileAsHLSL(...);
-      return 0;
+      const ShaderFiles Files(Options["file"].as<Path_t>());
+
+      if (Options.count("hlsl"))
+      {
+        Files.CompileAsHLSL();
+        return 0;
+      }
+
+      if (Options.count("glsl"))
+      {
+        Files.CompileAsGLSL();
+        return 0;
+      }
     }
     catch (const ::std::exception & _Ex)
     {
@@ -55,21 +86,6 @@ int main(int _Argc, char * _ppArgv[])
       return -1;
     }
   }
-
-  if (Options.count("glsl"))
-  {
-    try
-    {
-      //CompileAsGLSL(...);
-      return 0;
-    }
-    catch (const ::std::exception & _Ex)
-    {
-      ::std::cout << _Ex.what() << ::std::endl;
-      return -1;
-    }
-  }
-
 
   ::std::cout << Description << ::std::endl;
   return -1;

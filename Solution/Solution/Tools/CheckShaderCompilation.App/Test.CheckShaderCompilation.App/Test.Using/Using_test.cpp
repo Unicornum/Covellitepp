@@ -39,6 +39,12 @@ protected:
     "  --glsl                Check shader as GLSL.\r\n"
     ;
 
+protected:
+  const Path_t m_PathToExampleFile =
+    THIS_DIRECTORY / L"Example.fxdef";
+  const Path_t m_PathToNotExistsInsideFile =
+    THIS_DIRECTORY / L"NotExistsInside.fxdef";
+
 public:
   Using_test(void) :
     Tools_test("CheckShaderCompilation.exe")
@@ -107,7 +113,12 @@ TEST_F(Using_test, /*DISABLED_*/Test_UnknownParameters)
 // ************************************************************************** //
 TEST_F(Using_test, /*DISABLED_*/Test_FileOnly)
 {
-  const auto Params = { uT("--file=version.hpp") };
+  using namespace ::alicorn::extension::std;
+
+  const auto Params =
+  {
+    uT("--file=") + string_cast<String>(m_PathToExampleFile)
+  };
 
   const auto Result = RunProcess(Params);
   EXPECT_EQ(-1, Result.ReturnCode);
@@ -127,7 +138,37 @@ TEST_F(Using_test, /*DISABLED_*/Test_HLSL_WithoutFile)
 // ************************************************************************** //
 TEST_F(Using_test, /*DISABLED_*/Test_HLSL_NotExistsFiles)
 {
-  FAIL() << u8"Добавить тесты";
+  {
+    const ::std::string ExpectMessage = "NotExists.hpp(): error C0000: "
+      "not exists file\r\n";
+
+    const auto Params =
+    {
+      uT("--file=NotExists.hpp"),
+      uT("--hlsl"),
+    };
+
+    const auto Result = RunProcess(Params);
+    EXPECT_EQ(-1, Result.ReturnCode);
+    EXPECT_EQ(ExpectMessage, Result.ConsoleOutput);
+  }
+
+  {
+    const ::std::string ExpectMessage = "NotExistsInside.fxdef(): error C0000: "
+      "not exists file NotExistsFile.fx\r\n" + AllowedOptions;
+
+    using namespace ::alicorn::extension::std;
+
+    const auto Params =
+    {
+      uT("--file=") + string_cast<String>(m_PathToNotExistsInsideFile),
+      uT("--hlsl"),
+    };
+
+    const auto Result = RunProcess(Params);
+    EXPECT_EQ(-1, Result.ReturnCode);
+    EXPECT_EQ(ExpectMessage, Result.ConsoleOutput);
+  }
 }
 
 // ************************************************************************** //
@@ -144,7 +185,6 @@ TEST_F(Using_test, /*DISABLED_*/Test_HLSL_ValidFile)
 
 // ************************************************************************** //
 TEST_F(Using_test, /*DISABLED_*/Test_GLSL_WithoutFile)
-
 {
   const auto Params = { uT("--glsl") };
 
@@ -156,7 +196,37 @@ TEST_F(Using_test, /*DISABLED_*/Test_GLSL_WithoutFile)
 // ************************************************************************** //
 TEST_F(Using_test, /*DISABLED_*/Test_GLSL_NotExistsFiles)
 {
-  FAIL() << u8"Добавить тесты";
+  {
+    const ::std::string ExpectMessage = "Path\\To\\NotExists.hpp(): error C0000: "
+      "not exists file\r\n";
+
+    const auto Params =
+    {
+      uT("--file=Path\\To\\NotExists.hpp"),
+      uT("--glsl"),
+    };
+
+    const auto Result = RunProcess(Params);
+    EXPECT_EQ(-1, Result.ReturnCode);
+    EXPECT_EQ(ExpectMessage, Result.ConsoleOutput);
+  }
+
+  {
+    const ::std::string ExpectMessage = "NotExistsInside.fxdef(): error C0000: "
+      "not exists file NotExistsFile.fx\r\n" + AllowedOptions;
+
+    using namespace ::alicorn::extension::std;
+
+    const auto Params =
+    {
+      uT("--file=") + string_cast<String>(m_PathToNotExistsInsideFile),
+      uT("--glsl"),
+    };
+
+    const auto Result = RunProcess(Params);
+    EXPECT_EQ(-1, Result.ReturnCode);
+    EXPECT_EQ(ExpectMessage, Result.ConsoleOutput);
+  }
 }
 
 // ************************************************************************** //
