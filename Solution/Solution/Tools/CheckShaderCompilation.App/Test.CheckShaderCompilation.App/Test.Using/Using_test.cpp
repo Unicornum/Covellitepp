@@ -1,5 +1,7 @@
 
 #include "stdafx.h"
+#include <alicorn\std\chrono.mock.hpp>
+#include <Tools\Tools_test.hpp>
 
 // Примеры макросов библиотеки Google Test
 #include <alicorn\google\test\example.hpp>
@@ -14,7 +16,8 @@
 
 // Общий тестовый класс класса Using
 class Using_test :
-  public ::testing::Test
+  public ::testing::Test,
+  public Tools_test
 {
 protected:
   // Вызывается ПЕРЕД запуском каждого теста
@@ -25,6 +28,22 @@ protected:
   // Вызывается ПОСЛЕ запуска каждого теста
   void TearDown(void) noexcept override
   {
+  }
+
+protected:
+  const ::std::string AllowedOptions =
+    "Allowed options:\r\n"
+    "  --help                Produce help message.\r\n"
+    "  --file arg            Path to shader pack file.\r\n"
+    "  --hlsl                Check shader as HLSL.\r\n"
+    "  --glsl                Check shader as GLSL.\r\n"
+    ;
+
+public:
+  Using_test(void) :
+    Tools_test("CheckShaderCompilation.exe")
+  {
+
   }
 };
 
@@ -37,7 +56,117 @@ ALICORN_DISABLE_GTEST_WARNINGS
 // FRIEND_TEST(Using_test, Test_Function);
 
 // ************************************************************************** //
-TEST_F(Using_test, /*DISABLED_*/Test_Function)
+TEST_F(Using_test, /*DISABLED_*/Test_EmptyParameters)
+{
+  const auto Params = { uT("") };
+
+  const auto Result = RunProcess(Params);
+  EXPECT_EQ(-1, Result.ReturnCode);
+  EXPECT_EQ(AllowedOptions, Result.ConsoleOutput);
+}
+
+// ************************************************************************** //
+TEST_F(Using_test, /*DISABLED_*/Test_Help)
+{
+  const auto Params = { uT("--help") };
+
+  const auto Result = RunProcess(Params);
+  EXPECT_EQ(0, Result.ReturnCode);
+  EXPECT_EQ(AllowedOptions, Result.ConsoleOutput);
+}
+
+// ************************************************************************** //
+TEST_F(Using_test, /*DISABLED_*/Test_Help_IgnoreAnotherCommand)
+{
+  const auto Params =
+  {
+    uT("--help"),
+    uT("--file=version.hpp"),
+    uT("--hlsl"),
+    uT("--glsl"),
+  };
+
+  const auto Result = RunProcess(Params);
+  EXPECT_EQ(0, Result.ReturnCode);
+  EXPECT_EQ(AllowedOptions, Result.ConsoleOutput);
+}
+
+// ************************************************************************** //
+TEST_F(Using_test, /*DISABLED_*/Test_UnknownParameters)
+{
+  const ::std::string ExpectMessage = "(): error C0000: "
+    "unrecognised option '--unknown'\r\n" + AllowedOptions;
+
+  const auto Params = { uT("--unknown") };
+
+  const auto Result = RunProcess(Params);
+  EXPECT_EQ(-1, Result.ReturnCode);
+  EXPECT_EQ(ExpectMessage, Result.ConsoleOutput);
+}
+
+// ************************************************************************** //
+TEST_F(Using_test, /*DISABLED_*/Test_FileOnly)
+{
+  const auto Params = { uT("--file=version.hpp") };
+
+  const auto Result = RunProcess(Params);
+  EXPECT_EQ(-1, Result.ReturnCode);
+  EXPECT_EQ(AllowedOptions, Result.ConsoleOutput);
+}
+
+// ************************************************************************** //
+TEST_F(Using_test, /*DISABLED_*/Test_HLSL_WithoutFile)
+{
+  const auto Params = { uT("--hlsl") };
+
+  const auto Result = RunProcess(Params);
+  EXPECT_EQ(-1, Result.ReturnCode);
+  EXPECT_EQ(AllowedOptions, Result.ConsoleOutput);
+}
+
+// ************************************************************************** //
+TEST_F(Using_test, /*DISABLED_*/Test_HLSL_NotExistsFiles)
+{
+  FAIL() << u8"Добавить тесты";
+}
+
+// ************************************************************************** //
+TEST_F(Using_test, /*DISABLED_*/Test_HLSL_InvalidFile)
+{
+  FAIL() << u8"Добавить тесты";
+}
+
+// ************************************************************************** //
+TEST_F(Using_test, /*DISABLED_*/Test_HLSL_ValidFile)
+{
+  FAIL() << u8"Добавить тесты";
+}
+
+// ************************************************************************** //
+TEST_F(Using_test, /*DISABLED_*/Test_GLSL_WithoutFile)
+
+{
+  const auto Params = { uT("--glsl") };
+
+  const auto Result = RunProcess(Params);
+  EXPECT_EQ(-1, Result.ReturnCode);
+  EXPECT_EQ(AllowedOptions, Result.ConsoleOutput);
+}
+
+// ************************************************************************** //
+TEST_F(Using_test, /*DISABLED_*/Test_GLSL_NotExistsFiles)
+{
+  FAIL() << u8"Добавить тесты";
+}
+
+// ************************************************************************** //
+TEST_F(Using_test, /*DISABLED_*/Test_GLSL_InvalidFile)
+{
+  FAIL() << u8"Добавить тесты";
+}
+
+// ************************************************************************** //
+TEST_F(Using_test, /*DISABLED_*/Test_GLSL_ValidFile)
 {
   FAIL() << u8"Добавить тесты";
 }

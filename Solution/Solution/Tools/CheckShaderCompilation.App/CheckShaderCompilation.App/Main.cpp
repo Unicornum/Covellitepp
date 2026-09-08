@@ -3,7 +3,7 @@
 #include <iostream>
 #include <boost/program_options.hpp>
 
-int main(int argc, char * argv[])
+int main(int _Argc, char * _ppArgv[])
 {
   using Path_t = ::boost::filesystem::path;
   using namespace ::boost::program_options;
@@ -12,22 +12,23 @@ int main(int argc, char * argv[])
 
   Description.add_options()
     ("help", "Produce help message.")
-    ("file", value<Path_t>(), "Path to source .rml file.")
-    ("hlsl", value<Path_t>(), "Path to result .png file.")
-    ("glsl", value<Path_t>(), "Path to result .png file.")
+    ("file", value<Path_t>(), "Path to shader pack file.")
+    ("hlsl", "Check shader as HLSL.")
+    ("glsl", "Check shader as GLSL.")
     ;
 
   variables_map Options;
 
   try
   {
-    store(command_line_parser(argc, argv).options(Description).run(), Options);
+    store(command_line_parser(_Argc, _ppArgv).options(Description).run(), Options);
     notify(Options);
   }
-  catch (const ::std::exception &)
+  catch (const ::std::exception & _Ex)
   {
-    ::std::cout << Description << ::std::endl;
-    return -1;
+    ::std::cout << "(): error C0000: " << _Ex.what() << ::std::endl;
+    //::std::cout << Description << ::std::endl;
+    //return -1;
   }
 
   if (Options.count("help"))
@@ -45,7 +46,7 @@ int main(int argc, char * argv[])
   {
     try
     {
-      //CompileHLSL(...);
+      //CompileAsHLSL(...);
       return 0;
     }
     catch (const ::std::exception & _Ex)
@@ -59,7 +60,7 @@ int main(int argc, char * argv[])
   {
     try
     {
-      //CompileGLSL(...);
+      //CompileAsGLSL(...);
       return 0;
     }
     catch (const ::std::exception & _Ex)
