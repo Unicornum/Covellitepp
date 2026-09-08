@@ -559,6 +559,17 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SDK", "SDK", "{11AFAC1E-2F1
 		Solution\Solution\SDK\ReadMe.txt = Solution\Solution\SDK\ReadMe.txt
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tools", "Tools", "{44579BE3-E3E6-479A-A7FF-B4FC6B121518}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "CheckShaderCompilation.App", "CheckShaderCompilation.App", "{6107B2E2-4F09-46A3-800C-9C427448F2A8}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CheckShaderCompilation.App", "Solution\Solution\Tools\CheckShaderCompilation.App\CheckShaderCompilation.App\CheckShaderCompilation.App.vcxproj", "{1AB609A1-DA9A-4C18-A468-926320DC793F}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "(Documentation)", "(Documentation)", "{42EEDE15-7971-49DD-86E4-60B37D7C89DB}"
+	ProjectSection(SolutionItems) = preProject
+		Solution\Solution\Tools\CheckShaderCompilation.App\(Documentation)\ProjectPage.hpp = Solution\Solution\Tools\CheckShaderCompilation.App\(Documentation)\ProjectPage.hpp
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug.Product|ARM64 = Debug.Product|ARM64
@@ -1564,6 +1575,18 @@ Global
 		{0DA08785-A170-4321-8B8B-13EF61FA36D7}.Release|ARM64.ActiveCfg = Release|x64
 		{0DA08785-A170-4321-8B8B-13EF61FA36D7}.Release|x64.ActiveCfg = Release|x64
 		{0DA08785-A170-4321-8B8B-13EF61FA36D7}.Release|x64.Build.0 = Release|x64
+		{1AB609A1-DA9A-4C18-A468-926320DC793F}.Debug.Product|ARM64.ActiveCfg = Debug|x64
+		{1AB609A1-DA9A-4C18-A468-926320DC793F}.Debug.Product|x64.ActiveCfg = Debug|x64
+		{1AB609A1-DA9A-4C18-A468-926320DC793F}.Debug.Product|x64.Build.0 = Debug|x64
+		{1AB609A1-DA9A-4C18-A468-926320DC793F}.Debug|ARM64.ActiveCfg = Debug|x64
+		{1AB609A1-DA9A-4C18-A468-926320DC793F}.Debug|x64.ActiveCfg = Debug|x64
+		{1AB609A1-DA9A-4C18-A468-926320DC793F}.Debug|x64.Build.0 = Debug|x64
+		{1AB609A1-DA9A-4C18-A468-926320DC793F}.Release.Product|ARM64.ActiveCfg = Release|x64
+		{1AB609A1-DA9A-4C18-A468-926320DC793F}.Release.Product|x64.ActiveCfg = Release|x64
+		{1AB609A1-DA9A-4C18-A468-926320DC793F}.Release.Product|x64.Build.0 = Release|x64
+		{1AB609A1-DA9A-4C18-A468-926320DC793F}.Release|ARM64.ActiveCfg = Release|x64
+		{1AB609A1-DA9A-4C18-A468-926320DC793F}.Release|x64.ActiveCfg = Release|x64
+		{1AB609A1-DA9A-4C18-A468-926320DC793F}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -1683,6 +1706,10 @@ Global
 		{834EAA44-E0DB-476E-9D26-DA27F845E3D1} = {F3C7AFB5-D5F6-4460-AB5F-AF218F350A43}
 		{0DA08785-A170-4321-8B8B-13EF61FA36D7} = {A1625B89-EE05-4E0A-8A19-62CD2C243E8A}
 		{11AFAC1E-2F1F-4937-832A-D996C7976DF4} = {E4463267-802E-423D-8D5A-7243F92CBA2D}
+		{44579BE3-E3E6-479A-A7FF-B4FC6B121518} = {E4463267-802E-423D-8D5A-7243F92CBA2D}
+		{6107B2E2-4F09-46A3-800C-9C427448F2A8} = {44579BE3-E3E6-479A-A7FF-B4FC6B121518}
+		{1AB609A1-DA9A-4C18-A468-926320DC793F} = {6107B2E2-4F09-46A3-800C-9C427448F2A8}
+		{42EEDE15-7971-49DD-86E4-60B37D7C89DB} = {6107B2E2-4F09-46A3-800C-9C427448F2A8}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {C1363F25-17E1-4DB1-AE71-7921BFCA0645}
