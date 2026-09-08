@@ -48,9 +48,11 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "BuildAll", "Solution\Build\BuildAll\BuildAll.vcxproj", "{B4DA1495-8E5E-461A-B683-1E8B02D01678}"
 	ProjectSection(ProjectDependencies) = postProject
 		{12B6D0D0-7936-4680-9800-2F145C6A7F17} = {12B6D0D0-7936-4680-9800-2F145C6A7F17}
+		{1AB609A1-DA9A-4C18-A468-926320DC793F} = {1AB609A1-DA9A-4C18-A468-926320DC793F}
 		{54315DD6-D9F6-4423-8712-B8DEFEEB6CD8} = {54315DD6-D9F6-4423-8712-B8DEFEEB6CD8}
 		{AFAEDCA2-A3C6-4FC3-A972-525CD8E75A57} = {AFAEDCA2-A3C6-4FC3-A972-525CD8E75A57}
 		{BC1B0A9D-C107-4E52-8E3C-6C479FC83380} = {BC1B0A9D-C107-4E52-8E3C-6C479FC83380}
+		{C10AD30B-C13E-45A6-AE5D-325686F805D7} = {C10AD30B-C13E-45A6-AE5D-325686F805D7}
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Clean", "Solution\Build\Clean\Clean.vcxproj", "{9BFFECD0-7F8D-45B4-8834-4637D0BA8DB1}"
@@ -564,10 +566,18 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "CheckShaderCompilation.App", "CheckShaderCompilation.App", "{6107B2E2-4F09-46A3-800C-9C427448F2A8}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CheckShaderCompilation.App", "Solution\Solution\Tools\CheckShaderCompilation.App\CheckShaderCompilation.App\CheckShaderCompilation.App.vcxproj", "{1AB609A1-DA9A-4C18-A468-926320DC793F}"
+	ProjectSection(ProjectDependencies) = postProject
+		{6314E391-0A82-4703-A819-7BC337D46715} = {6314E391-0A82-4703-A819-7BC337D46715}
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "(Documentation)", "(Documentation)", "{42EEDE15-7971-49DD-86E4-60B37D7C89DB}"
 	ProjectSection(SolutionItems) = preProject
 		Solution\Solution\Tools\CheckShaderCompilation.App\(Documentation)\ProjectPage.hpp = Solution\Solution\Tools\CheckShaderCompilation.App\(Documentation)\ProjectPage.hpp
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CheckShaderCompilation", "Solution\Solution\Externals\Tools\CheckShaderCompilation\CheckShaderCompilation.vcxproj", "{C10AD30B-C13E-45A6-AE5D-325686F805D7}"
+	ProjectSection(ProjectDependencies) = postProject
+		{1AB609A1-DA9A-4C18-A468-926320DC793F} = {1AB609A1-DA9A-4C18-A468-926320DC793F}
 	EndProjectSection
 EndProject
 Global
@@ -1587,6 +1597,18 @@ Global
 		{1AB609A1-DA9A-4C18-A468-926320DC793F}.Release|ARM64.ActiveCfg = Release|x64
 		{1AB609A1-DA9A-4C18-A468-926320DC793F}.Release|x64.ActiveCfg = Release|x64
 		{1AB609A1-DA9A-4C18-A468-926320DC793F}.Release|x64.Build.0 = Release|x64
+		{C10AD30B-C13E-45A6-AE5D-325686F805D7}.Debug.Product|ARM64.ActiveCfg = Debug|x64
+		{C10AD30B-C13E-45A6-AE5D-325686F805D7}.Debug.Product|x64.ActiveCfg = Debug|x64
+		{C10AD30B-C13E-45A6-AE5D-325686F805D7}.Debug.Product|x64.Build.0 = Debug|x64
+		{C10AD30B-C13E-45A6-AE5D-325686F805D7}.Debug|ARM64.ActiveCfg = Debug|x64
+		{C10AD30B-C13E-45A6-AE5D-325686F805D7}.Debug|x64.ActiveCfg = Debug|x64
+		{C10AD30B-C13E-45A6-AE5D-325686F805D7}.Debug|x64.Build.0 = Debug|x64
+		{C10AD30B-C13E-45A6-AE5D-325686F805D7}.Release.Product|ARM64.ActiveCfg = Release|x64
+		{C10AD30B-C13E-45A6-AE5D-325686F805D7}.Release.Product|x64.ActiveCfg = Release|x64
+		{C10AD30B-C13E-45A6-AE5D-325686F805D7}.Release.Product|x64.Build.0 = Release|x64
+		{C10AD30B-C13E-45A6-AE5D-325686F805D7}.Release|ARM64.ActiveCfg = Release|x64
+		{C10AD30B-C13E-45A6-AE5D-325686F805D7}.Release|x64.ActiveCfg = Release|x64
+		{C10AD30B-C13E-45A6-AE5D-325686F805D7}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -1710,6 +1732,7 @@ Global
 		{6107B2E2-4F09-46A3-800C-9C427448F2A8} = {44579BE3-E3E6-479A-A7FF-B4FC6B121518}
 		{1AB609A1-DA9A-4C18-A468-926320DC793F} = {6107B2E2-4F09-46A3-800C-9C427448F2A8}
 		{42EEDE15-7971-49DD-86E4-60B37D7C89DB} = {6107B2E2-4F09-46A3-800C-9C427448F2A8}
+		{C10AD30B-C13E-45A6-AE5D-325686F805D7} = {6107B2E2-4F09-46A3-800C-9C427448F2A8}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {C1363F25-17E1-4DB1-AE71-7921BFCA0645}
