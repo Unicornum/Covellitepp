@@ -7,6 +7,9 @@
     <Filter Include="Tests">
       <UniqueIdentifier>{8c9b3b90-01b4-4c5a-9f59-393719bfa270}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Tests\Using">
+      <UniqueIdentifier>{1f7d025a-d03d-49a7-b56a-0c3538b1f577}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="Resources.rc">
@@ -16,6 +19,9 @@
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
       <Filter>Source</Filter>
+    </ClCompile>
+    <ClCompile Include="Test.Using\Using_test.cpp">
+      <Filter>Tests\Using</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
