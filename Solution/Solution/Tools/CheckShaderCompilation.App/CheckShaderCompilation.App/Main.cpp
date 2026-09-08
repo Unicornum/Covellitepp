@@ -1,12 +1,16 @@
 
 #include "stdafx.h"
 #include <iostream>
+#include <boost/filesystem.hpp>
 #include <boost/program_options.hpp>
 #include <alicorn/std/exception.hpp>
+#include <alicorn/document.hpp>
 
 class ShaderFiles
 {
   using Path_t = ::boost::filesystem::path;
+  using Encoding_t = ::alicorn::extension::std::Encoding;
+  using Text_t = ::alicorn::source::document::Text_t<Encoding_t::Russian::CP1251>;
 
 public:
   void CompileAsHLSL(void) const
@@ -19,6 +23,10 @@ public:
     throw ::std::runtime_error("CompileAsGLSL(): not implemented");
   }
 
+private:
+  Path_t m_PathToShaderDirectories;
+  ::std::vector<Path_t> m_ShaderFiles;
+
 public:
   ShaderFiles(const Path_t & _PathToFile)
   {
@@ -26,6 +34,23 @@ public:
     {
       throw EXCEPTION_NO_FILE_LINE(::std::runtime_error) <<
         _PathToFile.string() << "(): error C0000: not exists file";
+    }
+
+    m_PathToShaderDirectories = _PathToFile.parent_path();
+
+    Text_t Example(_PathToFile);
+
+    for (auto Line : Example)
+    {
+      const auto PathToFxFile = m_PathToShaderDirectories / Line.Value.To<Path_t>();
+
+      if (!::boost::filesystem::exists(PathToFxFile))
+      {
+        throw EXCEPTION_NO_FILE_LINE(::std::runtime_error) <<
+          PathToFxFile.string() << "(): error C0000: not exists file.";
+      }
+
+      m_ShaderFiles.push_back(PathToFxFile);
     }
   }
 };

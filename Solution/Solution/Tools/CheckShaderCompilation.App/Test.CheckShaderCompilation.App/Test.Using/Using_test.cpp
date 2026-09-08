@@ -154,8 +154,9 @@ TEST_F(Using_test, /*DISABLED_*/Test_HLSL_NotExistsFiles)
   }
 
   {
-    const ::std::string ExpectMessage = "NotExistsInside.fxdef(): error C0000: "
-      "not exists file NotExistsFile.fx\r\n" + AllowedOptions;
+    const ::std::string ExpectMessage =
+      (THIS_DIRECTORY / "NotExistsFile.fx").string() +
+      "(): error C0000: not exists file.\r\n";
 
     using namespace ::alicorn::extension::std;
 
@@ -212,8 +213,9 @@ TEST_F(Using_test, /*DISABLED_*/Test_GLSL_NotExistsFiles)
   }
 
   {
-    const ::std::string ExpectMessage = "NotExistsInside.fxdef(): error C0000: "
-      "not exists file NotExistsFile.fx\r\n" + AllowedOptions;
+    const ::std::string ExpectMessage =
+      (THIS_DIRECTORY / "NotExistsFile.fx").string() +
+      "(): error C0000: not exists file.\r\n";
 
     using namespace ::alicorn::extension::std;
 

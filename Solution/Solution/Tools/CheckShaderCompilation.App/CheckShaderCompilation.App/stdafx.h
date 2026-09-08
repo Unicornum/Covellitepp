@@ -1,5 +1,4 @@
 
 #pragma once
 #include "targetver.h"
-#include <stdio.h>
-#include <boost\filesystem.hpp>
+#include <alicorn/requirements.hpp>
