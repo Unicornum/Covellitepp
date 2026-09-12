@@ -12,6 +12,7 @@
     <ClInclude Include="targetver.h">
       <Filter>Common</Filter>
     </ClInclude>
+    <ClInclude Include="Initial.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">

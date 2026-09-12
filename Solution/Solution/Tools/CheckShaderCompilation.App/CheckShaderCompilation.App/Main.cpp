@@ -5,55 +5,8 @@
 #include <boost/program_options.hpp>
 #include <alicorn/std/exception.hpp>
 #include <alicorn/document.hpp>
-
-class ShaderFiles
-{
-  using Path_t = ::boost::filesystem::path;
-  using Encoding_t = ::alicorn::extension::std::Encoding;
-  using Text_t = ::alicorn::source::document::Text_t<Encoding_t::Russian::CP1251>;
-
-public:
-  void CompileAsHLSL(void) const
-  {
-    throw ::std::runtime_error("CompileAsHLSL(): not implemented");
-  }
-
-  void CompileAsGLSL(void) const
-  {
-    throw ::std::runtime_error("CompileAsGLSL(): not implemented");
-  }
-
-private:
-  Path_t m_PathToShaderDirectories;
-  ::std::vector<Path_t> m_ShaderFiles;
-
-public:
-  ShaderFiles(const Path_t & _PathToFile)
-  {
-    if (!::boost::filesystem::exists(_PathToFile))
-    {
-      throw EXCEPTION_NO_FILE_LINE(::std::runtime_error) <<
-        _PathToFile.string() << "(): error C0000: not exists file";
-    }
-
-    m_PathToShaderDirectories = _PathToFile.parent_path();
-
-    Text_t Example(_PathToFile);
-
-    for (auto Line : Example)
-    {
-      const auto PathToFxFile = m_PathToShaderDirectories / Line.Value.To<Path_t>();
-
-      if (!::boost::filesystem::exists(PathToFxFile))
-      {
-        throw EXCEPTION_NO_FILE_LINE(::std::runtime_error) <<
-          PathToFxFile.string() << "(): error C0000: not exists file.";
-      }
-
-      m_ShaderFiles.push_back(PathToFxFile);
-    }
-  }
-};
+#include "Initial.hpp"
+#include "Serializator.inl"
 
 int main(const int _Argc, const char * const _ppArgv[])
 {
@@ -91,17 +44,29 @@ int main(const int _Argc, const char * const _ppArgv[])
   {
     try
     {
-      const ShaderFiles Files(Options["file"].as<Path_t>());
+      const auto PathToFile = Options["file"].as<Path_t>();
+
+      if (!::boost::filesystem::exists(PathToFile))
+      {
+        throw EXCEPTION_NO_FILE_LINE(::std::runtime_error) <<
+          PathToFile.string() << "(): error C0000: not exists file";
+      }
+
+      using namespace ::game::repository;
+
+      const auto pShader = Serializator<initial::Shader_t>::Read(
+        ::boost::filesystem::load_binary_file(PathToFile))
+        .BuildComponent(PathToFile.parent_path());
 
       if (Options.count("hlsl"))
       {
-        Files.CompileAsHLSL();
+        //DirectX11::Compile(pShader);
         return 0;
       }
 
       if (Options.count("glsl"))
       {
-        Files.CompileAsGLSL();
+        //OpenGL::Compile(pShader);
         return 0;
       }
     }

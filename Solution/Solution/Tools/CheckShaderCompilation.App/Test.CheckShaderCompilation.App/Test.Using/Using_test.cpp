@@ -9,6 +9,9 @@
 // Примеры макросов библиотеки Google Mock
 #include <alicorn\google\mock\example.hpp>
 
+#include "..\..\CheckShaderCompilation.App\Initial.hpp"
+#include "..\..\CheckShaderCompilation.App\Serializator.hpp"
+
 /**
 * \file
 *  Тесты класса Using.
@@ -41,9 +44,9 @@ protected:
 
 protected:
   const Path_t m_PathToExampleFile =
-    THIS_DIRECTORY / L"Example.fxdef";
+    THIS_DIRECTORY / L"Example.ini";
   const Path_t m_PathToNotExistsInsideFile =
-    THIS_DIRECTORY / L"NotExistsInside.fxdef";
+    THIS_DIRECTORY / L"NotExistsInside.ini";
 
 public:
   Using_test(void) :
@@ -113,6 +116,16 @@ TEST_F(Using_test, /*DISABLED_*/Test_UnknownParameters)
 // ************************************************************************** //
 TEST_F(Using_test, /*DISABLED_*/Test_FileOnly)
 {
+  //using namespace ::game::repository;
+
+  //Serializator<initial::Shader_t>::Write(
+  //  m_PathToNotExistsInsideFile,
+  //  initial::Shader_t{
+  //    { "NotExistsFile.fx" },
+  //    uT("Main"),
+  //    uT("Example")
+  //  });
+
   using namespace ::alicorn::extension::std;
 
   const auto Params =
