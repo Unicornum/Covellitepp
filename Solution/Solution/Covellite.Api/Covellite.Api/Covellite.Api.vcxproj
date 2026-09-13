@@ -79,6 +79,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="CompileShader.hpp" />
     <ClInclude Include="Component.hpp" />
     <ClInclude Include="Constant.hpp" />
     <ClInclude Include="Defines.hpp" />
@@ -111,6 +112,7 @@
     <ClInclude Include="Window.mock.hpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="CompileShader.cpp" />
     <ClCompile Include="Renderer\DirectX.cpp" />
     <ClCompile Include="Renderer\DirectX10.cpp">
       <DisableSpecificWarnings Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">26415;26418;%(DisableSpecificWarnings)</DisableSpecificWarnings>

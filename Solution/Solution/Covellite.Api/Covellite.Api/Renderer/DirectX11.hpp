@@ -1,6 +1,7 @@
 
 #pragma once
 #include <wrl.h>
+#include <d3dcommon.h>
 #include "GraphicApi.hpp"
 
 struct ID3D11Device;
@@ -73,6 +74,12 @@ protected:
   Render_t CreatePresentBuffer(const ComponentPtr_t &) override;
 
 private:
+  static ComPtr_t<ID3DBlob> CompileShader(
+    const ComponentPtr_t &,
+    String_t * = nullptr,
+    ::std::vector<String_t> * = nullptr);
+
+private:
   void CreateDeviceAndSwapChain(const Data_t &);
   void SetRenderTargetSize(const UINT, const UINT);
   void CreateRenderTargetView(const UINT, const UINT);
@@ -114,6 +121,7 @@ public:
   ~DirectX11(void);
 
 private:
+  friend class CompileShader;
   friend DirectX11_test;
   friend DirectX11Texture_test;
 };
