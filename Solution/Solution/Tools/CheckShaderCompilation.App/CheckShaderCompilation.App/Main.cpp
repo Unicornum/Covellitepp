@@ -5,6 +5,8 @@
 #include <boost/program_options.hpp>
 #include <alicorn/std/exception.hpp>
 #include <alicorn/document.hpp>
+#include <Covellite/App/Settings.hpp>
+#include <Covellite/Api.hpp>
 #include "Initial.hpp"
 #include "Serializator.inl"
 
@@ -52,21 +54,36 @@ int main(const int _Argc, const char * const _ppArgv[])
           PathToFile.string() << "(): error C0000: not exists file";
       }
 
+      using BinaryData_t = ::alicorn::extension::std::memory::BinaryData_t;
+
+      const auto LoadFile = [](const Path_t & _Path) -> BinaryData_t
+      {
+        namespace fs = ::boost::filesystem;
+
+        if (!fs::exists(_Path))
+        {
+          throw EXCEPTION_NO_FILE_LINE(::std::runtime_error) <<
+            _Path.string() << "(): error C0000: not exists file.";
+        }
+
+        return fs::load_binary_file(_Path);
+      };
+
       using namespace ::game::repository;
 
       const auto pShader = Serializator<initial::Shader_t>::Read(
         ::boost::filesystem::load_binary_file(PathToFile))
-        .BuildComponent(PathToFile.parent_path());
+        .BuildComponent(PathToFile.parent_path(), LoadFile);
 
       if (Options.count("hlsl"))
       {
-        //DirectX11::Compile(pShader);
+        ::covellite::api::CompileShader::AsHLSL(pShader);
         return 0;
       }
 
       if (Options.count("glsl"))
       {
-        //OpenGL::Compile(pShader);
+        ::covellite::api::CompileShader::AsGLSL(pShader);
         return 0;
       }
     }
@@ -80,3 +97,15 @@ int main(const int _Argc, const char * const _ppArgv[])
   ::std::cout << Description << ::std::endl;
   return -1;
 }
+
+namespace alicorn::extension::std
+{
+
+using namespace ::covellite::app;
+
+/*static*/ SectionPtr_t Singleton<Section_t>::Make(void)
+{
+  throw STD_EXCEPTION << "Not needed";
+}
+
+} // namespace alicorn::extension::std

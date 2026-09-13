@@ -116,16 +116,6 @@ TEST_F(Using_test, /*DISABLED_*/Test_UnknownParameters)
 // ************************************************************************** //
 TEST_F(Using_test, /*DISABLED_*/Test_FileOnly)
 {
-  //using namespace ::game::repository;
-
-  //Serializator<initial::Shader_t>::Write(
-  //  m_PathToNotExistsInsideFile,
-  //  initial::Shader_t{
-  //    { "NotExistsFile.fx" },
-  //    uT("Main"),
-  //    uT("Example")
-  //  });
-
   using namespace ::alicorn::extension::std;
 
   const auto Params =
@@ -188,13 +178,59 @@ TEST_F(Using_test, /*DISABLED_*/Test_HLSL_NotExistsFiles)
 // ************************************************************************** //
 TEST_F(Using_test, /*DISABLED_*/Test_HLSL_InvalidFile)
 {
-  FAIL() << u8"Добавить тесты";
+  const Path_t m_PathToFile =
+    THIS_DIRECTORY / L"Invalid.ini";
+
+  using namespace ::game::repository;
+
+  Serializator<initial::Shader_t>::Write(
+    m_PathToFile,
+    initial::Shader_t{
+      { "Invalid.fx" },
+      uT("vsMain"),
+      uT("")
+    });
+
+  using namespace ::alicorn::extension::std;
+
+  const auto Params =
+  {
+    uT("--file=") + string_cast<String>(m_PathToFile),
+    uT("--hlsl"),
+  };
+
+  const auto Result = RunProcess(Params);
+  EXPECT_EQ(-1, Result.ReturnCode);
+  //EXPECT_EQ("", Result.ConsoleOutput);
 }
 
 // ************************************************************************** //
 TEST_F(Using_test, /*DISABLED_*/Test_HLSL_ValidFile)
 {
-  FAIL() << u8"Добавить тесты";
+  const Path_t m_PathToFile =
+    THIS_DIRECTORY / L"Valid.ini";
+
+  using namespace ::game::repository;
+
+  Serializator<initial::Shader_t>::Write(
+    m_PathToFile,
+    initial::Shader_t{
+      { "Valid.fx" },
+      uT("vsMain"),
+      uT("")
+    });
+
+  using namespace ::alicorn::extension::std;
+
+  const auto Params =
+  {
+    uT("--file=") + string_cast<String>(m_PathToFile),
+    uT("--hlsl"),
+  };
+
+  const auto Result = RunProcess(Params);
+  EXPECT_EQ(0, Result.ReturnCode);
+  EXPECT_EQ("", Result.ConsoleOutput);
 }
 
 // ************************************************************************** //

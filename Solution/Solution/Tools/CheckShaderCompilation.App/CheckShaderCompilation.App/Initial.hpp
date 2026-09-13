@@ -14,6 +14,8 @@ class Shader_t final
   using Entry_t = ::alicorn::extension::std::String;
   using Instance_t = ::alicorn::extension::std::String;
   using Path_t = ::boost::filesystem::path;
+  using BinaryData_t = ::alicorn::extension::std::memory::BinaryData_t;
+  using LoadFile_t = ::std::function<BinaryData_t(const Path_t &)>;
   using Component_t = ::covellite::api::Component;
   using ComponentPtr_t = ::std::shared_ptr<Component_t>;
 
@@ -45,6 +47,7 @@ public:
 
   ComponentPtr_t BuildComponent(
     const Path_t & _PathToRoot,
+    const LoadFile_t & _LoadFile,
     const String_t & _ShaderId = uT("")) const
   {
     using Data_t = ::alicorn::extension::std::memory::BinaryData_t;
@@ -54,15 +57,7 @@ public:
 
     for (const auto & PathToFile : PathToFiles)
     {
-      namespace fs = ::boost::filesystem;
-
-      if (!fs::exists(_PathToRoot / PathToFile))
-      {
-        throw EXCEPTION_NO_FILE_LINE(::std::runtime_error) <<
-          (_PathToRoot / PathToFile).string() << "(): error C0000: not exists file.";
-      }
-
-      ShaderData += fs::load_binary_file(_PathToRoot / PathToFile);
+      ShaderData += _LoadFile(_PathToRoot / PathToFile);
     }
 
     const auto pShader = Component_t::Make(
