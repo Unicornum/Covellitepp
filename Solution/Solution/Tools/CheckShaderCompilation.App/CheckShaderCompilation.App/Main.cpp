@@ -9,6 +9,7 @@
 #include <Covellite/Api.hpp>
 #include "Initial.hpp"
 #include "Serializator.inl"
+#include "Shell\Shell.h"
 
 int main(const int _Argc, const char * const _ppArgv[])
 {
@@ -83,6 +84,27 @@ int main(const int _Argc, const char * const _ppArgv[])
 
       if (Options.count("glsl"))
       {
+        ShellRenderInterfaceOpenGL OpenGLRenderer;
+
+        // Generic OS initialisation, creates a window and attaches OpenGL.
+        if (!Shell::Initialise("") ||
+          !Shell::OpenWindow(L"CheckShaderCompilation", &OpenGLRenderer,
+          10, 10, true, false))
+        {
+          return -1;
+        }
+
+        class Shutdown final
+        {
+        public:
+          ~Shutdown(void) noexcept
+          {
+            Shell::CloseWindow();
+          }
+        };
+
+        Shutdown oShutdown;
+
         ::covellite::api::CompileShader::AsGLSL(pShader);
         return 0;
       }

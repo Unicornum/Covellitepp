@@ -2,6 +2,7 @@
 #include "stdafx.h"
 #include "CompileShader.hpp"
 #include "Renderer/DirectX11.hpp"
+#include "Renderer/OpenGLCommonShader.hpp"
 
 namespace covellite::api
 {
@@ -13,7 +14,7 @@ namespace covellite::api
 
 /*static*/ void CompileShader::AsGLSL(const ComponentPtr_t & _pComponent)
 {
-  throw STD_EXCEPTION << "Not implemented yet.";
+  renderer::OpenGLCommonShader::CompileShader(_pComponent);
 }
 
 } // namespace covellite::api

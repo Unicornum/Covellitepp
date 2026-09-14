@@ -4,6 +4,9 @@
     <Filter Include="Common">
       <UniqueIdentifier>{fd6dc5a4-c540-477f-8355-8f7561dd3552}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Shell">
+      <UniqueIdentifier>{95395193-6e1f-4456-9a07-f96fa1e9f78c}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">
@@ -13,11 +16,29 @@
       <Filter>Common</Filter>
     </ClInclude>
     <ClInclude Include="Initial.hpp" />
+    <ClInclude Include="Shell\Shell.h">
+      <Filter>Shell</Filter>
+    </ClInclude>
+    <ClInclude Include="Shell\ShellRenderInterfaceExtensions.h">
+      <Filter>Shell</Filter>
+    </ClInclude>
+    <ClInclude Include="Shell\ShellRenderInterfaceOpenGL.h">
+      <Filter>Shell</Filter>
+    </ClInclude>
+    <ClInclude Include="Shell\stdafx.h">
+      <Filter>Shell</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
       <Filter>Common</Filter>
     </ClCompile>
     <ClCompile Include="Main.cpp" />
+    <ClCompile Include="Shell\ShellRenderInterfaceExtensionsOpenGL_Win32.cpp">
+      <Filter>Shell</Filter>
+    </ClCompile>
+    <ClCompile Include="Shell\ShellWin32.cpp">
+      <Filter>Shell</Filter>
+    </ClCompile>
   </ItemGroup>
 </Project>

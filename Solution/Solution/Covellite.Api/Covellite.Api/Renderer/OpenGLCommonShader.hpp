@@ -47,6 +47,9 @@ protected:
   Render_t CreateTransform(const ComponentPtr_t &) override;
   Render_t CreatePresentBuffer(const ComponentPtr_t &) override;
 
+protected:
+  static const ::std::string DesktopShaderHeader;
+
 private:
   Render_t GetCameraCommon(const ComponentPtr_t &);
   Render_t GetCameraOrthographic(const ComponentPtr_t &);
@@ -65,6 +68,9 @@ private:
   using ProgramsPtr_t = ::std::shared_ptr<Programs>;
   const ProgramsPtr_t m_pPrograms;
 
+private:
+  static void CompileShader(const ComponentPtr_t &);
+
 public:
   OpenGLCommonShader(const Data_t &, const String_t &, const ::std::string &);
   OpenGLCommonShader(const OpenGLCommonShader &) = delete;
@@ -72,6 +78,9 @@ public:
   OpenGLCommonShader & operator= (const OpenGLCommonShader &) = delete;
   OpenGLCommonShader & operator= (OpenGLCommonShader &&) = delete;
   ~OpenGLCommonShader(void) = default;
+
+private:
+  friend class CompileShader;
 };
 
 } // namespace renderer
