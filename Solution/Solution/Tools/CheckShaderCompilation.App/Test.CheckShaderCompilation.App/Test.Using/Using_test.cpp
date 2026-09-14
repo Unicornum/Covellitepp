@@ -31,6 +31,10 @@ protected:
   // Вызывается ПОСЛЕ запуска каждого теста
   void TearDown(void) noexcept override
   {
+    if (::boost::filesystem::exists(m_PathToWorkFile))
+    {
+      ::boost::filesystem::remove(m_PathToWorkFile);
+    }
   }
 
 protected:
@@ -43,10 +47,10 @@ protected:
     ;
 
 protected:
-  const Path_t m_PathToExampleFile =
-    THIS_DIRECTORY / L"Example.ini";
   const Path_t m_PathToNotExistsInsideFile =
     THIS_DIRECTORY / L"NotExistsInside.ini";
+  const Path_t m_PathToWorkFile =
+    THIS_DIRECTORY / L"Work.ini";
 
 public:
   Using_test(void) :
@@ -116,6 +120,9 @@ TEST_F(Using_test, /*DISABLED_*/Test_UnknownParameters)
 // ************************************************************************** //
 TEST_F(Using_test, /*DISABLED_*/Test_FileOnly)
 {
+  const Path_t m_PathToExampleFile =
+    THIS_DIRECTORY / L"Example.ini";
+
   using namespace ::alicorn::extension::std;
 
   const auto Params =
@@ -178,13 +185,10 @@ TEST_F(Using_test, /*DISABLED_*/Test_HLSL_NotExistsFiles)
 // ************************************************************************** //
 TEST_F(Using_test, /*DISABLED_*/Test_HLSL_InvalidFile)
 {
-  const Path_t m_PathToFile =
-    THIS_DIRECTORY / L"Invalid.ini";
-
   using namespace ::game::repository;
 
   Serializator<initial::Shader_t>::Write(
-    m_PathToFile,
+    m_PathToWorkFile,
     initial::Shader_t{
       { "Invalid.fx" },
       uT("vsMain"),
@@ -195,7 +199,7 @@ TEST_F(Using_test, /*DISABLED_*/Test_HLSL_InvalidFile)
 
   const auto Params =
   {
-    uT("--file=") + string_cast<String>(m_PathToFile),
+    uT("--file=") + string_cast<String>(m_PathToWorkFile),
     uT("--hlsl"),
   };
 
@@ -207,13 +211,10 @@ TEST_F(Using_test, /*DISABLED_*/Test_HLSL_InvalidFile)
 // ************************************************************************** //
 TEST_F(Using_test, /*DISABLED_*/Test_HLSL_ValidFile)
 {
-  const Path_t m_PathToFile =
-    THIS_DIRECTORY / L"Valid.ini";
-
   using namespace ::game::repository;
 
   Serializator<initial::Shader_t>::Write(
-    m_PathToFile,
+    m_PathToWorkFile,
     initial::Shader_t{
       { "Valid.fx" },
       uT("vsMain"),
@@ -224,7 +225,7 @@ TEST_F(Using_test, /*DISABLED_*/Test_HLSL_ValidFile)
 
   const auto Params =
   {
-    uT("--file=") + string_cast<String>(m_PathToFile),
+    uT("--file=") + string_cast<String>(m_PathToWorkFile),
     uT("--hlsl"),
   };
 
@@ -283,13 +284,10 @@ TEST_F(Using_test, /*DISABLED_*/Test_GLSL_NotExistsFiles)
 // ************************************************************************** //
 TEST_F(Using_test, /*DISABLED_*/Test_GLSL_InvalidFile)
 {
-  const Path_t m_PathToFile =
-    THIS_DIRECTORY / L"Invalid.ini";
-
   using namespace ::game::repository;
 
   Serializator<initial::Shader_t>::Write(
-    m_PathToFile,
+    m_PathToWorkFile,
     initial::Shader_t{
       { "Invalid.fx" },
       uT("vsMain"),
@@ -300,7 +298,7 @@ TEST_F(Using_test, /*DISABLED_*/Test_GLSL_InvalidFile)
 
   const auto Params =
   {
-    uT("--file=") + string_cast<String>(m_PathToFile),
+    uT("--file=") + string_cast<String>(m_PathToWorkFile),
     uT("--glsl"),
   };
 
@@ -312,13 +310,10 @@ TEST_F(Using_test, /*DISABLED_*/Test_GLSL_InvalidFile)
 // ************************************************************************** //
 TEST_F(Using_test, /*DISABLED_*/Test_GLSL_ValidFile)
 {
-  const Path_t m_PathToFile =
-    THIS_DIRECTORY / L"Valid.ini";
-
   using namespace ::game::repository;
 
   Serializator<initial::Shader_t>::Write(
-    m_PathToFile,
+    m_PathToWorkFile,
     initial::Shader_t{
       { "Valid.fx" },
       uT("vsMain"),
@@ -329,7 +324,7 @@ TEST_F(Using_test, /*DISABLED_*/Test_GLSL_ValidFile)
 
   const auto Params =
   {
-    uT("--file=") + string_cast<String>(m_PathToFile),
+    uT("--file=") + string_cast<String>(m_PathToWorkFile),
     uT("--glsl"),
   };
 
