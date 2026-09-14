@@ -49,6 +49,7 @@ protected:
 
 protected:
   static const ::std::string DesktopShaderHeader;
+  static const ::std::string AndroidShaderHeader;
 
 private:
   Render_t GetCameraCommon(const ComponentPtr_t &);

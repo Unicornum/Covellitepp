@@ -7,9 +7,7 @@ namespace covellite::api::renderer
 {
 
 OpenGLES3::OpenGLES3(const Data_t & _Data) :
-  OpenGLCommonShader(_Data, uT(""), 
-    "#version 300 es\r\n"
-    "#define COVELLITE_SHADER_MOBILE\r\n"),
+  OpenGLCommonShader(_Data, uT(""), AndroidShaderHeader),
   m_pDisplay(::std::make_unique<covellite::egl::Display>()),
   m_pConfig(::std::make_unique<covellite::egl::Config>(*m_pDisplay, ::covellite::any_cast<ANativeWindow *>(_Data.Handle))),
   m_pSurface(::std::make_unique<covellite::egl::Surface>(*m_pDisplay, *m_pConfig, ::covellite::any_cast<ANativeWindow *>(_Data.Handle))),
