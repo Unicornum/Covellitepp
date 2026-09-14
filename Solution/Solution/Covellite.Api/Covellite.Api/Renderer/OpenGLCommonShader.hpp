@@ -47,6 +47,10 @@ protected:
   Render_t CreateTransform(const ComponentPtr_t &) override;
   Render_t CreatePresentBuffer(const ComponentPtr_t &) override;
 
+protected:
+  static const ::std::string DesktopShaderHeader;
+  static const ::std::string AndroidShaderHeader;
+
 private:
   Render_t GetCameraCommon(const ComponentPtr_t &);
   Render_t GetCameraOrthographic(const ComponentPtr_t &);

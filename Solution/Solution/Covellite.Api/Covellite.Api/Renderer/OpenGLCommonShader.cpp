@@ -932,6 +932,28 @@ public:
   ~Programs(void) = default;
 };
 
+/*static*/ const ::std::string OpenGLCommonShader::DesktopShaderHeader =
+  "#version 330 core\r\n"
+  "#define COVELLITE_SHADER_DESKTOP\r\n";
+
+/*static*/ const ::std::string OpenGLCommonShader::AndroidShaderHeader =
+  "#version 300 es\r\n"
+  "#define COVELLITE_SHADER_MOBILE\r\n";
+
+/*static*/ void OpenGLCommonShader::CompileShader(
+  const ComponentPtr_t & _pComponent)
+{
+  Programs::CreateShader(
+    ::std::make_shared<Programs>(DesktopShaderHeader), _pComponent);
+
+  // - AndroidShaderHeader в Windows на простейших шейдерах здесь тоже работает,
+  // но серьезно возможность использовать не проверялась.
+  // - Одновременно работать не будет, т.к. при компиляции из компонента
+  // удаляются данные тела шейдера.
+  //Programs::CreateShader(
+  //  ::std::make_shared<Programs>(AndroidShaderHeader), _pComponent);
+}
+
 auto OpenGLCommonShader::CreateShader(const ComponentPtr_t & _pComponent) -> Render_t /*override*/
 {
   const auto pShaderDataComponent = CapturingServiceComponent::Get(_pComponent, 
