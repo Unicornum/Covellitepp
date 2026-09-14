@@ -201,7 +201,7 @@ TEST_F(Using_test, /*DISABLED_*/Test_HLSL_InvalidFile)
 
   const auto Result = RunProcess(Params);
   EXPECT_EQ(-1, Result.ReturnCode);
-  //EXPECT_EQ("", Result.ConsoleOutput);
+  EXPECT_NE("", Result.ConsoleOutput);
 }
 
 // ************************************************************************** //
@@ -306,7 +306,7 @@ TEST_F(Using_test, /*DISABLED_*/Test_GLSL_InvalidFile)
 
   const auto Result = RunProcess(Params);
   EXPECT_EQ(-1, Result.ReturnCode);
-  //EXPECT_EQ("", Result.ConsoleOutput);
+  EXPECT_NE("", Result.ConsoleOutput);
 }
 
 // ************************************************************************** //
