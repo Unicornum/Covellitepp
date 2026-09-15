@@ -163,7 +163,7 @@ int main(const int _Argc, const char * const _ppArgv[])
 
       if (
         !ParseErrorMessage(uT(".+\\[header line: ([0-9]+).+\\(([0-9]+),\\d+-\\d+\\)(.+)\\]\\.")) &&
-        !ParseErrorMessage(uT(".+\\[header line: ([0-9]+)\\]: \\d\\(([0-9]+)\\) (.+)")))
+        !ParseErrorMessage(uT(".+\\[header line: ([0-9]+)\\]: (?:\\d\\(([0-9]+)\\) (.+?))(?:\\d\\([0-9]+\\) .+?)*?")))
       {
         ::std::cout << string_cast<::std::string, Encoding::UTF8>(ErrorMessage) << ::std::endl;
       }
