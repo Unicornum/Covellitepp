@@ -50,10 +50,9 @@ public:
     const LoadFile_t & _LoadFile,
     const String_t & _ShaderId = uT("")) const
   {
-    using Data_t = ::alicorn::extension::std::memory::BinaryData_t;
     using namespace ::alicorn::extension::std;
 
-    Data_t ShaderData;
+    BinaryData_t ShaderData;
 
     for (const auto & PathToFile : PathToFiles)
     {
@@ -74,6 +73,42 @@ public:
     }
 
     return pShader;
+  }
+
+  ::std::pair<::std::string, int> GetErrorFileLine(
+    const Path_t & _PathToRoot,
+    const LoadFile_t & _LoadFile,
+    const int _Line) const
+  {
+    int Line = _Line;
+    ::std::string ResultPathToFile;
+
+    const auto GetLineCount = [](const BinaryData_t & _Data)
+    {
+      int Result = 0;
+
+      for (const auto & Char : _Data)
+      {
+        if (Char == '\n') Result++;
+      }
+
+      return Result;
+    };
+
+    for (const auto & PathToFile : PathToFiles)
+    {
+      const auto LineCount = GetLineCount(_LoadFile(_PathToRoot / PathToFile));
+
+      if (Line <= LineCount)
+      {
+        ResultPathToFile = PathToFile;
+        break;
+      }
+
+      Line -= LineCount;
+    }
+
+    return { ResultPathToFile, Line };
   }
 };
 

@@ -4,6 +4,8 @@
 #include <boost/filesystem.hpp>
 #include <boost/program_options.hpp>
 #include <alicorn/std/exception.hpp>
+#include <alicorn/std/regex.hpp>
+#include <alicorn/boost/lexical-cast.hpp>
 #include <alicorn/document.hpp>
 #include <Covellite/App/Settings.hpp>
 #include <Covellite/Api.hpp>
@@ -113,7 +115,54 @@ int main(const int _Argc, const char * const _ppArgv[])
     }
     catch (const ::std::exception & _Ex)
     {
-      ::std::cout << _Ex.what() << ::std::endl;
+      ::std::string sErrorMessage;
+
+      for (auto * pError = _Ex.what(); *pError != 0x00; pError++)
+      {
+        if (*pError == '\r') continue;
+        if (*pError == '\n') continue;
+
+        sErrorMessage += *pError;
+      }
+
+      using namespace ::alicorn::extension::std;
+
+      const auto ErrorMessage = 
+        string_cast<String, Encoding::UTF8>(sErrorMessage);
+        //.Replace(uT("\r\n"), uT("")).Trim(); // ??? не работает ???
+
+      regex::Match HLSLMatch(
+        uT(".+\\[header line: ([0-9]+).+\\(([0-9]+),[0-9]+-[0-9]+\\)(.+)\\]\\."));
+      if (HLSLMatch.IsMatch(ErrorMessage))
+      {
+        const auto Groups = HLSLMatch.GetGroups();
+
+        const auto Line = ::boost::lexical_cast<int>(Groups[1]) -
+          ::boost::lexical_cast<int>(Groups[0]);
+        const auto HLSLErrorMessage =
+          string_cast<::std::string, Encoding::UTF8>(Groups[2]);
+
+        using namespace ::game::repository;
+
+        const auto PathToFile = Options["file"].as<Path_t>();
+
+        using BinaryData_t = ::alicorn::extension::std::memory::BinaryData_t;
+
+        const auto LoadFile = [](const Path_t & _Path) -> BinaryData_t
+        {
+          return ::boost::filesystem::load_binary_file(_Path);
+        };
+
+        const auto [ErrorFile, ErrorLine] = Serializator<initial::Shader_t>::Read(
+          ::boost::filesystem::load_binary_file(PathToFile))
+          .GetErrorFileLine(PathToFile.parent_path(), LoadFile, Line);
+
+        ::std::cout << ErrorFile << "(" << ErrorLine << ")" 
+          << HLSLErrorMessage << "." << ::std::endl;
+        return -1;
+      }
+
+      ::std::cout << string_cast<::std::string, Encoding::UTF8>(ErrorMessage) << ::std::endl;
       return -1;
     }
   }
