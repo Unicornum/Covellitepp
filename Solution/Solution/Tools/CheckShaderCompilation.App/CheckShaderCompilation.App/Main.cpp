@@ -131,69 +131,43 @@ int main(const int _Argc, const char * const _ppArgv[])
         string_cast<String, Encoding::UTF8>(sErrorMessage);
         //.Replace(uT("\r\n"), uT("")).Trim(); // ??? не работает ???
 
-      regex::Match HLSLMatch(
-        uT(".+\\[header line: ([0-9]+).+\\(([0-9]+),[0-9]+-[0-9]+\\)(.+)\\]\\."));
-      if (HLSLMatch.IsMatch(ErrorMessage))
+      const auto ParseErrorMessage = [&](const String & _Match)
       {
-        const auto Groups = HLSLMatch.GetGroups();
+        regex::Match XLSLMatch(_Match);
+        if (!XLSLMatch.IsMatch(ErrorMessage)) return false;
+
+        const auto Groups = XLSLMatch.GetGroups();
 
         const auto Line = ::boost::lexical_cast<int>(Groups[1]) -
           ::boost::lexical_cast<int>(Groups[0]);
         const auto HLSLErrorMessage =
           string_cast<::std::string, Encoding::UTF8>(Groups[2]);
 
-        using namespace ::game::repository;
-
-        const auto PathToFile = Options["file"].as<Path_t>();
-
-        using BinaryData_t = ::alicorn::extension::std::memory::BinaryData_t;
-
-        const auto LoadFile = [](const Path_t & _Path) -> BinaryData_t
+        const auto LoadFile = [](const Path_t & _Path)
         {
           return ::boost::filesystem::load_binary_file(_Path);
         };
 
-        const auto [ErrorFile, ErrorLine] = Serializator<initial::Shader_t>::Read(
-          ::boost::filesystem::load_binary_file(PathToFile))
-          .GetErrorFileLine(PathToFile.parent_path(), LoadFile, Line);
-
-        ::std::cout << ErrorFile << "(" << ErrorLine << ")" 
-          << HLSLErrorMessage << "." << ::std::endl;
-        return -1;
-      }
-
-      regex::Match GLSLMatch(
-        uT(".+\\[header line: (.+)\\]: \\d\\(([0-9]+)\\) (.+)"));
-      if (GLSLMatch.IsMatch(ErrorMessage))
-      {
-        const auto Groups = GLSLMatch.GetGroups();
-
-        const auto Line = ::boost::lexical_cast<int>(Groups[1]) -
-          ::boost::lexical_cast<int>(Groups[0]);
-        const auto GLSLErrorMessage =
-          string_cast<::std::string, Encoding::UTF8>(Groups[2]);
-
-        using namespace ::game::repository;
-
         const auto PathToFile = Options["file"].as<Path_t>();
 
-        using BinaryData_t = ::alicorn::extension::std::memory::BinaryData_t;
-
-        const auto LoadFile = [](const Path_t & _Path) -> BinaryData_t
-        {
-          return ::boost::filesystem::load_binary_file(_Path);
-        };
+        using namespace ::game::repository;
 
         const auto [ErrorFile, ErrorLine] = Serializator<initial::Shader_t>::Read(
           ::boost::filesystem::load_binary_file(PathToFile))
           .GetErrorFileLine(PathToFile.parent_path(), LoadFile, Line);
 
         ::std::cout << ErrorFile << "(" << ErrorLine << ")"
-          << GLSLErrorMessage << "." << ::std::endl;
-        return -1;
+          << HLSLErrorMessage << "." << ::std::endl;
+        return true;
+      };
+
+      if (
+        !ParseErrorMessage(uT(".+\\[header line: ([0-9]+).+\\(([0-9]+),\\d+-\\d+\\)(.+)\\]\\.")) &&
+        !ParseErrorMessage(uT(".+\\[header line: ([0-9]+)\\]: \\d\\(([0-9]+)\\) (.+)")))
+      {
+        ::std::cout << string_cast<::std::string, Encoding::UTF8>(ErrorMessage) << ::std::endl;
       }
 
-      ::std::cout << string_cast<::std::string, Encoding::UTF8>(ErrorMessage) << ::std::endl;
       return -1;
     }
   }
