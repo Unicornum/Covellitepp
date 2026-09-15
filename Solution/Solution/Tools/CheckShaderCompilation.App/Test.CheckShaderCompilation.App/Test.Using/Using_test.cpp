@@ -237,7 +237,6 @@ TEST_F(Using_test, /*DISABLED_*/Test_HLSL_ExtractFileLineFromError_Forward)
   const auto Result = RunProcess(Params);
   EXPECT_EQ(-1, Result.ReturnCode);
   EXPECT_EQ(ExpectMessage, Result.ConsoleOutput);
-  //P:\projects\Covellitepp\Solution\Solution\Covellite.Api\Covellite.Api\Renderer\DirectX.cpp(29): Failed: -2147467259 [header line: 174, P:\projects\Covellitepp\Debug\Test\x64\[Covellite::Api]: vsMain(178,3-16): error X3017: cannot implicitly convert from 'float3' to 'float4'].
 }
 
 // ************************************************************************** //
@@ -270,7 +269,6 @@ TEST_F(Using_test, /*DISABLED_*/Test_HLSL_ExtractFileLineFromError_Reverse)
   const auto Result = RunProcess(Params);
   EXPECT_EQ(-1, Result.ReturnCode);
   EXPECT_EQ(ExpectMessage, Result.ConsoleOutput);
-  // P:\projects\Covellitepp\Solution\Solution\Covellite.Api\Covellite.Api\Renderer\DirectX.cpp(29): Failed: -2147467259 [header line: 174, P:\projects\Covellitepp\Debug\Test\x64\[Covellite::Api]: vsMain(183,3-16): error X3017: cannot implicitly convert from 'float3' to 'float4'].
 }
 
 // ************************************************************************** //
@@ -393,6 +391,70 @@ TEST_F(Using_test, /*DISABLED_*/Test_GLSL_ValidFile)
   const auto Result = RunProcess(Params);
   EXPECT_EQ(0, Result.ReturnCode);
   EXPECT_EQ("", Result.ConsoleOutput);
+}
+
+// ************************************************************************** //
+TEST_F(Using_test, /*DISABLED_*/Test_GLSL_ExtractFileLineFromError_Forward)
+{
+  const ::std::string ExpectMessage =
+    "Example1.fx(4): error C1016: expression type incompatible with function return type.\r\n";
+
+  using namespace ::game::repository;
+
+  Serializator<initial::Shader_t>::Write(m_PathToWorkFile,
+    initial::Shader_t{
+      {
+        "Example1.fx",
+        "Example2.fx",
+        "Main.fx"
+      },
+      uT("vsMain"),
+      uT("")
+    });
+
+  using namespace ::alicorn::extension::std;
+
+  const auto Params =
+  {
+    uT("--file=") + string_cast<String>(m_PathToWorkFile),
+    uT("--glsl"),
+  };
+
+  const auto Result = RunProcess(Params);
+  EXPECT_EQ(-1, Result.ReturnCode);
+  EXPECT_EQ(ExpectMessage, Result.ConsoleOutput);
+}
+
+// ************************************************************************** //
+TEST_F(Using_test, /*DISABLED_*/Test_GLSL_ExtractFileLineFromError_Reverse)
+{
+  const ::std::string ExpectMessage =
+    "Example1.fx(4): error C1016: expression type incompatible with function return type.\r\n";
+
+  using namespace ::game::repository;
+
+  Serializator<initial::Shader_t>::Write(m_PathToWorkFile,
+    initial::Shader_t{
+      {
+        "Example2.fx",
+        "Example1.fx",
+        "Main.fx"
+      },
+      uT("vsMain"),
+      uT("")
+    });
+
+  using namespace ::alicorn::extension::std;
+
+  const auto Params =
+  {
+    uT("--file=") + string_cast<String>(m_PathToWorkFile),
+    uT("--glsl"),
+  };
+
+  const auto Result = RunProcess(Params);
+  EXPECT_EQ(-1, Result.ReturnCode);
+  EXPECT_EQ(ExpectMessage, Result.ConsoleOutput);
 }
 
 ALICORN_RESTORE_WARNINGS
