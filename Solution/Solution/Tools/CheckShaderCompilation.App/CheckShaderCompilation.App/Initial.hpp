@@ -41,12 +41,10 @@ public:
   {
     // Нужна реализация функции получения уникального хэша объекта на основе
     // содержащихся в нем данных.
-    //return ::covellite::api::Component::GetHash(Entry);
     return 0;
   }
 
   ComponentPtr_t BuildComponent(
-    const Path_t & _PathToRoot,
     const LoadFile_t & _LoadFile,
     const String_t & _ShaderId = uT("")) const
   {
@@ -56,7 +54,7 @@ public:
 
     for (const auto & PathToFile : PathToFiles)
     {
-      ShaderData += _LoadFile(_PathToRoot / PathToFile);
+      ShaderData += _LoadFile(PathToFile);
     }
 
     const auto pShader = Component_t::Make(
@@ -76,7 +74,6 @@ public:
   }
 
   ::std::pair<::std::string, int> GetErrorFileLine(
-    const Path_t & _PathToRoot,
     const LoadFile_t & _LoadFile,
     const int _Line) const
   {
@@ -97,7 +94,7 @@ public:
 
     for (const auto & PathToFile : PathToFiles)
     {
-      const auto LineCount = GetLineCount(_LoadFile(_PathToRoot / PathToFile));
+      const auto LineCount = GetLineCount(_LoadFile(PathToFile));
 
       if (Line <= LineCount)
       {

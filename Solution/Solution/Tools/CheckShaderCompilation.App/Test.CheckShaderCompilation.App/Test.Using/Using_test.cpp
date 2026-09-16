@@ -41,22 +41,22 @@ protected:
   const ::std::string AllowedOptions =
     "Allowed options:\r\n"
     "  --help                Produce help message.\r\n"
-    "  --file arg            Path to shader pack file.\r\n"
+    "  --file arg            Path to shader ini file.\r\n"
     "  --hlsl                Check shader as HLSL.\r\n"
     "  --glsl                Check shader as GLSL.\r\n"
     ;
 
 protected:
   const Path_t m_PathToNotExistsInsideFile =
-    THIS_DIRECTORY / L"NotExistsInside.ini";
+    Path_t() / "Data" / "Initial" / "NotExistsInside.ini";
   const Path_t m_PathToWorkFile =
-    THIS_DIRECTORY / L"Work.ini";
+    Path_t() / "Data" / "Initial" / "Work.ini";
 
 public:
   Using_test(void) :
     Tools_test("CheckShaderCompilation.exe")
   {
-
+    ::boost::filesystem::current_path(THIS_DIRECTORY);
   }
 };
 
@@ -120,8 +120,8 @@ TEST_F(Using_test, /*DISABLED_*/Test_UnknownParameters)
 // ************************************************************************** //
 TEST_F(Using_test, /*DISABLED_*/Test_FileOnly)
 {
-  const Path_t m_PathToExampleFile =
-    THIS_DIRECTORY / L"Example.ini";
+  const auto m_PathToExampleFile =
+    Path_t() / "Data" / "Initial" / "Example.ini";
 
   using namespace ::alicorn::extension::std;
 
@@ -165,8 +165,7 @@ TEST_F(Using_test, /*DISABLED_*/Test_HLSL_NotExistsFiles)
 
   {
     const ::std::string ExpectMessage =
-      (THIS_DIRECTORY / "NotExistsFile.fx").string() +
-      "(): error C0000: not exists file.\r\n";
+      "NotExistsFile.fx(): error C0000: not exists file.\r\n";
 
     using namespace ::alicorn::extension::std;
 
@@ -189,7 +188,7 @@ TEST_F(Using_test, /*DISABLED_*/Test_HLSL_InvalidFile)
 
   Serializator<initial::Shader_t>::Write(m_PathToWorkFile,
     initial::Shader_t{
-      { "Invalid.fx" },
+      { "Data\\Shaders\\Invalid.fx" },
       uT("vsMain"),
       uT("")
     });
@@ -211,16 +210,17 @@ TEST_F(Using_test, /*DISABLED_*/Test_HLSL_InvalidFile)
 TEST_F(Using_test, /*DISABLED_*/Test_HLSL_ExtractFileLineFromError_Forward)
 {
   const ::std::string ExpectMessage =
-    "Example1.fx(4): error X3017: cannot implicitly convert from 'float3' to 'float4'.\r\n";
+    "Data\\Shaders\\Example1.fx(4): "
+    "error X3017: cannot implicitly convert from 'float3' to 'float4'.\r\n";
 
   using namespace ::game::repository;
 
   Serializator<initial::Shader_t>::Write(m_PathToWorkFile,
     initial::Shader_t{
       {
-        "Example1.fx",
-        "Example2.fx",
-        "Main.fx"
+        "Data\\Shaders\\Example1.fx",
+        "Data\\Shaders\\Example2.fx",
+        "Data\\Shaders\\Main.fx"
       },
       uT("vsMain"),
       uT("")
@@ -243,16 +243,17 @@ TEST_F(Using_test, /*DISABLED_*/Test_HLSL_ExtractFileLineFromError_Forward)
 TEST_F(Using_test, /*DISABLED_*/Test_HLSL_ExtractFileLineFromError_Reverse)
 {
   const ::std::string ExpectMessage =
-    "Example1.fx(4): error X3017: cannot implicitly convert from 'float3' to 'float4'.\r\n";
+    "Data\\Shaders\\Example1.fx(4): "
+    "error X3017: cannot implicitly convert from 'float3' to 'float4'.\r\n";
 
   using namespace ::game::repository;
 
   Serializator<initial::Shader_t>::Write(m_PathToWorkFile,
     initial::Shader_t{
       {
-        "Example2.fx",
-        "Example1.fx",
-        "Main.fx"
+        "Data\\Shaders\\Example2.fx",
+        "Data\\Shaders\\Example1.fx",
+        "Data\\Shaders\\Main.fx"
       },
       uT("vsMain"),
       uT("")
@@ -278,7 +279,7 @@ TEST_F(Using_test, /*DISABLED_*/Test_HLSL_ValidFile)
 
   Serializator<initial::Shader_t>::Write(m_PathToWorkFile,
     initial::Shader_t{
-      { "Valid.fx" },
+      { "Data\\Shaders\\Valid.fx" },
       uT("vsMain"),
       uT("")
     });
@@ -326,8 +327,7 @@ TEST_F(Using_test, /*DISABLED_*/Test_GLSL_NotExistsFiles)
 
   {
     const ::std::string ExpectMessage =
-      (THIS_DIRECTORY / "NotExistsFile.fx").string() +
-      "(): error C0000: not exists file.\r\n";
+      "NotExistsFile.fx(): error C0000: not exists file.\r\n";
 
     using namespace ::alicorn::extension::std;
 
@@ -350,7 +350,7 @@ TEST_F(Using_test, /*DISABLED_*/Test_GLSL_InvalidFile)
 
   Serializator<initial::Shader_t>::Write(m_PathToWorkFile,
     initial::Shader_t{
-      { "Invalid.fx" },
+      { "Data\\Shaders\\Invalid.fx" },
       uT("vsMain"),
       uT("")
     });
@@ -375,7 +375,7 @@ TEST_F(Using_test, /*DISABLED_*/Test_GLSL_ValidFile)
 
   Serializator<initial::Shader_t>::Write(m_PathToWorkFile,
     initial::Shader_t{
-      { "Valid.fx" },
+      { "Data\\Shaders\\Valid.fx" },
       uT("vsMain"),
       uT("")
     });
@@ -397,16 +397,17 @@ TEST_F(Using_test, /*DISABLED_*/Test_GLSL_ValidFile)
 TEST_F(Using_test, /*DISABLED_*/Test_GLSL_ExtractFileLineFromError_Forward)
 {
   const ::std::string ExpectMessage =
-    "Example1.fx(4): error C1016: expression type incompatible with function return type.\r\n";
+    "Data\\Shaders\\Example1.fx(4): "
+    "error C1016: expression type incompatible with function return type.\r\n";
 
   using namespace ::game::repository;
 
   Serializator<initial::Shader_t>::Write(m_PathToWorkFile,
     initial::Shader_t{
       {
-        "Example1.fx",
-        "Example2.fx",
-        "Main.fx"
+        "Data\\Shaders\\Example1.fx",
+        "Data\\Shaders\\Example2.fx",
+        "Data\\Shaders\\Main.fx"
       },
       uT("vsMain"),
       uT("")
@@ -429,16 +430,17 @@ TEST_F(Using_test, /*DISABLED_*/Test_GLSL_ExtractFileLineFromError_Forward)
 TEST_F(Using_test, /*DISABLED_*/Test_GLSL_ExtractFileLineFromError_Reverse)
 {
   const ::std::string ExpectMessage =
-    "Example1.fx(4): error C1016: expression type incompatible with function return type.\r\n";
+    "Data\\Shaders\\Example1.fx(4): "
+    "error C1016: expression type incompatible with function return type.\r\n";
 
   using namespace ::game::repository;
 
   Serializator<initial::Shader_t>::Write(m_PathToWorkFile,
     initial::Shader_t{
       {
-        "Example2.fx",
-        "Example1.fx",
-        "Main.fx"
+        "Data\\Shaders\\Example2.fx",
+        "Data\\Shaders\\Example1.fx",
+        "Data\\Shaders\\Main.fx"
       },
       uT("vsMain"),
       uT("")

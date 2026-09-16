@@ -44,7 +44,7 @@ int main(const int _Argc, const char * const _ppArgv[])
 
   Description.add_options()
     ("help", "Produce help message.")
-    ("file", value<Path_t>(), "Path to shader pack file.")
+    ("file", value<Path_t>(), "Path to shader ini file.")
     ("hlsl", "Check shader as HLSL.")
     ("glsl", "Check shader as GLSL.")
     ;
@@ -98,7 +98,7 @@ int main(const int _Argc, const char * const _ppArgv[])
 
       const auto pShader = Serializator<initial::Shader_t>::Read(
         ::boost::filesystem::load_binary_file(PathToFile))
-        .BuildComponent(PathToFile.parent_path(), LoadFile);
+        .BuildComponent(LoadFile);
 
       if (Options.count("hlsl"))
       {
@@ -154,7 +154,7 @@ int main(const int _Argc, const char * const _ppArgv[])
 
         const auto [ErrorFile, ErrorLine] = Serializator<initial::Shader_t>::Read(
           ::boost::filesystem::load_binary_file(PathToFile))
-          .GetErrorFileLine(PathToFile.parent_path(), LoadFile, Line);
+          .GetErrorFileLine(LoadFile, Line);
 
         ::std::cout << ErrorFile << "(" << ErrorLine << ")"
           << HLSLErrorMessage << "." << ::std::endl;

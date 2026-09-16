@@ -37,13 +37,18 @@ public:
   }
 
 private:
-  const Path_t m_PathToRootSolutionDirectory =
-    ::boost::filesystem::current_path().parent_path().parent_path();
+  const Path_t m_PathToRootConfigDirectory =
+    (THIS_DIRECTORY).parent_path().parent_path().parent_path() /
+# ifdef _DEBUG
+    "Debug";
+# else
+    "Release";
+# endif
   const Path_t m_PathToToolExe;
 
 protected:
   explicit Tools_test(const Path_t & _ToolExe) :
-    m_PathToToolExe(m_PathToRootSolutionDirectory / "Bin" / "x64" / _ToolExe)
+    m_PathToToolExe(m_PathToRootConfigDirectory / "Bin" / "x64" / _ToolExe)
   {
 
   }
