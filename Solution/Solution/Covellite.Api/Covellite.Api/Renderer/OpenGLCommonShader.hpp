@@ -50,6 +50,7 @@ protected:
 protected:
   static const ::std::string DesktopShaderHeader;
   static const ::std::string AndroidShaderHeader;
+  static void CompileShader(const ComponentPtr_t &);
 
 private:
   Render_t GetCameraCommon(const ComponentPtr_t &);
@@ -76,6 +77,9 @@ public:
   OpenGLCommonShader & operator= (const OpenGLCommonShader &) = delete;
   OpenGLCommonShader & operator= (OpenGLCommonShader &&) = delete;
   ~OpenGLCommonShader(void) = default;
+
+private:
+  friend class CompileShader;
 };
 
 } // namespace renderer

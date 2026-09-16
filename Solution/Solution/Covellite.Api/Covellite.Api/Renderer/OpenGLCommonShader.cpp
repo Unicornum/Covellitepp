@@ -870,6 +870,30 @@ public:
       Main).c_str());
   }
 
+  static ShaderPtr_t CreateShader(
+    const ProgramsPtr_t & _pPrograms,
+    const ComponentPtr_t & _pComponent,
+    String_t * _pKind = nullptr)
+  {
+    const Component::Shader ShaderData{ *_pComponent, ::Default };
+    if (_pKind) *_pKind = ShaderData.Kind;
+
+    if (ShaderData.Kind == uT("Vertex"))
+    {
+      const auto pShader = _pPrograms->MakeVertex(ShaderData);
+      pShader->Compile();
+      return pShader;
+    }
+    else if (ShaderData.Kind == uT("Pixel"))
+    {
+      const auto pShader = _pPrograms->MakePixel(ShaderData);
+      pShader->Compile();
+      return pShader;
+    }
+
+    return nullptr;
+  }
+
   void Activate(const ShaderPtr_t & _pShader)
   {
     if (_pShader->Type == GL_VERTEX_SHADER) m_VsShaderId = _pShader->Id;
@@ -956,26 +980,22 @@ public:
 
 auto OpenGLCommonShader::CreateShader(const ComponentPtr_t & _pComponent) -> Render_t /*override*/
 {
-  const auto pShaderDataComponent = CapturingServiceComponent::Get(_pComponent, 
+  const auto pShaderDataComponent = CapturingServiceComponent::Get(_pComponent,
     { { uT("Shader"), _pComponent } })[0];
 
-  const Component::Shader ShaderData{ *pShaderDataComponent, ::Default };
+  String_t Kind;
+  const auto pShader =
+    Programs::CreateShader(m_pPrograms, pShaderDataComponent, &Kind);
 
-  if (ShaderData.Kind == uT("Vertex"))
+  if (Kind == uT("Vertex"))
   {
-    const auto pShader = m_pPrograms->MakeVertex(ShaderData);
-    pShader->Compile();
-
     return [=](void)
     {
       m_pPrograms->Activate(pShader);
     };
   }
-  else if (ShaderData.Kind == uT("Pixel"))
+  else if (Kind == uT("Pixel"))
   {
-    const auto pShader = m_pPrograms->MakePixel(ShaderData);
-    pShader->Compile();
-
     return [=](void)
     {
       m_pPrograms->Activate(pShader);
