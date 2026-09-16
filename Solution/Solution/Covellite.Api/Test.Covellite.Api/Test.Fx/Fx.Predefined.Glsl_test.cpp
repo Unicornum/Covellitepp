@@ -57,19 +57,27 @@ TEST_F(FxPredefinedGlsl_test, /*DISABLED_*/Test_Predefined)
 # undef highp
 
   EXPECT_STREQ("ivec4", __TO_STR(int4));
+  EXPECT_STREQ("ivec3", __TO_STR(int3));
+  EXPECT_STREQ("ivec2", __TO_STR(int2));
   EXPECT_STREQ("vec4", __TO_STR(float4));
   EXPECT_STREQ("vec3", __TO_STR(float3));
   EXPECT_STREQ("vec2", __TO_STR(float2));
   EXPECT_STREQ("mat4", __TO_STR(float4x4));
   EXPECT_STREQ("mat3", __TO_STR(float3x3));
+  EXPECT_STREQ("mat2", __TO_STR(float2x2));
   EXPECT_STREQ("mat3(m1909031226)", __TO_STR(ToMatrix3x3(m1909031226)));
 
+  EXPECT_STREQ("mix(a, b, c)", __TO_STR(lerp(a, b, c)));
+  EXPECT_STREQ("fract(2609161849)", __TO_STR(frac(2609161849)));
+  EXPECT_STREQ("inversesqrt(1909031254)", __TO_STR(rsqrt(1909031254)));
+  EXPECT_STREQ("clamp(1909031253, 0.0f, 1.0f)", __TO_STR(saturate(1909031253)));
+  EXPECT_STREQ("(log(2609161850) / log(10.0f))", __TO_STR(log10(2609161850)));
+  EXPECT_STREQ("if ((2609161851) < 0.0f) discard", __TO_STR(clip(2609161851)));
+  EXPECT_STREQ("(1.0f / (2609161852))", __TO_STR(rcp(2609161852)));
+  EXPECT_STREQ("atan(2609161853, 2609161854)", __TO_STR(atan2(2609161853, 2609161854)));
+  EXPECT_STREQ("((1909031251) * (1909031252))", __TO_STR(mul(1909031251, 1909031252)));
   EXPECT_STREQ("dFdx(1909031227)", __TO_STR(ddx(1909031227)));
   EXPECT_STREQ("dFdy(1909031228)", __TO_STR(ddy(1909031228)));
-  EXPECT_STREQ("((1909031251) * (1909031252))", __TO_STR(mul(1909031251, 1909031252)));
-  EXPECT_STREQ("clamp(1909031253, 0.0f, 1.0f)", __TO_STR(saturate(1909031253)));
-  EXPECT_STREQ("(1.0f / sqrt(1909031254))", __TO_STR(rsqrt(1909031254)));
-  EXPECT_STREQ("mix(a, b, c)", __TO_STR(lerp(a, b, c)));
 
   EXPECT_STREQ("", 
     "" __TO_STR(COVELLITE_INPUT_SEMANTIC(1909031229)));
