@@ -95,6 +95,8 @@ protected:
   App_t m_App{ App_t::EventBased{} };
 };
 
+ALICORN_DISABLE_GTEST_WARNINGS
+
 // Образец макроса для подстановки в класс Window 
 // для доступа тестовой функции к закрытым функциям класса (чтобы это сработало, 
 // нужно чтобы тестовая функция была расположена В ТОМ ЖЕ ПРОСТРАНСТВЕ ИМЕН, 
@@ -406,3 +408,36 @@ TEST_F(Window_test, /*DISABLED_*/Test_GetRenders)
   EXPECT_TRUE(Result1);
   EXPECT_TRUE(Result2);
 }
+
+// ************************************************************************** //
+TEST_F(Window_test, /*DISABLED_*/Test_GetDrawCallCount)
+{
+  ::mock::covellite::os::Window::Proxy WindowOsProxy;
+  ::mock::alicorn::modules::settings::SectionImplProxy SettingsProxy;
+  ::mock::RendererImpl::Proxy RendererImplProxy;
+  const ::mock::Id_t RenderId = 2609181238;
+  const size_t DrawCallCount = 2609181240;
+  WindowOs_t WindowOs{ m_App };
+
+  using namespace ::testing;
+
+  EXPECT_CALL(SettingsProxy, GetValue(_, _))
+    .WillOnce(Return(uT("false")))
+    .WillRepeatedly(Return(uT("Dummy")));
+
+  EXPECT_CALL(RendererImplProxy, Constructor(_))
+    .Times(1)
+    .WillOnce(Return(RenderId));
+
+  const Tested_t Example{ WindowOs };
+  const IWindowApi_t * const pExample = &Example;
+
+  EXPECT_CALL(RendererImplProxy, GetDrawCallCount(RenderId))
+    .Times(1)
+    .WillOnce(Return(DrawCallCount));
+
+  const auto Result = pExample->GetDrawCallCount();
+  EXPECT_EQ(DrawCallCount, Result);
+}
+
+ALICORN_RESTORE_WARNINGS

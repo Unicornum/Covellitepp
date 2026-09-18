@@ -18,28 +18,38 @@ GraphicApi::GraphicApi(void) :
   m_StartProgram{ std::chrono::system_clock::now() },
   m_CurrentFrameTime{ 0.0f }
 {
+  const auto CreatePresent = [this](const ComponentPtr_t & _pComponent)
+  {
+    const auto PresentRender = CreatePresentBuffer(_pComponent);
+
+    return [=](void)
+    {
+      PresentRender();
+      m_DrawCallCounter++;
+    };
+  };
+
   m_Creators =
   {
-    { uT("Test"), [=](const ComponentPtr_t &)
+    { uT("Test"), [](const ComponentPtr_t &)
       { return [](void) {}; } },
-    { uT("Camera"), [=](const ComponentPtr_t & _pComponent)
+    { uT("Camera"), [this](const ComponentPtr_t & _pComponent)
       { return CreateCamera(_pComponent); } },
-    { uT("BkSurface"), [=](const ComponentPtr_t & _pComponent)
+    { uT("BkSurface"), [this](const ComponentPtr_t & _pComponent)
       { return CreateBkSurface(_pComponent); } },
-    { uT("State"), [=](const ComponentPtr_t & _pComponent)
+    { uT("State"), [this](const ComponentPtr_t & _pComponent)
       { return CreateState(_pComponent); } },
-    { uT("Texture"), [=](const ComponentPtr_t & _pComponent)
+    { uT("Texture"), [this](const ComponentPtr_t & _pComponent)
       { return CreateTexture(_pComponent); } },
-    { uT("TextureArray"), [=](const ComponentPtr_t & _pComponent)
+    { uT("TextureArray"), [this](const ComponentPtr_t & _pComponent)
       { return CreateTextureArray(_pComponent); } },
-    { uT("Shader"), [=](const ComponentPtr_t & _pComponent)
+    { uT("Shader"), [this](const ComponentPtr_t & _pComponent)
       { return CreateShader(_pComponent); } },
-    { uT("Buffer"), [=](const ComponentPtr_t & _pComponent)
+    { uT("Buffer"), [this](const ComponentPtr_t & _pComponent)
       { return CreateBuffer(_pComponent); } },
     { uT("Transform"), [this](const ComponentPtr_t & _pComponent)
       { return CreateTransform(_pComponent); } },
-    { uT("Present"), [=](const ComponentPtr_t & _pComponent)
-      { return CreatePresentBuffer(_pComponent); } },
+    { uT("Present"), CreatePresent },
     { uT("Updater"), [this](const ComponentPtr_t & _pComponent)
       { return CreateUpdater(_pComponent); } },
   };
@@ -51,11 +61,18 @@ void GraphicApi::PresentFrame(void) /*override*/
     (std::chrono::system_clock::now() - m_StartProgram);
   m_CurrentFrameTime = Time.count();
   m_IsResizeWindow = false;
+  m_DrawCallCount = m_DrawCallCounter;
+  m_DrawCallCounter = 0;
 }
 
 auto GraphicApi::GetCreators(void) const noexcept -> const Creators_t & /*final*/
 {
   return m_Creators;
+}
+
+size_t GraphicApi::GetDrawCallCount(void) const /*final*/
+{
+  return m_DrawCallCount;
 }
 
 auto GraphicApi::CreateUpdater(const ComponentPtr_t & _pComponent) const -> Render_t

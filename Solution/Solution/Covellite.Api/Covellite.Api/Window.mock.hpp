@@ -55,6 +55,7 @@ public:
     MOCK_METHOD1(Constructor, Id_t(Id_t));
     MOCK_METHOD1(GetClientRect, ::covellite::Rect(Id_t));
     MOCK_METHOD1(GetRenders, RendersPtr_t(Id_t));
+    MOCK_METHOD1(GetDrawCallCount, size_t(::mock::Id_t));
   };
 
 public:
@@ -77,6 +78,11 @@ public:
   RendersPtr_t GetRenders(void) const override
   {
     return Proxy::GetInstance()->GetRenders(m_Id);
+  }
+
+  size_t GetDrawCallCount(void) const override
+  {
+    return Proxy::GetInstance()->GetDrawCallCount(m_Id);
   }
 
 private:
