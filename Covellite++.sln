@@ -554,6 +554,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "SDK", "SDK", "{11AFAC1E-2F1
 	ProjectSection(SolutionItems) = preProject
 		Solution\Solution\SDK\build.cmd = Solution\Solution\SDK\build.cmd
 		Solution\Solution\SDK\Directory.Build.targets = Solution\Solution\SDK\Directory.Build.targets
+		Solution\Solution\SDK\Externals.Error.props = Solution\Solution\SDK\Externals.Error.props
 		Solution\Solution\SDK\Externals.props = Solution\Solution\SDK\Externals.props
 		Solution\Solution\SDK\install.cmd = Solution\Solution\SDK\install.cmd
 		Solution\Solution\SDK\ReadMe.txt = Solution\Solution\SDK\ReadMe.txt

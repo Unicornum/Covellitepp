@@ -9,6 +9,7 @@ echo ===================== Archived =====================
 
 %Run7z% a "%PathToResultFile%" ReadMe.txt
 %Run7z% a "%PathToResultFile%" Externals.props
+%Run7z% a "%PathToResultFile%" Externals.Error.props
 call :SetVersionAndAddToArchive install.cmd
 call :SetVersionAndAddToArchive Directory.Build.targets
 
@@ -22,7 +23,8 @@ copy .\..\..\..\LICENSE.txt %PathToExternals%\Covellite /Y
 del %PathToExternals%\Covellite\LICENSE.txt
 
 echo Archived Alicorn...
-%Run7z% a "%PathToResultFile%" %AlicornSdkPath%\* -xr!ReadMe.txt -xr!Externals.props -xr!install.cmd -xr!*Directory.Build.targets
+%Run7z% a "%PathToResultFile%" %AlicornSdkPath%\Alicorn
+%Run7z% a "%PathToResultFile%" %AlicornSdkPath%\Externals
 
 goto :EndOfFile
 
