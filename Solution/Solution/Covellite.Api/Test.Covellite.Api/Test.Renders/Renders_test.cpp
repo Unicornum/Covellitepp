@@ -72,6 +72,12 @@ TEST_F(Renders_test, /*DISABLED_*/Test_Destructor)
 }
 
 // ************************************************************************** //
+TEST_F(Renders_test, /*DISABLED_*/Test_VertexSize)
+{
+  EXPECT_EQ(0, sizeof(::covellite::api::Vertex) % 16);
+}
+
+// ************************************************************************** //
 TEST_F(Renders_test, /*DISABLED_*/Test_Obtain_UnknownType)
 {
   using LoggerProxy_t = ::mock::alicorn::modules::logger::LoggerProxy;
