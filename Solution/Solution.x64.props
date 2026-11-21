@@ -18,6 +18,9 @@
       <DisableSpecificWarnings>4710;4711;5045;6244;26481;26446;26472;26486;26426;26485;%(DisableSpecificWarnings)</DisableSpecificWarnings>
       <WarningLevel>TurnOffAllWarnings</WarningLevel>
     </ClCompile>
+    <Manifest>
+      <EnableDpiAwareness>PerMonitorHighDPIAware</EnableDpiAwareness>
+    </Manifest>
   </ItemDefinitionGroup>
   <ItemGroup />
 </Project>
