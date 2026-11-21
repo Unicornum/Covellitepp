@@ -770,6 +770,7 @@ TEST_F(Renderer_test, /*DISABLED_*/Test_ReleaseCompiledGeometry_RemoveUniqueComp
   const Renders_t::Creators_t Creators =
   {
     { uT("Buffer"), Creator },
+    { uT("Transform"), Creator },
     { uT("Present"), Creator },
   };
 
@@ -794,6 +795,12 @@ TEST_F(Renderer_test, /*DISABLED_*/Test_ReleaseCompiledGeometry_RemoveUniqueComp
       })),
       pRenders->Obtain(Component_t::Make(
       {
+        { uT("id"), uT("Covellite.Gui.Transform.") + strObjectId },
+        { uT("type"), uT("Transform") },
+        { uT("test_data"), uT("Transform.2611210603") },
+       })),
+      pRenders->Obtain(Component_t::Make(
+      {
         { uT("id"), uT("Covellite.Gui.Present.") + strObjectId },
         { uT("type"), uT("Present") },
         { uT("test_data"), uT("Present.1811261258") },
@@ -807,6 +814,13 @@ TEST_F(Renderer_test, /*DISABLED_*/Test_ReleaseCompiledGeometry_RemoveUniqueComp
       uT("Vertex.1811161832")
     };
 
+    const Values_t ExpectedTransformData =
+    {
+      uT("Covellite.Gui.Transform.") + strObjectId,
+      uT("Transform"),
+      uT("Transform.2611210603")
+    };
+
     const Values_t ExpectedPresentData =
     {
       uT("Covellite.Gui.Present.") + strObjectId,
@@ -817,10 +831,13 @@ TEST_F(Renderer_test, /*DISABLED_*/Test_ReleaseCompiledGeometry_RemoveUniqueComp
     EXPECT_CALL(RenderProxy, Render(ExpectedVertexBufferData))
       .Times(1);
 
+    EXPECT_CALL(RenderProxy, Render(ExpectedTransformData))
+      .Times(1);
+
     EXPECT_CALL(RenderProxy, Render(ExpectedPresentData))
       .Times(1);
 
-    EXPECT_EQ(2, Renders.size());
+    EXPECT_EQ(3, Renders.size());
     for (auto & Render : Renders) Render();
   }
 
@@ -837,6 +854,11 @@ TEST_F(Renderer_test, /*DISABLED_*/Test_ReleaseCompiledGeometry_RemoveUniqueComp
       })),
       pRenders->Obtain(Component_t::Make(
       {
+        { uT("id"), uT("Covellite.Gui.Transform.") + strObjectId },
+        { uT("type"), uT("Transform") },
+      })),
+      pRenders->Obtain(Component_t::Make(
+      {
         { uT("id"), uT("Covellite.Gui.Present.") + strObjectId },
         { uT("type"), uT("Present") },
       }))
@@ -846,6 +868,13 @@ TEST_F(Renderer_test, /*DISABLED_*/Test_ReleaseCompiledGeometry_RemoveUniqueComp
     {
       uT("Covellite.Gui.Buffer.Vertex.") + strObjectId,
       uT("Buffer"),
+      uT("")
+    };
+
+    const Values_t ExpectedTransformData =
+    {
+      uT("Covellite.Gui.Transform.") + strObjectId,
+      uT("Transform"),
       uT("")
     };
 
@@ -859,10 +888,13 @@ TEST_F(Renderer_test, /*DISABLED_*/Test_ReleaseCompiledGeometry_RemoveUniqueComp
     EXPECT_CALL(RenderProxy, Render(ExpectedVertexBufferData))
       .Times(1);
 
+    EXPECT_CALL(RenderProxy, Render(ExpectedTransformData))
+      .Times(1);
+
     EXPECT_CALL(RenderProxy, Render(ExpectedPresentData))
       .Times(1);
 
-    EXPECT_EQ(2, Renders.size());
+    EXPECT_EQ(3, Renders.size());
     for (auto & Render : Renders) Render();
   }
 }
