@@ -106,7 +106,7 @@ TEST_F(FxPredefinedGlsl_test, /*DISABLED_*/Test_Predefined)
     "out vec4 Covellite_MultiOutPixelColor[c1910131355]",
     __TO_STR(COVELLITE_DECLARE_MULTI_TARGET_STRUCTURE(n1910131354, c1910131355)));
 
-  EXPECT_STREQ("1909031335.xyz", __TO_STR(ToFloat3(1909031335)));
+  EXPECT_STREQ("(1909031335).xyz", __TO_STR(ToFloat3(1909031335)));
 }
 
 #pragma warning(pop)

@@ -110,4 +110,4 @@ precision highp int;
 #define COVELLITE_DECLARE_CONST_USER_BUFFER(type, cbname, name) \
   COVELLITE_DECLARE_CONST_BUFFER(type, cbname, name, COVELLITE_BUFFER_INDEX_USER)
 
-#define ToFloat3(v) v.xyz
+#define ToFloat3(v) (v).xyz
