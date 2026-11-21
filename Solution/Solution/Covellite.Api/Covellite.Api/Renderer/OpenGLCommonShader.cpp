@@ -114,6 +114,8 @@ public:
 
   inline void UpdateData(const void * _pData, const size_t _Size) const
   {
+    // полный аналог D3D11_MAP_WRITE_DISCARD
+    glBufferData(m_Type, static_cast<GLsizeiptr>(_Size), nullptr, GL_STREAM_DRAW);
     glBufferSubData(m_Type, 0, static_cast<GLsizeiptr>(_Size), _pData);
   }
 
@@ -281,7 +283,7 @@ public:
 
   template<class T>
   Buffer(const T * _pData, const ::std::size_t _Size) :
-    Buffer(GL_UNIFORM_BUFFER, _pData, _Size, GL_DYNAMIC_DRAW, Support<T>::Index)
+    Buffer(GL_UNIFORM_BUFFER, _pData, _Size, GL_STREAM_DRAW, Support<T>::Index)
   {
 
   }
@@ -1088,7 +1090,7 @@ auto OpenGLCommonShader::CreateBuffer(const ComponentPtr_t & _pBuffer) -> Render
     }
 
     const auto pBuffer = ::std::make_shared<Buffer>(GL_ARRAY_BUFFER,
-      Info.Data.data(), Info.Data.size() * sizeof(Type_t), GL_DYNAMIC_DRAW);
+      Info.Data.data(), Info.Data.size() * sizeof(Type_t), GL_STREAM_DRAW);
 
     const auto pData = ::std::make_shared<Buffer_t<Type_t>>(Info.Data);
 
@@ -1244,7 +1246,7 @@ auto OpenGLCommonShader::CreatePresentBuffer(const ComponentPtr_t & _pComponent)
   const auto pData =
     ::std::make_shared<BinaryData_t>(BufferSize, (uint8_t)0x00);
   const auto pInstanceBuffer = ::std::make_shared<Buffer>(GL_ARRAY_BUFFER,
-    nullptr, BufferSize, GL_DYNAMIC_DRAW);
+    nullptr, BufferSize, GL_STREAM_DRAW);
 
   if ((*pInstanceBufferData)[uT("mapper")].IsType<BufferMapperMaxCount_t>())
   {

@@ -121,6 +121,33 @@ void Window::DeferredCreateObject(
 
 /**
 * \brief
+*  Функция создания 3D объекта.
+* \details
+*  - Аналогично предыдущей, но с измерением времени создания объекта.
+*
+* \param [in] _fnObjectCreation
+*  Функция создания игрового объекта.
+* \param [in] _Callback
+*  Функция обратного вызова, которая вызывается после создания объекта.
+*/
+void Window::DeferredCreateObject(
+  const fnObjectCreation_t & _fnObjectCreation,
+  const fnObjectCreationCompletedTime_t & _Callback) /*override*/
+{
+  m_LoadingQueue.emplace([=](void)
+  {
+    using USING_MOCK::std::chrono::system_clock;
+    using ::std::chrono::duration;
+
+    const auto Begin = system_clock::now();
+    const auto ObjectId = m_pScene->m_GameScene.CreateObject(_fnObjectCreation());
+    const duration<float> Time = system_clock::now() - Begin;
+    _Callback(ObjectId, Time.count());
+  });
+}
+
+/**
+* \brief
 *  Функция удаления объекта.
 *
 * \param [in] _Id

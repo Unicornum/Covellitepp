@@ -18,12 +18,14 @@ namespace expanse
 *
 * \version
 *  1.0.0.0        \n
+*  1.0.1.0        \n
 * \date
 *  18 Èþíü 2020    \n
+*  22 Íîÿáðü 2026    \n
 * \author
 *  CTAPOBEP (unicornum.verum@gmail.com)
 * \copyright
-*  © CTAPOBEP 2020
+*  © CTAPOBEP 2020 - 2026
 */
 class IWindow :
   public ::covellite::events::IEvents,
@@ -33,10 +35,13 @@ class IWindow :
 protected:
   using fnObjectCreation_t = ::std::function<GameObject_t(void)>;
   using fnObjectCreationCompleted_t = ::std::function<void(ObjectId_t)>;
+  using fnObjectCreationCompletedTime_t = ::std::function<void(ObjectId_t, float)>;
 
 public:
   virtual void DeferredCreateObject(const fnObjectCreation_t &, 
     const fnObjectCreationCompleted_t &) = 0;
+  virtual void DeferredCreateObject(const fnObjectCreation_t &,
+    const fnObjectCreationCompletedTime_t &) = 0;
 };
 
 } // namespace expanse

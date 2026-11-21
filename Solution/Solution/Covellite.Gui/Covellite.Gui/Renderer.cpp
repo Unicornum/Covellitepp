@@ -206,6 +206,10 @@ void Renderer::ReleaseCompiledGeometry(
     }));
   m_pRenders->Remove(Component_t::Make(
     {
+      { uT("id"), uT("Covellite.Gui.Transform.") + strObjectId }
+    }));
+  m_pRenders->Remove(Component_t::Make(
+    {
       { uT("id"), uT("Covellite.Gui.Present.") + strObjectId }
     }));
 

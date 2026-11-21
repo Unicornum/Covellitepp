@@ -6,6 +6,10 @@
 *  =================
 *  <table frame=void><tr><td></td></tr></table>
 *  
+*  Version: 2.3.4.2585 Unknown
+*  -----
+*  <table frame=void><tr><td></td></tr></table>
+*  
 *  Version: 2.3.3.2583 Unknown
 *  -----
 *  <table cellpadding=5 width=98%><tr><td bgcolor=#FFFFC0> Проект \ref CovelliteApiPage : </td></tr></table>

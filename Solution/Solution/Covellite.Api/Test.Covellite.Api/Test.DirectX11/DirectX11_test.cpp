@@ -8353,7 +8353,7 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Buffer_Vertex_Dynamic)
         .Times(1)
         .WillOnce(Return(true));
 
-      EXPECT_CALL(DeviceContext, Mapped(&Buffer, D3D11_MAP_WRITE_NO_OVERWRITE))
+      EXPECT_CALL(DeviceContext, Mapped(&Buffer, D3D11_MAP_WRITE_DISCARD))
         .Times(1)
         .WillOnce(Return(Resource));
 
@@ -10719,7 +10719,7 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Present_Instance_MaxSize)
         .Times(1)
         .WillOnce(Return(true));
 
-      EXPECT_CALL(DeviceContext, Mapped(&InstanceBuffer, D3D11_MAP_WRITE_NO_OVERWRITE))
+      EXPECT_CALL(DeviceContext, Mapped(&InstanceBuffer, D3D11_MAP_WRITE_DISCARD))
         .Times(1)
         .WillOnce(Return(Resource));
 
@@ -10938,7 +10938,7 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Present_Instance_ChangeSize)
         .Times(1)
         .WillOnce(Return(true));
 
-      EXPECT_CALL(DeviceContext, Mapped(&InstanceBuffer, D3D11_MAP_WRITE_NO_OVERWRITE))
+      EXPECT_CALL(DeviceContext, Mapped(&InstanceBuffer, D3D11_MAP_WRITE_DISCARD))
         .Times(1)
         .WillOnce(Return(Resource));
 
@@ -10969,7 +10969,7 @@ TEST_F(DirectX11_test, /*DISABLED_*/Test_Present_Instance_ChangeSize)
         .Times(1)
         .WillOnce(Return(true));
 
-      EXPECT_CALL(DeviceContext, Mapped(&InstanceBuffer, D3D11_MAP_WRITE_NO_OVERWRITE))
+      EXPECT_CALL(DeviceContext, Mapped(&InstanceBuffer, D3D11_MAP_WRITE_DISCARD))
         .Times(1)
         .WillOnce(Return(Resource));
 

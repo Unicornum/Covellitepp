@@ -7966,14 +7966,16 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Buffer_Vertex_Dynamic)
     {
       1808261932.0f, 1808261933.0f, 1812161256.0f, 1808261934.0f,
       1812161257.0f, 1808261935.0f,
-      1808261936.0f, 1812161258.0f, 1908201945.0f, 1908201946.0f
+      1808261936.0f, 1812161258.0f, 1908201945.0f, 1908201946.0f,
+      1.0f, 1.0f
     },
     {
       1808261932.0f, 1808261933.0f, 1812161259.0f, 1808261934.0f,
       1812161300.0f, 1808261935.0f,
-      1808261936.0f, 1812161301.0f, 1908201947.0f, 1908201948.0f
+      1808261936.0f, 1812161301.0f, 1908201947.0f, 1908201948.0f,
+      1.0f, 1.0f
     },
-    { 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f }, // Маркер конца данных
+    { 0.0f }, // Маркер конца данных
   };
 
   IntroduceBufferSize(Source1);
@@ -7983,9 +7985,11 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Buffer_Vertex_Dynamic)
     1908011341.0f, 1908261933.0f, 1912161256.0f, 1908261934.0f,
     1912161257.0f, 1908261935.0f,
     1908261936.0f, 1912161258.0f, 1908201949.0f, 1908201950.0f,
+    1.0f, 1.0f,
     1908261932.0f, 1908261933.0f, 1912161259.0f, 1908261934.0f,
     1912161300.0f, 1908261935.0f,
     1908261936.0f, 1912161301.0f, 1908201951.0f, 1908201952.0f,
+    1.0f, 1.0f,
   };
 
   const BufferMapper_t Mapper = [&](Vertex_t * _pData)
@@ -8021,7 +8025,7 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Buffer_Vertex_Dynamic)
       static_cast<::mock::GLsizeiptr>(Source1.size() * sizeof(Vertex_t));
 
     EXPECT_CALL(GLProxy, BufferData(GL_ARRAY_BUFFER, Size, 
-      GetExpected(Source1), GL_DYNAMIC_DRAW))
+      GetExpected(Source1), GL_STREAM_DRAW))
       .Times(1);
 
     EXPECT_CALL(GLProxy, BindBuffer(GL_ARRAY_BUFFER, 0))
@@ -8043,6 +8047,9 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Buffer_Vertex_Dynamic)
         .WillOnce(Return(false));
 
       EXPECT_CALL(oProxy, Mapper(_))
+        .Times(0);
+
+      EXPECT_CALL(GLProxy, BufferData(_, _, _, _))
         .Times(0);
 
       EXPECT_CALL(GLProxy, BufferSubData(_, _, _, _))
@@ -8112,6 +8119,10 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Buffer_Vertex_Dynamic)
         .WillOnce(Return(true));
 
       EXPECT_CALL(oProxy, Mapper(_))
+        .Times(1);
+
+      EXPECT_CALL(GLProxy,
+        BufferData(GL_ARRAY_BUFFER, Size, ::std::vector<uint8_t>{}, GL_STREAM_DRAW))
         .Times(1);
 
       EXPECT_CALL(GLProxy, BufferSubData(GL_ARRAY_BUFFER, 0, Size, Source2))
@@ -9023,6 +9034,9 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Buffer_Constant_User_UpdateBuffer_No
     EXPECT_CALL(GLProxy, BindBuffer(_, _))
       .Times(0);
 
+    EXPECT_CALL(GLProxy, BufferData(_, _, _, _))
+      .Times(0);
+
     EXPECT_CALL(GLProxy, UniformBufferSubData(_, _, _))
       .Times(0);
 
@@ -9098,7 +9112,7 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Buffer_Constant_User)
       .Times(1);
 
     EXPECT_CALL(GLProxy,
-      BufferData(GL_UNIFORM_BUFFER, Size, _, GL_DYNAMIC_DRAW))
+      BufferData(GL_UNIFORM_BUFFER, Size, _, GL_STREAM_DRAW))
       .Times(1);
 
     EXPECT_CALL(GLProxy, BindBuffer(GL_UNIFORM_BUFFER, 0))
@@ -9122,6 +9136,9 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Buffer_Constant_User)
       .WillOnce(Return(BlockIndex));
 
     EXPECT_CALL(GLProxy, BindBuffer(_, _))
+      .Times(1);
+
+    EXPECT_CALL(GLProxy, BufferData(_, _, _, _))
       .Times(1);
 
     EXPECT_CALL(GLProxy, UniformBufferSubData(_, _, _))
@@ -9150,6 +9167,10 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Buffer_Constant_User)
       .WillOnce(Return(BlockIndex));
 
     EXPECT_CALL(GLProxy, BindBuffer(GL_UNIFORM_BUFFER, BufferId))
+      .Times(1);
+
+    EXPECT_CALL(GLProxy, BufferData(GL_UNIFORM_BUFFER, Size,
+      ::std::vector<uint8_t>{}, GL_STREAM_DRAW))
       .Times(1);
 
     EXPECT_CALL(GLProxy, UniformBufferSubData(0, Size, pData))

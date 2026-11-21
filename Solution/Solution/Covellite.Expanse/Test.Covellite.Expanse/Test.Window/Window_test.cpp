@@ -315,6 +315,148 @@ TEST_F(Window_test, /*DISABLED_*/Test_DeferredCreateObject)
 }
 
 // ************************************************************************** //
+TEST_F(Window_test, /*DISABLED_*/Test_DeferredCreateObject_Time)
+{
+  using ObjectId_t = ::covellite::expanse::ObjectId_t;
+
+  class Callback :
+    public ::alicorn::extension::testing::Proxy<Callback>
+  {
+  public:
+    MOCK_METHOD2(Call, void(ObjectId_t, float));
+  };
+
+  Callback oCallback;
+  ::mock::covellite::expanse::GameScene::Proxy GameSceneProxy;
+  ::mock::std::chrono::system_clock::Proxy SystemClockProxy;
+
+  constexpr ::mock::Id_t GameSceneId = 2008051010;
+  constexpr ObjectId_t ObjectId = 2008051011;
+
+  const ::covellite::expanse::GameObject_t GameObject1 =
+  {
+    ::covellite::api::Component::Make({}),
+  };
+
+  const ::covellite::expanse::GameObject_t GameObject2 =
+  {
+    ::covellite::api::Component::Make({}),
+    ::covellite::api::Component::Make({}),
+  };
+
+  const ::covellite::expanse::GameObject_t GameObject3 =
+  {
+    ::covellite::api::Component::Make({}),
+    ::covellite::api::Component::Make({}),
+    ::covellite::api::Component::Make({}),
+  };
+
+  const auto fnGameObject1 = [&](void) { return GameObject1; };
+  const auto fnGameObject2 = [&](void) { return GameObject2; };
+  const auto fnGameObject3 = [&](void) { return GameObject3; };
+
+  const WindowApi_t WindowApi{ m_WindowOs };
+  const IWindowApi_t & IWindowApi = WindowApi;
+
+  using namespace ::testing;
+
+  InSequence Dummy;
+
+  EXPECT_CALL(GameSceneProxy, Constructor(_, _))
+    .Times(1)
+    .WillOnce(Return(GameSceneId));
+
+  Tested_t Example{ IWindowApi };
+  ::covellite::expanse::IWindow & IExample = Example;
+
+  EXPECT_CALL(GameSceneProxy, CreateObject(_, _))
+    .Times(0);
+
+  IExample.DeferredCreateObject(fnGameObject1,
+    [&](ObjectId_t _Id, float _Time) { oCallback.Call(_Id, _Time); });
+
+  IExample.DeferredCreateObject(fnGameObject2,
+    [&](ObjectId_t _Id, float _Time) { oCallback.Call(_Id, _Time); });
+
+  IExample.DeferredCreateObject(fnGameObject3,
+    [&](ObjectId_t _Id, float _Time) { oCallback.Call(_Id, _Time); });
+
+  EXPECT_CALL(SystemClockProxy, Now())
+    .WillOnce(Return(::std::chrono::microseconds{ 0 }))
+    .WillOnce(Return(::std::chrono::microseconds{ 9999 }))
+    .WillOnce(Return(::std::chrono::milliseconds{ 1234 }));
+
+  EXPECT_CALL(GameSceneProxy, CreateObject(GameSceneId, GameObject1))
+    .Times(1)
+    .WillOnce(Return(ObjectId + 1));
+
+  EXPECT_CALL(SystemClockProxy, Now())
+    .Times(1)
+    .WillOnce(Return(::std::chrono::milliseconds{ 9876 }));
+
+  EXPECT_CALL(oCallback, Call(ObjectId + 1, 8.642f))
+    .Times(1);
+
+  EXPECT_CALL(SystemClockProxy, Now())
+    .Times(1)
+    .WillOnce(Return(::std::chrono::microseconds{ 10001 }));
+
+  EXPECT_CALL(GameSceneProxy, CreateObject(_, _))
+    .Times(0);
+
+  EXPECT_CALL(SystemClockProxy, Now())
+    .Times(0);
+
+  Events_t ExampleEvents = Example;
+  ExampleEvents[::covellite::events::Drawing.Do]();
+
+  EXPECT_CALL(SystemClockProxy, Now())
+    .WillOnce(Return(::std::chrono::microseconds{ 0 }))
+    .WillOnce(Return(::std::chrono::microseconds{ 1 }))
+    .WillOnce(Return(::std::chrono::milliseconds{ 2345 }));
+
+  EXPECT_CALL(GameSceneProxy, CreateObject(GameSceneId, GameObject2))
+    .Times(1)
+    .WillOnce(Return(ObjectId + 2));
+
+  EXPECT_CALL(SystemClockProxy, Now())
+    .Times(1)
+    .WillOnce(Return(::std::chrono::milliseconds{ 8765 }));
+
+  EXPECT_CALL(oCallback, Call(ObjectId + 2, 6.42f))
+    .Times(1);
+
+  EXPECT_CALL(SystemClockProxy, Now())
+    .WillOnce(Return(::std::chrono::microseconds{ 2 }))
+    .WillOnce(Return(::std::chrono::milliseconds{ 3456 }));
+
+  EXPECT_CALL(GameSceneProxy, CreateObject(GameSceneId, GameObject3))
+    .Times(1)
+    .WillOnce(Return(ObjectId + 3));
+
+  EXPECT_CALL(SystemClockProxy, Now())
+    .Times(1)
+    .WillOnce(Return(::std::chrono::milliseconds{ 7654 }));
+
+  EXPECT_CALL(oCallback, Call(ObjectId + 3, 4.198f))
+    .Times(1);
+
+  EXPECT_CALL(SystemClockProxy, Now())
+    .Times(0);
+
+  ExampleEvents[::covellite::events::Drawing.Do]();
+
+  EXPECT_CALL(GameSceneProxy, CreateObject(_, _))
+    .Times(0);
+
+  IExample.DeferredCreateObject(fnGameObject1,
+    [](ObjectId_t _Id, float _Time) {});
+
+  EXPECT_CALL(GameSceneProxy, CreateObject(_, _))
+    .Times(0);
+}
+
+// ************************************************************************** //
 TEST_F(Window_test, /*DISABLED_*/Test_RemoveObject)
 {
   using GameSceneProxy_t = ::mock::covellite::expanse::GameScene::Proxy;
