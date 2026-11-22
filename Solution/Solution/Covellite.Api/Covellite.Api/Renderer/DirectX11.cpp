@@ -1178,7 +1178,7 @@ auto DirectX11::CreateBuffer(const ComponentPtr_t & _pComponent) -> Render_t /*o
       {
         D3D11_MAPPED_SUBRESOURCE Resource = { 0 };
         DX_CHECK m_pImmediateContext->Map(pBuffer.Get(), 0,
-          D3D11_MAP_WRITE_NO_OVERWRITE, 0, &Resource);
+          D3D11_MAP_WRITE_DISCARD, 0, &Resource);
         cbBufferMapper(static_cast<::covellite::api::Vertex *>(Resource.pData));
         m_pImmediateContext->Unmap(pBuffer.Get(), 0);
       }
@@ -1332,7 +1332,7 @@ auto DirectX11::CreatePresentBuffer(const ComponentPtr_t & _pComponent) ->Render
       {
         D3D11_MAPPED_SUBRESOURCE Resource = { 0 };
         DX_CHECK m_pImmediateContext->Map(pInstanceBuffer.Get(), 0,
-          D3D11_MAP_WRITE_NO_OVERWRITE, 0, &Resource);
+          D3D11_MAP_WRITE_DISCARD, 0, &Resource);
         cbBufferMapper(Resource.pData);
         m_pImmediateContext->Unmap(pInstanceBuffer.Get(), 0);
       }
@@ -1361,7 +1361,7 @@ auto DirectX11::CreatePresentBuffer(const ComponentPtr_t & _pComponent) ->Render
     {
       D3D11_MAPPED_SUBRESOURCE Resource = { 0 };
       DX_CHECK m_pImmediateContext->Map(pInstanceBuffer.Get(), 0,
-        D3D11_MAP_WRITE_NO_OVERWRITE, 0, &Resource);
+        D3D11_MAP_WRITE_DISCARD, 0, &Resource);
       cbBufferMapper(Resource.pData, InstanceCount);
       m_pImmediateContext->Unmap(pInstanceBuffer.Get(), 0);
     }
