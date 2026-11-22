@@ -18,17 +18,17 @@ namespace expanse
 * \brief
 *  Класс входит в проект \ref CovelliteExpansePage \n
 *  Класс окна, предоставлющего клиентскому коду возможности проекта.
-* \details
-*  - Подробное описание класса.
 *
 * \version
 *  1.0.0.0        \n
+*  1.0.1.0        \n
 * \date
 *  18 Июнь 2020    \n
+*  22 Ноябрь 2026    \n
 * \author
 *  CTAPOBEP (unicornum.verum@gmail.com)
 * \copyright
-*  © CTAPOBEP 2020
+*  © CTAPOBEP 2020 - 2026
 */
 class Window final :
   public ::covellite::expanse::IWindow,
@@ -49,6 +49,8 @@ public:
   // Интерфейс IWindow:
   void DeferredCreateObject(const fnObjectCreation_t &,
     const fnObjectCreationCompleted_t &) override;
+  void DeferredCreateObject(const fnObjectCreation_t &,
+    const fnObjectCreationCompletedTime_t &) override;
 
 public:
   // Интерфейс I3DScene:
