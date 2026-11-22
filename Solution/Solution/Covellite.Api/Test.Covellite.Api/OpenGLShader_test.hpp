@@ -8025,7 +8025,7 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Buffer_Vertex_Dynamic)
       static_cast<::mock::GLsizeiptr>(Source1.size() * sizeof(Vertex_t));
 
     EXPECT_CALL(GLProxy, BufferData(GL_ARRAY_BUFFER, Size, 
-      GetExpected(Source1), GL_DYNAMIC_DRAW))
+      GetExpected(Source1), GL_STREAM_DRAW))
       .Times(1);
 
     EXPECT_CALL(GLProxy, BindBuffer(GL_ARRAY_BUFFER, 0))
@@ -8047,6 +8047,9 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Buffer_Vertex_Dynamic)
         .WillOnce(Return(false));
 
       EXPECT_CALL(oProxy, Mapper(_))
+        .Times(0);
+
+      EXPECT_CALL(GLProxy, BufferData(_, _, _, _))
         .Times(0);
 
       EXPECT_CALL(GLProxy, BufferSubData(_, _, _, _))
@@ -8116,6 +8119,10 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Buffer_Vertex_Dynamic)
         .WillOnce(Return(true));
 
       EXPECT_CALL(oProxy, Mapper(_))
+        .Times(1);
+
+      EXPECT_CALL(GLProxy,
+        BufferData(GL_ARRAY_BUFFER, Size, ::std::vector<uint8_t>{}, GL_STREAM_DRAW))
         .Times(1);
 
       EXPECT_CALL(GLProxy, BufferSubData(GL_ARRAY_BUFFER, 0, Size, Source2))
@@ -9027,6 +9034,9 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Buffer_Constant_User_UpdateBuffer_No
     EXPECT_CALL(GLProxy, BindBuffer(_, _))
       .Times(0);
 
+    EXPECT_CALL(GLProxy, BufferData(_, _, _, _))
+      .Times(0);
+
     EXPECT_CALL(GLProxy, UniformBufferSubData(_, _, _))
       .Times(0);
 
@@ -9102,7 +9112,7 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Buffer_Constant_User)
       .Times(1);
 
     EXPECT_CALL(GLProxy,
-      BufferData(GL_UNIFORM_BUFFER, Size, _, GL_DYNAMIC_DRAW))
+      BufferData(GL_UNIFORM_BUFFER, Size, _, GL_STREAM_DRAW))
       .Times(1);
 
     EXPECT_CALL(GLProxy, BindBuffer(GL_UNIFORM_BUFFER, 0))
@@ -9126,6 +9136,9 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Buffer_Constant_User)
       .WillOnce(Return(BlockIndex));
 
     EXPECT_CALL(GLProxy, BindBuffer(_, _))
+      .Times(1);
+
+    EXPECT_CALL(GLProxy, BufferData(_, _, _, _))
       .Times(1);
 
     EXPECT_CALL(GLProxy, UniformBufferSubData(_, _, _))
@@ -9154,6 +9167,10 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Buffer_Constant_User)
       .WillOnce(Return(BlockIndex));
 
     EXPECT_CALL(GLProxy, BindBuffer(GL_UNIFORM_BUFFER, BufferId))
+      .Times(1);
+
+    EXPECT_CALL(GLProxy, BufferData(GL_UNIFORM_BUFFER, Size,
+      ::std::vector<uint8_t>{}, GL_STREAM_DRAW))
       .Times(1);
 
     EXPECT_CALL(GLProxy, UniformBufferSubData(0, Size, pData))

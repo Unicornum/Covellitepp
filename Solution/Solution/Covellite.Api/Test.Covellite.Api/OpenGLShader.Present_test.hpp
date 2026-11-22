@@ -384,7 +384,7 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Present_Instance_MaxCount)
       .Times(1);
 
     EXPECT_CALL(GLProxy, BufferData(GL_ARRAY_BUFFER, InstanceBufferSize, 
-      ::std::vector<uint8_t>{}, GL_DYNAMIC_DRAW))
+      ::std::vector<uint8_t>{}, GL_STREAM_DRAW))
       .Times(1);
 
     EXPECT_CALL(GLProxy, BindBuffer(GL_ARRAY_BUFFER, 0))
@@ -446,6 +446,10 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Present_Instance_MaxCount)
         .Times(1);
 
       EXPECT_CALL(GLProxy, BindBuffer(GL_ARRAY_BUFFER, InstanceBufferId))
+        .Times(1);
+
+      EXPECT_CALL(GLProxy, BufferData(GL_ARRAY_BUFFER, InstanceBufferSize,
+        ::std::vector<uint8_t>{}, GL_STREAM_DRAW))
         .Times(1);
 
       EXPECT_CALL(GLProxy, 
@@ -652,7 +656,7 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Present_Instance_ChangeCount)
       .Times(1);
 
     EXPECT_CALL(GLProxy, BufferData(GL_ARRAY_BUFFER, InstanceBufferSize,
-      ::std::vector<uint8_t>{}, GL_DYNAMIC_DRAW))
+      ::std::vector<uint8_t>{}, GL_STREAM_DRAW))
       .Times(1);
 
     EXPECT_CALL(GLProxy, BindBuffer(GL_ARRAY_BUFFER, 0))
@@ -746,6 +750,10 @@ TEST_F(OpenGLShader_test, /*DISABLED_*/Test_Present_Instance_ChangeCount)
         .Times(1);
 
       EXPECT_CALL(GLProxy, BindBuffer(GL_ARRAY_BUFFER, InstanceBufferId))
+        .Times(1);
+
+      EXPECT_CALL(GLProxy, BufferData(GL_ARRAY_BUFFER, InstanceBufferSize,
+        ::std::vector<uint8_t>{}, GL_STREAM_DRAW))
         .Times(1);
 
       EXPECT_CALL(GLProxy,
